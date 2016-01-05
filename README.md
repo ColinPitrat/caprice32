@@ -33,7 +33,9 @@ Use:
 
 to compile a developer build, or use: 
 
-`make RELEASE=TRUE` for an optimized executable.
+`make RELEASE=TRUE` 
+
+for an optimized executable.
 
 #### Linux target:
 
@@ -43,7 +45,9 @@ Use :
 
 to compile a developer build, or use: 
 
-`make -f makefile.unix RELEASE=TRUE` for an optimized executable.
+`make -f makefile.unix RELEASE=TRUE` 
+
+for an optimized executable.
 
 # Comments or ready to contribute?
 
