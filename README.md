@@ -1,8 +1,10 @@
-Caprice32 - Amstrad CPC Emulator
+Caprice32 - Amstrad CPC Emulator 
 
 (c) Copyright 1997-2004 Ulrich Doewich
 
 https://github.com/ColinPitrat/caprice32
+
+[![Build Status](https://travis-ci.org/ColinPitrat/caprice32.svg?branch=master)](https://travis-ci.org/ColinPitrat/caprice32)
 
 # What is it ?
 
