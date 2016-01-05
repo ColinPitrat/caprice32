@@ -1,4 +1,5 @@
-# use "make RELEASE=TRUE" to create release executable
+# makefile for compiling native windows builds
+# use "make -f makefile.windows RELEASE=TRUE" to create release executable
 
 CC	= g++
 

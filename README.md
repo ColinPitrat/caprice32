@@ -24,12 +24,11 @@ You will need the following to successfully compile an executable:
 
 # Compiling
 
-#### Windows target:
+#### Linux target:
 
-Edit the makefile to update the IPATHS directive with the correct location of the SDL include and library files.
-Use:
+Use :
 
-`make` (or `mingw32-make`, depending on how you have your MinGW installed) 
+`make` 
 
 to compile a developer build, or use: 
 
@@ -37,15 +36,16 @@ to compile a developer build, or use:
 
 for an optimized executable.
 
-#### Linux target:
+#### Windows target:
 
-Use :
+Edit the makefile to update the IPATHS directive with the correct location of the SDL include and library files.
+Use:
 
-`make -f makefile.unix` 
+`make -f makefile.windows` (or `mingw32-make -f makefile.windows`, depending on how you have your MinGW installed) 
 
 to compile a developer build, or use: 
 
-`make -f makefile.unix RELEASE=TRUE` 
+`make -f makefile.windows RELEASE=TRUE` 
 
 for an optimized executable.
 

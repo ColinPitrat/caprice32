@@ -1,5 +1,5 @@
 # makefile for compiling native unix builds
-# use "make -f makefile.unix RELEASE=TRUE" to create release executable
+# use "make RELEASE=TRUE" to create release executable
 
 CC	= g++
 
