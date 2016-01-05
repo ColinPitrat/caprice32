@@ -1,4 +1,5 @@
 Caprice32 - Amstrad CPC Emulator
+
 (c) Copyright 1997-2004 Ulrich Doewich
 
 https://github.com/ColinPitrat/caprice32
@@ -17,20 +18,32 @@ I encourage you to get involved in the project.
 
 You will need the following to successfully compile an executable:
 
-MinGW (only for Windows) - http://sourceforge.net/projects/mingw/
-SDL - http://www.libsdl.org/index.php
-zLib - http://www.gzip.org/zlib/
+  * MinGW (only for Windows) - http://sourceforge.net/projects/mingw/
+  * SDL - http://www.libsdl.org/index.php
+  * zLib - http://www.gzip.org/zlib/
 
 # Compiling
 
 #### Windows target:
 
 Edit the makefile to update the IPATHS directive with the correct location of the SDL include and library files.
-Use `make` (or `mingw32-make`, depending on how you have your MinGW installed) to compile a developer build, or use `make RELEASE=TRUE` for an optimized executable.
+Use:
+
+`make` (or `mingw32-make`, depending on how you have your MinGW installed) 
+
+to compile a developer build, or use: 
+
+`make RELEASE=TRUE` for an optimized executable.
 
 #### Linux target:
 
-Use `make -f makefile.unix` to compile a developer build, or use `make -f makefile.unix RELEASE=TRUE` for an optimized executable.
+Use :
+
+`make -f makefile.unix` 
+
+to compile a developer build, or use: 
+
+`make -f makefile.unix RELEASE=TRUE` for an optimized executable.
 
 # Comments or ready to contribute?
 
@@ -48,4 +61,4 @@ There are many repository for caprice32 on GitHub:
   * https://github.com/egrath/caprice32-mod
   * https://github.com/burzumishi/caprice32wx
 
-So why create another one ? All these repository are highly inactive but more than that, in my opinion, they took a wrong direction. Some added dependencies (wxWidget, GTK) without really adding feature. Two imported the code but do not did not do any update. The most promising one in my opinion is sebhz's one but the addition in it of some games images is annoys me too much to contribute to it !
+So why create another one ? All these repository are highly inactive but more than that, in my opinion, they took a wrong direction. Some added dependencies (wxWidget, GTK) without really adding feature. Two imported the code but do not did not do any update. The most promising one in my opinion is sebhz's one but the addition in it of some games images annoys me too much to contribute to it !
