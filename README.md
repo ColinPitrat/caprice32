@@ -1,4 +1,4 @@
-Caprice32 - Amstrad CPC Emulator
+Caprice32 - Amstrad CPC Emulator [![Build Status](https://travis-ci.org/ColinPitrat/kalenji-gps-watch-reader.svg?branch=master)](https://travis-ci.org/ColinPitrat/kalenji-gps-watch-reader)
 
 (c) Copyright 1997-2004 Ulrich Doewich
 
