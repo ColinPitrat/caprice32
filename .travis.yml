@@ -3,6 +3,6 @@ addons:
  apt:
   packages:
     - libsdl2-dev
-    - zlib
+    - zlib1g-dev
 script: 
  - make
