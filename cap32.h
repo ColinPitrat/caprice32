@@ -212,6 +212,7 @@ typedef struct {
    unsigned int scr_fs_bpp;
    unsigned int scr_style;
    unsigned int scr_oglfilter;
+   unsigned int scr_oglscanlines;
    unsigned int scr_vsync;
    unsigned int scr_led;
    unsigned int scr_fps;
@@ -436,6 +437,18 @@ typedef struct {
 
 // cap32.cpp
 void emulator_reset(bool bolMF2Reset);
+int  emulator_init(void);
+int  video_set_palette (void);
+void update_cpc_speed(void);
+int  printer_start(void);
+void printer_stop(void);
+int audio_init (void);
+void audio_shutdown (void);
+void audio_pause (void);
+void audio_resume (void);
+int video_init (void);
+void video_shutdown (void);
+
 
 // fdc.c
 void fdc_write_data(unsigned char val);

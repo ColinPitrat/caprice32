@@ -27,6 +27,9 @@
 
 #define VERSION_STRING "v4.2.0"
 
+#include "CapriceGui.h"
+#include "CapriceGuiView.h"
+
 #define ERR_INPUT_INIT           1
 #define ERR_VIDEO_INIT           2
 #define ERR_VIDEO_SET_MODE       3
@@ -175,6 +178,7 @@ typedef enum {
    CAP32_EXIT = MOD_EMU_KEY,
    CAP32_FPS,
    CAP32_FULLSCRN,
+   CAP32_GUI,
    CAP32_JOY,
    CAP32_LOADDRVA,
    CAP32_LOADDRVB,
@@ -938,6 +942,7 @@ static int kbd_layout[4][KBD_MAX_ENTRIES][2] = {
       { CAP32_EXIT,     SDLK_F10 },
       { CAP32_FPS,      SDLK_F12 | MOD_PC_CTRL },
       { CAP32_FULLSCRN, SDLK_F1 },
+      { CAP32_GUI,      SDLK_F1 | MOD_PC_CTRL},
       { CAP32_JOY,      SDLK_F8 | MOD_PC_CTRL },
       { CAP32_LOADDRVA, SDLK_F6 },
       { CAP32_LOADDRVB, SDLK_F7 },
@@ -1058,8 +1063,8 @@ static int kbd_layout[4][KBD_MAX_ENTRIES][2] = {
       { CPC_F9,         SDLK_KP9 },
       { CPC_FR_aGRAVE,  SDLK_WORLD_64 },
       { CPC_FR_cCEDIL,  SDLK_WORLD_71 },
-      { CPC_FR_eACUTE,  SDLK_WORLD_72 },
-      { CPC_FR_eGRAVE,  SDLK_WORLD_73 },
+      { CPC_FR_eACUTE,  SDLK_WORLD_73 },
+      { CPC_FR_eGRAVE,  SDLK_WORLD_72 },
       { CPC_FR_uGRAVE,  SDLK_WORLD_89 },
       { CPC_FPERIOD,    SDLK_KP_PERIOD },
       { CPC_GREATER,    SDLK_LESS | MOD_PC_SHIFT },
@@ -1091,6 +1096,7 @@ static int kbd_layout[4][KBD_MAX_ENTRIES][2] = {
       { CAP32_EXIT,     SDLK_F10 },
       { CAP32_FPS,      SDLK_F12 | MOD_PC_CTRL },
       { CAP32_FULLSCRN, SDLK_F1 },
+      { CAP32_GUI,      SDLK_F1 | MOD_PC_CTRL},
       { CAP32_JOY,      SDLK_F8 | MOD_PC_CTRL },
       { CAP32_LOADDRVA, SDLK_F6 },
       { CAP32_LOADDRVB, SDLK_F7 },
@@ -1239,6 +1245,7 @@ static int kbd_layout[4][KBD_MAX_ENTRIES][2] = {
       { CAP32_EXIT,     SDLK_F10 },
       { CAP32_FPS,      SDLK_F12 | MOD_PC_CTRL },
       { CAP32_FULLSCRN, SDLK_F1 },
+      { CAP32_GUI,      SDLK_F1 | MOD_PC_CTRL},
       { CAP32_JOY,      SDLK_F8 | MOD_PC_CTRL },
       { CAP32_LOADDRVA, SDLK_F6 },
       { CAP32_LOADDRVB, SDLK_F7 },
@@ -3577,7 +3584,7 @@ void video_set_style (void)
    else
    {
       dwXScale = 2;
-      dwYScale = 1;
+      dwYScale = 2;
    }
    switch (dwXScale) {
       case 1:
@@ -3595,20 +3602,48 @@ void video_set_style (void)
    switch(CPC.scr_bpp)
    {
       case 32:
-               CPC.scr_render = (void(*)(void))render32bpp;
+               switch(dwYScale) {
+                 case 1:
+                   CPC.scr_render = (void(*)(void))render32bpp;
+                   break;
+                 case 2:
+                   CPC.scr_render = (void(*)(void))render32bpp_doubleY;
+                   break;
+               }
                break;
 
       case 24:
-               CPC.scr_render = (void(*)(void))render24bpp;
+               switch(dwYScale) {
+                 case 1:
+                   CPC.scr_render = (void(*)(void))render24bpp;
+                   break;
+                 case 2:
+                   CPC.scr_render = (void(*)(void))render24bpp_doubleY;
+                   break;
+               }
                break;
 
       case 16:
       case 15:
-               CPC.scr_render = (void(*)(void))render16bpp;
+               switch(dwYScale) {
+                 case 1:
+                   CPC.scr_render = (void(*)(void))render16bpp;
+                   break;
+                 case 2:
+                   CPC.scr_render = (void(*)(void))render16bpp_doubleY;
+                   break;
+               }
                break;
 
       case 8:
-               CPC.scr_render = (void(*)(void))render8bpp;
+               switch(dwYScale) {
+                 case 1:
+                   CPC.scr_render = (void(*)(void))render8bpp;
+                   break;
+                 case 2:
+                   CPC.scr_render = (void(*)(void))render8bpp_doubleY;
+                   break;
+               }
                break;
    }
 }
@@ -3622,7 +3657,8 @@ int video_init (void)
 
    vid_plugin=&video_plugin_list[CPC.scr_style];
 
-   back_surface=vid_plugin->init(CPC.scr_fs_width, CPC.scr_fs_height, CPC.scr_fs_bpp, CPC.scr_window==0);
+   back_surface=vid_plugin->init(vid_plugin,CPC.scr_fs_width, CPC.scr_fs_height, CPC.scr_fs_bpp, CPC.scr_window==0);
+
    if (!back_surface) { // attempt to set the required video mode
       fprintf(stderr, "Could not set requested video mode: %s\n", SDL_GetError());
       return ERR_VIDEO_SET_MODE;
@@ -3636,8 +3672,8 @@ int video_init (void)
       return iErrCode;
    }
 
-   vid_plugin->lock();
 
+   vid_plugin->lock();
    CPC.scr_bps = back_surface->pitch / 4; // rendered screen line length (changing bytes to dwords)
    CPC.scr_line_offs = CPC.scr_bps * dwYScale;
    CPC.scr_pos =
@@ -3685,6 +3721,14 @@ void input_swap_joy (void) {
    }
 }
 
+// Recalculate emulation speed (to verify, seems to work reasonably well)
+void update_cpc_speed(void) {
+   dwTicksOffset = (int)(20.0 / (double)((CPC.speed * 25) / 100.0));
+   dwTicksTarget = SDL_GetTicks();
+   dwTicksTargetFPS = dwTicksTarget;
+   dwTicksTarget += dwTicksOffset;
+   InitAY();
+}
 
 
 int input_init (void)
@@ -3738,7 +3782,7 @@ int input_init (void)
 
 
 
-int getConfigValueInt (char* pchFileName, char* pchSection, char* pchKey, int iDefaultValue)
+int getConfigValueInt (char* pchFileName, const char* pchSection, const char* pchKey, int iDefaultValue)
 {
    FILE* pfoConfigFile;
    char chLine[MAX_LINE_LEN + 1];
@@ -3768,7 +3812,7 @@ int getConfigValueInt (char* pchFileName, char* pchSection, char* pchKey, int iD
 
 
 
-void getConfigValueString (char* pchFileName, char* pchSection, char* pchKey, char* pchValue, int iSize, char* pchDefaultValue)
+void getConfigValueString (char* pchFileName, const char* pchSection, const char* pchKey, char* pchValue, int iSize, char* pchDefaultValue)
 {
    FILE* pfoConfigFile;
    char chLine[MAX_LINE_LEN + 1];
@@ -3847,6 +3891,10 @@ void loadConfiguration (void)
       CPC.scr_style = 0;
    }
    CPC.scr_oglfilter = getConfigValueInt(chFileName, "video", "scr_oglfilter", 1) & 1;
+   CPC.scr_oglscanlines = getConfigValueInt(chFileName, "video", "scr_oglscanlines", 30);
+   if ((CPC.scr_oglscanlines < 0) || (CPC.scr_oglscanlines > 100)) {
+      CPC.scr_oglscanlines = 30;
+   }
    CPC.scr_vsync = getConfigValueInt(chFileName, "video", "scr_vsync", 1) & 1;
    CPC.scr_led = getConfigValueInt(chFileName, "video", "scr_led", 1) & 1;
    CPC.scr_fps = getConfigValueInt(chFileName, "video", "scr_fps", 0) & 1;
@@ -4394,6 +4442,19 @@ int main (int argc, char **argv)
    iExitCondition = EC_FRAME_COMPLETE;
    bolDone = false;
 
+
+    // Initialise gui
+    SDL_Surface* guiBackSurface;    
+    guiBackSurface = SDL_CreateRGBSurface(SDL_SWSURFACE, back_surface->w, back_surface->h, 32,
+                               0x000000FF, 0x0000FF00, 0x00FF0000, 0x00000000);
+	CapriceGui capriceGui(argc, argv);
+	capriceGui.Init();
+//  judb pass 'current' SDL surface as argument + the area in which to draw the gui (which is now the whole screen...)
+//  We need a separate surface (guiBackSurface) because vid is the surface the user sees.
+//  Just before the gui is started, the current screen content (which is in vid) is copied into guiBackSurface.
+//  The gui can then correctly be displayed on top of guiBackSurface.
+	CapriceGuiView capriceGuiView(back_surface, guiBackSurface, CRect(0, 0, back_surface->w, back_surface->h));
+
    while (!bolDone) {
       while (SDL_PollEvent(&event)) {
          switch (event.type) {
@@ -4445,6 +4506,23 @@ int main (int argc, char **argv)
                      }
                   } else { // process emulator specific keys
                      switch (cpc_key) {
+
+                        case CAP32_GUI:
+						    // judb
+                            audio_pause();                                
+                            // Activate gui
+                            // copy contents of vid to back_surface ("take a backup")
+                            SDL_BlitSurface(back_surface, NULL, guiBackSurface, NULL);
+                            SDL_ShowCursor(SDL_ENABLE);
+                            capriceGuiView.SetSurface(back_surface); // surface pointer may have changed, 
+                                                            // e.g. when toggling fullscreen
+                            capriceGui.SetMouseVisibility(true);
+                            capriceGui.Exec();
+                            // Clear SDL surface:
+                            SDL_FillRect(back_surface, NULL, SDL_MapRGB(back_surface->format, 0, 0, 0));
+                            SDL_ShowCursor(SDL_DISABLE);
+                            audio_resume();
+                            break;
 
                         case CAP32_FULLSCRN:
                            audio_pause();
