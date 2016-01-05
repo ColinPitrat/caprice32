@@ -2,7 +2,7 @@ language: cpp
 addons:
  apt:
   packages:
-    - libsdl-dev
+    - libsdl1.2-dev
     - zlib1g-dev
 script: 
  - make
