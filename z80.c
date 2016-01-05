@@ -23,39 +23,6 @@
     Juergen Buchmueller (MAME Z80 core v3.3)
     Marat Fayzullin
     and my own Z80 x86 assembly code (Caprice32 up to version 2.00b2)
-
-   Oct 03, 2000 - 18:56    all un-prefixed opcodes done
-   Oct 07, 2000 - 11:04    all CB opcodes done
-   Oct 07, 2000 - 15:06    all DD opcodes done
-   Oct 07, 2000 - 15:23    all DD CB opcodes done
-   Oct 09, 2000 - 12:41    all ED, FD, and FD CB opcodes done
-   Oct 14, 2000 - 17:48    added interrupt processing to z80_getopcode
-   Oct 22, 2000 - 19:18    removed R register update from DDCB and FDCB opcode handlers
-   Oct 22, 2000 - 19:43    added break-point and trace capabilities
-   Oct 24, 2000 - 17:57    changed math based opcodes to always work with unsigned parameters
-   Oct 29, 2000 - 20:46    fixed 16 bit memory read/write opcodes (read both halves from the low byte!)
-   Oct 29, 2000 - 20:51    fixed LD L,byte; RRC r (used wrong registers - forgot to change them after copy!)
-   Nov 06, 2000 - 21:08    fixed a couple of IX/IY instructions (forgot to change a few I?h/I?l related opcodes!)
-   Nov 06, 2000 - 21:20    fixed some DDCB/FDCB instructions (one too many M cycles for BIT (I?+o) & co.)
-   Nov 07, 2000 - 18:58    complete overhaul of DDCB/FDCB instructions (offset byte handling was wrong!)
-   Jan 24, 2001 - 18:26    fixed LD (IX/IY + o), L and LD (IX/IY + o), H (uses L and H, not I?l and I?h!)
-   Feb 19, 2001 - 18:37    removed machine cycle specific code; added cycle count tables and 'wait state' routine
-   Mar 05, 2001 - 22:58    reworked all cycle count tables - verfied with the real CPC & an oscilloscope
-   Mar 29, 2001 - 19:10    fixed the timing problem (z80_wait_states was called after interrupts even if they were disabled!)
-   Apr 03, 2001 - 18:25    incorporated the changes from the MAME Z80 core v3.1 to v3.2 update
-   Apr 09, 2001 - 19:30    fixed the problem with some CPC programs crashing (offset for IX/IY instructions was unsigned!)
-   Jul 31, 2001 - 23:34    put the 'old' NOP cycle timing table back in
-   Nov 12, 2001 - 18:15    incorporated the changes from the MAME Z80 core v3.2 to v3.3 update
-   Nov 14, 2002 - 21:39    changed the length of processing an interrupt in IM2 from 28T to 76T
-   Feb 10, 2003 - 18:24    corrected the cycle count of CPI/CPIR & CPD/CPDR with the help of Richard's PlusTest
-   Feb 12, 2003 - 17:29    added the wait state adjustment on interrupts for a specific number of instructions
-                           (see Richard's document on andercheran for the complete list)
-   Apr 07, 2003 - 19:10    added z80_mf2stop to emulate the NMI caused by the stop button of the MF2
-   Apr 07, 2003 - 22:48    added code to z80_execute to monitor when the MF2 finishes and has to be made 'invisible'
-   May 10, 2003 - 19:12    fixed the unofficial DDCB/FDCB RES/SET instructions: the unaltered value was
-                           stored in the associated register; some minor code clean up
-   May 15, 2003 - 23:19    "Thomas the Tank Engine", "N.E.X.O.R." and "Jocky Wilson's Darts Compendium" work now:
-                           DI did not clear the z80.EI_issued counter
 */
 
 #include "z80.h"

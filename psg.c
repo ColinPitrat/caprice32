@@ -20,26 +20,6 @@
 
    converted from the AY Emulator project by Sergey Vladimirovich Bulba
    based on Version 2.7 beta 3
-
-   Jul 07, 2001 - 16:07 basic functionality of sound_fill_buffer, converted from asm code
-   Jul 20, 2001 - 18:49 sound emulation works properly for the first time; tone and noise implemented
-   Jul 28, 2001 - 15:23 switched to the AY emulation from MAME
-   Jul 28, 2001 - 16:09 fixed the envelope problem: the amp_table was still being referenced as byte!
-   Aug 01, 2001 - 17:28 added code to support mono output
-   Aug 12, 2001 - 21:42 moved psg_reg_write() from cap32.cpp
-   Dec 08, 2002 - 10:43 properly integrated the tape noise into the mixing buffer
-   Apr 29, 2003 - 21:48 started to convert AyEmul source code from Pascal to C
-   Apr 30, 2003 - 23:39 continued with conversion
-   May 04, 2003 - 00:13 modified Synthesizer_Stereo16 for Caprice32 - new AY code works for the first time!
-   May 04, 2003 - 16:09 fixed the problem with the envelope period: the struct in TRegisterAY wasn't accessed properly
-   May 05, 2003 - 18:46 added alternate synthesizers for mono/stereo + 8/16 bits; some code cleanup
-   May 06, 2003 - 15:18 enabled 'tape noise' again
-   May 13, 2003 - 15:57 moved counter init to InitAYCounterVars; corrected the 'divide by zero' possibility in the
-                        synthesizer routines: LoopCountInit calculation needs to take CPC speed into account
-   May 15, 2003 - 00:08 replaced the rand() call with Sergey's noise algorithm
-   May 23, 2003 - 14:58 added code to supress sound if the tone frequency is set to a value below 5, and no
-                        envelope assigned to the channel
-   Jun 04, 2003 - 19:37 added support for Digiblaster/Soundplayer on the printer port
 */
 
 #include <math.h>
@@ -56,8 +36,6 @@ extern byte *pbSndBufferEnd;
 extern byte bTapeLevel;
 
 #define TAPE_VOLUME 32
-
-
 
 // Amplitude table (c)Hacker KAY
 word Amplitudes_AY[16] = {

@@ -18,36 +18,6 @@
 
 /* Nec uPD765A Floppy Disk Controller emulation
    (c) Copyright 1997-2003 Ulrich Doewich
-
-   Nov 08, 2000 - 18:02 started conversion of assembly FDC routines to C
-   Nov 22, 2000 - 17:50 added fdc_read_status()
-   Dec 19, 2000 - 00:05 added fdc_seek()
-   Jan 15, 2001 - 16:52 fdc_read() done
-   Jan 17, 2001 - 19:15 updated/fixed fdc_read(), fdc_readID, fdc_intstat; added fdc_recalib
-   Jan 18, 2001 - 23:43 inlined cmd_read(); added #defines for loading the result buffer; added fdc_drvstat()
-   Jan 24, 2001 - 22:26 fixed fdc_readID() (the result got overwritten by LOAD_RESULT_WITH_CHRN!)
-   Aug 03, 2001 - 00:07 added fdc_write()
-   Aug 04, 2001 - 10:40 added fdc_writeID()
-   Oct 06, 2001 - 23:21 added fdc_readtrk()
-   Oct 07, 2001 - 11:37 got fdc_readtrk() to work properly
-
-   Jan 12, 2003 - 18:49 fdc_drvstat now reports an error condition when accessing side 2 on a one sided disk
-   Jan 21, 2003 - 18:13 mod to fdc_drvstat was incorrect: drive falls back to 1st side on a single head drive
-   Jan 25, 2003 - 15:57 data transfers can now time out and will be reported via OVERRUN condition
-   Feb 05, 2003 - 19:42 changed the OVERRUN_TIMEOUT to 26µs as per NEC's documentation
-   Feb 08, 2003 - 16:26 added a delay to fdc_read_status in execution phase: FDC first indicates busy before
-                        starting data transfer ("Last Mission" loads)
-   Feb 10, 2003 - 21:45 fixed cmd_read: multi-sector reads end on the first sector that is found to have the
-                        opposite of the requested AM ("Nigel Mansell's Grand Prix" loads)
-   Feb 11, 2003 - 18:35 increased OVERRUN_TIMEOUT again ("Puffy's Saga" loads)
-   Mar 16, 2003 - 00:19 added the missing scan equal, scan low or equal and scan high or equal commands
-   Mar 16, 2003 - 12:22 modified find_sector: if a sector cannot be found, table index should be 0
-   Mar 16, 2003 - 16:12 fdc_seek now only changes track if the drive is ready (i.e. has a disk inserted)
-   Mar 17, 2003 - 22:42 updated fdc_intstat to report status changes (drive ready/not ready)
-   Mar 17, 2003 - 23:04 fixed fdc_drvstat: reset ready if motor is off or no disk inserted
-   Mar 22, 2003 - 18:54 added support for the "flipped" disk condition
-   Jun 03, 2003 - 18:34 fixed Bad Cylinder and No Cylinder handling when a sector cannot be found:
-                        ("Starfox - CPM version" loads)
 */
 
 #include "cap32.h"

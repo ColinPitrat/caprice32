@@ -18,22 +18,6 @@
 
 /* Hitachi HD6845S CRT Controller (CRTC Type 0) emulation
    based on the CRTC emulation of WinAPE32 v2.0a5b by Richard Wilson
-
-   Oct 16, 2000 - 23:12 started conversion from assembly to C
-   Oct 17, 2000 - 19:25 finished converting main CRTC update loop
-   Oct 17, 2000 - 22:04 added framework for mode draw handlers
-   Oct 25, 2000 - 22:03 changed all CRTC counters to be only 8 bits wide; fixed address calculation
-   Oct 30, 2000 - 19:03 fixed CPC screen address line advancement (test should have been for a _reset_ bit!)
-   Mar 20, 2001 - 16:00 added draw_mode2
-   Jun 20, 2001 - 23:24 added drawing routines for 32bpp video modes
-   Jul 04, 2001 - 22:28 16bpp rendering; updated 8bpp code with VDU visible region limiting
-   Sep 26, 2002 - 22:39 moved rendering code to separate files; added line doubling (in software) code
-   Oct 07, 2002 - 21:58 removed the CPC.scr_max test in write_video_data; added support for variable line spacing
-
-   May 23, 2004 - 17:38 added some preliminary VDU frame cropping to reduce the amount of data written to the video buffer
-   May 24, 2004 - 00:44 moved the write_video_data code into the body of access_video_memory
-
-   Jul 08, 2004 - 16:58 started implementing Richard's assembly CRTC emulation in C
 */
 
 #include <math.h>

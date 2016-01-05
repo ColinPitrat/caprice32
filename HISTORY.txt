@@ -1,3 +1,6 @@
+*************
+* cap32.cpp *
+*************
    Oct 11, 2000 - 22:12 preliminary IN/OUT handlers; started with the GA OUT register write routines
    Oct 12, 2000 - 23:31 added GA ROM select to z80_OUT_handler
    Oct 14, 2000 - 13:58 added PPI IN/OUT handlers
@@ -137,3 +140,128 @@
    May 23, 2004 - 17:48 dropped double buffer scheme in favour of a back buffer/custom blit operation; fixed colour palette init in 8bpp mode; added support for half size render mode; back buffer is cleared in video_init(); replaced the SDL_Flip operation with an SDL_BlitSurface; initial ExitCondition is now EC_FRAME_COMPLETE to ensure we have a valid video memory pointer to start with
    May 24, 2004 - 00:49 reintroduced snapshot_load & snapshot_save; modified vdu_init to update the two SDL_Rect structures to center or crop the CPC screen; introduced the dwXScale var to support the half size render mode
    May 29, 2004 - 18:09 reintroduced tape_eject, tape_insert and tape_insert_voc; added sound support via the native SDL audio routines
+
+*********
+* z80.c *
+*********
+   Oct 03, 2000 - 18:56    all un-prefixed opcodes done
+   Oct 07, 2000 - 11:04    all CB opcodes done
+   Oct 07, 2000 - 15:06    all DD opcodes done
+   Oct 07, 2000 - 15:23    all DD CB opcodes done
+   Oct 09, 2000 - 12:41    all ED, FD, and FD CB opcodes done
+   Oct 14, 2000 - 17:48    added interrupt processing to z80_getopcode
+   Oct 22, 2000 - 19:18    removed R register update from DDCB and FDCB opcode handlers
+   Oct 22, 2000 - 19:43    added break-point and trace capabilities
+   Oct 24, 2000 - 17:57    changed math based opcodes to always work with unsigned parameters
+   Oct 29, 2000 - 20:46    fixed 16 bit memory read/write opcodes (read both halves from the low byte!)
+   Oct 29, 2000 - 20:51    fixed LD L,byte; RRC r (used wrong registers - forgot to change them after copy!)
+   Nov 06, 2000 - 21:08    fixed a couple of IX/IY instructions (forgot to change a few I?h/I?l related opcodes!)
+   Nov 06, 2000 - 21:20    fixed some DDCB/FDCB instructions (one too many M cycles for BIT (I?+o) & co.)
+   Nov 07, 2000 - 18:58    complete overhaul of DDCB/FDCB instructions (offset byte handling was wrong!)
+   Jan 24, 2001 - 18:26    fixed LD (IX/IY + o), L and LD (IX/IY + o), H (uses L and H, not I?l and I?h!)
+   Feb 19, 2001 - 18:37    removed machine cycle specific code; added cycle count tables and 'wait state' routine
+   Mar 05, 2001 - 22:58    reworked all cycle count tables - verfied with the real CPC & an oscilloscope
+   Mar 29, 2001 - 19:10    fixed the timing problem (z80_wait_states was called after interrupts even if they were disabled!)
+   Apr 03, 2001 - 18:25    incorporated the changes from the MAME Z80 core v3.1 to v3.2 update
+   Apr 09, 2001 - 19:30    fixed the problem with some CPC programs crashing (offset for IX/IY instructions was unsigned!)
+   Jul 31, 2001 - 23:34    put the 'old' NOP cycle timing table back in
+   Nov 12, 2001 - 18:15    incorporated the changes from the MAME Z80 core v3.2 to v3.3 update
+   Nov 14, 2002 - 21:39    changed the length of processing an interrupt in IM2 from 28T to 76T
+   Feb 10, 2003 - 18:24    corrected the cycle count of CPI/CPIR & CPD/CPDR with the help of Richard's PlusTest
+   Feb 12, 2003 - 17:29    added the wait state adjustment on interrupts for a specific number of instructions
+                           (see Richard's document on andercheran for the complete list)
+   Apr 07, 2003 - 19:10    added z80_mf2stop to emulate the NMI caused by the stop button of the MF2
+   Apr 07, 2003 - 22:48    added code to z80_execute to monitor when the MF2 finishes and has to be made 'invisible'
+   May 10, 2003 - 19:12    fixed the unofficial DDCB/FDCB RES/SET instructions: the unaltered value was
+                           stored in the associated register; some minor code clean up
+   May 15, 2003 - 23:19    "Thomas the Tank Engine", "N.E.X.O.R." and "Jocky Wilson's Darts Compendium" work now:
+                           DI did not clear the z80.EI_issued counter
+
+**********
+* tape.c *
+**********
+   Nov 05, 2002 - 22:17
+   Nov 06, 2002 - 21:31 first test run - nada, zip, zilch - nothing happens...
+   Nov 07, 2002 - 11:52 doh! data bits were missing one half of their wave; OHMUMMY.CDT loads, but does not run yet
+   Nov 07, 2002 - 22:04 tapes with block id 0x11 seem to load now - enabling tape control through the motor bit fixed it: go figure!
+   Nov 07, 2002 - 23:26 added processing of blocks 0x10, 0x12, 0x13, 0x14
+   Nov 14, 2002 - 23:35 modified the pause to properly finish the previous pulse, if necessary
+   Dec 07, 2002 - 23:00 changed the points where Tape_SwitchLevel is called; level changes should now occur at the correct times
+   Jan 19, 2003 - 12:09 added support for the direct recording block (0x15)
+   Jan 28, 2003 - 22:33 VOC "tapes" work - problems with SpeedLock loaders must therefore be due to incorrect CDT emulation
+   Jan 29, 2003 - 19:14 fixed CDT loading: the pause-after-block value was read from the wrong location!
+
+*********
+* psg.c *
+*********
+   Jul 07, 2001 - 16:07 basic functionality of sound_fill_buffer, converted from asm code
+   Jul 20, 2001 - 18:49 sound emulation works properly for the first time; tone and noise implemented
+   Jul 28, 2001 - 15:23 switched to the AY emulation from MAME
+   Jul 28, 2001 - 16:09 fixed the envelope problem: the amp_table was still being referenced as byte!
+   Aug 01, 2001 - 17:28 added code to support mono output
+   Aug 12, 2001 - 21:42 moved psg_reg_write() from cap32.cpp
+   Dec 08, 2002 - 10:43 properly integrated the tape noise into the mixing buffer
+   Apr 29, 2003 - 21:48 started to convert AyEmul source code from Pascal to C
+   Apr 30, 2003 - 23:39 continued with conversion
+   May 04, 2003 - 00:13 modified Synthesizer_Stereo16 for Caprice32 - new AY code works for the first time!
+   May 04, 2003 - 16:09 fixed the problem with the envelope period: the struct in TRegisterAY wasn't accessed properly
+   May 05, 2003 - 18:46 added alternate synthesizers for mono/stereo + 8/16 bits; some code cleanup
+   May 06, 2003 - 15:18 enabled 'tape noise' again
+   May 13, 2003 - 15:57 moved counter init to InitAYCounterVars; corrected the 'divide by zero' possibility in the
+                        synthesizer routines: LoopCountInit calculation needs to take CPC speed into account
+   May 15, 2003 - 00:08 replaced the rand() call with Sergey's noise algorithm
+   May 23, 2003 - 14:58 added code to supress sound if the tone frequency is set to a value below 5, and no
+                        envelope assigned to the channel
+   Jun 04, 2003 - 19:37 added support for Digiblaster/Soundplayer on the printer port
+   
+**********
+* crtc.c *
+**********
+   Oct 16, 2000 - 23:12 started conversion from assembly to C
+   Oct 17, 2000 - 19:25 finished converting main CRTC update loop
+   Oct 17, 2000 - 22:04 added framework for mode draw handlers
+   Oct 25, 2000 - 22:03 changed all CRTC counters to be only 8 bits wide; fixed address calculation
+   Oct 30, 2000 - 19:03 fixed CPC screen address line advancement (test should have been for a _reset_ bit!)
+   Mar 20, 2001 - 16:00 added draw_mode2
+   Jun 20, 2001 - 23:24 added drawing routines for 32bpp video modes
+   Jul 04, 2001 - 22:28 16bpp rendering; updated 8bpp code with VDU visible region limiting
+   Sep 26, 2002 - 22:39 moved rendering code to separate files; added line doubling (in software) code
+   Oct 07, 2002 - 21:58 removed the CPC.scr_max test in write_video_data; added support for variable line spacing
+
+   May 23, 2004 - 17:38 added some preliminary VDU frame cropping to reduce the amount of data written to the video buffer
+   May 24, 2004 - 00:44 moved the write_video_data code into the body of access_video_memory
+
+   Jul 08, 2004 - 16:58 started implementing Richard's assembly CRTC emulation in C
+
+*********
+* fdc.c *
+*********
+   Nov 08, 2000 - 18:02 started conversion of assembly FDC routines to C
+   Nov 22, 2000 - 17:50 added fdc_read_status()
+   Dec 19, 2000 - 00:05 added fdc_seek()
+   Jan 15, 2001 - 16:52 fdc_read() done
+   Jan 17, 2001 - 19:15 updated/fixed fdc_read(), fdc_readID, fdc_intstat; added fdc_recalib
+   Jan 18, 2001 - 23:43 inlined cmd_read(); added #defines for loading the result buffer; added fdc_drvstat()
+   Jan 24, 2001 - 22:26 fixed fdc_readID() (the result got overwritten by LOAD_RESULT_WITH_CHRN!)
+   Aug 03, 2001 - 00:07 added fdc_write()
+   Aug 04, 2001 - 10:40 added fdc_writeID()
+   Oct 06, 2001 - 23:21 added fdc_readtrk()
+   Oct 07, 2001 - 11:37 got fdc_readtrk() to work properly
+
+   Jan 12, 2003 - 18:49 fdc_drvstat now reports an error condition when accessing side 2 on a one sided disk
+   Jan 21, 2003 - 18:13 mod to fdc_drvstat was incorrect: drive falls back to 1st side on a single head drive
+   Jan 25, 2003 - 15:57 data transfers can now time out and will be reported via OVERRUN condition
+   Feb 05, 2003 - 19:42 changed the OVERRUN_TIMEOUT to 26µs as per NEC's documentation
+   Feb 08, 2003 - 16:26 added a delay to fdc_read_status in execution phase: FDC first indicates busy before
+                        starting data transfer ("Last Mission" loads)
+   Feb 10, 2003 - 21:45 fixed cmd_read: multi-sector reads end on the first sector that is found to have the
+                        opposite of the requested AM ("Nigel Mansell's Grand Prix" loads)
+   Feb 11, 2003 - 18:35 increased OVERRUN_TIMEOUT again ("Puffy's Saga" loads)
+   Mar 16, 2003 - 00:19 added the missing scan equal, scan low or equal and scan high or equal commands
+   Mar 16, 2003 - 12:22 modified find_sector: if a sector cannot be found, table index should be 0
+   Mar 16, 2003 - 16:12 fdc_seek now only changes track if the drive is ready (i.e. has a disk inserted)
+   Mar 17, 2003 - 22:42 updated fdc_intstat to report status changes (drive ready/not ready)
+   Mar 17, 2003 - 23:04 fixed fdc_drvstat: reset ready if motor is off or no disk inserted
+   Mar 22, 2003 - 18:54 added support for the "flipped" disk condition
+   Jun 03, 2003 - 18:34 fixed Bad Cylinder and No Cylinder handling when a sector cannot be found:
+                        ("Starfox - CPM version" loads)

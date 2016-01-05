@@ -18,17 +18,6 @@
 
 /* CDT tape image emulation
    (c) Copyright 2002,2003 Ulrich Doewich
-
-   Nov 05, 2002 - 22:17
-   Nov 06, 2002 - 21:31 first test run - nada, zip, zilch - nothing happens...
-   Nov 07, 2002 - 11:52 doh! data bits were missing one half of their wave; OHMUMMY.CDT loads, but does not run yet
-   Nov 07, 2002 - 22:04 tapes with block id 0x11 seem to load now - enabling tape control through the motor bit fixed it: go figure!
-   Nov 07, 2002 - 23:26 added processing of blocks 0x10, 0x12, 0x13, 0x14
-   Nov 14, 2002 - 23:35 modified the pause to properly finish the previous pulse, if necessary
-   Dec 07, 2002 - 23:00 changed the points where Tape_SwitchLevel is called; level changes should now occur at the correct times
-   Jan 19, 2003 - 12:09 added support for the direct recording block (0x15)
-   Jan 28, 2003 - 22:33 VOC "tapes" work - problems with SpeedLock loaders must therefore be due to incorrect CDT emulation
-   Jan 29, 2003 - 19:14 fixed CDT loading: the pause-after-block value was read from the wrong location!
 */
 
 #include "cap32.h"
