@@ -206,6 +206,7 @@ typedef struct {
    unsigned int keyboard;
    unsigned int joysticks;
    int cycle_count;
+   char resources_path[_MAX_PATH + 1];
 
    unsigned int scr_fs_width;
    unsigned int scr_fs_height;

@@ -3891,6 +3891,12 @@ void loadConfiguration (void)
       CPC.keyboard = 0;
    }
    CPC.joysticks = getConfigValueInt(chFileName, "system", "joysticks", 0) & 1;
+   strncpy(chPath, chAppPath, sizeof(chPath)-5);
+   strcat(chPath, "/resources");
+   getConfigValueString(chFileName, "system", "resources_path", CPC.resources_path, sizeof(CPC.resources_path)-1, chPath);
+   if (CPC.resources_path[0] == '\0') { // if the path is empty, set it to the default
+      strcpy(CPC.rom_path, chPath);
+   }
 
    CPC.scr_fs_width = getConfigValueInt(chFileName, "video", "scr_width", 800);
    CPC.scr_fs_height = getConfigValueInt(chFileName, "video", "scr_height", 600);

@@ -4,7 +4,7 @@
 #include <map>
 #include "std_ex.h"
 #include "CapriceOptions.h"
-
+#include "cap32.h"
 
 // CPC emulation properties, defined in cap32.h:
 extern t_CPC CPC;
@@ -25,12 +25,12 @@ CapriceOptions::CapriceOptions(const CRect& WindowRect, CView* pParent, CFontEng
 
     // Navigation bar
     m_pNavigationBar = new CNavigationBar(this, CPoint(10, 5), 6, 50, 50);
-    m_pNavigationBar->AddItem(SNavBarItem("General", "resource/general.bmp"));
-    m_pNavigationBar->AddItem(SNavBarItem("ROMs", "resource/rom.bmp"));
-    m_pNavigationBar->AddItem(SNavBarItem("Video", "resource/video.bmp"));
-    m_pNavigationBar->AddItem(SNavBarItem("Audio", "resource/audio.bmp"));
-    m_pNavigationBar->AddItem(SNavBarItem("Disk", "resource/disk.bmp"));
-    m_pNavigationBar->AddItem(SNavBarItem("Input", "resource/input.bmp"));
+    m_pNavigationBar->AddItem(SNavBarItem("General", std::string(CPC.resources_path) + "/general.bmp"));
+    m_pNavigationBar->AddItem(SNavBarItem("ROMs",    std::string(CPC.resources_path) + "/rom.bmp"));
+    m_pNavigationBar->AddItem(SNavBarItem("Video",   std::string(CPC.resources_path) + "/video.bmp"));
+    m_pNavigationBar->AddItem(SNavBarItem("Audio",   std::string(CPC.resources_path) + "/audio.bmp"));
+    m_pNavigationBar->AddItem(SNavBarItem("Disk",    std::string(CPC.resources_path) + "/disk.bmp"));
+    m_pNavigationBar->AddItem(SNavBarItem("Input",   std::string(CPC.resources_path) + "/input.bmp"));
     m_pNavigationBar->SelectItem(0);
 
     // Groupboxes containing controls for each 'tab' (easier to make a 'tab page' visible or invisible)
