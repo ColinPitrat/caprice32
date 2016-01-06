@@ -44,4 +44,4 @@ z80.o: z80.c z80.h cap32.h
 	$(CC) $(CFLAGS) -c z80.c
 
 clean:
-	rm *.o cap32
+	rm -f *.o cap32
