@@ -87,7 +87,7 @@ CapriceGuiView::CapriceGuiView(SDL_Surface* surface, SDL_Surface* backSurface, c
 	m_pBtnReset   = new CButton(CRect(CPoint(m_pScreenSurface->w /2 - 50, m_pScreenSurface->h /2 - 20), 100, 20), this, "Reset (F5)");
 	m_pBtnAbout   = new CButton(CRect(CPoint(m_pScreenSurface->w /2 - 50, m_pScreenSurface->h /2 + 10), 100, 20), this, "About");
 	m_pBtnResume  = new CButton(CRect(CPoint(m_pScreenSurface->w /2 - 50, m_pScreenSurface->h /2 + 40), 100, 20), this, "Resume");
-	m_pBtnQuit    = new CButton(CRect(CPoint(m_pScreenSurface->w /2 - 50, m_pScreenSurface->h /2 + 70), 100, 20), this, "Quit");
+	m_pBtnQuit    = new CButton(CRect(CPoint(m_pScreenSurface->w /2 - 50, m_pScreenSurface->h /2 + 70), 100, 20), this, "Quit (F10)");
 }
 
 
