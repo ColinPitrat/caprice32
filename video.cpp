@@ -39,7 +39,7 @@
 #include <math.h>
 
 // the real video surface
-static SDL_Surface* vid;
+SDL_Surface* vid;
 // the video surface shown by the plugin to the application
 static SDL_Surface* pub;
 
@@ -54,7 +54,7 @@ extern t_CPC CPC;
 #endif
 
 // checks for an OpenGL extension
-bool have_gl_extension (char *nom_ext)
+static bool have_gl_extension (const char *nom_ext)
 {
 #ifdef HAVE_GL
    const char *ext;
@@ -77,7 +77,7 @@ bool have_gl_extension (char *nom_ext)
 // computes the clipping of two rectangles and changes src and dst accordingly
 // dst is the screen
 // src is the internal window
-void compute_rects(SDL_Rect* src, SDL_Rect* dst)
+static void compute_rects(SDL_Rect* src, SDL_Rect* dst)
 {
 	/* initialise the source rect to full source */
 	src->x=0;
@@ -116,7 +116,7 @@ void compute_rects(SDL_Rect* src, SDL_Rect* dst)
 	}
 	else
 	{
-		src->h-=2*3;
+		src->h-=2*2;
 		dst->h=CPC_VISIBLE_SCR_HEIGHT*2;
 	}
 }
@@ -124,7 +124,7 @@ void compute_rects(SDL_Rect* src, SDL_Rect* dst)
 /* ------------------------------------------------------------------------------------ */
 /* Half size video plugin ------------------------------------------------------------- */
 /* ------------------------------------------------------------------------------------ */
-SDL_Surface* half_init(int w,int h, int bpp,bool fs)
+SDL_Surface* half_init(video_plugin* t,int w,int h, int bpp,bool fs)
 {
 	if (!fs)
 	{
@@ -134,6 +134,20 @@ SDL_Surface* half_init(int w,int h, int bpp,bool fs)
 	vid=SDL_SetVideoMode(w,h,bpp,SDL_ANYFORMAT | SDL_HWSURFACE | SDL_HWPALETTE | (fs?SDL_FULLSCREEN:0));
 	if (!vid)
 		return NULL;
+	if (fs)
+	{
+		t->x_scale=1.0;
+		t->y_scale=1.0;
+		t->x_offset=(int)(w-CPC_VISIBLE_SCR_WIDTH/t->x_scale)/2;
+		t->y_offset=(int)(h-CPC_VISIBLE_SCR_HEIGHT/t->y_scale)/2;
+	}
+	else
+	{
+		t->x_scale=1.0;
+		t->y_scale=1.0;
+		t->x_offset=0;
+		t->y_offset=0;
+	}
 	SDL_FillRect(vid,NULL,SDL_MapRGB(vid->format,0,0,0));
 	pub=SDL_CreateRGBSurface(SDL_SWSURFACE,CPC_VISIBLE_SCR_WIDTH,CPC_VISIBLE_SCR_HEIGHT,bpp,0,0,0,0);
 	return pub;
@@ -175,7 +189,7 @@ void half_close()
 /* ------------------------------------------------------------------------------------ */
 /* Half size with hardware flip video plugin ------------------------------------------ */
 /* ------------------------------------------------------------------------------------ */
-SDL_Surface* halfhw_init(int w,int h, int bpp, bool fs)
+SDL_Surface* halfhw_init(video_plugin* t,int w,int h, int bpp, bool fs)
 {
 	if (!fs)
 	{
@@ -185,6 +199,10 @@ SDL_Surface* halfhw_init(int w,int h, int bpp, bool fs)
 	vid=SDL_SetVideoMode(CPC_VISIBLE_SCR_WIDTH,CPC_VISIBLE_SCR_HEIGHT,bpp,SDL_ANYFORMAT | SDL_DOUBLEBUF | SDL_HWSURFACE | SDL_HWPALETTE | (fs?SDL_FULLSCREEN:0));
 	if (!vid)
 		return NULL;
+  t->x_scale=1.0;
+  t->y_scale=1.0;
+  t->x_offset=0;
+  t->y_offset=0;
 	SDL_FillRect(vid,NULL,SDL_MapRGB(vid->format,0,0,0));
 	return vid;
 }
@@ -217,60 +235,9 @@ void halfhw_close()
 }
 
 /* ------------------------------------------------------------------------------------ */
-/* Double width video plugin ---------------------------------------------------------- */
+/* Double size video plugin ----------------------------------------------------------- */
 /* ------------------------------------------------------------------------------------ */
-SDL_Surface* doublew_init(int w,int h, int bpp, bool fs)
-{
-	if (!fs)
-	{
-		w=CPC_VISIBLE_SCR_WIDTH*2;
-		h=CPC_VISIBLE_SCR_HEIGHT;
-	}
-	vid=SDL_SetVideoMode(w,h,bpp,SDL_ANYFORMAT | SDL_HWSURFACE | SDL_HWPALETTE | (fs?SDL_FULLSCREEN:0));
-	if (!vid)
-		return NULL;
-	SDL_FillRect(vid,NULL,SDL_MapRGB(vid->format,0,0,0));
-	pub=SDL_CreateRGBSurface(SDL_SWSURFACE,CPC_VISIBLE_SCR_WIDTH*2,CPC_VISIBLE_SCR_HEIGHT,bpp,0,0,0,0);
-	return pub;
-}
-
-void doublew_setpal(SDL_Color* c)
-{
-	SDL_SetPalette(vid, SDL_LOGPAL | SDL_PHYSPAL, c, 0, 32); 
-	SDL_SetPalette(pub, SDL_LOGPAL | SDL_PHYSPAL, c, 0, 32); 
-}
-
-bool doublew_lock()
-{
-	return true;
-}
-
-void doublew_unlock()
-{
-}
-
-void doublew_flip()
-{
-	SDL_Rect dr;
-	dr.x=(vid->w-CPC_VISIBLE_SCR_WIDTH*2)/2;
-	dr.y=(vid->h-CPC_VISIBLE_SCR_HEIGHT)/2;
-	dr.w=CPC_VISIBLE_SCR_WIDTH*2;
-	dr.h=CPC_VISIBLE_SCR_HEIGHT;
-	SDL_BlitSurface(pub,NULL,vid,&dr);
-	SDL_UpdateRects(vid,1,&dr);
-}
-
-void doublew_close()
-{
-	if (!vid)
-		return;
-	SDL_FreeSurface(pub);
-}
-
-/* ------------------------------------------------------------------------------------ */
-/* Scanlines video plugin ------------------------------------------------------------- */
-/* ------------------------------------------------------------------------------------ */
-SDL_Surface* scanline_init(int w,int h, int bpp, bool fs)
+SDL_Surface* double_init(video_plugin* t,int w,int h, int bpp, bool fs)
 {
 	if (!fs)
 	{
@@ -280,79 +247,22 @@ SDL_Surface* scanline_init(int w,int h, int bpp, bool fs)
 	vid=SDL_SetVideoMode(w,h,bpp,SDL_ANYFORMAT | SDL_HWSURFACE | SDL_HWPALETTE | (fs?SDL_FULLSCREEN:0));
 	if (!vid)
 		return NULL;
-	SDL_FillRect(vid,NULL,SDL_MapRGB(vid->format,0,0,0));
-	pub=SDL_CreateRGBSurface(SDL_SWSURFACE,CPC_VISIBLE_SCR_WIDTH*2,CPC_VISIBLE_SCR_HEIGHT,bpp,0,0,0,0);
-	return pub;
-}
-
-void scanline_setpal(SDL_Color* c)
-{
-	SDL_SetPalette(vid, SDL_LOGPAL | SDL_PHYSPAL, c, 0, 32); 
-	SDL_SetPalette(pub, SDL_LOGPAL | SDL_PHYSPAL, c, 0, 32); 
-}
-
-bool scanline_lock()
-{
-	return true;
-}
-
-void scanline_unlock()
-{
-}
-
-void scanline_flip()
-{
-	int line;
-	SDL_Rect sr,dr;
-	if (CPC_VISIBLE_SCR_WIDTH*2>vid->w)
-		sr.x=(CPC_VISIBLE_SCR_WIDTH*2-vid->w)/2;
-	else
-		sr.x=0;
-	if (CPC_VISIBLE_SCR_HEIGHT*2>vid->h)
-		sr.y=(CPC_VISIBLE_SCR_HEIGHT*2-vid->h)/4;
-	else
-		sr.y=0;
-	sr.w=pub->w;
-	sr.h=1;
-	dr.x=(vid->w-CPC_VISIBLE_SCR_WIDTH*2)/2;
-	dr.y=(vid->h-CPC_VISIBLE_SCR_HEIGHT*2)/2;
-	dr.w=pub->w;
-	dr.h=1;
-	for(line=0;line<pub->h;line++)
+	if (fs)
 	{
-		SDL_BlitSurface(pub,&sr,vid,&dr);
-		sr.y++;
-		dr.y+=2;
+		t->x_scale=1.0;
+		t->y_scale=1.0;
+		t->x_offset=(int)(w-CPC_VISIBLE_SCR_WIDTH*2/t->x_scale)/2;
+		t->y_offset=(int)(h-CPC_VISIBLE_SCR_HEIGHT*2/t->y_scale)/2;
 	}
-	dr.x=max((vid->w-CPC_VISIBLE_SCR_WIDTH*2)/2,0);
-	dr.y=max((vid->h-CPC_VISIBLE_SCR_HEIGHT*2)/2,0);
-	dr.w=min(pub->w,vid->w);
-	dr.h=min(pub->h*2,vid->h);
-	SDL_UpdateRects(vid,1,&dr);
-}
-
-void scanline_close()
-{
-	if (!vid)
-		return;
-	SDL_FreeSurface(pub);
-}
-
-/* ------------------------------------------------------------------------------------ */
-/* Line doubling video plugin --------------------------------------------------------- */
-/* ------------------------------------------------------------------------------------ */
-SDL_Surface* double_init(int w,int h, int bpp, bool fs)
-{
-	if (!fs)
+	else
 	{
-		w=CPC_VISIBLE_SCR_WIDTH*2;
-		h=CPC_VISIBLE_SCR_HEIGHT*2;
+		t->x_scale=1.0;
+		t->y_scale=1.0;
+		t->x_offset=0;
+		t->y_offset=0;
 	}
-	vid=SDL_SetVideoMode(w,h,bpp,SDL_ANYFORMAT | SDL_HWSURFACE | SDL_HWPALETTE | (fs?SDL_FULLSCREEN:0));
-	if (!vid)
-		return NULL;
 	SDL_FillRect(vid,NULL,SDL_MapRGB(vid->format,0,0,0));
-	pub=SDL_CreateRGBSurface(SDL_SWSURFACE,CPC_VISIBLE_SCR_WIDTH*2,CPC_VISIBLE_SCR_HEIGHT,bpp,0,0,0,0);
+	pub=SDL_CreateRGBSurface(SDL_SWSURFACE,CPC_VISIBLE_SCR_WIDTH*2,CPC_VISIBLE_SCR_HEIGHT*2,bpp,0,0,0,0);
 	return pub;
 }
 
@@ -373,34 +283,12 @@ void double_unlock()
 
 void double_flip()
 {
-	int line;
-	SDL_Rect sr,dr;
-	if (CPC_VISIBLE_SCR_WIDTH*2>vid->w)
-		sr.x=(CPC_VISIBLE_SCR_WIDTH*2-vid->w)/2;
-	else
-		sr.x=0;
-	if (CPC_VISIBLE_SCR_HEIGHT*2>vid->h)
-		sr.y=(CPC_VISIBLE_SCR_HEIGHT*2-vid->h)/4;
-	else
-		sr.y=0;
-	sr.w=pub->w;
-	sr.h=1;
+	SDL_Rect dr;
 	dr.x=(vid->w-CPC_VISIBLE_SCR_WIDTH*2)/2;
 	dr.y=(vid->h-CPC_VISIBLE_SCR_HEIGHT*2)/2;
-	dr.w=pub->w;
-	dr.h=1;
-	for(line=0;line<pub->h;line++)
-	{
-		SDL_BlitSurface(pub,&sr,vid,&dr);
-		dr.y++;
-		SDL_BlitSurface(pub,&sr,vid,&dr);
-		dr.y++;
-		sr.y++;
-	}
-	dr.x=max((vid->w-CPC_VISIBLE_SCR_WIDTH*2)/2,0);
-	dr.y=max((vid->h-CPC_VISIBLE_SCR_HEIGHT*2)/2,0);
-	dr.w=min(pub->w,vid->w);
-	dr.h=min(pub->h*2,vid->h);
+	dr.w=CPC_VISIBLE_SCR_WIDTH*2;
+	dr.h=CPC_VISIBLE_SCR_HEIGHT*2;
+	SDL_BlitSurface(pub,NULL,vid,&dr);
 	SDL_UpdateRects(vid,1,&dr);
 }
 
@@ -411,6 +299,54 @@ void double_close()
 	SDL_FreeSurface(pub);
 }
 
+/* ------------------------------------------------------------------------------------ */
+/* Double size with hardware flip video plugin ---------------------------------------- */
+/* ------------------------------------------------------------------------------------ */
+SDL_Surface* doublehw_init(video_plugin* t,int w,int h, int bpp, bool fs)
+{
+	if (!fs)
+	{
+		w=CPC_VISIBLE_SCR_WIDTH*2;
+		h=CPC_VISIBLE_SCR_HEIGHT*2;
+	}
+	vid=SDL_SetVideoMode(CPC_VISIBLE_SCR_WIDTH*2,CPC_VISIBLE_SCR_HEIGHT*2,bpp,SDL_ANYFORMAT | SDL_DOUBLEBUF | SDL_HWSURFACE | SDL_HWPALETTE | (fs?SDL_FULLSCREEN:0));
+	if (!vid)
+		return NULL;
+  t->x_scale=1.0;
+  t->y_scale=1.0;
+  t->x_offset=0;
+  t->y_offset=0;
+	SDL_FillRect(vid,NULL,SDL_MapRGB(vid->format,0,0,0));
+	return vid;
+}
+
+void doublehw_setpal(SDL_Color* c)
+{
+	SDL_SetPalette(vid, SDL_LOGPAL | SDL_PHYSPAL, c, 0, 32); 
+}
+
+bool doublehw_lock()
+{
+	if (SDL_MUSTLOCK(vid))
+		return (SDL_LockSurface(vid)==0);
+	return true;
+}
+
+void doublehw_unlock()
+{
+	if (SDL_MUSTLOCK(vid))
+		SDL_UnlockSurface(vid);
+}
+
+void doublehw_flip()
+{
+	SDL_Flip(vid);
+}
+
+void doublehw_close()
+{
+}
+
 #ifdef HAVE_GL
 /* ------------------------------------------------------------------------------------ */
 /* OpenGL scaling video plugin -------------------------------------------------------- */
@@ -419,15 +355,16 @@ static int tex_x,tex_y;
 static GLuint screen_texnum,modulate_texnum;
 static int gl_scanlines;
 
-SDL_Surface* gl_init(int w,int h, int bpp, bool fs)
+SDL_Surface* glscale_init(video_plugin* t,int w,int h, int bpp, bool fs)
 {
 #ifdef _WIN32
-	char *gl_library = "OpenGL32.DLL";
+	const char *gl_library = "OpenGL32.DLL";
 #else
-	char *gl_library = "libGL.so.1";
+	const char *gl_library = "libGL.so.1";
 #endif
 	int surface_bpp;
 
+	gl_scanlines=CPC.scr_oglscanlines;
 	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 0);
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 	if (SDL_GL_LoadLibrary(gl_library)<0)
@@ -452,6 +389,11 @@ SDL_Surface* gl_init(int w,int h, int bpp, bool fs)
 		fprintf(stderr, "Cannot init OpenGL functions: %s\n", SDL_GetError());
 		return NULL;
 	}
+
+	t->x_scale=CPC_VISIBLE_SCR_WIDTH/(float)w;
+	t->y_scale=CPC_VISIBLE_SCR_HEIGHT/(float)h;
+	t->x_offset=0;
+	t->y_offset=0;
 
 	int major, minor;
 	const char *version;
@@ -533,19 +475,7 @@ SDL_Surface* gl_init(int w,int h, int bpp, bool fs)
 	if (gl_scanlines!=0)
 	{
 		Uint8 texmod;
-		switch(gl_scanlines)
-		{
-			case 25:
-			texmod=192; break;
-			case 50:
-			texmod=128; break;
-			case 75:
-			texmod=64; break;
-			case 100:
-			texmod=0; break;
-			default:
-			texmod=255;
-		}
+		texmod=(100-gl_scanlines)*255/100;
 		eglGenTextures(1,&modulate_texnum);
 		eglBindTexture(GL_TEXTURE_2D,modulate_texnum);
 		eglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, CPC.scr_oglfilter?GL_LINEAR:GL_NEAREST);
@@ -569,32 +499,6 @@ SDL_Surface* gl_init(int w,int h, int bpp, bool fs)
 
 	pub=SDL_CreateRGBSurface(SDL_SWSURFACE,CPC_VISIBLE_SCR_WIDTH,CPC_VISIBLE_SCR_HEIGHT,surface_bpp,0,0,0,0);
 	return pub;
-}
-
-SDL_Surface* glscale_init(int w,int h, int bpp, bool fs)
-{
-	gl_scanlines=0;
-	return gl_init(w,h,bpp,fs);
-}
-SDL_Surface* glscale25_init(int w,int h, int bpp, bool fs)
-{
-	gl_scanlines=25;
-	return gl_init(w,h,bpp,fs);
-}
-SDL_Surface* glscale50_init(int w,int h, int bpp, bool fs)
-{
-	gl_scanlines=50;
-	return gl_init(w,h,bpp,fs);
-}
-SDL_Surface* glscale75_init(int w,int h, int bpp, bool fs)
-{
-	gl_scanlines=75;
-	return gl_init(w,h,bpp,fs);
-}
-SDL_Surface* glscale100_init(int w,int h, int bpp, bool fs)
-{
-	gl_scanlines=100;
-	return gl_init(w,h,bpp,fs);
 }
 
 void glscale_setpal(SDL_Color* c)
@@ -729,10 +633,6 @@ void glscale_close()
 	if (!vid)
 		return;
 	SDL_FreeSurface(pub);
-	if (eglIsTexture(screen_texnum))
-		eglDeleteTextures(1,&screen_texnum);
-	if (eglIsTexture(modulate_texnum))
-		eglDeleteTextures(1,&modulate_texnum);
 }
 #endif // HAVE_GL
 
@@ -989,7 +889,7 @@ void filter_supereagle(Uint8 *srcPtr, Uint32 srcPitch, /* Uint8 *deltaPtr,  */
 	}			// endof: for (height; height; height--)
 }
 
-SDL_Surface* seagle_init(int w,int h, int bpp, bool fs)
+SDL_Surface* seagle_init(video_plugin* t,int w,int h, int bpp, bool fs)
 {
 	if (bpp!=16)
 		return NULL;
@@ -1003,6 +903,20 @@ SDL_Surface* seagle_init(int w,int h, int bpp, bool fs)
 		return NULL;
 	if (vid->format->BitsPerPixel!=16)
 		return NULL;
+	if (fs)
+	{
+		t->x_scale=0.5;
+		t->y_scale=0.5;
+		t->x_offset=(int)(w-CPC_VISIBLE_SCR_WIDTH/t->x_scale)/2;
+		t->y_offset=(int)(h-CPC_VISIBLE_SCR_HEIGHT/t->y_scale)/2;
+	}
+	else
+	{
+		t->x_scale=0.5;
+		t->y_scale=0.5;
+		t->x_offset=0;
+		t->y_offset=0;
+	}
 	SDL_FillRect(vid,NULL,SDL_MapRGB(vid->format,0,0,0));
 	pub=SDL_CreateRGBSurface(SDL_SWSURFACE,CPC_VISIBLE_SCR_WIDTH,CPC_VISIBLE_SCR_HEIGHT,bpp,0,0,0,0);
 	return pub;
@@ -1030,7 +944,7 @@ void seagle_flip()
 	SDL_Rect src;
 	SDL_Rect dst;
 	compute_rects(&src,&dst);
-	filter_supereagle((Uint8*)pub->pixels + (2*src.x+src.y*pub->pitch), pub->pitch,
+	filter_supereagle((Uint8*)pub->pixels + (2*src.x+src.y*pub->pitch) + (pub->pitch), pub->pitch,
 		 (Uint8*)vid->pixels + (2*dst.x+dst.y*vid->pitch), vid->pitch, src.w, src.h);
 	if (SDL_MUSTLOCK(vid))
 		SDL_UnlockSurface(vid);
@@ -1076,7 +990,7 @@ void filter_scale2x(Uint8 *srcPtr, Uint32 srcPitch,
 	}
 }
 
-SDL_Surface* scale2x_init(int w,int h, int bpp, bool fs)
+SDL_Surface* scale2x_init(video_plugin* t,int w,int h, int bpp, bool fs)
 {
 	if (bpp!=16)
 		return NULL;
@@ -1090,6 +1004,20 @@ SDL_Surface* scale2x_init(int w,int h, int bpp, bool fs)
 		return NULL;
 	if (vid->format->BitsPerPixel!=16)
 		return NULL;
+	if (fs)
+	{
+		t->x_scale=0.5;
+		t->y_scale=0.5;
+		t->x_offset=(int)(w-CPC_VISIBLE_SCR_WIDTH/t->x_scale)/2;
+		t->y_offset=(int)(h-CPC_VISIBLE_SCR_HEIGHT/t->y_scale)/2;
+	}
+	else
+	{
+		t->x_scale=0.5;
+		t->y_scale=0.5;
+		t->x_offset=0;
+		t->y_offset=0;
+	}
 	SDL_FillRect(vid,NULL,SDL_MapRGB(vid->format,0,0,0));
 	pub=SDL_CreateRGBSurface(SDL_SWSURFACE,CPC_VISIBLE_SCR_WIDTH,CPC_VISIBLE_SCR_HEIGHT,bpp,0,0,0,0);
 	return pub;
@@ -1117,7 +1045,7 @@ void scale2x_flip()
 	SDL_Rect src;
 	SDL_Rect dst;
 	compute_rects(&src,&dst);
-	filter_scale2x((Uint8*)pub->pixels + (2*src.x+src.y*pub->pitch), pub->pitch,
+	filter_scale2x((Uint8*)pub->pixels + (2*src.x+src.y*pub->pitch) + (pub->pitch), pub->pitch,
 		 (Uint8*)vid->pixels + (2*dst.x+dst.y*vid->pitch), vid->pitch, src.w, src.h);
 	if (SDL_MUSTLOCK(vid))
 		SDL_UnlockSurface(vid);
@@ -1335,7 +1263,7 @@ void filter_ascale2x (Uint8 *srcPtr, Uint32 srcPitch,
 
 
 
-SDL_Surface* ascale2x_init(int w,int h, int bpp, bool fs)
+SDL_Surface* ascale2x_init(video_plugin* t,int w,int h, int bpp, bool fs)
 {
 	if (bpp!=16)
 		return NULL;
@@ -1349,6 +1277,20 @@ SDL_Surface* ascale2x_init(int w,int h, int bpp, bool fs)
 		return NULL;
 	if (vid->format->BitsPerPixel!=16)
 		return NULL;
+	if (fs)
+	{
+		t->x_scale=0.5;
+		t->y_scale=0.5;
+		t->x_offset=(int)(w-CPC_VISIBLE_SCR_WIDTH/t->x_scale)/2;
+		t->y_offset=(int)(h-CPC_VISIBLE_SCR_HEIGHT/t->y_scale)/2;
+	}
+	else
+	{
+		t->x_scale=0.5;
+		t->y_scale=0.5;
+		t->x_offset=0;
+		t->y_offset=0;
+	}
 	SDL_FillRect(vid,NULL,SDL_MapRGB(vid->format,0,0,0));
 	pub=SDL_CreateRGBSurface(SDL_SWSURFACE,CPC_VISIBLE_SCR_WIDTH,CPC_VISIBLE_SCR_HEIGHT,bpp,0,0,0,0);
 	return pub;
@@ -1376,7 +1318,7 @@ void ascale2x_flip()
 	SDL_Rect src;
 	SDL_Rect dst;
 	compute_rects(&src,&dst);
-	filter_ascale2x((Uint8*)pub->pixels + (2*src.x+src.y*pub->pitch), pub->pitch,
+	filter_ascale2x((Uint8*)pub->pixels + (2*src.x+src.y*pub->pitch) + (pub->pitch), pub->pitch,
 		 (Uint8*)vid->pixels + (2*dst.x+dst.y*vid->pitch), vid->pitch, src.w, src.h);
 	if (SDL_MUSTLOCK(vid))
 		SDL_UnlockSurface(vid);
@@ -1423,7 +1365,7 @@ void filter_tv2x(Uint8 *srcPtr, Uint32 srcPitch,
 	}
 }
 
-SDL_Surface* tv2x_init(int w,int h, int bpp, bool fs)
+SDL_Surface* tv2x_init(video_plugin* t,int w,int h, int bpp, bool fs)
 {
 	if (bpp!=16)
 		return NULL;
@@ -1437,6 +1379,20 @@ SDL_Surface* tv2x_init(int w,int h, int bpp, bool fs)
 		return NULL;
 	if (vid->format->BitsPerPixel!=16)
 		return NULL;
+	if (fs)
+	{
+		t->x_scale=0.5;
+		t->y_scale=0.5;
+		t->x_offset=(int)(w-CPC_VISIBLE_SCR_WIDTH/t->x_scale)/2;
+		t->y_offset=(int)(h-CPC_VISIBLE_SCR_HEIGHT/t->y_scale)/2;
+	}
+	else
+	{
+		t->x_scale=0.5;
+		t->y_scale=0.5;
+		t->x_offset=0;
+		t->y_offset=0;
+	}
 	SDL_FillRect(vid,NULL,SDL_MapRGB(vid->format,0,0,0));
 	pub=SDL_CreateRGBSurface(SDL_SWSURFACE,CPC_VISIBLE_SCR_WIDTH,CPC_VISIBLE_SCR_HEIGHT,bpp,0,0,0,0);
 	return pub;
@@ -1464,7 +1420,7 @@ void tv2x_flip()
 	SDL_Rect src;
 	SDL_Rect dst;
 	compute_rects(&src,&dst);
-	filter_tv2x((Uint8*)pub->pixels + (2*src.x+src.y*pub->pitch), pub->pitch,
+	filter_tv2x((Uint8*)pub->pixels + (2*src.x+src.y*pub->pitch) + (pub->pitch), pub->pitch,
 		 (Uint8*)vid->pixels + (2*dst.x+dst.y*vid->pitch), vid->pitch, src.w, src.h);
 	if (SDL_MUSTLOCK(vid))
 		SDL_UnlockSurface(vid);
@@ -1507,7 +1463,7 @@ void filter_bilinear(Uint8 *srcPtr, Uint32 srcPitch,
 	}
 }
 
-SDL_Surface* swbilin_init(int w,int h, int bpp, bool fs)
+SDL_Surface* swbilin_init(video_plugin* t,int w,int h, int bpp, bool fs)
 {
 	if (bpp!=16)
 		return NULL;
@@ -1521,6 +1477,20 @@ SDL_Surface* swbilin_init(int w,int h, int bpp, bool fs)
 		return NULL;
 	if (vid->format->BitsPerPixel!=16)
 		return NULL;
+	if (fs)
+	{
+		t->x_scale=0.5;
+		t->y_scale=0.5;
+		t->x_offset=(int)(w-CPC_VISIBLE_SCR_WIDTH/t->x_scale)/2;
+		t->y_offset=(int)(h-CPC_VISIBLE_SCR_HEIGHT/t->y_scale)/2;
+	}
+	else
+	{
+		t->x_scale=0.5;
+		t->y_scale=0.5;
+		t->x_offset=0;
+		t->y_offset=0;
+	}
 	SDL_FillRect(vid,NULL,SDL_MapRGB(vid->format,0,0,0));
 	pub=SDL_CreateRGBSurface(SDL_SWSURFACE,CPC_VISIBLE_SCR_WIDTH,CPC_VISIBLE_SCR_HEIGHT,bpp,0,0,0,0);
 	return pub;
@@ -1548,7 +1518,7 @@ void swbilin_flip()
 	SDL_Rect src;
 	SDL_Rect dst;
 	compute_rects(&src,&dst);
-	filter_bilinear((Uint8*)pub->pixels + (2*src.x+src.y*pub->pitch), pub->pitch,
+	filter_bilinear((Uint8*)pub->pixels + (2*src.x+src.y*pub->pitch) + (pub->pitch), pub->pitch,
 		 (Uint8*)vid->pixels + (2*dst.x+dst.y*vid->pitch), vid->pitch, src.w, src.h);
 	if (SDL_MUSTLOCK(vid))
 		SDL_UnlockSurface(vid);
@@ -1638,7 +1608,7 @@ void filter_bicubic(Uint8 *srcPtr, Uint32 srcPitch,
   }
 }
 
-SDL_Surface* swbicub_init(int w,int h, int bpp, bool fs)
+SDL_Surface* swbicub_init(video_plugin* t,int w,int h, int bpp, bool fs)
 {
 	if (bpp!=16)
 		return NULL;
@@ -1652,6 +1622,20 @@ SDL_Surface* swbicub_init(int w,int h, int bpp, bool fs)
 		return NULL;
 	if (vid->format->BitsPerPixel!=16)
 		return NULL;
+	if (fs)
+	{
+		t->x_scale=0.5;
+		t->y_scale=0.5;
+		t->x_offset=(int)(w-CPC_VISIBLE_SCR_WIDTH/t->x_scale)/2;
+		t->y_offset=(int)(h-CPC_VISIBLE_SCR_HEIGHT/t->y_scale)/2;
+	}
+	else
+	{
+		t->x_scale=0.5;
+		t->y_scale=0.5;
+		t->x_offset=0;
+		t->y_offset=0;
+	}
 	SDL_FillRect(vid,NULL,SDL_MapRGB(vid->format,0,0,0));
 	pub=SDL_CreateRGBSurface(SDL_SWSURFACE,CPC_VISIBLE_SCR_WIDTH,CPC_VISIBLE_SCR_HEIGHT,bpp,0,0,0,0);
 	return pub;
@@ -1679,7 +1663,7 @@ void swbicub_flip()
 	SDL_Rect src;
 	SDL_Rect dst;
 	compute_rects(&src,&dst);
-	filter_bicubic((Uint8*)pub->pixels + (2*src.x+src.y*pub->pitch), pub->pitch,
+	filter_bicubic((Uint8*)pub->pixels + (2*src.x+src.y*pub->pitch) + (pub->pitch), pub->pitch,
 		 (Uint8*)vid->pixels + (2*dst.x+dst.y*vid->pitch), vid->pitch, src.w, src.h);
 	if (SDL_MUSTLOCK(vid))
 		SDL_UnlockSurface(vid);
@@ -1731,7 +1715,7 @@ void filter_dotmatrix(Uint8 *srcPtr, Uint32 srcPitch,
 	}
 }
 
-SDL_Surface* dotmat_init(int w,int h, int bpp, bool fs)
+SDL_Surface* dotmat_init(video_plugin* t,int w,int h, int bpp, bool fs)
 {
 	if (bpp!=16)
 		return NULL;
@@ -1745,6 +1729,20 @@ SDL_Surface* dotmat_init(int w,int h, int bpp, bool fs)
 		return NULL;
 	if (vid->format->BitsPerPixel!=16)
 		return NULL;
+	if (fs)
+	{
+		t->x_scale=0.5;
+		t->y_scale=0.5;
+		t->x_offset=(int)(w-CPC_VISIBLE_SCR_WIDTH/t->x_scale)/2;
+		t->y_offset=(int)(h-CPC_VISIBLE_SCR_HEIGHT/t->y_scale)/2;
+	}
+	else
+	{
+		t->x_scale=0.5;
+		t->y_scale=0.5;
+		t->x_offset=0;
+		t->y_offset=0;
+	}
 	SDL_FillRect(vid,NULL,SDL_MapRGB(vid->format,0,0,0));
 	pub=SDL_CreateRGBSurface(SDL_SWSURFACE,CPC_VISIBLE_SCR_WIDTH,CPC_VISIBLE_SCR_HEIGHT,bpp,0,0,0,0);
 	return pub;
@@ -1772,7 +1770,7 @@ void dotmat_flip()
 	SDL_Rect src;
 	SDL_Rect dst;
 	compute_rects(&src,&dst);
-	filter_dotmatrix((Uint8*)pub->pixels + (2*src.x+src.y*pub->pitch), pub->pitch,
+	filter_dotmatrix((Uint8*)pub->pixels + (2*src.x+src.y*pub->pitch) + (pub->pitch), pub->pitch,
 		 (Uint8*)vid->pixels + (2*dst.x+dst.y*vid->pitch), vid->pitch, src.w, src.h);
 	if (SDL_MUSTLOCK(vid))
 		SDL_UnlockSurface(vid);
@@ -1794,11 +1792,10 @@ void dotmat_close()
 video_plugin video_plugin_list[]=
 {
 /* Name					Init func	Palette func 	Lock func		Unlock func		Flip func	Close func 		Pixel formats	Half size ?		*/
-{"Scanlines",				scanline_init,	scanline_setpal,scanline_lock,		scanline_unlock,	scanline_flip,	scanline_close,		ALL,		0			},
-{"Double size",				double_init,	double_setpal,	double_lock,		double_unlock,		double_flip,	double_close,		ALL,		0			},
-{"Double width",			doublew_init,	doublew_setpal,	doublew_lock,		doublew_unlock,		doublew_flip,	doublew_close,		ALL,		0			},
-{"Half size",				half_init,	half_setpal,	half_lock,		half_unlock,		half_flip,	half_close,		ALL,		1			},
 {"Half size with hardware flip",	halfhw_init,	halfhw_setpal,	halfhw_lock,		halfhw_unlock,		halfhw_flip,	half_close,		ALL,		1			},
+{"Double size with hardware flip",	doublehw_init,	doublehw_setpal,	doublehw_lock,		doublehw_unlock,		doublehw_flip,	doublehw_close,		ALL,		0			},
+{"Half size",				half_init,	half_setpal,	half_lock,		half_unlock,		half_flip,	half_close,		ALL,		1			},
+{"Double size",				double_init,	double_setpal,	double_lock,		double_unlock,		double_flip,	double_close,		ALL,		0			},
 {"Super eagle",				seagle_init,	seagle_setpal,	seagle_lock,		seagle_unlock,		seagle_flip,	seagle_close,		F16_BPP,	1			},
 {"Scale2x",				scale2x_init,	scale2x_setpal,	scale2x_lock,		scale2x_unlock,		scale2x_flip,	scale2x_close,		F16_BPP,	1			},
 {"Advanced Scale2x",			ascale2x_init,	ascale2x_setpal,ascale2x_lock,		ascale2x_unlock,	ascale2x_flip,	ascale2x_close,		F16_BPP,	1			},
@@ -1808,10 +1805,6 @@ video_plugin video_plugin_list[]=
 {"Dot matrix",				dotmat_init,	dotmat_setpal,	dotmat_lock,		dotmat_unlock,		dotmat_flip,	dotmat_close,		F16_BPP,	1			},
 #ifdef HAVE_GL
 {"OpenGL scaling",			glscale_init,	glscale_setpal,	glscale_lock,		glscale_unlock,		glscale_flip,	glscale_close,		ALL,		1			},
-{"OpenGL scaling, 25%% scanlines",	glscale25_init,	glscale_setpal,	glscale_lock,		glscale_unlock,		glscale_flip,	glscale_close,		ALL,		1			},
-{"OpenGL scaling, 50%% scanlines",	glscale50_init,	glscale_setpal,	glscale_lock,		glscale_unlock,		glscale_flip,	glscale_close,		ALL,		1			},
-{"OpenGL scaling, 75%% scanlines",	glscale75_init,	glscale_setpal,	glscale_lock,		glscale_unlock,		glscale_flip,	glscale_close,		ALL,		1			},
-{"OpenGL scaling, 100%% scanlines",	glscale100_init,glscale_setpal,	glscale_lock,		glscale_unlock,		glscale_flip,	glscale_close,		ALL,		1			},
 #endif
 {NULL,					NULL,		NULL,		NULL,			NULL,			NULL,		NULL,			0,		0			}
 };
