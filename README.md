@@ -28,28 +28,34 @@ You will need the following to successfully compile an executable:
 
 #### Linux target:
 
-Use :
+To build with default options, use :
 
 `make` 
 
-to compile a developer build, or use: 
+The following options are available:
 
-`make RELEASE=TRUE` 
+ * DEBUG=TRUE
+ * WITHOUT_GL=TRUE
 
-for an optimized executable.
+For example, for a debug build, use:
+
+`make DEBUG=TRUE` 
 
 #### Windows target:
 
 Edit the makefile to update the IPATHS directive with the correct location of the SDL include and library files.
-Use:
+To build with default options, use:
 
 `make -f makefile.windows` (or `mingw32-make -f makefile.windows`, depending on how you have your MinGW installed) 
 
-to compile a developer build, or use: 
+The following options are available:
 
-`make -f makefile.windows RELEASE=TRUE` 
+ * DEBUG=TRUE
+ * WITHOUT_GL=TRUE
 
-for an optimized executable.
+For example, for a debug build, use:
+
+`make -f makefile.windows DEBUG=TRUE` 
 
 # Comments or ready to contribute?
 

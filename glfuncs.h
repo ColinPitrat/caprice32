@@ -16,6 +16,7 @@
    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#ifdef HAVE_GL
 
 #ifndef GLFUNCS_H
 #define GLFUNCS_H
@@ -46,5 +47,6 @@ extern int init_glfuncs();
 }
 #endif
 
-#endif
+#endif // GLFUNCS_H
 
+#endif // HAVE_GL

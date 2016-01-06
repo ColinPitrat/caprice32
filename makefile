@@ -1,14 +1,20 @@
 # makefile for compiling native unix builds
-# use "make RELEASE=TRUE" to create release executable
+# use "make DEBUG=TRUE" to build a debug executable
 
 CC	= g++
 
 GFLAGS	= -Wall `sdl-config --cflags`
 
-ifdef RELEASE
-CFLAGS	= $(GFLAGS) -O2 -funroll-loops -ffast-math -fomit-frame-pointer -fno-strength-reduce -finline-functions -s
+ifdef DEBUG
+DFLAGS	= $(GFLAGS) -gstabs+
 else
-CFLAGS	= $(GFLAGS) -gstabs+
+DFLAGS	= $(GFLAGS) -O2 -funroll-loops -ffast-math -fomit-frame-pointer -fno-strength-reduce -finline-functions -s
+endif
+
+ifdef WITHOUT_GL
+CFLAGS = $(DFLAGS)
+else
+CFLAGS = $(DFLAGS) -DHAVE_GL
 endif
 
 LIBS = `sdl-config --libs` -lz

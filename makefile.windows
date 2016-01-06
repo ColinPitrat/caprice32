@@ -1,14 +1,20 @@
 # makefile for compiling native windows builds
-# use "make -f makefile.windows RELEASE=TRUE" to create release executable
+# use "make -f makefile.windows DEBUG=TRUE" to create debug executable
 
 CC	= g++
 
 GFLAGS	= -mwindows -Wall -Wstrict-prototypes
 
-ifdef RELEASE
-CFLAGS	= $(GFLAGS) -O2 -funroll-loops -ffast-math -fomit-frame-pointer -fno-strength-reduce -finline-functions -s
+ifdef DEBUG
+DFLAGS	= $(GFLAGS) -gstabs+
 else
-CFLAGS	= $(GFLAGS) -gstabs+
+DFLAGS	= $(GFLAGS) -O2 -funroll-loops -ffast-math -fomit-frame-pointer -fno-strength-reduce -finline-functions -s
+endif
+
+ifdef WITHOUT_GL
+CFLAGS = $(DFLAGS)
+else
+CFLAGS = $(DFLAGS) -DHAVE_GL
 endif
 
 IPATHS	= -I/mingw/SDL/include/SDL -L/mingw/SDL/lib
