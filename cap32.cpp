@@ -16,6 +16,8 @@
    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#include <iostream>
+
 #include <zlib.h>
 #include "SDL.h"
 
@@ -3849,8 +3851,20 @@ void loadConfiguration (void)
    char chFileName[_MAX_PATH + 1];
    char chPath[_MAX_PATH + 1];
 
-   strncpy(chFileName, chAppPath, sizeof(chFileName)-10);
+   // First look for cap32.cfg in the same directory as executable
+   strncpy(chFileName, chAppPath, sizeof(chFileName)-11);
    strcat(chFileName, "/cap32.cfg");
+   if(access(chFileName, F_OK) != 0) {
+     // If not found, look for .cap32.cfg in the home of current user
+     strncpy(chFileName, getenv("HOME"), sizeof(chFileName)-12);
+     strcat(chFileName, "/.cap32.cfg");
+     // If still not found, look for cap32.cfg in /etc
+     if(access(chFileName, F_OK) != 0) {
+       strncpy(chFileName, "/etc/cap32.cfg", sizeof(chFileName)-1);
+       chFileName[_MAX_PATH] = '\0';
+     }
+   }
+   std::cout << "Using configuration file: " << chFileName << std::endl;
 
    memset(&CPC, 0, sizeof(CPC));
    CPC.model = getConfigValueInt(chFileName, "system", "model", 2); // CPC 6128
