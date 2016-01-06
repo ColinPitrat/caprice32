@@ -195,20 +195,10 @@ SDL_Surface* halfhw_init(video_plugin* t,int w,int h, int bpp, bool fs)
 	vid=SDL_SetVideoMode(CPC_VISIBLE_SCR_WIDTH,CPC_VISIBLE_SCR_HEIGHT,bpp,SDL_ANYFORMAT | SDL_DOUBLEBUF | SDL_HWSURFACE | SDL_HWPALETTE | (fs?SDL_FULLSCREEN:0));
 	if (!vid)
 		return NULL;
-	if (fs)
-	{
-		t->x_scale=1.0;
-		t->y_scale=1.0;
-		t->x_offset=(int)(w-CPC_VISIBLE_SCR_WIDTH/t->x_scale)/2;
-		t->y_offset=(int)(h-CPC_VISIBLE_SCR_HEIGHT/t->y_scale)/2;
-	}
-	else
-	{
-		t->x_scale=1.0;
-		t->y_scale=1.0;
-		t->x_offset=0;
-		t->y_offset=0;
-	}
+  t->x_scale=1.0;
+  t->y_scale=1.0;
+  t->x_offset=0;
+  t->y_offset=0;
 	SDL_FillRect(vid,NULL,SDL_MapRGB(vid->format,0,0,0));
 	return vid;
 }
@@ -318,20 +308,10 @@ SDL_Surface* doublehw_init(video_plugin* t,int w,int h, int bpp, bool fs)
 	vid=SDL_SetVideoMode(CPC_VISIBLE_SCR_WIDTH*2,CPC_VISIBLE_SCR_HEIGHT*2,bpp,SDL_ANYFORMAT | SDL_DOUBLEBUF | SDL_HWSURFACE | SDL_HWPALETTE | (fs?SDL_FULLSCREEN:0));
 	if (!vid)
 		return NULL;
-	if (fs)
-	{
-		t->x_scale=1.0;
-		t->y_scale=1.0;
-		t->x_offset=(int)(w-CPC_VISIBLE_SCR_WIDTH*2/t->x_scale)/2;
-		t->y_offset=(int)(h-CPC_VISIBLE_SCR_HEIGHT*2/t->y_scale)/2;
-	}
-	else
-	{
-		t->x_scale=1.0;
-		t->y_scale=1.0;
-		t->x_offset=0;
-		t->y_offset=0;
-	}
+  t->x_scale=1.0;
+  t->y_scale=1.0;
+  t->x_offset=0;
+  t->y_offset=0;
 	SDL_FillRect(vid,NULL,SDL_MapRGB(vid->format,0,0,0));
 	return vid;
 }
