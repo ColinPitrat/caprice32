@@ -186,4 +186,3 @@ wg_tab.o: wg_tab.cpp wg_tab.h
 wg_tree.o: wg_tree.cpp wg_tree.h
 clean:
 	rm -f *.o cap32
-	cd gui/src; rm -f *.o
