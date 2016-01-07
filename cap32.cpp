@@ -2089,8 +2089,8 @@ int zip_extract (char *pchZipFile, char *pchFileName, dword dwOffset)
    FILE *pfileOut, *pfileIn;
    z_stream z;
 
-   tmpnam(pchFileName); // generate a unique (temporary) file name for the decompression process
-   if (!(pfileOut = fopen(pchFileName, "wb"))) {
+   pfileOut = tmpfile();
+   if (pfileOut == NULL) {
       return ERR_FILE_UNZIP_FAILED; // couldn't create output file
    }
    pfileIn = fopen(pchZipFile, "rb"); // open ZIP file for reading
@@ -3919,6 +3919,8 @@ void loadConfiguration (void)
 {
    char chFileName[_MAX_PATH + 1];
    char chPath[_MAX_PATH + 1];
+   char chNoFile[1];
+   chNoFile[0] = '\0';
 
    // First look for cap32.cfg in the same directory as executable
    strncpy(chFileName, chAppPath, sizeof(chFileName)-11);
@@ -4021,7 +4023,7 @@ void loadConfiguration (void)
    if (CPC.snap_path[0] == '\0') {
       strcpy(CPC.snap_path, chPath);
    }
-   getConfigValueString(chFileName, "file", "snap_file", CPC.snap_file, sizeof(CPC.snap_file)-1, "");
+   getConfigValueString(chFileName, "file", "snap_file", CPC.snap_file, sizeof(CPC.snap_file)-1, chNoFile);
    CPC.snap_zip = getConfigValueInt(chFileName, "file", "snap_zip", 0) & 1;
    strncpy(chPath, chAppPath, sizeof(chPath)-7);
    strcat(chPath, "/disk");
@@ -4029,14 +4031,14 @@ void loadConfiguration (void)
    if (CPC.drvA_path[0] == '\0') {
       strcpy(CPC.drvA_path, chPath);
    }
-   getConfigValueString(chFileName, "file", "drvA_file", CPC.drvA_file, sizeof(CPC.drvA_file)-1, "");
+   getConfigValueString(chFileName, "file", "drvA_file", CPC.drvA_file, sizeof(CPC.drvA_file)-1, chNoFile);
    CPC.drvA_zip = getConfigValueInt(chFileName, "file", "drvA_zip", 0) & 1;
    CPC.drvA_format = getConfigValueInt(chFileName, "file", "drvA_format", DEFAULT_DISK_FORMAT);
    getConfigValueString(chFileName, "file", "drvB_path", CPC.drvB_path, sizeof(CPC.drvB_path)-1, chPath);
    if (CPC.drvB_path[0] == '\0') {
       strcpy(CPC.drvB_path, chPath);
    }
-   getConfigValueString(chFileName, "file", "drvB_file", CPC.drvB_file, sizeof(CPC.drvB_file)-1, "");
+   getConfigValueString(chFileName, "file", "drvB_file", CPC.drvB_file, sizeof(CPC.drvB_file)-1, chNoFile);
    CPC.drvB_zip = getConfigValueInt(chFileName, "file", "drvB_zip", 0) & 1;
    CPC.drvB_format = getConfigValueInt(chFileName, "file", "drvB_format", DEFAULT_DISK_FORMAT);
    strncpy(chPath, chAppPath, sizeof(chPath)-7);
@@ -4045,7 +4047,7 @@ void loadConfiguration (void)
    if (CPC.tape_path[0] == '\0') {
       strcpy(CPC.tape_path, chPath);
    }
-   getConfigValueString(chFileName, "file", "tape_file", CPC.tape_file, sizeof(CPC.tape_file)-1, "");
+   getConfigValueString(chFileName, "file", "tape_file", CPC.tape_file, sizeof(CPC.tape_file)-1, chNoFile);
    CPC.tape_zip = getConfigValueInt(chFileName, "file", "tape_zip", 0) & 1;
 
    int iFmt = FIRST_CUSTOM_DISK_FORMAT;
@@ -4056,7 +4058,7 @@ void loadConfiguration (void)
       disk_format[iFmt].label[0] = 0; // clear slot
       sprintf(chFmtId, "fmt%02d", i); // build format ID
       char chFmtStr[256];
-      getConfigValueString(chFileName, "file", chFmtId, chFmtStr, sizeof(chFmtStr)-1, "");
+      getConfigValueString(chFileName, "file", chFmtId, chFmtStr, sizeof(chFmtStr)-1, chNoFile);
       if (chFmtStr[0] != 0) { // found format definition for this slot?
          char chDelimiters[] = ",";
          char *pchToken;
@@ -4146,7 +4148,7 @@ void loadConfiguration (void)
    for (int iRomNum = 0; iRomNum < 16; iRomNum++) { // loop for ROMs 0-15
       char chRomId[14];
       sprintf(chRomId, "slot%02d", iRomNum); // build ROM ID
-      getConfigValueString(chFileName, "rom", chRomId, CPC.rom_file[iRomNum], sizeof(CPC.rom_file[iRomNum])-1, "");
+      getConfigValueString(chFileName, "rom", chRomId, CPC.rom_file[iRomNum], sizeof(CPC.rom_file[iRomNum])-1, chNoFile);
    }
    if (CPC.rom_path[0] == '\0') { // if the path is empty, set it to the default
       strcpy(CPC.rom_path, chPath);
@@ -4156,7 +4158,7 @@ void loadConfiguration (void)
    } else {
       fclose(pfileObject);
    }
-   getConfigValueString(chFileName, "rom", "rom_mf2", CPC.rom_mf2, sizeof(CPC.rom_mf2)-1, "");
+   getConfigValueString(chFileName, "rom", "rom_mf2", CPC.rom_mf2, sizeof(CPC.rom_mf2)-1, chNoFile);
 }
 
 
@@ -4297,7 +4299,7 @@ int main (int argc, char **argv)
             extension[4] = '\0'; // zero terminate string
             if (strcasecmp(extension, ".zip") == 0) { // are we dealing with a zip archive?
                zip_info.pchZipFile = path;
-               zip_info.pchExtension = ".dsk.sna.cdt.voc";
+               zip_info.pchExtension = strdup(".dsk.sna.cdt.voc");
                if (zip_dir(&zip_info)) {
                   continue; // error or nothing relevant found
                } else {
@@ -4415,7 +4417,7 @@ int main (int argc, char **argv)
 
       if (CPC.drvA_zip) { // compressed image?
          zip_info.pchZipFile = CPC.drvA_path; // pchPath already has path and zip file combined
-         zip_info.pchExtension = ".dsk";
+         zip_info.pchExtension = strdup(".dsk");
          if (!zip_dir(&zip_info)) { // parse the zip for relevant files
             dword n;
             pchPtr = zip_info.pchFileNames;
@@ -4448,7 +4450,7 @@ int main (int argc, char **argv)
 
       if (CPC.drvB_zip) { // compressed image?
          zip_info.pchZipFile = CPC.drvB_path; // pchPath already has path and zip file combined
-         zip_info.pchExtension = ".dsk";
+         zip_info.pchExtension = strdup(".dsk");
          if (!zip_dir(&zip_info)) { // parse the zip for relevant files
             dword n;
             pchPtr = zip_info.pchFileNames;
@@ -4483,7 +4485,7 @@ int main (int argc, char **argv)
 
       if (CPC.tape_zip) { // compressed image?
          zip_info.pchZipFile = CPC.tape_path; // pchPath already has path and zip file combined
-         zip_info.pchExtension = ".cdt.voc";
+         zip_info.pchExtension = strdup(".cdt.voc");
          iErrorCode = zip_dir(&zip_info);
          if (!iErrorCode) { // parse the zip for relevant files
             dword n;
@@ -4682,7 +4684,7 @@ int main (int argc, char **argv)
 
             case SDL_JOYBUTTONDOWN:
             {
-              dword cpc_key;
+              dword cpc_key(0xff);
               switch(event.jbutton.button) {
                 case 0:
                   switch(event.jbutton.which) {
@@ -4703,9 +4705,6 @@ int main (int argc, char **argv)
                       cpc_key = cpc_kbd[CPC.keyboard][CPC_J1_FIRE2];
                       break;
                   }
-                  break;
-                default:
-                  cpc_key = 0xff;
                   break;
               }
               // TODO: deduplicate this from SDL_KEYDOWN, SDL_KEYUP, SDL_JOYBUTTONDOWN, SDL_JOYBUTTONUP and SDL_JOYAXISMOTION
@@ -4727,7 +4726,7 @@ int main (int argc, char **argv)
 
             case SDL_JOYBUTTONUP:
             {
-              dword cpc_key;
+              dword cpc_key(0xff);
               switch(event.jbutton.button) {
                 case 0:
                   switch(event.jbutton.which) {
@@ -4749,9 +4748,6 @@ int main (int argc, char **argv)
                       break;
                   }
                   break;
-                default:
-                  cpc_key = 0xff;
-                  break;
               }
               if (!CPC.paused && cpc_key != 0xff) {
                  keyboard_matrix[(byte)cpc_key >> 4] |= bit_values[(byte)cpc_key & 7]; // key has been released
@@ -4763,7 +4759,7 @@ int main (int argc, char **argv)
 
             case SDL_JOYAXISMOTION:
             {
-              dword cpc_key, cpc_key2;
+              dword cpc_key(0xff), cpc_key2(0xff);
               bool release = false;
               switch(event.jaxis.axis) {
                 case 0:
@@ -4821,9 +4817,6 @@ int main (int argc, char **argv)
                       }
                       break;
                   }
-                  break;
-                default:
-                  cpc_key = 0xff;
                   break;
               }
               if (!CPC.paused && cpc_key != 0xff) {

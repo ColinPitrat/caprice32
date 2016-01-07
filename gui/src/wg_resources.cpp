@@ -42,7 +42,7 @@ CwgBitmapResourceHandle::CwgBitmapResourceHandle(EwgResourceId resId) :
 	{
 		const CRGBColor T = COLOR_TRANSPARENT;
 		const CRGBColor B = DEFAULT_CHECKBOX_COLOR;
-        const CRGBColor W = COLOR_WHITE;
+    //const CRGBColor W = COLOR_WHITE;
 
 		switch (m_ResourceId)
 		{

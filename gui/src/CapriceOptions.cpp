@@ -270,7 +270,7 @@ bool CapriceOptions::HandleMessage(CMessage* pMessage)
                     // Selected ROM slots ( "..." is empty)
                     // Take the text on each 'ROM' button, if it is "...", clear the ROM, else
                     // set the ROM filename:
-       				for (int i = 0; i < m_pButtonRoms.size(); i ++) {
+       				for (unsigned int i = 0; i < m_pButtonRoms.size(); i ++) {
                         std::string romFileName = m_pButtonRoms.at(i)->GetWindowText();
                         if (romFileName == "...") {
                             strcpy (CPC.rom_file[i], "");
@@ -316,7 +316,7 @@ bool CapriceOptions::HandleMessage(CMessage* pMessage)
 
             // 'ROM' button clicked: open the ROM selection dialog:
             if (pMessage->Destination() == m_pGroupBoxTabExpansion) {
-				for (int i = 0; i < m_pButtonRoms.size(); i ++) {
+				for (unsigned int i = 0; i < m_pButtonRoms.size(); i ++) {
                     if (pMessage->Source() == m_pButtonRoms.at(i)) {
                         pRomSlotsDialog = new wGui::CapriceRomSlots(CRect(
                            CPoint(m_pSDLSurface->w /2 - 140, 30), 250, 200), this, 0, "", i, m_pButtonRoms.at(i));

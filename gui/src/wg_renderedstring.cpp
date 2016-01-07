@@ -34,12 +34,12 @@ namespace wGui
 CRenderedString::CRenderedString(CFontEngine* pFontEngine, const std::string& sString, EVAlign eVertAlign, EHAlign eHorzAlign) :
 	m_pFontEngine(pFontEngine),
 	m_sString(sString),
+	m_MaskChar(' '),
 	m_eVertAlign(eVertAlign),
 	m_eHorzAlign(eHorzAlign),
 	m_bCachedMetricsValid(false),
-	m_MaskChar(' '),
 	m_MaxFontHeight(-1),
-    m_MaxFontWidth(-1)
+  m_MaxFontWidth(-1)
 {
 	if (! m_pFontEngine)
 	{
@@ -65,9 +65,9 @@ void CRenderedString::Draw(SDL_Surface* pSurface, const CRect& BoundingRect, con
 			pGlyph = m_pFontEngine->RenderGlyph(m_MaskChar);
 		}
 		CPainter Painter(pSurface, CPainter::PAINT_NORMAL);
-		for (int y = 0; y < pGlyph->bitmap.rows; ++y)
+		for (unsigned int y = 0; y < pGlyph->bitmap.rows; ++y)
 		{
-			for (int x = 0; x < pGlyph->bitmap.width; ++x)
+			for (unsigned int x = 0; x < pGlyph->bitmap.width; ++x)
 			{
 				unsigned char* PixelOffset = pGlyph->bitmap.buffer + y * pGlyph->bitmap.width + x;
 				if (*PixelOffset != 0x00)
