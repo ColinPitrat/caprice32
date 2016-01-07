@@ -36,7 +36,6 @@ wg_progress.o wg_rect.o wg_renderedstring.o wg_resource_handle.o wg_resources.o 
 wg_scrollbar.o wg_tab.o wg_textbox.o wg_timer.o wg_toolbar.o wg_tooltip.o wg_tree.o \
 wg_view.o wg_window.o wutil_config_store.o wutil_log.o
 
-
 .cpp.o :
 	$(CC) -c $(CFLAGS) $(IPATHS) -o $@ $<
 
@@ -72,11 +71,11 @@ fileutils.o: fileutils.cpp fileutils.h
 
 cap32.o: cap32.cpp cap32.h crtc.h tape.h video.h z80.h CapriceGui.h CapriceGuiView.h font.c rom_mods.c
 
-CapriceAbout.o: CapriceAbout.cpp CapriceAbout.h wg_label.h wg_fontengine.h wg_messagebox.h wg_application.h
+CapriceAbout.o: CapriceAbout.cpp CapriceAbout.h wg_label.h wg_fontengine.h wg_messagebox.h wg_application.h cap32.h
 
 CapriceGui.o: CapriceGui.cpp CapriceGui.h wg_application.h
 
-CapriceGuiView.o: CapriceGuiView.cpp CapriceGuiView.h CapriceAbout.h CapriceOptions.h wg_view.h wg_application.h
+CapriceGuiView.o: CapriceGuiView.cpp CapriceGuiView.h CapriceAbout.h CapriceOptions.h wg_view.h wg_application.h cap32.h
 
 CapriceOptions.o: CapriceOptions.cpp CapriceOptions.h cap32.h std_ex.h CapriceRomSlots.h wgui.h \
  wg_checkbox.h wg_frame.h wg_groupbox.h wg_label.h wg_navigationbar.h wg_radiobutton.h wg_scrollbar.h
@@ -87,7 +86,7 @@ std_ex.o: std_ex.cpp std_ex.h
 
 wg_application.o: wg_application.cpp wg_application.h std_ex.h wg_error.h wg_fontengine.h \
  wg_message_client.h wg_message_server.h wg_resources.h wg_window.h wgui_include_config.h \
- wutil_config_store.h wutil_log.h wutil_debug.h
+ wutil_config_store.h wutil_log.h wutil_debug.h cap32.h
 
 wg_button.o: wg_button.cpp wg_button.h std_ex.h wg_application.h wg_message_server.h \
  wg_painter.h wg_picture.h wg_renderedstring.h wg_window.h wgui_include_config.h wutil_debug.h
@@ -190,5 +189,6 @@ wutil_log.o: wutil_log.cpp wutil_log.h wgui_include_config.h
 wg_tab.o: wg_tab.cpp wg_tab.h
 
 wg_tree.o: wg_tree.cpp wg_tree.h
+
 clean:
 	rm -f *.o cap32

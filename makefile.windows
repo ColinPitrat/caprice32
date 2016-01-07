@@ -5,6 +5,7 @@
 VPATH = gui/src:gui/includes
 
 .SUFFIXES : .o .cpp
+
 CC	= g++
 
 GFLAGS	= -mwindows -Wall -Wstrict-prototypes
@@ -55,25 +56,25 @@ psg.o: psg.c cap32.h z80.h
 tape.o: tape.c cap32.h tape.h z80.h
 	$(CC) $(CFLAGS) $(IPATHS) -c tape.c
 
-video.o: video.cpp video.h
+video.o: video.cpp video.h glfuncs.h glfunclist.h cap32.h
 	$(CC) $(CFLAGS) $(IPATHS) -c video.cpp
 
-z80.o: z80.c z80.h cap32.h
+z80.o: z80.c z80.h cap32.h tape.h z80daa.h
 	$(CC) $(CFLAGS) $(IPATHS) -c z80.c
 
 fileutils.o: fileutils.cpp fileutils.h
 
-
 ####################################
 ### Dependencies related to the gui:
 ####################################
+
 cap32.o: cap32.cpp cap32.h crtc.h tape.h video.h z80.h CapriceGui.h CapriceGuiView.h font.c rom_mods.c
 
-CapriceAbout.o: CapriceAbout.cpp CapriceAbout.h wg_label.h wg_fontengine.h wg_messagebox.h wg_application.h
+CapriceAbout.o: CapriceAbout.cpp CapriceAbout.h wg_label.h wg_fontengine.h wg_messagebox.h wg_application.h cap32.h
 
 CapriceGui.o: CapriceGui.cpp CapriceGui.h wg_application.h
 
-CapriceGuiView.o: CapriceGuiView.cpp CapriceGuiView.h CapriceAbout.h CapriceOptions.h wg_view.h wg_application.h
+CapriceGuiView.o: CapriceGuiView.cpp CapriceGuiView.h CapriceAbout.h CapriceOptions.h wg_view.h wg_application.h cap32.h
 
 CapriceOptions.o: CapriceOptions.cpp CapriceOptions.h cap32.h std_ex.h CapriceRomSlots.h wgui.h \
  wg_checkbox.h wg_frame.h wg_groupbox.h wg_label.h wg_navigationbar.h wg_radiobutton.h wg_scrollbar.h
@@ -84,7 +85,7 @@ std_ex.o: std_ex.cpp std_ex.h
 
 wg_application.o: wg_application.cpp wg_application.h std_ex.h wg_error.h wg_fontengine.h \
  wg_message_client.h wg_message_server.h wg_resources.h wg_window.h wgui_include_config.h \
- wutil_config_store.h wutil_log.h wutil_debug.h
+ wutil_config_store.h wutil_log.h wutil_debug.h cap32.h
 
 wg_button.o: wg_button.cpp wg_button.h std_ex.h wg_application.h wg_message_server.h \
  wg_painter.h wg_picture.h wg_renderedstring.h wg_window.h wgui_include_config.h wutil_debug.h
