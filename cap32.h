@@ -204,6 +204,7 @@ typedef struct {
    unsigned int printer_port;
    unsigned int mf2;
    unsigned int keyboard;
+   unsigned int joystick_emulation;
    unsigned int joysticks;
    int cycle_count;
    char resources_path[_MAX_PATH + 1];

@@ -78,12 +78,16 @@
 #define MSG_TAP_PLAY             43
 #define MSG_TAP_STOP             44
 
+#define ERR_JOYSTICKS_INIT       45
+
+
 #define MAX_LINE_LEN 256
 
 #define MIN_SPEED_SETTING 2
 #define MAX_SPEED_SETTING 32
 #define DEF_SPEED_SETTING 4
 
+#define MAX_NB_JOYSTICKS 2
 
 
 extern byte bTapeLevel;
@@ -99,6 +103,7 @@ SDL_AudioSpec *audio_spec = NULL;
 
 SDL_Surface *back_surface = NULL;
 video_plugin* vid_plugin;
+SDL_Joystick* joysticks[MAX_NB_JOYSTICKS];
 
 dword dwTicks, dwTicksOffset, dwTicksTarget, dwTicksTargetFPS;
 dword dwFPS, dwFrameCount;
@@ -3710,6 +3715,68 @@ void video_display (void)
 
 
 
+int joysticks_init (void)
+{
+   if(CPC.joysticks == 0) {
+      return 0;
+   }
+
+   if (SDL_InitSubSystem(SDL_INIT_JOYSTICK) < 0) {
+      fprintf(stderr, "Failed to initialize joystick subsystem. Error: %s\n", SDL_GetError());
+      return ERR_JOYSTICKS_INIT;
+   }
+
+   int nbJoysticks = SDL_NumJoysticks();
+   if (nbJoysticks < 0) {
+      fprintf(stderr, "Failed to count joysticks. Error: %s\n", SDL_GetError());
+      return ERR_JOYSTICKS_INIT;
+   }
+   if (nbJoysticks == 0) {
+      fprintf(stderr, "No joystick found.\n");
+      return ERR_JOYSTICKS_INIT;
+   }
+
+   if (SDL_JoystickEventState(SDL_ENABLE) != 1) {
+      fprintf(stderr, "Failed to activate joystick events. Error: %s\n", SDL_GetError());
+      return ERR_JOYSTICKS_INIT;
+   }
+
+   if(nbJoysticks > MAX_NB_JOYSTICKS) {
+      nbJoysticks = MAX_NB_JOYSTICKS;
+   }
+
+   for(int i = 0; i < MAX_NB_JOYSTICKS; i++) {
+      if(i < nbJoysticks) {
+        joysticks[i] = SDL_JoystickOpen(i);
+        if(joysticks[i] == NULL) {
+          fprintf(stderr, "Failed to open joystick %d. Error: %s\n", i, SDL_GetError());
+          //return ERR_JOYSTICKS_INIT;
+        }
+      } else {
+        joysticks[i] = NULL;
+      }
+   }
+
+   return 0;
+}
+
+
+
+void joysticks_shutdown (void)
+{
+/* This cores for an unknown reason - anyway, SDL_QuitSubSystem will do the job
+   for(int i = 0; i < MAX_NB_JOYSTICKS; i++) {
+      if(joysticks[i] != NULL) {
+         SDL_JoystickClose(joysticks[i]);
+      }
+   }
+*/
+
+   SDL_QuitSubSystem(SDL_INIT_JOYSTICK);
+}
+
+
+
 void input_swap_joy (void) 
 {
    dword n, pc_idx, val;
@@ -3777,7 +3844,7 @@ int input_init (void)
       }
    }
 
-   if (CPC.joysticks) { // enable keyboard joystick emulation?
+   if (CPC.joystick_emulation) { // enable keyboard joystick emulation?
       input_swap_joy();
    }
 
@@ -3892,7 +3959,8 @@ void loadConfiguration (void)
    if (CPC.keyboard > MAX_ROM_MODS) {
       CPC.keyboard = 0;
    }
-   CPC.joysticks = getConfigValueInt(chFileName, "system", "joysticks", 0) & 1;
+   CPC.joystick_emulation = getConfigValueInt(chFileName, "system", "joystick_emulation", 0) & 1;
+   CPC.joysticks = getConfigValueInt(chFileName, "system", "joysticks", 1) & 1;
    strncpy(chPath, chAppPath, sizeof(chPath)-5);
    strcat(chPath, "/resources");
    getConfigValueString(chFileName, "system", "resources_path", CPC.resources_path, sizeof(CPC.resources_path)-1, chPath);
@@ -4140,6 +4208,7 @@ void doCleanUp (void)
       free(zip_info.pchFileNames);
    }
 
+   joysticks_shutdown();
    audio_shutdown();
    video_shutdown();
 
@@ -4189,6 +4258,11 @@ int main (int argc, char **argv)
    if (audio_init()) {
       fprintf(stderr, "audio_init() failed. Disabling sound.\n");
       CPC.snd_enabled = 0; // disable sound emulation
+   }
+
+   if (joysticks_init()) {
+      fprintf(stderr, "joysticks_init() failed. Disabling joysticks.\n");
+      CPC.joysticks = 0;
    }
 
    if (emulator_init()) {
@@ -4573,7 +4647,7 @@ int main (int argc, char **argv)
                            break;
 
                         case CAP32_JOY:
-                           CPC.joysticks = CPC.joysticks ? 0 : 1;
+                           CPC.joystick_emulation = CPC.joystick_emulation ? 0 : 1;
                            input_swap_joy();
                            break;
 
@@ -4605,6 +4679,175 @@ int main (int argc, char **argv)
                   }
                }
                break;
+
+            case SDL_JOYBUTTONDOWN:
+            {
+              dword cpc_key;
+              switch(event.jbutton.button) {
+                case 0:
+                  switch(event.jbutton.which) {
+                    case 0:
+                      cpc_key = cpc_kbd[CPC.keyboard][CPC_J0_FIRE1];
+                      break;
+                    case 1:
+                      cpc_key = cpc_kbd[CPC.keyboard][CPC_J1_FIRE1];
+                      break;
+                  }
+                  break;
+                case 1:
+                  switch(event.jbutton.which) {
+                    case 0:
+                      cpc_key = cpc_kbd[CPC.keyboard][CPC_J0_FIRE2];
+                      break;
+                    case 1:
+                      cpc_key = cpc_kbd[CPC.keyboard][CPC_J1_FIRE2];
+                      break;
+                  }
+                  break;
+                default:
+                  cpc_key = 0xff;
+                  break;
+              }
+              // TODO: deduplicate this from SDL_KEYDOWN, SDL_KEYUP, SDL_JOYBUTTONDOWN, SDL_JOYBUTTONUP and SDL_JOYAXISMOTION
+              if (!CPC.paused && cpc_key != 0xff) {
+                 keyboard_matrix[(byte)cpc_key >> 4] &= ~bit_values[(byte)cpc_key & 7]; // key is being held down
+                 if (cpc_key & MOD_CPC_SHIFT) { // CPC SHIFT key required?
+                    keyboard_matrix[0x25 >> 4] &= ~bit_values[0x25 & 7]; // key needs to be SHIFTed
+                 } else {
+                    keyboard_matrix[0x25 >> 4] |= bit_values[0x25 & 7]; // make sure key is unSHIFTed
+                 }
+                 if (cpc_key & MOD_CPC_CTRL) { // CPC CONTROL key required?
+                    keyboard_matrix[0x27 >> 4] &= ~bit_values[0x27 & 7]; // CONTROL key is held down
+                 } else {
+                    keyboard_matrix[0x27 >> 4] |= bit_values[0x27 & 7]; // make sure CONTROL key is released
+                 }
+              }
+            }
+            break;
+
+            case SDL_JOYBUTTONUP:
+            {
+              dword cpc_key;
+              switch(event.jbutton.button) {
+                case 0:
+                  switch(event.jbutton.which) {
+                    case 0:
+                      cpc_key = cpc_kbd[CPC.keyboard][CPC_J0_FIRE1];
+                      break;
+                    case 1:
+                      cpc_key = cpc_kbd[CPC.keyboard][CPC_J1_FIRE1];
+                      break;
+                  }
+                  break;
+                case 1:
+                  switch(event.jbutton.which) {
+                    case 0:
+                      cpc_key = cpc_kbd[CPC.keyboard][CPC_J0_FIRE2];
+                      break;
+                    case 1:
+                      cpc_key = cpc_kbd[CPC.keyboard][CPC_J1_FIRE2];
+                      break;
+                  }
+                  break;
+                default:
+                  cpc_key = 0xff;
+                  break;
+              }
+              if (!CPC.paused && cpc_key != 0xff) {
+                 keyboard_matrix[(byte)cpc_key >> 4] |= bit_values[(byte)cpc_key & 7]; // key has been released
+                 keyboard_matrix[0x25 >> 4] |= bit_values[0x25 & 7]; // make sure key is unSHIFTed
+                 keyboard_matrix[0x27 >> 4] |= bit_values[0x27 & 7]; // make sure CONTROL key is not held down
+              }
+            }
+            break;
+
+            case SDL_JOYAXISMOTION:
+            {
+              dword cpc_key, cpc_key2;
+              bool release = false;
+              switch(event.jaxis.axis) {
+                case 0:
+                  switch(event.jaxis.which) {
+                    case 0:
+                      if(event.jaxis.value < -2000) {
+                        cpc_key = cpc_kbd[CPC.keyboard][CPC_J0_LEFT];
+                      } else if(event.jaxis.value > 2000) {
+                        cpc_key = cpc_kbd[CPC.keyboard][CPC_J0_RIGHT];
+                      } else {
+                        // LEFT or RIGHT ?!
+                        cpc_key = cpc_kbd[CPC.keyboard][CPC_J0_LEFT];
+                        cpc_key2 = cpc_kbd[CPC.keyboard][CPC_J0_RIGHT];
+                        release = true;
+                      }
+                      break;
+                    case 1:
+                      if(event.jaxis.value < -2000) {
+                        cpc_key = cpc_kbd[CPC.keyboard][CPC_J1_LEFT];
+                      } else if(event.jaxis.value > 2000) {
+                        cpc_key = cpc_kbd[CPC.keyboard][CPC_J1_RIGHT];
+                      } else {
+                        // LEFT or RIGHT ?!
+                        cpc_key = cpc_kbd[CPC.keyboard][CPC_J1_LEFT];
+                        cpc_key2 = cpc_kbd[CPC.keyboard][CPC_J1_RIGHT];
+                        release = true;
+                      }
+                      break;
+                  }
+                  break;
+                case 1:
+                  switch(event.jaxis.which) {
+                    case 0:
+                      if(event.jaxis.value < -2000) {
+                        cpc_key = cpc_kbd[CPC.keyboard][CPC_J0_UP];
+                      } else if(event.jaxis.value > 2000) {
+                        cpc_key = cpc_kbd[CPC.keyboard][CPC_J0_DOWN];
+                      } else {
+                        // UP or DOWN ?!
+                        cpc_key = cpc_kbd[CPC.keyboard][CPC_J0_UP];
+                        cpc_key2 = cpc_kbd[CPC.keyboard][CPC_J0_DOWN];
+                        release = true;
+                      }
+                      break;
+                    case 1:
+                      if(event.jaxis.value < -2000) {
+                        cpc_key = cpc_kbd[CPC.keyboard][CPC_J1_UP];
+                      } else if(event.jaxis.value > 2000) {
+                        cpc_key = cpc_kbd[CPC.keyboard][CPC_J1_DOWN];
+                      } else {
+                        // UP or DOWN ?!
+                        cpc_key = cpc_kbd[CPC.keyboard][CPC_J1_UP];
+                        cpc_key2 = cpc_kbd[CPC.keyboard][CPC_J1_DOWN];
+                        release = true;
+                      }
+                      break;
+                  }
+                  break;
+                default:
+                  cpc_key = 0xff;
+                  break;
+              }
+              if (!CPC.paused && cpc_key != 0xff) {
+                if(release) {
+                 keyboard_matrix[(byte)cpc_key >> 4] |= bit_values[(byte)cpc_key & 7]; // key has been released
+                 keyboard_matrix[(byte)cpc_key2 >> 4] |= bit_values[(byte)cpc_key2 & 7]; // key has been released
+                 keyboard_matrix[0x25 >> 4] |= bit_values[0x25 & 7]; // make sure key is unSHIFTed
+                 keyboard_matrix[0x27 >> 4] |= bit_values[0x27 & 7]; // make sure CONTROL key is not held down
+                } else {
+                 keyboard_matrix[(byte)cpc_key >> 4] &= ~bit_values[(byte)cpc_key & 7]; // key is being held down
+                 if (cpc_key & MOD_CPC_SHIFT) { // CPC SHIFT key required?
+                    keyboard_matrix[0x25 >> 4] &= ~bit_values[0x25 & 7]; // key needs to be SHIFTed
+                 } else {
+                    keyboard_matrix[0x25 >> 4] |= bit_values[0x25 & 7]; // make sure key is unSHIFTed
+                 }
+                 if (cpc_key & MOD_CPC_CTRL) { // CPC CONTROL key required?
+                    keyboard_matrix[0x27 >> 4] &= ~bit_values[0x27 & 7]; // CONTROL key is held down
+                 } else {
+                    keyboard_matrix[0x27 >> 4] |= bit_values[0x27 & 7]; // make sure CONTROL key is released
+                 }
+                }
+              }
+            }
+            break;
 
             case SDL_QUIT:
                exit(0);
