@@ -21,7 +21,6 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 //
 
-
 #include "wgui_include_config.h"
 #include "wg_application.h"
 #include "wg_error.h"
@@ -29,7 +28,11 @@
 #include "video.h"
 #include <iostream>
 #include <fstream>
+#include "cap32.h"
 
+// CPC emulation properties, defined in cap32.h:
+extern t_CPC CPC;
+// Video plugin, defined in video.h:
 extern video_plugin* vid_plugin;
 
 namespace wGui
@@ -188,7 +191,7 @@ void CApplication::Init(void)
 	SDL_EnableUNICODE(1);
 
     // judb removed references to wgui.conf; for caprice32 we may integrate these settings in cap32.cfg:
-    m_pDefaultFontEngine = GetFontEngine("resource/font.ttf", 8); // default size was 10
+    m_pDefaultFontEngine = GetFontEngine(std::string(CPC.resources_path) + "/font.ttf", 8); // default size was 10
     m_DefaultBackgroundColor = DEFAULT_BACKGROUND_COLOR;
 	m_DefaultForegroundColor = DEFAULT_FOREGROUND_COLOR;
 	m_DefaultSelectionColor  = DEFAULT_SELECTION_COLOR;
