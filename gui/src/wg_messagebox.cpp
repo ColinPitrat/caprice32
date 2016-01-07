@@ -32,7 +32,7 @@ CMessageBox::CMessageBox(const CRect& WindowRect, CWindow* pParent, CFontEngine*
 	CFrame(WindowRect, pParent, pFontEngine, sTitle),
 	m_iButtons(iButtons)
 {
-	m_pMessageLabel = new CLabel(CRect(75, 10, 200, 26), this, sMessage);
+	m_pMessageLabel = new CLabel(CRect(75, 10, GetClientRect().Right() - 75, GetClientRect().Bottom() - 40), this, sMessage);
     // judb Position buttons relative to lower right corner:
 	CPoint BottomRight(GetClientRect().Right() - 20, GetClientRect().Bottom() - 30);
 	if (iButtons & CMessageBox::BUTTON_CANCEL)

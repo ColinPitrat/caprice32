@@ -128,7 +128,7 @@ FILE *pfileObject;
 FILE *pfoPrinter;
 
 #ifdef DEBUG
-#define DEBUG_KEY SDLK_F9
+#define DEBUG_KEY SDLK_F12
 dword dwDebugFlag = 0;
 FILE *pfoDebug;
 #endif
@@ -942,10 +942,10 @@ static int kbd_layout[4][KBD_MAX_ENTRIES][2] = {
       { CPC_TAB,        SDLK_TAB },
       { CPC_UNDERSCORE, SDLK_MINUS | MOD_PC_SHIFT },
       { CAP32_EXIT,     SDLK_F10 },
-      { CAP32_FPS,      SDLK_F12 | MOD_PC_CTRL },
+      { CAP32_FPS,      SDLK_F8 },
       { CAP32_GUI,      SDLK_F1},
       { CAP32_FULLSCRN, SDLK_F2 },
-      { CAP32_JOY,      SDLK_F8 | MOD_PC_CTRL },
+      { CAP32_JOY,      SDLK_F7 },
       //{ CAP32_LOADDRVA, SDLK_F6 },
       //{ CAP32_LOADDRVB, SDLK_F7 },
       //{ CAP32_LOADSNAP, SDLK_F2 },
@@ -957,8 +957,8 @@ static int kbd_layout[4][KBD_MAX_ENTRIES][2] = {
       { CAP32_RESET,    SDLK_F5 },
       //{ CAP32_SAVESNAP, SDLK_F4 },
       //{ CAP32_SCRNSHOT, SDLK_PRINT },
-      { CAP32_SPEED,    SDLK_F12 },
-      { CAP32_TAPEPLAY, SDLK_F3 | MOD_PC_CTRL }
+      { CAP32_SPEED,    SDLK_F9 },
+      { CAP32_TAPEPLAY, SDLK_F4 }
    },
    { // French PC to CPC keyboard layout translation
       { CPC_0,          SDLK_WORLD_64 | MOD_PC_SHIFT },
@@ -1096,10 +1096,10 @@ static int kbd_layout[4][KBD_MAX_ENTRIES][2] = {
       { CPC_TAB,        SDLK_TAB },
       { CPC_UNDERSCORE, SDLK_UNDERSCORE },
       { CAP32_EXIT,     SDLK_F10 },
-      { CAP32_FPS,      SDLK_F12 | MOD_PC_CTRL },
+      { CAP32_FPS,      SDLK_F8 },
       { CAP32_GUI,      SDLK_F1},
       { CAP32_FULLSCRN, SDLK_F2 },
-      { CAP32_JOY,      SDLK_F8 | MOD_PC_CTRL },
+      { CAP32_JOY,      SDLK_F7 },
       //{ CAP32_LOADDRVA, SDLK_F6 },
       //{ CAP32_LOADDRVB, SDLK_F7 },
       //{ CAP32_LOADSNAP, SDLK_F2 },
@@ -1111,8 +1111,8 @@ static int kbd_layout[4][KBD_MAX_ENTRIES][2] = {
       { CAP32_RESET,    SDLK_F5 },
       //{ CAP32_SAVESNAP, SDLK_F4 },
       //{ CAP32_SCRNSHOT, SDLK_PRINT },
-      { CAP32_SPEED,    SDLK_F12 },
-      { CAP32_TAPEPLAY, SDLK_F3 | MOD_PC_CTRL }
+      { CAP32_SPEED,    SDLK_F9 },
+      { CAP32_TAPEPLAY, SDLK_F4 }
    },
    { // Spanish PC to CPC keyboard layout translation
       { CPC_0,          SDLK_0 },
@@ -1245,10 +1245,10 @@ static int kbd_layout[4][KBD_MAX_ENTRIES][2] = {
       { CPC_TAB,        SDLK_TAB },
       { CPC_UNDERSCORE, SDLK_MINUS | MOD_PC_SHIFT },
       { CAP32_EXIT,     SDLK_F10 },
-      { CAP32_FPS,      SDLK_F12 | MOD_PC_CTRL },
+      { CAP32_FPS,      SDLK_F8 },
       { CAP32_GUI,      SDLK_F1},
       { CAP32_FULLSCRN, SDLK_F2 },
-      { CAP32_JOY,      SDLK_F8 | MOD_PC_CTRL },
+      { CAP32_JOY,      SDLK_F7 },
       //{ CAP32_LOADDRVA, SDLK_F6 },
       //{ CAP32_LOADDRVB, SDLK_F7 },
       //{ CAP32_LOADSNAP, SDLK_F2 },
@@ -1260,8 +1260,8 @@ static int kbd_layout[4][KBD_MAX_ENTRIES][2] = {
       { CAP32_RESET,    SDLK_F5 },
       //{ CAP32_SAVESNAP, SDLK_F4 },
       //{ CAP32_SCRNSHOT, SDLK_PRINT },
-      { CAP32_SPEED,    SDLK_F12 },
-      { CAP32_TAPEPLAY, SDLK_F3 | MOD_PC_CTRL }
+      { CAP32_SPEED,    SDLK_F9 },
+      { CAP32_TAPEPLAY, SDLK_F4 }
    }
 };
 
@@ -3710,7 +3710,8 @@ void video_display (void)
 
 
 
-void input_swap_joy (void) {
+void input_swap_joy (void) 
+{
    dword n, pc_idx, val;
 
    for (n = 0; n < 6; n++) {
@@ -3724,7 +3725,8 @@ void input_swap_joy (void) {
 }
 
 // Recalculate emulation speed (to verify, seems to work reasonably well)
-void update_cpc_speed(void) {
+void update_cpc_speed(void) 
+{
    dwTicksOffset = (int)(20.0 / (double)((CPC.speed * 25) / 100.0));
    dwTicksTarget = SDL_GetTicks();
    dwTicksTargetFPS = dwTicksTarget;

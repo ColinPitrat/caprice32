@@ -31,8 +31,7 @@ bool bHandled = false;
 					break;					
 				}
 				if (pSource == m_pBtnAbout) {
-					wGui::CapriceAbout* pAboutBox = new wGui::CapriceAbout(CRect(CPoint(m_pScreenSurface->w /2 - 120, 
-                              m_pScreenSurface->h /2 - 50), 240, 110), this, 0);
+					wGui::CapriceAbout* pAboutBox = new wGui::CapriceAbout(CRect(CPoint(m_pScreenSurface->w /2 - 87, m_pScreenSurface->h /2 - 120), 174, 240), this, 0);
 					pAboutBox->SetModal(true);
 					break;
 				}
