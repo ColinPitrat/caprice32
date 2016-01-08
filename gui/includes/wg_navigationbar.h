@@ -84,35 +84,35 @@ public:
 	//! Adds a new item to the bar
 	//! \param ListItem A SNavBarItem structure with the data for the item
 	//! \return The index of the added item
-	int AddItem(SNavBarItem ListItem);
+	unsigned int AddItem(SNavBarItem ListItem);
 
 	//! Returns the desired item
 	//! \param iItemIndex The index of the item to check (will throw an exception if the index is out of range)
 	//! \return A reference to the SNavBarItem struct
-	SNavBarItem& GetItem(int iItemIndex) { return m_Items.at(iItemIndex); }
+	SNavBarItem& GetItem(unsigned int iItemIndex) { return m_Items.at(iItemIndex); }
 
 	//! Remove an item from the bar
 	//! \param iItemIndex The index of the item to remove
-	void RemoveItem(int iItemIndex);
+	void RemoveItem(unsigned int iItemIndex);
 
 	//! Remove all items from the bar
 	void ClearItems(void);
 
 	//! Gets the number of items in the navigation bar
 	//! \return The number of items in the bar
-	int Size(void) { return stdex::safe_static_cast<int>(m_Items.size()); }
+	unsigned int Size(void) { return m_Items.size(); }
 
 	//! \param iItemIndex The index of the item to check (will return false if the index is out of range)
 	//! \return true if the item is selected
-	bool IsSelected(int iItemIndex)
-		{ return (iItemIndex >= 0 && iItemIndex < stdex::safe_static_cast<int>(m_Items.size()) &&  m_iSelectedItem == iItemIndex); }
+	bool IsSelected(unsigned int iItemIndex)
+		{ return (iItemIndex < m_Items.size() && m_iSelectedItem == iItemIndex); }
 
-    // Returns the index of the selected item; returns -1 if there is no selection.
-    int getSelectedIndex();
+  // Returns the index of the selected item; returns -1 if there is no selection.
+  unsigned int getSelectedIndex();
 
 	//! Selects an item in the navigation bar.
 	//! \param iItemIndex The index of the item select.
-	void SelectItem(int iItemIndex);
+	void SelectItem(unsigned int iItemIndex);
 
 	// CWindow overrides
 	//! Draws the navigation bar
@@ -145,8 +145,8 @@ protected:
 	CFontEngine* m_pFontEngine;  //!< A pointer to the font engine to use to render the text
 	unsigned int m_iItemHeight;  //!< The height of the items in the navigation bar
 	unsigned int m_iItemWidth;  //!< The width of the items in the navigation bar
-	int m_iSelectedItem;  //!< The currently selected item (selection color)
-	int m_iFocusedItem;  //!< The currently focused item (rectangle)
+	unsigned int m_iSelectedItem;  //!< The currently selected item (selection color)
+	unsigned int m_iFocusedItem;  //!< The currently focused item (rectangle)
 	std::vector<SNavBarItem> m_Items;  //!< The list of items
 	std::vector<CRenderedString> m_RenderedStrings;  //!< A vector of the rendered strings
 	std::vector<CBitmapResourceHandle *> m_Bitmaps;  //!< A vector of the pictures (optional)

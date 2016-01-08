@@ -33,6 +33,7 @@ CNavigationBar::CNavigationBar(CWindow* pParent, const CPoint& UpperLeft, unsign
 	CWindow(CRect(UpperLeft, iMaxItems * iItemWidth + 4, iItemHeight), pParent),
 	m_iItemHeight(iItemHeight),
 	m_iItemWidth(iItemWidth),
+	m_iSelectedItem(0),
 	m_iFocusedItem(0)
 {
 	if (pFontEngine) {
@@ -71,7 +72,7 @@ void CNavigationBar::SetItemWidth(unsigned int iItemWidth) {
 }
 
 
-int CNavigationBar::AddItem(SNavBarItem NavBarItem) {
+unsigned int CNavigationBar::AddItem(SNavBarItem NavBarItem) {
 	m_Items.push_back(NavBarItem);
 	m_RenderedStrings.push_back(CRenderedString(m_pFontEngine, NavBarItem.sItemText, CRenderedString::VALIGN_BOTTOM, CRenderedString::HALIGN_CENTER));
     if (NavBarItem.sPictureFilename != "") {
@@ -82,12 +83,12 @@ int CNavigationBar::AddItem(SNavBarItem NavBarItem) {
         m_Bitmaps.push_back(NULL);
     }
 	Draw();
-	return stdex::safe_static_cast<int>(m_Items.size());
+	return m_Items.size();
 }
 
 
-void CNavigationBar::RemoveItem(int iItemIndex) {
-	if (iItemIndex >= 0 && iItemIndex < stdex::safe_static_cast<int>(m_Items.size())) {
+void CNavigationBar::RemoveItem(unsigned int iItemIndex) {
+	if (iItemIndex < m_Items.size()) {
 		m_Items.erase(m_Items.begin() + iItemIndex);
         m_RenderedStrings.erase(m_RenderedStrings.begin() + iItemIndex);
         delete m_Bitmaps.at(iItemIndex); // allocated pointer -> delete
@@ -104,13 +105,13 @@ void CNavigationBar::ClearItems(void)
 }
 
 
-int CNavigationBar::getSelectedIndex() {
+unsigned int CNavigationBar::getSelectedIndex() {
     return m_iSelectedItem;
 }
 
 
-void CNavigationBar::SelectItem(int iItemIndex) {
-	if (iItemIndex >= 0 && iItemIndex < stdex::safe_static_cast<int>(m_Items.size())) {
+void CNavigationBar::SelectItem(unsigned int iItemIndex) {
+	if (iItemIndex < m_Items.size()) {
         m_iSelectedItem = iItemIndex;
         m_iFocusedItem = iItemIndex;
         Draw();
@@ -138,7 +139,7 @@ void CNavigationBar::Draw(void) const {
 				{
 					Painter.DrawRect(ItemRect, true, CApplication::Instance()->GetDefaultSelectionColor(), CApplication::Instance()->GetDefaultSelectionColor());
 				}
-				if (stdex::safe_static_cast<int>(i) == m_iFocusedItem)
+				if (i == m_iFocusedItem)
 				{
 					ItemRect.Grow(1);
 					Painter.DrawRect(ItemRect, false, CApplication::Instance()->GetDefaultSelectionColor() * 0.7);
@@ -178,16 +179,14 @@ bool CNavigationBar::OnMouseButtonDown(CPoint Point, unsigned int Button)
 	{
 		if (!m_Items.empty() && m_ClientRect.HitTest(WindowPoint) == CRect::RELPOS_INSIDE) {
 			// Prep the new selection
-            // judb m_iFocusedItem should be <= the number of items in the bar (0-based, so m_Items.size() - 1)
-			m_iFocusedItem = stdex::MinInt((WindowPoint.XPos() / m_iItemWidth),
-                               m_Items.size() - 1);
+      // judb m_iFocusedItem should be <= the number of items in the bar (0-based, so m_Items.size() - 1)
+			m_iFocusedItem = stdex::MinInt((WindowPoint.XPos() / m_iItemWidth), m_Items.size() - 1);
 			SelectItem(m_iFocusedItem);
 			CWindow* pDestination = m_pParentWindow;
-            // could be optimized : keep 'previous' selection and only send the message if new m_iFocusedItem != 
-            // previous focused item.
+      // could be optimized : keep 'previous' selection and only send the message if new m_iFocusedItem != previous focused item.
 			CMessageServer::Instance().QueueMessage(new TIntMessage(CMessage::CTRL_VALUECHANGE, pDestination, this, m_iFocusedItem));
 			Draw();
-            bResult = true;
+      bResult = true;
 		}
 	}
 	return bResult;

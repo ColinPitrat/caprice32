@@ -113,7 +113,7 @@ void CListBox::ClearItems(void)
 }
 
 int CListBox::getFirstSelectedIndex() {
-    for (int i = 0; i < m_Items.size(); i ++) {
+    for (unsigned int i = 0; i < m_Items.size(); i ++) {
         if (IsSelected(i)) {
             return i;
         }
