@@ -81,7 +81,7 @@ union TEnvelopeCounter {
       dword Hi;
    };
    int64_t Re;
-} EnvelopeCounter;
+} Envelope_Counter;
 byte Ton_A, Ton_B, Ton_C;
 
 int Level_AR[32], Level_AL[32], Level_BR[32], Level_BL[32], Level_CR[32], Level_CL[32];
@@ -236,7 +236,7 @@ void Case_EnvType_14(void)
 
 inline void SetEnvelopeRegister(byte Value)
 {
-   EnvelopeCounter.Hi = 0;
+   Envelope_Counter.Hi = 0;
    PSG.FirstPeriod = true;
    if (!(Value & 4)) {
       PSG.AmplitudeEnv = 32;
@@ -345,12 +345,12 @@ inline void Synthesizer_Logic_Q(void)
       Noise_Counter.Hi = 0;
       Noise.Seed = (((((Noise.Seed >> 13) ^ (Noise.Seed >> 16)) & 1) ^ 1) | Noise.Seed << 1) & 0x1ffff;
    }
-   if (!EnvelopeCounter.Hi) {
+   if (!Envelope_Counter.Hi) {
       Case_EnvType();
    }
-   EnvelopeCounter.Hi++;
-   if (EnvelopeCounter.Hi >= *(word *)&PSG.RegisterAY.EnvelopeLo) {
-      EnvelopeCounter.Hi = 0;
+   Envelope_Counter.Hi++;
+   if (Envelope_Counter.Hi >= *(word *)&PSG.RegisterAY.EnvelopeLo) {
+      Envelope_Counter.Hi = 0;
    }
 }
 
@@ -709,7 +709,7 @@ void ResetAYChipEmulation(void)
    Ton_Counter_B.Re = 0;
    Ton_Counter_C.Re = 0;
    Noise_Counter.Re = 0;
-   EnvelopeCounter.Re = 0;
+   Envelope_Counter.Re = 0;
    Ton_A = 0;
    Ton_B = 0;
    Ton_C = 0;
