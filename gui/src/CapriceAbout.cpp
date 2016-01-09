@@ -17,11 +17,10 @@ CapriceAbout::CapriceAbout(const CRect& WindowRect, CWindow* pParent, CFontEngin
 	m_pMessageLabel = new CLabel(CPoint(5, 90), this, "F1 - Menu / Pause");
 	m_pMessageLabel = new CLabel(CPoint(5, 100), this, "F2 - Fullscreen");
 	m_pMessageLabel = new CLabel(CPoint(5, 110), this, "F3 - ");
-	//m_pMessageLabel = new CLabel(CPoint(5, 120), this, "F3 - Load/Save disk/tape/snapshot");
+	//m_pMessageLabel = new CLabel(CPoint(5, 120), this, "F3 - Load/Save disk/tape/snapshot/screenshot");
 	m_pMessageLabel = new CLabel(CPoint(5, 120), this, "F4 - Tape play");
 	m_pMessageLabel = new CLabel(CPoint(5, 130), this, "F5 - Reset");
-	m_pMessageLabel = new CLabel(CPoint(5, 140), this, "F6 - ");
-	//m_pMessageLabel = new CLabel(CPoint(5, 140), this, "F6 - Screenshot");
+	m_pMessageLabel = new CLabel(CPoint(5, 140), this, "F6 - Multiface II Stop");
 	m_pMessageLabel = new CLabel(CPoint(5, 150), this, "F7 - Joystick emulation");
 	m_pMessageLabel = new CLabel(CPoint(5, 160), this, "F8 - Display FPS");
 	m_pMessageLabel = new CLabel(CPoint(5, 170), this, "F9 - Limit speed");

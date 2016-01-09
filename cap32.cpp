@@ -27,6 +27,9 @@
 #include "video.h"
 #include "z80.h"
 
+#include <errno.h>
+#include <string.h>
+
 #define VERSION_STRING "v4.2.0"
 
 #include "CapriceGui.h"
@@ -955,8 +958,8 @@ static int kbd_layout[4][KBD_MAX_ENTRIES][2] = {
       //{ CAP32_LOADDRVB, SDLK_F7 },
       //{ CAP32_LOADSNAP, SDLK_F2 },
       //{ CAP32_LOADTAPE, SDLK_F3 },
-      //{ CAP32_MF2RESET, SDLK_F5 | MOD_PC_CTRL },
-      //{ CAP32_MF2STOP,  SDLK_F11 },
+      //{ CAP32_MF2RESET, SDLK_F6 | MOD_PC_CTRL },
+      { CAP32_MF2STOP,  SDLK_F6 },
       //{ CAP32_OPTIONS,  SDLK_F8 },
       //{ CAP32_PAUSE,    SDLK_BREAK },
       { CAP32_RESET,    SDLK_F5 },
@@ -1109,8 +1112,8 @@ static int kbd_layout[4][KBD_MAX_ENTRIES][2] = {
       //{ CAP32_LOADDRVB, SDLK_F7 },
       //{ CAP32_LOADSNAP, SDLK_F2 },
       //{ CAP32_LOADTAPE, SDLK_F3 },
-      //{ CAP32_MF2RESET, SDLK_F5 | MOD_PC_CTRL },
-      //{ CAP32_MF2STOP,  SDLK_F11 },
+      //{ CAP32_MF2RESET, SDLK_F6 | MOD_PC_CTRL },
+      { CAP32_MF2STOP,  SDLK_F6 },
       //{ CAP32_OPTIONS,  SDLK_F8 },
       //{ CAP32_PAUSE,    SDLK_BREAK },
       { CAP32_RESET,    SDLK_F5 },
@@ -1258,8 +1261,8 @@ static int kbd_layout[4][KBD_MAX_ENTRIES][2] = {
       //{ CAP32_LOADDRVB, SDLK_F7 },
       //{ CAP32_LOADSNAP, SDLK_F2 },
       //{ CAP32_LOADTAPE, SDLK_F3 },
-      //{ CAP32_MF2RESET, SDLK_F5 | MOD_PC_CTRL },
-      //{ CAP32_MF2STOP,  SDLK_F11 },
+      //{ CAP32_MF2RESET, SDLK_F6 | MOD_PC_CTRL },
+      { CAP32_MF2STOP,  SDLK_F6 },
       //{ CAP32_OPTIONS,  SDLK_F8 },
       //{ CAP32_PAUSE,    SDLK_BREAK },
       { CAP32_RESET,    SDLK_F5 },
@@ -1837,7 +1840,7 @@ void z80_OUT_handler (reg_pair port, byte val)
       else if (port.b.l == 0xea) { // page out MF2 ROM?
          dwMF2Flags &= ~MF2_ACTIVE;
          ga_memory_manager();
-      }
+      } 
    }
 }
 
@@ -3378,7 +3381,7 @@ int emulator_init (void)
             }
             fclose(pfileObject);
          } else { // error opening file
-            fprintf(stderr, "ERROR: The file selected as the MF2 ROM is either corrupt or invalid.\n");
+            fprintf(stderr, "ERROR: The file selected as the MF2 ROM couldn't be opened. Files is '%s', error is %d - %s.\n", chPath, errno, strerror(errno));
             delete [] pbMF2ROMbackup;
             delete [] pbMF2ROM;
             pbMF2ROM = NULL;
@@ -4641,6 +4644,25 @@ int main (int argc, char **argv)
                               } else {
                                  CPC.tape_play_button = 0x10;
                               }
+                           }
+                           break;
+
+                        case CAP32_MF2STOP:
+                           if(CPC.mf2) {
+                             reg_pair port;
+                             port.b.h = 0x40;
+                             z80_OUT_handler(port, 128); // Set mode to activate ROM_config
+                             port.b.h = 0xfe;
+                             if(dwMF2Flags & MF2_ACTIVE) {
+                                port.b.l = 0xea;
+                             } else {
+                                port.b.l = 0xe8;
+                                dwMF2Flags &= ~MF2_INVISIBLE;
+                             }
+                             z80_OUT_handler(port, 0);
+                             if(dwMF2Flags & MF2_ACTIVE) {
+                               z80_mf2stop();
+                             }
                            }
                            break;
 
