@@ -27,9 +27,6 @@
 #include "video.h"
 #include "z80.h"
 
-#include <errno.h>
-#include <string.h>
-
 #define VERSION_STRING "v4.2.0"
 
 #include "CapriceGui.h"
@@ -3381,7 +3378,7 @@ int emulator_init (void)
             }
             fclose(pfileObject);
          } else { // error opening file
-            fprintf(stderr, "ERROR: The file selected as the MF2 ROM couldn't be opened. Files is '%s', error is %d - %s.\n", chPath, errno, strerror(errno));
+            fprintf(stderr, "ERROR: The file selected as the MF2 ROM (%s) couldn't be opened.\n", chPath);
             delete [] pbMF2ROMbackup;
             delete [] pbMF2ROM;
             pbMF2ROM = NULL;
