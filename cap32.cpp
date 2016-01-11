@@ -3373,6 +3373,7 @@ int emulator_init (void)
                delete [] pbMF2ROMbackup;
                delete [] pbMF2ROM;
                pbMF2ROM = NULL;
+               pbMF2ROMbackup = NULL;
                CPC.rom_mf2[0] = 0;
                CPC.mf2 = 0; // disable MF2 support
             }
@@ -3382,6 +3383,7 @@ int emulator_init (void)
             delete [] pbMF2ROMbackup;
             delete [] pbMF2ROM;
             pbMF2ROM = NULL;
+            pbMF2ROMbackup = NULL;
             CPC.rom_mf2[0] = 0;
             CPC.mf2 = 0; // disable MF2 support
          }
@@ -3404,6 +3406,7 @@ void emulator_shutdown (void)
    delete [] pbMF2ROMbackup;
    delete [] pbMF2ROM;
    pbMF2ROM = NULL;
+   pbMF2ROMbackup = NULL;
    for (iRomNum = 2; iRomNum < 16; iRomNum++) // loop for ROMs 2-15
    {
       if (memmap_ROM[iRomNum] != NULL) // was a ROM assigned to this slot?
@@ -4645,18 +4648,20 @@ int main (int argc, char **argv)
                            break;
 
                         case CAP32_MF2STOP:
-                           if(CPC.mf2) {
+                           if(CPC.mf2 && !(dwMF2Flags & MF2_ACTIVE)) {
                              reg_pair port;
-                             port.b.h = 0x40;
-                             z80_OUT_handler(port, 128); // Set mode to activate ROM_config
+
+                             // Set mode to activate ROM_config
+                             //port.b.h = 0x40;
+                             //z80_OUT_handler(port, 128); 
+
+                             // Attempt to load MF2 in lower ROM (can fail if lower ROM is not active)
                              port.b.h = 0xfe;
-                             if(dwMF2Flags & MF2_ACTIVE) {
-                                port.b.l = 0xea;
-                             } else {
-                                port.b.l = 0xe8;
-                                dwMF2Flags &= ~MF2_INVISIBLE;
-                             }
+                             port.b.l = 0xe8;
+                             dwMF2Flags &= ~MF2_INVISIBLE;
                              z80_OUT_handler(port, 0);
+
+                             // Stop execution if load succeeded
                              if(dwMF2Flags & MF2_ACTIVE) {
                                z80_mf2stop();
                              }
