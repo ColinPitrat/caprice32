@@ -77,14 +77,14 @@ public:
 
 	//! \param iItemIndex The index of the item to check (will return false if the index is out of range)
 	//! \return true if the item is selected
-	bool IsSelected(int iItemIndex) { return m_pListBox->IsSelected(iItemIndex); }
+	bool IsSelected(unsigned int iItemIndex) { return m_pListBox->IsSelected(iItemIndex); }
 
     // judb get index of the selected item (-1 if none)
 	int GetSelectedIndex();
 
 	// judb select the item with index iItemIndex in the list, and display the item's name
     // (in the area to the left of the dropdown arrow)
-	void SelectItem(int iItemIndex);
+	void SelectItem(unsigned int iItemIndex);
 	//! Set an item as selected
 	//! \param iItemIndex The index of the item to change
 	//! \param bSelected Will select the item if true, or unselect if false

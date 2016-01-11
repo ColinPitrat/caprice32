@@ -77,27 +77,27 @@ void CListBox::SetItemHeight(unsigned int iItemHeight)
 }
 
 
-int CListBox::AddItem(SListItem ListItem)
+unsigned int CListBox::AddItem(SListItem ListItem)
 {
 	m_Items.push_back(ListItem);
 	m_SelectedItems.push_back(false);
 	m_RenderedStrings.push_back(CRenderedString(m_pFontEngine, ListItem.sItemText, CRenderedString::VALIGN_TOP, CRenderedString::HALIGN_LEFT));
-	int iMax = (m_Items.size() - 1) < 0 ? 0 : stdex::safe_static_cast<int>(m_Items.size() - 1);
+	int iMax = (m_Items.size() < 1 ? 0 : m_Items.size() - 1);
     // judb correction MaxLimit (number of 'scrolls' = number of items - visible number of items )
 	m_pVScrollbar->SetMaxLimit(stdex::MaxInt(iMax - (m_ClientRect.Height() / m_iItemHeight) + 1, 0));
 	Draw();
-	return stdex::safe_static_cast<int>(m_Items.size());
+	return m_Items.size();
 }
 
 
-void CListBox::RemoveItem(int iItemIndex)
+void CListBox::RemoveItem(unsigned int iItemIndex)
 {
-	if (iItemIndex >= 0 && iItemIndex < stdex::safe_static_cast<int>(m_SelectedItems.size()))
+	if (iItemIndex < m_SelectedItems.size())
 	{
 		m_Items.erase(m_Items.begin() + iItemIndex);
 		m_SelectedItems.erase(m_SelectedItems.begin() + iItemIndex);
-		int iMax = (m_Items.size() - 1) < 0 ? 0 : stdex::safe_static_cast<int>(m_Items.size() - 1);
-        // judb correction MaxLimit (number of 'scrolls' = number of items - visible number of items )
+		int iMax = m_Items.size() < 1 ? 0 : m_Items.size() - 1;
+    // judb correction MaxLimit (number of 'scrolls' = number of items - visible number of items )
 		m_pVScrollbar->SetMaxLimit(stdex::MaxInt(iMax - (m_ClientRect.Height() / m_iItemHeight) + 1, 0));
 		Draw();
 	}
@@ -121,9 +121,9 @@ int CListBox::getFirstSelectedIndex() {
     return -1;
 }
 
-void CListBox::SetSelection(int iItemIndex, bool bSelected)
+void CListBox::SetSelection(unsigned int iItemIndex, bool bSelected)
 {
-	if (iItemIndex >= 0 && iItemIndex < stdex::safe_static_cast<int>(m_SelectedItems.size()))
+	if (iItemIndex < m_SelectedItems.size())
 		m_SelectedItems.at(iItemIndex) = bSelected;
 }
 
@@ -136,7 +136,7 @@ void CListBox::SetAllSelections(bool bSelected)
 	}
 }
 
-void CListBox::SetFocus(int iItemIndex) {
+void CListBox::SetFocus(unsigned int iItemIndex) {
     m_iFocusedItem = iItemIndex;
 }
 
@@ -161,7 +161,7 @@ void CListBox::Draw(void) const
 				{
 					Painter.DrawRect(ItemRect, true, CApplication::Instance()->GetDefaultSelectionColor(), CApplication::Instance()->GetDefaultSelectionColor());
 				}
-				if (stdex::safe_static_cast<int>(i) == m_iFocusedItem)
+				if (i == m_iFocusedItem)
 				{
 					ItemRect.Grow(1);
 					Painter.DrawRect(ItemRect, false, COLOR_DARKGRAY);
@@ -228,8 +228,8 @@ bool CListBox::OnMouseButtonDown(CPoint Point, unsigned int Button)
 		if (!m_Items.empty() && m_ClientRect.HitTest(WindowPoint) == CRect::RELPOS_INSIDE)
 		{
 			// Prep the new selection
-            // judb m_iFocusedItem should be <= the number of items in the listbox (0-based, so m_Items.size() -1)
-			m_iFocusedItem = stdex::MinInt((WindowPoint.YPos() + m_ClientRect.Top()) / m_iItemHeight + m_pVScrollbar->GetValue(), m_Items.size() - 1);
+      // judb m_iFocusedItem should be <= the number of items in the listbox (0-based, so m_Items.size() -1)
+			m_iFocusedItem = std::min((WindowPoint.YPos() + m_ClientRect.Top()) / m_iItemHeight + m_pVScrollbar->GetValue(), m_Items.size() - 1);
 		}
 		bResult = true;
 	}
@@ -246,7 +246,7 @@ bool CListBox::OnMouseButtonUp(CPoint Point, unsigned int Button)
 	if (!bResult && m_bVisible && (Button == CMouseMessage::LEFT) && (m_ClientRect.HitTest(WindowPoint) == CRect::RELPOS_INSIDE))
 	{
         // judb m_iFocusedItem should be <= the number of items in the listbox (0-based, so m_Items.size() - 1)
-		if (m_iFocusedItem == stdex::MinInt(stdex::safe_static_cast<int>((WindowPoint.YPos() - m_ClientRect.Top()) / m_iItemHeight + m_pVScrollbar->GetValue()), m_Items.size() - 1))
+		if (m_iFocusedItem == std::min(((WindowPoint.YPos() - m_ClientRect.Top()) / m_iItemHeight + m_pVScrollbar->GetValue()), m_Items.size() - 1))
 		{
 			if (m_bSingleSelection)
 			{
@@ -289,7 +289,7 @@ bool CListBox::HandleMessage(CMessage* pMessage)
 						{
 							m_iFocusedItem++;
 							int diff = m_iFocusedItem - m_pVScrollbar->GetValue();
-							if (m_iItemHeight * (m_pVScrollbar->GetValue() + diff + 1) > stdex::safe_static_cast<unsigned int>(m_ClientRect.Height()))
+							if (m_iItemHeight * (m_pVScrollbar->GetValue() + diff + 1) > m_ClientRect.Height())
 							{
 								m_pVScrollbar->SetValue(m_pVScrollbar->GetValue() + 1);
 							}
@@ -315,8 +315,8 @@ bool CListBox::HandleMessage(CMessage* pMessage)
 					}
 					case SDLK_PAGEDOWN:
 					{
-						int nSize = Size() - 1;
-						int nItemsPerPage = m_ClientRect.Height() / m_iItemHeight;
+						unsigned int nSize = Size() - 1;
+						unsigned int nItemsPerPage = m_ClientRect.Height() / m_iItemHeight;
 						if (m_iFocusedItem + nItemsPerPage < nSize)
 						{
 							m_iFocusedItem += nItemsPerPage;

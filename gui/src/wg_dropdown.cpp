@@ -189,7 +189,7 @@ bool CDropDown::HandleMessage(CMessage* pMessage)
 
 // judb get index of the selected item (-1 if none)
 int CDropDown::GetSelectedIndex() {
-    for (int i = 0; i < m_pListBox->Size(); i ++) {
+    for (unsigned int i = 0; i < m_pListBox->Size(); i ++) {
         if (IsSelected(i)) {
             return i;
         }
@@ -199,13 +199,13 @@ int CDropDown::GetSelectedIndex() {
 
 // judb select the item with index iItemIndex in the list, and display the item's name
 // (in the area to the left of the dropdown arrow)
-void CDropDown::SelectItem(int iItemIndex) {
-    if (iItemIndex < 0 || iItemIndex >= m_pListBox->Size()) {
+void CDropDown::SelectItem(unsigned int iItemIndex) {
+    if (iItemIndex >= m_pListBox->Size()) {
         return;
     }
     SetAllSelections(false);
     m_pListBox->SetSelection(iItemIndex, true);
-	SetWindowText(m_pListBox->GetItem(iItemIndex).sItemText);
+    SetWindowText(m_pListBox->GetItem(iItemIndex).sItemText);
 }
 
 

@@ -91,7 +91,7 @@ public:
 
 	//! Gets the number of items in a menu
 	//! \return The number of items in the menu
-	int GetMenuItemCount(void) const { return stdex::safe_static_cast<int>(m_MenuItems.size()); }
+	unsigned int GetMenuItemCount(void) const { return m_MenuItems.size(); }
 
 	//! Hides the active popup window
 	void HideActivePopup(void);
