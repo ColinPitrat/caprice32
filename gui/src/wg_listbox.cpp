@@ -229,7 +229,7 @@ bool CListBox::OnMouseButtonDown(CPoint Point, unsigned int Button)
 		{
 			// Prep the new selection
       // judb m_iFocusedItem should be <= the number of items in the listbox (0-based, so m_Items.size() -1)
-			m_iFocusedItem = std::min((WindowPoint.YPos() + m_ClientRect.Top()) / m_iItemHeight + m_pVScrollbar->GetValue(), m_Items.size() - 1);
+			m_iFocusedItem = std::min((WindowPoint.YPos() + m_ClientRect.Top()) / m_iItemHeight + m_pVScrollbar->GetValue(), stdex::safe_static_cast<unsigned int>(m_Items.size()) - 1);
 		}
 		bResult = true;
 	}
@@ -246,7 +246,7 @@ bool CListBox::OnMouseButtonUp(CPoint Point, unsigned int Button)
 	if (!bResult && m_bVisible && (Button == CMouseMessage::LEFT) && (m_ClientRect.HitTest(WindowPoint) == CRect::RELPOS_INSIDE))
 	{
         // judb m_iFocusedItem should be <= the number of items in the listbox (0-based, so m_Items.size() - 1)
-		if (m_iFocusedItem == std::min(((WindowPoint.YPos() - m_ClientRect.Top()) / m_iItemHeight + m_pVScrollbar->GetValue()), m_Items.size() - 1))
+		if (m_iFocusedItem == std::min(((WindowPoint.YPos() - m_ClientRect.Top()) / m_iItemHeight + m_pVScrollbar->GetValue()), stdex::safe_static_cast<unsigned int>(m_Items.size()) - 1))
 		{
 			if (m_bSingleSelection)
 			{
