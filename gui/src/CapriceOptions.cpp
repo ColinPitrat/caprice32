@@ -14,8 +14,6 @@ namespace wGui {
 CapriceOptions::CapriceOptions(const CRect& WindowRect, CView* pParent, CFontEngine* pFontEngine) :
 	CFrame(WindowRect, pParent, pFontEngine, "Options", false)
 {
-    int i;
-
     // Make this window listen to incoming CTRL_VALUECHANGE messages (used for updating scrollbar values)
 	CMessageServer::Instance().RegisterMessageClient(this, CMessage::CTRL_VALUECHANGE);
     CMessageServer::Instance().RegisterMessageClient(this, CMessage::CTRL_VALUECHANGING);
@@ -95,9 +93,8 @@ CapriceOptions::CapriceOptions(const CRect& WindowRect, CView* pParent, CFontEng
  
     // ---------------- Expansion ROMs ----------------
     std::string romFileName;
-    for (i = 0; i < 16; i ++) { // create 16 'ROM' buttons
-      CLabel * m_pLabel = new CLabel(CPoint((i<8)?5:135, 4 + 18*(i%8)), m_pGroupBoxTabExpansion, 
-                                                                                   stdex::itoa(i));
+    for (unsigned int i = 0; i < 16; i ++) { // create 16 'ROM' buttons
+      new CLabel(CPoint((i<8)?5:135, 4 + 18*(i%8)), m_pGroupBoxTabExpansion, stdex::itoa(i));
 
       if (CPC.rom_file[i][0]) { // if CPC.rom_file[i] is not empty
           romFileName = CPC.rom_file[i];
@@ -144,7 +141,7 @@ CapriceOptions::CapriceOptions(const CRect& WindowRect, CView* pParent, CFontEng
     m_pLabelIntensityValue = new CLabel(CPoint(230, 10), m_pGroupBoxMonitor, intensityValue);
 
     m_pDropDownVideoPlugin = new CDropDown(CRect(CPoint(100,0),140,16), m_pGroupBoxTabVideo, 0, 14); // Select video plugin
-	i = 0;
+	unsigned int i = 0;
 	while(video_plugin_list[i].name)
 	{
             m_pDropDownVideoPlugin->AddItem(SListItem(video_plugin_list[i].name));
