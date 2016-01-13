@@ -27,7 +27,7 @@ IPATHS	= -I. -Igui/includes `freetype-config --cflags`
 LIBS = `sdl-config --libs` -lz `freetype-config --libs` 
 
 # wGui and 'own' gui components:
-GUIOBJS = CapriceAbout.o CapriceGui.o CapriceGuiView.o CapriceOptions.o CapriceRomSlots.o \
+GUIOBJS = CapriceLoadSave.o CapriceAbout.o CapriceGui.o CapriceGuiView.o CapriceOptions.o CapriceRomSlots.o \
 std_ex.o wg_application.o wg_button.o wg_checkbox.o wg_radiobutton.o wg_menu.o wg_color.o \
 wg_dropdown.o wg_editbox.o wg_fontengine.o \
 wg_frame.o wg_groupbox.o wg_label.o wg_listbox.o wg_messagebox.o wg_message_client.o wg_message.o \
@@ -71,11 +71,14 @@ fileutils.o: fileutils.cpp fileutils.h
 
 cap32.o: cap32.cpp cap32.h crtc.h tape.h video.h z80.h CapriceGui.h CapriceGuiView.h font.c rom_mods.c
 
+CapriceLoadSave.o: CapriceLoadSave.cpp CapriceLoadSave.h cap32.h std_ex.h CapriceRomSlots.h wgui.h \
+ wg_checkbox.h wg_frame.h wg_groupbox.h wg_label.h wg_navigationbar.h wg_radiobutton.h wg_scrollbar.h
+
 CapriceAbout.o: CapriceAbout.cpp CapriceAbout.h wg_label.h wg_fontengine.h wg_messagebox.h wg_application.h cap32.h
 
 CapriceGui.o: CapriceGui.cpp CapriceGui.h wg_application.h
 
-CapriceGuiView.o: CapriceGuiView.cpp CapriceGuiView.h CapriceAbout.h CapriceOptions.h wg_view.h wg_application.h cap32.h
+CapriceGuiView.o: CapriceGuiView.cpp CapriceGuiView.h CapriceLoadSave.h CapriceAbout.h CapriceOptions.h wg_view.h wg_application.h cap32.h
 
 CapriceOptions.o: CapriceOptions.cpp CapriceOptions.h cap32.h std_ex.h CapriceRomSlots.h wgui.h \
  wg_checkbox.h wg_frame.h wg_groupbox.h wg_label.h wg_navigationbar.h wg_radiobutton.h wg_scrollbar.h

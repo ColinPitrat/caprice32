@@ -1,6 +1,8 @@
 #include "CapriceGuiView.h"
 #include "CapriceAbout.h"
 #include "CapriceOptions.h"
+#include "CapriceLoadSave.h"
+#include "wg_messagebox.h"
 
 // Make caprice32 functions available here.
 extern void emulator_reset(bool);
@@ -21,6 +23,14 @@ bool bHandled = false;
 				if (pSource == m_pBtnOptions) {
 					wGui::CapriceOptions* pOptionsBox = new wGui::CapriceOptions(CRect(CPoint(m_pScreenSurface->w /2 - 165, m_pScreenSurface->h /2 - 127), 330, 260), this, 0);
 					pOptionsBox->SetModal(true);
+					break;					
+				}
+				if (pSource == m_pBtnLoadSave) {
+          wGui::CMessageBox *pMessageBox = new wGui::CMessageBox(CRect(CPoint(m_pScreenSurface->w /2 - 125, m_pScreenSurface->h /2 - 30), 250, 60), this, 0, "Not implemented", "Load/save not yet implemented", CMessageBox::BUTTON_OK);
+          pMessageBox->SetModal(true);
+
+					//wGui::CapriceLoadSave* pLoadSaveBox = new wGui::CapriceLoadSave(CRect(CPoint(m_pScreenSurface->w /2 - 165, m_pScreenSurface->h /2 - 127), 330, 260), this, 0);
+          //pLoadSaveBox->SetModal(true);
 					break;					
 				}
 				if (pSource == m_pBtnReset) {
@@ -82,11 +92,12 @@ CapriceGuiView::CapriceGuiView(SDL_Surface* surface, SDL_Surface* backSurface, c
 	// judb Apparently this needs to be done the first time:
   CApplication::Instance()->SetKeyFocus(this);
 
-  m_pBtnOptions = new CButton(CRect(CPoint(m_pScreenSurface->w /2 - 50, m_pScreenSurface->h /2 - 50), 100, 20), this, "Options");
-	m_pBtnReset   = new CButton(CRect(CPoint(m_pScreenSurface->w /2 - 50, m_pScreenSurface->h /2 - 20), 100, 20), this, "Reset (F5)");
-	m_pBtnAbout   = new CButton(CRect(CPoint(m_pScreenSurface->w /2 - 50, m_pScreenSurface->h /2 + 10), 100, 20), this, "About");
-	m_pBtnResume  = new CButton(CRect(CPoint(m_pScreenSurface->w /2 - 50, m_pScreenSurface->h /2 + 40), 100, 20), this, "Resume");
-	m_pBtnQuit    = new CButton(CRect(CPoint(m_pScreenSurface->w /2 - 50, m_pScreenSurface->h /2 + 70), 100, 20), this, "Quit (F10)");
+  m_pBtnOptions  = new CButton(CRect(CPoint(m_pScreenSurface->w / 2 - 50, m_pScreenSurface->h / 2 - 75), 100, 20), this, "Options");
+  m_pBtnLoadSave = new CButton(CRect(CPoint(m_pScreenSurface->w / 2 - 50, m_pScreenSurface->h / 2 - 45), 100, 20), this, "Load / Save");
+	m_pBtnReset    = new CButton(CRect(CPoint(m_pScreenSurface->w / 2 - 50, m_pScreenSurface->h / 2 - 15), 100, 20), this, "Reset (F5)");
+	m_pBtnAbout    = new CButton(CRect(CPoint(m_pScreenSurface->w / 2 - 50, m_pScreenSurface->h / 2 + 15), 100, 20), this, "About");
+	m_pBtnResume   = new CButton(CRect(CPoint(m_pScreenSurface->w / 2 - 50, m_pScreenSurface->h / 2 + 45), 100, 20), this, "Resume");
+	m_pBtnQuit     = new CButton(CRect(CPoint(m_pScreenSurface->w / 2 - 50, m_pScreenSurface->h / 2 + 75), 100, 20), this, "Quit (F10)");
 }
 
 

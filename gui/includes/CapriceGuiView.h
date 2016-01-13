@@ -7,6 +7,7 @@ class CapriceGuiView : public CView
 {
 	protected:
 		CButton* m_pBtnOptions;
+		CButton* m_pBtnLoadSave;
 		CButton* m_pBtnReset;
 		CButton* m_pBtnAbout;
 		CButton* m_pBtnResume;
