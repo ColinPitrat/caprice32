@@ -46,6 +46,7 @@ CEditBox::CEditBox(const CRect& WindowRect, CWindow* pParent, CFontEngine* pFont
 	m_bMouseDown(false),
 	m_bUseMask(false),
 	m_bLastMouseMoveInside(false),
+  m_contentType(ANY),
 	m_bDrawCursor(true)
 {
 	m_BackgroundColor = COLOR_WHITE;
@@ -189,7 +190,7 @@ void CEditBox::Draw(void) const
 			m_pRenderedString->SetMaskChar(' ');
 		}
 
-		CRGBColor FontColor = m_bReadOnly ? DEFAULT_DISABLED_LINE_COLOR : DEFAULT_LINE_COLOR;
+		CRGBColor FontColor = m_bReadOnly ? DEFAULT_DISABLED_LINE_COLOR : COLOR_BLACK;
 		if (CApplication::Instance()->GetKeyFocus() == dynamic_cast<const CWindow*>(this) && !m_bReadOnly)
 		{
 			CPoint BoundedDims;
@@ -614,7 +615,23 @@ bool CEditBox::HandleMessage(CMessage* pMessage)
 							{
 								SelDelete(&sBuffer);
 								// we are deliberately truncating the unicode data, so don't use safe_static_cast
-								sBuffer.insert(m_SelStart++, 1, static_cast<char>(pKeyboardMessage->Unicode & 0x7F));
+                char val = static_cast<char>(pKeyboardMessage->Unicode & 0x7F);
+                if(m_contentType == NUMBER && (val < '0' || val > '9')) {
+                  break;
+                }
+                if(m_contentType == HEXNUMBER && (val < '0' || val > '9') && (val < 'A' || val > 'F') && (val < 'a' || val > 'f')) {
+                  break;
+                }
+                if(m_contentType == HEXNUMBER && val >= 'a' && val <= 'z') {
+                    val += 'A' - 'a';
+                }
+                if(m_contentType == ALPHA && (val < 'A' || val > 'Z') && (val < 'a' || val > 'z')) {
+                  break;
+                }
+                if(m_contentType == ALPHANUM && (val < '0' || val > '9') && (val < 'A' || val > 'Z') && (val < 'a' || val > 'z')) {
+                  break;
+                }
+								sBuffer.insert(m_SelStart++, 1, val);
 							}
 							else
 							{
@@ -631,8 +648,7 @@ bool CEditBox::HandleMessage(CMessage* pMessage)
 					m_sWindowText = sBuffer;
 					CWindow::SetWindowText(sBuffer);
 
-					std::auto_ptr<CRenderedString> pRenderedString(new CRenderedString(
-						m_pFontEngine, sBuffer, CRenderedString::VALIGN_NORMAL, CRenderedString::HALIGN_LEFT));
+					std::auto_ptr<CRenderedString> pRenderedString(new CRenderedString(m_pFontEngine, sBuffer, CRenderedString::VALIGN_NORMAL, CRenderedString::HALIGN_LEFT));
 
 					m_pRenderedString = pRenderedString;
 					m_bDrawCursor = true;

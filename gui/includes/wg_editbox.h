@@ -32,7 +32,6 @@
 #include "wg_resources.h"
 #include <memory>
 
-
 namespace wGui
 {
 
@@ -52,6 +51,15 @@ public:
 
 	//! Standard destructor
 	virtual ~CEditBox(void);
+
+  //! The content allowed
+  enum EContentType {
+    ANY, //!< Any char allowed
+    NUMBER, //!< Only numbers
+    HEXNUMBER, //!< Numbers and char [A-Z]
+    ALPHA, //!< Only letters
+    ALPHANUM //!< Letters and digits
+  };
 
 	//! Set the Password mask state of the control
 	//! \param bUseMask  If set to true, the control will act as a password mask box
@@ -113,6 +121,8 @@ public:
 	//! \param pMessage A pointer to the message that needs to be handled
 	virtual bool HandleMessage(CMessage* pMessage);
 
+  void SetContentType(EContentType ctype) { m_contentType = ctype; };
+
 
 protected:
 
@@ -132,6 +142,7 @@ protected:
 	bool m_bMouseDown; //!< Set to true when the mouse button goes down
 	bool m_bUseMask; //!< Set to true if you want the edit box to act as a password box and have a mask of asterikses
 	bool m_bLastMouseMoveInside;  //!< True if the cursor was inside the control on the last MOUSE_MOVE message
+  EContentType m_contentType;
 
 
 private:

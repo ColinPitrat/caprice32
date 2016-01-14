@@ -213,7 +213,7 @@ m_pScreenSurface->h, CApplication::Instance()->GetBitsPerPixel(), 0x000000FF, 0x
 				if (pFrame)
 				{
 					pFrame->SetModal(false);
-                    pFrame->SetNewParent(0);
+          pFrame->SetNewParent(0);
 					CMessageServer::Instance().QueueMessage(new CMessage(CMessage::APP_PAINT, 0, this));
 					delete pFrame;
 				}
