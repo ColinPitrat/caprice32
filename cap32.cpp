@@ -27,6 +27,9 @@
 #include "video.h"
 #include "z80.h"
 
+#include <errno.h>
+#include <string.h>
+
 #define VERSION_STRING "v4.2.0"
 
 #include "CapriceGui.h"
@@ -2095,7 +2098,11 @@ int zip_extract (char *pchZipFile, char *pchFileName, dword dwOffset)
    }
    pfileIn = fopen(pchZipFile, "rb"); // open ZIP file for reading
    fseek(pfileIn, dwOffset, SEEK_SET); // move file pointer to beginning of data block
-   fread(pbGPBuffer, 30, 1, pfileIn); // read local header
+   if(fread(pbGPBuffer, 30, 1, pfileIn) != 1) { // read local header
+      fclose(pfileIn);
+      fclose(pfileOut);
+      return ERR_FILE_UNZIP_FAILED;
+   }
    dwSize = *(dword *)(pbGPBuffer + 18); // length of compressed data
    dwOffset += 30 + *(word *)(pbGPBuffer + 26) + *(word *)(pbGPBuffer + 28);
    fseek(pfileIn, dwOffset, SEEK_SET); // move file pointer to start of compressed data
@@ -2148,7 +2155,10 @@ int snapshot_load (char *pchFileName)
 
    memset(&sh, 0, sizeof(sh));
    if ((pfileObject = fopen(pchFileName, "rb")) != NULL) {
-      fread(&sh, sizeof(sh), 1, pfileObject); // read snapshot header
+      if(fread(&sh, sizeof(sh), 1, pfileObject) != 1) { // read snapshot header
+        fclose(pfileObject);
+        return ERR_SNA_INVALID;
+      }
       if (memcmp(sh.id, "MV - SNA", 8) != 0) { // valid SNApshot image?
          fclose(pfileObject);
          return ERR_SNA_INVALID;
@@ -2555,7 +2565,10 @@ int dsk_load (char *pchFileName, t_drive *drive, char chID)
    iRetCode = 0;
    dsk_eject(drive);
    if ((pfileObject = fopen(pchFileName, "rb")) != NULL) {
-      fread(pbGPBuffer, 0x100, 1, pfileObject); // read DSK header
+      if(fread(pbGPBuffer, 0x100, 1, pfileObject) != 1) { // read DSK header
+        iRetCode = ERR_DSK_INVALID;
+        goto exit;
+      }
       pbPtr = pbGPBuffer;
 
       if (memcmp(pbPtr, "MV - CPC", 8) == 0) { // normal DSK image?
@@ -2572,7 +2585,10 @@ int dsk_load (char *pchFileName, t_drive *drive, char chID)
          drive->sides--; // zero base number of sides
          for (track = 0; track < drive->tracks; track++) { // loop for all tracks
             for (side = 0; side <= drive->sides; side++) { // loop for all sides
-               fread(pbGPBuffer+0x100, 0x100, 1, pfileObject); // read track header
+               if(fread(pbGPBuffer+0x100, 0x100, 1, pfileObject) != 1) { // read track header
+                iRetCode = ERR_DSK_INVALID;
+                goto exit;
+               }
                pbPtr = pbGPBuffer + 0x100;
                if (memcmp(pbPtr, "Track-Info", 10) != 0) { // abort if ID does not match
                   iRetCode = ERR_DSK_INVALID;
@@ -2627,7 +2643,10 @@ int dsk_load (char *pchFileName, t_drive *drive, char chID)
                   dwTrackSize = (*pbTrackSizeTable++ << 8); // track size in bytes
                   if (dwTrackSize != 0) { // only process if track contains data
                      dwTrackSize -= 0x100; // compensate for track header
-                     fread(pbGPBuffer+0x100, 0x100, 1, pfileObject); // read track header
+                     if(fread(pbGPBuffer+0x100, 0x100, 1, pfileObject) != 1) { // read track header
+                       iRetCode = ERR_DSK_INVALID;
+                       goto exit;
+                     }
                      pbPtr = pbGPBuffer + 0x100;
                      if (memcmp(pbPtr, "Track-Info", 10) != 0) { // valid track header?
                         iRetCode = ERR_DSK_INVALID;
@@ -2835,7 +2854,10 @@ int tape_insert (char *pchFileName)
    if ((pfileObject = fopen(pchFileName, "rb")) == NULL) {
       return ERR_FILE_NOT_FOUND;
    }
-   fread(pbGPBuffer, 10, 1, pfileObject); // read CDT header
+   if(fread(pbGPBuffer, 10, 1, pfileObject) != 1) { // read CDT header
+      fclose(pfileObject);
+      return ERR_TAP_INVALID;
+   }
    pbPtr = pbGPBuffer;
    if (memcmp(pbPtr, "ZXTape!\032", 8) != 0) { // valid CDT file?
       fclose(pfileObject);
@@ -2853,7 +2875,10 @@ int tape_insert (char *pchFileName)
    pbTapeImage = (byte *)malloc(lFileSize+6);
    *pbTapeImage = 0x20; // start off with a pause block
    *(word *)(pbTapeImage+1) = 2000; // set the length to 2 seconds
-   fread(pbTapeImage+3, lFileSize, 1, pfileObject); // append the entire CDT file
+   if(fread(pbTapeImage+3, lFileSize, 1, pfileObject) != 1) { // append the entire CDT file
+     fclose(pfileObject);
+     return ERR_TAP_INVALID;
+   }
    fclose(pfileObject);
    *(pbTapeImage+lFileSize+3) = 0x20; // end with a pause block
    *(word *)(pbTapeImage+lFileSize+3+1) = 2000; // set the length to 2 seconds
@@ -2990,7 +3015,10 @@ int tape_insert_voc (char *pchFileName)
    if ((pfileObject = fopen(pchFileName, "rb")) == NULL) {
       return ERR_FILE_NOT_FOUND;
    }
-   fread(pbGPBuffer, 26, 1, pfileObject); // read VOC header
+   if(fread(pbGPBuffer, 26, 1, pfileObject) != 1) { // read VOC header
+     fclose(pfileObject);
+     return ERR_TAP_BAD_VOC;
+   }
    pbPtr = pbGPBuffer;
    if (memcmp(pbPtr, "Creative Voice File\032", 20) != 0) { // valid VOC file?
       fclose(pfileObject);
@@ -3013,7 +3041,10 @@ int tape_insert_voc (char *pchFileName)
    bolDone = false;
    while ((!bolDone) && (lOffset < lFileSize)) {
       fseek(pfileObject, lOffset, SEEK_SET);
-      fread(pbPtr, 16, 1, pfileObject); // read block ID + size
+      if(fread(pbPtr, 16, 1, pfileObject) != 1) { // read block ID + size
+        fclose(pfileObject);
+        return ERR_TAP_BAD_VOC;
+      }
       #ifdef DEBUG_TAPE
       fprintf(pfoDebug, "%02x %d\r\n", *pbPtr, *(dword *)(pbPtr+0x01) & 0x00ffffff);
       #endif
@@ -3090,13 +3121,19 @@ int tape_insert_voc (char *pchFileName)
    byte bByte = 0;
    while ((!bolDone) && (lOffset < lFileSize)) {
       fseek(pfileObject, lOffset, SEEK_SET);
-      fread(pbPtr, 1, 1, pfileObject); // read block ID
+      if(fread(pbPtr, 1, 1, pfileObject) != 1) { // read block ID
+        fclose(pfileObject);
+        return ERR_TAP_BAD_VOC;
+      }
       switch(*pbPtr) {
          case 0x0: // terminator
             bolDone = true;
             break;
          case 0x1: // sound data
-            fread(pbPtr, 3+2, 1, pfileObject); // get block size and sound info
+            if(fread(pbPtr, 3+2, 1, pfileObject) != 1) { // get block size and sound info
+              fclose(pfileObject);
+              return ERR_TAP_BAD_VOC;
+            }
             iBlockLength = (*(dword *)(pbPtr) & 0x00ffffff) + 4;
             lSampleLength = iBlockLength - 6;
             pbVocDataBlock = (byte *)malloc(lSampleLength);
@@ -3105,7 +3142,10 @@ int tape_insert_voc (char *pchFileName)
                tape_eject();
                return ERR_OUT_OF_MEMORY;
             }
-            fread(pbVocDataBlock, lSampleLength, 1, pfileObject);
+            if(fread(pbVocDataBlock, lSampleLength, 1, pfileObject) != 1) {
+              fclose(pfileObject);
+              return ERR_TAP_BAD_VOC;
+            }
             pbVocDataBlockPtr = pbVocDataBlock;
             for (int iBytePos = 0; iBytePos < lSampleLength; iBytePos++) {
                byte bVocSample = *pbVocDataBlockPtr++;
@@ -3122,7 +3162,10 @@ int tape_insert_voc (char *pchFileName)
             free(pbVocDataBlock);
             break;
          case 0x2: // sound continue
-            fread(pbPtr, 3, 1, pfileObject); // get block size
+            if(fread(pbPtr, 3, 1, pfileObject) != 1) { // get block size
+              fclose(pfileObject);
+              return ERR_TAP_BAD_VOC;
+            }
             iBlockLength = (*(dword *)(pbPtr) & 0x00ffffff) + 4;
             lSampleLength = iBlockLength - 4;
             pbVocDataBlock = (byte *)malloc(lSampleLength);
@@ -3131,7 +3174,10 @@ int tape_insert_voc (char *pchFileName)
                tape_eject();
                return ERR_OUT_OF_MEMORY;
             }
-            fread(pbVocDataBlock, lSampleLength, 1, pfileObject);
+            if(fread(pbVocDataBlock, lSampleLength, 1, pfileObject) != 1) {
+              fclose(pfileObject);
+              return ERR_TAP_BAD_VOC;
+            }
             pbVocDataBlockPtr = pbVocDataBlock;
             for (int iBytePos = 0; iBytePos < lSampleLength; iBytePos++) {
                byte bVocSample = *pbVocDataBlockPtr++;
@@ -3205,7 +3251,10 @@ int emulator_patch_ROM (void)
    strcat(chPath, "/");
    strncat(chPath, chROMFile[CPC.model], sizeof(chPath)-1 - strlen(chPath)); // determine the ROM image name for the selected model
    if ((pfileObject = fopen(chPath, "rb")) != NULL) { // load CPC OS + Basic
-      fread(pbROMlo, 2*16384, 1, pfileObject);
+      if(fread(pbROMlo, 2*16384, 1, pfileObject) != 1) {
+        fclose(pfileObject);
+        return ERR_NOT_A_CPC_ROM;
+      }
       fclose(pfileObject);
    } else {
       return ERR_CPC_ROM_MISSING;
@@ -3331,16 +3380,25 @@ int emulator_init (void)
          strcat(chPath, "/");
          strncat(chPath, CPC.rom_file[iRomNum], sizeof(chPath)-1 - strlen(chPath));
          if ((pfileObject = fopen(chPath, "rb")) != NULL) { // attempt to open the ROM image
-            fread(pchRomData, 128, 1, pfileObject); // read 128 bytes of ROM data
+            if(fread(pchRomData, 128, 1, pfileObject) != 1) { // read 128 bytes of ROM data
+              fclose(pfileObject);
+              return ERR_NOT_A_CPC_ROM;
+            }
             word checksum = 0;
             for (int n = 0; n < 0x43; n++) {
                checksum += pchRomData[n];
             }
             if (checksum == ((pchRomData[0x43] << 8) + pchRomData[0x44])) { // if the checksum matches, we got us an AMSDOS header
-               fread(pchRomData, 128, 1, pfileObject); // skip it
+               if(fread(pchRomData, 128, 1, pfileObject) != 1) { // skip it
+                 fclose(pfileObject);
+                 return ERR_NOT_A_CPC_ROM;
+               }
             }
             if (!(pchRomData[0] & 0xfc)) { // is it a valid CPC ROM image (0 = forground, 1 = background, 2 = extension)?
-               fread(pchRomData+128, 16384-128, 1, pfileObject); // read the rest of the ROM file
+               if(fread(pchRomData+128, 16384-128, 1, pfileObject) != 1) { // read the rest of the ROM file
+                 fclose(pfileObject);
+                 return ERR_NOT_A_CPC_ROM;
+               }
                memmap_ROM[iRomNum] = (byte *)pchRomData; // update the ROM map
             } else { // not a valid ROM file
                fprintf(stderr, "ERROR: %s is not a CPC ROM file - clearing ROM slot %d.\n", CPC.rom_file[iRomNum], iRomNum);
@@ -3366,26 +3424,24 @@ int emulator_init (void)
          strncpy(chPath, CPC.rom_path, sizeof(chPath)-2);
          strcat(chPath, "/");
          strncat(chPath, CPC.rom_mf2, sizeof(chPath)-1 - strlen(chPath)); // combine path and file name
+         bool MF2error = false;
          if ((pfileObject = fopen(chPath, "rb")) != NULL) { // attempt to open the ROM image
-            fread(pbMF2ROMbackup, 8192, 1, pfileObject);
-            if (memcmp(pbMF2ROMbackup+0x0d32, "MULTIFACE 2", 11) != 0) { // does it have the required signature?
+            if((fread(pbMF2ROMbackup, 8192, 1, pfileObject) != 1) || (memcmp(pbMF2ROMbackup+0x0d32, "MULTIFACE 2", 11) != 0)) { // does it have the required signature?
                fprintf(stderr, "ERROR: The file selected as the MF2 ROM is either corrupt or invalid.\n");
-               delete [] pbMF2ROMbackup;
-               delete [] pbMF2ROM;
-               pbMF2ROM = NULL;
-               pbMF2ROMbackup = NULL;
-               CPC.rom_mf2[0] = 0;
-               CPC.mf2 = 0; // disable MF2 support
+               MF2error = true;
             }
             fclose(pfileObject);
          } else { // error opening file
             fprintf(stderr, "ERROR: The file selected as the MF2 ROM (%s) couldn't be opened.\n", chPath);
-            delete [] pbMF2ROMbackup;
-            delete [] pbMF2ROM;
-            pbMF2ROM = NULL;
-            pbMF2ROMbackup = NULL;
-            CPC.rom_mf2[0] = 0;
-            CPC.mf2 = 0; // disable MF2 support
+            MF2error = true;
+         }
+         if(MF2error) {
+           delete [] pbMF2ROMbackup;
+           delete [] pbMF2ROM;
+           pbMF2ROM = NULL;
+           pbMF2ROMbackup = NULL;
+           CPC.rom_mf2[0] = 0;
+           CPC.mf2 = 0; // disable MF2 support
          }
       }
    }
@@ -4239,7 +4295,10 @@ int main (int argc, char **argv)
    }
    atexit(doCleanUp); // install the clean up routine
 
-   getcwd(chAppPath, sizeof(chAppPath)-1); // get the location of the executable
+   if(getcwd(chAppPath, sizeof(chAppPath)-1) == NULL) { // get the location of the executable
+      fprintf(stderr, "getcwd failed: %s\n", strerror(errno));
+      exit(-1);
+   }
 
    loadConfiguration(); // retrieve the emulator configuration
    if (CPC.printer) {
