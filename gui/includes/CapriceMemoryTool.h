@@ -28,8 +28,16 @@ namespace wGui
         CEditBox *m_pPokeValue;
         CButton  *m_pButtonPoke;
         CButton  *m_pButtonClose;
+        CLabel   *m_pFilterLabel;
+        CEditBox *m_pFilterValue;
+        CButton  *m_pButtonFilter;
+        //CListBox *m_pListMemContent;
+        CTextBox *m_pTextMemContent;
+
+        unsigned int m_filterValue;
 
       private:
+        void UpdateTextMemory();
         void operator=(CapriceMemoryTool) { }  //!< The assignment operator is not allowed for CWindow derived objects
     };
 }
