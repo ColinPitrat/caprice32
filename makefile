@@ -33,7 +33,7 @@ wg_dropdown.o wg_editbox.o wg_fontengine.o \
 wg_frame.o wg_groupbox.o wg_label.o wg_listbox.o wg_messagebox.o wg_message_client.o wg_message.o \
 wg_message_server.o wg_navigationbar.o wg_painter.o wg_picture.o wg_point.o \
 wg_progress.o wg_rect.o wg_renderedstring.o wg_resource_handle.o wg_resources.o \
-wg_scrollbar.o wg_tab.o wg_textbox.o wg_timer.o wg_toolbar.o wg_tooltip.o wg_tree.o \
+wg_scrollbar.o wg_tab.o wg_textbox.o wg_timer.o wg_toolbar.o wg_tooltip.o \
 wg_view.o wg_window.o wutil_config_store.o wutil_log.o
 
 .cpp.o :
@@ -193,8 +193,6 @@ wutil_config_store.o: wutil_config_store.cpp wutil_config_store.h std_ex.h wgui_
 wutil_log.o: wutil_log.cpp wutil_log.h wgui_include_config.h
 
 wg_tab.o: wg_tab.cpp wg_tab.h
-
-wg_tree.o: wg_tree.cpp wg_tree.h
 
 clean:
 	rm -f *.o cap32
