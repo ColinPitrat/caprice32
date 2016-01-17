@@ -65,9 +65,9 @@ void CRenderedString::Draw(SDL_Surface* pSurface, const CRect& BoundingRect, con
 			pGlyph = m_pFontEngine->RenderGlyph(m_MaskChar);
 		}
 		CPainter Painter(pSurface, CPainter::PAINT_NORMAL);
-		for (unsigned int y = 0; y < pGlyph->bitmap.rows; ++y)
+		for (unsigned int y = 0; y < static_cast<unsigned int>(pGlyph->bitmap.rows); ++y)
 		{
-			for (unsigned int x = 0; x < pGlyph->bitmap.width; ++x)
+			for (unsigned int x = 0; x < static_cast<unsigned int>(pGlyph->bitmap.width); ++x)
 			{
 				unsigned char* PixelOffset = pGlyph->bitmap.buffer + y * pGlyph->bitmap.width + x;
 				if (*PixelOffset != 0x00)

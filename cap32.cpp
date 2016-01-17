@@ -2369,7 +2369,7 @@ int snapshot_save (char *pchFileName)
    dword dwFlags;
 
    memset(&sh, 0, sizeof(sh));
-   strcpy(sh.id, "MV - SNA");
+   memcpy(sh.id, "MV - SNA", sizeof(sh.id));
    sh.version = 3;
 // Z80
    sh.AF[1] = _A;
@@ -2718,7 +2718,7 @@ int dsk_save (char *pchFileName, t_drive *drive, char chID)
 
    if ((pfileObject = fopen(pchFileName, "wb")) != NULL) {
       memset(&dh, 0, sizeof(dh));
-      strcpy(dh.id, "EXTENDED CPC DSK File\r\nDisk-Info\r\n");
+      memcpy(dh.id, "EXTENDED CPC DSK File\r\nDisk-Info\r\n", sizeof(dh.id));
       strcpy(dh.unused1, "Caprice32\r\n");
       dh.tracks = drive->tracks;
       dh.sides = (drive->sides+1) | (drive->random_DEs); // correct side count and indicate random DEs, if necessary
@@ -2737,7 +2737,7 @@ int dsk_save (char *pchFileName, t_drive *drive, char chID)
       }
 
       memset(&th, 0, sizeof(th));
-      strcpy(th.id, "Track-Info\r\n");
+      memcpy(th.id, "Track-Info\r\n", sizeof(th.id));
       for (track = 0; track < drive->tracks; track++) { // loop for all tracks
          for (side = 0; side <= drive->sides; side++) { // loop for all sides
             if (drive->track[track][side].size) { // track is formatted?
