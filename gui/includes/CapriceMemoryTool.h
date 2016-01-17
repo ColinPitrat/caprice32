@@ -31,6 +31,7 @@ namespace wGui
         CLabel   *m_pFilterLabel;
         CEditBox *m_pFilterValue;
         CButton  *m_pButtonFilter;
+        CButton  *m_pButtonCopy;
         //CListBox *m_pListMemContent;
         CTextBox *m_pTextMemContent;
 

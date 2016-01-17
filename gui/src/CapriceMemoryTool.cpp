@@ -25,6 +25,7 @@ CapriceMemoryTool::CapriceMemoryTool(const CRect& WindowRect, CView* pParent, CF
     m_pFilterLabel     = new CLabel(        CPoint(25, 50),            this, "Byte: ");
     m_pFilterValue     = new CEditBox(CRect(CPoint(65, 45),  30, 20),  this, NULL);
     m_pButtonFilter    = new CButton( CRect(CPoint(135, 45), 30, 20),  this, "Filter");
+    m_pButtonCopy      = new CButton( CRect(CPoint(205, 45), 70, 20),  this, "Dump to stdout");
 
     //m_pListMemContent  = new CListBox(CRect(CPoint(25, 75), 275, 100), this, true);
     m_pTextMemContent  = new CTextBox(CRect(CPoint(15, 75), 270, 100), this);
@@ -68,6 +69,16 @@ bool CapriceMemoryTool::HandleMessage(CMessage* pMessage)
               m_filterValue = strtol(m_pFilterValue->GetWindowText().c_str(), NULL, 16);
               std::cout << "Filtering value " << m_filterValue << " in memory." << std::endl;
               UpdateTextMemory();
+              bHandled = true;
+              break;
+            }
+            if (pMessage->Source() == m_pButtonCopy) {
+              std::cout << m_pTextMemContent->GetWindowText() << std::endl;
+            /* Requires SDL2
+              if(SDL_SetClipboardText(m_pTextMemContent->GetWindowText().c_str()) < 0) {
+                fprintf(stderr, "Error while copying data to clipboard: %s\n", SDL_GetError());
+              }
+              */
               bHandled = true;
               break;
             }
