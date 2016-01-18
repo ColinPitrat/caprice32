@@ -73,7 +73,7 @@ public:
 	//! \param argv The argument array from the command line
 	//! \param sFontFileName The font to use for controls, defaults to Arial
 	//! \param bHandleExceptionsInternally If this is true, wGui will handle most exceptions itself, if false, all exceptions will be returned to the user (defaults to true)
-	CApplication(int argc, char** argv, std::string sFontFileName = "resource/font.ttf", bool bHandleExceptionsInternally = true);
+	CApplication(int argc, char** argv, std::string sFontFileName = "resource/vera_sans.ttf", bool bHandleExceptionsInternally = true);
 
 	//! Standard destructor
 	virtual ~CApplication(void);

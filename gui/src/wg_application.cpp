@@ -191,7 +191,7 @@ void CApplication::Init(void)
 	SDL_EnableUNICODE(1);
 
     // judb removed references to wgui.conf; for caprice32 we may integrate these settings in cap32.cfg:
-    m_pDefaultFontEngine = GetFontEngine(std::string(CPC.resources_path) + "/font.ttf", 8); // default size was 10
+    m_pDefaultFontEngine = GetFontEngine(std::string(CPC.resources_path) + "/vera_sans.ttf", 8); // default size was 10
     m_DefaultBackgroundColor = DEFAULT_BACKGROUND_COLOR;
 	m_DefaultForegroundColor = DEFAULT_FOREGROUND_COLOR;
 	m_DefaultSelectionColor  = DEFAULT_SELECTION_COLOR;
