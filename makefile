@@ -81,7 +81,7 @@ CapriceAbout.o: CapriceAbout.cpp CapriceAbout.h wg_label.h wg_fontengine.h wg_me
 
 CapriceGui.o: CapriceGui.cpp CapriceGui.h wg_application.h
 
-CapriceGuiView.o: CapriceGuiView.cpp CapriceGuiView.h CapriceLoadSave.h CapriceAbout.h CapriceOptions.h wg_view.h wg_application.h cap32.h
+CapriceGuiView.o: CapriceGuiView.cpp CapriceGuiView.h CapriceLoadSave.h CapriceMemoryTool.h CapriceAbout.h CapriceOptions.h wg_view.h wg_application.h cap32.h
 
 CapriceOptions.o: CapriceOptions.cpp CapriceOptions.h cap32.h std_ex.h CapriceRomSlots.h wgui.h \
  wg_checkbox.h wg_frame.h wg_groupbox.h wg_label.h wg_navigationbar.h wg_radiobutton.h wg_scrollbar.h

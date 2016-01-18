@@ -7,36 +7,46 @@
 #include <iomanip>
 
 extern byte *pbRAM;
+extern t_CPC CPC;
 
 namespace wGui {
 
 CapriceMemoryTool::CapriceMemoryTool(const CRect& WindowRect, CView* pParent, CFontEngine* pFontEngine) :
 	CFrame(WindowRect, pParent, pFontEngine, "Memory Tool", false)
 {
+    m_pMonoFontEngine = CApplication::Instance()->GetFontEngine(std::string(CPC.resources_path) + "/vera_mono.ttf", 8);
+
+    m_bytesPerLine = 16;
     // Make this window listen to incoming KEYBOARD_KEYDOWN messages to capture TAB pressed and change focused field
     CMessageServer::Instance().RegisterMessageClient(this, CMessage::KEYBOARD_KEYDOWN);
 
-    m_pPokeAdressLabel = new CLabel(        CPoint(25, 18),            this, "Adress: ");
-    m_pPokeAdress      = new CEditBox(CRect(CPoint(65, 13),  30, 20),  this, NULL);
-    m_pPokeValueLabel  = new CLabel(        CPoint(135, 18),           this, "Value: ");
-    m_pPokeValue       = new CEditBox(CRect(CPoint(175, 13), 30, 20),  this, NULL);
-    m_pButtonPoke      = new CButton( CRect(CPoint(245, 13), 30, 20),  this, "Poke");
+    m_pPokeAdressLabel = new CLabel(        CPoint(15, 18),             this, "Adress: ");
+    m_pPokeAdress      = new CEditBox(CRect(CPoint(55, 13),  30, 20),   this, NULL);
+    m_pPokeValueLabel  = new CLabel(        CPoint(95, 18),             this, "Value: ");
+    m_pPokeValue       = new CEditBox(CRect(CPoint(130, 13), 30, 20),   this, NULL);
+    m_pButtonPoke      = new CButton( CRect(CPoint(175, 13), 30, 20),   this, "Poke");
 
-    m_pFilterLabel     = new CLabel(        CPoint(25, 50),            this, "Byte: ");
-    m_pFilterValue     = new CEditBox(CRect(CPoint(65, 45),  30, 20),  this, NULL);
-    m_pButtonFilter    = new CButton( CRect(CPoint(135, 45), 30, 20),  this, "Filter");
-    m_pButtonCopy      = new CButton( CRect(CPoint(205, 45), 70, 20),  this, "Dump to stdout");
+    m_pAdressLabel     = new CLabel(        CPoint(15, 50),             this, "Adress: ");
+    m_pAdressValue     = new CEditBox(CRect(CPoint(55, 45), 30, 20),    this, NULL);
+    m_pButtonDisplay   = new CButton( CRect(CPoint(95, 45), 40, 20),    this, "Display");
+    m_pFilterLabel     = new CLabel(        CPoint(15, 80),             this, "Byte: ");
+    m_pFilterValue     = new CEditBox(CRect(CPoint(55, 75), 30, 20),    this, NULL);
+    m_pButtonFilter    = new CButton( CRect(CPoint(95, 75), 40, 20),    this, "Filter");
+    m_pButtonCopy      = new CButton( CRect(CPoint(240, 75), 75, 20),   this, "Dump to stdout");
 
+    // The list box is way to slow to handle so much elements
     //m_pListMemContent  = new CListBox(CRect(CPoint(25, 75), 275, 100), this, true);
-    m_pTextMemContent  = new CTextBox(CRect(CPoint(15, 75), 270, 100), this);
-    m_pButtonClose     = new CButton( CRect(CPoint(25, 190), 250, 20),  this, "Close");
+    m_pTextMemContent  = new CTextBox(CRect(CPoint(15, 105), 300, 102), this, m_pMonoFontEngine);
+    m_pButtonClose     = new CButton( CRect(CPoint(15, 220), 300, 20),  this, "Close");
 
     m_pPokeAdress->SetContentType(CEditBox::HEXNUMBER);
     m_pPokeValue->SetContentType(CEditBox::HEXNUMBER);
+    m_pAdressValue->SetContentType(CEditBox::HEXNUMBER);
     m_pFilterValue->SetContentType(CEditBox::HEXNUMBER);
     m_pTextMemContent->SetReadOnly(true);
 
-    m_filterValue = 0;
+    m_filterValue = -1;
+    m_displayValue = -1;
 
     UpdateTextMemory();
 }
@@ -57,16 +67,41 @@ bool CapriceMemoryTool::HandleMessage(CMessage* pMessage)
           if (pMessage->Destination() == this)
           {
             if (pMessage->Source() == m_pButtonPoke) {
-              unsigned int pokeAdress = strtol(m_pPokeAdress->GetWindowText().c_str(), NULL, 16);
-              int pokeValue           = strtol(m_pPokeValue->GetWindowText().c_str(),  NULL, 16);
-              std::cout << "Poking " << pokeAdress << " with " << pokeValue << std::endl;
-              pbRAM[pokeAdress] = pokeValue;
+              std::string adress = m_pPokeAdress->GetWindowText();
+              std::string value  = m_pPokeValue->GetWindowText();
+              unsigned int pokeAdress = strtol(adress.c_str(), NULL, 16);
+              int pokeValue           = strtol(value.c_str(),  NULL, 16);
+              if(!adress.empty() && !value.empty() && pokeAdress < 65536 && pokeValue >= -128 && pokeValue <= 255) {
+                std::cout << "Poking " << pokeAdress << " with " << pokeValue << std::endl;
+                pbRAM[pokeAdress] = pokeValue;
+                UpdateTextMemory();
+              } else {
+                std::cout << "Cannot poke " << adress << "(" << pokeAdress << ") with " << value << "(" << pokeValue << ")" << std::endl;
+              }
+              bHandled = true;
+              break;
+            }
+            if (pMessage->Source() == m_pButtonDisplay) {
+              std::string display = m_pAdressValue->GetWindowText();
+              if(display.empty()) {
+                m_displayValue = -1;
+              } else {
+                m_displayValue = strtol(display.c_str(), NULL, 16);
+              }
+              m_filterValue = -1;
+              std::cout << "Displaying adress " << m_displayValue << " in memory." << std::endl;
               UpdateTextMemory();
               bHandled = true;
               break;
             }
             if (pMessage->Source() == m_pButtonFilter) {
-              m_filterValue = strtol(m_pFilterValue->GetWindowText().c_str(), NULL, 16);
+              m_displayValue = -1;
+              std::string filter = m_pFilterValue->GetWindowText();
+              if(filter.empty()) {
+                m_filterValue = -1;
+              } else {
+                m_filterValue = strtol(filter.c_str(), NULL, 16);
+              }
               std::cout << "Filtering value " << m_filterValue << " in memory." << std::endl;
               UpdateTextMemory();
               bHandled = true;
@@ -104,6 +139,16 @@ bool CapriceMemoryTool::HandleMessage(CMessage* pMessage)
               break;
             }
             if(CApplication::Instance()->GetKeyFocus() == m_pPokeValue) {
+              CApplication::Instance()->SetKeyFocus(m_pAdressValue);
+              bHandled = true;
+              break;
+            }
+            if(CApplication::Instance()->GetKeyFocus() == m_pAdressValue) {
+              CApplication::Instance()->SetKeyFocus(m_pFilterValue);
+              bHandled = true;
+              break;
+            }
+            if(CApplication::Instance()->GetKeyFocus() == m_pFilterValue) {
               CApplication::Instance()->SetKeyFocus(m_pPokeAdress);
               bHandled = true;
               break;
@@ -121,29 +166,32 @@ bool CapriceMemoryTool::HandleMessage(CMessage* pMessage)
 }
 
 void CapriceMemoryTool::UpdateTextMemory() {
-  //std::cout << "Start creating listbox" << std::endl;
   std::ostringstream memText;
-  for(unsigned int i = 0; i < 65536/16; i++) {
+  for(unsigned int i = 0; i < 65536/m_bytesPerLine; i++) {
     std::ostringstream memLine;
-    memLine << std::uppercase << std::setfill('0') << std::setw(4) << std::hex << i*16 << " : ";
-    //memText << std::setfill('0') << std::setw(4) << std::hex << i*16 << " : ";
+    memLine << std::uppercase << std::setfill('0') << std::setw(4) << std::hex << i*m_bytesPerLine << " : ";
+    //memText << std::setfill('0') << std::setw(4) << std::hex << i*m_bytesPerLine << " : ";
     bool displayLine = false;
-    for(unsigned int j = 0; j < 16; j++) {
-      memLine << std::setw(2) << static_cast<unsigned int>(pbRAM[i*16+j]) << " ";
-      //if(pbRAM[i*16+j] != 0) {
-        if(m_filterValue == 0 || m_filterValue > 255 || static_cast<unsigned int>(pbRAM[i*16+j]) == m_filterValue) {
-          displayLine = true;
-        }
-      //}
-      //memText << std::setw(2) << static_cast<unsigned int>(pbRAM[i*16+j]) << " ";
+    bool filterAdress = (m_displayValue >= 0 && m_displayValue <= 65535);
+    bool filterValue = (m_filterValue >= 0 && m_filterValue <= 255);
+    for(unsigned int j = 0; j < m_bytesPerLine; j++) {
+      memLine << std::setw(2) << static_cast<unsigned int>(pbRAM[i*m_bytesPerLine+j]) << " ";
+      if(!filterAdress && !filterValue) {
+        displayLine = true;
+      }
+      if(filterValue && static_cast<int>(pbRAM[i*m_bytesPerLine+j]) == m_filterValue) {
+        displayLine = true;
+      }
+      if(filterAdress && (i*m_bytesPerLine+j == static_cast<unsigned int>(m_displayValue))) {
+        displayLine = true;
+      }
+      //memText << std::setw(2) << static_cast<unsigned int>(pbRAM[i*m_bytesPerLine+j]) << " ";
     }
     if(displayLine) {
       memText << memLine.str() << "\n";
     }
-    //std::cout << memLine.str() << std::endl;
     //m_pListMemContent->AddItem(SListItem(memLine.str()));
   }
-  //std::cout << "End creating listbox" << std::endl;
   m_pTextMemContent->SetWindowText(memText.str().substr(0, memText.str().size()-1));
 }
 

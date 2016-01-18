@@ -21,21 +21,28 @@ namespace wGui
         bool HandleMessage(CMessage* pMessage);
 
       protected:
+        CFontEngine *m_pMonoFontEngine;
+
         CLabel   *m_pPokeLabel;
         CLabel   *m_pPokeAdressLabel;
         CEditBox *m_pPokeAdress;
         CLabel   *m_pPokeValueLabel;
         CEditBox *m_pPokeValue;
         CButton  *m_pButtonPoke;
-        CButton  *m_pButtonClose;
         CLabel   *m_pFilterLabel;
         CEditBox *m_pFilterValue;
         CButton  *m_pButtonFilter;
+        CLabel   *m_pAdressLabel;
+        CEditBox *m_pAdressValue;
+        CButton  *m_pButtonDisplay;
         CButton  *m_pButtonCopy;
+        CButton  *m_pButtonClose;
         //CListBox *m_pListMemContent;
         CTextBox *m_pTextMemContent;
 
-        unsigned int m_filterValue;
+        int m_filterValue;
+        int m_displayValue;
+        unsigned int m_bytesPerLine;
 
       private:
         void UpdateTextMemory();

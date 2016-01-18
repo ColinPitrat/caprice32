@@ -35,7 +35,7 @@ bool CapriceGuiView::HandleMessage(CMessage* pMessage)
           break;
         }
         if (pSource == m_pBtnMemoryTool) {
-          wGui::CapriceMemoryTool* pMemoryTool = new wGui::CapriceMemoryTool(CRect(CPoint(m_pScreenSurface->w /2 - 150, m_pScreenSurface->h /2 - 120), 300, 240), this, 0);
+          wGui::CapriceMemoryTool* pMemoryTool = new wGui::CapriceMemoryTool(CRect(CPoint(m_pScreenSurface->w /2 - 165, m_pScreenSurface->h /2 - 140), 330, 270), this, 0);
           pMemoryTool->SetModal(true);
           break;
         }
