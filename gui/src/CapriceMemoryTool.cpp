@@ -16,9 +16,11 @@ CapriceMemoryTool::CapriceMemoryTool(const CRect& WindowRect, CView* pParent, CF
 {
     m_pMonoFontEngine = CApplication::Instance()->GetFontEngine(std::string(CPC.resources_path) + "/vera_mono.ttf", 8);
 
-    m_bytesPerLine = 16;
     // Make this window listen to incoming KEYBOARD_KEYDOWN messages to capture TAB pressed and change focused field
     CMessageServer::Instance().RegisterMessageClient(this, CMessage::KEYBOARD_KEYDOWN);
+    // Make this window listen to incoming CTRL_VALUECHANGING messages for dropdown list update
+    CMessageServer::Instance().RegisterMessageClient(this, CMessage::CTRL_VALUECHANGE);
+    CMessageServer::Instance().RegisterMessageClient(this, CMessage::CTRL_VALUECHANGING);
 
     m_pPokeAdressLabel = new CLabel(        CPoint(15, 18),             this, "Adress: ");
     m_pPokeAdress      = new CEditBox(CRect(CPoint(55, 13),  30, 20),   this, NULL);
@@ -33,6 +35,18 @@ CapriceMemoryTool::CapriceMemoryTool(const CRect& WindowRect, CView* pParent, CF
     m_pFilterValue     = new CEditBox(CRect(CPoint(55, 75), 30, 20),    this, NULL);
     m_pButtonFilter    = new CButton( CRect(CPoint(95, 75), 40, 20),    this, "Filter");
     m_pButtonCopy      = new CButton( CRect(CPoint(240, 75), 75, 20),   this, "Dump to stdout");
+
+    m_pBytesPerLineLbl = new CLabel(       CPoint(240, 35),             this, "Bytes per line:");
+    m_pBytesPerLine  = new CDropDown( CRect(CPoint(240, 45), 50, 20),   this, NULL, 14);
+    m_pBytesPerLine->AddItem(SListItem("1"));
+    m_pBytesPerLine->AddItem(SListItem("4"));
+    m_pBytesPerLine->AddItem(SListItem("8"));
+    m_pBytesPerLine->AddItem(SListItem("16"));
+    m_pBytesPerLine->AddItem(SListItem("32"));
+    m_pBytesPerLine->AddItem(SListItem("64"));
+    m_pBytesPerLine->SetListboxHeight(4);
+    m_bytesPerLine = 16;
+    m_pBytesPerLine->SelectItem(3);
 
     // The list box is way to slow to handle so much elements
     //m_pListMemContent  = new CListBox(CRect(CPoint(25, 75), 275, 100), this, true);
@@ -154,6 +168,33 @@ bool CapriceMemoryTool::HandleMessage(CMessage* pMessage)
               break;
             }
           }
+        }
+        break;
+
+      case CMessage::CTRL_VALUECHANGE:
+        if (pMessage->Destination() == m_pBytesPerLine) {
+          switch (m_pBytesPerLine->GetSelectedIndex()) {
+            case 0:
+              m_bytesPerLine = 1;
+              break;
+            case 1:
+              m_bytesPerLine = 4;
+              break;
+            case 2:
+              m_bytesPerLine = 8;
+              break;
+            case 3:
+              m_bytesPerLine = 16;
+              break;
+            case 4:
+              m_bytesPerLine = 32;
+              break;
+            case 5:
+              m_bytesPerLine = 64;
+              break;
+          }
+          UpdateTextMemory();
+          bHandled = CFrame::HandleMessage(pMessage);
         }
         break;
 

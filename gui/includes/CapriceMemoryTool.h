@@ -37,6 +37,8 @@ namespace wGui
         CButton  *m_pButtonDisplay;
         CButton  *m_pButtonCopy;
         CButton  *m_pButtonClose;
+        CLabel   *m_pBytesPerLineLbl;
+        CDropDown *m_pBytesPerLine;
         //CListBox *m_pListMemContent;
         CTextBox *m_pTextMemContent;
 
