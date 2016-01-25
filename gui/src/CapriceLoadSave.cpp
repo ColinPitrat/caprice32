@@ -127,9 +127,8 @@ bool CapriceLoadSave::HandleMessage(CMessage* pMessage)
           }
           bHandled = CFrame::HandleMessage(pMessage);
         }
-				if (pMessage->Destination() == m_pFilesList) {
+				if (pMessage->Source() == m_pFilesList) {
 					std::string fn = m_pFilesList->GetItem(m_pFilesList->getFirstSelectedIndex()).sItemText;
-          std::cout << "Selected file changing: " << fn << std::endl;
 					if(fn[fn.size()-1] == '/') {
 						m_pDirectoryValue->SetWindowText(m_pDirectoryValue->GetWindowText() + fn);
 						// simplify using realpath (cf http://stackoverflow.com/questions/229012/getting-absolute-path-of-a-file)
