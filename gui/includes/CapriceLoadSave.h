@@ -15,10 +15,22 @@ namespace wGui
         //! \param pFontEngine A pointer to the font engine to use when drawing the control
         //! If this is set to 0 it will use the default font engine specified by the CApplication (which must be set before instantiating this object)
         CapriceLoadSave(const CRect& WindowRect, CWindow* pParent, CFontEngine* pFontEngine);
+        bool HandleMessage(CMessage* pMessage);
+        void UpdateFilesList();
 
       protected:
-        // Navigation bar control (to select the type of file to load/save)
-        CNavigationBar* m_pNavigationBar; 
+        std::string m_currentExt;
+        CLabel   *m_pTypeLabel;
+        CDropDown *m_pTypeValue;
+        CLabel   *m_pActionLabel;
+        CDropDown *m_pActionValue;
+        CLabel   *m_pDirectoryLabel;
+        CEditBox *m_pDirectoryValue;
+        CListBox *m_pFilesList;
+        CLabel   *m_pFileNameLabel;
+        CEditBox *m_pFileNameValue;
+        CButton  *m_pCancelButton;
+        CButton  *m_pLoadSaveButton;
 
       private:
         void operator=(CapriceLoadSave) { }  //!< The assignment operator is not allowed for CWindow derived objects

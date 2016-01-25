@@ -108,6 +108,7 @@ void CListBox::ClearItems(void)
 {
 	m_Items.clear();
 	m_SelectedItems.clear();
+  m_RenderedStrings.clear();
 	m_pVScrollbar->SetMaxLimit(0);
 	Draw();
 }
