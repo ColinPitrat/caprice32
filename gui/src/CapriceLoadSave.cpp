@@ -24,6 +24,7 @@ CapriceLoadSave::CapriceLoadSave(const CRect& WindowRect, CWindow* pParent, CFon
   // Make this window listen to incoming CTRL_VALUECHANGE messages (used for updating drop down values)
   CMessageServer::Instance().RegisterMessageClient(this, CMessage::CTRL_VALUECHANGE);
   CMessageServer::Instance().RegisterMessageClient(this, CMessage::CTRL_VALUECHANGING);
+  CMessageServer::Instance().RegisterMessageClient(this, CMessage::CTRL_DOUBLELCLICK);
 
   // File type (.SNA, .DSK, .TAP, .VOC)
   m_pTypeLabel = new CLabel(          CPoint(15, 25),             this, "File type: ");
@@ -73,6 +74,28 @@ bool CapriceLoadSave::HandleMessage(CMessage* pMessage)
 	{
 		switch(pMessage->MessageType())
 		{
+    /* Not working ...
+     * Would need to handle doubleclick in CListBox ?
+      case CMessage::CTRL_DOUBLELCLICK:
+        {
+          std::cout << "Double click on: " << pMessage->Destination() << std::endl;
+          if (pMessage->Destination() == m_pFilesList) {
+            std::string fn = m_pFilesList->GetItem(m_pFilesList->getFirstSelectedIndex()).sItemText;
+            if(fn[fn.size()-1] == '/') {
+              std::string newpath = m_pDirectoryValue->GetWindowText() + '/' + fn;
+              char simplepath[PATH_MAX+1];
+              if(realpath(newpath.c_str(), simplepath) == NULL) {
+                std::cerr << "Couldn't simplify path '" << newpath << "': " << strerror(errno) << std::endl;
+              } else {
+                m_pDirectoryValue->SetWindowText(simplepath);
+                m_pFileNameValue->SetWindowText("");
+                UpdateFilesList();
+              }
+            }
+            bHandled = CFrame::HandleMessage(pMessage);
+          }
+        }
+     */
       case CMessage::CTRL_SINGLELCLICK:
         {
           if (pMessage->Destination() == this)
@@ -129,12 +152,17 @@ bool CapriceLoadSave::HandleMessage(CMessage* pMessage)
         }
 				if (pMessage->Source() == m_pFilesList) {
 					std::string fn = m_pFilesList->GetItem(m_pFilesList->getFirstSelectedIndex()).sItemText;
-					if(fn[fn.size()-1] == '/') {
-						m_pDirectoryValue->SetWindowText(m_pDirectoryValue->GetWindowText() + fn);
-						// simplify using realpath (cf http://stackoverflow.com/questions/229012/getting-absolute-path-of-a-file)
-						m_pFileNameValue->SetWindowText(""); //(as not valid anymore !)
-						UpdateFilesList();
-					} else {
+          if(fn[fn.size()-1] == '/') {
+            std::string newpath = m_pDirectoryValue->GetWindowText() + '/' + fn;
+            char simplepath[PATH_MAX+1];
+            if(realpath(newpath.c_str(), simplepath) == NULL) {
+              std::cerr << "Couldn't simplify path '" << newpath << "': " << strerror(errno) << std::endl;
+            } else {
+              m_pDirectoryValue->SetWindowText(simplepath);
+              m_pFileNameValue->SetWindowText("");
+              UpdateFilesList();
+            }
+          } else {
 						m_pFileNameValue->SetWindowText(fn);
 					}
           bHandled = CFrame::HandleMessage(pMessage);
