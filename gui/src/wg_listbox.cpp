@@ -110,6 +110,7 @@ void CListBox::ClearItems(void)
 	m_SelectedItems.clear();
   m_RenderedStrings.clear();
 	m_pVScrollbar->SetMaxLimit(0);
+  m_pVScrollbar->SetValue(0);
 	Draw();
 }
 
@@ -173,6 +174,7 @@ void CListBox::Draw(void) const
 			}
 		}
 	}
+  m_pVScrollbar->Draw();
 }
 
 
