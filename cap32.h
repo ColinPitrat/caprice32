@@ -450,6 +450,15 @@ void audio_pause (void);
 void audio_resume (void);
 int video_init (void);
 void video_shutdown (void);
+int snapshot_load (const char *pchFileName);
+int snapshot_save (const char *pchFileName);
+int dsk_load (const char *pchFileName, t_drive *drive, char chID);
+int dsk_save (const char *pchFileName, t_drive *drive, char chID);
+void dsk_eject (t_drive *drive);
+int dsk_format (t_drive *drive, int iFormat);
+int tape_insert (const char *pchFileName);
+int tape_insert_voc (const char *pchFileName);
+void tape_eject (void);
 
 
 // fdc.c

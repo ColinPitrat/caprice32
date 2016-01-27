@@ -15,6 +15,8 @@
 
 // CPC emulation properties, defined in cap32.h:
 extern t_CPC CPC;
+extern t_drive driveA;
+extern t_drive driveB;
 
 namespace wGui {
 
@@ -105,6 +107,63 @@ bool CapriceLoadSave::HandleMessage(CMessage* pMessage)
               bHandled = true;
               break;
             }
+            if (pMessage->Source() == m_pLoadSaveButton) {
+              bool actionDone = false;
+              std::string filename = m_pFileNameValue->GetWindowText();
+              if(!filename.empty()) {
+                filename = m_pDirectoryValue->GetWindowText() + '/' + filename;
+                switch (m_pActionValue->GetSelectedIndex()) {
+                  case 0: // Load
+                    switch (m_pTypeValue->GetSelectedIndex()) {
+                      case 0: // Snapshot
+                        snapshot_load(filename.c_str());
+                        actionDone = true;
+                        break;
+                      case 1: // Drive A
+                        dsk_load(filename.c_str(), &driveA, 'A');
+                        actionDone = true;
+                        break;
+                      case 2: // Drive B
+                        dsk_load(filename.c_str(), &driveB, 'B');
+                        actionDone = true;
+                        break;
+                      case 3: // Tape
+                        tape_insert(filename.c_str());
+                        actionDone = true;
+                        break;
+                    }
+                    break;
+                  case 1: // Save
+                    switch (m_pTypeValue->GetSelectedIndex()) {
+                      case 0: // Snapshot
+                        snapshot_save(filename.c_str());
+                        actionDone = true;
+                        break;
+                      case 1: // Drive A
+                        dsk_save(filename.c_str(), &driveA, 'A');
+                        actionDone = true;
+                        break;
+                      case 2: // Drive B
+                        dsk_save(filename.c_str(), &driveB, 'B');
+                        actionDone = true;
+                        break;
+                      case 3: // Tape
+                        // Unsupported
+                        wGui::CMessageBox *pMessageBox = new wGui::CMessageBox(CRect(CPoint(m_ClientRect.Width() /2 - 125, m_ClientRect.Height() /2 - 30), 250, 60), this, 0, "Not implemented", "Saving tape not  yet implemented", CMessageBox::BUTTON_OK);
+                        pMessageBox->SetModal(true);
+                        //tape_save(filename.c_str());
+                        break;
+                    }
+                    break;
+                }
+              }
+              if(actionDone) {
+                CloseFrame();
+              }
+              bHandled = true;
+              break;
+            }
+
             // handle further buttons and events...
             bHandled = CFrame::HandleMessage(pMessage);
           }

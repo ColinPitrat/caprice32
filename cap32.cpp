@@ -2084,7 +2084,7 @@ int zip_dir (t_zip_info *zi)
 
 
 
-int zip_extract (char *pchZipFile, char *pchFileName, dword dwOffset)
+int zip_extract (const char *pchZipFile, const char *pchFileName, dword dwOffset)
 {
    int iStatus, iCount;
    dword dwSize;
@@ -2144,7 +2144,7 @@ int zip_extract (char *pchZipFile, char *pchFileName, dword dwOffset)
 
 
 
-int snapshot_load (char *pchFileName)
+int snapshot_load (const char *pchFileName)
 {
    int n;
    dword dwSnapSize, dwModel, dwFlags;
@@ -2362,7 +2362,7 @@ int snapshot_load (char *pchFileName)
 
 
 
-int snapshot_save (char *pchFileName)
+int snapshot_save (const char *pchFileName)
 {
    t_SNA_header sh;
    int n;
@@ -2556,7 +2556,7 @@ void dsk_eject (t_drive *drive)
 
 
 
-int dsk_load (char *pchFileName, t_drive *drive, char chID)
+int dsk_load (const char *pchFileName, t_drive *drive, char chID)
 {
    int iRetCode;
    dword dwTrackSize, track, side, sector, dwSectorSize, dwSectors;
@@ -2710,7 +2710,7 @@ exit:
 
 
 
-int dsk_save (char *pchFileName, t_drive *drive, char chID)
+int dsk_save (const char *pchFileName, t_drive *drive, char chID)
 {
    t_DSK_header dh;
    t_track_header th;
@@ -2843,7 +2843,7 @@ void tape_eject (void)
 
 
 
-int tape_insert (char *pchFileName)
+int tape_insert (const char *pchFileName)
 {
    long lFileSize;
    int iBlockLength;
@@ -3004,7 +3004,7 @@ int tape_insert (char *pchFileName)
 
 
 
-int tape_insert_voc (char *pchFileName)
+int tape_insert_voc (const char *pchFileName)
 {
    long lFileSize, lOffset, lInitialOffset, lSampleLength;
    int iBlockLength;
@@ -3912,7 +3912,7 @@ int input_init (void)
 
 
 
-int getConfigValueInt (char* pchFileName, const char* pchSection, const char* pchKey, int iDefaultValue)
+int getConfigValueInt (const char* pchFileName, const char* pchSection, const char* pchKey, int iDefaultValue)
 {
    FILE* pfoConfigFile;
    char chLine[MAX_LINE_LEN + 1];
@@ -3942,7 +3942,7 @@ int getConfigValueInt (char* pchFileName, const char* pchSection, const char* pc
 
 
 
-void getConfigValueString (char* pchFileName, const char* pchSection, const char* pchKey, char* pchValue, int iSize, char* pchDefaultValue)
+void getConfigValueString (const char* pchFileName, const char* pchSection, const char* pchKey, char* pchValue, int iSize, char* pchDefaultValue)
 {
    FILE* pfoConfigFile;
    char chLine[MAX_LINE_LEN + 1];

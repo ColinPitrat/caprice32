@@ -27,11 +27,8 @@ bool CapriceGuiView::HandleMessage(CMessage* pMessage)
           break;
         }
         if (pSource == m_pBtnLoadSave) {
-          wGui::CMessageBox *pMessageBox = new wGui::CMessageBox(CRect(CPoint(m_pScreenSurface->w /2 - 125, m_pScreenSurface->h /2 - 30), 250, 60), this, 0, "Not implemented", "Load/save not yet implemented", CMessageBox::BUTTON_OK);
-          pMessageBox->SetModal(true);
-
-          //wGui::CapriceLoadSave* pLoadSaveBox = new wGui::CapriceLoadSave(CRect(CPoint(m_pScreenSurface->w /2 - 165, m_pScreenSurface->h /2 - 127), 330, 260), this, 0);
-          //pLoadSaveBox->SetModal(true);
+          wGui::CapriceLoadSave* pLoadSaveBox = new wGui::CapriceLoadSave(CRect(CPoint(m_pScreenSurface->w /2 - 165, m_pScreenSurface->h /2 - 127), 330, 260), this, 0);
+          pLoadSaveBox->SetModal(true);
           break;
         }
         if (pSource == m_pBtnMemoryTool) {
