@@ -50,7 +50,7 @@ CapriceLoadSave::CapriceLoadSave(const CRect& WindowRect, CWindow* pParent, CFon
   // Directory
   m_pDirectoryLabel = new CLabel(          CPoint(15, 85),             this, "Directory: ");
   m_pDirectoryValue = new CEditBox( CRect( CPoint(80, 80), 150, 20),    this, NULL);
-  m_pDirectoryValue->SetWindowText(CPC.snap_path);
+  m_pDirectoryValue->SetWindowText(simplifyPath(CPC.snap_path));
   m_pDirectoryValue->SetReadOnly(true);
 
   // File list
@@ -84,15 +84,9 @@ bool CapriceLoadSave::HandleMessage(CMessage* pMessage)
           if (pMessage->Destination() == m_pFilesList) {
             std::string fn = m_pFilesList->GetItem(m_pFilesList->getFirstSelectedIndex()).sItemText;
             if(fn[fn.size()-1] == '/') {
-              std::string newpath = m_pDirectoryValue->GetWindowText() + '/' + fn;
-              char simplepath[PATH_MAX+1];
-              if(realpath(newpath.c_str(), simplepath) == NULL) {
-                std::cerr << "Couldn't simplify path '" << newpath << "': " << strerror(errno) << std::endl;
-              } else {
-                m_pDirectoryValue->SetWindowText(simplepath);
-                m_pFileNameValue->SetWindowText("");
-                UpdateFilesList();
-              }
+              m_pDirectoryValue->SetWindowText(simplifyPath(m_pDirectoryValue->GetWindowText() + '/' + fn));
+              m_pFileNameValue->SetWindowText("");
+              UpdateFilesList();
             }
             bHandled = CFrame::HandleMessage(pMessage);
           }
@@ -187,22 +181,22 @@ bool CapriceLoadSave::HandleMessage(CMessage* pMessage)
         if (pMessage->Destination() == m_pTypeValue) {
           switch (m_pTypeValue->GetSelectedIndex()) {
             case 0: // Snapshot
-              m_pDirectoryValue->SetWindowText(CPC.snap_path);
+              m_pDirectoryValue->SetWindowText(simplifyPath(CPC.snap_path));
               m_currentExt = ".sna";
               UpdateFilesList();
               break;
             case 1: // Drive A
-              m_pDirectoryValue->SetWindowText(CPC.drvA_path);
+              m_pDirectoryValue->SetWindowText(simplifyPath(CPC.drvA_path));
               m_currentExt = ".dsk";
               UpdateFilesList();
               break;
             case 2: // Drive B
-              m_pDirectoryValue->SetWindowText(CPC.drvB_path);
+              m_pDirectoryValue->SetWindowText(simplifyPath(CPC.drvB_path));
               m_currentExt = ".dsk";
               UpdateFilesList();
               break;
             case 3: // Tape
-              m_pDirectoryValue->SetWindowText(CPC.tape_path);
+              m_pDirectoryValue->SetWindowText(simplifyPath(CPC.tape_path));
               m_currentExt = ".tap";
               UpdateFilesList();
               break;
@@ -212,15 +206,9 @@ bool CapriceLoadSave::HandleMessage(CMessage* pMessage)
 				if (pMessage->Source() == m_pFilesList) {
 					std::string fn = m_pFilesList->GetItem(m_pFilesList->getFirstSelectedIndex()).sItemText;
           if(fn[fn.size()-1] == '/') {
-            std::string newpath = m_pDirectoryValue->GetWindowText() + '/' + fn;
-            char simplepath[PATH_MAX+1];
-            if(realpath(newpath.c_str(), simplepath) == NULL) {
-              std::cerr << "Couldn't simplify path '" << newpath << "': " << strerror(errno) << std::endl;
-            } else {
-              m_pDirectoryValue->SetWindowText(simplepath);
-              m_pFileNameValue->SetWindowText("");
-              UpdateFilesList();
-            }
+            m_pDirectoryValue->SetWindowText(simplifyPath(m_pDirectoryValue->GetWindowText() + '/' + fn));
+            m_pFileNameValue->SetWindowText("");
+            UpdateFilesList();
           } else {
 						m_pFileNameValue->SetWindowText(fn);
 					}
@@ -234,6 +222,16 @@ bool CapriceLoadSave::HandleMessage(CMessage* pMessage)
     }
   }
 	return bHandled;
+}
+
+std::string CapriceLoadSave::simplifyPath(std::string path)
+{
+  char simplepath[PATH_MAX+1];
+  if(realpath(path.c_str(), simplepath) == NULL) {
+    std::cerr << "Couldn't simplify path '" << path << "': " << strerror(errno) << std::endl;
+    return path;
+  } 
+  return std::string(simplepath);
 }
 
 void CapriceLoadSave::UpdateFilesList()

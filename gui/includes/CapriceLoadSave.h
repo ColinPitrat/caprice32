@@ -16,6 +16,7 @@ namespace wGui
         //! If this is set to 0 it will use the default font engine specified by the CApplication (which must be set before instantiating this object)
         CapriceLoadSave(const CRect& WindowRect, CWindow* pParent, CFontEngine* pFontEngine);
         bool HandleMessage(CMessage* pMessage);
+        std::string simplifyPath(std::string path);
         void UpdateFilesList();
 
       protected:
