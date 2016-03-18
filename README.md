@@ -73,4 +73,4 @@ There are many repository for caprice32 on GitHub:
   * https://github.com/egrath/caprice32-mod
   * https://github.com/burzumishi/caprice32wx
 
-So why create another one ? All these repository are highly inactive but more than that, in my opinion, they took a wrong direction. Some added dependencies (wxWidget, GTK) without really adding feature. Two imported the code but do not did not do any update. The most promising one in my opinion is sebhz's one but the addition in it of some games images annoys me too much to contribute to it !
+So why create another one ? All these repository are highly inactive but more than that, in my opinion, they took a wrong direction. Some added dependencies (wxWidget, GTK) without really adding feature. Two imported the code but did not do any update. The most promising one in my opinion is sebhz's one but the addition in it of some games images annoys me too much to contribute to it !
