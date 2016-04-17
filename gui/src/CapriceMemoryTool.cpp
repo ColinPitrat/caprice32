@@ -167,6 +167,8 @@ bool CapriceMemoryTool::HandleMessage(CMessage* pMessage)
               bHandled = true;
               break;
             }
+          } else {
+            bHandled = CFrame::HandleMessage(pMessage);
           }
         }
         break;

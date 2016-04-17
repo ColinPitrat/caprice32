@@ -8,10 +8,22 @@
 // Make caprice32 functions available here.
 extern void emulator_reset(bool);
 
+enum SelectedItem {
+  NONE,
+  OPTIONS,
+  LOAD_SAVE,
+  MEMORY_TOOL,
+  RESET,
+  ABOUT,
+  RESUME,
+  QUIT
+};
+
 bool CapriceGuiView::HandleMessage(CMessage* pMessage)
 {
   bool bHandled = false;
 
+  SelectedItem selected(NONE);
   if (pMessage)
   {
     switch (pMessage->MessageType())
@@ -22,65 +34,125 @@ bool CapriceGuiView::HandleMessage(CMessage* pMessage)
         bHandled = true;
         const wGui::CMessageClient* pSource = pMessage->Source();
         if (pSource == m_pBtnOptions) {
-          wGui::CapriceOptions* pOptionsBox = new wGui::CapriceOptions(CRect(CPoint(m_pScreenSurface->w /2 - 165, m_pScreenSurface->h /2 - 127), 330, 260), this, 0);
-          pOptionsBox->SetModal(true);
-          break;
+          selected = OPTIONS;
         }
-        if (pSource == m_pBtnLoadSave) {
-          wGui::CapriceLoadSave* pLoadSaveBox = new wGui::CapriceLoadSave(CRect(CPoint(m_pScreenSurface->w /2 - 165, m_pScreenSurface->h /2 - 127), 330, 260), this, 0);
-          pLoadSaveBox->SetModal(true);
-          break;
+        else if (pSource == m_pBtnLoadSave) {
+          selected = LOAD_SAVE;
         }
-        if (pSource == m_pBtnMemoryTool) {
-          wGui::CapriceMemoryTool* pMemoryTool = new wGui::CapriceMemoryTool(CRect(CPoint(m_pScreenSurface->w /2 - 165, m_pScreenSurface->h /2 - 140), 330, 270), this, 0);
-          pMemoryTool->SetModal(true);
-          break;
+        else if (pSource == m_pBtnMemoryTool) {
+          selected = MEMORY_TOOL;
         }
-        if (pSource == m_pBtnReset) {
-          emulator_reset(false);
-          // Exit gui
-          CMessageServer::Instance().QueueMessage(new CMessage(CMessage::APP_EXIT, 
-          0, this));
-          break;
+        else if (pSource == m_pBtnReset) {
+          selected = RESET;
         }
-        if (pSource == m_pBtnAbout) {
-          wGui::CapriceAbout* pAboutBox = new wGui::CapriceAbout(CRect(CPoint(m_pScreenSurface->w /2 - 87, m_pScreenSurface->h /2 - 120), 174, 240), this, 0);
-          pAboutBox->SetModal(true);
-          break;
+        else if (pSource == m_pBtnAbout) {
+          selected = ABOUT;
         }
-        if (pSource == m_pBtnResume) {
-          // Exit gui, see also handling of SDLK_ESCAPE below.
-          CMessageServer::Instance().QueueMessage(new CMessage(CMessage::APP_EXIT, 0, this));
-          break;
+        else if (pSource == m_pBtnResume) {
+          selected = RESUME;
         }
-        if (pSource == m_pBtnQuit) {
-          // atexit() takes care of all the cleanup
-          exit (0);
-          break;
+        else if (pSource == m_pBtnQuit) {
+          selected = QUIT;
         }
       }
       break;
-        case CMessage::KEYBOARD_KEYDOWN:
-            if (m_bVisible && pMessage->Destination() == this) {
-            CKeyboardMessage* pKeyboardMessage = dynamic_cast<CKeyboardMessage*>(pMessage);
+    case CMessage::KEYBOARD_KEYDOWN:
+      if (m_bVisible && pMessage->Destination() == this) {
+        CKeyboardMessage* pKeyboardMessage = dynamic_cast<CKeyboardMessage*>(pMessage);
         if (pKeyboardMessage) {
-          if (pKeyboardMessage->Key == SDLK_ESCAPE) {
-                        // Exit gui, see handling of m_pBtmResume above.
-                CMessageServer::Instance().QueueMessage(new CMessage(CMessage::APP_EXIT, 0, this));
+          switch (pKeyboardMessage->Key) {
+            case SDLK_o:
               bHandled = true;
-                    }
-                }      
-            }
-            break;
-        //case wGui::CMessage::CTRL_MESSAGEBOXRETURN:
-        //  {
-        //  bHandled = false;
-        //      break;
-        //  }
+              selected = OPTIONS;
+              break;
+            case SDLK_l:
+              bHandled = true;
+              selected = LOAD_SAVE;
+              break;
+            case SDLK_m:
+              bHandled = true;
+              selected = MEMORY_TOOL;
+              break;
+            case SDLK_F5:
+              bHandled = true;
+              selected = RESET;
+              break;
+            case SDLK_a:
+              bHandled = true;
+              selected = ABOUT;
+              break;
+            case SDLK_q:
+            case SDLK_F10:
+              bHandled = true;
+              selected = QUIT;
+              break;
+            case SDLK_r:
+            case SDLK_ESCAPE: 
+              bHandled = true;
+              selected = RESUME;
+              break;
+            default:
+              break;
+          }
+        }      
+      }
+      break;
+      //case wGui::CMessage::CTRL_MESSAGEBOXRETURN:
+      //  {
+      //  bHandled = false;
+      //      break;
+      //  }
     default:
       bHandled = CView::HandleMessage(pMessage);
       break;
     }
+  }
+  switch (selected) {
+    case OPTIONS:
+      {
+        wGui::CapriceOptions* pOptionsBox = new wGui::CapriceOptions(CRect(CPoint(m_pScreenSurface->w /2 - 165, m_pScreenSurface->h /2 - 127), 330, 260), this, 0);
+        pOptionsBox->SetModal(true);
+        break;
+      }
+    case LOAD_SAVE:
+      {
+        wGui::CapriceLoadSave* pLoadSaveBox = new wGui::CapriceLoadSave(CRect(CPoint(m_pScreenSurface->w /2 - 165, m_pScreenSurface->h /2 - 127), 330, 260), this, 0);
+        pLoadSaveBox->SetModal(true);
+        break;
+      }
+    case MEMORY_TOOL:
+      {
+        wGui::CapriceMemoryTool* pMemoryTool = new wGui::CapriceMemoryTool(CRect(CPoint(m_pScreenSurface->w /2 - 165, m_pScreenSurface->h /2 - 140), 330, 270), this, 0);
+        pMemoryTool->SetModal(true);
+        break;
+      }
+    case RESET:
+      {
+        emulator_reset(false);
+        // Exit gui
+        CMessageServer::Instance().QueueMessage(new CMessage(CMessage::APP_EXIT, 0, this));
+        break;
+      }
+    case ABOUT:
+      {
+        wGui::CapriceAbout* pAboutBox = new wGui::CapriceAbout(CRect(CPoint(m_pScreenSurface->w /2 - 87, m_pScreenSurface->h /2 - 120), 174, 240), this, 0);
+        pAboutBox->SetModal(true);
+        break;
+      }
+    case RESUME:
+      {
+        // Exit gui
+        CMessageServer::Instance().QueueMessage(new CMessage(CMessage::APP_EXIT, 0, this));
+        break;
+      }
+    case QUIT:
+      {
+        // atexit() takes care of all the cleanup
+        exit (0);
+        break;
+      }
+    case NONE:
+      break;
   }
 
   return bHandled;
