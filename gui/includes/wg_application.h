@@ -240,7 +240,7 @@ protected:
 	bool m_bHandleExceptionsInternally;  //!< If true, wGui will handle most exceptions itself
 	bool m_bResourcePoolEnabled;  //!< If true, wGui provided resources will be added to the resource pool as they are created, defaults to true
 	std::list<CResourceHandle> m_ResourceHandlePool;  //!< The resource handle pool which keeps commonly used resources alive
-	std::auto_ptr<CCursorResourceHandle> m_pCurrentCursorResourceHandle;  //!< An autopointer to the handle for the current mouse cursor
+	std::unique_ptr<CCursorResourceHandle> m_pCurrentCursorResourceHandle;  //!< An autopointer to the handle for the current mouse cursor
 	SDL_Cursor* m_pSystemDefaultCursor;  //!< A pointer to the default system cursor
 	wUtil::CConfigStore m_GlobalConfig;  //!< A CConfigStore object that has the Global configuration
 	wUtil::CLog m_AppLog;  //!< A log for wGui stuff

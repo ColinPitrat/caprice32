@@ -126,7 +126,7 @@ protected:
 	CRGBColor m_TitleBarTextColor;  //!< The title bar text color, defaults to the default line color
 	int m_iTitleBarHeight;  //!< The height of the title bar, defaults to 12
 	CFontEngine* m_pFontEngine;  //!< A pointer to the font engine to use to render the text
-	std::auto_ptr<CRenderedString> m_pRenderedString;  //!< An autopointer to the rendered version of the string
+	std::unique_ptr<CRenderedString> m_pRenderedString;  //!< An autopointer to the rendered version of the string
 	bool m_bResizable;  //!< Indicates if the frame is resizable
 	bool m_bModal;  //!< Indicates if the frame is modal
 	CMenu* m_pMenu;  //!< A pointer to the frame's menu

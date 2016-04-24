@@ -87,7 +87,7 @@ public:
 
 protected:
 	CFontEngine* m_pFontEngine;  //!< A pointer to the font engine to use to render the text
-	std::auto_ptr<CRenderedString> m_pRenderedString;  //!< An autopointer to the rendered version of the string
+	std::unique_ptr<CRenderedString> m_pRenderedString;  //!< An autopointer to the rendered version of the string
 	CRGBColor m_FontColor;  //!< The font color
 	CWindow* m_pToolWindow;  //!< A pointer to the CWindow based object the tooltip is for
 	CTimer* m_pTimer;  //!< A pointer to a timer so that tooltips only appear after the mouse has been motionless for a bit
