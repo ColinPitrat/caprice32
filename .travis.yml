@@ -1,6 +1,8 @@
 language: cpp
 addons:
  apt:
+  sources:
+    - ubuntu-toolchain-r-test
   packages:
     - libsdl1.2-dev
     - zlib1g-dev
