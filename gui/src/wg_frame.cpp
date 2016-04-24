@@ -49,8 +49,7 @@ CFrame::CFrame(const CRect& WindowRect, CWindow* pParent, CFontEngine* pFontEngi
 	m_pFrameCloseButton = new CPictureButton(CRect(0, 0, 8, 8),
 			this, CwgBitmapResourceHandle(WGRES_X_BITMAP));
 
-	std::auto_ptr<CRenderedString> pRenderedString(new CRenderedString(m_pFontEngine, m_sWindowText, CRenderedString::VALIGN_CENTER));
-	m_pRenderedString = pRenderedString;
+	m_pRenderedString.reset(new CRenderedString(m_pFontEngine, m_sWindowText, CRenderedString::VALIGN_CENTER));
 
 	SetWindowRect(WindowRect);  // must be done after the buttons are created, and after the CRenderedString is created
 
@@ -195,8 +194,7 @@ void CFrame::SetWindowRect(const CRect& WindowRect)  // virtual
 
 void CFrame::SetWindowText(const std::string& sWindowText)  // virtual
 {
-	std::auto_ptr<CRenderedString> pRenderedString(new CRenderedString(m_pFontEngine, sWindowText, CRenderedString::VALIGN_CENTER));
-	m_pRenderedString = pRenderedString;
+	m_pRenderedString.reset(new CRenderedString(m_pFontEngine, sWindowText, CRenderedString::VALIGN_CENTER));
 	CWindow::SetWindowText(sWindowText);
 }
 
