@@ -102,9 +102,9 @@ extern word MaxVSync;
 extern t_flags1 flags1;
 extern t_new_dt new_dt;
 
-SDL_AudioSpec *audio_spec = NULL;
+SDL_AudioSpec *audio_spec = nullptr;
 
-SDL_Surface *back_surface = NULL;
+SDL_Surface *back_surface = nullptr;
 video_plugin* vid_plugin;
 SDL_Joystick* joysticks[MAX_NB_JOYSTICKS];
 
@@ -115,19 +115,19 @@ dword dwSndBufferCopied;
 
 dword dwBreakPoint, dwTrace, dwMF2ExitAddr;
 dword dwMF2Flags = 0;
-byte *pbGPBuffer = NULL;
-byte *pbSndBuffer = NULL;
-byte *pbSndBufferEnd = NULL;
-byte *pbSndStream = NULL;
+byte *pbGPBuffer = nullptr;
+byte *pbSndBuffer = nullptr;
+byte *pbSndBufferEnd = nullptr;
+byte *pbSndStream = nullptr;
 byte *membank_read[4], *membank_write[4], *memmap_ROM[256];
-byte *pbRAM = NULL;
-byte *pbROMlo = NULL;
-byte *pbROMhi = NULL;
-byte *pbExpansionROM = NULL;
-byte *pbMF2ROMbackup = NULL;
-byte *pbMF2ROM = NULL;
-byte *pbTapeImage = NULL;
-byte *pbTapeImageEnd = NULL;
+byte *pbRAM = nullptr;
+byte *pbROMlo = nullptr;
+byte *pbROMhi = nullptr;
+byte *pbExpansionROM = nullptr;
+byte *pbMF2ROMbackup = nullptr;
+byte *pbMF2ROM = nullptr;
+byte *pbTapeImage = nullptr;
+byte *pbTapeImageEnd = nullptr;
 byte keyboard_matrix[16];
 
 static byte *membank_config[8][4];
@@ -1738,7 +1738,7 @@ void z80_OUT_handler (reg_pair port, byte val)
    if (!(port.b.h & 0x20)) { // ROM select?
       GateArray.upper_ROM = val;
       pbExpansionROM = memmap_ROM[val];
-      if (pbExpansionROM == NULL) { // selected expansion ROM not present?
+      if (pbExpansionROM == nullptr) { // selected expansion ROM not present?
          pbExpansionROM = pbROMhi; // revert to BASIC ROM
       }
       if (!(GateArray.ROM_config & 0x08)) { // upper/expansion ROM is enabled?
@@ -2009,7 +2009,7 @@ int zip_dir (t_zip_info *zi)
    dword dwOffset;
 
    iFileCount = 0;
-   if ((pfileObject = fopen(zi->pchZipFile, "rb")) == NULL) {
+   if ((pfileObject = fopen(zi->pchZipFile, "rb")) == nullptr) {
       return ERR_FILE_NOT_FOUND;
    }
 
@@ -2093,7 +2093,7 @@ int zip_extract (const char *pchZipFile, const char *pchFileName, dword dwOffset
    z_stream z;
 
    pfileOut = tmpfile();
-   if (pfileOut == NULL) {
+   if (pfileOut == nullptr) {
       return ERR_FILE_UNZIP_FAILED; // couldn't create output file
    }
    pfileIn = fopen(pchZipFile, "rb"); // open ZIP file for reading
@@ -2154,7 +2154,7 @@ int snapshot_load (const char *pchFileName)
    t_SNA_header sh;
 
    memset(&sh, 0, sizeof(sh));
-   if ((pfileObject = fopen(pchFileName, "rb")) != NULL) {
+   if ((pfileObject = fopen(pchFileName, "rb")) != nullptr) {
       if(fread(&sh, sizeof(sh), 1, pfileObject) != 1) { // read snapshot header
         fclose(pfileObject);
         return ERR_SNA_INVALID;
@@ -2276,7 +2276,7 @@ int snapshot_load (const char *pchFileName)
             strncpy(chPath, CPC.rom_path, sizeof(chPath)-2);
             strcat(chPath, "/");
             strncat(chPath, chROMFile[dwModel], sizeof(chPath)-1 - strlen(chPath)); // path to the required ROM image
-            if ((pfileObject = fopen(chPath, "rb")) != NULL) {
+            if ((pfileObject = fopen(chPath, "rb")) != nullptr) {
                n = fread(pbROMlo, 2*16384, 1, pfileObject);
                fclose(pfileObject);
                if (!n) {
@@ -2514,7 +2514,7 @@ int snapshot_save (const char *pchFileName)
    sh.ga_sl_count = GateArray.sl_count;
    sh.z80_int_pending = z80.int_pending;
 
-   if ((pfileObject = fopen(pchFileName, "wb")) != NULL) {
+   if ((pfileObject = fopen(pchFileName, "wb")) != nullptr) {
       if (fwrite(&sh, sizeof(sh), 1, pfileObject) != 1) { // write snapshot header
          fclose(pfileObject);
          return ERR_SNA_WRITE;
@@ -2564,7 +2564,7 @@ int dsk_load (const char *pchFileName, t_drive *drive, char chID)
 
    iRetCode = 0;
    dsk_eject(drive);
-   if ((pfileObject = fopen(pchFileName, "rb")) != NULL) {
+   if ((pfileObject = fopen(pchFileName, "rb")) != nullptr) {
       if(fread(pbGPBuffer, 0x100, 1, pfileObject) != 1) { // read DSK header
         iRetCode = ERR_DSK_INVALID;
         goto exit;
@@ -2603,7 +2603,7 @@ int dsk_load (const char *pchFileName, t_drive *drive, char chID)
                drive->track[track][side].sectors = dwSectors; // store sector count
                drive->track[track][side].size = dwTrackSize; // store track size
                drive->track[track][side].data = (byte *)malloc(dwTrackSize); // attempt to allocate the required memory
-               if (drive->track[track][side].data == NULL) { // abort if not enough
+               if (drive->track[track][side].data == nullptr) { // abort if not enough
                   iRetCode = ERR_OUT_OF_MEMORY;
                   goto exit;
                }
@@ -2660,7 +2660,7 @@ int dsk_load (const char *pchFileName, t_drive *drive, char chID)
                      drive->track[track][side].sectors = dwSectors; // store sector count
                      drive->track[track][side].size = dwTrackSize; // store track size
                      drive->track[track][side].data = (byte *)malloc(dwTrackSize); // attempt to allocate the required memory
-                     if (drive->track[track][side].data == NULL) { // abort if not enough
+                     if (drive->track[track][side].data == nullptr) { // abort if not enough
                         iRetCode = ERR_OUT_OF_MEMORY;
                         goto exit;
                      }
@@ -2716,7 +2716,7 @@ int dsk_save (const char *pchFileName, t_drive *drive, char chID)
    t_track_header th;
    dword track, side, pos, sector;
 
-   if ((pfileObject = fopen(pchFileName, "wb")) != NULL) {
+   if ((pfileObject = fopen(pchFileName, "wb")) != nullptr) {
       memset(&dh, 0, sizeof(dh));
       memcpy(dh.id, "EXTENDED CPC DSK File\r\nDisk-Info\r\n", sizeof(dh.id));
       strcpy(dh.unused1, "Caprice32\r\n");
@@ -2804,7 +2804,7 @@ int dsk_format (t_drive *drive, int iFormat)
          drive->track[track][side].sectors = dwSectors; // store sector count
          drive->track[track][side].size = dwTrackSize; // store track size
          drive->track[track][side].data = (byte *)malloc(dwTrackSize); // attempt to allocate the required memory
-         if (drive->track[track][side].data == NULL) { // abort if not enough
+         if (drive->track[track][side].data == nullptr) { // abort if not enough
             iRetCode = ERR_OUT_OF_MEMORY;
             goto exit;
          }
@@ -2838,7 +2838,7 @@ exit:
 void tape_eject (void)
 {
    free(pbTapeImage);
-   pbTapeImage = NULL;
+   pbTapeImage = nullptr;
 }
 
 
@@ -2851,7 +2851,7 @@ int tape_insert (const char *pchFileName)
    byte *pbPtr, *pbBlock;
 
    tape_eject();
-   if ((pfileObject = fopen(pchFileName, "rb")) == NULL) {
+   if ((pfileObject = fopen(pchFileName, "rb")) == nullptr) {
       return ERR_FILE_NOT_FOUND;
    }
    if(fread(pbGPBuffer, 10, 1, pfileObject) != 1) { // read CDT header
@@ -3012,7 +3012,7 @@ int tape_insert_voc (const char *pchFileName)
    bool bolDone;
 
    tape_eject();
-   if ((pfileObject = fopen(pchFileName, "rb")) == NULL) {
+   if ((pfileObject = fopen(pchFileName, "rb")) == nullptr) {
       return ERR_FILE_NOT_FOUND;
    }
    if(fread(pbGPBuffer, 26, 1, pfileObject) != 1) { // read VOC header
@@ -3101,7 +3101,7 @@ int tape_insert_voc (const char *pchFileName)
       return ERR_TAP_BAD_VOC;
    }
    pbTapeImage = (byte *)malloc(dwCompressedSize+1+8+6);
-   if (pbTapeImage == NULL) { // check if the memory allocation has failed
+   if (pbTapeImage == nullptr) { // check if the memory allocation has failed
       fclose(pfileObject);
       return ERR_OUT_OF_MEMORY;
    }
@@ -3137,7 +3137,7 @@ int tape_insert_voc (const char *pchFileName)
             iBlockLength = (*(dword *)(pbPtr) & 0x00ffffff) + 4;
             lSampleLength = iBlockLength - 6;
             pbVocDataBlock = (byte *)malloc(lSampleLength);
-            if (pbVocDataBlock == NULL) {
+            if (pbVocDataBlock == nullptr) {
                fclose(pfileObject);
                tape_eject();
                return ERR_OUT_OF_MEMORY;
@@ -3169,7 +3169,7 @@ int tape_insert_voc (const char *pchFileName)
             iBlockLength = (*(dword *)(pbPtr) & 0x00ffffff) + 4;
             lSampleLength = iBlockLength - 4;
             pbVocDataBlock = (byte *)malloc(lSampleLength);
-            if (pbVocDataBlock == NULL) {
+            if (pbVocDataBlock == nullptr) {
                fclose(pfileObject);
                tape_eject();
                return ERR_OUT_OF_MEMORY;
@@ -3222,7 +3222,7 @@ int tape_insert_voc (const char *pchFileName)
    pbTapeImageEnd = pbTapeImagePtr + 3;
 /*
    #ifdef DEBUG_TAPE
-   if ((pfileObject = fopen("./test.cdt", "wb")) != NULL) {
+   if ((pfileObject = fopen("./test.cdt", "wb")) != nullptr) {
       fwrite(pbTapeImage, (int)((pbTapeImagePtr+3)-pbTapeImage), 1, pfileObject);
       fclose(pfileObject);
    }
@@ -3250,7 +3250,7 @@ int emulator_patch_ROM (void)
    strncpy(chPath, CPC.rom_path, sizeof(chPath)-2);
    strcat(chPath, "/");
    strncat(chPath, chROMFile[CPC.model], sizeof(chPath)-1 - strlen(chPath)); // determine the ROM image name for the selected model
-   if ((pfileObject = fopen(chPath, "rb")) != NULL) { // load CPC OS + Basic
+   if ((pfileObject = fopen(chPath, "rb")) != nullptr) { // load CPC OS + Basic
       if(fread(pbROMlo, 2*16384, 1, pfileObject) != 1) {
         fclose(pfileObject);
         return ERR_NOT_A_CPC_ROM;
@@ -3379,7 +3379,7 @@ int emulator_init (void)
          strncpy(chPath, CPC.rom_path, sizeof(chPath)-2);
          strcat(chPath, "/");
          strncat(chPath, CPC.rom_file[iRomNum], sizeof(chPath)-1 - strlen(chPath));
-         if ((pfileObject = fopen(chPath, "rb")) != NULL) { // attempt to open the ROM image
+         if ((pfileObject = fopen(chPath, "rb")) != nullptr) { // attempt to open the ROM image
             if(fread(pchRomData, 128, 1, pfileObject) != 1) { // read 128 bytes of ROM data
               fclose(pfileObject);
               return ERR_NOT_A_CPC_ROM;
@@ -3425,7 +3425,7 @@ int emulator_init (void)
          strcat(chPath, "/");
          strncat(chPath, CPC.rom_mf2, sizeof(chPath)-1 - strlen(chPath)); // combine path and file name
          bool MF2error = false;
-         if ((pfileObject = fopen(chPath, "rb")) != NULL) { // attempt to open the ROM image
+         if ((pfileObject = fopen(chPath, "rb")) != nullptr) { // attempt to open the ROM image
             if((fread(pbMF2ROMbackup, 8192, 1, pfileObject) != 1) || (memcmp(pbMF2ROMbackup+0x0d32, "MULTIFACE 2", 11) != 0)) { // does it have the required signature?
                fprintf(stderr, "ERROR: The file selected as the MF2 ROM is either corrupt or invalid.\n");
                MF2error = true;
@@ -3438,8 +3438,8 @@ int emulator_init (void)
          if(MF2error) {
            delete [] pbMF2ROMbackup;
            delete [] pbMF2ROM;
-           pbMF2ROM = NULL;
-           pbMF2ROMbackup = NULL;
+           pbMF2ROM = nullptr;
+           pbMF2ROMbackup = nullptr;
            CPC.rom_mf2[0] = 0;
            CPC.mf2 = 0; // disable MF2 support
          }
@@ -3461,11 +3461,11 @@ void emulator_shutdown (void)
 
    delete [] pbMF2ROMbackup;
    delete [] pbMF2ROM;
-   pbMF2ROM = NULL;
-   pbMF2ROMbackup = NULL;
+   pbMF2ROM = nullptr;
+   pbMF2ROMbackup = nullptr;
    for (iRomNum = 2; iRomNum < 16; iRomNum++) // loop for ROMs 2-15
    {
-      if (memmap_ROM[iRomNum] != NULL) // was a ROM assigned to this slot?
+      if (memmap_ROM[iRomNum] != nullptr) // was a ROM assigned to this slot?
          delete [] memmap_ROM[iRomNum]; // if so, release the associated memory
    }
 
@@ -3493,7 +3493,7 @@ void printer_stop (void)
    if (pfoPrinter) {
       fclose(pfoPrinter);
    }
-   pfoPrinter = NULL;
+   pfoPrinter = nullptr;
 }
 
 
@@ -3534,7 +3534,7 @@ int audio_init (void)
    desired->channels = CPC.snd_stereo+1;
    desired->samples = audio_align_samples(desired->freq / 50); // desired is 20ms at the given frequency
    desired->callback = audio_update;
-   desired->userdata = NULL;
+   desired->userdata = nullptr;
 
    if (SDL_OpenAudio(desired, obtained) < 0) {
       fprintf(stderr, "Could not open audio: %s\n", SDL_GetError());
@@ -3807,12 +3807,12 @@ int joysticks_init (void)
    for(int i = 0; i < MAX_NB_JOYSTICKS; i++) {
       if(i < nbJoysticks) {
         joysticks[i] = SDL_JoystickOpen(i);
-        if(joysticks[i] == NULL) {
+        if(joysticks[i] == nullptr) {
           fprintf(stderr, "Failed to open joystick %d. Error: %s\n", i, SDL_GetError());
           //return ERR_JOYSTICKS_INIT;
         }
       } else {
-        joysticks[i] = NULL;
+        joysticks[i] = nullptr;
       }
    }
 
@@ -3825,7 +3825,7 @@ void joysticks_shutdown (void)
 {
 /* This cores for an unknown reason - anyway, SDL_QuitSubSystem will do the job
    for(int i = 0; i < MAX_NB_JOYSTICKS; i++) {
-      if(joysticks[i] != NULL) {
+      if(joysticks[i] != nullptr) {
          SDL_JoystickClose(joysticks[i]);
       }
    }
@@ -3918,16 +3918,16 @@ int getConfigValueInt (const char* pchFileName, const char* pchSection, const ch
    char chLine[MAX_LINE_LEN + 1];
    char* pchToken;
 
-   if ((pfoConfigFile = fopen(pchFileName, "r")) != NULL) { // open the config file
-      while(fgets(chLine, MAX_LINE_LEN, pfoConfigFile) != NULL) { // grab one line
+   if ((pfoConfigFile = fopen(pchFileName, "r")) != nullptr) { // open the config file
+      while(fgets(chLine, MAX_LINE_LEN, pfoConfigFile) != nullptr) { // grab one line
          pchToken = strtok(chLine, "[]"); // check if there's a section key
-         if((pchToken != NULL) && (pchToken[0] != '#') && (strcmp(pchToken, pchSection) == 0)) {
-            while(fgets(chLine, MAX_LINE_LEN, pfoConfigFile) != NULL) { // get the next line
+         if((pchToken != nullptr) && (pchToken[0] != '#') && (strcmp(pchToken, pchSection) == 0)) {
+            while(fgets(chLine, MAX_LINE_LEN, pfoConfigFile) != nullptr) { // get the next line
                pchToken = strtok(chLine, "\t =\n\r"); // check if it has a key=value pair
-               if((pchToken != NULL) && (pchToken[0] != '#') && (strcmp(pchToken, pchKey) == 0)) {
-                  char* pchPtr = strtok(NULL, "\t =#\n\r"); // get the value if it matches our key
-                  if (pchPtr != NULL) {
-                     return (strtol(pchPtr, NULL, 0)); // return as integer
+               if((pchToken != nullptr) && (pchToken[0] != '#') && (strcmp(pchToken, pchKey) == 0)) {
+                  char* pchPtr = strtok(nullptr, "\t =#\n\r"); // get the value if it matches our key
+                  if (pchPtr != nullptr) {
+                     return (strtol(pchPtr, nullptr, 0)); // return as integer
                   } else {
                      return iDefaultValue; // no value found
                   }
@@ -3948,15 +3948,15 @@ void getConfigValueString (const char* pchFileName, const char* pchSection, cons
    char chLine[MAX_LINE_LEN + 1];
    char* pchToken;
 
-   if ((pfoConfigFile = fopen(pchFileName, "r")) != NULL) { // open the config file
-      while(fgets(chLine, MAX_LINE_LEN, pfoConfigFile) != NULL) { // grab one line
+   if ((pfoConfigFile = fopen(pchFileName, "r")) != nullptr) { // open the config file
+      while(fgets(chLine, MAX_LINE_LEN, pfoConfigFile) != nullptr) { // grab one line
          pchToken = strtok(chLine, "[]"); // check if there's a section key
-         if((pchToken != NULL) && (pchToken[0] != '#') && (strcmp(pchToken, pchSection) == 0)) {
-            while(fgets(chLine, MAX_LINE_LEN, pfoConfigFile) != NULL) { // get the next line
+         if((pchToken != nullptr) && (pchToken[0] != '#') && (strcmp(pchToken, pchSection) == 0)) {
+            while(fgets(chLine, MAX_LINE_LEN, pfoConfigFile) != nullptr) { // get the next line
                pchToken = strtok(chLine, "\t =\n\r"); // check if it has a key=value pair
-               if((pchToken != NULL) && (pchToken[0] != '#') && (strcmp(pchToken, pchKey) == 0)) {
-                  char* pchPtr = strtok(NULL, "\t=#\n\r"); // get the value if it matches our key
-                  if (pchPtr != NULL) {
+               if((pchToken != nullptr) && (pchToken[0] != '#') && (strcmp(pchToken, pchKey) == 0)) {
+                  char* pchPtr = strtok(nullptr, "\t=#\n\r"); // get the value if it matches our key
+                  if (pchPtr != nullptr) {
                      strncpy(pchValue, pchPtr, iSize); // copy to destination
                      return;
                   } else {
@@ -4034,7 +4034,7 @@ void loadConfiguration (void)
    CPC.scr_fs_bpp = getConfigValueInt(chFileName, "video", "scr_bpp", 8);
    CPC.scr_style = getConfigValueInt(chFileName, "video", "scr_style", 0);
    unsigned i=0;
-   while((video_plugin_list[i+1].name!=NULL)&&(i<CPC.scr_style))
+   while((video_plugin_list[i+1].name!=nullptr)&&(i<CPC.scr_style))
    {
       i++;
    }
@@ -4123,8 +4123,8 @@ void loadConfiguration (void)
          char *pchToken;
          pchToken = strtok(chFmtStr, chDelimiters); // format label
          strncpy((char *)disk_format[iFmt].label, pchToken, sizeof(disk_format[iFmt].label)-1);
-         pchToken = strtok(NULL, chDelimiters); // number of tracks
-         if (pchToken == NULL) { // value missing?
+         pchToken = strtok(nullptr, chDelimiters); // number of tracks
+         if (pchToken == nullptr) { // value missing?
             continue;
          }
          dwVal = strtoul(pchToken, &pchTail, 0);
@@ -4132,8 +4132,8 @@ void loadConfiguration (void)
             continue;
          }
          disk_format[iFmt].tracks = dwVal;
-         pchToken = strtok(NULL, chDelimiters); // number of sides
-         if (pchToken == NULL) { // value missing?
+         pchToken = strtok(nullptr, chDelimiters); // number of sides
+         if (pchToken == nullptr) { // value missing?
             continue;
          }
          dwVal = strtoul(pchToken, &pchTail, 0);
@@ -4141,8 +4141,8 @@ void loadConfiguration (void)
             continue;
          }
          disk_format[iFmt].sides = dwVal;
-         pchToken = strtok(NULL, chDelimiters); // number of sectors
-         if (pchToken == NULL) { // value missing?
+         pchToken = strtok(nullptr, chDelimiters); // number of sectors
+         if (pchToken == nullptr) { // value missing?
             continue;
          }
          dwVal = strtoul(pchToken, &pchTail, 0);
@@ -4150,8 +4150,8 @@ void loadConfiguration (void)
             continue;
          }
          disk_format[iFmt].sectors = dwVal;
-         pchToken = strtok(NULL, chDelimiters); // sector size as N value
-         if (pchToken == NULL) { // value missing?
+         pchToken = strtok(nullptr, chDelimiters); // sector size as N value
+         if (pchToken == nullptr) { // value missing?
             continue;
          }
          dwVal = strtoul(pchToken, &pchTail, 0);
@@ -4159,8 +4159,8 @@ void loadConfiguration (void)
             continue;
          }
          disk_format[iFmt].sector_size = dwVal;
-         pchToken = strtok(NULL, chDelimiters); // gap#3 length
-         if (pchToken == NULL) { // value missing?
+         pchToken = strtok(nullptr, chDelimiters); // gap#3 length
+         if (pchToken == nullptr) { // value missing?
             continue;
          }
          dwVal = strtoul(pchToken, &pchTail, 0);
@@ -4168,16 +4168,16 @@ void loadConfiguration (void)
             continue;
          }
          disk_format[iFmt].gap3_length = dwVal;
-         pchToken = strtok(NULL, chDelimiters); // filler byte
-         if (pchToken == NULL) { // value missing?
+         pchToken = strtok(nullptr, chDelimiters); // filler byte
+         if (pchToken == nullptr) { // value missing?
             continue;
          }
          dwVal = strtoul(pchToken, &pchTail, 0);
          disk_format[iFmt].filler_byte = (byte)dwVal;
          for (int iSide = 0; iSide < (int)disk_format[iFmt].sides; iSide++) {
             for (int iSector = 0; iSector < (int)disk_format[iFmt].sectors; iSector++) {
-               pchToken = strtok(NULL, chDelimiters); // sector ID
-               if (pchToken == NULL) { // value missing?
+               pchToken = strtok(nullptr, chDelimiters); // sector ID
+               if (pchToken == nullptr) { // value missing?
                   dwVal = iSector+1;
                } else {
                   dwVal = strtoul(pchToken, &pchTail, 0);
@@ -4212,7 +4212,7 @@ void loadConfiguration (void)
    if (CPC.rom_path[0] == '\0') { // if the path is empty, set it to the default
       strcpy(CPC.rom_path, chPath);
    }
-   if ((pfileObject = fopen(chFileName, "rt")) == NULL) {
+   if ((pfileObject = fopen(chFileName, "rt")) == nullptr) {
       strcpy(CPC.rom_file[7], "amsdos.rom"); // insert AMSDOS in slot 7 if the config file does not exist yet
    } else {
       fclose(pfileObject);
@@ -4295,7 +4295,7 @@ int main (int argc, char **argv)
    }
    atexit(doCleanUp); // install the clean up routine
 
-   if(getcwd(chAppPath, sizeof(chAppPath)-1) == NULL) { // get the location of the executable
+   if(getcwd(chAppPath, sizeof(chAppPath)-1) == nullptr) { // get the location of the executable
       fprintf(stderr, "getcwd failed: %s\n", strerror(errno));
       exit(-1);
    }
@@ -4672,14 +4672,14 @@ int main (int argc, char **argv)
                             audio_pause();                                
                             // Activate gui
                             // copy contents of vid to back_surface ("take a backup")
-                            SDL_BlitSurface(back_surface, NULL, guiBackSurface, NULL);
+                            SDL_BlitSurface(back_surface, nullptr, guiBackSurface, nullptr);
                             SDL_ShowCursor(SDL_ENABLE);
                             capriceGuiView.SetSurface(back_surface); // surface pointer may have changed, 
                                                             // e.g. when toggling fullscreen
                             capriceGui.SetMouseVisibility(true);
                             capriceGui.Exec();
                             // Clear SDL surface:
-                            SDL_FillRect(back_surface, NULL, SDL_MapRGB(back_surface->format, 0, 0, 0));
+                            SDL_FillRect(back_surface, nullptr, SDL_MapRGB(back_surface->format, 0, 0, 0));
                             SDL_ShowCursor(SDL_DISABLE);
                             audio_resume();
                             break;

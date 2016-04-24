@@ -60,7 +60,7 @@ static bool have_gl_extension (const char *nom_ext)
    const char *ext;
    ext = (const char *) (eglGetString (GL_EXTENSIONS));
    const char *f;
-   if (ext == NULL)
+   if (ext == nullptr)
       return false;
    f = ext + strlen (ext);
    while (ext < f)
@@ -133,7 +133,7 @@ SDL_Surface* half_init(video_plugin* t,int w,int h, int bpp,bool fs)
 	}
 	vid=SDL_SetVideoMode(w,h,bpp,SDL_ANYFORMAT | SDL_HWSURFACE | SDL_HWPALETTE | (fs?SDL_FULLSCREEN:0));
 	if (!vid)
-		return NULL;
+		return nullptr;
 	if (fs)
 	{
 		t->x_scale=1.0;
@@ -148,7 +148,7 @@ SDL_Surface* half_init(video_plugin* t,int w,int h, int bpp,bool fs)
 		t->x_offset=0;
 		t->y_offset=0;
 	}
-	SDL_FillRect(vid,NULL,SDL_MapRGB(vid->format,0,0,0));
+	SDL_FillRect(vid,nullptr,SDL_MapRGB(vid->format,0,0,0));
 	pub=SDL_CreateRGBSurface(SDL_SWSURFACE,CPC_VISIBLE_SCR_WIDTH,CPC_VISIBLE_SCR_HEIGHT,bpp,0,0,0,0);
 	return pub;
 }
@@ -175,7 +175,7 @@ void half_flip()
 	dr.y=(vid->h-CPC_VISIBLE_SCR_HEIGHT)/2;
 	dr.w=CPC_VISIBLE_SCR_WIDTH;
 	dr.h=CPC_VISIBLE_SCR_HEIGHT;
-	SDL_BlitSurface(pub,NULL,vid,&dr);
+	SDL_BlitSurface(pub,nullptr,vid,&dr);
 	SDL_UpdateRects(vid,1,&dr);
 }
 
@@ -198,12 +198,12 @@ SDL_Surface* halfhw_init(video_plugin* t,int w,int h, int bpp, bool fs)
 	}
 	vid=SDL_SetVideoMode(CPC_VISIBLE_SCR_WIDTH,CPC_VISIBLE_SCR_HEIGHT,bpp,SDL_ANYFORMAT | SDL_DOUBLEBUF | SDL_HWSURFACE | SDL_HWPALETTE | (fs?SDL_FULLSCREEN:0));
 	if (!vid)
-		return NULL;
+		return nullptr;
   t->x_scale=1.0;
   t->y_scale=1.0;
   t->x_offset=0;
   t->y_offset=0;
-	SDL_FillRect(vid,NULL,SDL_MapRGB(vid->format,0,0,0));
+	SDL_FillRect(vid,nullptr,SDL_MapRGB(vid->format,0,0,0));
 	return vid;
 }
 
@@ -246,7 +246,7 @@ SDL_Surface* double_init(video_plugin* t,int w,int h, int bpp, bool fs)
 	}
 	vid=SDL_SetVideoMode(w,h,bpp,SDL_ANYFORMAT | SDL_HWSURFACE | SDL_HWPALETTE | (fs?SDL_FULLSCREEN:0));
 	if (!vid)
-		return NULL;
+		return nullptr;
 	if (fs)
 	{
 		t->x_scale=1.0;
@@ -261,7 +261,7 @@ SDL_Surface* double_init(video_plugin* t,int w,int h, int bpp, bool fs)
 		t->x_offset=0;
 		t->y_offset=0;
 	}
-	SDL_FillRect(vid,NULL,SDL_MapRGB(vid->format,0,0,0));
+	SDL_FillRect(vid,nullptr,SDL_MapRGB(vid->format,0,0,0));
 	pub=SDL_CreateRGBSurface(SDL_SWSURFACE,CPC_VISIBLE_SCR_WIDTH*2,CPC_VISIBLE_SCR_HEIGHT*2,bpp,0,0,0,0);
 	return pub;
 }
@@ -288,7 +288,7 @@ void double_flip()
 	dr.y=(vid->h-CPC_VISIBLE_SCR_HEIGHT*2)/2;
 	dr.w=CPC_VISIBLE_SCR_WIDTH*2;
 	dr.h=CPC_VISIBLE_SCR_HEIGHT*2;
-	SDL_BlitSurface(pub,NULL,vid,&dr);
+	SDL_BlitSurface(pub,nullptr,vid,&dr);
 	SDL_UpdateRects(vid,1,&dr);
 }
 
@@ -311,12 +311,12 @@ SDL_Surface* doublehw_init(video_plugin* t,int w,int h, int bpp, bool fs)
 	}
 	vid=SDL_SetVideoMode(CPC_VISIBLE_SCR_WIDTH*2,CPC_VISIBLE_SCR_HEIGHT*2,bpp,SDL_ANYFORMAT | SDL_DOUBLEBUF | SDL_HWSURFACE | SDL_HWPALETTE | (fs?SDL_FULLSCREEN:0));
 	if (!vid)
-		return NULL;
+		return nullptr;
   t->x_scale=1.0;
   t->y_scale=1.0;
   t->x_offset=0;
   t->y_offset=0;
-	SDL_FillRect(vid,NULL,SDL_MapRGB(vid->format,0,0,0));
+	SDL_FillRect(vid,nullptr,SDL_MapRGB(vid->format,0,0,0));
 	return vid;
 }
 
@@ -370,7 +370,7 @@ SDL_Surface* glscale_init(video_plugin* t,int w,int h, int bpp, bool fs)
 	if (SDL_GL_LoadLibrary(gl_library)<0)
 	{
 		fprintf(stderr,"Unable to dynamically open GL lib : %s\n",SDL_GetError());
-		return NULL;
+		return nullptr;
 	}
 
 	if (!fs)
@@ -382,12 +382,12 @@ SDL_Surface* glscale_init(video_plugin* t,int w,int h, int bpp, bool fs)
 	if (!vid)
 	{
 		fprintf(stderr, "Could not set requested video mode: %s\n", SDL_GetError());
-		return NULL;
+		return nullptr;
 	}
 	if (init_glfuncs()!=0)
 	{
 		fprintf(stderr, "Cannot init OpenGL functions: %s\n", SDL_GetError());
-		return NULL;
+		return nullptr;
 	}
 
 	t->x_scale=CPC_VISIBLE_SCR_WIDTH/(float)w;
@@ -400,14 +400,14 @@ SDL_Surface* glscale_init(video_plugin* t,int w,int h, int bpp, bool fs)
 	version = (char *) eglGetString(GL_VERSION); 
 	if (sscanf(version, "%d.%d", &major, &minor) != 2) {
 		fprintf(stderr, "Unable to get OpenGL version\n");
-		return NULL;
+		return nullptr;
 	}
 
 	GLint max_texsize;
 	eglGetIntegerv(GL_MAX_TEXTURE_SIZE,&max_texsize);
 	if (max_texsize<512) {
 		fprintf(stderr, "Your OpenGL implementation doesn't support 512x512 textures\n");
-		return NULL;
+		return nullptr;
 	}
 
 	// We have to react differently to the bpp parameter than with software rendering
@@ -433,7 +433,7 @@ SDL_Surface* glscale_init(video_plugin* t,int w,int h, int bpp, bool fs)
 	}
 	if (surface_bpp==0) {
 		fprintf(stderr, "Your OpenGL implementation doesn't support %dbpp textures\n",surface_bpp);
-		return NULL;
+		return nullptr;
 	}
 
 	eglDisable(GL_FOG);
@@ -458,17 +458,17 @@ SDL_Surface* glscale_init(video_plugin* t,int w,int h, int bpp, bool fs)
 		case 24:
 			eglTexImage2D(GL_TEXTURE_2D, 0,GL_RGB,tex_x,tex_y, 0,
 					GL_RGB,
-					GL_UNSIGNED_BYTE, NULL);
+					GL_UNSIGNED_BYTE, nullptr);
 			break;
 		case 16:
 			eglTexImage2D(GL_TEXTURE_2D, 0,GL_RGB5,tex_x,tex_y, 0,
 					GL_RGB,
-					GL_UNSIGNED_BYTE, NULL);
+					GL_UNSIGNED_BYTE, nullptr);
 			break;
 		case 8:
 			eglTexImage2D(GL_TEXTURE_2D, 0,GL_COLOR_INDEX8_EXT,tex_x,tex_y, 0,
 					GL_COLOR_INDEX,
-					GL_UNSIGNED_BYTE, NULL);
+					GL_UNSIGNED_BYTE, nullptr);
 			break;
 	}
 
@@ -892,7 +892,7 @@ void filter_supereagle(Uint8 *srcPtr, Uint32 srcPitch, /* Uint8 *deltaPtr,  */
 SDL_Surface* seagle_init(video_plugin* t,int w,int h, int bpp, bool fs)
 {
 	if (bpp!=16)
-		return NULL;
+		return nullptr;
 	if (!fs)
 	{
 		w=CPC_VISIBLE_SCR_WIDTH*2;
@@ -900,9 +900,9 @@ SDL_Surface* seagle_init(video_plugin* t,int w,int h, int bpp, bool fs)
 	}
 	vid=SDL_SetVideoMode(w,h,bpp,SDL_ANYFORMAT | SDL_HWSURFACE | SDL_HWPALETTE | (fs?SDL_FULLSCREEN:0));
 	if (!vid)
-		return NULL;
+		return nullptr;
 	if (vid->format->BitsPerPixel!=16)
-		return NULL;
+		return nullptr;
 	if (fs)
 	{
 		t->x_scale=0.5;
@@ -917,7 +917,7 @@ SDL_Surface* seagle_init(video_plugin* t,int w,int h, int bpp, bool fs)
 		t->x_offset=0;
 		t->y_offset=0;
 	}
-	SDL_FillRect(vid,NULL,SDL_MapRGB(vid->format,0,0,0));
+	SDL_FillRect(vid,nullptr,SDL_MapRGB(vid->format,0,0,0));
 	pub=SDL_CreateRGBSurface(SDL_SWSURFACE,CPC_VISIBLE_SCR_WIDTH,CPC_VISIBLE_SCR_HEIGHT,bpp,0,0,0,0);
 	return pub;
 }
@@ -993,7 +993,7 @@ void filter_scale2x(Uint8 *srcPtr, Uint32 srcPitch,
 SDL_Surface* scale2x_init(video_plugin* t,int w,int h, int bpp, bool fs)
 {
 	if (bpp!=16)
-		return NULL;
+		return nullptr;
 	if (!fs)
 	{
 		w=CPC_VISIBLE_SCR_WIDTH*2;
@@ -1001,9 +1001,9 @@ SDL_Surface* scale2x_init(video_plugin* t,int w,int h, int bpp, bool fs)
 	}
 	vid=SDL_SetVideoMode(w,h,bpp,SDL_ANYFORMAT | SDL_HWSURFACE | SDL_HWPALETTE | (fs?SDL_FULLSCREEN:0));
 	if (!vid)
-		return NULL;
+		return nullptr;
 	if (vid->format->BitsPerPixel!=16)
-		return NULL;
+		return nullptr;
 	if (fs)
 	{
 		t->x_scale=0.5;
@@ -1018,7 +1018,7 @@ SDL_Surface* scale2x_init(video_plugin* t,int w,int h, int bpp, bool fs)
 		t->x_offset=0;
 		t->y_offset=0;
 	}
-	SDL_FillRect(vid,NULL,SDL_MapRGB(vid->format,0,0,0));
+	SDL_FillRect(vid,nullptr,SDL_MapRGB(vid->format,0,0,0));
 	pub=SDL_CreateRGBSurface(SDL_SWSURFACE,CPC_VISIBLE_SCR_WIDTH,CPC_VISIBLE_SCR_HEIGHT,bpp,0,0,0,0);
 	return pub;
 }
@@ -1266,7 +1266,7 @@ void filter_ascale2x (Uint8 *srcPtr, Uint32 srcPitch,
 SDL_Surface* ascale2x_init(video_plugin* t,int w,int h, int bpp, bool fs)
 {
 	if (bpp!=16)
-		return NULL;
+		return nullptr;
 	if (!fs)
 	{
 		w=CPC_VISIBLE_SCR_WIDTH*2;
@@ -1274,9 +1274,9 @@ SDL_Surface* ascale2x_init(video_plugin* t,int w,int h, int bpp, bool fs)
 	}
 	vid=SDL_SetVideoMode(w,h,bpp,SDL_ANYFORMAT | SDL_HWSURFACE | SDL_HWPALETTE | (fs?SDL_FULLSCREEN:0));
 	if (!vid)
-		return NULL;
+		return nullptr;
 	if (vid->format->BitsPerPixel!=16)
-		return NULL;
+		return nullptr;
 	if (fs)
 	{
 		t->x_scale=0.5;
@@ -1291,7 +1291,7 @@ SDL_Surface* ascale2x_init(video_plugin* t,int w,int h, int bpp, bool fs)
 		t->x_offset=0;
 		t->y_offset=0;
 	}
-	SDL_FillRect(vid,NULL,SDL_MapRGB(vid->format,0,0,0));
+	SDL_FillRect(vid,nullptr,SDL_MapRGB(vid->format,0,0,0));
 	pub=SDL_CreateRGBSurface(SDL_SWSURFACE,CPC_VISIBLE_SCR_WIDTH,CPC_VISIBLE_SCR_HEIGHT,bpp,0,0,0,0);
 	return pub;
 }
@@ -1368,7 +1368,7 @@ void filter_tv2x(Uint8 *srcPtr, Uint32 srcPitch,
 SDL_Surface* tv2x_init(video_plugin* t,int w,int h, int bpp, bool fs)
 {
 	if (bpp!=16)
-		return NULL;
+		return nullptr;
 	if (!fs)
 	{
 		w=CPC_VISIBLE_SCR_WIDTH*2;
@@ -1376,9 +1376,9 @@ SDL_Surface* tv2x_init(video_plugin* t,int w,int h, int bpp, bool fs)
 	}
 	vid=SDL_SetVideoMode(w,h,bpp,SDL_ANYFORMAT | SDL_HWSURFACE | SDL_HWPALETTE | (fs?SDL_FULLSCREEN:0));
 	if (!vid)
-		return NULL;
+		return nullptr;
 	if (vid->format->BitsPerPixel!=16)
-		return NULL;
+		return nullptr;
 	if (fs)
 	{
 		t->x_scale=0.5;
@@ -1393,7 +1393,7 @@ SDL_Surface* tv2x_init(video_plugin* t,int w,int h, int bpp, bool fs)
 		t->x_offset=0;
 		t->y_offset=0;
 	}
-	SDL_FillRect(vid,NULL,SDL_MapRGB(vid->format,0,0,0));
+	SDL_FillRect(vid,nullptr,SDL_MapRGB(vid->format,0,0,0));
 	pub=SDL_CreateRGBSurface(SDL_SWSURFACE,CPC_VISIBLE_SCR_WIDTH,CPC_VISIBLE_SCR_HEIGHT,bpp,0,0,0,0);
 	return pub;
 }
@@ -1466,7 +1466,7 @@ void filter_bilinear(Uint8 *srcPtr, Uint32 srcPitch,
 SDL_Surface* swbilin_init(video_plugin* t,int w,int h, int bpp, bool fs)
 {
 	if (bpp!=16)
-		return NULL;
+		return nullptr;
 	if (!fs)
 	{
 		w=CPC_VISIBLE_SCR_WIDTH*2;
@@ -1474,9 +1474,9 @@ SDL_Surface* swbilin_init(video_plugin* t,int w,int h, int bpp, bool fs)
 	}
 	vid=SDL_SetVideoMode(w,h,bpp,SDL_ANYFORMAT | SDL_HWSURFACE | SDL_HWPALETTE | (fs?SDL_FULLSCREEN:0));
 	if (!vid)
-		return NULL;
+		return nullptr;
 	if (vid->format->BitsPerPixel!=16)
-		return NULL;
+		return nullptr;
 	if (fs)
 	{
 		t->x_scale=0.5;
@@ -1491,7 +1491,7 @@ SDL_Surface* swbilin_init(video_plugin* t,int w,int h, int bpp, bool fs)
 		t->x_offset=0;
 		t->y_offset=0;
 	}
-	SDL_FillRect(vid,NULL,SDL_MapRGB(vid->format,0,0,0));
+	SDL_FillRect(vid,nullptr,SDL_MapRGB(vid->format,0,0,0));
 	pub=SDL_CreateRGBSurface(SDL_SWSURFACE,CPC_VISIBLE_SCR_WIDTH,CPC_VISIBLE_SCR_HEIGHT,bpp,0,0,0,0);
 	return pub;
 }
@@ -1611,7 +1611,7 @@ void filter_bicubic(Uint8 *srcPtr, Uint32 srcPitch,
 SDL_Surface* swbicub_init(video_plugin* t,int w,int h, int bpp, bool fs)
 {
 	if (bpp!=16)
-		return NULL;
+		return nullptr;
 	if (!fs)
 	{
 		w=CPC_VISIBLE_SCR_WIDTH*2;
@@ -1619,9 +1619,9 @@ SDL_Surface* swbicub_init(video_plugin* t,int w,int h, int bpp, bool fs)
 	}
 	vid=SDL_SetVideoMode(w,h,bpp,SDL_ANYFORMAT | SDL_HWSURFACE | SDL_HWPALETTE | (fs?SDL_FULLSCREEN:0));
 	if (!vid)
-		return NULL;
+		return nullptr;
 	if (vid->format->BitsPerPixel!=16)
-		return NULL;
+		return nullptr;
 	if (fs)
 	{
 		t->x_scale=0.5;
@@ -1636,7 +1636,7 @@ SDL_Surface* swbicub_init(video_plugin* t,int w,int h, int bpp, bool fs)
 		t->x_offset=0;
 		t->y_offset=0;
 	}
-	SDL_FillRect(vid,NULL,SDL_MapRGB(vid->format,0,0,0));
+	SDL_FillRect(vid,nullptr,SDL_MapRGB(vid->format,0,0,0));
 	pub=SDL_CreateRGBSurface(SDL_SWSURFACE,CPC_VISIBLE_SCR_WIDTH,CPC_VISIBLE_SCR_HEIGHT,bpp,0,0,0,0);
 	return pub;
 }
@@ -1718,7 +1718,7 @@ void filter_dotmatrix(Uint8 *srcPtr, Uint32 srcPitch,
 SDL_Surface* dotmat_init(video_plugin* t,int w,int h, int bpp, bool fs)
 {
 	if (bpp!=16)
-		return NULL;
+		return nullptr;
 	if (!fs)
 	{
 		w=CPC_VISIBLE_SCR_WIDTH*2;
@@ -1726,9 +1726,9 @@ SDL_Surface* dotmat_init(video_plugin* t,int w,int h, int bpp, bool fs)
 	}
 	vid=SDL_SetVideoMode(w,h,bpp,SDL_ANYFORMAT | SDL_HWSURFACE | SDL_HWPALETTE | (fs?SDL_FULLSCREEN:0));
 	if (!vid)
-		return NULL;
+		return nullptr;
 	if (vid->format->BitsPerPixel!=16)
-		return NULL;
+		return nullptr;
 	if (fs)
 	{
 		t->x_scale=0.5;
@@ -1743,7 +1743,7 @@ SDL_Surface* dotmat_init(video_plugin* t,int w,int h, int bpp, bool fs)
 		t->x_offset=0;
 		t->y_offset=0;
 	}
-	SDL_FillRect(vid,NULL,SDL_MapRGB(vid->format,0,0,0));
+	SDL_FillRect(vid,nullptr,SDL_MapRGB(vid->format,0,0,0));
 	pub=SDL_CreateRGBSurface(SDL_SWSURFACE,CPC_VISIBLE_SCR_WIDTH,CPC_VISIBLE_SCR_HEIGHT,bpp,0,0,0,0);
 	return pub;
 }
@@ -1806,6 +1806,6 @@ video_plugin video_plugin_list[]=
 #ifdef HAVE_GL
 {"OpenGL scaling",			glscale_init,	glscale_setpal,	glscale_lock,		glscale_unlock,		glscale_flip,	glscale_close,		ALL,		1			},
 #endif
-{NULL,					NULL,		NULL,		NULL,			NULL,			NULL,		NULL,			0,		0			}
+{nullptr,					nullptr,		nullptr,		nullptr,			nullptr,			nullptr,		nullptr,			0,		0			}
 };
 

@@ -173,7 +173,7 @@ t_sector *find_sector(byte *requested_CHRN)
    dword idx;
    t_sector *sector;
 
-   sector = NULL; // return value indicates 'sector not found' by default
+   sector = nullptr; // return value indicates 'sector not found' by default
    loop_count = 0; // detection of index hole counter
    idx = active_drive->current_sector; // get the active sector index
    do {

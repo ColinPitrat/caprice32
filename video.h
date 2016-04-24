@@ -25,7 +25,7 @@ typedef struct video_plugin
 {
 	/* the user-displayed name of this plugin */
 	const char* name;
-	/* initializes the video plugin ; returns the surface that you must draw into, NULL in the (unlikely ;) event of a failure */
+	/* initializes the video plugin ; returns the surface that you must draw into, nullptr in the (unlikely ;) event of a failure */
 	SDL_Surface* (*init)(video_plugin* t,int w,int h,int bpp,bool fs);
 
 	void (*set_palette)(SDL_Color* c);

@@ -8,7 +8,7 @@ VPATH = gui/src:gui/includes
 
 CC	= g++
 
-GFLAGS	= -mwindows -Wall -Wstrict-prototypes
+GFLAGS	= -mwindows -std=c++11 -Wall -Wstrict-prototypes
 
 ifdef DEBUG
 DFLAGS	= $(GFLAGS) -gstabs+

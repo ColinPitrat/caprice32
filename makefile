@@ -8,7 +8,7 @@ VPATH = gui/src:gui/includes
 
 CC	= g++
 
-GFLAGS	= -Wall `sdl-config --cflags`
+GFLAGS	= -std=c++11 -Wall `sdl-config --cflags`
 
 ifdef DEBUG
 DFLAGS	= $(GFLAGS) -gstabs+
