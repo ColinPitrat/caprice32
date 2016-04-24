@@ -108,8 +108,8 @@ CApplication::CApplication(int argc, char** argv, std::string sFontFileName, boo
 	m_DefaultSelectionColor(DEFAULT_BACKGROUND_COLOR),
 	m_bHandleExceptionsInternally(bHandleExceptionsInternally),
 	m_bResourcePoolEnabled(true),
-	m_pCurrentCursorResourceHandle(0),
-	m_pSystemDefaultCursor(0)
+	m_pCurrentCursorResourceHandle(nullptr),
+	m_pSystemDefaultCursor(nullptr)
 {
 	if (m_pInstance)
 	{
@@ -391,20 +391,14 @@ void CApplication::SetMouseCursor(CCursorResourceHandle* pCursorResourceHandle)
 	// The auto pointer is used to make sure that the cursor handle is valid until we're done using the cursor
 	if (pCursorResourceHandle && pCursorResourceHandle != m_pCurrentCursorResourceHandle.get())
 	{
-		std::auto_ptr<CCursorResourceHandle> pNewCursorResourceHandle(new CCursorResourceHandle(*pCursorResourceHandle));
-		m_pCurrentCursorResourceHandle = pNewCursorResourceHandle;
+		m_pCurrentCursorResourceHandle.reset(new CCursorResourceHandle(*pCursorResourceHandle));
 		SDL_SetCursor(m_pCurrentCursorResourceHandle->Cursor());
 	}
 	else
 	{
 		if( m_pCurrentCursorResourceHandle.get() )
 		{
-			#ifdef MSVC6  // VC6's auto pointers are really broken
-				delete m_pCurrentCursorResourceHandle.release();
-				m_pCurrentCursorResourceHandle = std::auto_ptr<CCursorResourceHandle>(0);
-			#else
-				m_pCurrentCursorResourceHandle.reset(0);
-			#endif // MSVC6
+			m_pCurrentCursorResourceHandle.reset(nullptr);
 			SDL_SetCursor(m_pSystemDefaultCursor);
 		}
 	}
