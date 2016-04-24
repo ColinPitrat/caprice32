@@ -23,21 +23,21 @@ CapriceMemoryTool::CapriceMemoryTool(const CRect& WindowRect, CView* pParent, CF
     CMessageServer::Instance().RegisterMessageClient(this, CMessage::CTRL_VALUECHANGING);
 
     m_pPokeAdressLabel = new CLabel(        CPoint(15, 18),             this, "Adress: ");
-    m_pPokeAdress      = new CEditBox(CRect(CPoint(55, 13),  30, 20),   this, NULL);
+    m_pPokeAdress      = new CEditBox(CRect(CPoint(55, 13),  30, 20),   this, nullptr);
     m_pPokeValueLabel  = new CLabel(        CPoint(95, 18),             this, "Value: ");
-    m_pPokeValue       = new CEditBox(CRect(CPoint(130, 13), 30, 20),   this, NULL);
+    m_pPokeValue       = new CEditBox(CRect(CPoint(130, 13), 30, 20),   this, nullptr);
     m_pButtonPoke      = new CButton( CRect(CPoint(175, 13), 30, 20),   this, "Poke");
 
     m_pAdressLabel     = new CLabel(        CPoint(15, 50),             this, "Adress: ");
-    m_pAdressValue     = new CEditBox(CRect(CPoint(55, 45), 30, 20),    this, NULL);
+    m_pAdressValue     = new CEditBox(CRect(CPoint(55, 45), 30, 20),    this, nullptr);
     m_pButtonDisplay   = new CButton( CRect(CPoint(95, 45), 40, 20),    this, "Display");
     m_pFilterLabel     = new CLabel(        CPoint(15, 80),             this, "Byte: ");
-    m_pFilterValue     = new CEditBox(CRect(CPoint(55, 75), 30, 20),    this, NULL);
+    m_pFilterValue     = new CEditBox(CRect(CPoint(55, 75), 30, 20),    this, nullptr);
     m_pButtonFilter    = new CButton( CRect(CPoint(95, 75), 40, 20),    this, "Filter");
     m_pButtonCopy      = new CButton( CRect(CPoint(240, 75), 75, 20),   this, "Dump to stdout");
 
     m_pBytesPerLineLbl = new CLabel(       CPoint(240, 35),             this, "Bytes per line:");
-    m_pBytesPerLine  = new CDropDown( CRect(CPoint(240, 45), 50, 20),   this, NULL, 14);
+    m_pBytesPerLine  = new CDropDown( CRect(CPoint(240, 45), 50, 20),   this, false, 14);
     m_pBytesPerLine->AddItem(SListItem("1"));
     m_pBytesPerLine->AddItem(SListItem("4"));
     m_pBytesPerLine->AddItem(SListItem("8"));
@@ -83,8 +83,8 @@ bool CapriceMemoryTool::HandleMessage(CMessage* pMessage)
             if (pMessage->Source() == m_pButtonPoke) {
               std::string adress = m_pPokeAdress->GetWindowText();
               std::string value  = m_pPokeValue->GetWindowText();
-              unsigned int pokeAdress = strtol(adress.c_str(), NULL, 16);
-              int pokeValue           = strtol(value.c_str(),  NULL, 16);
+              unsigned int pokeAdress = strtol(adress.c_str(), nullptr, 16);
+              int pokeValue           = strtol(value.c_str(),  nullptr, 16);
               if(!adress.empty() && !value.empty() && pokeAdress < 65536 && pokeValue >= -128 && pokeValue <= 255) {
                 std::cout << "Poking " << pokeAdress << " with " << pokeValue << std::endl;
                 pbRAM[pokeAdress] = pokeValue;
@@ -100,7 +100,7 @@ bool CapriceMemoryTool::HandleMessage(CMessage* pMessage)
               if(display.empty()) {
                 m_displayValue = -1;
               } else {
-                m_displayValue = strtol(display.c_str(), NULL, 16);
+                m_displayValue = strtol(display.c_str(), nullptr, 16);
               }
               m_filterValue = -1;
               std::cout << "Displaying adress " << m_displayValue << " in memory." << std::endl;
@@ -114,7 +114,7 @@ bool CapriceMemoryTool::HandleMessage(CMessage* pMessage)
               if(filter.empty()) {
                 m_filterValue = -1;
               } else {
-                m_filterValue = strtol(filter.c_str(), NULL, 16);
+                m_filterValue = strtol(filter.c_str(), nullptr, 16);
               }
               std::cout << "Filtering value " << m_filterValue << " in memory." << std::endl;
               UpdateTextMemory();

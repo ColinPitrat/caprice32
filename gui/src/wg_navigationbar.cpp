@@ -80,7 +80,7 @@ unsigned int CNavigationBar::AddItem(SNavBarItem NavBarItem) {
         // Set transparency color to COLOR_WHITE:
         SDL_SetColorKey(m_Bitmaps.at(m_Bitmaps.size() - 1)->Bitmap(), SDL_SRCCOLORKEY, COLOR_WHITE.SDLColor(m_pSDLSurface->format));
     } else {
-        m_Bitmaps.push_back(NULL);
+        m_Bitmaps.push_back(nullptr);
     }
 	Draw();
 	return m_Items.size();
@@ -150,7 +150,7 @@ void CNavigationBar::Draw(void) const {
                 // etc. are not fully visible.
 				m_RenderedStrings.at(i).Draw(m_pSDLSurface, ItemRect, ItemRect.BottomLeft() - CPoint(0, 1) + CPoint(ItemRect.Width()/2, 0), m_Items[i].ItemColor);
                // Draw the picture (if available):
-               if (m_Bitmaps.at(i) != NULL) {
+               if (m_Bitmaps.at(i) != nullptr) {
                    SDL_Rect DestRect = ItemRect.Move(9, 1).SDLRect();
                    SDL_BlitSurface(m_Bitmaps.at(i)->Bitmap(), &PictureSourceRect, m_pSDLSurface, &DestRect);
                }

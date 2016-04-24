@@ -98,7 +98,7 @@ CView::CView(SDL_Surface* surface, SDL_Surface* backSurface, const CRect& Window
     m_pBackSurface   = backSurface;
 
 	// judb should not happen:-)
-	if (m_pScreenSurface == NULL)
+	if (m_pScreenSurface == nullptr)
 		throw( Wg_Ex_SDL(std::string("Surface not created? : ") + SDL_GetError()));
 
 	CApplication::Instance()->GetApplicationLog().AddLogEntry("Created new CView ", APP_LOG_INFO);
@@ -159,7 +159,7 @@ void CView::SetWindowRect(const CRect& WindowRect)
 	}
 
 	m_pScreenSurface = SDL_SetVideoMode(m_WindowRect.Width(), m_WindowRect.Height(), CApplication::Instance()->GetBitsPerPixel(), iFlags);
-	if (m_pScreenSurface == NULL)
+	if (m_pScreenSurface == nullptr)
 		throw( Wg_Ex_SDL(std::string("Could not set video mode: ") + SDL_GetError()) );
 }
 
@@ -236,7 +236,7 @@ m_pScreenSurface->h, CApplication::Instance()->GetBitsPerPixel(), 0x000000FF, 0x
 				m_ClientRect.ClipTo(m_WindowRect.SizeRect());
 
 				m_pScreenSurface = SDL_SetVideoMode(m_WindowRect.Width(), m_WindowRect.Height(), DEFAULT_BPP, iFlags);
-				if (m_pScreenSurface == NULL)
+				if (m_pScreenSurface == nullptr)
 					throw( Wg_Ex_SDL(std::string("Could not set video mode : ") + SDL_GetError()) );
 
 				bHandled = true;

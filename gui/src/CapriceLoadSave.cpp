@@ -49,17 +49,17 @@ CapriceLoadSave::CapriceLoadSave(const CRect& WindowRect, CWindow* pParent, CFon
 
   // Directory
   m_pDirectoryLabel = new CLabel(          CPoint(15, 85),             this, "Directory: ");
-  m_pDirectoryValue = new CEditBox( CRect( CPoint(80, 80), 150, 20),    this, NULL);
+  m_pDirectoryValue = new CEditBox( CRect( CPoint(80, 80), 150, 20),    this, nullptr);
   m_pDirectoryValue->SetWindowText(simplifyPath(CPC.snap_path));
   m_pDirectoryValue->SetReadOnly(true);
 
   // File list
-  m_pFilesList = new CListBox(CRect(CPoint(80, 115), 150, 80), this, true, 12, NULL);
+  m_pFilesList = new CListBox(CRect(CPoint(80, 115), 150, 80), this, true, 12, nullptr);
   UpdateFilesList();
 
   // File name
   m_pFileNameLabel  = new CLabel(          CPoint(15, 215),              this, "File: ");
-  m_pFileNameValue  = new CEditBox( CRect( CPoint(80, 210), 150, 20),    this, NULL);
+  m_pFileNameValue  = new CEditBox( CRect( CPoint(80, 210), 150, 20),    this, nullptr);
   m_pFileNameValue->SetWindowText("");
   m_pFileNameValue->SetReadOnly(true);
 
@@ -227,7 +227,7 @@ bool CapriceLoadSave::HandleMessage(CMessage* pMessage)
 std::string CapriceLoadSave::simplifyPath(std::string path)
 {
   char simplepath[PATH_MAX+1];
-  if(realpath(path.c_str(), simplepath) == NULL) {
+  if(realpath(path.c_str(), simplepath) == nullptr) {
     std::cerr << "Couldn't simplify path '" << path << "': " << strerror(errno) << std::endl;
     return path;
   } 
@@ -242,12 +242,12 @@ void CapriceLoadSave::UpdateFilesList()
   struct dirent *ep;
 
   dp = opendir(m_pDirectoryValue->GetWindowText().c_str());
-  if(dp == NULL) {
+  if(dp == nullptr) {
     std::cerr << "Could not open " << m_pDirectoryValue->GetWindowText() << ": " << strerror(errno) << std::endl;
   } else {
     std::vector<std::string> directories;
     std::vector<std::string> files;
-    while((ep = readdir(dp)) != NULL) {
+    while((ep = readdir(dp)) != nullptr) {
       std::string entry_name = ep->d_name;
       // ep->d_type is always set to DT_UNKNOWN on my computer => use a call to stat to determine if it's a directory
       struct stat entry_infos;
