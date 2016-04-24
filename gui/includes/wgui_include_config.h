@@ -37,13 +37,6 @@
 		#pragma warning (disable : 4702)
 	#endif  // DEBUG
 
-	#ifdef MSVC6
-		// Fixes for building in MS Visual C++ 6
-		#define min _MIN
-		#define max _MAX
-		#pragma warning (disable : 4786)
-	#endif  // MSVC6
-
 	#include <stdlib.h>  // needed for the getenv() function
 	// OS specific constants
 	static const std::string GLOBAL_CONFIG_PATH = std::string(getenv("windir")).substr(0, 1) + ":\\program files\\common files\\wgui\\";

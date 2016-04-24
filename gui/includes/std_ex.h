@@ -98,14 +98,6 @@ std::list<std::string> DetokenizeString(const std::string& sString, const std::s
 template<typename TDest, typename TSrc>
 TDest safe_static_cast(const TSrc& Value)
 {
-#ifndef MSVC6
-	bool bSpecialized = std::numeric_limits<TDest>::is_specialized && std::numeric_limits<TDest>::is_bounded;
-	bool bNotSigned = ! std::numeric_limits<TDest>::is_signed;
-	if (bSpecialized && ((bNotSigned && Value < std::numeric_limits<TDest>::min()) || Value > std::numeric_limits<TDest>::max()))
-	{
-		throw std::out_of_range("safe_static_cast : Out of range!");
-	}
-#endif
 	return static_cast<TDest>(Value);
 }
 #ifdef WIN32
