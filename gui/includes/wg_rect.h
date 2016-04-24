@@ -160,9 +160,17 @@ public:
 	//! \param p A point to offset the CRect by
 	CRect operator+(const CPoint& p) const;
 
+	//! Addition operator to add a CPoint, will offset the CRect
+	//! \param p A point to offset the CRect by
+	CRect& operator+=(const CPoint& p);
+
 	//! Subtraction operator to subtract a CPoint, will offset the CRect
 	//! \param p A point to offset the CRect by
 	CRect operator-(const CPoint& p) const;
+
+	//! Subtraction operator to subtract a CPoint, will offset the CRect
+	//! \param p A point to offset the CRect by
+	CRect& operator-=(const CPoint& p);
 
 	//! Equality operator
 	//! \param r The rect to compare to

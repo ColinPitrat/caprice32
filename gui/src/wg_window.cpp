@@ -42,7 +42,8 @@ CWindow::CWindow(const CRect& WindowRect, CWindow* pParent) :
 	m_ClientRect(WindowRect.SizeRect()),
 	m_pParentWindow(0),
 	m_pSDLSurface(0),
-	m_bVisible(true)
+	m_bVisible(true),
+  m_bHasFocus(false)
 {
 	if (!CApplication::Instance())
 	{
@@ -61,7 +62,8 @@ CWindow::CWindow(CWindow* pParent) :
 	m_BackgroundColor(DEFAULT_BACKGROUND_COLOR),
 	m_pParentWindow(0),
 	m_pSDLSurface(0),
-	m_bVisible(true)
+	m_bVisible(true),
+  m_bHasFocus(false)
 {
 	if (!CApplication::Instance())
 	{
@@ -182,6 +184,13 @@ void CWindow::SetVisible(bool bVisible)
 		}
 		CMessageServer::Instance().QueueMessage(new CMessage(CMessage::APP_PAINT, 0, this));
 	}
+}
+
+
+void CWindow::SetHasFocus(bool bHasFocus)
+{
+  m_bHasFocus = bHasFocus;
+  Draw();
 }
 
 

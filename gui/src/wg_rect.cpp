@@ -58,18 +58,38 @@ CRect& CRect::operator=(const CRect& r)
 }
 
 
+CRect& CRect::operator+=(const CPoint& p)
+{
+  m_Left   += p.XPos();
+  m_Right  += p.XPos();
+  m_Top    += p.YPos();
+  m_Bottom += p.YPos();
+  return *this;
+}
+
+
 CRect CRect::operator+(const CPoint& p) const
 {
-	CRect result(m_Left + p.XPos(), m_Top + p.YPos(), m_Right + p.XPos(), m_Bottom + p.YPos());
-
+	CRect result(*this);
+  result += p;
 	return result;
+}
+
+
+CRect& CRect::operator-=(const CPoint& p)
+{
+  m_Left   -= p.XPos();
+  m_Right  -= p.XPos();
+  m_Top    -= p.YPos();
+  m_Bottom -= p.YPos();
+	return *this;
 }
 
 
 CRect CRect::operator-(const CPoint& p) const
 {
-	CRect result(m_Left - p.XPos(), m_Top - p.YPos(), m_Right - p.XPos(), m_Bottom - p.YPos());
-
+	CRect result(*this);
+  result -= p;
 	return result;
 }
 

@@ -100,7 +100,7 @@ public:
 
 protected:
 	CFontEngine* m_pFontEngine;  //!< A pointer to the font engine to use to render the text
-	std::auto_ptr<CRenderedString> m_pRenderedString;  //!< An autopointer to the rendered version of the string
+	std::unique_ptr<CRenderedString> m_pRenderedString;  //!< An autopointer to the rendered version of the string
 	EState m_eButtonState;  //!< The button's state
 	unsigned int m_MouseButton;  //!< The last mouse button to be pushed over the control, it's used internally
 
@@ -145,7 +145,7 @@ public:
 
 
 private:
-	std::auto_ptr<CBitmapResourceHandle> m_phBitmap;  //!< An auto pointer to a handle for the bitmap resource
+	std::unique_ptr<CBitmapResourceHandle> m_phBitmap;  //!< An auto pointer to a handle for the bitmap resource
 	void operator=(CPictureButton) { }  //!< The assignment operator is not allowed for CWindow derived objects
 };
 

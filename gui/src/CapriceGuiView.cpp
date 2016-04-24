@@ -8,51 +8,57 @@
 // Make caprice32 functions available here.
 extern void emulator_reset(bool);
 
-enum SelectedItem {
-  NONE,
-  OPTIONS,
-  LOAD_SAVE,
-  MEMORY_TOOL,
-  RESET,
-  ABOUT,
-  RESUME,
-  QUIT
-};
+// Basically the same as FocusNext except for rbegin/rend replacing begin/end
+void CapriceGuiView::FocusPrev()
+{
+  CButton *to_unfocus = nullptr;
+  for(auto it = m_buttons.rbegin(); it != m_buttons.rend(); ++it) {
+    auto &b = *it;
+    if(to_unfocus != nullptr) {
+      to_unfocus->SetHasFocus(false);
+      b.GetButton()->SetHasFocus(true);
+      break;
+    }
+    if(b.GetButton()->HasFocus()) {
+      to_unfocus = b.GetButton();
+    }
+  }
+}
+
+
+void CapriceGuiView::FocusNext()
+{
+  CButton *to_unfocus = nullptr;
+  for(auto &b : m_buttons) {
+    if(to_unfocus != nullptr) {
+      to_unfocus->SetHasFocus(false);
+      b.GetButton()->SetHasFocus(true);
+      break;
+    }
+    if(b.GetButton()->HasFocus()) {
+      to_unfocus = b.GetButton();
+    }
+  }
+}
+
 
 bool CapriceGuiView::HandleMessage(CMessage* pMessage)
 {
   bool bHandled = false;
 
-  SelectedItem selected(NONE);
+  MenuItem selected(MenuItem::NONE);
   if (pMessage)
   {
     switch (pMessage->MessageType())
     {
     case CMessage::CTRL_SINGLELCLICK:
-      if (pMessage->Destination() == this)
-      {
+      if (pMessage->Destination() == this) {
         bHandled = true;
-        const wGui::CMessageClient* pSource = pMessage->Source();
-        if (pSource == m_pBtnOptions) {
-          selected = OPTIONS;
-        }
-        else if (pSource == m_pBtnLoadSave) {
-          selected = LOAD_SAVE;
-        }
-        else if (pSource == m_pBtnMemoryTool) {
-          selected = MEMORY_TOOL;
-        }
-        else if (pSource == m_pBtnReset) {
-          selected = RESET;
-        }
-        else if (pSource == m_pBtnAbout) {
-          selected = ABOUT;
-        }
-        else if (pSource == m_pBtnResume) {
-          selected = RESUME;
-        }
-        else if (pSource == m_pBtnQuit) {
-          selected = QUIT;
+        for(auto& b : m_buttons) {
+          if (pMessage->Source() == b.GetButton()) {
+            selected = b.GetItem();
+            break;
+          }
         }
       }
       break;
@@ -61,35 +67,59 @@ bool CapriceGuiView::HandleMessage(CMessage* pMessage)
         CKeyboardMessage* pKeyboardMessage = dynamic_cast<CKeyboardMessage*>(pMessage);
         if (pKeyboardMessage) {
           switch (pKeyboardMessage->Key) {
+            case SDLK_UP:
+              bHandled = true;
+              FocusPrev();
+              break;
+            case SDLK_DOWN:
+              bHandled = true;
+              FocusNext();
+              break;
+            case SDLK_TAB:
+              bHandled = true;
+              if(pKeyboardMessage->Modifiers & KMOD_SHIFT) {
+                FocusPrev();
+              } else {
+                FocusNext();
+              }
+              break;
+            case SDLK_RETURN:
+              bHandled = true;
+              for(auto &b : m_buttons) {
+                if(b.GetButton()->HasFocus()) {
+                  selected = b.GetItem();
+                }
+              }
+              break;
             case SDLK_o:
               bHandled = true;
-              selected = OPTIONS;
+              selected = MenuItem::OPTIONS;
               break;
             case SDLK_l:
               bHandled = true;
-              selected = LOAD_SAVE;
+              selected = MenuItem::LOAD_SAVE;
               break;
             case SDLK_m:
               bHandled = true;
-              selected = MEMORY_TOOL;
+              selected = MenuItem::MEMORY_TOOL;
               break;
             case SDLK_F5:
               bHandled = true;
-              selected = RESET;
+              selected = MenuItem::RESET;
               break;
             case SDLK_a:
               bHandled = true;
-              selected = ABOUT;
+              selected = MenuItem::ABOUT;
               break;
             case SDLK_q:
             case SDLK_F10:
               bHandled = true;
-              selected = QUIT;
+              selected = MenuItem::QUIT;
               break;
             case SDLK_r:
             case SDLK_ESCAPE: 
               bHandled = true;
-              selected = RESUME;
+              selected = MenuItem::RESUME;
               break;
             default:
               break;
@@ -97,61 +127,56 @@ bool CapriceGuiView::HandleMessage(CMessage* pMessage)
         }      
       }
       break;
-      //case wGui::CMessage::CTRL_MESSAGEBOXRETURN:
-      //  {
-      //  bHandled = false;
-      //      break;
-      //  }
     default:
       bHandled = CView::HandleMessage(pMessage);
       break;
     }
   }
   switch (selected) {
-    case OPTIONS:
+    case MenuItem::OPTIONS:
       {
         wGui::CapriceOptions* pOptionsBox = new wGui::CapriceOptions(CRect(CPoint(m_pScreenSurface->w /2 - 165, m_pScreenSurface->h /2 - 127), 330, 260), this, 0);
         pOptionsBox->SetModal(true);
         break;
       }
-    case LOAD_SAVE:
+    case MenuItem::LOAD_SAVE:
       {
         wGui::CapriceLoadSave* pLoadSaveBox = new wGui::CapriceLoadSave(CRect(CPoint(m_pScreenSurface->w /2 - 165, m_pScreenSurface->h /2 - 127), 330, 260), this, 0);
         pLoadSaveBox->SetModal(true);
         break;
       }
-    case MEMORY_TOOL:
+    case MenuItem::MEMORY_TOOL:
       {
         wGui::CapriceMemoryTool* pMemoryTool = new wGui::CapriceMemoryTool(CRect(CPoint(m_pScreenSurface->w /2 - 165, m_pScreenSurface->h /2 - 140), 330, 270), this, 0);
         pMemoryTool->SetModal(true);
         break;
       }
-    case RESET:
+    case MenuItem::RESET:
       {
         emulator_reset(false);
         // Exit gui
         CMessageServer::Instance().QueueMessage(new CMessage(CMessage::APP_EXIT, 0, this));
         break;
       }
-    case ABOUT:
+    case MenuItem::ABOUT:
       {
         wGui::CapriceAbout* pAboutBox = new wGui::CapriceAbout(CRect(CPoint(m_pScreenSurface->w /2 - 87, m_pScreenSurface->h /2 - 120), 174, 240), this, 0);
         pAboutBox->SetModal(true);
         break;
       }
-    case RESUME:
+    case MenuItem::RESUME:
       {
         // Exit gui
         CMessageServer::Instance().QueueMessage(new CMessage(CMessage::APP_EXIT, 0, this));
         break;
       }
-    case QUIT:
+    case MenuItem::QUIT:
       {
         // atexit() takes care of all the cleanup
         exit (0);
         break;
       }
-    case NONE:
+    case MenuItem::NONE:
       break;
   }
 
@@ -167,13 +192,23 @@ CapriceGuiView::CapriceGuiView(SDL_Surface* surface, SDL_Surface* backSurface, c
   // judb Apparently this needs to be done the first time:
   CApplication::Instance()->SetKeyFocus(this);
 
-  m_pBtnOptions    = new CButton(CRect(CPoint(m_pScreenSurface->w / 2 - 50, m_pScreenSurface->h / 2 - 90), 100, 20), this, "Options");
-  m_pBtnLoadSave   = new CButton(CRect(CPoint(m_pScreenSurface->w / 2 - 50, m_pScreenSurface->h / 2 - 60), 100, 20), this, "Load / Save");
-  m_pBtnMemoryTool = new CButton(CRect(CPoint(m_pScreenSurface->w / 2 - 50, m_pScreenSurface->h / 2 - 30), 100, 20), this, "Memory tool");
-  m_pBtnReset      = new CButton(CRect(CPoint(m_pScreenSurface->w / 2 - 50, m_pScreenSurface->h / 2),      100, 20), this, "Reset (F5)");
-  m_pBtnAbout      = new CButton(CRect(CPoint(m_pScreenSurface->w / 2 - 50, m_pScreenSurface->h / 2 + 30), 100, 20), this, "About");
-  m_pBtnResume     = new CButton(CRect(CPoint(m_pScreenSurface->w / 2 - 50, m_pScreenSurface->h / 2 + 60), 100, 20), this, "Resume");
-  m_pBtnQuit       = new CButton(CRect(CPoint(m_pScreenSurface->w / 2 - 50, m_pScreenSurface->h / 2 + 90), 100, 20), this, "Quit (F10)");
+  std::map<MenuItem, std::string> buttons = {
+    { MenuItem::OPTIONS, "Options" },
+    { MenuItem::LOAD_SAVE, "Load / Save" },
+    { MenuItem::MEMORY_TOOL, "Memory tool" },
+    { MenuItem::RESET, "Reset (F5)" },
+    { MenuItem::ABOUT, "About" },
+    { MenuItem::RESUME, "Resume" },
+    { MenuItem::QUIT, "Quit (F10)" }
+  };
+  CPoint button_space = CPoint(0, 30);
+  CRect button_rect(CPoint(m_pScreenSurface->w / 2 - 50, m_pScreenSurface->h / 2 - 90), 100, 20);
+
+  for(auto& b : buttons) {
+    m_buttons.push_back(CapriceGuiViewButton(b.first, new CButton(button_rect, this, b.second)));
+    button_rect += button_space;
+  }
+  m_buttons.front().GetButton()->SetHasFocus(true);
 }
 
 
@@ -183,20 +218,21 @@ void CapriceGuiView::PaintToSurface(SDL_Surface& ScreenSurface, SDL_Surface& Flo
 {
   if (m_bVisible)
   {
-    SDL_Rect SourceRect = CRect(m_WindowRect.SizeRect()).SDLRect();
-    SDL_Rect DestRect = CRect(m_WindowRect + Offset).SDLRect();
-  
-        CPoint FakeWindowAnchorPoint = CPoint(m_pScreenSurface->w / 2 - 80, 200);
-        CRect FakeWindowRect = CRect(FakeWindowAnchorPoint, 160, 160);
+    // Draw a 'fake' window so the controls (buttons) don't swim inside the emulation display.
+    {
+      SDL_Rect SourceRect = CRect(m_WindowRect.SizeRect()).SDLRect();
+      SDL_Rect DestRect = CRect(m_WindowRect + Offset).SDLRect();
 
-        // Draw a 'fake' window so the controls (buttons) don't swim inside the emulation display.
-    //CPainter Painter(m_pBackSurface, CPainter::PAINT_REPLACE);
-//    CPainter Painter(m_pScreenSurface, CPainter::PAINT_REPLACE);
-//    Painter.DrawRect(FakeWindowRect, true, DEFAULT_BACKGROUND_COLOR, DEFAULT_BACKGROUND_COLOR);
-        // Draw shadow effect.
-//    Painter.Draw3DRaisedRect(FakeWindowRect,DEFAULT_BACKGROUND_COLOR);
-    // Copy everything to the visible screen:
-    SDL_BlitSurface(m_pBackSurface, &SourceRect, &ScreenSurface, &DestRect);
+      CPoint FakeWindowAnchorPoint = CPoint(m_pScreenSurface->w / 2 - 70, 160);
+      CRect FakeWindowRect = CRect(FakeWindowAnchorPoint, 140, 240);
+
+      CPainter Painter(m_pBackSurface, CPainter::PAINT_REPLACE);
+      Painter.DrawRect(FakeWindowRect, true, DEFAULT_BACKGROUND_COLOR, DEFAULT_BACKGROUND_COLOR);
+      Painter.Draw3DRaisedRect(FakeWindowRect,DEFAULT_BACKGROUND_COLOR);
+      SDL_BlitSurface(m_pBackSurface, &SourceRect, &ScreenSurface, &DestRect);
+    }
+
+    // Draw all buttons
     CPoint NewOffset = m_ClientRect.TopLeft() + m_WindowRect.TopLeft() + Offset;
     for (std::list<CWindow*>::const_iterator iter = m_ChildWindows.begin(); iter != m_ChildWindows.end(); ++iter)
     {

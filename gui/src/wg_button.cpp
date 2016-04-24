@@ -48,9 +48,8 @@ CButton::CButton(const CRect& WindowRect, CWindow* pParent, std::string sText, C
 	{
 		m_pFontEngine = CApplication::Instance()->GetDefaultFontEngine();
 	}
-	std::auto_ptr<CRenderedString> pRenderedString(new CRenderedString(
+	m_pRenderedString.reset(new CRenderedString(
 		m_pFontEngine, sText, CRenderedString::VALIGN_CENTER, CRenderedString::HALIGN_CENTER));
-	m_pRenderedString = pRenderedString;
 //	m_BackgroundColor = CApplication::Instance()->GetDefaultForegroundColor();
     m_BackgroundColor = DEFAULT_BUTTON_COLOR;
 	CMessageServer::Instance().RegisterMessageClient(this, CMessage::MOUSE_BUTTONUP);
@@ -100,6 +99,10 @@ void CButton::Draw(void) const
 			break;
 		}
 		SubRect.Grow(-2);
+    if (m_bHasFocus)
+    {
+			Painter.DrawRect(SubRect, false, COLOR_GRAY);
+    }
 		if (m_pRenderedString.get())
 		{
 			m_pRenderedString->Draw(m_pSDLSurface, SubRect, FontCenterPoint, FontColor);
@@ -110,9 +113,9 @@ void CButton::Draw(void) const
 
 void CButton::SetWindowText(const std::string& sWindowText)
 {
-	std::auto_ptr<CRenderedString> pRenderedString(new CRenderedString(
+	m_pRenderedString.reset(new CRenderedString(
 		m_pFontEngine, sWindowText, CRenderedString::VALIGN_CENTER, CRenderedString::HALIGN_CENTER));
-	m_pRenderedString = pRenderedString;
+
 	CWindow::SetWindowText(sWindowText);
 }
 
@@ -192,8 +195,7 @@ bool CButton::HandleMessage(CMessage* pMessage)
 CPictureButton::CPictureButton(const CRect& WindowRect, CWindow* pParent, std::string sPictureFile) :
 	CButton(WindowRect, pParent, sPictureFile, 0)
 {
-	std::auto_ptr<CBitmapResourceHandle> phBitmap(new CBitmapFileResourceHandle(sPictureFile));
-	m_phBitmap = phBitmap;
+	m_phBitmap.reset(new CBitmapFileResourceHandle(sPictureFile));
 	Draw();
 }
 
@@ -201,8 +203,7 @@ CPictureButton::CPictureButton(const CRect& WindowRect, CWindow* pParent, std::s
 CPictureButton::CPictureButton(const CRect& WindowRect, CWindow* pParent, const CBitmapResourceHandle& hBitmap) :
 	CButton(WindowRect, pParent, "<bitmap>", 0)
 {
-	std::auto_ptr<CBitmapResourceHandle> phBitmap(new CBitmapResourceHandle(hBitmap));
-	m_phBitmap = phBitmap;
+	m_phBitmap.reset(new CBitmapResourceHandle(hBitmap));
 	Draw();
 }
 
@@ -221,8 +222,7 @@ void CPictureButton::SetPicture(std::string sPictureFile)
 
 void CPictureButton::SetPicture(const CBitmapResourceHandle& hBitmap)
 {
-	std::auto_ptr<CBitmapResourceHandle> phBitmap(new CBitmapResourceHandle(hBitmap));
-	m_phBitmap = phBitmap;
+	m_phBitmap.reset(new CBitmapResourceHandle(hBitmap));
 	Draw();
 }
 

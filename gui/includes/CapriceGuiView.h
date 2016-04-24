@@ -3,21 +3,42 @@
 using namespace std;
 using namespace wGui;
 
+enum class MenuItem {
+  NONE,
+  OPTIONS,
+  LOAD_SAVE,
+  MEMORY_TOOL,
+  RESET,
+  ABOUT,
+  RESUME,
+  QUIT
+};
+
+class CapriceGuiViewButton
+{
+  public:
+    CapriceGuiViewButton(MenuItem item, CButton *button) : m_item(item), m_button(button) {};
+    ~CapriceGuiViewButton() {};
+
+    CButton *GetButton() const { return m_button.get(); };
+    MenuItem GetItem() const { return m_item; };
+
+  private:
+    MenuItem m_item;
+    std::shared_ptr<CButton> m_button;
+};
+
 class CapriceGuiView : public CView
 {
   protected:
-    CButton* m_pBtnOptions;
-    CButton* m_pBtnLoadSave;
-    CButton* m_pBtnMemoryTool;
-    CButton* m_pBtnReset;
-    CButton* m_pBtnAbout;
-    CButton* m_pBtnResume;
-    CButton* m_pBtnQuit;
-    CEditBox* m_pDisplay;
+    std::list<CapriceGuiViewButton> m_buttons;
 
   public:
     CapriceGuiView(SDL_Surface* surface, SDL_Surface* backSurface, const CRect& WindowRect);
     
+    void FocusPrev();
+    void FocusNext();
+
     // specific functionality, see .cpp file.
     virtual void PaintToSurface(SDL_Surface& ScreenSurface, SDL_Surface& FloatingSurface, const CPoint& Offset) const;
 

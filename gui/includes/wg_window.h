@@ -121,6 +121,14 @@ public:
 	//! \param bVisible Set to false to hide the control
 	virtual void SetVisible(bool bVisible);
 
+	//! Get whether the control has the focus
+	//! \return true if the control has the focus
+  virtual bool HasFocus(void) { return m_bHasFocus; }
+
+	//! Get whether the control has the focus
+	//! \param bHasFocus Set to true to tell the control it has the focus
+  virtual void SetHasFocus(bool bHasFocus);
+
 	//! Gets the SDL surface the window draws to
 	//! \return A pointer to the window's SDL surface
 	virtual SDL_Surface* GetSDLSurface(void) { return m_pSDLSurface; }
@@ -235,6 +243,9 @@ protected:
 
 	//! If this is false, the control will not paint itself
 	bool m_bVisible;
+
+  //! If this window currently has the focus
+  bool m_bHasFocus;
 
 private:
 	void operator=(CWindow) { }  //!< The assignment operator is not allowed for CWindow objects
