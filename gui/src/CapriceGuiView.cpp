@@ -4,41 +4,29 @@
 #include "CapriceLoadSave.h"
 #include "CapriceMemoryTool.h"
 #include "wg_messagebox.h"
+#include <algorithm>
 
 // Make caprice32 functions available here.
 extern void emulator_reset(bool);
 
-// Basically the same as FocusNext except for rbegin/rend replacing begin/end
-void CapriceGuiView::FocusPrev()
+
+void CapriceGuiView::FocusNext(FocusDirection direction)
 {
   CButton *to_unfocus = nullptr;
-  for(auto it = m_buttons.rbegin(); it != m_buttons.rend(); ++it) {
-    auto &b = *it;
+  auto loop_body = [&to_unfocus](const CapriceGuiViewButton& b) {
     if(to_unfocus != nullptr) {
       to_unfocus->SetHasFocus(false);
       b.GetButton()->SetHasFocus(true);
-      break;
-    }
-    if(b.GetButton()->HasFocus()) {
+      to_unfocus = nullptr;
+    } else if(b.GetButton()->HasFocus()) {
       to_unfocus = b.GetButton();
     }
-  }
-}
+  };
 
-
-void CapriceGuiView::FocusNext()
-{
-  CButton *to_unfocus = nullptr;
-  for(auto &b : m_buttons) {
-    if(to_unfocus != nullptr) {
-      to_unfocus->SetHasFocus(false);
-      b.GetButton()->SetHasFocus(true);
-      break;
-    }
-    if(b.GetButton()->HasFocus()) {
-      to_unfocus = b.GetButton();
-    }
-  }
+  if(direction == FocusDirection::BACKWARD)
+    std::for_each(m_buttons.rbegin(), m_buttons.rend(), loop_body);
+  else
+    std::for_each(m_buttons.begin(), m_buttons.end(), loop_body);
 }
 
 
@@ -69,18 +57,18 @@ bool CapriceGuiView::HandleMessage(CMessage* pMessage)
           switch (pKeyboardMessage->Key) {
             case SDLK_UP:
               bHandled = true;
-              FocusPrev();
+              FocusNext(FocusDirection::BACKWARD);
               break;
             case SDLK_DOWN:
               bHandled = true;
-              FocusNext();
+              FocusNext(FocusDirection::FORWARD);
               break;
             case SDLK_TAB:
               bHandled = true;
               if(pKeyboardMessage->Modifiers & KMOD_SHIFT) {
-                FocusPrev();
+                FocusNext(FocusDirection::BACKWARD);
               } else {
-                FocusNext();
+                FocusNext(FocusDirection::FORWARD);
               }
               break;
             case SDLK_RETURN:

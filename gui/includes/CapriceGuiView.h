@@ -28,6 +28,11 @@ class CapriceGuiViewButton
     std::shared_ptr<CButton> m_button;
 };
 
+enum class FocusDirection {
+  FORWARD,
+  BACKWARD
+};
+
 class CapriceGuiView : public CView
 {
   protected:
@@ -36,8 +41,7 @@ class CapriceGuiView : public CView
   public:
     CapriceGuiView(SDL_Surface* surface, SDL_Surface* backSurface, const CRect& WindowRect);
     
-    void FocusPrev();
-    void FocusNext();
+    void FocusNext(FocusDirection direction);
 
     // specific functionality, see .cpp file.
     virtual void PaintToSurface(SDL_Surface& ScreenSurface, SDL_Surface& FloatingSurface, const CPoint& Offset) const;
