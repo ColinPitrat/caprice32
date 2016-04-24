@@ -6,7 +6,9 @@ VPATH = gui/src:gui/includes
 
 .SUFFIXES : .o .cpp
 
-CC	= g++
+ifndef CXX
+CXX	= g++
+endif
 
 GFLAGS	= -std=c++11 -Wall `sdl-config --cflags`
 
@@ -37,31 +39,31 @@ wg_scrollbar.o wg_tab.o wg_textbox.o wg_timer.o wg_toolbar.o wg_tooltip.o \
 wg_view.o wg_window.o wutil_config_store.o wutil_log.o
 
 .cpp.o :
-	$(CC) -c $(CFLAGS) $(IPATHS) -o $@ $<
+	$(CXX) -c $(CFLAGS) $(IPATHS) -o $@ $<
 
 cap32: cap32.cpp $(GUIOBJS) crtc.o fdc.o glfuncs.o psg.o tape.o video.o z80.o fileutils.o cap32.h z80.h
-	$(CC) $(CFLAGS) $(IPATHS) -o cap32 cap32.cpp crtc.o fdc.o glfuncs.o psg.o tape.o video.o z80.o fileutils.o $(GUIOBJS) $(LIBS)
+	$(CXX) $(CFLAGS) $(IPATHS) -o cap32 cap32.cpp crtc.o fdc.o glfuncs.o psg.o tape.o video.o z80.o fileutils.o $(GUIOBJS) $(LIBS)
 
 crtc.o: crtc.c cap32.h crtc.h z80.h
-	$(CC) $(CFLAGS) $(IPATHS) -c crtc.c
+	$(CXX) $(CFLAGS) $(IPATHS) -c crtc.c
 
 fdc.o: fdc.c cap32.h z80.h
-	$(CC) $(CFLAGS) $(IPATHS) -c fdc.c
+	$(CXX) $(CFLAGS) $(IPATHS) -c fdc.c
 
 glfuncs.o: glfuncs.cpp glfuncs.h glfunclist.h
-	$(CC) $(CFLAGS) $(IPATHS) -c glfuncs.cpp
+	$(CXX) $(CFLAGS) $(IPATHS) -c glfuncs.cpp
 
 psg.o: psg.c cap32.h z80.h
-	$(CC) $(CFLAGS) $(IPATHS) -c psg.c
+	$(CXX) $(CFLAGS) $(IPATHS) -c psg.c
 
 tape.o: tape.c cap32.h tape.h z80.h
-	$(CC) $(CFLAGS) $(IPATHS) -c tape.c
+	$(CXX) $(CFLAGS) $(IPATHS) -c tape.c
 
 video.o: video.cpp video.h glfuncs.h glfunclist.h cap32.h
-	$(CC) $(CFLAGS) $(IPATHS) -c video.cpp
+	$(CXX) $(CFLAGS) $(IPATHS) -c video.cpp
 
 z80.o: z80.c z80.h cap32.h tape.h z80daa.h
-	$(CC) $(CFLAGS) $(IPATHS) -c z80.c
+	$(CXX) $(CFLAGS) $(IPATHS) -c z80.c
 
 fileutils.o: fileutils.cpp fileutils.h
 

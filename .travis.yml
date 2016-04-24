@@ -4,5 +4,9 @@ addons:
   packages:
     - libsdl1.2-dev
     - zlib1g-dev
+    - gcc-4.8
+    - g++-4.8
+before_script:
+    - export CXX=g++-4.8
 script: 
  - make
