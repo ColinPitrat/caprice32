@@ -41,9 +41,8 @@ CToolTip::CToolTip(CWindow* pToolWindow, std::string sText, CRGBColor& FontColor
 	{
 		m_pFontEngine = CApplication::Instance()->GetDefaultFontEngine();
 	}
-	std::auto_ptr<CRenderedString> pRenderedString(new CRenderedString(
+	m_pRenderedString.reset(new CRenderedString(
 		m_pFontEngine, sText, CRenderedString::VALIGN_TOP, CRenderedString::HALIGN_LEFT));
-	m_pRenderedString = pRenderedString;
 
 	m_pTimer = new CTimer(this);
 

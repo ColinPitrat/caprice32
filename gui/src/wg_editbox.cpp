@@ -61,9 +61,8 @@ CEditBox::CEditBox(const CRect& WindowRect, CWindow* pParent, CFontEngine* pFont
 	}
 	m_pDblClickTimer = new CTimer();
 	m_pCursorTimer = new CTimer(this);
-	std::auto_ptr<CRenderedString> pRenderedString(new CRenderedString(
+	m_pRenderedString.reset(new CRenderedString(
 		m_pFontEngine, "", CRenderedString::VALIGN_NORMAL, CRenderedString::HALIGN_LEFT));
-	m_pRenderedString = pRenderedString;
 	CMessageServer::Instance().RegisterMessageClient(this, CMessage::KEYBOARD_KEYDOWN);
 	CMessageServer::Instance().RegisterMessageClient(this, CMessage::MOUSE_BUTTONUP);
 	CMessageServer::Instance().RegisterMessageClient(this, CMessage::MOUSE_MOVE);
@@ -291,9 +290,8 @@ void CEditBox::SetWindowText(const std::string& sText)
 {
 	m_SelStart = 0;
 	m_SelLength = 0;
-	std::auto_ptr<CRenderedString> pRenderedString(new CRenderedString(
+	m_pRenderedString.reset(new CRenderedString(
 		m_pFontEngine, sText, CRenderedString::VALIGN_NORMAL, CRenderedString::HALIGN_LEFT));
-	m_pRenderedString = pRenderedString;
 	CWindow::SetWindowText(sText);
 }
 
@@ -648,9 +646,8 @@ bool CEditBox::HandleMessage(CMessage* pMessage)
 					m_sWindowText = sBuffer;
 					CWindow::SetWindowText(sBuffer);
 
-					std::auto_ptr<CRenderedString> pRenderedString(new CRenderedString(m_pFontEngine, sBuffer, CRenderedString::VALIGN_NORMAL, CRenderedString::HALIGN_LEFT));
+					m_pRenderedString.reset(new CRenderedString(m_pFontEngine, sBuffer, CRenderedString::VALIGN_NORMAL, CRenderedString::HALIGN_LEFT));
 
-					m_pRenderedString = pRenderedString;
 					m_bDrawCursor = true;
 					Draw();
 				}

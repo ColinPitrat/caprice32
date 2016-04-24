@@ -46,9 +46,8 @@ CGroupBox::CGroupBox(const CRect& WindowRect, CWindow* pParent, std::string sTex
 	}
 	m_ClientRect.Grow(-2);
 	m_ClientRect.SetTop(15);
-	std::auto_ptr<CRenderedString> pRenderedString(new CRenderedString(
+	m_pRenderedString.reset(new CRenderedString(
 		m_pFontEngine, sText, CRenderedString::VALIGN_TOP, CRenderedString::HALIGN_LEFT));
-	m_pRenderedString = pRenderedString;
 	m_BackgroundColor = CApplication::Instance()->GetDefaultBackgroundColor();
 	Draw();
 }
@@ -86,9 +85,8 @@ void CGroupBox::Draw(void) const
 
 void CGroupBox::SetWindowText(const std::string& sWindowText)
 {
-	std::auto_ptr<CRenderedString> pRenderedString(new CRenderedString(
+	m_pRenderedString.reset(new CRenderedString(
 		m_pFontEngine, sWindowText, CRenderedString::VALIGN_TOP, CRenderedString::HALIGN_LEFT));
-	m_pRenderedString = pRenderedString;
 	CWindow::SetWindowText(sWindowText);
 }
 
