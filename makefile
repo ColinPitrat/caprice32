@@ -13,7 +13,7 @@ endif
 GFLAGS	= -std=c++11 -Wall `sdl-config --cflags`
 
 ifdef DEBUG
-DFLAGS	= $(GFLAGS) -gstabs+
+DFLAGS	= $(GFLAGS) -g -Og
 else
 DFLAGS	= $(GFLAGS) -O2 -funroll-loops -ffast-math -fomit-frame-pointer -fno-strength-reduce -finline-functions -s
 endif
