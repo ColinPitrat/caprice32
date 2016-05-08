@@ -211,7 +211,7 @@ void CapriceGuiView::PaintToSurface(SDL_Surface& ScreenSurface, SDL_Surface& Flo
       SDL_Rect SourceRect = CRect(m_WindowRect.SizeRect()).SDLRect();
       SDL_Rect DestRect = CRect(m_WindowRect + Offset).SDLRect();
 
-      CPoint FakeWindowAnchorPoint = CPoint(m_pScreenSurface->w / 2 - 70, 160);
+      CPoint FakeWindowAnchorPoint = CPoint(m_pScreenSurface->w / 2 - 70, m_pScreenSurface->h / 2 - 110);
       CRect FakeWindowRect = CRect(FakeWindowAnchorPoint, 140, 240);
 
       CPainter Painter(m_pBackSurface, CPainter::PAINT_REPLACE);
