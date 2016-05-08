@@ -1484,7 +1484,7 @@ byte z80_IN_handler (reg_pair port)
                ret_val = bTapeLevel | // tape level when reading
                          (CPC.printer ? 0 : 0x40) | // ready line of connected printer
                          (CPC.jumpers & 0x7f) | // manufacturer + 50Hz
-								 (CRTC.flag_invsync ? 1 : 0); // VSYNC status
+                         (CRTC.flag_invsync ? 1 : 0); // VSYNC status
             } else {
                ret_val = PPI.portB; // return last programmed value
             }
@@ -3628,11 +3628,11 @@ int video_set_palette (void)
          }
          }
 
-	vid_plugin->set_palette(colours);
+         vid_plugin->set_palette(colours);
 
    for (n = 0; n < 17; n++) { // loop for all colours + border
-		int i=GateArray.ink_values[n];
-		GateArray.palette[n] = SDL_MapRGB(back_surface->format,colours[i].r,colours[i].g,colours[i].b);
+     int i=GateArray.ink_values[n];
+     GateArray.palette[n] = SDL_MapRGB(back_surface->format,colours[i].r,colours[i].g,colours[i].b);
    }
 
    return 0;
@@ -4607,13 +4607,13 @@ int main (int argc, char **argv)
     SDL_Surface* guiBackSurface;    
     guiBackSurface = SDL_CreateRGBSurface(SDL_SWSURFACE, back_surface->w, back_surface->h, 32,
                                0x000000FF, 0x0000FF00, 0x00FF0000, 0x00000000);
-	CapriceGui capriceGui(argc, argv);
-	capriceGui.Init();
+    CapriceGui capriceGui(argc, argv);
+    capriceGui.Init();
 //  judb pass 'current' SDL surface as argument + the area in which to draw the gui (which is now the whole screen...)
 //  We need a separate surface (guiBackSurface) because vid is the surface the user sees.
 //  Just before the gui is started, the current screen content (which is in vid) is copied into guiBackSurface.
 //  The gui can then correctly be displayed on top of guiBackSurface.
-	CapriceGuiView capriceGuiView(back_surface, guiBackSurface, CRect(0, 0, back_surface->w, back_surface->h));
+    CapriceGuiView capriceGuiView(back_surface, guiBackSurface, CRect(0, 0, back_surface->w, back_surface->h));
 
    while (!bolDone) {
       while (SDL_PollEvent(&event)) {
@@ -4668,7 +4668,7 @@ int main (int argc, char **argv)
                      switch (cpc_key) {
 
                         case CAP32_GUI:
-						    // judb
+                          // judb
                             audio_pause();                                
                             // Activate gui
                             // copy contents of vid to back_surface ("take a backup")
