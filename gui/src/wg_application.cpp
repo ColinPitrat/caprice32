@@ -92,9 +92,7 @@ void CApplication::HandleSDLEvent(SDL_Event Event)
 }
 
 
-CApplication::CApplication(int argc, char** argv, std::string sFontFileName, bool bHandleExceptionsInternally) :
-	m_argc(argc),
-	m_argv(argv),
+CApplication::CApplication(std::string sFontFileName, bool bHandleExceptionsInternally) :
 	m_sFontFileName(sFontFileName),
 	m_iExitCode(EXIT_FAILURE),
 	m_bRunning(false),
@@ -119,7 +117,7 @@ CApplication::CApplication(int argc, char** argv, std::string sFontFileName, boo
 	m_pInstance = this;
 
 	// judb
-        //if(SDL_Init(SDL_INIT_TIMER | SDL_INIT_VIDEO | SDL_INIT_NOPARACHUTE ) == -1)
+  //if(SDL_Init(SDL_INIT_TIMER | SDL_INIT_VIDEO | SDL_INIT_NOPARACHUTE ) == -1)
 	//{
 	//	throw(Wg_Ex_SDL(std::string("CApplication::CApplication : Could not initialize SDL: ") + SDL_GetError()));
 	//}
@@ -151,6 +149,8 @@ CApplication::~CApplication(void)
 
 	m_AppLog.AddLogEntry("wGui Application closing", APP_LOG_INFO);
 	m_AppLog.WriteToFile("wGui.log", false, "wGui Application Log (version " + std::string(VERSION) + ")\nSeverity Levels : [1] Critical, [3] Error, [5] Warning, [8] Info");
+
+  CMessageServer::Instance().PurgeQueuedMessages();
 }
 
 

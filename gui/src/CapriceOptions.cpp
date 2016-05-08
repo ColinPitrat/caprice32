@@ -12,10 +12,10 @@ extern t_CPC CPC;
 namespace wGui {
 
 CapriceOptions::CapriceOptions(const CRect& WindowRect, CView* pParent, CFontEngine* pFontEngine) :
-	CFrame(WindowRect, pParent, pFontEngine, "Options", false)
+  CFrame(WindowRect, pParent, pFontEngine, "Options", false)
 {
     // Make this window listen to incoming CTRL_VALUECHANGE messages (used for updating scrollbar values)
-	CMessageServer::Instance().RegisterMessageClient(this, CMessage::CTRL_VALUECHANGE);
+    CMessageServer::Instance().RegisterMessageClient(this, CMessage::CTRL_VALUECHANGE);
     CMessageServer::Instance().RegisterMessageClient(this, CMessage::CTRL_VALUECHANGING);
 
     // remember the current CPC configuration.
@@ -50,18 +50,18 @@ CapriceOptions::CapriceOptions(const CRect& WindowRect, CView* pParent, CFontEng
     TabMap["disk"] = m_pGroupBoxTabDisk;
     TabMap["input"] = m_pGroupBoxTabInput;
 
-	// ---------------- 'General' Options ----------------
+    // ---------------- 'General' Options ----------------
     m_pLabelCPCModel    = new CLabel(CPoint(10, 3), m_pGroupBoxTabGeneral, "CPC Model");
     m_pDropDownCPCModel = new CDropDown(CRect(CPoint(80, 0), 80, 16), m_pGroupBoxTabGeneral, 0, 14);
     m_pDropDownCPCModel->AddItem(SListItem("CPC 464"));
     m_pDropDownCPCModel->AddItem(SListItem("CPC 664"));
     m_pDropDownCPCModel->AddItem(SListItem("CPC 6128"));
-	m_pDropDownCPCModel->SetListboxHeight(3);
+    m_pDropDownCPCModel->SetListboxHeight(3);
        // index and model match, i.e. 0 -> 464, 1 -> 664, 2 -> 6128:
-	m_pDropDownCPCModel->SelectItem(CPC.model);
+    m_pDropDownCPCModel->SelectItem(CPC.model);
 
-    m_pLabelRamSize = new CLabel(CPoint(10, 28), m_pGroupBoxTabGeneral, "RAM memory"); 
-    m_pScrollBarRamSize = new CScrollBar(CRect(CPoint(90, 25), 120, 12), m_pGroupBoxTabGeneral, 
+    m_pLabelRamSize = new CLabel(CPoint(10, 28), m_pGroupBoxTabGeneral, "RAM memory");
+    m_pScrollBarRamSize = new CScrollBar(CRect(CPoint(90, 25), 120, 12), m_pGroupBoxTabGeneral,
                                                                              CScrollBar::HORIZONTAL);
     m_pScrollBarRamSize->SetMinLimit(1); // * 64.  Minimum is 128k if model is 6128!
     m_pScrollBarRamSize->SetMaxLimit(9); // * 64 = 576k
@@ -77,7 +77,7 @@ CapriceOptions::CapriceOptions(const CRect& WindowRect, CView* pParent, CFontEng
         m_pCheckBoxLimitSpeed->SetCheckBoxState(CCheckBox::CHECKED);
     }
     m_pLabelCPCSpeed  = new CLabel(CPoint(10, 71), m_pGroupBoxTabGeneral, "CPC Speed");;
-    m_pScrollBarCPCSpeed  = new CScrollBar(CRect(CPoint(78, 68), 120, 12), m_pGroupBoxTabGeneral, 
+    m_pScrollBarCPCSpeed  = new CScrollBar(CRect(CPoint(78, 68), 120, 12), m_pGroupBoxTabGeneral,
                                                                              CScrollBar::HORIZONTAL);
     m_pScrollBarCPCSpeed->SetMinLimit(2);
     m_pScrollBarCPCSpeed->SetMaxLimit(32);
@@ -90,7 +90,7 @@ CapriceOptions::CapriceOptions(const CRect& WindowRect, CView* pParent, CFontEng
     if (CPC.printer  == 1) {
         m_pCheckBoxPrinterToFile->SetCheckBoxState(CCheckBox::CHECKED);
     }
- 
+
     // ---------------- Expansion ROMs ----------------
     std::string romFileName;
     for (unsigned int i = 0; i < 16; i ++) { // create 16 'ROM' buttons
@@ -106,7 +106,7 @@ CapriceOptions::CapriceOptions(const CRect& WindowRect, CView* pParent, CFontEng
     }
 
     // ---------------- 'Video' options ----------------
-	m_pCheckBoxShowFps      = new CCheckBox(CRect(CPoint(10, 94), 10, 10), m_pGroupBoxTabVideo);
+    m_pCheckBoxShowFps      = new CCheckBox(CRect(CPoint(10, 94), 10, 10), m_pGroupBoxTabVideo);
     if (CPC.scr_fps == 1) {
         m_pCheckBoxShowFps->SetCheckBoxState(CCheckBox::CHECKED);
     }
@@ -134,23 +134,23 @@ CapriceOptions::CapriceOptions(const CRect& WindowRect, CView* pParent, CFontEng
     m_pScrollBarIntensity->SetValue(CPC.scr_intensity);
 
     m_pLabelIntensity    = new CLabel(CPoint(80, 10), m_pGroupBoxMonitor, "Intensity");
-    
+
     // intensity values are indeed from 5 to 15, but we display intensity/10 :
     char intensityValue[5];
     sprintf(intensityValue, "%2.1f ", CPC.scr_intensity / 10.0);
     m_pLabelIntensityValue = new CLabel(CPoint(230, 10), m_pGroupBoxMonitor, intensityValue);
 
     m_pDropDownVideoPlugin = new CDropDown(CRect(CPoint(100,0),140,16), m_pGroupBoxTabVideo, 0, 14); // Select video plugin
-	unsigned int i = 0;
-	while(video_plugin_list[i].name)
-	{
+    unsigned int i = 0;
+    while(video_plugin_list[i].name)
+    {
             m_pDropDownVideoPlugin->AddItem(SListItem(video_plugin_list[i].name));
             i++;
-	}
-	m_pDropDownVideoPlugin->SetListboxHeight(5);
-	m_pDropDownVideoPlugin->SelectItem(CPC.scr_style);
-    
-    m_pLabelVideoPlugin = new CLabel(CPoint(10, 2), m_pGroupBoxTabVideo, "Video plugin"); 
+    }
+    m_pDropDownVideoPlugin->SetListboxHeight(5);
+    m_pDropDownVideoPlugin->SelectItem(CPC.scr_style);
+
+    m_pLabelVideoPlugin = new CLabel(CPoint(10, 2), m_pGroupBoxTabVideo, "Video plugin");
     // ---------------- 'Audio' Options ----------------
     m_pCheckBoxEnableSound = new CCheckBox(CRect(CPoint(10,0), 10,10), m_pGroupBoxTabAudio);    // Show emulation speed
     if (CPC.snd_enabled == 1) {
@@ -159,18 +159,18 @@ CapriceOptions::CapriceOptions(const CRect& WindowRect, CView* pParent, CFontEng
     m_pLabelEnableSound    = new CLabel(CPoint(28, 1), m_pGroupBoxTabAudio, "Enable Sound Emulation");
 
     m_pDropDownSamplingRate = new CDropDown(CRect(CPoint(100,25),100,16), m_pGroupBoxTabAudio, 0, 14); // Select audio sampling rate
-	m_pDropDownSamplingRate->AddItem(SListItem("11025 Hz"));
-	m_pDropDownSamplingRate->AddItem(SListItem("22050 Hz"));
-	m_pDropDownSamplingRate->AddItem(SListItem("44100 Hz"));
-	m_pDropDownSamplingRate->AddItem(SListItem("48000 Hz"));
-	m_pDropDownSamplingRate->AddItem(SListItem("96000 Hz"));
-	m_pDropDownSamplingRate->SetListboxHeight(4);
-	m_pDropDownSamplingRate->SelectItem(CPC.snd_playback_rate);
-    
-    m_pLabelSamplingRate = new CLabel(CPoint(10, 27), m_pGroupBoxTabAudio, "Playback Rate"); 
+    m_pDropDownSamplingRate->AddItem(SListItem("11025 Hz"));
+    m_pDropDownSamplingRate->AddItem(SListItem("22050 Hz"));
+    m_pDropDownSamplingRate->AddItem(SListItem("44100 Hz"));
+    m_pDropDownSamplingRate->AddItem(SListItem("48000 Hz"));
+    m_pDropDownSamplingRate->AddItem(SListItem("96000 Hz"));
+    m_pDropDownSamplingRate->SetListboxHeight(4);
+    m_pDropDownSamplingRate->SelectItem(CPC.snd_playback_rate);
 
-   	m_pGroupBoxChannels    = new CGroupBox(CRect(CPoint(10, 55), 130, 40), m_pGroupBoxTabAudio, "Channels");
-   	m_pGroupBoxSampleSize  = new CGroupBox(CRect(CPoint(150, 55), 130, 40), m_pGroupBoxTabAudio, "Sample Size");
+    m_pLabelSamplingRate = new CLabel(CPoint(10, 27), m_pGroupBoxTabAudio, "Playback Rate");
+
+    m_pGroupBoxChannels    = new CGroupBox(CRect(CPoint(10, 55), 130, 40), m_pGroupBoxTabAudio, "Channels");
+    m_pGroupBoxSampleSize  = new CGroupBox(CRect(CPoint(150, 55), 130, 40), m_pGroupBoxTabAudio, "Sample Size");
     m_pLabelSoundVolume    = new CLabel(CPoint(10, 108), m_pGroupBoxTabAudio, "Volume");
     m_pScrollBarVolume     = new CScrollBar(CRect(CPoint(60, 105), 120, 16), m_pGroupBoxTabAudio, CScrollBar::HORIZONTAL);
     m_pScrollBarVolume->SetMinLimit(0);
@@ -186,14 +186,14 @@ CapriceOptions::CapriceOptions(const CRect& WindowRect, CView* pParent, CFontEng
     if (CPC.snd_stereo == 0) {
         m_pRadioButtonMono->SetState(CRadioButton::CHECKED);
     } else {
-	    m_pRadioButtonStereo->SetState(CRadioButton::CHECKED);
-	}
+      m_pRadioButtonStereo->SetState(CRadioButton::CHECKED);
+    }
     m_pRadioButton8bit  = new CRadioButton(CPoint(5, 2), 10, m_pGroupBoxSampleSize);
     m_pLabel8bit        = new CLabel(CPoint(20,3), m_pGroupBoxSampleSize, "8 bit");
     m_pRadioButton16bit = new CRadioButton(CPoint(55, 2), 10, m_pGroupBoxSampleSize);
     m_pLabel16bit       = new CLabel(CPoint(70, 3), m_pGroupBoxSampleSize, "16 bit");
     if (CPC.snd_bits == 0)  {
-		m_pRadioButton8bit->SetState(CRadioButton::CHECKED);
+      m_pRadioButton8bit->SetState(CRadioButton::CHECKED);
     } else {
         m_pRadioButton16bit->SetState(CRadioButton::CHECKED);
     }
@@ -203,33 +203,33 @@ CapriceOptions::CapriceOptions(const CRect& WindowRect, CView* pParent, CFontEng
     m_pGroupBoxDriveB  = new CGroupBox(CRect(CPoint(10, 50), 280, 45), m_pGroupBoxTabDisk, "CPC Drive B");
     m_pLabelDriveAFormat    = new CLabel(CPoint(10,3), m_pGroupBoxDriveA, "Insert blank disks as");
     m_pDropDownDriveAFormat = new CDropDown(CRect(CPoint(130,1),140,16), m_pGroupBoxDriveA, 0, 14);
-	m_pDropDownDriveAFormat->AddItem(SListItem("178K Data Format"));
-	m_pDropDownDriveAFormat->AddItem(SListItem("169K Vendor Format"));
-	m_pDropDownDriveAFormat->SetListboxHeight(2);
+    m_pDropDownDriveAFormat->AddItem(SListItem("178K Data Format"));
+    m_pDropDownDriveAFormat->AddItem(SListItem("169K Vendor Format"));
+    m_pDropDownDriveAFormat->SetListboxHeight(2);
     m_pDropDownDriveAFormat->SelectItem(CPC.drvA_format == 0 ? 0 : 1);
     m_pLabelDriveBFormat    = new CLabel(CPoint(10,3), m_pGroupBoxDriveB, "Insert blank disks as");;
     m_pDropDownDriveBFormat = new CDropDown(CRect(CPoint(130,1),140,16), m_pGroupBoxDriveB, 0, 14);
-	m_pDropDownDriveBFormat->AddItem(SListItem("178K Data Format"));
-	m_pDropDownDriveBFormat->AddItem(SListItem("169K Vendor Format"));
-	m_pDropDownDriveBFormat->SetListboxHeight(2);
+    m_pDropDownDriveBFormat->AddItem(SListItem("178K Data Format"));
+    m_pDropDownDriveBFormat->AddItem(SListItem("169K Vendor Format"));
+    m_pDropDownDriveBFormat->SetListboxHeight(2);
     m_pDropDownDriveBFormat->SelectItem(CPC.drvB_format == 0 ? 0 : 1);
 
     // ---------------- 'Input' Options ----------------
     // option 'keyboard' which is the CPC language
     m_pLabelCPCLanguage    = new CLabel(CPoint(10,3), m_pGroupBoxTabInput, "CPC language");;
     m_pDropDownCPCLanguage = new CDropDown(CRect(CPoint(130,1),140,16), m_pGroupBoxTabInput, 0, 14);
-	m_pDropDownCPCLanguage->AddItem(SListItem("English CPC"));
-	m_pDropDownCPCLanguage->AddItem(SListItem("French CPC"));
-	m_pDropDownCPCLanguage->AddItem(SListItem("Spanish CPC"));
-	m_pDropDownCPCLanguage->SetListboxHeight(3);
+    m_pDropDownCPCLanguage->AddItem(SListItem("English CPC"));
+    m_pDropDownCPCLanguage->AddItem(SListItem("French CPC"));
+    m_pDropDownCPCLanguage->AddItem(SListItem("Spanish CPC"));
+    m_pDropDownCPCLanguage->SetListboxHeight(3);
     m_pDropDownCPCLanguage->SelectItem(CPC.keyboard);
     // option 'kbd_layout' which is the platform keyboard layout (i.e. the PC keyboard layout)
     m_pLabelPCLanguage    = new CLabel(CPoint(10,33), m_pGroupBoxTabInput, "PC Keyboard language");;
     m_pDropDownPCLanguage = new CDropDown(CRect(CPoint(130,31),140,16), m_pGroupBoxTabInput, 0, 14);
-	m_pDropDownPCLanguage->AddItem(SListItem("English"));
-	m_pDropDownPCLanguage->AddItem(SListItem("French"));
-	m_pDropDownPCLanguage->AddItem(SListItem("Spanish"));
-	m_pDropDownPCLanguage->SetListboxHeight(3);
+    m_pDropDownPCLanguage->AddItem(SListItem("English"));
+    m_pDropDownPCLanguage->AddItem(SListItem("French"));
+    m_pDropDownPCLanguage->AddItem(SListItem("Spanish"));
+    m_pDropDownPCLanguage->SetListboxHeight(3);
     m_pDropDownPCLanguage->SelectItem(CPC.kbd_layout);
 
     EnableTab("general");
@@ -240,178 +240,178 @@ CapriceOptions::~CapriceOptions(void) {
 
 bool CapriceOptions::HandleMessage(CMessage* pMessage)
 {
-	bool bHandled = false;
+  bool bHandled = false;
 
-	if (pMessage)
-	{
-		switch(pMessage->MessageType())
-		{
-		case CMessage::CTRL_SINGLELCLICK:
-		{
-			if (pMessage->Destination() == this)
-			{
-				if (pMessage->Source() == m_pButtonCancel) {
-					CloseFrame();
-					bHandled = true;
-                    break;
-                }
-				if (pMessage->Source() == m_pButtonOk) {
-					// save settings + close
-
-                    // 'General' settings
-                    CPC.model    = m_pDropDownCPCModel->GetSelectedIndex();
-                    CPC.ram_size = m_pScrollBarRamSize->GetValue() * 64;
-				    CPC.limit_speed = (m_pCheckBoxLimitSpeed->GetCheckBoxState() == CCheckBox::CHECKED)?1:0;
-                    CPC.speed    = m_pScrollBarCPCSpeed->GetValue();
-                    CPC.printer  = (m_pCheckBoxPrinterToFile->GetCheckBoxState() == CCheckBox::CHECKED)?1:0;
-                    // Selected ROM slots ( "..." is empty)
-                    // Take the text on each 'ROM' button, if it is "...", clear the ROM, else
-                    // set the ROM filename:
-       				for (unsigned int i = 0; i < m_pButtonRoms.size(); i ++) {
-                        std::string romFileName = m_pButtonRoms.at(i)->GetWindowText();
-                        if (romFileName == "...") {
-                            strcpy (CPC.rom_file[i], "");
-                        } else {
-                            strcpy (CPC.rom_file[i], romFileName.c_str()); // c_str() converts from std::string to C 
-                                                                           // string.
-                        }
-                    }
-                    // 'Video' settings
-                    CPC.scr_fps = (m_pCheckBoxShowFps->GetCheckBoxState() == CCheckBox::CHECKED)?1:0;
-                    CPC.scr_window = (m_pCheckBoxFullScreen->GetCheckBoxState() == CCheckBox::CHECKED)?0:1;
-                    CPC.scr_tube = (m_pRadioButtonMonochrome->GetState() == CRadioButton::CHECKED)?1:0;
-                    CPC.scr_intensity = m_pScrollBarIntensity->GetValue();
-                    CPC.scr_style = m_pDropDownVideoPlugin->GetSelectedIndex();
-                    // 'Audio' settings
-                    CPC.snd_enabled = (m_pCheckBoxEnableSound->GetCheckBoxState() == CCheckBox::CHECKED)?1:0;
-						// index in listbox = index in array defining sample rate (maybe rewrite this so 
-						// it's less dependent on this?
-                        // + todo : audio needs to be restarted if sampling rate has changed!
-                    CPC.snd_playback_rate = m_pDropDownSamplingRate->GetSelectedIndex();
-                    CPC.snd_volume = m_pScrollBarVolume->GetValue();
-					CPC.snd_stereo = m_pRadioButtonStereo->GetState()==CRadioButton::CHECKED ? 1 : 0;
-					CPC.snd_bits   = m_pRadioButton16bit->GetState()==CRadioButton::CHECKED ? 1 : 0;
-                    // 'Disk' settings
-                    CPC.drvA_format = m_pDropDownDriveAFormat->GetSelectedIndex() == 0 ? 0 : 1;
-                    CPC.drvB_format = m_pDropDownDriveBFormat->GetSelectedIndex() == 0 ? 0 : 1;
-
-                    // 'Input' settings
-                    CPC.keyboard = m_pDropDownCPCLanguage->GetSelectedIndex();
-                    CPC.kbd_layout = m_pDropDownPCLanguage->GetSelectedIndex();
-
-                    // Check if any reset or re-init is required, e.g. emulator reset, sound system reset...
-                    ProcessOptionChanges(CPC);
-
-					CloseFrame();
-					bHandled = true;
-                    break;
-				}
-                // handle further buttons and events...
-
-           		bHandled = CFrame::HandleMessage(pMessage);
-			}
-
-            // 'ROM' button clicked: open the ROM selection dialog:
-            if (pMessage->Destination() == m_pGroupBoxTabExpansion) {
-				for (unsigned int i = 0; i < m_pButtonRoms.size(); i ++) {
-                    if (pMessage->Source() == m_pButtonRoms.at(i)) {
-                        pRomSlotsDialog = new wGui::CapriceRomSlots(CRect(
-                           CPoint(m_pSDLSurface->w /2 - 140, 30), 250, 200), this, 0, "", i, m_pButtonRoms.at(i));
-                        pRomSlotsDialog->SetModal(true);
-                        bHandled = CFrame::HandleMessage(pMessage);
-                        break;
-                    }
-                }
+  if (pMessage)
+  {
+    switch(pMessage->MessageType())
+    {
+      case CMessage::CTRL_SINGLELCLICK:
+        {
+          if (pMessage->Destination() == this)
+          {
+            if (pMessage->Source() == m_pButtonCancel) {
+              CloseFrame();
+              bHandled = true;
+              break;
             }
-			break;
-		}
+            if (pMessage->Source() == m_pButtonOk) {
+              // save settings + close
 
-        case CMessage::CTRL_VALUECHANGE:
-            if (pMessage->Destination() == this) {
-                if (pMessage->Source() == m_pNavigationBar) {
-                   switch (m_pNavigationBar->getSelectedIndex()) {
-                       case 0 : { // 'General'
-                           EnableTab("general");
-                           break;
-                       }
-                       case 1 : { // 'Expansion' or 'ROMs'
-                           EnableTab("expansion");
-                           break;
-                       }
-                       case 2 : { // 'Video'
-                           EnableTab("video");
-                           break;
-                       }
-                       case 3 : { // 'Audio'
-                           EnableTab("audio");
-                           break;
-                       }
-                       case 4 : { // 'Disk'
-                           EnableTab("disk");
-                           break;
-                       }
-                       case 5 : { // 'Input'
-                           EnableTab("input");
-                           break;
-                       }
-                   }
+              // 'General' settings
+              CPC.model    = m_pDropDownCPCModel->GetSelectedIndex();
+              CPC.ram_size = m_pScrollBarRamSize->GetValue() * 64;
+              CPC.limit_speed = (m_pCheckBoxLimitSpeed->GetCheckBoxState() == CCheckBox::CHECKED)?1:0;
+              CPC.speed    = m_pScrollBarCPCSpeed->GetValue();
+              CPC.printer  = (m_pCheckBoxPrinterToFile->GetCheckBoxState() == CCheckBox::CHECKED)?1:0;
+              // Selected ROM slots ( "..." is empty)
+              // Take the text on each 'ROM' button, if it is "...", clear the ROM, else
+              // set the ROM filename:
+              for (unsigned int i = 0; i < m_pButtonRoms.size(); i ++) {
+                std::string romFileName = m_pButtonRoms.at(i)->GetWindowText();
+                if (romFileName == "...") {
+                  strcpy (CPC.rom_file[i], "");
+                } else {
+                  strcpy (CPC.rom_file[i], romFileName.c_str()); // c_str() converts from std::string to C
+                  // string.
                 }
+              }
+              // 'Video' settings
+              CPC.scr_fps = (m_pCheckBoxShowFps->GetCheckBoxState() == CCheckBox::CHECKED)?1:0;
+              CPC.scr_window = (m_pCheckBoxFullScreen->GetCheckBoxState() == CCheckBox::CHECKED)?0:1;
+              CPC.scr_tube = (m_pRadioButtonMonochrome->GetState() == CRadioButton::CHECKED)?1:0;
+              CPC.scr_intensity = m_pScrollBarIntensity->GetValue();
+              CPC.scr_style = m_pDropDownVideoPlugin->GetSelectedIndex();
+              // 'Audio' settings
+              CPC.snd_enabled = (m_pCheckBoxEnableSound->GetCheckBoxState() == CCheckBox::CHECKED)?1:0;
+              // index in listbox = index in array defining sample rate (maybe rewrite this so
+              // it's less dependent on this?
+              // + todo : audio needs to be restarted if sampling rate has changed!
+              CPC.snd_playback_rate = m_pDropDownSamplingRate->GetSelectedIndex();
+              CPC.snd_volume = m_pScrollBarVolume->GetValue();
+              CPC.snd_stereo = m_pRadioButtonStereo->GetState()==CRadioButton::CHECKED ? 1 : 0;
+              CPC.snd_bits   = m_pRadioButton16bit->GetState()==CRadioButton::CHECKED ? 1 : 0;
+              // 'Disk' settings
+              CPC.drvA_format = m_pDropDownDriveAFormat->GetSelectedIndex() == 0 ? 0 : 1;
+              CPC.drvB_format = m_pDropDownDriveBFormat->GetSelectedIndex() == 0 ? 0 : 1;
+
+              // 'Input' settings
+              CPC.keyboard = m_pDropDownCPCLanguage->GetSelectedIndex();
+              CPC.kbd_layout = m_pDropDownPCLanguage->GetSelectedIndex();
+
+              // Check if any reset or re-init is required, e.g. emulator reset, sound system reset...
+              ProcessOptionChanges(CPC);
+
+              CloseFrame();
+              bHandled = true;
+              break;
             }
-            // Note that there is no 'break;' here !
-        case CMessage::CTRL_VALUECHANGING:
-            if (pMessage->Destination() == m_pGroupBoxTabGeneral) {
-                // Update the CPC speed %
-				if (pMessage->Source() == m_pScrollBarCPCSpeed) {
-				    m_pLabelCPCSpeedValue->SetWindowText(stdex::itoa(m_pScrollBarCPCSpeed->GetValue() * 25) + "%  ");
-			    }
-                // Update the RAM size value:
-				if (pMessage->Source() == m_pScrollBarRamSize) {
-                    // if CPC.model = 2 (CPC 6128), minimum RAM size is 128k:
-                    int newRamSize = m_pScrollBarRamSize->GetValue();
-                    if (m_pDropDownCPCModel->GetSelectedIndex() == 2) { // selection in Dropdown is 'CPC 6128'
-                        if (newRamSize < 2) {
-                            newRamSize = 2; // *64k
-                            m_pScrollBarRamSize->SetValue(2);
-                        } 
-                    }
-				    m_pLabelRamSizeValue->SetWindowText(stdex::itoa(newRamSize * 64) + "k     ");
-			    }
+            // handle further buttons and events...
 
-				if (pMessage->Source() == m_pDropDownCPCModel) {
-                    if (m_pDropDownCPCModel->GetSelectedIndex() == 2) { // selection changes to 'CPC 6128'
-                        if (m_pScrollBarRamSize->GetValue() < 2) { 
-                           m_pScrollBarRamSize->SetValue(2);  // *64k
-                           m_pLabelRamSizeValue->SetWindowText("128k     ");
-                        }
-                    }
-                }
+            bHandled = CFrame::HandleMessage(pMessage);
+          }
 
+          // 'ROM' button clicked: open the ROM selection dialog:
+          if (pMessage->Destination() == m_pGroupBoxTabExpansion) {
+            for (unsigned int i = 0; i < m_pButtonRoms.size(); i ++) {
+              if (pMessage->Source() == m_pButtonRoms.at(i)) {
+                pRomSlotsDialog = new wGui::CapriceRomSlots(CRect(
+                      CPoint(m_pSDLSurface->w /2 - 140, 30), 250, 200), this, 0, "", i, m_pButtonRoms.at(i));
+                pRomSlotsDialog->SetModal(true);
+                bHandled = CFrame::HandleMessage(pMessage);
+                break;
+              }
             }
+          }
+          break;
+        }
 
-            // Update the monitor intensity value
-            if (pMessage->Destination() == m_pGroupBoxMonitor) {
-                if (pMessage->Source() == m_pScrollBarIntensity) {
-                    char intensityValue[5];
-                    sprintf(intensityValue, "%2.1f ", m_pScrollBarIntensity->GetValue()/ 10.0);
-                    m_pLabelIntensityValue->SetWindowText(intensityValue);
-                }
+      case CMessage::CTRL_VALUECHANGE:
+        if (pMessage->Destination() == this) {
+          if (pMessage->Source() == m_pNavigationBar) {
+            switch (m_pNavigationBar->getSelectedIndex()) {
+              case 0 : { // 'General'
+                         EnableTab("general");
+                         break;
+                       }
+              case 1 : { // 'Expansion' or 'ROMs'
+                         EnableTab("expansion");
+                         break;
+                       }
+              case 2 : { // 'Video'
+                         EnableTab("video");
+                         break;
+                       }
+              case 3 : { // 'Audio'
+                         EnableTab("audio");
+                         break;
+                       }
+              case 4 : { // 'Disk'
+                         EnableTab("disk");
+                         break;
+                       }
+              case 5 : { // 'Input'
+                         EnableTab("input");
+                         break;
+                       }
             }
-
-            // Update the sound volume %
-            if (pMessage->Destination() == m_pGroupBoxTabAudio) {
-				if (pMessage->Source() == m_pScrollBarVolume) {
-				    m_pLabelSoundVolumeValue->SetWindowText(stdex::itoa(m_pScrollBarVolume->GetValue()) + "%  ");
-			    }
+          }
+        }
+        // Note that there is no 'break;' here !
+      case CMessage::CTRL_VALUECHANGING:
+        if (pMessage->Destination() == m_pGroupBoxTabGeneral) {
+          // Update the CPC speed %
+          if (pMessage->Source() == m_pScrollBarCPCSpeed) {
+            m_pLabelCPCSpeedValue->SetWindowText(stdex::itoa(m_pScrollBarCPCSpeed->GetValue() * 25) + "%  ");
+          }
+          // Update the RAM size value:
+          if (pMessage->Source() == m_pScrollBarRamSize) {
+            // if CPC.model = 2 (CPC 6128), minimum RAM size is 128k:
+            int newRamSize = m_pScrollBarRamSize->GetValue();
+            if (m_pDropDownCPCModel->GetSelectedIndex() == 2) { // selection in Dropdown is 'CPC 6128'
+              if (newRamSize < 2) {
+                newRamSize = 2; // *64k
+                m_pScrollBarRamSize->SetValue(2);
+              }
             }
-			bHandled = CFrame::HandleMessage(pMessage);
-            break;
+            m_pLabelRamSizeValue->SetWindowText(stdex::itoa(newRamSize * 64) + "k     ");
+          }
 
-		default :
-			bHandled = CFrame::HandleMessage(pMessage);
-			break;
-		}
-	}
-	return bHandled;
+          if (pMessage->Source() == m_pDropDownCPCModel) {
+            if (m_pDropDownCPCModel->GetSelectedIndex() == 2) { // selection changes to 'CPC 6128'
+              if (m_pScrollBarRamSize->GetValue() < 2) {
+                m_pScrollBarRamSize->SetValue(2);  // *64k
+                m_pLabelRamSizeValue->SetWindowText("128k     ");
+              }
+            }
+          }
+
+        }
+
+        // Update the monitor intensity value
+        if (pMessage->Destination() == m_pGroupBoxMonitor) {
+          if (pMessage->Source() == m_pScrollBarIntensity) {
+            char intensityValue[5];
+            sprintf(intensityValue, "%2.1f ", m_pScrollBarIntensity->GetValue()/ 10.0);
+            m_pLabelIntensityValue->SetWindowText(intensityValue);
+          }
+        }
+
+        // Update the sound volume %
+        if (pMessage->Destination() == m_pGroupBoxTabAudio) {
+          if (pMessage->Source() == m_pScrollBarVolume) {
+            m_pLabelSoundVolumeValue->SetWindowText(stdex::itoa(m_pScrollBarVolume->GetValue()) + "%  ");
+          }
+        }
+        bHandled = CFrame::HandleMessage(pMessage);
+        break;
+
+      default :
+        bHandled = CFrame::HandleMessage(pMessage);
+        break;
+    }
+  }
+  return bHandled;
 }
 
 // Enable a 'tab', i.e. make the corresponding CGroupBox (and its content) visible.
@@ -430,9 +430,9 @@ void CapriceOptions::ProcessOptionChanges(t_CPC& CPC) {
     //  - amount of RAM
     //  - Configuration of expansion ROMs
     //  - new keyboard layouts
-    if (CPC.model != m_oldCPCsettings.model || CPC.ram_size != m_oldCPCsettings.ram_size || 
+    if (CPC.model != m_oldCPCsettings.model || CPC.ram_size != m_oldCPCsettings.ram_size ||
         CPC.keyboard != m_oldCPCsettings.keyboard || CPC.kbd_layout != m_oldCPCsettings.kbd_layout) {
-        emulator_init();        
+        emulator_init();
     }
     // compare the ROM configuration & call emulator_init if required:
     bool bRomsChanged = false;
@@ -442,12 +442,12 @@ void CapriceOptions::ProcessOptionChanges(t_CPC& CPC) {
         }
     }
     if (bRomsChanged) {
-        emulator_init();    
+        emulator_init();
     }
     // if scr_tube has changed (colour-> mono or mono->colour) or if the intensity value has changed,
     // call video_set_palette():
     if (CPC.scr_tube !=  m_oldCPCsettings.scr_tube || CPC.scr_intensity != m_oldCPCsettings.scr_intensity) {
-        video_set_palette();    
+        video_set_palette();
     }
 
     // Update CPC emulation speed:
@@ -465,12 +465,12 @@ void CapriceOptions::ProcessOptionChanges(t_CPC& CPC) {
     }
 
     if (CPC.snd_enabled != m_oldCPCsettings.snd_enabled) {
-        if (CPC.snd_enabled) { // disabled -> enabled: reinit required in case the user has changed sound 
+        if (CPC.snd_enabled) { // disabled -> enabled: reinit required in case the user has changed sound
                                // options (sample size etc.) in between.
             audio_shutdown();
             audio_init();
         }
-    
+
     }
 
     // Restart audio subsystem if playback rate, sample size or channels (mono/stereo) or volume has changed:
@@ -492,9 +492,9 @@ void CapriceOptions::ProcessOptionChanges(t_CPC& CPC) {
         video_shutdown();
         if (video_init())
         {
-            // we failed video init, restore previous plugin
-	    CPC.scr_style = m_oldCPCsettings.scr_style;
-            video_init();
+          // we failed video init, restore previous plugin
+          CPC.scr_style = m_oldCPCsettings.scr_style;
+          video_init();
         }
         audio_resume();
 

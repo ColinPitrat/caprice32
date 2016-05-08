@@ -3738,7 +3738,6 @@ int video_init (void)
       return iErrCode;
    }
 
-
    vid_plugin->lock();
    CPC.scr_bps = back_surface->pitch / 4; // rendered screen line length (changing bytes to dwords)
    CPC.scr_line_offs = CPC.scr_bps * dwYScale;
@@ -4602,19 +4601,6 @@ int main (int argc, char **argv)
    iExitCondition = EC_FRAME_COMPLETE;
    bolDone = false;
 
-
-    // Initialise gui
-    SDL_Surface* guiBackSurface;    
-    guiBackSurface = SDL_CreateRGBSurface(SDL_SWSURFACE, back_surface->w, back_surface->h, 32,
-                               0x000000FF, 0x0000FF00, 0x00FF0000, 0x00000000);
-    CapriceGui capriceGui(argc, argv);
-    capriceGui.Init();
-//  judb pass 'current' SDL surface as argument + the area in which to draw the gui (which is now the whole screen...)
-//  We need a separate surface (guiBackSurface) because vid is the surface the user sees.
-//  Just before the gui is started, the current screen content (which is in vid) is copied into guiBackSurface.
-//  The gui can then correctly be displayed on top of guiBackSurface.
-    CapriceGuiView capriceGuiView(back_surface, guiBackSurface, CRect(0, 0, back_surface->w, back_surface->h));
-
    while (!bolDone) {
       while (SDL_PollEvent(&event)) {
          switch (event.type) {
@@ -4668,21 +4654,25 @@ int main (int argc, char **argv)
                      switch (cpc_key) {
 
                         case CAP32_GUI:
-                          // judb
-                            audio_pause();                                
+                          {
                             // Activate gui
-                            // copy contents of vid to back_surface ("take a backup")
-                            SDL_BlitSurface(back_surface, nullptr, guiBackSurface, nullptr);
+                            audio_pause();                                
                             SDL_ShowCursor(SDL_ENABLE);
-                            capriceGuiView.SetSurface(back_surface); // surface pointer may have changed, 
-                                                            // e.g. when toggling fullscreen
+                            CapriceGui capriceGui;
+                            capriceGui.Init();
+                            // guiBackSurface will allow the GUI to capture the current frame
+                            SDL_Surface* guiBackSurface(SDL_CreateRGBSurface(SDL_SWSURFACE, back_surface->w, back_surface->h, 32, 0x000000FF, 0x0000FF00, 0x00FF0000, 0x00000000));
+                            SDL_BlitSurface(back_surface, nullptr, guiBackSurface, nullptr);
+                            CapriceGuiView capriceGuiView(back_surface, guiBackSurface, CRect(0, 0, back_surface->w, back_surface->h));
                             capriceGui.SetMouseVisibility(true);
                             capriceGui.Exec();
+                            SDL_FreeSurface(guiBackSurface);
                             // Clear SDL surface:
                             SDL_FillRect(back_surface, nullptr, SDL_MapRGB(back_surface->format, 0, 0, 0));
                             SDL_ShowCursor(SDL_DISABLE);
                             audio_resume();
                             break;
+                          }
 
                         case CAP32_FULLSCRN:
                            audio_pause();

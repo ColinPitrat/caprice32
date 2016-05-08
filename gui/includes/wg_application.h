@@ -69,11 +69,9 @@ class CApplication : public CMessageClient
 {
 public:
 	//! Standard constructor
-	//! \param argc The argument count from the command line
-	//! \param argv The argument array from the command line
 	//! \param sFontFileName The font to use for controls, defaults to Arial
 	//! \param bHandleExceptionsInternally If this is true, wGui will handle most exceptions itself, if false, all exceptions will be returned to the user (defaults to true)
-	CApplication(int argc, char** argv, std::string sFontFileName = "resource/vera_sans.ttf", bool bHandleExceptionsInternally = true);
+	CApplication(std::string sFontFileName = "resource/vera_sans.ttf", bool bHandleExceptionsInternally = true);
 
 	//! Standard destructor
 	virtual ~CApplication(void);
@@ -218,8 +216,6 @@ protected:
 	virtual void HandleSDLEvent(SDL_Event event);
 
 	static CApplication* m_pInstance;  //!< A pointer to the one valid instance of the application
-	int m_argc;  //!< The argument count from the command line
-	char** m_argv;  //!< The argument array from the command line
 	std::string m_sFontFileName;  //!< The font to use for all controls
 	int m_iExitCode;  //!< The exit code to be returned when the app exits
 	bool m_bRunning;  //!< Indicates if the app is currently spinning in the message loop

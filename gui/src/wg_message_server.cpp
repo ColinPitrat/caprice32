@@ -197,4 +197,9 @@ void CMessageServer::QueueMessage(CMessage* pMessage)
 	}
 }
 
+void CMessageServer::PurgeQueuedMessages()
+{
+  m_MessageQueue.clear();
+}
+
 }

@@ -6,7 +6,7 @@ using namespace wGui;
 class CapriceGui : public CApplication
 {
 	public:
-		CapriceGui(int argc, char **argv) : CApplication(argc, argv) {};
+		CapriceGui() : CApplication() {};
 		void Init(void);
 };
 

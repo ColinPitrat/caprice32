@@ -38,7 +38,7 @@ extern video_plugin* vid_plugin;
 namespace wGui
 {
 
-CView* CView::m_pInstance = 0;
+CView* CView::m_pInstance = nullptr;
 
 
 CView::CView(const CRect& WindowRect, std::string sTitle, bool bResizable, bool bFullScreen) :
@@ -89,7 +89,7 @@ CView::CView(SDL_Surface* surface, SDL_Surface* backSurface, const CRect& Window
 
 	// judb this works, but better rewrite this to make things clearer !
 	CWindow::SetWindowRect(WindowRect);
-    // judb ClientRect is relative to WindowRect (it is the client area within a Window(Rect) ) so 
+    // judb ClientRect is relative to WindowRect (it is the client area within a Window(Rect) ) so
     // its coordinates are relative to WindowRect ->
     // here we use a rectangle with the same dimensions as WindowRect, but (0,0) as its upper left point.
     // so it covers the entire WindowRect.
@@ -111,7 +111,7 @@ CView::~CView(void)
 	delete m_pMenu;
 	if (m_pInstance == this)
 	{
-		m_pInstance = 0;
+		m_pInstance = nullptr;
 	}
 }
 

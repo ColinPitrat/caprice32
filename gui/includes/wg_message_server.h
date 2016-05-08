@@ -121,6 +121,9 @@ public:
 	//! \param bIgnore if true, the message queue will ignore any new messages
 	void IgnoreAllNewMessages(bool bIgnore) { m_bIgnoreAllNewMessages = bIgnore; }
 
+  //! Discard all pending messages
+  void PurgeQueuedMessages();
+
 
 protected:
 	static CMessageServer* m_pInstance;  //!< A pointer to the single instande of the message server
