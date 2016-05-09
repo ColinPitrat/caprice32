@@ -3446,7 +3446,6 @@ int emulator_init (void)
       }
    }
 
-   crtc_init();
    emulator_reset(false);
    CPC.paused &= ~1;
 
@@ -3750,6 +3749,8 @@ int video_init (void)
 
    SDL_WM_SetCaption("Caprice32 " VERSION_STRING, "Caprice32");
 
+   crtc_init();
+
    return 0;
 }
 
@@ -4032,13 +4033,8 @@ void loadConfiguration (void)
    CPC.scr_fs_height = getConfigValueInt(chFileName, "video", "scr_height", 600);
    CPC.scr_fs_bpp = getConfigValueInt(chFileName, "video", "scr_bpp", 8);
    CPC.scr_style = getConfigValueInt(chFileName, "video", "scr_style", 0);
-   unsigned i=0;
-   while((video_plugin_list[i+1].name!=nullptr)&&(i<CPC.scr_style))
-   {
-      i++;
-   }
-   if (i!=CPC.scr_style) {
-      CPC.scr_style = 0;
+   if (CPC.scr_style >= nb_video_plugins) {
+    CPC.scr_style = 0;
    }
    CPC.scr_oglfilter = getConfigValueInt(chFileName, "video", "scr_oglfilter", 1) & 1;
    CPC.scr_oglscanlines = getConfigValueInt(chFileName, "video", "scr_oglscanlines", 30);
@@ -4946,8 +4942,8 @@ int main (int argc, char **argv)
          }
 
          if (!vid_plugin->lock()) { // lock the video buffer
-               continue; // skip the emulation if we can't get a lock
-            }
+           continue; // skip the emulation if we can't get a lock
+         }
          dwOffset = CPC.scr_pos - CPC.scr_base; // offset in current surface row
          if (VDU.scrln > 0) {
             CPC.scr_base = (dword *)back_surface->pixels + (VDU.scrln * CPC.scr_line_offs); // determine current position

@@ -60,6 +60,7 @@ video_plugin;
 #define ALL		0xffffffff
 
 extern video_plugin video_plugin_list[];
+extern unsigned int nb_video_plugins;
 
 #endif
 

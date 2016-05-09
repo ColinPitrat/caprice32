@@ -1809,3 +1809,4 @@ video_plugin video_plugin_list[]=
 {nullptr,					nullptr,		nullptr,		nullptr,			nullptr,			nullptr,		nullptr,			0,		0			}
 };
 
+unsigned int nb_video_plugins = sizeof(video_plugin_list)/sizeof(video_plugin_list[0]);
