@@ -1,6 +1,7 @@
 # makefile for compiling native unix builds
 # use "make DEBUG=TRUE" to build a debug executable
 
+LAST_BUILD_IN_DEBUG=$(shell [ -e .debug ] && echo 1 || echo 0)
 # Search these directories for source files:
 VPATH = gui/src:gui/includes
 
@@ -12,10 +13,17 @@ endif
 
 GFLAGS	= -std=c++11 -Wall `sdl-config --cflags`
 
+ifeq ($(LAST_BUILD_IN_DEBUG), 1)
+FORCED_DEBUG=1
+DEBUG=1
+endif
+
 ifdef DEBUG
 DFLAGS	= $(GFLAGS) -g -Og
+all: debug
 else
 DFLAGS	= $(GFLAGS) -O2 -funroll-loops -ffast-math -fomit-frame-pointer -fno-strength-reduce -finline-functions -s
+all: cap32
 endif
 
 ifdef WITHOUT_GL
@@ -40,6 +48,14 @@ wg_view.o wg_window.o wutil_config_store.o wutil_log.o
 
 .cpp.o :
 	$(CXX) -c $(CFLAGS) $(IPATHS) -o $@ $<
+
+debug: debug_flag cap32
+
+debug_flag:
+ifdef FORCED_DEBUG
+	@echo -e '\n!!!!!!!!!!!\n!! Warning: previous build was in debug - rebuilding in debug.\n!! Use make clean before running make to rebuild in release.\n!!!!!!!!!!!\n'
+endif
+	@touch .debug
 
 cap32: cap32.cpp $(GUIOBJS) crtc.o fdc.o glfuncs.o psg.o tape.o video.o z80.o fileutils.o cap32.h z80.h
 	$(CXX) $(CFLAGS) $(IPATHS) -o cap32 cap32.cpp crtc.o fdc.o glfuncs.o psg.o tape.o video.o z80.o fileutils.o $(GUIOBJS) $(LIBS)
@@ -197,4 +213,4 @@ wutil_log.o: wutil_log.cpp wutil_log.h wgui_include_config.h
 wg_tab.o: wg_tab.cpp wg_tab.h
 
 clean:
-	rm -f *.o cap32
+	rm -f *.o cap32 .debug

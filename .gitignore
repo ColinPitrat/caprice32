@@ -1,4 +1,5 @@
 *.o
-cap32
-printer.dat
-tags
+/cap32
+/printer.dat
+/tags
+/.debug
