@@ -71,7 +71,7 @@ void CGroupBox::Draw(void) const
         rect = rect + CPoint(1, 1);
         Painter.DrawRect(rect, false, m_BackgroundColor * 1.6);
 		CPoint Dims, Offset;
-		m_pRenderedString->GetMetrics(&Dims, &Offset, 0);
+		m_pRenderedString->GetMetrics(&Dims, &Offset, nullptr);
 		Painter.DrawRect(CRect(CPoint(6, 0), CPoint(14, 0) + Dims),
 			true, m_BackgroundColor, m_BackgroundColor);
 

@@ -68,7 +68,7 @@ CDropDown::~CDropDown(void)
     // Reset floating window (see HideListBox() and ShowListBox()), otherwise the FloatingWindow 
     // would point to 'nothing' -> memory errors. This could occur when you open the dropdown list 
     // and immediately close the window with the keyboard.
-    m_pCViewAncestor->SetFloatingWindow(0);
+    m_pCViewAncestor->SetFloatingWindow(nullptr);
 }
 
 
@@ -229,7 +229,7 @@ void CDropDown::HideListBox(void)
 		m_pListBox->SetVisible(false);
 		if (m_pCViewAncestor && m_pCViewAncestor->GetFloatingWindow() == m_pListBox)
 		{
-			m_pCViewAncestor->SetFloatingWindow(0);
+			m_pCViewAncestor->SetFloatingWindow(nullptr);
 		}
 	}
 }

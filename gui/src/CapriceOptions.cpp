@@ -316,7 +316,7 @@ bool CapriceOptions::HandleMessage(CMessage* pMessage)
             for (unsigned int i = 0; i < m_pButtonRoms.size(); i ++) {
               if (pMessage->Source() == m_pButtonRoms.at(i)) {
                 pRomSlotsDialog = new wGui::CapriceRomSlots(CRect(
-                      CPoint(m_pSDLSurface->w /2 - 140, 30), 250, 200), this, 0, "", i, m_pButtonRoms.at(i));
+                      CPoint(m_pSDLSurface->w /2 - 140, 30), 250, 200), this, nullptr, "", i, m_pButtonRoms.at(i));
                 pRomSlotsDialog->SetModal(true);
                 bHandled = CFrame::HandleMessage(pMessage);
                 break;
@@ -498,7 +498,7 @@ void CapriceOptions::ProcessOptionChanges(t_CPC& CPC) {
         }
         audio_resume();
 
-        CMessageServer::Instance().QueueMessage(new CMessage(CMessage::APP_EXIT, 0, this));
+        CMessageServer::Instance().QueueMessage(new CMessage(CMessage::APP_EXIT, nullptr, this));
     }
 }
 

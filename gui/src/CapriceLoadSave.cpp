@@ -143,7 +143,7 @@ bool CapriceLoadSave::HandleMessage(CMessage* pMessage)
                         break;
                       case 3: // Tape
                         // Unsupported
-                        wGui::CMessageBox *pMessageBox = new wGui::CMessageBox(CRect(CPoint(m_ClientRect.Width() /2 - 125, m_ClientRect.Height() /2 - 30), 250, 60), this, 0, "Not implemented", "Saving tape not  yet implemented", CMessageBox::BUTTON_OK);
+                        wGui::CMessageBox *pMessageBox = new wGui::CMessageBox(CRect(CPoint(m_ClientRect.Width() /2 - 125, m_ClientRect.Height() /2 - 30), 250, 60), this, nullptr, "Not implemented", "Saving tape not  yet implemented", CMessageBox::BUTTON_OK);
                         pMessageBox->SetModal(true);
                         //tape_save(filename.c_str());
                         break;

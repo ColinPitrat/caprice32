@@ -119,6 +119,11 @@ public:
 	//! \param pMessage A pointer to the message
 	virtual bool HandleMessage(CMessage* pMessage);
 
+  virtual void AddFocusableWidget(CWindow *pWidget) override;
+
+  virtual void RemoveFocusableWidget(CWindow *pWidget) override;
+
+  void FocusNext(EFocusDirection direction);
 
 protected:
 	CPictureButton* m_pFrameCloseButton;  //!< The close button for the frame
@@ -130,6 +135,7 @@ protected:
 	bool m_bResizable;  //!< Indicates if the frame is resizable
 	bool m_bModal;  //!< Indicates if the frame is modal
 	CMenu* m_pMenu;  //!< A pointer to the frame's menu
+  std::list<CWindow*> m_FocusableWidgets; //!< A list of all focusable widgets in this frame
 
 private:
 	CRect m_TitleBarRect;  //!< A place to cache the title bar rect

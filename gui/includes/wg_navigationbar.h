@@ -60,7 +60,7 @@ public:
 	//! \param pFontEngine A pointer to the font engine to use when drawing the control
 	//! If this is left out (or set to 0) it will use the default font engine specified by the CApplication (which must be set before instantiating this object)
 	CNavigationBar(CWindow* pParent, const CPoint& UpperLeft, unsigned int iMaxItems,
-                   unsigned int iItemWidth = 50, unsigned int iItemHeight = 50, CFontEngine* pFontEngine = 0);
+                   unsigned int iItemWidth = 50, unsigned int iItemHeight = 50, CFontEngine* pFontEngine = nullptr);
 
 	//! Standard destructor
 	virtual ~CNavigationBar(void);

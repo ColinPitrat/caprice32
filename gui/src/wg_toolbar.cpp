@@ -51,7 +51,7 @@ void CToolBar::InsertButton(CButton* pButton, long int iButtonID, unsigned int i
 	if (iPosition > m_vpButtons.size())
 		iPosition = stdex::safe_static_cast<unsigned int>(m_vpButtons.size());
 	long int iFixedButtonID = iButtonID;
-	if (pButton == 0)
+	if (pButton == nullptr)
 	{
 		iFixedButtonID = 0;
 	}

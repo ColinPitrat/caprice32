@@ -140,7 +140,7 @@ std::string::size_type CEditBox::GetIndexFromPoint(const CPoint& Point) const  /
 {
 	CPoint Offset;
 	std::vector<CRect> CharRects;
-	m_pRenderedString->GetMetrics(0, &Offset, &CharRects);
+	m_pRenderedString->GetMetrics(nullptr, &Offset, &CharRects);
 	CRect SubRect(m_WindowRect.SizeRect());
 	SubRect.Grow(-3);
 	std::string::size_type index = 0;

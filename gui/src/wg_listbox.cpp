@@ -38,7 +38,7 @@ CListBox::CListBox(const CRect& WindowRect, CWindow* pParent, bool bSingleSelect
 	m_iItemHeight(iItemHeight),
 	m_iFocusedItem(0),
 	m_bSingleSelection(bSingleSelection),
-	m_pDropDown(0)
+	m_pDropDown(nullptr)
 {
 	if (pFontEngine)
 	{

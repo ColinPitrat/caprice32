@@ -52,7 +52,6 @@ bool CapriceMenu::HandleMessage(CMessage* pMessage)
     switch (pMessage->MessageType())
     {
     case CMessage::CTRL_SINGLELCLICK:
-      std::cout << "Received SINGLECLICK" << std::endl;
       if (pMessage->Destination() == this) {
         bHandled = true;
         for(auto& b : m_buttons) {
@@ -64,9 +63,7 @@ bool CapriceMenu::HandleMessage(CMessage* pMessage)
       }
       break;
     case CMessage::KEYBOARD_KEYDOWN:
-      std::cout << "Received KEYDOWN " << m_bVisible << " - " << (pMessage->Destination() == this) << std::endl;
       if (m_bVisible && pMessage->Destination() == this) {
-        std::cout << "For me" << std::endl;
         CKeyboardMessage* pKeyboardMessage = dynamic_cast<CKeyboardMessage*>(pMessage);
         if (pKeyboardMessage) {
           switch (pKeyboardMessage->Key) {

@@ -47,7 +47,7 @@ CwgBitmapResourceHandle::CwgBitmapResourceHandle(EwgResourceId resId) :
 		switch (m_ResourceId)
 		{
 			case NULL_RESOURCE_ID:
-				m_BitmapMap[NULL_RESOURCE_ID] = 0;
+				m_BitmapMap[NULL_RESOURCE_ID] = nullptr;
 				break;
 			case WGRES_UP_ARROW_BITMAP:
 			{
@@ -242,7 +242,7 @@ CwgCursorResourceHandle::CwgCursorResourceHandle(EwgResourceId resId) :
 		switch (m_ResourceId)
 		{
 			case NULL_RESOURCE_ID:
-				m_SDLCursorMap[m_ResourceId] = 0;
+				m_SDLCursorMap[m_ResourceId] = nullptr;
 				break;
 			case WGRES_POINTER_CURSOR:
 			{

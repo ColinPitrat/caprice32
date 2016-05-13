@@ -31,6 +31,7 @@
 #include "wg_frame.h"
 #include "std_ex.h"
 #include "video.h"
+#include <algorithm>
 
 extern video_plugin* vid_plugin;
 
@@ -42,12 +43,12 @@ CView* CView::m_pInstance = nullptr;
 
 
 CView::CView(const CRect& WindowRect, std::string sTitle, bool bResizable, bool bFullScreen) :
-	CWindow(WindowRect, 0),
+	CWindow(WindowRect, nullptr),
 	m_bResizable(bResizable),
 	m_bFullScreen(bFullScreen),
-	m_pMenu(0),
-	m_pFloatingWindow(0),
-	m_pScreenSurface(0)
+	m_pMenu(nullptr),
+	m_pFloatingWindow(nullptr),
+	m_pScreenSurface(nullptr)
 {
 	if (m_pInstance)
 	{
@@ -70,10 +71,10 @@ CView::CView(const CRect& WindowRect, std::string sTitle, bool bResizable, bool 
 
 
 CView::CView(SDL_Surface* surface, SDL_Surface* backSurface, const CRect& WindowRect) :
-	CWindow(CRect(0, 0, surface->w, surface->h), 0),
-	m_pMenu(0),
-	m_pFloatingWindow(0),
-	m_pScreenSurface(0)
+	CWindow(CRect(0, 0, surface->w, surface->h), nullptr),
+	m_pMenu(nullptr),
+	m_pFloatingWindow(nullptr),
+	m_pScreenSurface(nullptr)
 {
 	if (m_pInstance)
 	{
@@ -95,7 +96,7 @@ CView::CView(SDL_Surface* surface, SDL_Surface* backSurface, const CRect& Window
     // so it covers the entire WindowRect.
 	m_ClientRect     = WindowRect.SizeRect();
 	m_pScreenSurface = surface;
-    m_pBackSurface   = backSurface;
+  m_pBackSurface   = backSurface;
 
 	// judb should not happen:-)
 	if (m_pScreenSurface == nullptr)
@@ -185,11 +186,10 @@ bool CView::HandleMessage(CMessage* pMessage)
 		switch(pMessage->MessageType())
 		{
 		case CMessage::APP_PAINT :
-			if (pMessage->Destination() == this || pMessage->Destination() == 0)
+			if (pMessage->Destination() == this || pMessage->Destination() == nullptr)
 			{
 				vid_plugin->lock();
-				SDL_Surface* pFloatingSurface = SDL_CreateRGBSurface(SDL_SWSURFACE, m_pScreenSurface->w,
-m_pScreenSurface->h, CApplication::Instance()->GetBitsPerPixel(), 0x000000FF, 0x0000FF00, 0x00FF0000, 0xFF000000);
+				SDL_Surface* pFloatingSurface = SDL_CreateRGBSurface(SDL_SWSURFACE, m_pScreenSurface->w, m_pScreenSurface->h, CApplication::Instance()->GetBitsPerPixel(), 0x000000FF, 0x0000FF00, 0x00FF0000, 0xFF000000);
 				PaintToSurface(*m_pScreenSurface, *pFloatingSurface, CPoint(0, 0));
 				// judb use entire application SDL surface (otherwise strange clipping effects occur
 				// when moving frames, also clipping of listboxes.)
@@ -207,14 +207,14 @@ m_pScreenSurface->h, CApplication::Instance()->GetBitsPerPixel(), 0x000000FF, 0x
 			}
 			break;
 		case CMessage::APP_DESTROY_FRAME:
-			if (pMessage->Destination() == this || pMessage->Destination() == 0)
+			if (pMessage->Destination() == this || pMessage->Destination() == nullptr)
 			{
 				CFrame* pFrame = dynamic_cast<CFrame*>(const_cast<CMessageClient*>(pMessage->Source()));
 				if (pFrame)
 				{
 					pFrame->SetModal(false);
-          pFrame->SetNewParent(0);
-					CMessageServer::Instance().QueueMessage(new CMessage(CMessage::APP_PAINT, 0, this));
+          pFrame->SetNewParent(nullptr);
+					CMessageServer::Instance().QueueMessage(new CMessage(CMessage::APP_PAINT, nullptr, this));
 					delete pFrame;
 				}
 				bHandled = true;
@@ -250,7 +250,7 @@ m_pScreenSurface->h, CApplication::Instance()->GetBitsPerPixel(), 0x000000FF, 0x
 			{
 				if (!m_pFloatingWindow || !m_pFloatingWindow->OnMouseButtonDown(pMouseMessage->Point, pMouseMessage->Button))
 				{
-					if (pMouseMessage->Destination() == 0)
+					if (pMouseMessage->Destination() == nullptr)
 					{
 						OnMouseButtonDown(pMouseMessage->Point, pMouseMessage->Button);
 					}
@@ -270,7 +270,7 @@ m_pScreenSurface->h, CApplication::Instance()->GetBitsPerPixel(), 0x000000FF, 0x
 			{
 				if (!m_pFloatingWindow || !m_pFloatingWindow->OnMouseButtonUp(pMouseMessage->Point, pMouseMessage->Button))
 				{
-					if (pMouseMessage->Destination() == 0)
+					if (pMouseMessage->Destination() == nullptr)
 					{
 						OnMouseButtonUp(pMouseMessage->Point, pMouseMessage->Button);
 					}

@@ -207,6 +207,10 @@ public:
 	//! \return true if the object handled the message (the message will not be given to any other handlers)
 	virtual bool HandleMessage(CMessage* pMessage);
 
+  virtual void AddFocusableWidget(CWindow *pWidget);
+
+  virtual void RemoveFocusableWidget(CWindow *pWidget);
+
 
 protected:
 	// Registering and Deregistering child windows is automatically handled by the constructors and destructors

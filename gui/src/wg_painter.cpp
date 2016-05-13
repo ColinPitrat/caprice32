@@ -32,7 +32,7 @@ namespace wGui
 
 CPainter::CPainter(SDL_Surface* pSurface, EPaintMode ePaintMode) :
 	m_pSurface(pSurface),
-	m_pWindow(0),
+	m_pWindow(nullptr),
 	m_PaintMode(ePaintMode)
 {
 	if (!m_pSurface)
@@ -43,7 +43,7 @@ CPainter::CPainter(SDL_Surface* pSurface, EPaintMode ePaintMode) :
 
 
 CPainter::CPainter(CWindow* pWindow, EPaintMode ePaintMode) :
-	m_pSurface(0),
+	m_pSurface(nullptr),
 	m_pWindow(pWindow),
 	m_PaintMode(ePaintMode)
 {
@@ -205,7 +205,7 @@ void CPainter::DrawBox(CPoint UpperLeftPoint, int width, int height, const CRGBC
 
 void CPainter::DrawPoint(const CPoint& Point, const CRGBColor& PointColor)
 {
-	CPoint RealPoint = (m_pWindow != 0) ? Point + m_pWindow->GetClientRect().TopLeft() : Point;
+	CPoint RealPoint = (m_pWindow != nullptr) ? Point + m_pWindow->GetClientRect().TopLeft() : Point;
 	if (CRect(0, 0, m_pSurface->w, m_pSurface->h).HitTest(RealPoint) == CRect::RELPOS_INSIDE)
 	{
 		LockSurface();
@@ -243,7 +243,7 @@ void CPainter::DrawPoint(const CPoint& Point, const CRGBColor& PointColor)
 
 CRGBColor CPainter::ReadPoint(const CPoint& Point)
 {
-	CPoint RealPoint = (m_pWindow != 0) ? Point + m_pWindow->GetClientRect().TopLeft() : Point;
+	CPoint RealPoint = (m_pWindow != nullptr) ? Point + m_pWindow->GetClientRect().TopLeft() : Point;
 	Uint32 PixelColor = 0;
 	if (CRect(0, 0, m_pSurface->w, m_pSurface->h).HitTest(RealPoint) == CRect::RELPOS_INSIDE)
 	{

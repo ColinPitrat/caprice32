@@ -2109,9 +2109,9 @@ int zip_extract (const char *pchZipFile, const char *pchFileName, dword dwOffset
 
    pbInputBuffer = pbGPBuffer; // space for compressed data chunck
    pbOutputBuffer = pbInputBuffer + 16384; // space for uncompressed data chunck
-   z.zalloc = (alloc_func)0;
-   z.zfree = (free_func)0;
-   z.opaque = (voidpf)0;
+   z.zalloc = (alloc_func)nullptr;
+   z.zfree = (free_func)nullptr;
+   z.opaque = (voidpf)nullptr;
    iStatus = inflateInit2(&z, -MAX_WBITS); // init zlib stream (no header)
    do {
       z.next_in = pbInputBuffer;

@@ -48,7 +48,7 @@ CToolTip::CToolTip(CWindow* pToolWindow, std::string sText, CRGBColor& FontColor
 
 	//Now resize the window so that it fits the Tooltip text
 	CPoint Dims;
-	m_pRenderedString->GetMetrics(&Dims, 0, 0);
+	m_pRenderedString->GetMetrics(&Dims, nullptr, nullptr);
 	m_BoundingRect = CRect(CPoint(0, 0), Dims + CPoint(4, 4));
 
 	m_BackgroundColor = BackgroundColor;
@@ -74,7 +74,7 @@ void CToolTip::ShowTip(const CPoint& DrawPoint)
 void CToolTip::HideTip(void)
 {
 	SetVisible(false);
-	CMessageServer::Instance().QueueMessage(new CMessage(CMessage::APP_PAINT, 0, this));
+	CMessageServer::Instance().QueueMessage(new CMessage(CMessage::APP_PAINT, nullptr, this));
 }
 
 

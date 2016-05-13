@@ -174,7 +174,7 @@ public:
 
 	//! Changes the mouse cursor
 	//! \param pCursorResourceHandle A pointer to the cursor resource handle, if no cursor is specified, the cursor will revert to the system default
-	virtual void SetMouseCursor(CCursorResourceHandle* pCursorResourceHandle = 0);
+	virtual void SetMouseCursor(CCursorResourceHandle* pCursorResourceHandle = nullptr);
 
 	//! Changes the mouse position
 	//! When this is called a new SDL_MOUSEMOTION event is triggered
@@ -206,7 +206,6 @@ public:
 	//! CApplication will handle the APP_EXIT message, and will close the application on it's receipt
 	//! \param pMessage A pointer the the message to handle
 	virtual bool HandleMessage(CMessage* pMessage);
-
 
 protected:
 

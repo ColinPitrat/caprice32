@@ -78,7 +78,7 @@ FT_BitmapGlyphRec* CFontEngine::RenderGlyph(char Char)
 		{
 			throw(Wg_Ex_FreeType("CFontEngine::RenderGlyph : Unable to copy glyph."));
 		}
-		if (FT_Glyph_To_Bitmap(&glyph, ft_render_mode_normal, 0, 1))
+		if (FT_Glyph_To_Bitmap(&glyph, ft_render_mode_normal, nullptr, 1))
 		{
 			throw(Wg_Ex_FreeType("CFontEngine::RenderGlyph : Unable to render glyph."));
 		}

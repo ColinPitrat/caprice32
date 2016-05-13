@@ -45,7 +45,7 @@ class CTimer : public CMessageClient
 public:
 	//! Standard constructor
 	//! \param pOwner A pointer to the timer 'owner'.  This is what the timer will set as the destination for it's messages.  Use 0 to broadcast the message.
-	CTimer(CMessageClient* pOwner = 0);
+	CTimer(CMessageClient* pOwner = nullptr);
 
 	//! Standard destructor
 	virtual ~CTimer(void);
@@ -60,7 +60,7 @@ public:
 
 	//! Indicates if the timer is currently running
 	//! \return true is the timer is currently running
-	bool IsRunning(void) { return m_TimerID != 0; }
+	bool IsRunning(void) { return m_TimerID != nullptr; }
 
 	//! Gets the number of times the timer has triggered since it was last reset
 	//! \return The count of times the timer has fired

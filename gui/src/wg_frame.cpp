@@ -25,6 +25,8 @@
 #include "wgui_include_config.h"
 #include "wg_frame.h"
 #include "wg_application.h"
+#include <algorithm>
+#include <iostream>
 
 namespace wGui
 {
@@ -36,7 +38,7 @@ CFrame::CFrame(const CRect& WindowRect, CWindow* pParent, CFontEngine* pFontEngi
 	m_iTitleBarHeight(12),
 	m_bResizable(bResizable),
 	m_bModal(false),
-	m_pMenu(0),
+	m_pMenu(nullptr),
 	m_bDragMode(false)
 {
 	if (pFontEngine) {
@@ -71,7 +73,7 @@ CFrame::CFrame(const CRect& WindowRect, CWindow* pParent, CFontEngine* pFontEngi
 
 void CFrame::CloseFrame(void)
 {
-	CMessageServer::Instance().QueueMessage(new CMessage(CMessage::APP_DESTROY_FRAME, 0, this));
+	CMessageServer::Instance().QueueMessage(new CMessage(CMessage::APP_DESTROY_FRAME, nullptr, this));
 }
 
 
@@ -210,7 +212,7 @@ bool CFrame::OnMouseButtonDown(CPoint Point, unsigned int Button)  // virtual
 			m_bDragMode = true;
 			m_DragPointerStart = Point;
 			m_FrameGhostRect = m_WindowRect;
-			CMessageServer::Instance().QueueMessage(new CMessage(CMessage::APP_PAINT, 0, this));
+			CMessageServer::Instance().QueueMessage(new CMessage(CMessage::APP_PAINT, nullptr, this));
 		}
 		SetNewParent(m_pParentWindow);	// This moves the window to the top
 		bResult = true;
@@ -237,7 +239,7 @@ bool CFrame::HandleMessage(CMessage* pMessage)  // virtual
 				CRect MovedRect = m_WindowRect + (pMouseMessage->Point - m_DragPointerStart);
 				CRect Bounds = m_pParentWindow->GetClientRect().SizeRect();
 
-//                if (MovedRect.Right() > Bounds.Right())
+//        if (MovedRect.Right() > Bounds.Right())
 //				{
 //					MovedRect.Move(Bounds.Right() - MovedRect.Right(), 0);
 //				}
@@ -263,7 +265,7 @@ bool CFrame::HandleMessage(CMessage* pMessage)  // virtual
 				{
 					m_FrameGhostRect = MovedRect;
 				}
-				CMessageServer::Instance().QueueMessage(new CMessage(CMessage::APP_PAINT, 0, this));
+				CMessageServer::Instance().QueueMessage(new CMessage(CMessage::APP_PAINT, nullptr, this));
 			}
 			break;
 		}
@@ -298,6 +300,39 @@ bool CFrame::HandleMessage(CMessage* pMessage)  // virtual
 	}
 
 	return bHandled;
+}
+
+void CFrame::AddFocusableWidget(CWindow *pWidget)
+{
+  std::cout << "AddFocusableWidget for frame" << std::endl;
+  if (m_FocusableWidgets.empty()) {
+    pWidget->SetHasFocus(true);
+  }
+  m_FocusableWidgets.push_back(pWidget);
+}
+
+void CFrame::RemoveFocusableWidget(CWindow *pWidget)
+{
+  m_FocusableWidgets.remove(pWidget);
+}
+
+void CFrame::FocusNext(EFocusDirection direction)
+{
+  CWindow *to_unfocus = nullptr;
+  auto loop_body = [&to_unfocus](CWindow* w) {
+    if(to_unfocus != nullptr) {
+      to_unfocus->SetHasFocus(false);
+      w->SetHasFocus(true);
+      to_unfocus = nullptr;
+    } else if(w->HasFocus()) {
+      to_unfocus = w;
+    }
+  };
+
+  if(direction == EFocusDirection::BACKWARD)
+    std::for_each(m_FocusableWidgets.rbegin(), m_FocusableWidgets.rend(), loop_body);
+  else
+    std::for_each(m_FocusableWidgets.begin(), m_FocusableWidgets.end(), loop_body);
 }
 
 }

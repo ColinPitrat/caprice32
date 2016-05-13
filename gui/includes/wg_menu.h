@@ -49,11 +49,11 @@ public:
 	//! \param sItemText The text to display for the menu item
 	//! \param iItemId An identifier for the menu item, which gets returned in the CTRL_SINGLELCLICK message
 	//! \param pPopup A pointer to a popup menu, if the menu item is actually a submenu, this should be 0 if the item isn't a submenu (defaults to 0)
-	SMenuItem(std::string sItemText, long int iItemId = 0, CPopupMenu* pPopup = 0) :
+	SMenuItem(std::string sItemText, long int iItemId = 0, CPopupMenu* pPopup = nullptr) :
 		sItemText(sItemText), iItemId(iItemId), pPopup(pPopup), bSpacer(false) { }
 
 	//! Constructs a new Spacer Menu Item
-	SMenuItem(void) : sItemText(""), iItemId(0), pPopup(0), bSpacer(true) { }
+	SMenuItem(void) : sItemText(""), iItemId(0), pPopup(nullptr), bSpacer(true) { }
 
 	std::string sItemText;  //!< The caption to display for the menu item
 	long int iItemId;  //!< An identifier for the menu item, which gets returned in the CTRL_SINGLELCLICK message
@@ -75,7 +75,7 @@ public:
 	//! \param pParent A pointer to the parent window
 	//! \param pFontEngine A pointer to the font engine to use when drawing the control
 	//! If this is left out (or set to 0) it will use the default font engine specified by the CApplication (which must be set before instantiating this object)
-	CMenuBase(const CRect& WindowRect, CWindow* pParent, CFontEngine* pFontEngine = 0);
+	CMenuBase(const CRect& WindowRect, CWindow* pParent, CFontEngine* pFontEngine = nullptr);
 
 	//! Standard destructor
 	virtual ~CMenuBase(void);
@@ -170,7 +170,7 @@ public:
 	//! \param pParent A pointer to the parent window
 	//! \param pFontEngine A pointer to the font engine to use when drawing the control
 	//! If this is left out (or set to 0) it will use the default font engine specified by the CApplication (which must be set before instantiating this object)
-	CMenu(const CRect& WindowRect, CWindow* pParent, CFontEngine* pFontEngine = 0);
+	CMenu(const CRect& WindowRect, CWindow* pParent, CFontEngine* pFontEngine = nullptr);
 
 	//! Standard destructor
 	virtual ~CMenu(void);
@@ -224,7 +224,7 @@ public:
 	//! \param pParent A pointer to the parent window
 	//! \param pFontEngine A pointer to the font engine to use when drawing the control
 	//! If this is left out (or set to 0) it will use the default font engine specified by the CApplication (which must be set before instantiating this object)
-	CPopupMenu(const CRect& WindowRect, CWindow* pParent, CFontEngine* pFontEngine = 0);
+	CPopupMenu(const CRect& WindowRect, CWindow* pParent, CFontEngine* pFontEngine = nullptr);
 
 	//! Standard destructor
 	virtual ~CPopupMenu(void);

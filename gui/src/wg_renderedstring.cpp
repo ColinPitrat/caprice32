@@ -52,7 +52,7 @@ void CRenderedString::Draw(SDL_Surface* pSurface, const CRect& BoundingRect, con
 {
 	CPoint OriginOffset;
 	std::vector<CRect> CharacterRects;
-	GetMetrics(0, &OriginOffset, &CharacterRects);
+	GetMetrics(nullptr, &OriginOffset, &CharacterRects);
 	for (unsigned int i = 0; i < m_sString.size(); ++i)
 	{
 		FT_BitmapGlyphRec* pGlyph;

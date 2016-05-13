@@ -19,8 +19,8 @@
 #ifdef HAVE_GL
 #include "glfuncs.h"
 
-#define GL_FUNC(ret,func,params) ptr##func e##func=0;
-#define GL_FUNC_OPTIONAL(ret,func,params) ptr##func e##func=0;
+#define GL_FUNC(ret,func,params) ptr##func e##func=nullptr;
+#define GL_FUNC_OPTIONAL(ret,func,params) ptr##func e##func=nullptr;
 #include "glfunclist.h"
 #undef GL_FUNC
 #undef GL_FUNC_OPTIONAL

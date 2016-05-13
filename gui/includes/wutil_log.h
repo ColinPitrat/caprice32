@@ -63,7 +63,7 @@ public:
 	//! \param sMessage A text string with the log message
 	//! \param iSeverity An arbitrary severity indicator, where lower numbers are considered more severe (1 is the most severe), defaults to 5
 	void AddLogEntry(const std::string& sMessage, unsigned int iSeverity = 5)
-		{ AddLogEntry(sMessage, iSeverity, time(0)); }
+		{ AddLogEntry(sMessage, iSeverity, time(nullptr)); }
 
 	//! Get a list of the log entries
 	//! \param iSeverity If this is zero, all log entries will be returned, otherwise it will only return log entries with the specified severity (defaults to 0)

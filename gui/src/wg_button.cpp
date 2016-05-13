@@ -26,6 +26,7 @@
 #include "wutil_debug.h"
 #include "wg_button.h"
 #include "wg_application.h"
+#include "wg_view.h"
 #include "wg_message_server.h"
 #include "std_ex.h"
 #include <algorithm>
@@ -51,15 +52,16 @@ CButton::CButton(const CRect& WindowRect, CWindow* pParent, std::string sText, C
 	m_pRenderedString.reset(new CRenderedString(
 		m_pFontEngine, sText, CRenderedString::VALIGN_CENTER, CRenderedString::HALIGN_CENTER));
 //	m_BackgroundColor = CApplication::Instance()->GetDefaultForegroundColor();
-    m_BackgroundColor = DEFAULT_BUTTON_COLOR;
+  m_BackgroundColor = DEFAULT_BUTTON_COLOR;
 	CMessageServer::Instance().RegisterMessageClient(this, CMessage::MOUSE_BUTTONUP);
 	Draw();
+  m_pParentWindow->AddFocusableWidget(this);
 }
 
 
 CButton::~CButton(void)
 {
-
+  m_pParentWindow->RemoveFocusableWidget(this);
 }
 
 
@@ -193,7 +195,7 @@ bool CButton::HandleMessage(CMessage* pMessage)
 
 
 CPictureButton::CPictureButton(const CRect& WindowRect, CWindow* pParent, std::string sPictureFile) :
-	CButton(WindowRect, pParent, sPictureFile, 0)
+	CButton(WindowRect, pParent, sPictureFile, nullptr)
 {
 	m_phBitmap.reset(new CBitmapFileResourceHandle(sPictureFile));
 	Draw();
@@ -201,7 +203,7 @@ CPictureButton::CPictureButton(const CRect& WindowRect, CWindow* pParent, std::s
 
 
 CPictureButton::CPictureButton(const CRect& WindowRect, CWindow* pParent, const CBitmapResourceHandle& hBitmap) :
-	CButton(WindowRect, pParent, "<bitmap>", 0)
+	CButton(WindowRect, pParent, "<bitmap>", nullptr)
 {
 	m_phBitmap.reset(new CBitmapResourceHandle(hBitmap));
 	Draw();

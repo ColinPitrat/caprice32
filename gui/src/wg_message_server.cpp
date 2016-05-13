@@ -37,7 +37,7 @@
 namespace wGui
 {
 
-CMessageServer* CMessageServer::m_pInstance = 0;
+CMessageServer* CMessageServer::m_pInstance = nullptr;
 
 
 CMessageServer::CMessageServer(void) : m_bIgnoreAllNewMessages(true)
