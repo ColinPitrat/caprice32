@@ -167,7 +167,7 @@ wg_picture.o: wg_picture.cpp wg_picture.h wgui_include_config.h wg_window.h wg_p
 wg_point.o: wg_point.cpp wg_point.h std_ex.h wgui_include_config.h
 
 wg_progress.o: wg_progress.cpp wg_progress.h wgui_include_config.h wg_painter.h wg_range_control.h \
-  std_ex.h
+  std_ex.h wg_window.h
 
 wg_radiobutton.o: wg_radiobutton.cpp wg_radiobutton.h wg_window.h wg_painter.h wg_resources.h \
   wg_message_server.h wgui_include_config.h
