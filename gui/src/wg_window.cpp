@@ -35,7 +35,7 @@
 namespace wGui
 {
 
-CWindow::CWindow(const CRect& WindowRect, CWindow* pParent) :
+CWindow::CWindow(const CRect& WindowRect, CWindow* pParent, bool isFocusable) :
 	m_sWindowText(""),
 	m_WindowRect(WindowRect),
 	m_BackgroundColor(DEFAULT_BACKGROUND_COLOR),
@@ -43,7 +43,8 @@ CWindow::CWindow(const CRect& WindowRect, CWindow* pParent) :
 	m_pParentWindow(nullptr),
 	m_pSDLSurface(nullptr),
 	m_bVisible(true),
-  m_bHasFocus(false)
+  m_bHasFocus(false),
+  m_bIsFocusable(isFocusable)
 {
 	if (!CApplication::Instance())
 	{
@@ -53,6 +54,9 @@ CWindow::CWindow(const CRect& WindowRect, CWindow* pParent) :
 	SetWindowRect(WindowRect);
 	m_BackgroundColor = CApplication::Instance()->GetDefaultBackgroundColor();
 	SetNewParent(pParent);
+  if (m_bIsFocusable) {
+    m_pParentWindow->AddFocusableWidget(this);
+  }
 }
 
 // judb constructor like above, but without specifying a CRect ;
@@ -191,6 +195,17 @@ void CWindow::SetHasFocus(bool bHasFocus)
 {
   m_bHasFocus = bHasFocus;
   Draw();
+}
+
+
+void CWindow::SetIsFocusable(bool bIsFocusable)
+{
+  m_bIsFocusable = bIsFocusable;
+  if (m_bIsFocusable) {
+    m_pParentWindow->AddFocusableWidget(this);
+  } else {
+    m_pParentWindow->RemoveFocusableWidget(this);
+  }
 }
 
 
@@ -392,7 +407,6 @@ bool CWindow::HandleMessage(CMessage* /*pMessage*/)
 
 void CWindow::AddFocusableWidget(CWindow *pWidget)
 {
-  std::cout << "AddFocusableWidget for window" << std::endl;
   if (m_pParentWindow)
   {
     m_pParentWindow->AddFocusableWidget(pWidget);

@@ -123,7 +123,9 @@ public:
 
   virtual void RemoveFocusableWidget(CWindow *pWidget) override;
 
-  void FocusNext(EFocusDirection direction);
+  virtual CWindow *GetFocused();
+
+  void FocusNext(EFocusDirection direction, bool loop = true);
 
 protected:
 	CPictureButton* m_pFrameCloseButton;  //!< The close button for the frame

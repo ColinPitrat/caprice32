@@ -115,6 +115,8 @@ public:
 	//! \return True if it's in the bounds of the editbox
 	virtual bool OnMouseButtonDown(CPoint Point, unsigned int Button);
 
+  //! Override of SetHasFocus to also set key focus
+  virtual void SetHasFocus(bool bHasFocus) override;
 
 	// CMessageClient overrides
 	//! CEditBox will handle MOUSE_BUTTONDOWN and KEYBOARD_KEYDOWN messages

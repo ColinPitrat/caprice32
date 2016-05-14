@@ -15,12 +15,10 @@ extern t_CPC CPC;
 
 namespace wGui {
 
-CapriceMenu::CapriceMenu(const CRect& WindowRect, CView* pParent, CFontEngine* pFontEngine) :
-  CFrame(WindowRect, pParent, pFontEngine, "Caprice32 - Menu", false), m_pParentView(pParent)
+CapriceMenu::CapriceMenu(const CRect& WindowRect, CWindow* pParent, SDL_Surface* screen, CFontEngine* pFontEngine) :
+  CFrame(WindowRect, pParent, pFontEngine, "Caprice32 - Menu", false), m_pScreenSurface(screen)
 {
-  CMessageServer::Instance().RegisterMessageClient(this, CMessage::KEYBOARD_KEYDOWN);
-  CApplication::Instance()->SetKeyFocus(this);
-
+  SetModal(true);
   std::map<MenuItem, std::string> buttons = {
     { MenuItem::OPTIONS, "Options" },
     { MenuItem::LOAD_SAVE, "Load / Save" },
@@ -34,7 +32,7 @@ CapriceMenu::CapriceMenu(const CRect& WindowRect, CView* pParent, CFontEngine* p
   CRect button_rect(CPoint(20, 10), 100, 20);
 
   for(auto& b : buttons) {
-    m_buttons.push_back(CapriceGuiViewButton(b.first, new CButton(button_rect, this, b.second)));
+    m_buttons.push_back(CapriceGuiViewButton(b.first, new CButton(button_rect, this, b.second, true)));
     button_rect += button_space;
   }
 }
@@ -69,23 +67,11 @@ bool CapriceMenu::HandleMessage(CMessage* pMessage)
           switch (pKeyboardMessage->Key) {
             case SDLK_UP:
               bHandled = true;
-              //FocusNext(FocusDirection::BACKWARD);
               CFrame::FocusNext(EFocusDirection::BACKWARD);
               break;
             case SDLK_DOWN:
               bHandled = true;
-              //FocusNext(FocusDirection::FORWARD);
               CFrame::FocusNext(EFocusDirection::FORWARD);
-              break;
-            case SDLK_TAB:
-              bHandled = true;
-              if(pKeyboardMessage->Modifiers & KMOD_SHIFT) {
-                //FocusNext(FocusDirection::BACKWARD);
-                CFrame::FocusNext(EFocusDirection::BACKWARD);
-              } else {
-                //FocusNext(FocusDirection::FORWARD);
-                CFrame::FocusNext(EFocusDirection::FORWARD);
-              }
               break;
             case SDLK_RETURN:
               bHandled = true;
@@ -128,32 +114,30 @@ bool CapriceMenu::HandleMessage(CMessage* pMessage)
             default:
               break;
           }
-        }      
+        }
       }
       break;
     default:
-      bHandled = CFrame::HandleMessage(pMessage);
       break;
     }
   }
-  SDL_Surface *pScreenSurface = m_pParentView->GetSurface();
+  if(!bHandled) {
+      bHandled = CFrame::HandleMessage(pMessage);
+  }
   switch (selected) {
     case MenuItem::OPTIONS:
       {
-        CapriceOptions* pOptionsBox = new CapriceOptions(CRect(CPoint(pScreenSurface->w /2 - 165, pScreenSurface->h /2 - 127), 330, 260), m_pParentView, nullptr);
-        pOptionsBox->SetModal(true);
+        /*CapriceOptions* pOptionsBox = */new CapriceOptions(CRect(ViewToClient(CPoint(m_pScreenSurface->w /2 - 165, m_pScreenSurface->h /2 - 127)), 330, 260), this, nullptr);
         break;
       }
     case MenuItem::LOAD_SAVE:
       {
-        CapriceLoadSave* pLoadSaveBox = new CapriceLoadSave(CRect(CPoint(pScreenSurface->w /2 - 165, pScreenSurface->h /2 - 127), 330, 260), m_pParentView, nullptr);
-        pLoadSaveBox->SetModal(true);
+        /*CapriceLoadSave* pLoadSaveBox = */new CapriceLoadSave(CRect(ViewToClient(CPoint(m_pScreenSurface->w /2 - 165, m_pScreenSurface->h /2 - 127)), 330, 260), this, nullptr);
         break;
       }
     case MenuItem::MEMORY_TOOL:
       {
-        CapriceMemoryTool* pMemoryTool = new CapriceMemoryTool(CRect(CPoint(pScreenSurface->w /2 - 165, pScreenSurface->h /2 - 140), 330, 270), m_pParentView, nullptr);
-        pMemoryTool->SetModal(true);
+        /*CapriceMemoryTool* pMemoryTool = */new CapriceMemoryTool(CRect(ViewToClient(CPoint(m_pScreenSurface->w /2 - 165, m_pScreenSurface->h /2 - 140)), 330, 270), this, nullptr);
         break;
       }
     case MenuItem::RESET:
@@ -165,8 +149,7 @@ bool CapriceMenu::HandleMessage(CMessage* pMessage)
       }
     case MenuItem::ABOUT:
       {
-        CapriceAbout* pAboutBox = new CapriceAbout(CRect(CPoint(pScreenSurface->w /2 - 87, pScreenSurface->h /2 - 120), 174, 240), m_pParentView, nullptr);
-        pAboutBox->SetModal(true);
+        /*CapriceAbout* pAboutBox = */new CapriceAbout(CRect(ViewToClient(CPoint(m_pScreenSurface->w /2 - 87, m_pScreenSurface->h /2 - 120)), 174, 240), this, nullptr);
         break;
       }
     case MenuItem::RESUME:

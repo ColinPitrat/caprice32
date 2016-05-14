@@ -8,7 +8,7 @@ CapriceGuiView::CapriceGuiView(SDL_Surface* surface, SDL_Surface* backSurface, c
 {
   CMessageServer::Instance().RegisterMessageClient(this, CMessage::CTRL_MESSAGEBOXRETURN);
   // judb Apparently this needs to be done the first time:
-  m_menuFrame = new CapriceMenu(CRect(CPoint(m_pScreenSurface->w / 2 - 70, m_pScreenSurface->h / 2 - 110), 140, 240), this, nullptr);
+  m_menuFrame = new CapriceMenu(CRect(CPoint(m_pScreenSurface->w / 2 - 70, m_pScreenSurface->h / 2 - 110), 140, 240), this, m_pScreenSurface, nullptr);
 }
 
 // judb Show the Caprice32 emulation display, and our CCaGuiView (CView) on top of it.

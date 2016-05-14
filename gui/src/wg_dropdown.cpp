@@ -29,8 +29,6 @@
 #include "wg_resources.h"
 #include "wg_view.h"
 
-
-
 namespace wGui
 {
 
@@ -38,8 +36,7 @@ CDropDown::CDropDown(const CRect& WindowRect, CWindow* pParent, bool bAllowEdit,
 	CWindow(WindowRect, pParent),
 	m_bAllowEdit(bAllowEdit)
 {
-
-    m_pCViewAncestor = GetView();
+  m_pCViewAncestor = GetView();
 	m_pEditBox = new CEditBox(CRect(0, 0, m_WindowRect.Width() - m_WindowRect.Height(), m_WindowRect.Height()), this, pFontEngine);
 	if (!m_bAllowEdit)
 	{
@@ -106,7 +103,6 @@ void CDropDown::MoveWindow(const CPoint& MoveDistance)
 	m_pListBox->MoveWindow(MoveDistance);
 }
 
-// judb override
 void CDropDown::SetVisible(bool bVisible) {
 	CWindow::SetVisible(bVisible);
 	HideListBox();

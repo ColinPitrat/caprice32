@@ -23,6 +23,7 @@ namespace wGui {
 CapriceLoadSave::CapriceLoadSave(const CRect& WindowRect, CWindow* pParent, CFontEngine* pFontEngine) :
 	CFrame(WindowRect, pParent, pFontEngine, "Load / Save", false)
 {
+  SetModal(true);
   // Make this window listen to incoming CTRL_VALUECHANGE messages (used for updating drop down values)
   CMessageServer::Instance().RegisterMessageClient(this, CMessage::CTRL_VALUECHANGE);
   CMessageServer::Instance().RegisterMessageClient(this, CMessage::CTRL_VALUECHANGING);
@@ -30,7 +31,7 @@ CapriceLoadSave::CapriceLoadSave(const CRect& WindowRect, CWindow* pParent, CFon
 
   // File type (.SNA, .DSK, .TAP, .VOC)
   m_pTypeLabel = new CLabel(          CPoint(15, 25),             this, "File type: ");
-  m_pTypeValue = new CDropDown( CRect(CPoint(80, 20), 150, 20),    this, "File type: ");
+  m_pTypeValue = new CDropDown( CRect(CPoint(80, 20), 150, 20),    this, false);
   m_pTypeValue->AddItem(SListItem("Snapshot (.sna)"));
   m_pTypeValue->AddItem(SListItem("Drive A (.dsk)"));
   m_pTypeValue->AddItem(SListItem("Drive B (.dsk)"));
@@ -40,8 +41,8 @@ CapriceLoadSave::CapriceLoadSave(const CRect& WindowRect, CWindow* pParent, CFon
   m_currentExt = ".sna";
 
   // Action: load / save
-  m_pActionLabel = new CLabel(          CPoint(15, 55),             this, "File type: ");
-  m_pActionValue = new CDropDown( CRect(CPoint(80, 50), 150, 20),   this, "File type: ");
+  m_pActionLabel = new CLabel(          CPoint(15, 55),             this, "Action: ");
+  m_pActionValue = new CDropDown( CRect(CPoint(80, 50), 150, 20),   this, false);
   m_pActionValue->AddItem(SListItem("Load"));
   m_pActionValue->AddItem(SListItem("Save"));
   m_pActionValue->SetListboxHeight(2);
@@ -64,8 +65,8 @@ CapriceLoadSave::CapriceLoadSave(const CRect& WindowRect, CWindow* pParent, CFon
   m_pFileNameValue->SetReadOnly(true);
 
   // Buttons
-  m_pCancelButton   = new CButton(  CRect( CPoint(250, 180), 50, 20), this, "Cancel");
-  m_pLoadSaveButton = new CButton(  CRect( CPoint(250, 210), 50, 20), this, "Load");
+  m_pCancelButton   = new CButton(  CRect( CPoint(250, 180), 50, 20), this, "Cancel", true);
+  m_pLoadSaveButton = new CButton(  CRect( CPoint(250, 210), 50, 20), this, "Load", true);
 }
 
 bool CapriceLoadSave::HandleMessage(CMessage* pMessage)
@@ -76,22 +77,6 @@ bool CapriceLoadSave::HandleMessage(CMessage* pMessage)
 	{
 		switch(pMessage->MessageType())
 		{
-    /* Not working ...
-     * Would need to handle doubleclick in CListBox ?
-      case CMessage::CTRL_DOUBLELCLICK:
-        {
-          std::cout << "Double click on: " << pMessage->Destination() << std::endl;
-          if (pMessage->Destination() == m_pFilesList) {
-            std::string fn = m_pFilesList->GetItem(m_pFilesList->getFirstSelectedIndex()).sItemText;
-            if(fn[fn.size()-1] == '/') {
-              m_pDirectoryValue->SetWindowText(simplifyPath(m_pDirectoryValue->GetWindowText() + '/' + fn));
-              m_pFileNameValue->SetWindowText("");
-              UpdateFilesList();
-            }
-            bHandled = CFrame::HandleMessage(pMessage);
-          }
-        }
-     */
       case CMessage::CTRL_SINGLELCLICK:
         {
           if (pMessage->Destination() == this)
@@ -157,9 +142,6 @@ bool CapriceLoadSave::HandleMessage(CMessage* pMessage)
               bHandled = true;
               break;
             }
-
-            // handle further buttons and events...
-            bHandled = CFrame::HandleMessage(pMessage);
           }
         }
         break;
@@ -176,7 +158,6 @@ bool CapriceLoadSave::HandleMessage(CMessage* pMessage)
               m_pFileNameValue->SetReadOnly(false);
               break;
           }
-          bHandled = CFrame::HandleMessage(pMessage);
         }
         if (pMessage->Destination() == m_pTypeValue) {
           switch (m_pTypeValue->GetSelectedIndex()) {
@@ -201,7 +182,6 @@ bool CapriceLoadSave::HandleMessage(CMessage* pMessage)
               UpdateFilesList();
               break;
           }
-          bHandled = CFrame::HandleMessage(pMessage);
         }
 				if (pMessage->Source() == m_pFilesList) {
 					std::string fn = m_pFilesList->GetItem(m_pFilesList->getFirstSelectedIndex()).sItemText;
@@ -212,14 +192,15 @@ bool CapriceLoadSave::HandleMessage(CMessage* pMessage)
           } else {
 						m_pFileNameValue->SetWindowText(fn);
 					}
-          bHandled = CFrame::HandleMessage(pMessage);
 				}
         break;
 
       default :
-        bHandled = CFrame::HandleMessage(pMessage);
         break;
     }
+  }
+  if (!bHandled) {
+    bHandled = CFrame::HandleMessage(pMessage);
   }
 	return bHandled;
 }

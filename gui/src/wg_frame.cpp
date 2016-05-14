@@ -41,6 +41,10 @@ CFrame::CFrame(const CRect& WindowRect, CWindow* pParent, CFontEngine* pFontEngi
 	m_pMenu(nullptr),
 	m_bDragMode(false)
 {
+// TODO: remove these 2 lines:
+  // Make this window listen to incoming KEYBOARD_KEYDOWN messages to capture TAB pressed and change focused field
+  CMessageServer::Instance().RegisterMessageClient(this, CMessage::KEYBOARD_KEYDOWN);
+
 	if (pFontEngine) {
 		m_pFontEngine = pFontEngine;
 	} else {
@@ -58,7 +62,7 @@ CFrame::CFrame(const CRect& WindowRect, CWindow* pParent, CFontEngine* pFontEngi
 	CMessageServer::Instance().RegisterMessageClient(this, CMessage::MOUSE_BUTTONUP);
 	CMessageServer::Instance().RegisterMessageClient(this, CMessage::MOUSE_MOVE);
 	CMessageServer::Instance().RegisterMessageClient(this, CMessage::CTRL_SINGLELCLICK);
-    CMessageServer::Instance().RegisterMessageClient(this, CMessage::KEYBOARD_KEYDOWN);
+  CMessageServer::Instance().RegisterMessageClient(this, CMessage::KEYBOARD_KEYDOWN);
 }
 
 
@@ -230,72 +234,96 @@ bool CFrame::HandleMessage(CMessage* pMessage)  // virtual
 	{
 		switch(pMessage->MessageType())
 		{
-		case CMessage::MOUSE_MOVE:  // intentional fall through
-		case CMessage::MOUSE_BUTTONUP:
-		{
-			CMouseMessage* pMouseMessage = dynamic_cast<CMouseMessage*>(pMessage);
-			if (pMouseMessage && m_bDragMode)
-			{
-				CRect MovedRect = m_WindowRect + (pMouseMessage->Point - m_DragPointerStart);
-				CRect Bounds = m_pParentWindow->GetClientRect().SizeRect();
+      case CMessage::MOUSE_MOVE:  // intentional fall through
+      case CMessage::MOUSE_BUTTONUP:
+      {
+        CMouseMessage* pMouseMessage = dynamic_cast<CMouseMessage*>(pMessage);
+        if (pMouseMessage && m_bDragMode)
+        {
+          CRect MovedRect = m_WindowRect + (pMouseMessage->Point - m_DragPointerStart);
+          CRect Bounds = m_pParentWindow->GetClientRect().SizeRect();
 
-//        if (MovedRect.Right() > Bounds.Right())
-//				{
-//					MovedRect.Move(Bounds.Right() - MovedRect.Right(), 0);
-//				}
-//				if (MovedRect.Left() < Bounds.Left())
-//				{
-//					MovedRect.Move(Bounds.Left() - MovedRect.Left(), 0);
-//				}
-//				if (MovedRect.Bottom() > Bounds.Bottom())
-//				{
-//					MovedRect.Move(0, Bounds.Bottom() - MovedRect.Bottom());
-//				}
-//				if (MovedRect.Top() < Bounds.Top())
-//				{
-//					MovedRect.Move(0, Bounds.Top() - MovedRect.Top());
-//				}
-				if (pMessage->MessageType() == CMessage::MOUSE_BUTTONUP)
-				{
-					m_WindowRect = MovedRect;
-					m_bDragMode = false;
-					bHandled = true;
-				}
-				else
-				{
-					m_FrameGhostRect = MovedRect;
-				}
-				CMessageServer::Instance().QueueMessage(new CMessage(CMessage::APP_PAINT, nullptr, this));
-			}
-			break;
-		}
-		case CMessage::CTRL_SINGLELCLICK:
-		{
-			if (pMessage->Destination() == this)
-			{
-				if (pMessage->Source() == m_pFrameCloseButton)
-				{
-					CloseFrame();
-					bHandled = true;
-				}
-			}
-			break;
-		}
-
-        case CMessage::KEYBOARD_KEYDOWN:
-            if (m_bVisible && pMessage->Destination() == this) {
-  			    CKeyboardMessage* pKeyboardMessage = dynamic_cast<CKeyboardMessage*>(pMessage);
-				if (pKeyboardMessage) {
-					if (pKeyboardMessage->Key == SDLK_ESCAPE) {
-                        CloseFrame();
-					    bHandled = true;
-                    }
-                }      
+  //        if (MovedRect.Right() > Bounds.Right())
+  //				{
+  //					MovedRect.Move(Bounds.Right() - MovedRect.Right(), 0);
+  //				}
+  //				if (MovedRect.Left() < Bounds.Left())
+  //				{
+  //					MovedRect.Move(Bounds.Left() - MovedRect.Left(), 0);
+  //				}
+  //				if (MovedRect.Bottom() > Bounds.Bottom())
+  //				{
+  //					MovedRect.Move(0, Bounds.Bottom() - MovedRect.Bottom());
+  //				}
+  //				if (MovedRect.Top() < Bounds.Top())
+  //				{
+  //					MovedRect.Move(0, Bounds.Top() - MovedRect.Top());
+  //				}
+          if (pMessage->MessageType() == CMessage::MOUSE_BUTTONUP)
+          {
+            m_WindowRect = MovedRect;
+            m_bDragMode = false;
+            bHandled = true;
+          }
+          else
+          {
+            m_FrameGhostRect = MovedRect;
+          }
+          CMessageServer::Instance().QueueMessage(new CMessage(CMessage::APP_PAINT, nullptr, this));
+        }
+        break;
+      }
+      case CMessage::CTRL_SINGLELCLICK:
+      {
+        if (pMessage->Destination() == this)
+        {
+          if (pMessage->Source() == m_pFrameCloseButton)
+          {
+            CloseFrame();
+            bHandled = true;
+          }
+        }
+        break;
+      }
+      case CMessage::KEYBOARD_KEYDOWN:
+      {
+        if (m_bVisible && pMessage->Destination() == this) {
+          CKeyboardMessage* pKeyboardMessage = dynamic_cast<CKeyboardMessage*>(pMessage);
+          if (pKeyboardMessage) {
+            switch (pKeyboardMessage->Key) {
+              case SDLK_ESCAPE:
+                CloseFrame();
+                bHandled = true;
+                break;
+              case SDLK_TAB:
+                bHandled = true;
+                if(pKeyboardMessage->Modifiers & KMOD_SHIFT) {
+                  CFrame::FocusNext(EFocusDirection::BACKWARD);
+                } else {
+                  CFrame::FocusNext(EFocusDirection::FORWARD);
+                }
+                break;
+              case SDLK_RETURN:
+                {
+                  CWindow *target = GetFocused();
+                  if (target) {
+                    bHandled = true;
+                    CMessageServer::Instance().QueueMessage(new TIntMessage(
+                          CMessage::CTRL_SINGLELCLICK, target->GetAncestor(PARENT), target,
+                          0));
+                  }
+                  break;
+                }
+              default:
+                break;
             }
-            break;
-		default :
-			bHandled = CWindow::HandleMessage(pMessage);
-			break;
+          }
+        }      
+        break;
+      }
+      default :
+        bHandled = CWindow::HandleMessage(pMessage);
+        break;
 		}
 	}
 
@@ -304,35 +332,59 @@ bool CFrame::HandleMessage(CMessage* pMessage)  // virtual
 
 void CFrame::AddFocusableWidget(CWindow *pWidget)
 {
-  std::cout << "AddFocusableWidget for frame" << std::endl;
-  if (m_FocusableWidgets.empty()) {
-    pWidget->SetHasFocus(true);
+  if (pWidget && pWidget->IsFocusable()) {
+    // TODO: we can end-up with a non-visible widget being focused. This is not a big issue but still not super cool
+    //if (find_if(m_FocusableWidgets.begin(), m_FocusableWidgets.end(), [](CWindow *w) -> bool { return w->IsVisible(); }) == m_FocusableWidgets.end()) {
+    if (m_FocusableWidgets.empty()) {
+      pWidget->SetHasFocus(true);
+    }
+    m_FocusableWidgets.push_back(pWidget);
   }
-  m_FocusableWidgets.push_back(pWidget);
 }
 
 void CFrame::RemoveFocusableWidget(CWindow *pWidget)
 {
+  if (pWidget && pWidget->HasFocus()) {
+    FocusNext(EFocusDirection::FORWARD);
+  }
+  // The widget can still have the focus if it's the only focusable one
+  if (pWidget == GetFocused()) {
+    pWidget->SetHasFocus(false);
+  }
   m_FocusableWidgets.remove(pWidget);
 }
 
-void CFrame::FocusNext(EFocusDirection direction)
+CWindow *CFrame::GetFocused() {
+  auto focused = std::find_if(m_FocusableWidgets.begin(), m_FocusableWidgets.end(), [](CWindow *w) { return w->HasFocus();});
+  if(focused == m_FocusableWidgets.end()) {
+    return nullptr;
+  }
+  return *focused;
+}
+
+void CFrame::FocusNext(EFocusDirection direction, bool loop)
 {
   CWindow *to_unfocus = nullptr;
   auto loop_body = [&to_unfocus](CWindow* w) {
     if(to_unfocus != nullptr) {
-      to_unfocus->SetHasFocus(false);
-      w->SetHasFocus(true);
-      to_unfocus = nullptr;
+      if(w->IsVisible()) {
+        to_unfocus->SetHasFocus(false);
+        w->SetHasFocus(true);
+        to_unfocus = nullptr;
+      }
     } else if(w->HasFocus()) {
       to_unfocus = w;
     }
   };
 
-  if(direction == EFocusDirection::BACKWARD)
-    std::for_each(m_FocusableWidgets.rbegin(), m_FocusableWidgets.rend(), loop_body);
-  else
-    std::for_each(m_FocusableWidgets.begin(), m_FocusableWidgets.end(), loop_body);
+  do {
+    if(direction == EFocusDirection::BACKWARD)
+      std::for_each(m_FocusableWidgets.rbegin(), m_FocusableWidgets.rend(), loop_body);
+    else
+      std::for_each(m_FocusableWidgets.begin(), m_FocusableWidgets.end(), loop_body);
+  } while(loop && 
+      (loop = !loop     // Ensure we loop only once even if there's just one focusable widget
+       || to_unfocus)); // If to_unfocus is not null, it means the focused widget is the last one eligible and we need to loop
 }
 
 }

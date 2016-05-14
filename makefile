@@ -92,10 +92,12 @@ fileutils.o: fileutils.cpp fileutils.h
 cap32.o: cap32.cpp cap32.h crtc.h tape.h video.h z80.h CapriceGui.h CapriceGuiView.h font.c rom_mods.c
 
 CapriceMemoryTool.o: CapriceMemoryTool.cpp CapriceMemoryTool.h cap32.h std_ex.h CapriceRomSlots.h wgui.h \
- wg_checkbox.h wg_frame.h wg_groupbox.h wg_label.h wg_navigationbar.h wg_radiobutton.h wg_scrollbar.h
+ wg_checkbox.h wg_frame.h wg_groupbox.h wg_label.h wg_navigationbar.h wg_radiobutton.h wg_scrollbar.h \
+ wg_button.h
 
 CapriceLoadSave.o: CapriceLoadSave.cpp CapriceLoadSave.h cap32.h std_ex.h CapriceRomSlots.h wgui.h \
- wg_checkbox.h wg_frame.h wg_groupbox.h wg_label.h wg_navigationbar.h wg_radiobutton.h wg_scrollbar.h
+ wg_checkbox.h wg_frame.h wg_groupbox.h wg_label.h wg_navigationbar.h wg_radiobutton.h wg_scrollbar.h \
+ wg_button.h
 
 CapriceAbout.o: CapriceAbout.cpp CapriceAbout.h wg_label.h wg_fontengine.h wg_messagebox.h wg_application.h cap32.h
 
@@ -103,13 +105,16 @@ CapriceGui.o: CapriceGui.cpp CapriceGui.h wg_application.h
 
 CapriceGuiView.o: CapriceGuiView.cpp CapriceGuiView.h CapriceMenu.h
 
-CapriceMenu.o: CapriceMenu.cpp CapriceMenu.h CapriceLoadSave.h CapriceMemoryTool.h CapriceAbout.h CapriceOptions.h wg_view.h wg_application.h wg_button.h
+CapriceMenu.o: CapriceMenu.cpp CapriceMenu.h CapriceLoadSave.h CapriceMemoryTool.h CapriceAbout.h CapriceOptions.h \
+ wg_view.h wg_application.h wg_button.h wg_frame.h
 
 
 CapriceOptions.o: CapriceOptions.cpp CapriceOptions.h cap32.h std_ex.h CapriceRomSlots.h wgui.h \
- wg_checkbox.h wg_frame.h wg_groupbox.h wg_label.h wg_navigationbar.h wg_radiobutton.h wg_scrollbar.h
+ wg_checkbox.h wg_frame.h wg_groupbox.h wg_label.h wg_navigationbar.h wg_radiobutton.h wg_scrollbar.h \
+ wg_button.h
 
-CapriceRomSlots.o: CapriceRomSlots.cpp CapriceRomSlots.h cap32.h wg_frame.h wg_label.h wgui.h fileutils.h
+CapriceRomSlots.o: CapriceRomSlots.cpp CapriceRomSlots.h cap32.h wg_frame.h wg_label.h wgui.h fileutils.h \
+ wg_button.h
 
 std_ex.o: std_ex.cpp std_ex.h
 
@@ -158,7 +163,7 @@ wg_message_client.o: wg_message_client.cpp wg_message_client.h wg_error.h wg_mes
 wg_message_server.o: wg_message_server.cpp wg_message_server.h std_ex.h wg_application.h \
  wg_error.h wg_message.h wg_message_client.h wgui_include_config.h wutil_debug.h
 
-wg_messagebox.o: wg_messagebox.cpp wg_messagebox.h wg_frame.h wg_label.h wgui_include_config.h
+wg_messagebox.o: wg_messagebox.cpp wg_messagebox.h wg_frame.h wg_label.h wgui_include_config.h wg_button.h
 
 wg_navigationbar.o: wg_navigationbar.cpp wg_navigationbar.h std_ex.h wg_application.h \
   wg_error.h wg_message_server.h wg_painter.h wg_renderedstring.h wg_resource_handle.h \
@@ -172,7 +177,7 @@ wg_picture.o: wg_picture.cpp wg_picture.h wgui_include_config.h wg_window.h wg_p
 wg_point.o: wg_point.cpp wg_point.h std_ex.h wgui_include_config.h
 
 wg_progress.o: wg_progress.cpp wg_progress.h wgui_include_config.h wg_painter.h wg_range_control.h \
-  std_ex.h
+  std_ex.h wg_button.h
 
 wg_radiobutton.o: wg_radiobutton.cpp wg_radiobutton.h wg_window.h wg_painter.h wg_resources.h \
   wg_message_server.h wgui_include_config.h

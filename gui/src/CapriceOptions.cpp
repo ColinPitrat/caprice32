@@ -11,9 +11,10 @@ extern t_CPC CPC;
 
 namespace wGui {
 
-CapriceOptions::CapriceOptions(const CRect& WindowRect, CView* pParent, CFontEngine* pFontEngine) :
+CapriceOptions::CapriceOptions(const CRect& WindowRect, CWindow* pParent, CFontEngine* pFontEngine) :
   CFrame(WindowRect, pParent, pFontEngine, "Options", false)
 {
+    SetModal(true);
     // Make this window listen to incoming CTRL_VALUECHANGE messages (used for updating scrollbar values)
     CMessageServer::Instance().RegisterMessageClient(this, CMessage::CTRL_VALUECHANGE);
     CMessageServer::Instance().RegisterMessageClient(this, CMessage::CTRL_VALUECHANGING);
@@ -39,8 +40,8 @@ CapriceOptions::CapriceOptions(const CRect& WindowRect, CView* pParent, CFontEng
     m_pGroupBoxTabDisk   = new CGroupBox(CRect(CPoint(5, 60), m_ClientRect.Width() - 12, m_ClientRect.Height() - 80), this, "");
     m_pGroupBoxTabInput   = new CGroupBox(CRect(CPoint(5, 60), m_ClientRect.Width() - 12, m_ClientRect.Height() - 80), this, "");
 
-    m_pButtonOk     = new CButton(CRect(CPoint(100, m_ClientRect.Height() - 20), 50, 15), this, "OK");
-    m_pButtonCancel = new CButton(CRect(CPoint(160, m_ClientRect.Height() - 20), 50, 15), this, "Cancel");
+    m_pButtonOk     = new CButton(CRect(CPoint(100, m_ClientRect.Height() - 20), 50, 15), this, "OK", true);
+    m_pButtonCancel = new CButton(CRect(CPoint(160, m_ClientRect.Height() - 20), 50, 15), this, "Cancel", true);
 
     // Store associations, see EnableTab method:
     TabMap["general"] = m_pGroupBoxTabGeneral;
@@ -101,7 +102,7 @@ CapriceOptions::CapriceOptions(const CRect& WindowRect, CView* pParent, CFontEng
       } else {
           romFileName = "...";
       }
-      CButton* romButton = new CButton(CRect(CPoint((i<8)?20:150, 1 + 18*(i%8)), 100, 15), m_pGroupBoxTabExpansion, romFileName);
+      CButton* romButton = new CButton(CRect(CPoint((i<8)?20:150, 1 + 18*(i%8)), 100, 15), m_pGroupBoxTabExpansion, romFileName, true);
       m_pButtonRoms.push_back(romButton); // element i corresponds with ROM slot i.
     }
 
@@ -306,9 +307,6 @@ bool CapriceOptions::HandleMessage(CMessage* pMessage)
               bHandled = true;
               break;
             }
-            // handle further buttons and events...
-
-            bHandled = CFrame::HandleMessage(pMessage);
           }
 
           // 'ROM' button clicked: open the ROM selection dialog:
@@ -318,7 +316,6 @@ bool CapriceOptions::HandleMessage(CMessage* pMessage)
                 pRomSlotsDialog = new wGui::CapriceRomSlots(CRect(
                       CPoint(m_pSDLSurface->w /2 - 140, 30), 250, 200), this, nullptr, "", i, m_pButtonRoms.at(i));
                 pRomSlotsDialog->SetModal(true);
-                bHandled = CFrame::HandleMessage(pMessage);
                 break;
               }
             }
@@ -403,13 +400,14 @@ bool CapriceOptions::HandleMessage(CMessage* pMessage)
             m_pLabelSoundVolumeValue->SetWindowText(stdex::itoa(m_pScrollBarVolume->GetValue()) + "%  ");
           }
         }
-        bHandled = CFrame::HandleMessage(pMessage);
         break;
 
       default :
-        bHandled = CFrame::HandleMessage(pMessage);
         break;
     }
+  }
+  if (!bHandled) {
+    bHandled = CFrame::HandleMessage(pMessage);
   }
   return bHandled;
 }

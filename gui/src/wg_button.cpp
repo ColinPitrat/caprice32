@@ -35,8 +35,8 @@
 namespace wGui
 {
 
-CButton::CButton(const CRect& WindowRect, CWindow* pParent, std::string sText, CFontEngine* pFontEngine) :
-	CWindow(WindowRect, pParent),
+CButton::CButton(const CRect& WindowRect, CWindow* pParent, std::string sText, bool isFocusable, CFontEngine* pFontEngine) :
+	CWindow(WindowRect, pParent, isFocusable),
 	m_eButtonState(UP),
 	m_MouseButton(0)
 {
@@ -55,7 +55,6 @@ CButton::CButton(const CRect& WindowRect, CWindow* pParent, std::string sText, C
   m_BackgroundColor = DEFAULT_BUTTON_COLOR;
 	CMessageServer::Instance().RegisterMessageClient(this, CMessage::MOUSE_BUTTONUP);
 	Draw();
-  m_pParentWindow->AddFocusableWidget(this);
 }
 
 
@@ -195,7 +194,7 @@ bool CButton::HandleMessage(CMessage* pMessage)
 
 
 CPictureButton::CPictureButton(const CRect& WindowRect, CWindow* pParent, std::string sPictureFile) :
-	CButton(WindowRect, pParent, sPictureFile, nullptr)
+	CButton(WindowRect, pParent, sPictureFile)
 {
 	m_phBitmap.reset(new CBitmapFileResourceHandle(sPictureFile));
 	Draw();
@@ -203,7 +202,7 @@ CPictureButton::CPictureButton(const CRect& WindowRect, CWindow* pParent, std::s
 
 
 CPictureButton::CPictureButton(const CRect& WindowRect, CWindow* pParent, const CBitmapResourceHandle& hBitmap) :
-	CButton(WindowRect, pParent, "<bitmap>", nullptr)
+	CButton(WindowRect, pParent, "<bitmap>")
 {
 	m_phBitmap.reset(new CBitmapResourceHandle(hBitmap));
 	Draw();
