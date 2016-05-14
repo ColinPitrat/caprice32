@@ -41,7 +41,7 @@ struct SListItem
 {
 public:
 	//! Standard constructor
-	SListItem(std::string sItemTextIn, void* pItemDataIn = 0, CRGBColor ItemColorIn = DEFAULT_TEXT_COLOR) :
+	SListItem(std::string sItemTextIn, void* pItemDataIn = nullptr, CRGBColor ItemColorIn = DEFAULT_TEXT_COLOR) :
 		sItemText(sItemTextIn), pItemData(pItemDataIn), ItemColor(ItemColorIn) { }
 
 	std::string sItemText;  //!< The displayed text for the item
@@ -65,7 +65,7 @@ public:
 	//! \param iItemHeight The height of the items in the list, defaults to 15
 	//! \param pFontEngine A pointer to the font engine to use when drawing the control
 	//! If this is left out (or set to 0) it will use the default font engine specified by the CApplication (which must be set before instantiating this object)
-	CListBox(const CRect& WindowRect, CWindow* pParent, bool bSingleSelection = false, unsigned int iItemHeight = 12, CFontEngine* pFontEngine = 0);
+	CListBox(const CRect& WindowRect, CWindow* pParent, bool bSingleSelection = false, unsigned int iItemHeight = 12, CFontEngine* pFontEngine = nullptr);
 
 	//! Standard destructor
 	virtual ~CListBox(void);

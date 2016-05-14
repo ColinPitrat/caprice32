@@ -14,12 +14,13 @@ namespace wGui {
 CapriceRomSlots::CapriceRomSlots(const CRect& WindowRect, CWindow* pParent, CFontEngine* pFontEngine, std::string sTitle, int selectedRomSlot, CButton* pSelectedRomButton) :
 	CFrame(WindowRect, pParent, pFontEngine, sTitle, false)
 {
+    SetModal(true);
     romSlot = selectedRomSlot;
     m_pSelectedRomButton =  pSelectedRomButton; // the button that was clicked to open this dialog
     SetWindowText("ROM slot " + stdex::itoa(romSlot));
-    m_pButtonInsert = new CButton(CRect(CPoint( 40, m_ClientRect.Height() - 22), 50, 15), this, "Insert");
-    m_pButtonClear  = new CButton(CRect(CPoint(100, m_ClientRect.Height() - 22), 50, 15), this, "Clear");
-    m_pButtonCancel = new CButton(CRect(CPoint(160, m_ClientRect.Height() - 22), 50, 15), this, "Cancel");
+    m_pButtonInsert = new CButton(CRect(CPoint( 40, m_ClientRect.Height() - 22), 50, 15), this, "Insert", true);
+    m_pButtonClear  = new CButton(CRect(CPoint(100, m_ClientRect.Height() - 22), 50, 15), this, "Clear", true);
+    m_pButtonCancel = new CButton(CRect(CPoint(160, m_ClientRect.Height() - 22), 50, 15), this, "Cancel", true);
 
 	m_pListBoxRoms = new CListBox(CRect(CPoint(10, 10), m_ClientRect.Width() - 25, 140), this, true);
 

@@ -39,7 +39,7 @@ namespace wGui
 {
 
 // Static members
-CApplication* CApplication::m_pInstance = 0;
+CApplication* CApplication::m_pInstance = nullptr;
 
 
 void CApplication::HandleSDLEvent(SDL_Event Event)
@@ -49,7 +49,7 @@ void CApplication::HandleSDLEvent(SDL_Event Event)
 	{
 	case SDL_VIDEORESIZE:
 		CMessageServer::Instance().QueueMessage(new TPointMessage(
-			CMessage::CTRL_RESIZE, 0, this, CPoint(Event.resize.w, Event.resize.h)));
+			CMessage::CTRL_RESIZE, nullptr, this, CPoint(Event.resize.w, Event.resize.h)));
 		break;
 	case SDL_KEYDOWN:
 		CMessageServer::Instance().QueueMessage(new CKeyboardMessage(
@@ -82,11 +82,11 @@ void CApplication::HandleSDLEvent(SDL_Event Event)
 			CMouseMessage::TranslateSDLButtonState(Event.motion.state)));
 		break;
 	case SDL_QUIT:
-//		CMessageServer::Instance().QueueMessage(new CMessage(CMessage::APP_EXIT, 0, this));
-        exit(0);
+//		CMessageServer::Instance().QueueMessage(new CMessage(CMessage::APP_EXIT, nullptr, this));
+    exit(0);
 		break;
 	default:
-		CMessageServer::Instance().QueueMessage(new CSDLMessage(CMessage::SDL, 0, this, Event));
+		CMessageServer::Instance().QueueMessage(new CSDLMessage(CMessage::SDL, nullptr, this, Event));
 		break;
 	}
 }
@@ -97,9 +97,9 @@ CApplication::CApplication(std::string sFontFileName, bool bHandleExceptionsInte
 	m_iExitCode(EXIT_FAILURE),
 	m_bRunning(false),
 	m_bInited(false),
-	m_pKeyFocusWindow(0),
-	m_pMouseFocusWindow(0),
-	m_pDefaultFontEngine(0),
+	m_pKeyFocusWindow(nullptr),
+	m_pMouseFocusWindow(nullptr),
+	m_pDefaultFontEngine(nullptr),
 	m_iBitsPerPixel(DEFAULT_BPP),
 	m_DefaultBackgroundColor(DEFAULT_BACKGROUND_COLOR),
 	m_DefaultForegroundColor(DEFAULT_FOREGROUND_COLOR),
@@ -138,13 +138,13 @@ CApplication::~CApplication(void)
 {
 	if (m_pInstance == this)
 	{
-		m_pInstance = 0;
+		m_pInstance = nullptr;
 	}
 
 	for(std::map<std::pair<std::string, unsigned char>, CFontEngine*>::iterator iter = m_FontEngines.begin(); iter != m_FontEngines.end(); ++iter)
 	{
 		delete iter->second;
-		iter->second = 0;
+		iter->second = nullptr;
 	}
 
 	m_AppLog.AddLogEntry("wGui Application closing", APP_LOG_INFO);
@@ -211,7 +211,7 @@ void CApplication::Exec(void)
 		m_bRunning = true;
 		SDL_Event event;
 		CMessageServer::Instance().IgnoreAllNewMessages(false);
-		CMessageServer::Instance().QueueMessage(new CMessage(CMessage::APP_PAINT, 0, this));
+		CMessageServer::Instance().QueueMessage(new CMessage(CMessage::APP_PAINT, nullptr, this));
 		m_AppLog.AddLogEntry("wGui Application entering Exec loop", APP_LOG_INFO);
 		while (m_bRunning)
 		{
@@ -287,8 +287,8 @@ void CApplication::ApplicationExit(int iExitCode)
 	SDL_Event user_event;
 	user_event.type=SDL_USEREVENT;
 	user_event.user.code=0;
-	user_event.user.data1=0;
-	user_event.user.data2=0;
+	user_event.user.data1=nullptr;
+	user_event.user.data2=nullptr;
 	int iResult = SDL_PushEvent(&user_event);
 	wUtil::TraceIf(iResult == -1, "CApplication::ApplicationExit - Unable to push SDL user_event.");
 	m_iExitCode = iExitCode;
@@ -300,7 +300,7 @@ CFontEngine* CApplication::GetFontEngine(std::string sFontFileName, unsigned cha
 {
 	// First search to see if the requested font engine already exists
 	t_FontEngineMap::iterator iterFontEngine = m_FontEngines.find(std::make_pair(sFontFileName, iFontSize));
-	CFontEngine* pFontEngine = 0;
+	CFontEngine* pFontEngine = nullptr;
 
 	if (iterFontEngine == m_FontEngines.end())
 	{

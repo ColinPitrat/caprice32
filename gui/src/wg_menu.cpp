@@ -39,12 +39,12 @@ namespace wGui
 
 CMenuBase::CMenuBase(const CRect& WindowRect, CWindow* pParent, CFontEngine* pFontEngine) :
 	CWindow(WindowRect, pParent),
-	m_pHighlightedItem(0),
+	m_pHighlightedItem(nullptr),
 	m_bCachedRectsValid(false),
-	m_pActivePopup(0),
+	m_pActivePopup(nullptr),
 	m_hRightArrowBitmap(WGRES_RIGHT_ARROW_BITMAP),
 	m_HighlightColor(DEFAULT_BACKGROUND_COLOR),
-	m_pPopupTimer(0)
+	m_pPopupTimer(nullptr)
 {
 	if (pFontEngine)
 	{
@@ -68,7 +68,7 @@ CMenuBase::CMenuBase(const CRect& WindowRect, CWindow* pParent, CFontEngine* pFo
 CMenuBase::~CMenuBase(void)
 {
 	delete m_pPopupTimer;
-	m_pPopupTimer = 0;
+	m_pPopupTimer = nullptr;
 }
 
 
@@ -94,7 +94,7 @@ void CMenuBase::HideActivePopup(void)
 	if (m_pActivePopup)
 	{
 		m_pActivePopup->Hide();
-		m_pActivePopup = 0;
+		m_pActivePopup = nullptr;
 	}
 }
 
@@ -136,7 +136,7 @@ bool CMenuBase::HandleMessage(CMessage* pMessage)
 			{
 				UpdateCachedRects();
 				SMenuItem* pOldHighlight = m_pHighlightedItem;
-				m_pHighlightedItem = 0;
+				m_pHighlightedItem = nullptr;
 				CPoint WindowPoint(ViewToWindow(pMouseMessage->Point));
 				for (t_MenuItemVector::iterator iter = m_MenuItems.begin(); iter != m_MenuItems.end(); ++iter)
 				{
@@ -156,10 +156,10 @@ bool CMenuBase::HandleMessage(CMessage* pMessage)
 					Draw();
 				}
 			}
-			else if (m_pHighlightedItem != 0)
+			else if (m_pHighlightedItem != nullptr)
 			{
 				m_pPopupTimer->StopTimer();
-				m_pHighlightedItem = 0;
+				m_pHighlightedItem = nullptr;
 				Draw();
 			}
 			break;
@@ -309,7 +309,7 @@ bool CMenu::HandleMessage(CMessage* pMessage)
 			{
 				UpdateCachedRects();
 				SMenuItem* pOldHighlight = m_pHighlightedItem;
-				m_pHighlightedItem = 0;
+				m_pHighlightedItem = nullptr;
 				CPoint WindowPoint(ViewToWindow(pMouseMessage->Point));
 				for (t_MenuItemVector::iterator iter = m_MenuItems.begin(); iter != m_MenuItems.end(); ++iter)
 				{
@@ -324,9 +324,9 @@ bool CMenu::HandleMessage(CMessage* pMessage)
 					Draw();
 				}
 			}
-			else if (m_pHighlightedItem != 0)
+			else if (m_pHighlightedItem != nullptr)
 			{
-				m_pHighlightedItem = 0;
+				m_pHighlightedItem = nullptr;
 				Draw();
 			}
 			break;
@@ -360,7 +360,7 @@ void CMenu::UpdateCachedRects(void) const
 			else
 			{
 				CPoint Dims;
-				iter->RenderedString.GetMetrics(&Dims, 0, 0);
+				iter->RenderedString.GetMetrics(&Dims, nullptr, nullptr);
 				CRect TextRect(SubRect.Left() + iWidth, SubRect.Top() + 2, SubRect.Left() + iWidth + Dims.XPos(), SubRect.Bottom() - 2);
 				TextRect.Grow(2);
 				iter->Rect = TextRect;
@@ -401,7 +401,7 @@ void CMenu::ShowActivePopup(const CRect& ParentRect, const CRect& BoundingRect)
 
 CPopupMenu::CPopupMenu(const CRect& WindowRect, CWindow* pParent, CFontEngine* pFontEngine) :
 	CMenuBase(WindowRect, pParent, pFontEngine),
-	m_pParentMenu(0)
+	m_pParentMenu(nullptr)
 {
 	m_bVisible = false;
 	CMessageServer::Instance().RegisterMessageClient(this, CMessage::MOUSE_BUTTONDOWN);
@@ -430,7 +430,7 @@ void CPopupMenu::Show(CPoint Position)
 		else
 		{
 			CPoint Dims;
-			iter->RenderedString.GetMetrics(&Dims, 0, 0);
+			iter->RenderedString.GetMetrics(&Dims, nullptr, nullptr);
 			iHeight += Dims.YPos() + 5;
 		}
 	}
@@ -477,10 +477,10 @@ void CPopupMenu::Hide(void)
 	CView* pView = GetView();
 	if (!dynamic_cast<CPopupMenu*>(m_pParentWindow) && pView && pView->GetFloatingWindow() == this)
 	{
-		pView->SetFloatingWindow(0);
+		pView->SetFloatingWindow(nullptr);
 	}
-	CMessageServer::Instance().QueueMessage(new CMessage(CMessage::APP_PAINT, 0, this));
-	m_pHighlightedItem = 0;
+	CMessageServer::Instance().QueueMessage(new CMessage(CMessage::APP_PAINT, nullptr, this));
+	m_pHighlightedItem = nullptr;
 	Draw();
 }
 
@@ -702,7 +702,7 @@ void CPopupMenu::UpdateCachedRects(void) const
 			else
 			{
 				CPoint Dims;
-				iter->RenderedString.GetMetrics(&Dims, 0, 0);
+				iter->RenderedString.GetMetrics(&Dims, nullptr, nullptr);
 				CRect TextRect(SubRect.Left() + 3, SubRect.Top() + iHeight, SubRect.Right() - 3, SubRect.Top() + iHeight + Dims.YPos());
 				TextRect.Grow(2);
 				iter->Rect = TextRect;

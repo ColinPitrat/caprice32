@@ -43,8 +43,8 @@ CTextBox::CTextBox(const CRect& WindowRect, CWindow* pParent, CFontEngine* pFont
 	m_bReadOnly(false),
 	m_bMouseDown(false),
 	m_bLastMouseMoveInside(false),
-	m_pVerticalScrollBar(0),
-	m_pHorizontalScrollBar(0),
+	m_pVerticalScrollBar(nullptr),
+	m_pHorizontalScrollBar(nullptr),
 	m_iLineCount(0),
 	m_iRowHeight(0),
 	m_iMaxWidth(0),
@@ -323,7 +323,7 @@ bool CTextBox::OnMouseButtonDown(CPoint Point, unsigned int Button)  // virtual
 				{
 					CPoint Offset;
 					std::vector<CRect> CharRects;
-					(*iter)->GetMetrics(0, &Offset, &CharRects);
+					(*iter)->GetMetrics(nullptr, &Offset, &CharRects);
 					vOffsets.push_back(Offset);
 					vCharRects.push_back(CharRects);
 				}
@@ -431,7 +431,7 @@ bool CTextBox::HandleMessage(CMessage* pMessage)  // virtual
 					{
 						CPoint Offset;
 						std::vector<CRect> CharRects;
-						(*iter)->GetMetrics(0, &Offset, &CharRects);
+						(*iter)->GetMetrics(nullptr, &Offset, &CharRects);
 						vOffsets.push_back(Offset);
 						vCharRects.push_back(CharRects);
 					}
@@ -851,7 +851,7 @@ void CTextBox::PrepareWindowText(const std::string& sText)
 		m_vpRenderedString.push_back(new CRenderedString(
 			m_pFontEngine, sText.substr(start, loc - start), CRenderedString::VALIGN_TOP, CRenderedString::HALIGN_LEFT));
 		CPoint BoundingDimensions;
-		m_vpRenderedString.back()->GetMetrics(&BoundingDimensions, 0, 0);
+		m_vpRenderedString.back()->GetMetrics(&BoundingDimensions, nullptr, nullptr);
 		if (BoundingDimensions.XPos() > stdex::safe_static_cast<int>(m_iMaxWidth))
 		{
 			m_iMaxWidth = BoundingDimensions.XPos();

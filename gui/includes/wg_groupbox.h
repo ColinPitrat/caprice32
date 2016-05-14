@@ -49,7 +49,7 @@ public:
 	//! \param pFontEngine A pointer to the font engine to use when drawing the control
 	//! If this is left out (or set to 0) it will use the default font engine specified by the CApplication (which must be set before instantiating this object)
 	CGroupBox(const CRect& WindowRect, CWindow* pParent, std::string sText,
-		CRGBColor& FontColor = ALTERNATE_TEXT_COLOR, CFontEngine* pFontEngine = 0);
+		CRGBColor& FontColor = ALTERNATE_TEXT_COLOR, CFontEngine* pFontEngine = nullptr);
 
 	//! Standard destructor
 	virtual ~CGroupBox(void);

@@ -54,7 +54,7 @@ public:
 	//! The parent is then responsible for destroying the window
   	//! \param WindowRect A CRect that defines the outer limits of the control
 	//! \param pParent A pointer to the parent window
-	CWindow(const CRect& WindowRect, CWindow* pParent);
+	CWindow(const CRect& WindowRect, CWindow* pParent, bool isFocusable = false);
 
     // judb constructor without CRect; don't forget to call SetWindowRect before using the CWindow!
 	CWindow(CWindow* pParent);
@@ -125,9 +125,17 @@ public:
 	//! \return true if the control has the focus
   virtual bool HasFocus(void) { return m_bHasFocus; }
 
-	//! Get whether the control has the focus
+	//! Set whether the control has the focus
 	//! \param bHasFocus Set to true to tell the control it has the focus
   virtual void SetHasFocus(bool bHasFocus);
+
+	//! Get whether the control is focusable or not
+	//! \return true if the control can have the focus
+  virtual bool IsFocusable(void) { return m_bIsFocusable; }
+
+	//! Set whether the control has the focus
+	//! \param bHasFocus Set to true to tell the control it has the focus
+  virtual void SetIsFocusable(bool bIsFocusable);
 
 	//! Gets the SDL surface the window draws to
 	//! \return A pointer to the window's SDL surface
@@ -207,6 +215,10 @@ public:
 	//! \return true if the object handled the message (the message will not be given to any other handlers)
 	virtual bool HandleMessage(CMessage* pMessage);
 
+  virtual void AddFocusableWidget(CWindow *pWidget);
+
+  virtual void RemoveFocusableWidget(CWindow *pWidget);
+
 
 protected:
 	// Registering and Deregistering child windows is automatically handled by the constructors and destructors
@@ -246,6 +258,9 @@ protected:
 
   //! If this window currently has the focus
   bool m_bHasFocus;
+
+  //! If this window can have the focus
+  bool m_bIsFocusable;
 
 private:
 	void operator=(CWindow) { }  //!< The assignment operator is not allowed for CWindow objects

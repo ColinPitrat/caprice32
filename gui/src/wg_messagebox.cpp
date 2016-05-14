@@ -38,22 +38,22 @@ CMessageBox::CMessageBox(const CRect& WindowRect, CWindow* pParent, CFontEngine*
 	CPoint BottomRight(GetClientRect().Right() - 20, GetClientRect().Bottom() - 30);
 	if (iButtons & CMessageBox::BUTTON_CANCEL)
 	{
-		m_ButtonMap.insert(std::make_pair(CMessageBox::BUTTON_CANCEL, new CButton(CRect(BottomRight - CPoint(50, 18), BottomRight), this, "Cancel")));
+		m_ButtonMap.insert(std::make_pair(CMessageBox::BUTTON_CANCEL, new CButton(CRect(BottomRight - CPoint(50, 18), BottomRight), this, "Cancel", true)));
 		BottomRight = BottomRight - CPoint(60, 0);
 	}
 	if (iButtons & CMessageBox::BUTTON_OK)
 	{
-		m_ButtonMap.insert(std::make_pair(CMessageBox::BUTTON_OK, new CButton(CRect(BottomRight - CPoint(50, 18), BottomRight), this, "Ok")));
+		m_ButtonMap.insert(std::make_pair(CMessageBox::BUTTON_OK, new CButton(CRect(BottomRight - CPoint(50, 18), BottomRight), this, "Ok", true)));
 		BottomRight = BottomRight - CPoint(60, 0);
 	}
 	if (iButtons & CMessageBox::BUTTON_NO)
 	{
-		m_ButtonMap.insert(std::make_pair(CMessageBox::BUTTON_NO, new CButton(CRect(BottomRight - CPoint(50, 18), BottomRight), this, "No")));
+		m_ButtonMap.insert(std::make_pair(CMessageBox::BUTTON_NO, new CButton(CRect(BottomRight - CPoint(50, 18), BottomRight), this, "No", true)));
 		BottomRight = BottomRight - CPoint(60, 0);
 	}
 	if (iButtons & CMessageBox::BUTTON_YES)
 	{
-		m_ButtonMap.insert(std::make_pair(CMessageBox::BUTTON_YES, new CButton(CRect(BottomRight - CPoint(50, 18), BottomRight), this, "Yes")));
+		m_ButtonMap.insert(std::make_pair(CMessageBox::BUTTON_YES, new CButton(CRect(BottomRight - CPoint(50, 18), BottomRight), this, "Yes", true)));
 		BottomRight = BottomRight - CPoint(60, 0);
 	}
 }
@@ -65,7 +65,7 @@ bool CMessageBox::HandleMessage(CMessage* pMessage)
 
 	if (pMessage)
 	{
-      switch(pMessage->MessageType())
+    switch(pMessage->MessageType())
 		{
 		case CMessage::CTRL_SINGLELCLICK:
 		{
@@ -75,9 +75,9 @@ bool CMessageBox::HandleMessage(CMessage* pMessage)
 				{
 					if (pMessage->Source() == iter->second)
 					{
-						CMessageServer::Instance().QueueMessage(new CValueMessage<CMessageBox::EButton>(CMessage::CTRL_MESSAGEBOXRETURN, m_pParentWindow, 0, iter->first));
+						CMessageServer::Instance().QueueMessage(new CValueMessage<CMessageBox::EButton>(CMessage::CTRL_MESSAGEBOXRETURN, m_pParentWindow, nullptr, iter->first));
 						CloseFrame();
-                        bHandled = true;
+            bHandled = true;
 						break;
 					}
 				}

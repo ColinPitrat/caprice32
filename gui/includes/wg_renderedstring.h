@@ -83,7 +83,7 @@ public:
 	//! \param pBoundedDimensions A pointer to a CPoint object that will receive the width and height of the rendered string
 	//! \param pOriginOffset A pointer to a CPoint object that will receive the offset of the top left corner of the rendered string from the origin of the string
 	//! \param pCharacterRects A pointer to a CRect vector that will receive CRects that contain each character.  The corrdinates are in reference to the top left corner of the string as a whole
-	void GetMetrics(CPoint* pBoundedDimensions, CPoint* pOriginOffset, std::vector<CRect>* pCharacterRects = 0) const;
+	void GetMetrics(CPoint* pBoundedDimensions, CPoint* pOriginOffset, std::vector<CRect>* pCharacterRects = nullptr) const;
 
 	//! Get the length of the rendered string in characters
 	//! \return The length of the string

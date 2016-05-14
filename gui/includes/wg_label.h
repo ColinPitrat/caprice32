@@ -49,11 +49,11 @@ public:
 	//! \param pFontEngine A pointer to the font engine to use when drawing the control, defaults to 0
 	//! If this is left out (or set to 0) it will use the default font engine specified by the CApplication (which must be set before instantiating this object)
 	CLabel(const CRect& WindowRect, CWindow* pParent, std::string sText = "",
-		CRGBColor& FontColor = DEFAULT_TEXT_COLOR, CFontEngine* pFontEngine = 0);
+		CRGBColor& FontColor = DEFAULT_TEXT_COLOR, CFontEngine* pFontEngine = nullptr);
 
     // judb constructor using a reference point (upper-left corner)
 	CLabel(const CPoint& point, CWindow* pParent, std::string sText = "",
-		CRGBColor& FontColor = DEFAULT_TEXT_COLOR, CFontEngine* pFontEngine = 0);
+		CRGBColor& FontColor = DEFAULT_TEXT_COLOR, CFontEngine* pFontEngine = nullptr);
 
 
 	//! Standard destructor

@@ -33,6 +33,12 @@
 namespace wGui
 {
 
+//! The directions in which focus can be toggled: forward or backward
+enum class EFocusDirection {
+  FORWARD,
+  BACKWARD
+};
+
 //! A general view class
 
 //! A CView creates itself as a root window (it has no parent)
@@ -87,6 +93,8 @@ public:
 	// judb ; sometimes the surface is re-created in caprice32; in this case, we have
 	// to pass it on here
 	void SetSurface(SDL_Surface* surface) { m_pScreenSurface = surface; }
+
+  SDL_Surface* GetSurface() { return m_pScreenSurface; }
 
 
 	// CWindow Overrides

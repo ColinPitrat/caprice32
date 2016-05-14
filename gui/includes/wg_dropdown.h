@@ -49,7 +49,7 @@ public:
 	//! \param iItemHeight The height of the items in the listbox portion of the control, defaults to 15
 	//! \param pFontEngine A pointer to the font engine to use when drawing the control
 	//! If this is left out (or set to 0) it will use the default font engine specified by the CApplication (which must be set before instantiating this object)
-	CDropDown(const CRect& WindowRect, CWindow* pParent, bool bAllowEdit = true, unsigned int iItemHeight = 15, CFontEngine* pFontEngine = 0);
+	CDropDown(const CRect& WindowRect, CWindow* pParent, bool bAllowEdit = true, unsigned int iItemHeight = 15, CFontEngine* pFontEngine = nullptr);
 
 	//! Standard destructor
 	virtual ~CDropDown(void);

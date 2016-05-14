@@ -35,15 +35,16 @@
 namespace wGui
 {
 
-CWindow::CWindow(const CRect& WindowRect, CWindow* pParent) :
+CWindow::CWindow(const CRect& WindowRect, CWindow* pParent, bool isFocusable) :
 	m_sWindowText(""),
 	m_WindowRect(WindowRect),
 	m_BackgroundColor(DEFAULT_BACKGROUND_COLOR),
 	m_ClientRect(WindowRect.SizeRect()),
-	m_pParentWindow(0),
-	m_pSDLSurface(0),
+	m_pParentWindow(nullptr),
+	m_pSDLSurface(nullptr),
 	m_bVisible(true),
-  m_bHasFocus(false)
+  m_bHasFocus(false),
+  m_bIsFocusable(isFocusable)
 {
 	if (!CApplication::Instance())
 	{
@@ -53,6 +54,9 @@ CWindow::CWindow(const CRect& WindowRect, CWindow* pParent) :
 	SetWindowRect(WindowRect);
 	m_BackgroundColor = CApplication::Instance()->GetDefaultBackgroundColor();
 	SetNewParent(pParent);
+  if (m_bIsFocusable) {
+    m_pParentWindow->AddFocusableWidget(this);
+  }
 }
 
 // judb constructor like above, but without specifying a CRect ;
@@ -60,8 +64,8 @@ CWindow::CWindow(const CRect& WindowRect, CWindow* pParent) :
 CWindow::CWindow(CWindow* pParent) :
 	m_sWindowText(""),
 	m_BackgroundColor(DEFAULT_BACKGROUND_COLOR),
-	m_pParentWindow(0),
-	m_pSDLSurface(0),
+	m_pParentWindow(nullptr),
+	m_pSDLSurface(nullptr),
 	m_bVisible(true),
   m_bHasFocus(false)
 {
@@ -86,7 +90,7 @@ CWindow::~CWindow(void)
 		delete *(m_ChildWindows.begin());
 	}
 	m_ChildWindows.clear();
-	SetNewParent(0);
+	SetNewParent(nullptr);
 }
 
 
@@ -112,13 +116,13 @@ void CWindow::SetWindowRect(const CRect& WindowRect)
 void CWindow::MoveWindow(const CPoint& MoveDistance)
 {
 	m_WindowRect = m_WindowRect + MoveDistance;
-	CMessageServer::Instance().QueueMessage(new CMessage(CMessage::APP_PAINT, 0, this));
+	CMessageServer::Instance().QueueMessage(new CMessage(CMessage::APP_PAINT, nullptr, this));
 }
 
 
 CWindow* CWindow::GetAncestor(EAncestor eAncestor) const
 {
-	CWindow* pWindow = 0;
+	CWindow* pWindow = nullptr;
 
 	switch (eAncestor)
 	{
@@ -179,10 +183,10 @@ void CWindow::SetVisible(bool bVisible)
 			(*iter)->SetVisible(bVisible);
 			if (!bVisible && (*iter) == CApplication::Instance()->GetKeyFocus())
 			{
-				CApplication::Instance()->SetKeyFocus(0);
+				CApplication::Instance()->SetKeyFocus(nullptr);
 			}
 		}
-		CMessageServer::Instance().QueueMessage(new CMessage(CMessage::APP_PAINT, 0, this));
+		CMessageServer::Instance().QueueMessage(new CMessage(CMessage::APP_PAINT, nullptr, this));
 	}
 }
 
@@ -191,6 +195,17 @@ void CWindow::SetHasFocus(bool bHasFocus)
 {
   m_bHasFocus = bHasFocus;
   Draw();
+}
+
+
+void CWindow::SetIsFocusable(bool bIsFocusable)
+{
+  m_bIsFocusable = bIsFocusable;
+  if (m_bIsFocusable) {
+    m_pParentWindow->AddFocusableWidget(this);
+  } else {
+    m_pParentWindow->RemoveFocusableWidget(this);
+  }
 }
 
 
@@ -284,7 +299,7 @@ void CWindow::Draw(void) const
 
 		CPainter Painter(m_pSDLSurface, CPainter::PAINT_REPLACE);
 		Painter.DrawRect(m_WindowRect.SizeRect(), true, m_BackgroundColor, m_BackgroundColor);
-		CMessageServer::Instance().QueueMessage(new CMessage(CMessage::APP_PAINT, 0, this));
+		CMessageServer::Instance().QueueMessage(new CMessage(CMessage::APP_PAINT, nullptr, this));
 	}
 }
 
@@ -388,6 +403,22 @@ bool CWindow::HandleMessage(CMessage* /*pMessage*/)
 	bool bHandled = false;
 
 	return bHandled;
+}
+
+void CWindow::AddFocusableWidget(CWindow *pWidget)
+{
+  if (m_pParentWindow)
+  {
+    m_pParentWindow->AddFocusableWidget(pWidget);
+  }
+}
+
+void CWindow::RemoveFocusableWidget(CWindow *pWidget)
+{
+  if (m_pParentWindow)
+  {
+    m_pParentWindow->RemoveFocusableWidget(pWidget);
+  }
 }
 
 }

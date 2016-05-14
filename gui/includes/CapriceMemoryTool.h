@@ -16,7 +16,7 @@ namespace wGui
         //! \param pParent A pointer to the parent view
         //! \param pFontEngine A pointer to the font engine to use when drawing the control
         //! If this is set to 0 it will use the default font engine specified by the CApplication (which must be set before instantiating this object)
-        CapriceMemoryTool(const CRect& WindowRect, CView* pParent, CFontEngine* pFontEngine);
+        CapriceMemoryTool(const CRect& WindowRect, CWindow* pParent, CFontEngine* pFontEngine);
         ~CapriceMemoryTool(void);
         bool HandleMessage(CMessage* pMessage);
 

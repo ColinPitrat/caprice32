@@ -43,12 +43,12 @@ class CButton : public CWindow
 {
 public:
 	//! Constructs a new button
-  	//! \param WindowRect A CRect that defines the outer limits of the control
+  //! \param WindowRect A CRect that defines the outer limits of the control
 	//! \param pParent A pointer to the parent window
 	//! \param sText The text on the button
 	//! \param pFontEngine A pointer to the font engine to use when drawing the control
 	//! If this is left out (or set to 0) it will use the default font engine specified by the CApplication (which must be set before instantiating this object)
-	CButton(const CRect& WindowRect, CWindow* pParent, std::string sText, CFontEngine* pFontEngine = 0);
+	CButton(const CRect& WindowRect, CWindow* pParent, std::string sText, bool isFocusable = false, CFontEngine* pFontEngine = nullptr);
 
 	//! Standard destructor
 	virtual ~CButton(void);

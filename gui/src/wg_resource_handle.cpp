@@ -88,7 +88,7 @@ CBitmapResourceHandle::~CBitmapResourceHandle(void)
 
 SDL_Surface* CBitmapResourceHandle::Bitmap(void) const
 {
-	return (m_BitmapMap.find(m_ResourceId) != m_BitmapMap.end()) ? m_BitmapMap[m_ResourceId] : 0;
+	return (m_BitmapMap.find(m_ResourceId) != m_BitmapMap.end()) ? m_BitmapMap[m_ResourceId] : nullptr;
 }
 
 
@@ -135,7 +135,7 @@ CCursorResourceHandle::~CCursorResourceHandle(void)
 
 SDL_Cursor* CCursorResourceHandle::Cursor(void) const
 {
-	return (m_SDLCursorMap.find(m_ResourceId) != m_SDLCursorMap.end()) ? m_SDLCursorMap[m_ResourceId] : 0;
+	return (m_SDLCursorMap.find(m_ResourceId) != m_SDLCursorMap.end()) ? m_SDLCursorMap[m_ResourceId] : nullptr;
 }
 
 }

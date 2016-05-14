@@ -37,7 +37,7 @@ namespace wGui
 {
 
 CEditBox::CEditBox(const CRect& WindowRect, CWindow* pParent, CFontEngine* pFontEngine) :
-	CWindow(WindowRect, pParent),
+	CWindow(WindowRect, pParent, true),
 	m_SelStart(0),
 	m_SelLength(0),
 	m_DragStart(0),
@@ -70,6 +70,11 @@ CEditBox::CEditBox(const CRect& WindowRect, CWindow* pParent, CFontEngine* pFont
 	CMessageServer::Instance().RegisterMessageClient(this, CMessage::CTRL_TIMER);
 	CMessageServer::Instance().RegisterMessageClient(this, CMessage::CTRL_GAININGKEYFOCUS);
 	CMessageServer::Instance().RegisterMessageClient(this, CMessage::CTRL_LOSINGKEYFOCUS);
+
+  // We need to do it has the call in CWindow will call CWindow::SetHasFocus
+  if (m_bHasFocus) {
+    SetHasFocus(m_bHasFocus);
+  }
 	Draw();
 }
 
@@ -85,6 +90,7 @@ void CEditBox::SetReadOnly(bool bReadOnly)
 {
 	m_BackgroundColor = bReadOnly ? COLOR_LIGHTGRAY : COLOR_WHITE;
 	m_bReadOnly = bReadOnly;
+  SetIsFocusable(!bReadOnly);
 	Draw();
 }
 
@@ -140,7 +146,7 @@ std::string::size_type CEditBox::GetIndexFromPoint(const CPoint& Point) const  /
 {
 	CPoint Offset;
 	std::vector<CRect> CharRects;
-	m_pRenderedString->GetMetrics(0, &Offset, &CharRects);
+	m_pRenderedString->GetMetrics(nullptr, &Offset, &CharRects);
 	CRect SubRect(m_WindowRect.SizeRect());
 	SubRect.Grow(-3);
 	std::string::size_type index = 0;
@@ -337,6 +343,17 @@ bool CEditBox::OnMouseButtonDown(CPoint Point, unsigned int Button)
 }
 
 
+void CEditBox::SetHasFocus(bool bHasFocus)
+{
+  if (bHasFocus) {
+    CApplication::Instance()->SetKeyFocus(this);
+  } else {
+    CApplication::Instance()->SetKeyFocus(m_pParentWindow);
+  }
+  CWindow::SetHasFocus(bHasFocus);
+}
+
+
 bool CEditBox::HandleMessage(CMessage* pMessage)
 {
 	bool bHandled = false;
@@ -441,6 +458,7 @@ bool CEditBox::HandleMessage(CMessage* pMessage)
 				if (pKeyboardMessage && pMessage->Destination() == this && !m_bReadOnly)
 				{
 					std::string sBuffer = m_sWindowText;
+          bHandled = true;
 
 					switch(pKeyboardMessage->Key)
 					{
@@ -606,6 +624,11 @@ bool CEditBox::HandleMessage(CMessage* pMessage)
 							m_SelStart = 0;
 						}
 						break;
+          case SDLK_TAB:
+            // TAB is not for us - let parent handle it
+            CMessageServer::Instance().QueueMessage(new CKeyboardMessage(CMessage::KEYBOARD_KEYDOWN, m_pParentWindow, this,
+                  pKeyboardMessage->ScanCode, pKeyboardMessage->Modifiers, pKeyboardMessage->Key, pKeyboardMessage->Unicode));
+            break;
 					default:
 						if (pKeyboardMessage->Unicode)
 						{
@@ -654,10 +677,12 @@ bool CEditBox::HandleMessage(CMessage* pMessage)
 				break;
 			}
 		default :
-			bHandled = CWindow::HandleMessage(pMessage);
 			break;
 		}
 	}
+  if (!bHandled) {
+    bHandled = CWindow::HandleMessage(pMessage);
+  }
 
 	return bHandled;
 }

@@ -29,8 +29,6 @@
 #include "wg_resources.h"
 #include "wg_view.h"
 
-
-
 namespace wGui
 {
 
@@ -38,8 +36,7 @@ CDropDown::CDropDown(const CRect& WindowRect, CWindow* pParent, bool bAllowEdit,
 	CWindow(WindowRect, pParent),
 	m_bAllowEdit(bAllowEdit)
 {
-
-    m_pCViewAncestor = GetView();
+  m_pCViewAncestor = GetView();
 	m_pEditBox = new CEditBox(CRect(0, 0, m_WindowRect.Width() - m_WindowRect.Height(), m_WindowRect.Height()), this, pFontEngine);
 	if (!m_bAllowEdit)
 	{
@@ -68,7 +65,7 @@ CDropDown::~CDropDown(void)
     // Reset floating window (see HideListBox() and ShowListBox()), otherwise the FloatingWindow 
     // would point to 'nothing' -> memory errors. This could occur when you open the dropdown list 
     // and immediately close the window with the keyboard.
-    m_pCViewAncestor->SetFloatingWindow(0);
+    m_pCViewAncestor->SetFloatingWindow(nullptr);
 }
 
 
@@ -106,7 +103,6 @@ void CDropDown::MoveWindow(const CPoint& MoveDistance)
 	m_pListBox->MoveWindow(MoveDistance);
 }
 
-// judb override
 void CDropDown::SetVisible(bool bVisible) {
 	CWindow::SetVisible(bVisible);
 	HideListBox();
@@ -229,7 +225,7 @@ void CDropDown::HideListBox(void)
 		m_pListBox->SetVisible(false);
 		if (m_pCViewAncestor && m_pCViewAncestor->GetFloatingWindow() == m_pListBox)
 		{
-			m_pCViewAncestor->SetFloatingWindow(0);
+			m_pCViewAncestor->SetFloatingWindow(nullptr);
 		}
 	}
 }

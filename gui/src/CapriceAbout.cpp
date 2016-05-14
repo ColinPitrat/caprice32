@@ -12,6 +12,7 @@ namespace wGui {
 CapriceAbout::CapriceAbout(const CRect& WindowRect, CWindow* pParent, CFontEngine* pFontEngine) :
 	CMessageBox(WindowRect, pParent, pFontEngine, "About Caprice32", "", CMessageBox::BUTTON_OK)
 {
+  SetModal(true);
 	// Override here: specify position of label ourselves:
 	m_pMessageLabel = new CLabel(CPoint(5, 70), this, "Version 4.2.0");
 	m_pMessageLabel = new CLabel(CPoint(5, 90), this, "F1 - Menu / Pause");
