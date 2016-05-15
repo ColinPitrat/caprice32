@@ -24,8 +24,8 @@ namespace wGui
 {
 
 // judb p is the upper-left corner of the radiobutton; size is the width=height
-CRadioButton::CRadioButton(const CPoint& p, int size, CWindow* pParent, bool bFocusable) :
-	CWindow(CRect(p, size, size), pParent, bFocusable),
+CRadioButton::CRadioButton(const CPoint& p, int size, CWindow* pParent) :
+	CWindow(CRect(p, size, size), pParent),
 	m_eRadioButtonState(UNCHECKED),
 	m_MouseButton(0),
     m_hBitmapRadioButton(CwgBitmapResourceHandle(WGRES_RADIOBUTTON_BITMAP))

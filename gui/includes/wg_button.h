@@ -48,7 +48,7 @@ public:
 	//! \param sText The text on the button
 	//! \param pFontEngine A pointer to the font engine to use when drawing the control
 	//! If this is left out (or set to 0) it will use the default font engine specified by the CApplication (which must be set before instantiating this object)
-	CButton(const CRect& WindowRect, CWindow* pParent, std::string sText, bool isFocusable = false, CFontEngine* pFontEngine = nullptr);
+	CButton(const CRect& WindowRect, CWindow* pParent, std::string sText, CFontEngine* pFontEngine = nullptr);
 
 	//! Standard destructor
 	virtual ~CButton(void);
@@ -118,13 +118,13 @@ public:
   	//! \param WindowRect A CRect that defines the outer limits of the control
 	//! \param pParent A pointer to the parent window
 	//! \param sPictureFile The file to use as the button's picture
-	CPictureButton(const CRect& WindowRect, CWindow* pParent, std::string sPictureFile, bool bFocusable = false);
+	CPictureButton(const CRect& WindowRect, CWindow* pParent, std::string sPictureFile);
 
 	//! Constructs a new picture button
   	//! \param WindowRect A CRect that defines the outer limits of the control
 	//! \param pParent A pointer to the parent window
 	//! \param hBitmap A handle for the bitmap resource
-	CPictureButton(const CRect& WindowRect, CWindow* pParent, const CBitmapResourceHandle& hBitmap, bool bFocusable = false);
+	CPictureButton(const CRect& WindowRect, CWindow* pParent, const CBitmapResourceHandle& hBitmap);
 
 	//! Standard destructor
 	virtual ~CPictureButton(void);

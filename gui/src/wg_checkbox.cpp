@@ -30,8 +30,8 @@
 namespace wGui
 {
 
-CCheckBox::CCheckBox(const CRect& WindowRect, CWindow* pParent, bool bFocusable) :
-	CWindow(WindowRect, pParent, bFocusable),
+CCheckBox::CCheckBox(const CRect& WindowRect, CWindow* pParent) :
+	CWindow(WindowRect, pParent),
 	m_eCheckBoxState(UNCHECKED),
 	m_MouseButton(0),
     m_hBitmapCheck(CwgBitmapResourceHandle(WGRES_CHECK_BITMAP))

@@ -45,7 +45,7 @@ public:
 	//! Constructs a new checkbox
   	//! \param WindowRect A CRect that defines the outer limits of the control
 	//! \param pParent A pointer to the parent window
-	CCheckBox(const CRect& WindowRect, CWindow* pParent, bool bFocusable = false);
+	CCheckBox(const CRect& WindowRect, CWindow* pParent);
 
 	//! Standard destructor
 	virtual ~CCheckBox(void);

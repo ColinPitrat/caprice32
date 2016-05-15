@@ -33,8 +33,8 @@
 namespace wGui
 {
 
-CListBox::CListBox(const CRect& WindowRect, CWindow* pParent, bool bSingleSelection, unsigned int iItemHeight, bool bFocusable, CFontEngine* pFontEngine) :
-	CWindow(WindowRect, pParent, bFocusable),
+CListBox::CListBox(const CRect& WindowRect, CWindow* pParent, bool bSingleSelection, unsigned int iItemHeight, CFontEngine* pFontEngine) :
+	CWindow(WindowRect, pParent),
 	m_iItemHeight(iItemHeight),
 	m_iFocusedItem(0),
 	m_bSingleSelection(bSingleSelection),

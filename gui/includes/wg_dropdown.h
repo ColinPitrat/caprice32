@@ -49,7 +49,7 @@ public:
 	//! \param iItemHeight The height of the items in the listbox portion of the control, defaults to 15
 	//! \param pFontEngine A pointer to the font engine to use when drawing the control
 	//! If this is left out (or set to 0) it will use the default font engine specified by the CApplication (which must be set before instantiating this object)
-	CDropDown(const CRect& WindowRect, CWindow* pParent, bool bAllowEdit = true, bool bFocusable = false, unsigned int iItemHeight = 15, CFontEngine* pFontEngine = nullptr);
+	CDropDown(const CRect& WindowRect, CWindow* pParent, bool bAllowEdit = true, unsigned int iItemHeight = 15, CFontEngine* pFontEngine = nullptr);
 
 	//! Standard destructor
 	virtual ~CDropDown(void);
@@ -117,6 +117,9 @@ public:
 
 	// slight override from CWindow: if visible is set to "true", the dropdown part should stay invisible:
 	void SetVisible(bool bVisible);
+
+  // Override the default behaviour: a focused drop-down list is in fact it's button being focused
+  virtual void SetIsFocusable(bool bFocused) override;
 
 	// CMessageClient overrides
 	//! CDropDown will handle MOUSE_BUTTONDOWN messages

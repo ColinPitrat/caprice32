@@ -38,22 +38,30 @@ CMessageBox::CMessageBox(const CRect& WindowRect, CWindow* pParent, CFontEngine*
 	CPoint BottomRight(GetClientRect().Right() - 20, GetClientRect().Bottom() - 30);
 	if (iButtons & CMessageBox::BUTTON_CANCEL)
 	{
-		m_ButtonMap.insert(std::make_pair(CMessageBox::BUTTON_CANCEL, new CButton(CRect(BottomRight - CPoint(50, 18), BottomRight), this, "Cancel", true)));
+    CButton *button = new CButton(CRect(BottomRight - CPoint(50, 18), BottomRight), this, "Cancel");
+    button->SetIsFocusable(true);
+		m_ButtonMap.insert(std::make_pair(CMessageBox::BUTTON_CANCEL, button));
 		BottomRight = BottomRight - CPoint(60, 0);
 	}
 	if (iButtons & CMessageBox::BUTTON_OK)
 	{
-		m_ButtonMap.insert(std::make_pair(CMessageBox::BUTTON_OK, new CButton(CRect(BottomRight - CPoint(50, 18), BottomRight), this, "Ok", true)));
+    CButton *button = new CButton(CRect(BottomRight - CPoint(50, 18), BottomRight), this, "Ok");
+    button->SetIsFocusable(true);
+		m_ButtonMap.insert(std::make_pair(CMessageBox::BUTTON_OK, button));
 		BottomRight = BottomRight - CPoint(60, 0);
 	}
 	if (iButtons & CMessageBox::BUTTON_NO)
 	{
-		m_ButtonMap.insert(std::make_pair(CMessageBox::BUTTON_NO, new CButton(CRect(BottomRight - CPoint(50, 18), BottomRight), this, "No", true)));
+    CButton *button = new CButton(CRect(BottomRight - CPoint(50, 18), BottomRight), this, "No");
+    button->SetIsFocusable(true);
+		m_ButtonMap.insert(std::make_pair(CMessageBox::BUTTON_NO, button));
 		BottomRight = BottomRight - CPoint(60, 0);
 	}
 	if (iButtons & CMessageBox::BUTTON_YES)
 	{
-		m_ButtonMap.insert(std::make_pair(CMessageBox::BUTTON_YES, new CButton(CRect(BottomRight - CPoint(50, 18), BottomRight), this, "Yes", true)));
+    CButton *button = new CButton(CRect(BottomRight - CPoint(50, 18), BottomRight), this, "Yes");
+    button->SetIsFocusable(true);
+		m_ButtonMap.insert(std::make_pair(CMessageBox::BUTTON_YES, button));
 		BottomRight = BottomRight - CPoint(60, 0);
 	}
 }

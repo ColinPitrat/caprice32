@@ -40,9 +40,6 @@ CapriceOptions::CapriceOptions(const CRect& WindowRect, CWindow* pParent, CFontE
     m_pGroupBoxTabDisk   = new CGroupBox(CRect(CPoint(5, 60), m_ClientRect.Width() - 12, m_ClientRect.Height() - 80), this, "");
     m_pGroupBoxTabInput   = new CGroupBox(CRect(CPoint(5, 60), m_ClientRect.Width() - 12, m_ClientRect.Height() - 80), this, "");
 
-    m_pButtonOk     = new CButton(CRect(CPoint(100, m_ClientRect.Height() - 20), 50, 15), this, "OK", true);
-    m_pButtonCancel = new CButton(CRect(CPoint(160, m_ClientRect.Height() - 20), 50, 15), this, "Cancel", true);
-
     // Store associations, see EnableTab method:
     TabMap["general"] = m_pGroupBoxTabGeneral;
     TabMap["expansion"] = m_pGroupBoxTabExpansion;
@@ -53,13 +50,14 @@ CapriceOptions::CapriceOptions(const CRect& WindowRect, CWindow* pParent, CFontE
 
     // ---------------- 'General' Options ----------------
     m_pLabelCPCModel    = new CLabel(CPoint(10, 3), m_pGroupBoxTabGeneral, "CPC Model");
-    m_pDropDownCPCModel = new CDropDown(CRect(CPoint(80, 0), 80, 16), m_pGroupBoxTabGeneral, 0, true, 14);
+    m_pDropDownCPCModel = new CDropDown(CRect(CPoint(80, 0), 80, 16), m_pGroupBoxTabGeneral, false, 14);
     m_pDropDownCPCModel->AddItem(SListItem("CPC 464"));
     m_pDropDownCPCModel->AddItem(SListItem("CPC 664"));
     m_pDropDownCPCModel->AddItem(SListItem("CPC 6128"));
     m_pDropDownCPCModel->SetListboxHeight(3);
        // index and model match, i.e. 0 -> 464, 1 -> 664, 2 -> 6128:
     m_pDropDownCPCModel->SelectItem(CPC.model);
+    m_pDropDownCPCModel->SetIsFocusable(true);
 
     m_pLabelRamSize = new CLabel(CPoint(10, 28), m_pGroupBoxTabGeneral, "RAM memory");
     m_pScrollBarRamSize = new CScrollBar(CRect(CPoint(90, 25), 120, 12), m_pGroupBoxTabGeneral,
@@ -72,7 +70,8 @@ CapriceOptions::CapriceOptions(const CRect& WindowRect, CWindow* pParent, CFontE
     m_pScrollBarRamSize->SetValue(CPC.ram_size / 64);
     m_pLabelRamSizeValue = new CLabel(CPoint(217,28), m_pGroupBoxTabGeneral, stdex::itoa(CPC.ram_size) + "k     ");
 
-    m_pCheckBoxLimitSpeed   = new CCheckBox(CRect(CPoint(10, 49), 10, 10), m_pGroupBoxTabGeneral, true);
+    m_pCheckBoxLimitSpeed   = new CCheckBox(CRect(CPoint(10, 49), 10, 10), m_pGroupBoxTabGeneral);
+    m_pCheckBoxLimitSpeed->SetIsFocusable(true);
     m_pLabelLimitSpeed      = new CLabel(CPoint(27, 50), m_pGroupBoxTabGeneral, "Limit emulation speed");
     if (CPC.limit_speed == 1) {
         m_pCheckBoxLimitSpeed->SetCheckBoxState(CCheckBox::CHECKED);
@@ -86,11 +85,12 @@ CapriceOptions::CapriceOptions(const CRect& WindowRect, CWindow* pParent, CFontE
     m_pScrollBarCPCSpeed->SetValue(CPC.speed);
        // Actual emulation speed = value * 25 e.g. 4 -> 100%; values range between 2 and 32
     m_pLabelCPCSpeedValue = new CLabel(CPoint(205, 71), m_pGroupBoxTabGeneral, stdex::itoa(CPC.speed * 25) + "%  ");
-    m_pCheckBoxPrinterToFile = new CCheckBox(CRect(CPoint(10, 90), 10, 10), m_pGroupBoxTabGeneral, true);
+    m_pCheckBoxPrinterToFile = new CCheckBox(CRect(CPoint(10, 90), 10, 10), m_pGroupBoxTabGeneral);
     m_pLabelPrinterToFile    = new CLabel(CPoint(27, 91), m_pGroupBoxTabGeneral, "Capture printer output to file");
     if (CPC.printer  == 1) {
         m_pCheckBoxPrinterToFile->SetCheckBoxState(CCheckBox::CHECKED);
     }
+    m_pCheckBoxPrinterToFile->SetIsFocusable(true);
 
     // ---------------- Expansion ROMs ----------------
     std::string romFileName;
@@ -102,31 +102,37 @@ CapriceOptions::CapriceOptions(const CRect& WindowRect, CWindow* pParent, CFontE
       } else {
           romFileName = "...";
       }
-      CButton* romButton = new CButton(CRect(CPoint((i<8)?20:150, 1 + 18*(i%8)), 100, 15), m_pGroupBoxTabExpansion, romFileName, true);
+      CButton* romButton = new CButton(CRect(CPoint((i<8)?20:150, 1 + 18*(i%8)), 100, 15), m_pGroupBoxTabExpansion, romFileName);
+      romButton->SetIsFocusable(true);
       m_pButtonRoms.push_back(romButton); // element i corresponds with ROM slot i.
     }
 
     // ---------------- 'Video' options ----------------
-    m_pCheckBoxShowFps      = new CCheckBox(CRect(CPoint(10, 94), 10, 10), m_pGroupBoxTabVideo, true);
-    if (CPC.scr_fps == 1) {
-        m_pCheckBoxShowFps->SetCheckBoxState(CCheckBox::CHECKED);
+    m_pDropDownVideoPlugin = new CDropDown(CRect(CPoint(100,0),140,16), m_pGroupBoxTabVideo, false, 14); // Select video plugin
+    unsigned int i = 0;
+    while(video_plugin_list[i].name)
+    {
+            m_pDropDownVideoPlugin->AddItem(SListItem(video_plugin_list[i].name));
+            i++;
     }
-    m_pLabelShowFps      = new CLabel(CPoint(27, 95), m_pGroupBoxTabVideo, "Show emulation speed");
-    m_pCheckBoxFullScreen   = new CCheckBox(CRect(CPoint(10, 114), 10, 10), m_pGroupBoxTabVideo, true);
-    if (CPC.scr_window == 0) {
-        m_pCheckBoxFullScreen->SetCheckBoxState(CCheckBox::CHECKED);
-    }
-    m_pLabelFullScreen      = new CLabel(CPoint(27, 115), m_pGroupBoxTabVideo, "Full screen");
+    m_pDropDownVideoPlugin->SetListboxHeight(5);
+    m_pDropDownVideoPlugin->SelectItem(CPC.scr_style);
+    m_pDropDownVideoPlugin->SetIsFocusable(true);
+
+    m_pLabelVideoPlugin = new CLabel(CPoint(10, 2), m_pGroupBoxTabVideo, "Video plugin");
+
     m_pGroupBoxMonitor   = new CGroupBox(CRect(CPoint(10, 30), 280, 55), m_pGroupBoxTabVideo, "Monitor");
-    m_pRadioButtonColour = new CRadioButton(CPoint(10, 1), 10, m_pGroupBoxMonitor, true); // Colour or monochrome monitor
+    m_pRadioButtonColour = new CRadioButton(CPoint(10, 1), 10, m_pGroupBoxMonitor); // Colour or monochrome monitor
     m_pLabelColour       = new CLabel(CPoint(27,2), m_pGroupBoxMonitor, "Colour");
-    m_pRadioButtonMonochrome   = new CRadioButton(CPoint(10, 16), 10, m_pGroupBoxMonitor, true); // Colour or monochrome monitor;
+    m_pRadioButtonMonochrome   = new CRadioButton(CPoint(10, 16), 10, m_pGroupBoxMonitor); // Colour or monochrome monitor;
     m_pLabelMonochrome         = new CLabel(CPoint(27,17), m_pGroupBoxMonitor, "Mono");
     if (CPC.scr_tube == 1) {
         m_pRadioButtonMonochrome->SetState(CRadioButton::CHECKED);
     } else {
         m_pRadioButtonColour->SetState(CRadioButton::CHECKED);
     }
+    m_pRadioButtonColour->SetIsFocusable(true);
+    m_pRadioButtonMonochrome->SetIsFocusable(true);
 
     m_pScrollBarIntensity = new CScrollBar(CRect(CPoint(130, 8), 90, 12), m_pGroupBoxMonitor, CScrollBar::HORIZONTAL);
     m_pScrollBarIntensity->SetMinLimit(5);
@@ -141,25 +147,27 @@ CapriceOptions::CapriceOptions(const CRect& WindowRect, CWindow* pParent, CFontE
     sprintf(intensityValue, "%2.1f ", CPC.scr_intensity / 10.0);
     m_pLabelIntensityValue = new CLabel(CPoint(230, 10), m_pGroupBoxMonitor, intensityValue);
 
-    m_pDropDownVideoPlugin = new CDropDown(CRect(CPoint(100,0),140,16), m_pGroupBoxTabVideo, 0, true, 14); // Select video plugin
-    unsigned int i = 0;
-    while(video_plugin_list[i].name)
-    {
-            m_pDropDownVideoPlugin->AddItem(SListItem(video_plugin_list[i].name));
-            i++;
+    m_pCheckBoxShowFps      = new CCheckBox(CRect(CPoint(10, 94), 10, 10), m_pGroupBoxTabVideo);
+    if (CPC.scr_fps == 1) {
+        m_pCheckBoxShowFps->SetCheckBoxState(CCheckBox::CHECKED);
     }
-    m_pDropDownVideoPlugin->SetListboxHeight(5);
-    m_pDropDownVideoPlugin->SelectItem(CPC.scr_style);
-
-    m_pLabelVideoPlugin = new CLabel(CPoint(10, 2), m_pGroupBoxTabVideo, "Video plugin");
+    m_pCheckBoxShowFps->SetIsFocusable(true);
+    m_pLabelShowFps      = new CLabel(CPoint(27, 95), m_pGroupBoxTabVideo, "Show emulation speed");
+    m_pCheckBoxFullScreen   = new CCheckBox(CRect(CPoint(10, 114), 10, 10), m_pGroupBoxTabVideo);
+    if (CPC.scr_window == 0) {
+        m_pCheckBoxFullScreen->SetCheckBoxState(CCheckBox::CHECKED);
+    }
+    m_pCheckBoxFullScreen->SetIsFocusable(true);
+    m_pLabelFullScreen      = new CLabel(CPoint(27, 115), m_pGroupBoxTabVideo, "Full screen");
     // ---------------- 'Audio' Options ----------------
-    m_pCheckBoxEnableSound = new CCheckBox(CRect(CPoint(10,0), 10,10), m_pGroupBoxTabAudio, true);    // Show emulation speed
+    m_pCheckBoxEnableSound = new CCheckBox(CRect(CPoint(10,0), 10,10), m_pGroupBoxTabAudio);    // Show emulation speed
     if (CPC.snd_enabled == 1) {
         m_pCheckBoxEnableSound->SetCheckBoxState(CCheckBox::CHECKED);
     }
+    m_pCheckBoxEnableSound->SetIsFocusable(true);
     m_pLabelEnableSound    = new CLabel(CPoint(28, 1), m_pGroupBoxTabAudio, "Enable Sound Emulation");
 
-    m_pDropDownSamplingRate = new CDropDown(CRect(CPoint(100,25),100,16), m_pGroupBoxTabAudio, 0, true, 14); // Select audio sampling rate
+    m_pDropDownSamplingRate = new CDropDown(CRect(CPoint(100,25),100,16), m_pGroupBoxTabAudio, false, 14); // Select audio sampling rate
     m_pDropDownSamplingRate->AddItem(SListItem("11025 Hz"));
     m_pDropDownSamplingRate->AddItem(SListItem("22050 Hz"));
     m_pDropDownSamplingRate->AddItem(SListItem("44100 Hz"));
@@ -167,6 +175,7 @@ CapriceOptions::CapriceOptions(const CRect& WindowRect, CWindow* pParent, CFontE
     m_pDropDownSamplingRate->AddItem(SListItem("96000 Hz"));
     m_pDropDownSamplingRate->SetListboxHeight(4);
     m_pDropDownSamplingRate->SelectItem(CPC.snd_playback_rate);
+    m_pDropDownSamplingRate->SetIsFocusable(true);
 
     m_pLabelSamplingRate = new CLabel(CPoint(10, 27), m_pGroupBoxTabAudio, "Playback Rate");
 
@@ -180,60 +189,73 @@ CapriceOptions::CapriceOptions(const CRect& WindowRect, CWindow* pParent, CFontE
     m_pScrollBarVolume->SetValue(CPC.snd_volume);
     m_pLabelSoundVolumeValue = new CLabel(CPoint(190, 108), m_pGroupBoxTabAudio, stdex::itoa(CPC.snd_volume) + "%  ");
 
-    m_pRadioButtonMono   = new CRadioButton(CPoint(5, 2), 10, m_pGroupBoxChannels, true);
+    m_pRadioButtonMono   = new CRadioButton(CPoint(5, 2), 10, m_pGroupBoxChannels);
     m_pLabelMono         = new CLabel(CPoint(20,3), m_pGroupBoxChannels, "Mono");
-    m_pRadioButtonStereo = new CRadioButton(CPoint(55, 2), 10, m_pGroupBoxChannels, true); // position is within the parent! (groupbox)
+    m_pRadioButtonStereo = new CRadioButton(CPoint(55, 2), 10, m_pGroupBoxChannels); // position is within the parent! (groupbox)
     m_pLabelStereo      = new CLabel(CPoint(70,3), m_pGroupBoxChannels, "Stereo");
     if (CPC.snd_stereo == 0) {
         m_pRadioButtonMono->SetState(CRadioButton::CHECKED);
     } else {
       m_pRadioButtonStereo->SetState(CRadioButton::CHECKED);
     }
-    m_pRadioButton8bit  = new CRadioButton(CPoint(5, 2), 10, m_pGroupBoxSampleSize, true);
+    m_pRadioButtonMono->SetIsFocusable(true);
+    m_pRadioButtonStereo->SetIsFocusable(true);
+    m_pRadioButton8bit  = new CRadioButton(CPoint(5, 2), 10, m_pGroupBoxSampleSize);
     m_pLabel8bit        = new CLabel(CPoint(20,3), m_pGroupBoxSampleSize, "8 bit");
-    m_pRadioButton16bit = new CRadioButton(CPoint(55, 2), 10, m_pGroupBoxSampleSize, true);
+    m_pRadioButton16bit = new CRadioButton(CPoint(55, 2), 10, m_pGroupBoxSampleSize);
     m_pLabel16bit       = new CLabel(CPoint(70, 3), m_pGroupBoxSampleSize, "16 bit");
     if (CPC.snd_bits == 0)  {
       m_pRadioButton8bit->SetState(CRadioButton::CHECKED);
     } else {
         m_pRadioButton16bit->SetState(CRadioButton::CHECKED);
     }
+    m_pRadioButton8bit->SetIsFocusable(true);
+    m_pRadioButton16bit->SetIsFocusable(true);
 
     // ---------------- 'Disk' Options ----------------
     m_pGroupBoxDriveA  = new CGroupBox(CRect(CPoint(10, 0), 280, 45), m_pGroupBoxTabDisk, "CPC Drive A");
     m_pGroupBoxDriveB  = new CGroupBox(CRect(CPoint(10, 50), 280, 45), m_pGroupBoxTabDisk, "CPC Drive B");
     m_pLabelDriveAFormat    = new CLabel(CPoint(10,3), m_pGroupBoxDriveA, "Insert blank disks as");
-    m_pDropDownDriveAFormat = new CDropDown(CRect(CPoint(130,1),140,16), m_pGroupBoxDriveA, 0, true, 14);
+    m_pDropDownDriveAFormat = new CDropDown(CRect(CPoint(130,1),140,16), m_pGroupBoxDriveA, false, 14);
     m_pDropDownDriveAFormat->AddItem(SListItem("178K Data Format"));
     m_pDropDownDriveAFormat->AddItem(SListItem("169K Vendor Format"));
     m_pDropDownDriveAFormat->SetListboxHeight(2);
     m_pDropDownDriveAFormat->SelectItem(CPC.drvA_format == 0 ? 0 : 1);
+    m_pDropDownDriveAFormat->SetIsFocusable(true);
     m_pLabelDriveBFormat    = new CLabel(CPoint(10,3), m_pGroupBoxDriveB, "Insert blank disks as");;
-    m_pDropDownDriveBFormat = new CDropDown(CRect(CPoint(130,1),140,16), m_pGroupBoxDriveB, 0, true, 14);
+    m_pDropDownDriveBFormat = new CDropDown(CRect(CPoint(130,1),140,16), m_pGroupBoxDriveB, false, 14);
     m_pDropDownDriveBFormat->AddItem(SListItem("178K Data Format"));
     m_pDropDownDriveBFormat->AddItem(SListItem("169K Vendor Format"));
     m_pDropDownDriveBFormat->SetListboxHeight(2);
     m_pDropDownDriveBFormat->SelectItem(CPC.drvB_format == 0 ? 0 : 1);
+    m_pDropDownDriveBFormat->SetIsFocusable(true);
 
     // ---------------- 'Input' Options ----------------
     // option 'keyboard' which is the CPC language
     m_pLabelCPCLanguage    = new CLabel(CPoint(10,3), m_pGroupBoxTabInput, "CPC language");;
-    m_pDropDownCPCLanguage = new CDropDown(CRect(CPoint(130,1),140,16), m_pGroupBoxTabInput, 0, true, 14);
+    m_pDropDownCPCLanguage = new CDropDown(CRect(CPoint(130,1),140,16), m_pGroupBoxTabInput, false, 14);
     m_pDropDownCPCLanguage->AddItem(SListItem("English CPC"));
     m_pDropDownCPCLanguage->AddItem(SListItem("French CPC"));
     m_pDropDownCPCLanguage->AddItem(SListItem("Spanish CPC"));
     m_pDropDownCPCLanguage->SetListboxHeight(3);
     m_pDropDownCPCLanguage->SelectItem(CPC.keyboard);
+    m_pDropDownCPCLanguage->SetIsFocusable(true);
     // option 'kbd_layout' which is the platform keyboard layout (i.e. the PC keyboard layout)
     m_pLabelPCLanguage    = new CLabel(CPoint(10,33), m_pGroupBoxTabInput, "PC Keyboard language");;
-    m_pDropDownPCLanguage = new CDropDown(CRect(CPoint(130,31),140,16), m_pGroupBoxTabInput, 0, true, 14);
+    m_pDropDownPCLanguage = new CDropDown(CRect(CPoint(130,31),140,16), m_pGroupBoxTabInput, false, 14);
     m_pDropDownPCLanguage->AddItem(SListItem("English"));
     m_pDropDownPCLanguage->AddItem(SListItem("French"));
     m_pDropDownPCLanguage->AddItem(SListItem("Spanish"));
     m_pDropDownPCLanguage->SetListboxHeight(3);
     m_pDropDownPCLanguage->SelectItem(CPC.kbd_layout);
+    m_pDropDownPCLanguage->SetIsFocusable(true);
 
     EnableTab("general");
+
+    m_pButtonOk     = new CButton(CRect(CPoint(100, m_ClientRect.Height() - 20), 50, 15), this, "OK");
+    m_pButtonOk->SetIsFocusable(true);
+    m_pButtonCancel = new CButton(CRect(CPoint(160, m_ClientRect.Height() - 20), 50, 15), this, "Cancel");
+    m_pButtonCancel->SetIsFocusable(true);
 }
 
 CapriceOptions::~CapriceOptions(void) {

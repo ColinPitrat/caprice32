@@ -40,7 +40,7 @@ public:
 	//! Constructs a new radiobutton
   	//! \param WindowRect A CRect that defines the outer limits of the control
 	//! \param pParent A pointer to the parent window
-	CRadioButton(const CPoint& p, int size, CWindow* pParent, bool bFocusable = false);
+	CRadioButton(const CPoint& p, int size, CWindow* pParent);
 
 	//! Standard destructor
 	virtual ~CRadioButton(void);

@@ -22,14 +22,19 @@ CapriceMemoryTool::CapriceMemoryTool(const CRect& WindowRect, CWindow* pParent, 
     CMessageServer::Instance().RegisterMessageClient(this, CMessage::CTRL_VALUECHANGING);
 
     m_pPokeAdressLabel = new CLabel(        CPoint(15, 18),             this, "Adress: ");
-    m_pPokeAdress      = new CEditBox(CRect(CPoint(55, 13),  30, 20),   this, true, nullptr);
+    m_pPokeAdress      = new CEditBox(CRect(CPoint(55, 13),  30, 20),   this);
+    m_pPokeAdress->SetIsFocusable(true);
     m_pPokeValueLabel  = new CLabel(        CPoint(95, 18),             this, "Value: ");
-    m_pPokeValue       = new CEditBox(CRect(CPoint(130, 13), 30, 20),   this, true, nullptr);
-    m_pButtonPoke      = new CButton( CRect(CPoint(175, 13), 30, 20),   this, "Poke", true);
+    m_pPokeValue       = new CEditBox(CRect(CPoint(130, 13), 30, 20),   this);
+    m_pPokeValue->SetIsFocusable(true);
+    m_pButtonPoke      = new CButton( CRect(CPoint(175, 13), 30, 20),   this, "Poke");
+    m_pButtonPoke->SetIsFocusable(true);
 
     m_pAdressLabel     = new CLabel(        CPoint(15, 50),             this, "Adress: ");
-    m_pAdressValue     = new CEditBox(CRect(CPoint(55, 45), 30, 20),    this, true, nullptr);
-    m_pButtonDisplay   = new CButton( CRect(CPoint(95, 45), 40, 20),    this, "Display", true);
+    m_pAdressValue     = new CEditBox(CRect(CPoint(55, 45), 30, 20),    this);
+    m_pAdressValue->SetIsFocusable(true);
+    m_pButtonDisplay   = new CButton( CRect(CPoint(95, 45), 40, 20),    this, "Display");
+    m_pButtonDisplay->SetIsFocusable(true);
 
     m_pBytesPerLineLbl = new CLabel(       CPoint(240, 35),             this, "Bytes per line:");
     m_pBytesPerLine  = new CDropDown( CRect(CPoint(240, 45), 50, 20),   this, false, 14);
@@ -42,16 +47,21 @@ CapriceMemoryTool::CapriceMemoryTool(const CRect& WindowRect, CWindow* pParent, 
     m_pBytesPerLine->SetListboxHeight(4);
     m_bytesPerLine = 16;
     m_pBytesPerLine->SelectItem(3);
+    m_pBytesPerLine->SetIsFocusable(true);
 
     m_pFilterLabel     = new CLabel(        CPoint(15, 80),             this, "Byte: ");
-    m_pFilterValue     = new CEditBox(CRect(CPoint(55, 75), 30, 20),    this, true, nullptr);
-    m_pButtonFilter    = new CButton( CRect(CPoint(95, 75), 40, 20),    this, "Filter", true);
-    m_pButtonCopy      = new CButton( CRect(CPoint(240, 75), 75, 20),   this, "Dump to stdout", true);
+    m_pFilterValue     = new CEditBox(CRect(CPoint(55, 75), 30, 20),    this);
+    m_pFilterValue->SetIsFocusable(true);
+    m_pButtonFilter    = new CButton( CRect(CPoint(95, 75), 40, 20),    this, "Filter");
+    m_pButtonFilter->SetIsFocusable(true);
+    m_pButtonCopy      = new CButton( CRect(CPoint(240, 75), 75, 20),   this, "Dump to stdout");
+    m_pButtonCopy->SetIsFocusable(true);
 
     // The list box is way to slow to handle so much elements
     //m_pListMemContent  = new CListBox(CRect(CPoint(25, 75), 275, 100), this, true);
     m_pTextMemContent  = new CTextBox(CRect(CPoint(15, 105), 300, 102), this, m_pMonoFontEngine);
-    m_pButtonClose     = new CButton( CRect(CPoint(15, 220), 300, 20),  this, "Close", true);
+    m_pButtonClose     = new CButton( CRect(CPoint(15, 220), 300, 20),  this, "Close");
+    m_pButtonClose->SetIsFocusable(true);
 
     m_pPokeAdress->SetContentType(CEditBox::HEXNUMBER);
     m_pPokeValue->SetContentType(CEditBox::HEXNUMBER);

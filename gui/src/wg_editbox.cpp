@@ -36,8 +36,8 @@
 namespace wGui
 {
 
-CEditBox::CEditBox(const CRect& WindowRect, CWindow* pParent, bool bFocusable, CFontEngine* pFontEngine) :
-	CWindow(WindowRect, pParent, bFocusable),
+CEditBox::CEditBox(const CRect& WindowRect, CWindow* pParent, CFontEngine* pFontEngine) :
+	CWindow(WindowRect, pParent),
 	m_SelStart(0),
 	m_SelLength(0),
 	m_DragStart(0),

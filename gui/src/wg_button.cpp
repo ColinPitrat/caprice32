@@ -35,8 +35,8 @@
 namespace wGui
 {
 
-CButton::CButton(const CRect& WindowRect, CWindow* pParent, std::string sText, bool isFocusable, CFontEngine* pFontEngine) :
-	CWindow(WindowRect, pParent, isFocusable),
+CButton::CButton(const CRect& WindowRect, CWindow* pParent, std::string sText, CFontEngine* pFontEngine) :
+	CWindow(WindowRect, pParent),
 	m_eButtonState(UP),
 	m_MouseButton(0)
 {
@@ -205,16 +205,16 @@ bool CButton::HandleMessage(CMessage* pMessage)
 }
 
 
-CPictureButton::CPictureButton(const CRect& WindowRect, CWindow* pParent, std::string sPictureFile, bool bFocusable) :
-	CButton(WindowRect, pParent, sPictureFile, bFocusable)
+CPictureButton::CPictureButton(const CRect& WindowRect, CWindow* pParent, std::string sPictureFile) :
+	CButton(WindowRect, pParent, sPictureFile)
 {
 	m_phBitmap.reset(new CBitmapFileResourceHandle(sPictureFile));
 	Draw();
 }
 
 
-CPictureButton::CPictureButton(const CRect& WindowRect, CWindow* pParent, const CBitmapResourceHandle& hBitmap, bool bFocusable) :
-	CButton(WindowRect, pParent, "<bitmap>", bFocusable)
+CPictureButton::CPictureButton(const CRect& WindowRect, CWindow* pParent, const CBitmapResourceHandle& hBitmap) :
+	CButton(WindowRect, pParent, "<bitmap>")
 {
 	m_phBitmap.reset(new CBitmapResourceHandle(hBitmap));
 	Draw();

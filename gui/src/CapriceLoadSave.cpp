@@ -30,22 +30,24 @@ CapriceLoadSave::CapriceLoadSave(const CRect& WindowRect, CWindow* pParent, CFon
 
   // File type (.SNA, .DSK, .TAP, .VOC)
   m_pTypeLabel = new CLabel(          CPoint(15, 25),             this, "File type: ");
-  m_pTypeValue = new CDropDown( CRect(CPoint(80, 20), 150, 20),    this, false, true);
+  m_pTypeValue = new CDropDown( CRect(CPoint(80, 20), 150, 20),    this, false);
   m_pTypeValue->AddItem(SListItem("Snapshot (.sna)"));
   m_pTypeValue->AddItem(SListItem("Drive A (.dsk)"));
   m_pTypeValue->AddItem(SListItem("Drive B (.dsk)"));
   m_pTypeValue->AddItem(SListItem("Tape (.tap)"));
   m_pTypeValue->SetListboxHeight(4);
   m_pTypeValue->SelectItem(0);
+  m_pTypeValue->SetIsFocusable(true);
   m_currentExt = ".sna";
 
   // Action: load / save
   m_pActionLabel = new CLabel(          CPoint(15, 55),             this, "Action: ");
-  m_pActionValue = new CDropDown( CRect(CPoint(80, 50), 150, 20),   this, false, true);
+  m_pActionValue = new CDropDown( CRect(CPoint(80, 50), 150, 20),   this, false);
   m_pActionValue->AddItem(SListItem("Load"));
   m_pActionValue->AddItem(SListItem("Save"));
   m_pActionValue->SetListboxHeight(2);
   m_pActionValue->SelectItem(0);
+  m_pActionValue->SetIsFocusable(true);
 
   // Directory
   m_pDirectoryLabel = new CLabel(          CPoint(15, 85),             this, "Directory: ");
@@ -54,7 +56,8 @@ CapriceLoadSave::CapriceLoadSave(const CRect& WindowRect, CWindow* pParent, CFon
   m_pDirectoryValue->SetReadOnly(true);
 
   // File list
-  m_pFilesList = new CListBox(CRect(CPoint(80, 115), 150, 80), this, true, 12, true, nullptr);
+  m_pFilesList = new CListBox(CRect(CPoint(80, 115), 150, 80), this, true, 12);
+  m_pFilesList->SetIsFocusable(true);
   UpdateFilesList();
 
   // File name
@@ -64,8 +67,10 @@ CapriceLoadSave::CapriceLoadSave(const CRect& WindowRect, CWindow* pParent, CFon
   m_pFileNameValue->SetReadOnly(true);
 
   // Buttons
-  m_pCancelButton   = new CButton(  CRect( CPoint(250, 180), 50, 20), this, "Cancel", true);
-  m_pLoadSaveButton = new CButton(  CRect( CPoint(250, 210), 50, 20), this, "Load", true);
+  m_pCancelButton   = new CButton(  CRect( CPoint(250, 180), 50, 20), this, "Cancel");
+  m_pCancelButton->SetIsFocusable(true);
+  m_pLoadSaveButton = new CButton(  CRect( CPoint(250, 210), 50, 20), this, "Load");
+  m_pLoadSaveButton->SetIsFocusable(true);
 }
 
 bool CapriceLoadSave::HandleMessage(CMessage* pMessage)

@@ -54,7 +54,7 @@ public:
 	//! The parent is then responsible for destroying the window
   	//! \param WindowRect A CRect that defines the outer limits of the control
 	//! \param pParent A pointer to the parent window
-	CWindow(const CRect& WindowRect, CWindow* pParent, bool isFocusable = false);
+	CWindow(const CRect& WindowRect, CWindow* pParent);
 
     // judb constructor without CRect; don't forget to call SetWindowRect before using the CWindow!
 	CWindow(CWindow* pParent);

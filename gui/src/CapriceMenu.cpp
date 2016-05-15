@@ -32,7 +32,9 @@ CapriceMenu::CapriceMenu(const CRect& WindowRect, CWindow* pParent, SDL_Surface*
   CRect button_rect(CPoint(20, 10), 100, 20);
 
   for(auto& b : buttons) {
-    m_buttons.push_back(CapriceGuiViewButton(b.first, new CButton(button_rect, this, b.second, true)));
+    CButton *button = new CButton(button_rect, this, b.second);
+    button->SetIsFocusable(true);
+    m_buttons.push_back(CapriceGuiViewButton(b.first, button));
     button_rect += button_space;
   }
 }

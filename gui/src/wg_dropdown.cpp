@@ -28,17 +28,16 @@
 #include "wg_message_server.h"
 #include "wg_resources.h"
 #include "wg_view.h"
-#include <iostream> // TODO: remove
 
 namespace wGui
 {
 
-CDropDown::CDropDown(const CRect& WindowRect, CWindow* pParent, bool bAllowEdit, bool bFocusable, unsigned int iItemHeight, CFontEngine* pFontEngine) :
+CDropDown::CDropDown(const CRect& WindowRect, CWindow* pParent, bool bAllowEdit, unsigned int iItemHeight, CFontEngine* pFontEngine) :
 	CWindow(WindowRect, pParent),
 	m_bAllowEdit(bAllowEdit)
 {
   m_pCViewAncestor = GetView();
-	m_pEditBox = new CEditBox(CRect(0, 0, m_WindowRect.Width() - m_WindowRect.Height(), m_WindowRect.Height()), this, false, pFontEngine);
+	m_pEditBox = new CEditBox(CRect(0, 0, m_WindowRect.Width() - m_WindowRect.Height(), m_WindowRect.Height()), this, pFontEngine);
 	if (!m_bAllowEdit)
 	{
 		m_pEditBox->SetReadOnly(true);
@@ -47,13 +46,13 @@ CDropDown::CDropDown(const CRect& WindowRect, CWindow* pParent, bool bAllowEdit,
 	}
 
 	m_pListBox = new CListBox(CRect(0, m_WindowRect.Height(), m_WindowRect.Width(), m_WindowRect.Height() + iItemHeight * 5 + 1),
-		this, true, iItemHeight, false, pFontEngine);
+		this, true, iItemHeight, pFontEngine);
 	m_pListBox->SetVisible(false);
 	m_pListBox->SetDropDown(this);
 
 	m_pDropButton = new CPictureButton(
 		CRect(m_WindowRect.Width() - m_WindowRect.Height() + 1, 0, m_WindowRect.Width(), m_WindowRect.Height()),
-		this, CwgBitmapResourceHandle(WGRES_DOWN_ARROW_BITMAP), true);
+		this, CwgBitmapResourceHandle(WGRES_DOWN_ARROW_BITMAP));
 	CMessageServer::Instance().RegisterMessageClient(this, CMessage::KEYBOARD_KEYDOWN);
 	CMessageServer::Instance().RegisterMessageClient(this, CMessage::MOUSE_BUTTONDOWN);
 	CMessageServer::Instance().RegisterMessageClient(this, CMessage::CTRL_SINGLELCLICK);
@@ -108,6 +107,10 @@ void CDropDown::MoveWindow(const CPoint& MoveDistance)
 void CDropDown::SetVisible(bool bVisible) {
 	CWindow::SetVisible(bVisible);
 	HideListBox();
+}
+
+void CDropDown::SetIsFocusable(bool bFocusable) {
+  m_pDropButton->SetIsFocusable(bFocusable);
 }
 
 bool CDropDown::HandleMessage(CMessage* pMessage)
