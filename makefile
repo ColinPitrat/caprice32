@@ -10,6 +10,8 @@ OBJECTS:=$(SOURCES:.cpp=.o)
 IPATHS	= -I. -Igui/includes `freetype-config --cflags` 
 LIBS = `sdl-config --libs` -lz `freetype-config --libs` 
 
+.PHONY: all clean debug debug_flag
+
 ifndef CXX
 CXX	= g++
 endif
@@ -39,41 +41,25 @@ endif
 
 CFLAGS = $(CFLAGS_3) $(IPATHS)
 
-#.cpp.o :
-#	$(CXX) -c $(CFLAGS) -o $@ $<
+$(DEPENDS): %.d: %.cpp
+	@echo Computing dependencies for $<
+	@$(CXX) -MM $(CFLAGS) $< | { sed 's#^[^:]*\.o[ :]*#$*.o $*.d : #g' ; echo "%.h:;" ; echo "" ; } > $@
 
-%.o: %.cpp
+$(OBJECTS): %.o: %.cpp
 	$(CXX) -c $(CFLAGS) -o $@ $<
-
-%.d: %.cpp
-	@echo Computing dependencies for $(*F)
-	@# Generate dependencies for .o
-	@$(CXX) -MM $(CFLAGS) $< > $@
-	@echo "" >> $@
-	@# Generate dependencies for .d
-	@cat $@ | sed 's/.o:/.d:/' >> $@
-	@#@echo "%.h:;" >> $@
-
--include: $(DEPENDS)
 
 debug: debug_flag cap32
 
 debug_flag:
-	@#echo "Sources: $(SOURCES)"
-	@#echo ""
-	@#echo "Objects: $(OBJECTS)"
-	@#echo ""
-	@#echo "Depends: $(DEPENDS)"
-	@#echo ""
-	@#echo "CFLAGS: $(CFLAGS)"
-	@#echo ""
 ifdef FORCED_DEBUG
 	@echo -e '\n!!!!!!!!!!!\n!! Warning: previous build was in debug - rebuilding in debug.\n!! Use make clean before running make to rebuild in release.\n!!!!!!!!!!!\n'
 endif
 	@touch .debug
 
-cap32: $(DEPENDS) $(OBJECTS)
+cap32: $(OBJECTS)
 	$(CXX) $(LDFLAGS) -o cap32 $(OBJECTS) $(LIBS)
 
 clean:
 	rm -f $(DEPENDS) $(OBJECTS) cap32 .debug
+
+include $(DEPENDS)
