@@ -53,6 +53,7 @@ CButton::CButton(const CRect& WindowRect, CWindow* pParent, std::string sText, b
 		m_pFontEngine, sText, CRenderedString::VALIGN_CENTER, CRenderedString::HALIGN_CENTER));
 //	m_BackgroundColor = CApplication::Instance()->GetDefaultForegroundColor();
   m_BackgroundColor = DEFAULT_BUTTON_COLOR;
+	CMessageServer::Instance().RegisterMessageClient(this, CMessage::KEYBOARD_KEYDOWN);
 	CMessageServer::Instance().RegisterMessageClient(this, CMessage::MOUSE_BUTTONUP);
 	Draw();
 }
@@ -173,6 +174,18 @@ bool CButton::HandleMessage(CMessage* pMessage)
 	{
 		switch(pMessage->MessageType())
 		{
+		case CMessage::KEYBOARD_KEYDOWN:
+    {
+      CKeyboardMessage* pKeyboardMessage = dynamic_cast<CKeyboardMessage*>(pMessage);
+      if (pKeyboardMessage && pMessage->Destination() == this)
+      {
+        std::cout << "Button forward" << std::endl;
+        // Forward all key downs to parent
+        CMessageServer::Instance().QueueMessage(new CKeyboardMessage(CMessage::KEYBOARD_KEYDOWN, m_pParentWindow, this,
+              pKeyboardMessage->ScanCode, pKeyboardMessage->Modifiers, pKeyboardMessage->Key, pKeyboardMessage->Unicode));
+      }
+      break;
+    }
 		case CMessage::MOUSE_BUTTONUP:
 		{
 			CMouseMessage* pMouseMessage = dynamic_cast<CMouseMessage*>(pMessage);
@@ -193,16 +206,16 @@ bool CButton::HandleMessage(CMessage* pMessage)
 }
 
 
-CPictureButton::CPictureButton(const CRect& WindowRect, CWindow* pParent, std::string sPictureFile) :
-	CButton(WindowRect, pParent, sPictureFile)
+CPictureButton::CPictureButton(const CRect& WindowRect, CWindow* pParent, std::string sPictureFile, bool bFocusable) :
+	CButton(WindowRect, pParent, sPictureFile, bFocusable)
 {
 	m_phBitmap.reset(new CBitmapFileResourceHandle(sPictureFile));
 	Draw();
 }
 
 
-CPictureButton::CPictureButton(const CRect& WindowRect, CWindow* pParent, const CBitmapResourceHandle& hBitmap) :
-	CButton(WindowRect, pParent, "<bitmap>")
+CPictureButton::CPictureButton(const CRect& WindowRect, CWindow* pParent, const CBitmapResourceHandle& hBitmap, bool bFocusable) :
+	CButton(WindowRect, pParent, "<bitmap>", bFocusable)
 {
 	m_phBitmap.reset(new CBitmapResourceHandle(hBitmap));
 	Draw();
@@ -250,6 +263,11 @@ void CPictureButton::Draw(void) const
 		default:
 			break;
 		}
+		SubRect.Grow(-2);
+    if (m_bHasFocus)
+    {
+			Painter.DrawRect(SubRect, false, COLOR_GRAY);
+    }
 		SubRect.Grow(-1);
 		SDL_Rect SourceRect;
 		SourceRect.x = stdex::safe_static_cast<short int>((m_phBitmap->Bitmap()->w - SubRect.Width()) / 2 < 0 ? 0 : (m_phBitmap->Bitmap()->w - SubRect.Width()) / 2);

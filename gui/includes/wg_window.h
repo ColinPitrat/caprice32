@@ -123,7 +123,7 @@ public:
 
 	//! Get whether the control has the focus
 	//! \return true if the control has the focus
-  virtual bool HasFocus(void) { return m_bHasFocus; }
+  virtual bool HasFocus(void) const { return m_bHasFocus; }
 
 	//! Set whether the control has the focus
 	//! \param bHasFocus Set to true to tell the control it has the focus

@@ -28,16 +28,17 @@
 #include "wg_message_server.h"
 #include "wg_resources.h"
 #include "wg_view.h"
+#include <iostream> // TODO: remove
 
 namespace wGui
 {
 
-CDropDown::CDropDown(const CRect& WindowRect, CWindow* pParent, bool bAllowEdit, unsigned int iItemHeight, CFontEngine* pFontEngine) :
+CDropDown::CDropDown(const CRect& WindowRect, CWindow* pParent, bool bAllowEdit, bool bFocusable, unsigned int iItemHeight, CFontEngine* pFontEngine) :
 	CWindow(WindowRect, pParent),
 	m_bAllowEdit(bAllowEdit)
 {
   m_pCViewAncestor = GetView();
-	m_pEditBox = new CEditBox(CRect(0, 0, m_WindowRect.Width() - m_WindowRect.Height(), m_WindowRect.Height()), this, pFontEngine);
+	m_pEditBox = new CEditBox(CRect(0, 0, m_WindowRect.Width() - m_WindowRect.Height(), m_WindowRect.Height()), this, false, pFontEngine);
 	if (!m_bAllowEdit)
 	{
 		m_pEditBox->SetReadOnly(true);
@@ -46,13 +47,14 @@ CDropDown::CDropDown(const CRect& WindowRect, CWindow* pParent, bool bAllowEdit,
 	}
 
 	m_pListBox = new CListBox(CRect(0, m_WindowRect.Height(), m_WindowRect.Width(), m_WindowRect.Height() + iItemHeight * 5 + 1),
-		this, true, iItemHeight, pFontEngine);
+		this, true, iItemHeight, false, pFontEngine);
 	m_pListBox->SetVisible(false);
 	m_pListBox->SetDropDown(this);
 
 	m_pDropButton = new CPictureButton(
 		CRect(m_WindowRect.Width() - m_WindowRect.Height() + 1, 0, m_WindowRect.Width(), m_WindowRect.Height()),
-		this, CwgBitmapResourceHandle(WGRES_DOWN_ARROW_BITMAP));
+		this, CwgBitmapResourceHandle(WGRES_DOWN_ARROW_BITMAP), true);
+	CMessageServer::Instance().RegisterMessageClient(this, CMessage::KEYBOARD_KEYDOWN);
 	CMessageServer::Instance().RegisterMessageClient(this, CMessage::MOUSE_BUTTONDOWN);
 	CMessageServer::Instance().RegisterMessageClient(this, CMessage::CTRL_SINGLELCLICK);
 	CMessageServer::Instance().RegisterMessageClient(this, CMessage::CTRL_VALUECHANGE);
@@ -118,6 +120,32 @@ bool CDropDown::HandleMessage(CMessage* pMessage)
 	{
 		switch(pMessage->MessageType())
 		{
+		case CMessage::KEYBOARD_KEYDOWN:
+    {
+      CKeyboardMessage* pKeyboardMessage = dynamic_cast<CKeyboardMessage*>(pMessage);
+      if (pKeyboardMessage && pMessage->Destination() == this)
+      {
+        switch (pKeyboardMessage->Key)
+        {
+          case SDLK_UP:
+            SelectItem(GetSelectedIndex() - 1);
+            break;
+          case SDLK_DOWN:
+            SelectItem(GetSelectedIndex() + 1);
+            break;
+          case SDLK_SPACE:
+						HideListBox();
+            break;
+          default:
+            // Forward all key downs to parent
+            std::cout << "Dropdown forward" << std::endl;
+            CMessageServer::Instance().QueueMessage(new CKeyboardMessage(CMessage::KEYBOARD_KEYDOWN, m_pParentWindow, this,
+                  pKeyboardMessage->ScanCode, pKeyboardMessage->Modifiers, pKeyboardMessage->Key, pKeyboardMessage->Unicode));
+            break;
+        }
+      }
+      break;
+    }
 		case CMessage::MOUSE_BUTTONDOWN:
 		{
 			CMouseMessage* pMouseMessage = dynamic_cast<CMouseMessage*>(pMessage);
@@ -183,7 +211,6 @@ bool CDropDown::HandleMessage(CMessage* pMessage)
 	return bHandled;
 }
 
-// judb get index of the selected item (-1 if none)
 int CDropDown::GetSelectedIndex() {
     for (unsigned int i = 0; i < m_pListBox->Size(); i ++) {
         if (IsSelected(i)) {
@@ -193,15 +220,14 @@ int CDropDown::GetSelectedIndex() {
     return -1;
 }
 
-// judb select the item with index iItemIndex in the list, and display the item's name
-// (in the area to the left of the dropdown arrow)
 void CDropDown::SelectItem(unsigned int iItemIndex) {
     if (iItemIndex >= m_pListBox->Size()) {
         return;
     }
-    SetAllSelections(false);
-    m_pListBox->SetSelection(iItemIndex, true);
+    m_pListBox->SetSelection(iItemIndex, true, false);
     SetWindowText(m_pListBox->GetItem(iItemIndex).sItemText);
+    CMessageServer::Instance().QueueMessage(new TIntMessage(CMessage::CTRL_VALUECHANGE, this, this, 0));
+    Draw();
 }
 
 

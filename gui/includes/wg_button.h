@@ -118,13 +118,13 @@ public:
   	//! \param WindowRect A CRect that defines the outer limits of the control
 	//! \param pParent A pointer to the parent window
 	//! \param sPictureFile The file to use as the button's picture
-	CPictureButton(const CRect& WindowRect, CWindow* pParent, std::string sPictureFile);
+	CPictureButton(const CRect& WindowRect, CWindow* pParent, std::string sPictureFile, bool bFocusable = false);
 
 	//! Constructs a new picture button
   	//! \param WindowRect A CRect that defines the outer limits of the control
 	//! \param pParent A pointer to the parent window
 	//! \param hBitmap A handle for the bitmap resource
-	CPictureButton(const CRect& WindowRect, CWindow* pParent, const CBitmapResourceHandle& hBitmap);
+	CPictureButton(const CRect& WindowRect, CWindow* pParent, const CBitmapResourceHandle& hBitmap, bool bFocusable = false);
 
 	//! Standard destructor
 	virtual ~CPictureButton(void);

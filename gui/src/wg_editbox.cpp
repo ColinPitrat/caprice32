@@ -36,8 +36,8 @@
 namespace wGui
 {
 
-CEditBox::CEditBox(const CRect& WindowRect, CWindow* pParent, CFontEngine* pFontEngine) :
-	CWindow(WindowRect, pParent, true),
+CEditBox::CEditBox(const CRect& WindowRect, CWindow* pParent, bool bFocusable, CFontEngine* pFontEngine) :
+	CWindow(WindowRect, pParent, bFocusable),
 	m_SelStart(0),
 	m_SelLength(0),
 	m_DragStart(0),
@@ -71,10 +71,6 @@ CEditBox::CEditBox(const CRect& WindowRect, CWindow* pParent, CFontEngine* pFont
 	CMessageServer::Instance().RegisterMessageClient(this, CMessage::CTRL_GAININGKEYFOCUS);
 	CMessageServer::Instance().RegisterMessageClient(this, CMessage::CTRL_LOSINGKEYFOCUS);
 
-  // We need to do it has the call in CWindow will call CWindow::SetHasFocus
-  if (m_bHasFocus) {
-    SetHasFocus(m_bHasFocus);
-  }
 	Draw();
 }
 
@@ -340,17 +336,6 @@ bool CEditBox::OnMouseButtonDown(CPoint Point, unsigned int Button)
 		}
 	}
 	return bResult;
-}
-
-
-void CEditBox::SetHasFocus(bool bHasFocus)
-{
-  if (bHasFocus) {
-    CApplication::Instance()->SetKeyFocus(this);
-  } else {
-    CApplication::Instance()->SetKeyFocus(m_pParentWindow);
-  }
-  CWindow::SetHasFocus(bHasFocus);
 }
 
 

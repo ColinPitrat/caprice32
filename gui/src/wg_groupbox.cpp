@@ -25,6 +25,7 @@
 #include "wgui_include_config.h"
 #include "wg_application.h"
 #include "wg_groupbox.h"
+#include <iostream> // TODO: remove
 
 
 namespace wGui
@@ -34,7 +35,6 @@ CGroupBox::CGroupBox(const CRect& WindowRect, CWindow* pParent, std::string sTex
 	CWindow(WindowRect, pParent),
 	m_FontColor(FontColor)
 {
-
 	m_sWindowText = sText;
 	if (pFontEngine)
 	{
@@ -49,6 +49,7 @@ CGroupBox::CGroupBox(const CRect& WindowRect, CWindow* pParent, std::string sTex
 	m_pRenderedString.reset(new CRenderedString(
 		m_pFontEngine, sText, CRenderedString::VALIGN_TOP, CRenderedString::HALIGN_LEFT));
 	m_BackgroundColor = CApplication::Instance()->GetDefaultBackgroundColor();
+	CMessageServer::Instance().RegisterMessageClient(this, CMessage::KEYBOARD_KEYDOWN);
 	Draw();
 }
 
@@ -99,8 +100,33 @@ void CGroupBox::SetWindowRect(const CRect& WindowRect)
 	m_ClientRect.SetTop(15);
 }
 
+bool CGroupBox::HandleMessage(CMessage* pMessage)
+{
+	bool bHandled = false;
+
+	if (pMessage)
+	{
+		switch(pMessage->MessageType())
+		{
+		case CMessage::KEYBOARD_KEYDOWN:
+    {
+      CKeyboardMessage* pKeyboardMessage = dynamic_cast<CKeyboardMessage*>(pMessage);
+      if (pKeyboardMessage && pMessage->Destination() == this)
+      {
+        std::cout << "Group box forward" << std::endl;
+        // Forward all key downs to parent
+        CMessageServer::Instance().QueueMessage(new CKeyboardMessage(CMessage::KEYBOARD_KEYDOWN, m_pParentWindow, this,
+              pKeyboardMessage->ScanCode, pKeyboardMessage->Modifiers, pKeyboardMessage->Key, pKeyboardMessage->Unicode));
+      }
+      break;
+    }
+		default :
+			bHandled = CWindow::HandleMessage(pMessage);
+			break;
+		}
+	}
+
+	return bHandled;
 }
 
-
-
-
+}

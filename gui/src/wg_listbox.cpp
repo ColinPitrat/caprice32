@@ -33,8 +33,8 @@
 namespace wGui
 {
 
-CListBox::CListBox(const CRect& WindowRect, CWindow* pParent, bool bSingleSelection, unsigned int iItemHeight, CFontEngine* pFontEngine) :
-	CWindow(WindowRect, pParent),
+CListBox::CListBox(const CRect& WindowRect, CWindow* pParent, bool bSingleSelection, unsigned int iItemHeight, bool bFocusable, CFontEngine* pFontEngine) :
+	CWindow(WindowRect, pParent, bFocusable),
 	m_iItemHeight(iItemHeight),
 	m_iFocusedItem(0),
 	m_bSingleSelection(bSingleSelection),
@@ -60,6 +60,8 @@ CListBox::CListBox(const CRect& WindowRect, CWindow* pParent, bool bSingleSelect
 	CMessageServer::Instance().RegisterMessageClient(this, CMessage::KEYBOARD_KEYDOWN);
 	CMessageServer::Instance().RegisterMessageClient(this, CMessage::CTRL_VALUECHANGE);
 	CMessageServer::Instance().RegisterMessageClient(this, CMessage::CTRL_VALUECHANGING);
+	CMessageServer::Instance().RegisterMessageClient(this, CMessage::CTRL_GAININGKEYFOCUS);
+	CMessageServer::Instance().RegisterMessageClient(this, CMessage::CTRL_LOSINGKEYFOCUS);
 	Draw();
 }
 
@@ -123,10 +125,26 @@ int CListBox::getFirstSelectedIndex() {
     return -1;
 }
 
-void CListBox::SetSelection(unsigned int iItemIndex, bool bSelected)
+void CListBox::SetSelection(unsigned int iItemIndex, bool bSelected, bool bNotify)
 {
 	if (iItemIndex < m_SelectedItems.size())
+  {
+    if (m_bSingleSelection)
+    {
+      SetAllSelections(false);
+    }
 		m_SelectedItems.at(iItemIndex) = bSelected;
+    CWindow* pDestination = m_pParentWindow;
+    if (m_pDropDown)
+    {
+      pDestination = m_pDropDown;
+    }
+    if (bNotify)
+    {
+      CMessageServer::Instance().QueueMessage(new TIntMessage(CMessage::CTRL_VALUECHANGE, pDestination, this, m_iFocusedItem));
+    }
+    Draw();
+  }
 }
 
 
@@ -140,6 +158,16 @@ void CListBox::SetAllSelections(bool bSelected)
 
 void CListBox::SetFocus(unsigned int iItemIndex) {
     m_iFocusedItem = iItemIndex;
+}
+
+void CListBox::SetDropDown(CWindow* pDropDown)
+{
+  m_pDropDown = pDropDown;
+  if (pDropDown == nullptr) {
+    SetIsFocusable(true);
+  } else {
+    SetIsFocusable(false);
+  }
 }
 
 void CListBox::Draw(void) const
@@ -163,7 +191,7 @@ void CListBox::Draw(void) const
 				{
 					Painter.DrawRect(ItemRect, true, CApplication::Instance()->GetDefaultSelectionColor(), CApplication::Instance()->GetDefaultSelectionColor());
 				}
-				if (i == m_iFocusedItem)
+				if (i == m_iFocusedItem && HasFocus())
 				{
 					ItemRect.Grow(1);
 					Painter.DrawRect(ItemRect, false, COLOR_DARKGRAY);
@@ -251,18 +279,7 @@ bool CListBox::OnMouseButtonUp(CPoint Point, unsigned int Button)
         // judb m_iFocusedItem should be <= the number of items in the listbox (0-based, so m_Items.size() - 1)
 		if (m_iFocusedItem == std::min(((WindowPoint.YPos() - m_ClientRect.Top()) / m_iItemHeight + m_pVScrollbar->GetValue()), stdex::safe_static_cast<unsigned int>(m_Items.size()) - 1))
 		{
-			if (m_bSingleSelection)
-			{
-				SetAllSelections(false);
-			}
 			SetSelection(m_iFocusedItem, !IsSelected(m_iFocusedItem));
-			CWindow* pDestination = m_pParentWindow;
-			if (m_pDropDown)
-			{
-				pDestination = m_pDropDown;
-			}
-			CMessageServer::Instance().QueueMessage(new TIntMessage(CMessage::CTRL_VALUECHANGE, pDestination, this, m_iFocusedItem));
-			Draw();
 		}
 		bResult = true;
 	}
@@ -279,6 +296,10 @@ bool CListBox::HandleMessage(CMessage* pMessage)
 	{
 		switch(pMessage->MessageType())
 		{
+    case CMessage::CTRL_GAININGKEYFOCUS:  // intentional fall through
+    case CMessage::CTRL_LOSINGKEYFOCUS:
+      Draw();
+      break;
 		case CMessage::KEYBOARD_KEYDOWN:
 		{
 			CKeyboardMessage* pKeyMsg = dynamic_cast<CKeyboardMessage*>(pMessage);
@@ -286,6 +307,13 @@ bool CListBox::HandleMessage(CMessage* pMessage)
 			{
 				switch (pKeyMsg->Key)
 				{
+          case SDLK_TAB:
+          {
+            // TAB is not for us - let parent handle it
+            CMessageServer::Instance().QueueMessage(new CKeyboardMessage(CMessage::KEYBOARD_KEYDOWN, m_pParentWindow, this,
+                  pKeyMsg->ScanCode, pKeyMsg->Modifiers, pKeyMsg->Key, pKeyMsg->Unicode));
+            break;
+          }
 					case SDLK_DOWN:
 					{
 						if (m_iFocusedItem + 1 < Size())

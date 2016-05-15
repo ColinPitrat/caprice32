@@ -27,11 +27,10 @@ CapriceLoadSave::CapriceLoadSave(const CRect& WindowRect, CWindow* pParent, CFon
   // Make this window listen to incoming CTRL_VALUECHANGE messages (used for updating drop down values)
   CMessageServer::Instance().RegisterMessageClient(this, CMessage::CTRL_VALUECHANGE);
   CMessageServer::Instance().RegisterMessageClient(this, CMessage::CTRL_VALUECHANGING);
-  CMessageServer::Instance().RegisterMessageClient(this, CMessage::CTRL_DOUBLELCLICK);
 
   // File type (.SNA, .DSK, .TAP, .VOC)
   m_pTypeLabel = new CLabel(          CPoint(15, 25),             this, "File type: ");
-  m_pTypeValue = new CDropDown( CRect(CPoint(80, 20), 150, 20),    this, false);
+  m_pTypeValue = new CDropDown( CRect(CPoint(80, 20), 150, 20),    this, false, true);
   m_pTypeValue->AddItem(SListItem("Snapshot (.sna)"));
   m_pTypeValue->AddItem(SListItem("Drive A (.dsk)"));
   m_pTypeValue->AddItem(SListItem("Drive B (.dsk)"));
@@ -42,7 +41,7 @@ CapriceLoadSave::CapriceLoadSave(const CRect& WindowRect, CWindow* pParent, CFon
 
   // Action: load / save
   m_pActionLabel = new CLabel(          CPoint(15, 55),             this, "Action: ");
-  m_pActionValue = new CDropDown( CRect(CPoint(80, 50), 150, 20),   this, false);
+  m_pActionValue = new CDropDown( CRect(CPoint(80, 50), 150, 20),   this, false, true);
   m_pActionValue->AddItem(SListItem("Load"));
   m_pActionValue->AddItem(SListItem("Save"));
   m_pActionValue->SetListboxHeight(2);
@@ -50,17 +49,17 @@ CapriceLoadSave::CapriceLoadSave(const CRect& WindowRect, CWindow* pParent, CFon
 
   // Directory
   m_pDirectoryLabel = new CLabel(          CPoint(15, 85),             this, "Directory: ");
-  m_pDirectoryValue = new CEditBox( CRect( CPoint(80, 80), 150, 20),    this, nullptr);
+  m_pDirectoryValue = new CEditBox( CRect( CPoint(80, 80), 150, 20),    this);
   m_pDirectoryValue->SetWindowText(simplifyPath(CPC.snap_path));
   m_pDirectoryValue->SetReadOnly(true);
 
   // File list
-  m_pFilesList = new CListBox(CRect(CPoint(80, 115), 150, 80), this, true, 12, nullptr);
+  m_pFilesList = new CListBox(CRect(CPoint(80, 115), 150, 80), this, true, 12, true, nullptr);
   UpdateFilesList();
 
   // File name
   m_pFileNameLabel  = new CLabel(          CPoint(15, 215),              this, "File: ");
-  m_pFileNameValue  = new CEditBox( CRect( CPoint(80, 210), 150, 20),    this, nullptr);
+  m_pFileNameValue  = new CEditBox( CRect( CPoint(80, 210), 150, 20),    this);
   m_pFileNameValue->SetWindowText("");
   m_pFileNameValue->SetReadOnly(true);
 
@@ -95,18 +94,22 @@ bool CapriceLoadSave::HandleMessage(CMessage* pMessage)
                   case 0: // Load
                     switch (m_pTypeValue->GetSelectedIndex()) {
                       case 0: // Snapshot
+                        std::cout << "Load snapshot" << std::endl;
                         snapshot_load(filename.c_str());
                         actionDone = true;
                         break;
                       case 1: // Drive A
+                        std::cout << "Load dsk A" << std::endl;
                         dsk_load(filename.c_str(), &driveA, 'A');
                         actionDone = true;
                         break;
                       case 2: // Drive B
+                        std::cout << "Load dsk B" << std::endl;
                         dsk_load(filename.c_str(), &driveB, 'B');
                         actionDone = true;
                         break;
                       case 3: // Tape
+                        std::cout << "Load tape" << std::endl;
                         tape_insert(filename.c_str());
                         actionDone = true;
                         break;
@@ -115,18 +118,22 @@ bool CapriceLoadSave::HandleMessage(CMessage* pMessage)
                   case 1: // Save
                     switch (m_pTypeValue->GetSelectedIndex()) {
                       case 0: // Snapshot
+                        std::cout << "Save snapshot" << std::endl;
                         snapshot_save(filename.c_str());
                         actionDone = true;
                         break;
                       case 1: // Drive A
+                        std::cout << "Save dsk A" << std::endl;
                         dsk_save(filename.c_str(), &driveA, 'A');
                         actionDone = true;
                         break;
                       case 2: // Drive B
+                        std::cout << "Save dsk B" << std::endl;
                         dsk_save(filename.c_str(), &driveB, 'B');
                         actionDone = true;
                         break;
                       case 3: // Tape
+                        std::cout << "Save tape" << std::endl;
                         // Unsupported
                         wGui::CMessageBox *pMessageBox = new wGui::CMessageBox(CRect(CPoint(m_ClientRect.Width() /2 - 125, m_ClientRect.Height() /2 - 30), 250, 60), this, nullptr, "Not implemented", "Saving tape not  yet implemented", CMessageBox::BUTTON_OK);
                         pMessageBox->SetModal(true);

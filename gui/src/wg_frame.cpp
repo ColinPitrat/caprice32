@@ -41,10 +41,6 @@ CFrame::CFrame(const CRect& WindowRect, CWindow* pParent, CFontEngine* pFontEngi
 	m_pMenu(nullptr),
 	m_bDragMode(false)
 {
-// TODO: remove these 2 lines:
-  // Make this window listen to incoming KEYBOARD_KEYDOWN messages to capture TAB pressed and change focused field
-  CMessageServer::Instance().RegisterMessageClient(this, CMessage::KEYBOARD_KEYDOWN);
-
 	if (pFontEngine) {
 		m_pFontEngine = pFontEngine;
 	} else {
@@ -348,7 +344,7 @@ void CFrame::RemoveFocusableWidget(CWindow *pWidget)
     FocusNext(EFocusDirection::FORWARD);
   }
   // The widget can still have the focus if it's the only focusable one
-  if (pWidget == GetFocused()) {
+  if (pWidget && pWidget == GetFocused()) {
     pWidget->SetHasFocus(false);
   }
   m_FocusableWidgets.remove(pWidget);

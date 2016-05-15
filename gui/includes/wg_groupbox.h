@@ -74,6 +74,11 @@ public:
 	//! \param WindowRect A CRect that defines the outer limits of the control
 	virtual void SetWindowRect(const CRect& WindowRect);
 
+	// CMessageClient overrides
+	//! CGroupBox will forward keyboard events to its parent
+	//! \param pMessage A pointer to the message that needs to be handled
+	virtual bool HandleMessage(CMessage* pMessage);
+
 protected:
 	CFontEngine* m_pFontEngine;  //!< A pointer to the font engine to use to render the text
 	std::unique_ptr<CRenderedString> m_pRenderedString;  //!< An autopointer to the rendered version of the string

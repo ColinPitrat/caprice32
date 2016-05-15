@@ -158,13 +158,20 @@ void CApplication::SetKeyFocus(CWindow* pWindow)
 {
 	if (m_pKeyFocusWindow != pWindow)
 	{
-		// notify the window that's losing focus to repaint itself
-		if (m_pKeyFocusWindow)
-		{
-			CMessageServer::Instance().QueueMessage(new CMessage(CMessage::CTRL_LOSINGKEYFOCUS, m_pKeyFocusWindow, this));
-		}
-		m_pKeyFocusWindow = pWindow;
-		CMessageServer::Instance().QueueMessage(new CMessage(CMessage::CTRL_GAININGKEYFOCUS, m_pKeyFocusWindow, this));
+    if (pWindow->IsVisible())
+    {
+      // notify the window that's losing focus to repaint itself
+      if (m_pKeyFocusWindow)
+      {
+        CMessageServer::Instance().QueueMessage(new CMessage(CMessage::CTRL_LOSINGKEYFOCUS, m_pKeyFocusWindow, this));
+      }
+      m_pKeyFocusWindow = pWindow;
+      CMessageServer::Instance().QueueMessage(new CMessage(CMessage::CTRL_GAININGKEYFOCUS, m_pKeyFocusWindow, this));
+    }
+    else
+    {
+      SetKeyFocus(pWindow->GetAncestor(CWindow::PARENT));
+    }
 	}
 }
 

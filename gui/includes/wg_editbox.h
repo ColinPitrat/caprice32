@@ -47,7 +47,7 @@ public:
 	//! \param pParent A pointer to the parent window
 	//! \param pFontEngine A pointer to the font engine to use when drawing the control
 	//! If this is left out (or set to 0) it will use the default font engine specified by the CApplication (which must be set before instantiating this object)
-	CEditBox(const CRect& WindowRect, CWindow* pParent, CFontEngine* pFontEngine = nullptr);
+	CEditBox(const CRect& WindowRect, CWindow* pParent, bool bFocusable = false, CFontEngine* pFontEngine = nullptr);
 
 	//! Standard destructor
 	virtual ~CEditBox(void);
@@ -114,9 +114,6 @@ public:
 	//! \param Button A bitfield indicating which button the window was clicked with
 	//! \return True if it's in the bounds of the editbox
 	virtual bool OnMouseButtonDown(CPoint Point, unsigned int Button);
-
-  //! Override of SetHasFocus to also set key focus
-  virtual void SetHasFocus(bool bHasFocus) override;
 
 	// CMessageClient overrides
 	//! CEditBox will handle MOUSE_BUTTONDOWN and KEYBOARD_KEYDOWN messages

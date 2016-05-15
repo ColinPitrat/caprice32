@@ -65,7 +65,7 @@ public:
 	//! \param iItemHeight The height of the items in the list, defaults to 15
 	//! \param pFontEngine A pointer to the font engine to use when drawing the control
 	//! If this is left out (or set to 0) it will use the default font engine specified by the CApplication (which must be set before instantiating this object)
-	CListBox(const CRect& WindowRect, CWindow* pParent, bool bSingleSelection = false, unsigned int iItemHeight = 12, CFontEngine* pFontEngine = nullptr);
+	CListBox(const CRect& WindowRect, CWindow* pParent, bool bSingleSelection = false, unsigned int iItemHeight = 12, bool iFocusable = false, CFontEngine* pFontEngine = nullptr);
 
 	//! Standard destructor
 	virtual ~CListBox(void);
@@ -110,7 +110,7 @@ public:
 	//! Set an item as selected
 	//! \param iItemIndex The index of the item to change
 	//! \param bSelected Will select the item if true, or unselect if false
-	void SetSelection(unsigned int iItemIndex, bool bSelected);
+	void SetSelection(unsigned int iItemIndex, bool bSelected, bool bNotify = true);
 
     //! Selects or deselects all items
     void SetAllSelections(bool bSelected);
@@ -120,7 +120,7 @@ public:
 
 	//! Set the dropdown window this is a part of
 	//! \param pDropDown A pointer to the dropdown window
-	void SetDropDown(CWindow* pDropDown) { m_pDropDown = pDropDown; }
+	void SetDropDown(CWindow* pDropDown);
 
 
 	// CWindow overrides

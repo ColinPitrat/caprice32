@@ -183,7 +183,7 @@ void CWindow::SetVisible(bool bVisible)
 			(*iter)->SetVisible(bVisible);
 			if (!bVisible && (*iter) == CApplication::Instance()->GetKeyFocus())
 			{
-				CApplication::Instance()->SetKeyFocus(nullptr);
+				CApplication::Instance()->SetKeyFocus(m_pParentWindow);
 			}
 		}
 		CMessageServer::Instance().QueueMessage(new CMessage(CMessage::APP_PAINT, nullptr, this));
@@ -193,6 +193,11 @@ void CWindow::SetVisible(bool bVisible)
 
 void CWindow::SetHasFocus(bool bHasFocus)
 {
+  if (bHasFocus) {
+    CApplication::Instance()->SetKeyFocus(this);
+  } else {
+    CApplication::Instance()->SetKeyFocus(m_pParentWindow);
+  }
   m_bHasFocus = bHasFocus;
   Draw();
 }
