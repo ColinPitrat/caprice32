@@ -30,14 +30,15 @@
 namespace wGui
 {
 
-CCheckBox::CCheckBox(const CRect& WindowRect, CWindow* pParent) :
-	CWindow(WindowRect, pParent),
+CCheckBox::CCheckBox(const CRect& WindowRect, CWindow* pParent, bool bFocusable) :
+	CWindow(WindowRect, pParent, bFocusable),
 	m_eCheckBoxState(UNCHECKED),
 	m_MouseButton(0),
     m_hBitmapCheck(CwgBitmapResourceHandle(WGRES_CHECK_BITMAP))
 
 {
 	m_BackgroundColor = DEFAULT_CHECKBOX_BACK_COLOR;
+	CMessageServer::Instance().RegisterMessageClient(this, CMessage::KEYBOARD_KEYDOWN);
 	CMessageServer::Instance().RegisterMessageClient(this, CMessage::MOUSE_BUTTONUP);
 	CMessageServer::Instance().RegisterMessageClient(this, CMessage::CTRL_SINGLELCLICK);
 	Draw();
@@ -60,6 +61,24 @@ void CCheckBox::SetCheckBoxState(EState eState)
 }
 
 
+void CCheckBox::ToggleCheckBoxState()
+{
+  switch (m_eCheckBoxState)
+  {
+    case UNCHECKED:
+      SetCheckBoxState(CHECKED);
+      CMessageServer::Instance().QueueMessage(new TIntMessage(CMessage::CTRL_VALUECHANGE, m_pParentWindow, this, 1));
+      break;
+    case CHECKED:
+      SetCheckBoxState(UNCHECKED);
+      CMessageServer::Instance().QueueMessage(new TIntMessage(CMessage::CTRL_VALUECHANGE, m_pParentWindow, this, 0));
+      break;
+    default:
+      break;
+  }
+}
+
+
 void CCheckBox::Draw(void) const
 {
 	CWindow::Draw();
@@ -74,7 +93,12 @@ void CCheckBox::Draw(void) const
 			Painter.DrawRect(SubRect, false, COLOR_LIGHTGRAY);
 			Painter.DrawHLine(SubRect.Left(), SubRect.Right(), SubRect.Top(), COLOR_BLACK);
 			Painter.DrawVLine(SubRect.Top(), SubRect.Bottom(), SubRect.Left(), COLOR_BLACK);
-			SubRect.Grow(-2);
+			SubRect.Grow(-1);
+      if (m_bHasFocus)
+      {
+        Painter.DrawRect(SubRect, false, COLOR_GRAY);
+      }
+			SubRect.Grow(-1);
 			if (m_eCheckBoxState == CHECKED)
 			{
 //				Painter.DrawLine(SubRect.TopLeft(), SubRect.BottomRight(), DEFAULT_LINE_COLOR);
@@ -139,6 +163,25 @@ bool CCheckBox::HandleMessage(CMessage* pMessage)
 	{
 		switch(pMessage->MessageType())
 		{
+		case CMessage::KEYBOARD_KEYDOWN:
+    {
+      CKeyboardMessage* pKeyboardMessage = dynamic_cast<CKeyboardMessage*>(pMessage);
+      if (pKeyboardMessage && pMessage->Destination() == this)
+      {
+        switch (pKeyboardMessage->Key)
+        {
+          case SDLK_SPACE:
+            ToggleCheckBoxState();
+            break;
+          default:
+            // Forward all key downs to parent
+            CMessageServer::Instance().QueueMessage(new CKeyboardMessage(CMessage::KEYBOARD_KEYDOWN, m_pParentWindow, this,
+                  pKeyboardMessage->ScanCode, pKeyboardMessage->Modifiers, pKeyboardMessage->Key, pKeyboardMessage->Unicode));
+            break;
+        }
+      }
+      break;
+    }
 		case CMessage::MOUSE_BUTTONUP:
 		{
 			CMouseMessage* pMouseMessage = dynamic_cast<CMouseMessage*>(pMessage);
@@ -153,19 +196,7 @@ bool CCheckBox::HandleMessage(CMessage* pMessage)
 		case CMessage::CTRL_SINGLELCLICK:
 			if (pMessage->Destination() == this)
 			{
-				switch (m_eCheckBoxState)
-				{
-				case UNCHECKED:
-					SetCheckBoxState(CHECKED);
-					CMessageServer::Instance().QueueMessage(new TIntMessage(CMessage::CTRL_VALUECHANGE, m_pParentWindow, this, 1));
-					break;
-				case CHECKED:
-					SetCheckBoxState(UNCHECKED);
-					CMessageServer::Instance().QueueMessage(new TIntMessage(CMessage::CTRL_VALUECHANGE, m_pParentWindow, this, 0));
-					break;
-				default:
-					break;
-				}
+        ToggleCheckBoxState();
 				bHandled = true;
 			}
 			break;

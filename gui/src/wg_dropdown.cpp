@@ -138,7 +138,6 @@ bool CDropDown::HandleMessage(CMessage* pMessage)
             break;
           default:
             // Forward all key downs to parent
-            std::cout << "Dropdown forward" << std::endl;
             CMessageServer::Instance().QueueMessage(new CKeyboardMessage(CMessage::KEYBOARD_KEYDOWN, m_pParentWindow, this,
                   pKeyboardMessage->ScanCode, pKeyboardMessage->Modifiers, pKeyboardMessage->Key, pKeyboardMessage->Unicode));
             break;

@@ -72,7 +72,7 @@ CapriceOptions::CapriceOptions(const CRect& WindowRect, CWindow* pParent, CFontE
     m_pScrollBarRamSize->SetValue(CPC.ram_size / 64);
     m_pLabelRamSizeValue = new CLabel(CPoint(217,28), m_pGroupBoxTabGeneral, stdex::itoa(CPC.ram_size) + "k     ");
 
-    m_pCheckBoxLimitSpeed   = new CCheckBox(CRect(CPoint(10, 49), 10, 10), m_pGroupBoxTabGeneral);
+    m_pCheckBoxLimitSpeed   = new CCheckBox(CRect(CPoint(10, 49), 10, 10), m_pGroupBoxTabGeneral, true);
     m_pLabelLimitSpeed      = new CLabel(CPoint(27, 50), m_pGroupBoxTabGeneral, "Limit emulation speed");
     if (CPC.limit_speed == 1) {
         m_pCheckBoxLimitSpeed->SetCheckBoxState(CCheckBox::CHECKED);
@@ -86,7 +86,7 @@ CapriceOptions::CapriceOptions(const CRect& WindowRect, CWindow* pParent, CFontE
     m_pScrollBarCPCSpeed->SetValue(CPC.speed);
        // Actual emulation speed = value * 25 e.g. 4 -> 100%; values range between 2 and 32
     m_pLabelCPCSpeedValue = new CLabel(CPoint(205, 71), m_pGroupBoxTabGeneral, stdex::itoa(CPC.speed * 25) + "%  ");
-    m_pCheckBoxPrinterToFile = new CCheckBox(CRect(CPoint(10, 90), 10, 10), m_pGroupBoxTabGeneral);
+    m_pCheckBoxPrinterToFile = new CCheckBox(CRect(CPoint(10, 90), 10, 10), m_pGroupBoxTabGeneral, true);
     m_pLabelPrinterToFile    = new CLabel(CPoint(27, 91), m_pGroupBoxTabGeneral, "Capture printer output to file");
     if (CPC.printer  == 1) {
         m_pCheckBoxPrinterToFile->SetCheckBoxState(CCheckBox::CHECKED);
@@ -107,12 +107,12 @@ CapriceOptions::CapriceOptions(const CRect& WindowRect, CWindow* pParent, CFontE
     }
 
     // ---------------- 'Video' options ----------------
-    m_pCheckBoxShowFps      = new CCheckBox(CRect(CPoint(10, 94), 10, 10), m_pGroupBoxTabVideo);
+    m_pCheckBoxShowFps      = new CCheckBox(CRect(CPoint(10, 94), 10, 10), m_pGroupBoxTabVideo, true);
     if (CPC.scr_fps == 1) {
         m_pCheckBoxShowFps->SetCheckBoxState(CCheckBox::CHECKED);
     }
     m_pLabelShowFps      = new CLabel(CPoint(27, 95), m_pGroupBoxTabVideo, "Show emulation speed");
-    m_pCheckBoxFullScreen   = new CCheckBox(CRect(CPoint(10, 114), 10, 10), m_pGroupBoxTabVideo);
+    m_pCheckBoxFullScreen   = new CCheckBox(CRect(CPoint(10, 114), 10, 10), m_pGroupBoxTabVideo, true);
     if (CPC.scr_window == 0) {
         m_pCheckBoxFullScreen->SetCheckBoxState(CCheckBox::CHECKED);
     }
@@ -153,7 +153,7 @@ CapriceOptions::CapriceOptions(const CRect& WindowRect, CWindow* pParent, CFontE
 
     m_pLabelVideoPlugin = new CLabel(CPoint(10, 2), m_pGroupBoxTabVideo, "Video plugin");
     // ---------------- 'Audio' Options ----------------
-    m_pCheckBoxEnableSound = new CCheckBox(CRect(CPoint(10,0), 10,10), m_pGroupBoxTabAudio);    // Show emulation speed
+    m_pCheckBoxEnableSound = new CCheckBox(CRect(CPoint(10,0), 10,10), m_pGroupBoxTabAudio, true);    // Show emulation speed
     if (CPC.snd_enabled == 1) {
         m_pCheckBoxEnableSound->SetCheckBoxState(CCheckBox::CHECKED);
     }

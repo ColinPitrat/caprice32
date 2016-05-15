@@ -45,7 +45,7 @@ public:
 	//! Constructs a new checkbox
   	//! \param WindowRect A CRect that defines the outer limits of the control
 	//! \param pParent A pointer to the parent window
-	CCheckBox(const CRect& WindowRect, CWindow* pParent);
+	CCheckBox(const CRect& WindowRect, CWindow* pParent, bool bFocusable = false);
 
 	//! Standard destructor
 	virtual ~CCheckBox(void);
@@ -65,6 +65,8 @@ public:
 	//! \param eState The checkbox state
 	void SetCheckBoxState(EState eState);
 
+	//! Toggle the checkbox state
+  void ToggleCheckBoxState();
 
 	// CWindow overrides
 	//! Draws the checkbox

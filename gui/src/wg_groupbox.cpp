@@ -113,7 +113,6 @@ bool CGroupBox::HandleMessage(CMessage* pMessage)
       CKeyboardMessage* pKeyboardMessage = dynamic_cast<CKeyboardMessage*>(pMessage);
       if (pKeyboardMessage && pMessage->Destination() == this)
       {
-        std::cout << "Group box forward" << std::endl;
         // Forward all key downs to parent
         CMessageServer::Instance().QueueMessage(new CKeyboardMessage(CMessage::KEYBOARD_KEYDOWN, m_pParentWindow, this,
               pKeyboardMessage->ScanCode, pKeyboardMessage->Modifiers, pKeyboardMessage->Key, pKeyboardMessage->Unicode));
