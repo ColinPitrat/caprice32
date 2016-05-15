@@ -167,6 +167,7 @@ bool CRadioButton::HandleMessage(CMessage* pMessage)
       {
         switch (pKeyboardMessage->Key)
         {
+          case SDLK_RETURN:  // intentional fall through
           case SDLK_SPACE:
             Select();
             break;

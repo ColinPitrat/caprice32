@@ -20,7 +20,6 @@ CapriceRomSlots::CapriceRomSlots(const CRect& WindowRect, CWindow* pParent, CFon
   SetWindowText("ROM slot " + stdex::itoa(romSlot));
 
 	m_pListBoxRoms = new CListBox(CRect(CPoint(10, 10), m_ClientRect.Width() - 25, 140), this, true);
-  m_pListBoxRoms->SetIsFocusable(true);
 
   std::vector<std::string> romFiles = getAvailableRoms();
   for (unsigned int i = 0; i < romFiles.size(); i ++) {
@@ -31,6 +30,7 @@ CapriceRomSlots::CapriceRomSlots(const CRect& WindowRect, CWindow* pParent, CFon
       m_pListBoxRoms->SetFocus(i);
     }
   }
+  m_pListBoxRoms->SetIsFocusable(true);
 
   m_pButtonInsert = new CButton(CRect(CPoint( 40, m_ClientRect.Height() - 22), 50, 15), this, "Insert");
   m_pButtonInsert->SetIsFocusable(true);

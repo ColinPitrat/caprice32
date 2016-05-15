@@ -111,8 +111,15 @@ public:
   unsigned int getSelectedIndex();
 
 	//! Selects an item in the navigation bar.
-	//! \param iItemIndex The index of the item select.
+	//! \param iItemIndex The index of the item to select.
 	void SelectItem(unsigned int iItemIndex);
+
+  // Returns the index of the focused item; returns -1 if there is no selection.
+  unsigned int getFocusedIndex();
+
+	//! Focus an item in the navigation bar.
+	//! \param iItemIndex The index of the item to focus.
+  void FocusItem(unsigned int iItemIndex);
 
 	// CWindow overrides
 	//! Draws the navigation bar

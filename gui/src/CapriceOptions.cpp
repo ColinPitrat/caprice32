@@ -31,6 +31,7 @@ CapriceOptions::CapriceOptions(const CRect& WindowRect, CWindow* pParent, CFontE
     m_pNavigationBar->AddItem(SNavBarItem("Disk",    std::string(CPC.resources_path) + "/disk.bmp"));
     m_pNavigationBar->AddItem(SNavBarItem("Input",   std::string(CPC.resources_path) + "/input.bmp"));
     m_pNavigationBar->SelectItem(0);
+    m_pNavigationBar->SetIsFocusable(true);
 
     // Groupboxes containing controls for each 'tab' (easier to make a 'tab page' visible or invisible)
     m_pGroupBoxTabGeneral = new CGroupBox(CRect(CPoint(5, 60), m_ClientRect.Width() - 12, m_ClientRect.Height() - 80), this, "");
@@ -68,6 +69,7 @@ CapriceOptions::CapriceOptions(const CRect& WindowRect, CWindow* pParent, CFontE
                                           // (stepsize of 64) be possible to select values that are no multiple
                                           // of 64.
     m_pScrollBarRamSize->SetValue(CPC.ram_size / 64);
+    m_pScrollBarRamSize->SetIsFocusable(true);
     m_pLabelRamSizeValue = new CLabel(CPoint(217,28), m_pGroupBoxTabGeneral, stdex::itoa(CPC.ram_size) + "k     ");
 
     m_pCheckBoxLimitSpeed   = new CCheckBox(CRect(CPoint(10, 49), 10, 10), m_pGroupBoxTabGeneral);
@@ -83,6 +85,7 @@ CapriceOptions::CapriceOptions(const CRect& WindowRect, CWindow* pParent, CFontE
     m_pScrollBarCPCSpeed->SetMaxLimit(32);
     m_pScrollBarCPCSpeed->SetStepSize(1);
     m_pScrollBarCPCSpeed->SetValue(CPC.speed);
+    m_pScrollBarCPCSpeed->SetIsFocusable(true);
        // Actual emulation speed = value * 25 e.g. 4 -> 100%; values range between 2 and 32
     m_pLabelCPCSpeedValue = new CLabel(CPoint(205, 71), m_pGroupBoxTabGeneral, stdex::itoa(CPC.speed * 25) + "%  ");
     m_pCheckBoxPrinterToFile = new CCheckBox(CRect(CPoint(10, 90), 10, 10), m_pGroupBoxTabGeneral);
@@ -139,6 +142,7 @@ CapriceOptions::CapriceOptions(const CRect& WindowRect, CWindow* pParent, CFontE
     m_pScrollBarIntensity->SetMaxLimit(15);
     m_pScrollBarIntensity->SetStepSize(1);
     m_pScrollBarIntensity->SetValue(CPC.scr_intensity);
+    m_pScrollBarIntensity->SetIsFocusable(true);
 
     m_pLabelIntensity    = new CLabel(CPoint(80, 10), m_pGroupBoxMonitor, "Intensity");
 
@@ -181,14 +185,6 @@ CapriceOptions::CapriceOptions(const CRect& WindowRect, CWindow* pParent, CFontE
 
     m_pGroupBoxChannels    = new CGroupBox(CRect(CPoint(10, 55), 130, 40), m_pGroupBoxTabAudio, "Channels");
     m_pGroupBoxSampleSize  = new CGroupBox(CRect(CPoint(150, 55), 130, 40), m_pGroupBoxTabAudio, "Sample Size");
-    m_pLabelSoundVolume    = new CLabel(CPoint(10, 108), m_pGroupBoxTabAudio, "Volume");
-    m_pScrollBarVolume     = new CScrollBar(CRect(CPoint(60, 105), 120, 16), m_pGroupBoxTabAudio, CScrollBar::HORIZONTAL);
-    m_pScrollBarVolume->SetMinLimit(0);
-    m_pScrollBarVolume->SetMaxLimit(100);
-    m_pScrollBarVolume->SetStepSize(5);
-    m_pScrollBarVolume->SetValue(CPC.snd_volume);
-    m_pLabelSoundVolumeValue = new CLabel(CPoint(190, 108), m_pGroupBoxTabAudio, stdex::itoa(CPC.snd_volume) + "%  ");
-
     m_pRadioButtonMono   = new CRadioButton(CPoint(5, 2), 10, m_pGroupBoxChannels);
     m_pLabelMono         = new CLabel(CPoint(20,3), m_pGroupBoxChannels, "Mono");
     m_pRadioButtonStereo = new CRadioButton(CPoint(55, 2), 10, m_pGroupBoxChannels); // position is within the parent! (groupbox)
@@ -211,6 +207,15 @@ CapriceOptions::CapriceOptions(const CRect& WindowRect, CWindow* pParent, CFontE
     }
     m_pRadioButton8bit->SetIsFocusable(true);
     m_pRadioButton16bit->SetIsFocusable(true);
+
+    m_pLabelSoundVolume    = new CLabel(CPoint(10, 108), m_pGroupBoxTabAudio, "Volume");
+    m_pScrollBarVolume     = new CScrollBar(CRect(CPoint(60, 105), 120, 16), m_pGroupBoxTabAudio, CScrollBar::HORIZONTAL);
+    m_pScrollBarVolume->SetMinLimit(0);
+    m_pScrollBarVolume->SetMaxLimit(100);
+    m_pScrollBarVolume->SetStepSize(5);
+    m_pScrollBarVolume->SetValue(CPC.snd_volume);
+    m_pScrollBarVolume->SetIsFocusable(true);
+    m_pLabelSoundVolumeValue = new CLabel(CPoint(190, 108), m_pGroupBoxTabAudio, stdex::itoa(CPC.snd_volume) + "%  ");
 
     // ---------------- 'Disk' Options ----------------
     m_pGroupBoxDriveA  = new CGroupBox(CRect(CPoint(10, 0), 280, 45), m_pGroupBoxTabDisk, "CPC Drive A");
@@ -337,7 +342,6 @@ bool CapriceOptions::HandleMessage(CMessage* pMessage)
               if (pMessage->Source() == m_pButtonRoms.at(i)) {
                 pRomSlotsDialog = new wGui::CapriceRomSlots(CRect(
                       CPoint(m_pSDLSurface->w /2 - 140, 30), 250, 200), this, nullptr, "", i, m_pButtonRoms.at(i));
-                pRomSlotsDialog->SetModal(true);
                 break;
               }
             }

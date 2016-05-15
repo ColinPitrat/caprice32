@@ -299,6 +299,7 @@ bool CFrame::HandleMessage(CMessage* pMessage)  // virtual
                   CFrame::FocusNext(EFocusDirection::FORWARD);
                 }
                 break;
+              case SDLK_SPACE:
               case SDLK_RETURN:
                 {
                   CWindow *target = GetFocused();

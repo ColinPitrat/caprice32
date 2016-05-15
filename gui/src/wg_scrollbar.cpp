@@ -65,6 +65,7 @@ CScrollBar::CScrollBar(const CRect& WindowRect, CWindow* pParent, EScrollBarType
 	}
 	m_ThumbRect = m_ClientRect;
 	RepositionThumb();
+	CMessageServer::Instance().RegisterMessageClient(this, CMessage::KEYBOARD_KEYDOWN);
 	CMessageServer::Instance().RegisterMessageClient(this, CMessage::MOUSE_BUTTONUP);
 	CMessageServer::Instance().RegisterMessageClient(this, CMessage::MOUSE_MOVE);
 	CMessageServer::Instance().RegisterMessageClient(this, CMessage::CTRL_SINGLELCLICK);
@@ -183,6 +184,13 @@ bool CScrollBar::OnMouseButtonDown(CPoint Point, unsigned int Button)
 }
 
 
+void CScrollBar::SetIsFocusable(bool bFocusable)
+{
+  m_pBtnUpLeft->SetIsFocusable(bFocusable);
+  m_pBtnDownRight->SetIsFocusable(bFocusable);
+}
+
+
 bool CScrollBar::HandleMessage(CMessage* pMessage)
 {
 	bool bHandled = false;
@@ -191,6 +199,17 @@ bool CScrollBar::HandleMessage(CMessage* pMessage)
 	{
 		switch(pMessage->MessageType())
 		{
+		case CMessage::KEYBOARD_KEYDOWN:
+    {
+      CKeyboardMessage* pKeyboardMessage = dynamic_cast<CKeyboardMessage*>(pMessage);
+      if (pKeyboardMessage && pMessage->Destination() == this)
+      {
+        // Forward all key downs to parent
+        CMessageServer::Instance().QueueMessage(new CKeyboardMessage(CMessage::KEYBOARD_KEYDOWN, m_pParentWindow, this,
+              pKeyboardMessage->ScanCode, pKeyboardMessage->Modifiers, pKeyboardMessage->Key, pKeyboardMessage->Unicode));
+      }
+      break;
+    }
 		case CMessage::MOUSE_BUTTONUP:
 		{
 			CMouseMessage* pMouseMessage = dynamic_cast<CMouseMessage*>(pMessage);

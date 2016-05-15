@@ -89,6 +89,7 @@ public:
 	//! \return True if it's in the bounds of the scrollbar
 	virtual bool OnMouseButtonDown(CPoint Point, unsigned int Button);
 
+  virtual void SetIsFocusable(bool bFocusable) override;
 
 	// CMessageClient overrides
 	//! CScrollBars handle MOUSE_BUTTONDOWN and MOUSE_BUTTONUP messages

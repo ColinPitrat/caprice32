@@ -132,13 +132,19 @@ bool CDropDown::HandleMessage(CMessage* pMessage)
         {
           case SDLK_UP:
             SelectItem(GetSelectedIndex() - 1);
+						ShowListBox();
             break;
           case SDLK_DOWN:
             SelectItem(GetSelectedIndex() + 1);
+						ShowListBox();
             break;
+          case SDLK_RETURN:
           case SDLK_SPACE:
 						HideListBox();
             break;
+          case SDLK_TAB:
+						HideListBox();
+            // intentional fall through: the parent frame will change focused widget
           default:
             // Forward all key downs to parent
             CMessageServer::Instance().QueueMessage(new CKeyboardMessage(CMessage::KEYBOARD_KEYDOWN, m_pParentWindow, this,

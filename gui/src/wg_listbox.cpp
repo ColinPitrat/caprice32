@@ -307,13 +307,6 @@ bool CListBox::HandleMessage(CMessage* pMessage)
 			{
 				switch (pKeyMsg->Key)
 				{
-          case SDLK_TAB:
-          {
-            // TAB is not for us - let parent handle it
-            CMessageServer::Instance().QueueMessage(new CKeyboardMessage(CMessage::KEYBOARD_KEYDOWN, m_pParentWindow, this,
-                  pKeyMsg->ScanCode, pKeyMsg->Modifiers, pKeyMsg->Key, pKeyMsg->Unicode));
-            break;
-          }
 					case SDLK_DOWN:
 					{
 						if (m_iFocusedItem + 1 < Size())
@@ -377,6 +370,7 @@ bool CListBox::HandleMessage(CMessage* pMessage)
 						bHandled=true;
 						break;
 					}
+					case SDLK_RETURN: // intentional fall through
 					case SDLK_SPACE:
 					{
 						if (! m_Items.empty())
@@ -389,6 +383,9 @@ bool CListBox::HandleMessage(CMessage* pMessage)
 					}
 					default:
 					{
+            // Not for us - let parent handle it
+            CMessageServer::Instance().QueueMessage(new CKeyboardMessage(CMessage::KEYBOARD_KEYDOWN, m_pParentWindow, this,
+                  pKeyMsg->ScanCode, pKeyMsg->Modifiers, pKeyMsg->Key, pKeyMsg->Unicode));
 						bHandled=false;
 						break;
 					}

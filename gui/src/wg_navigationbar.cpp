@@ -114,8 +114,24 @@ void CNavigationBar::SelectItem(unsigned int iItemIndex) {
 	if (iItemIndex < m_Items.size()) {
         m_iSelectedItem = iItemIndex;
         m_iFocusedItem = iItemIndex;
+        CWindow* pDestination = m_pParentWindow;
+        // could be optimized : keep 'previous' selection and only send the message if new m_iFocusedItem != previous focused item.
+        CMessageServer::Instance().QueueMessage(new TIntMessage(CMessage::CTRL_VALUECHANGE, pDestination, this, m_iFocusedItem));
         Draw();
     }
+}
+
+
+unsigned int CNavigationBar::getFocusedIndex() {
+    return m_iFocusedItem;
+}
+
+
+void CNavigationBar::FocusItem(unsigned int iItemIndex) {
+	if (iItemIndex < m_Items.size()) {
+    m_iFocusedItem = iItemIndex;
+    Draw();
+  }
 }
 
 
@@ -139,21 +155,21 @@ void CNavigationBar::Draw(void) const {
 				{
 					Painter.DrawRect(ItemRect, true, CApplication::Instance()->GetDefaultSelectionColor(), CApplication::Instance()->GetDefaultSelectionColor());
 				}
-				if (i == m_iFocusedItem)
+				if (i == m_iFocusedItem && HasFocus())
 				{
 					ItemRect.Grow(1);
 					Painter.DrawRect(ItemRect, false, CApplication::Instance()->GetDefaultSelectionColor() * 0.7);
 					ItemRect.Grow(-1);
 				}
 				ItemRect.Grow(-1);
-                // '- CPoint(0,1)' is to move the reference point one pixel up (otherwise the lowest pixels of p,g,q,y 
-                // etc. are not fully visible.
+        // '- CPoint(0,1)' is to move the reference point one pixel up (otherwise the lowest pixels of p,g,q,y 
+        // etc. are not fully visible.
 				m_RenderedStrings.at(i).Draw(m_pSDLSurface, ItemRect, ItemRect.BottomLeft() - CPoint(0, 1) + CPoint(ItemRect.Width()/2, 0), m_Items[i].ItemColor);
-               // Draw the picture (if available):
-               if (m_Bitmaps.at(i) != nullptr) {
-                   SDL_Rect DestRect = ItemRect.Move(9, 1).SDLRect();
-                   SDL_BlitSurface(m_Bitmaps.at(i)->Bitmap(), &PictureSourceRect, m_pSDLSurface, &DestRect);
-               }
+        // Draw the picture (if available):
+        if (m_Bitmaps.at(i) != nullptr) {
+          SDL_Rect DestRect = ItemRect.Move(9, 1).SDLRect();
+          SDL_BlitSurface(m_Bitmaps.at(i)->Bitmap(), &PictureSourceRect, m_pSDLSurface, &DestRect);
+        }
 			}
 		}
 	}
@@ -182,10 +198,6 @@ bool CNavigationBar::OnMouseButtonDown(CPoint Point, unsigned int Button)
       // judb m_iFocusedItem should be <= the number of items in the bar (0-based, so m_Items.size() - 1)
 			m_iFocusedItem = stdex::MinInt((WindowPoint.XPos() / m_iItemWidth), m_Items.size() - 1);
 			SelectItem(m_iFocusedItem);
-			CWindow* pDestination = m_pParentWindow;
-      // could be optimized : keep 'previous' selection and only send the message if new m_iFocusedItem != previous focused item.
-			CMessageServer::Instance().QueueMessage(new TIntMessage(CMessage::CTRL_VALUECHANGE, pDestination, this, m_iFocusedItem));
-			Draw();
       bResult = true;
 		}
 	}
@@ -208,11 +220,23 @@ bool CNavigationBar::HandleMessage(CMessage* pMessage) {
 			{
 				switch (pKeyMsg->Key)
 				{
+          case SDLK_LEFT:
+            FocusItem(getFocusedIndex() - 1);
+            break;
+          case SDLK_RIGHT:
+            FocusItem(getFocusedIndex() + 1);
+            break;
+          case SDLK_SPACE:  // intentional fall through
+          case SDLK_RETURN:
+            SelectItem(getFocusedIndex());
+            break;
 					default:
-                    {
+            // Let the parent handle it
+            CMessageServer::Instance().QueueMessage(new CKeyboardMessage(CMessage::KEYBOARD_KEYDOWN, m_pParentWindow, this,
+                  pKeyMsg->ScanCode, pKeyMsg->Modifiers, pKeyMsg->Key, pKeyMsg->Unicode));
+            break;
 						bHandled = false;
 						break;
-					}
 				}
 			}
 			break;

@@ -609,8 +609,9 @@ bool CEditBox::HandleMessage(CMessage* pMessage)
 							m_SelStart = 0;
 						}
 						break;
+          case SDLK_ESCAPE:  // intentional fall through
           case SDLK_TAB:
-            // TAB is not for us - let parent handle it
+            // Not for us - let parent handle it
             CMessageServer::Instance().QueueMessage(new CKeyboardMessage(CMessage::KEYBOARD_KEYDOWN, m_pParentWindow, this,
                   pKeyboardMessage->ScanCode, pKeyboardMessage->Modifiers, pKeyboardMessage->Key, pKeyboardMessage->Unicode));
             break;
