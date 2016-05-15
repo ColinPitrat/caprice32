@@ -40,7 +40,7 @@ public:
 	//! Constructs a new radiobutton
   	//! \param WindowRect A CRect that defines the outer limits of the control
 	//! \param pParent A pointer to the parent window
-	CRadioButton(const CPoint& p, int size, CWindow* pParent);
+	CRadioButton(const CPoint& p, int size, CWindow* pParent, bool bFocusable = false);
 
 	//! Standard destructor
 	virtual ~CRadioButton(void);
@@ -60,6 +60,8 @@ public:
 	//! \param eState The radiobutton state
 	void SetState(EState eState);
 
+	//! Check this radiobutton and uncheck all its siblings
+  void Select();
 
 	// CWindow overrides
 	//! Draws the radiobutton

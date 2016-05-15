@@ -118,9 +118,9 @@ CapriceOptions::CapriceOptions(const CRect& WindowRect, CWindow* pParent, CFontE
     }
     m_pLabelFullScreen      = new CLabel(CPoint(27, 115), m_pGroupBoxTabVideo, "Full screen");
     m_pGroupBoxMonitor   = new CGroupBox(CRect(CPoint(10, 30), 280, 55), m_pGroupBoxTabVideo, "Monitor");
-    m_pRadioButtonColour = new CRadioButton(CPoint(10, 1), 10, m_pGroupBoxMonitor); // Colour or monochrome monitor
+    m_pRadioButtonColour = new CRadioButton(CPoint(10, 1), 10, m_pGroupBoxMonitor, true); // Colour or monochrome monitor
     m_pLabelColour       = new CLabel(CPoint(27,2), m_pGroupBoxMonitor, "Colour");
-    m_pRadioButtonMonochrome   = new CRadioButton(CPoint(10, 16), 10, m_pGroupBoxMonitor); // Colour or monochrome monitor;
+    m_pRadioButtonMonochrome   = new CRadioButton(CPoint(10, 16), 10, m_pGroupBoxMonitor, true); // Colour or monochrome monitor;
     m_pLabelMonochrome         = new CLabel(CPoint(27,17), m_pGroupBoxMonitor, "Mono");
     if (CPC.scr_tube == 1) {
         m_pRadioButtonMonochrome->SetState(CRadioButton::CHECKED);
@@ -180,18 +180,18 @@ CapriceOptions::CapriceOptions(const CRect& WindowRect, CWindow* pParent, CFontE
     m_pScrollBarVolume->SetValue(CPC.snd_volume);
     m_pLabelSoundVolumeValue = new CLabel(CPoint(190, 108), m_pGroupBoxTabAudio, stdex::itoa(CPC.snd_volume) + "%  ");
 
-    m_pRadioButtonMono   = new CRadioButton(CPoint(5, 2), 10, m_pGroupBoxChannels);
+    m_pRadioButtonMono   = new CRadioButton(CPoint(5, 2), 10, m_pGroupBoxChannels, true);
     m_pLabelMono         = new CLabel(CPoint(20,3), m_pGroupBoxChannels, "Mono");
-    m_pRadioButtonStereo = new CRadioButton(CPoint(55, 2), 10, m_pGroupBoxChannels); // position is within the parent! (groupbox)
+    m_pRadioButtonStereo = new CRadioButton(CPoint(55, 2), 10, m_pGroupBoxChannels, true); // position is within the parent! (groupbox)
     m_pLabelStereo      = new CLabel(CPoint(70,3), m_pGroupBoxChannels, "Stereo");
     if (CPC.snd_stereo == 0) {
         m_pRadioButtonMono->SetState(CRadioButton::CHECKED);
     } else {
       m_pRadioButtonStereo->SetState(CRadioButton::CHECKED);
     }
-    m_pRadioButton8bit  = new CRadioButton(CPoint(5, 2), 10, m_pGroupBoxSampleSize);
+    m_pRadioButton8bit  = new CRadioButton(CPoint(5, 2), 10, m_pGroupBoxSampleSize, true);
     m_pLabel8bit        = new CLabel(CPoint(20,3), m_pGroupBoxSampleSize, "8 bit");
-    m_pRadioButton16bit = new CRadioButton(CPoint(55, 2), 10, m_pGroupBoxSampleSize);
+    m_pRadioButton16bit = new CRadioButton(CPoint(55, 2), 10, m_pGroupBoxSampleSize, true);
     m_pLabel16bit       = new CLabel(CPoint(70, 3), m_pGroupBoxSampleSize, "16 bit");
     if (CPC.snd_bits == 0)  {
       m_pRadioButton8bit->SetState(CRadioButton::CHECKED);

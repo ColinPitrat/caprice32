@@ -103,9 +103,9 @@ void CCheckBox::Draw(void) const
 			{
 //				Painter.DrawLine(SubRect.TopLeft(), SubRect.BottomRight(), DEFAULT_LINE_COLOR);
 //				Painter.DrawLine(SubRect.BottomLeft(), SubRect.TopRight(), DEFAULT_LINE_COLOR);
-                SDL_Rect SourceRect = m_WindowRect.SizeRect().SDLRect();
-                SDL_Rect DestRect = SubRect.SDLRect();
-                SDL_BlitSurface(m_hBitmapCheck.Bitmap(), &SourceRect, m_pSDLSurface, &DestRect);
+        SDL_Rect SourceRect = m_WindowRect.SizeRect().SDLRect();
+        SDL_Rect DestRect = SubRect.SDLRect();
+        SDL_BlitSurface(m_hBitmapCheck.Bitmap(), &SourceRect, m_pSDLSurface, &DestRect);
 			}
 		}
 	}

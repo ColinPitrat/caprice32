@@ -24,13 +24,14 @@ namespace wGui
 {
 
 // judb p is the upper-left corner of the radiobutton; size is the width=height
-CRadioButton::CRadioButton(const CPoint& p, int size, CWindow* pParent) :
-	CWindow(CRect(p, size, size), pParent),
+CRadioButton::CRadioButton(const CPoint& p, int size, CWindow* pParent, bool bFocusable) :
+	CWindow(CRect(p, size, size), pParent, bFocusable),
 	m_eRadioButtonState(UNCHECKED),
 	m_MouseButton(0),
     m_hBitmapRadioButton(CwgBitmapResourceHandle(WGRES_RADIOBUTTON_BITMAP))
 {
 	m_BackgroundColor = DEFAULT_CHECKBOX_BACK_COLOR;
+	CMessageServer::Instance().RegisterMessageClient(this, CMessage::KEYBOARD_KEYDOWN);
 	CMessageServer::Instance().RegisterMessageClient(this, CMessage::MOUSE_BUTTONUP);
 	CMessageServer::Instance().RegisterMessageClient(this, CMessage::CTRL_SINGLELCLICK);
 	Draw();
@@ -53,31 +54,59 @@ void CRadioButton::SetState(EState eState)
 }
 
 
+void CRadioButton::Select()
+{
+  if (m_eRadioButtonState == UNCHECKED)
+  {
+    SetState(CHECKED);
+    // Uncheck all other 'children' of this parent that are radiobuttons:
+    std::list<CWindow*> myChildWindows = m_pParentWindow->GetChildWindows();
+    for (std::list<CWindow*>::iterator iter = myChildWindows.begin(); iter != myChildWindows.end(); ++iter)
+    {
+      // Compare the types to find out if a child is a CRadioButton.
+      if (typeid(**iter) == typeid(*this) && *iter != this)
+      {
+        // 'other' radiobutton found -> UNCHECK
+        dynamic_cast<CRadioButton*>(*iter)->SetState(UNCHECKED);
+      }
+    }
+    CMessageServer::Instance().QueueMessage(new TIntMessage(CMessage::CTRL_VALUECHANGE, m_pParentWindow, this, 1));
+  }
+}
+
+
 void CRadioButton::Draw(void) const
 {
 	CWindow::Draw();
 
 	if (m_pSDLSurface)
-	{
-		CRect SubRect(m_WindowRect.SizeRect());
-		CPainter Painter(m_pSDLSurface, CPainter::PAINT_REPLACE);
-		if (m_eRadioButtonState != DISABLED)
-		{
-			Painter.DrawRect(SubRect, false, COLOR_LIGHTGRAY);
-			Painter.DrawHLine(SubRect.Left(), SubRect.Right(), SubRect.Top(), COLOR_BLACK);
-			Painter.DrawVLine(SubRect.Top(), SubRect.Bottom(), SubRect.Left(), COLOR_BLACK);
-			if (m_eRadioButtonState == CHECKED)
-			{
-//            Painter.DrawBox(CPoint(3, 3), SubRect.Width() - 6, SubRect.Height() - 6, COLOR_BLUE_1);
-              SDL_Rect SourceRect = m_WindowRect.SizeRect().SDLRect();
-              SubRect.Move(2, 2);
-              SDL_Rect DestRect = SubRect.SDLRect();
-              SDL_BlitSurface(m_hBitmapRadioButton.Bitmap(), &SourceRect, m_pSDLSurface, &DestRect);
-			}
-		} else {
-           Painter.DrawRect(SubRect, false, COLOR_LIGHTGRAY);
-        }
-	}
+  {
+    CRect SubRect(m_WindowRect.SizeRect());
+    CPainter Painter(m_pSDLSurface, CPainter::PAINT_REPLACE);
+    if (m_eRadioButtonState != DISABLED)
+    {
+      Painter.DrawRect(SubRect, false, COLOR_LIGHTGRAY);
+      Painter.DrawHLine(SubRect.Left(), SubRect.Right(), SubRect.Top(), COLOR_BLACK);
+      Painter.DrawVLine(SubRect.Top(), SubRect.Bottom(), SubRect.Left(), COLOR_BLACK);
+			SubRect.Grow(-1);
+      if (m_bHasFocus)
+      {
+        Painter.DrawRect(SubRect, false, COLOR_GRAY);
+      }
+      if (m_eRadioButtonState == CHECKED)
+      {
+        SubRect.Grow(-2);
+        Painter.DrawRect(SubRect, true, COLOR_BLACK, COLOR_BLACK);
+        /*
+        SDL_Rect SourceRect = m_WindowRect.SizeRect().SDLRect();
+        SDL_Rect DestRect = SubRect.SDLRect();
+        SDL_BlitSurface(m_hBitmapRadioButton.Bitmap(), &SourceRect, m_pSDLSurface, &DestRect);
+        */
+      }
+    } else {
+      Painter.DrawRect(SubRect, false, COLOR_LIGHTGRAY);
+    }
+  }
 }
 
 
@@ -129,9 +158,27 @@ bool CRadioButton::HandleMessage(CMessage* pMessage)
 
 	if (pMessage)
 	{
-		std::list<CWindow*> myChildWindows;
 		switch(pMessage->MessageType())
 		{
+		case CMessage::KEYBOARD_KEYDOWN:
+    {
+      CKeyboardMessage* pKeyboardMessage = dynamic_cast<CKeyboardMessage*>(pMessage);
+      if (pKeyboardMessage && pMessage->Destination() == this)
+      {
+        switch (pKeyboardMessage->Key)
+        {
+          case SDLK_SPACE:
+            Select();
+            break;
+          default:
+            // Forward all key downs to parent
+            CMessageServer::Instance().QueueMessage(new CKeyboardMessage(CMessage::KEYBOARD_KEYDOWN, m_pParentWindow, this,
+                  pKeyboardMessage->ScanCode, pKeyboardMessage->Modifiers, pKeyboardMessage->Key, pKeyboardMessage->Unicode));
+            break;
+        }
+      }
+      break;
+    }
 		case CMessage::MOUSE_BUTTONUP:
 		{
 			CMouseMessage* pMouseMessage = dynamic_cast<CMouseMessage*>(pMessage);
@@ -146,25 +193,7 @@ bool CRadioButton::HandleMessage(CMessage* pMessage)
 		case CMessage::CTRL_SINGLELCLICK:
 			if (pMessage->Destination() == this)
 			{
-				switch (m_eRadioButtonState)
-				{
-				case UNCHECKED:
-					SetState(CHECKED);
-                    // Uncheck all other 'children' of this parent that are radiobuttons:
-			        myChildWindows = m_pParentWindow->GetChildWindows();
-					for (std::list<CWindow*>::iterator iter = myChildWindows.begin(); iter != myChildWindows.end(); 
-                                                                                                            ++iter) {
-                        // Compare the types to find out if a child is a CRadioButton.
-                        if (typeid(**iter) == typeid(*this) && *iter != this) {
-                            // 'other' radiobutton found -> UNCHECK
-                            dynamic_cast<CRadioButton*>(*iter)->SetState(UNCHECKED);
-						}
-					}
-					CMessageServer::Instance().QueueMessage(new TIntMessage(CMessage::CTRL_VALUECHANGE, m_pParentWindow, this, 1));
-					break;
-				default:
-					break;
-				}
+        Select();
 				bHandled = true;
 			}
 			break;
@@ -178,6 +207,3 @@ bool CRadioButton::HandleMessage(CMessage* pMessage)
 }
 
 }
-
-
-
