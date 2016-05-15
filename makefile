@@ -62,4 +62,4 @@ cap32: $(OBJECTS)
 clean:
 	rm -f $(DEPENDS) $(OBJECTS) cap32 .debug
 
-include $(DEPENDS)
+-include $(DEPENDS)
