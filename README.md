@@ -59,7 +59,7 @@ For example, for a debug build, use:
 
 # Comments or ready to contribute?
 
-If you have suggestions, a bug report or even want to join the development team, please feel free to use one of the many contact methods presented on the Caprice32 project page on SourceForge.net - see the URL at the top.
+If you have suggestions, a bug report or even want to participate to the development, please feel free to open an issue or submit a pull request.
 
 # Why another GitHub repository ?
 
