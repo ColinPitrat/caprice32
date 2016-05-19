@@ -48,7 +48,7 @@ $(DEPENDS): %.d: %.cpp
 $(OBJECTS): %.o: %.cpp
 	$(CXX) -c $(CFLAGS) -o $@ $<
 
-debug: debug_flag cap32
+debug: debug_flag cap32 gtest unit_test
 
 debug_flag:
 ifdef FORCED_DEBUG
@@ -59,7 +59,25 @@ endif
 cap32: $(OBJECTS)
 	$(CXX) $(LDFLAGS) -o cap32 $(OBJECTS) $(LIBS)
 
+####################################
+### Tests
+####################################
+
+gtest:
+	[ -d googletest ] || git clone https://github.com/google/googletest.git
+
+TEST_TARGET=test/unit/unit_tester
+GTEST_DIR=googletest/googletest/
+TEST_CFLAGS=-I$(GTEST_DIR)/include -I$(GTEST_DIR)
+
+$(GTEST_DIR)/src/gtest-all.o: $(GTEST_DIR)/src/gtest-all.cc
+	$(CXX) $(TEST_CFLAGS) -c $(INCPATH) -o $@ $<
+
+unit_test: $(GTEST_DIR)/src/gtest-all.o $(OBJECTS)
+	$(CXX) $(IPATHS) $(TEST_CFLAGS) -o $(TEST_TARGET) $(LIBS) $(GTEST_DIR)/src/gtest-all.o test/unit/main.cpp
+	./$(TEST_TARGET) --gtest_shuffle
+
 clean:
-	rm -f $(DEPENDS) $(OBJECTS) cap32 .debug
+	rm -f $(DEPENDS) $(OBJECTS) $(TEST_TARGET) $(GTEST_DIR)/src/gtest-all.o cap32 .debug
 
 -include $(DEPENDS)
