@@ -52,7 +52,7 @@ $(DEPENDS) $(TEST_DEPENDS): %.d: %.cpp
 $(OBJECTS): %.o: %.cpp
 	$(CXX) -c $(CFLAGS) -o $@ $<
 
-$(TEST_OBJECTS): %.o: %.cpp
+$(TEST_OBJECTS): %.o: %.cpp gtest
 	$(CXX) -c $(CFLAGS) $(TEST_CFLAGS) -o $@ $<
 
 debug: debug_flag cap32 unit_test
@@ -77,9 +77,7 @@ TEST_TARGET=test/unit/unit_tester
 GTEST_DIR=googletest/googletest/
 TEST_CFLAGS=-I$(GTEST_DIR)/include -I$(GTEST_DIR)
 
-$(TEST_OBJECTS): gtest
-
-$(GTEST_DIR)/src/gtest-all.o: gtest $(GTEST_DIR)/src/gtest-all.cc
+$(GTEST_DIR)/src/gtest-all.o: $(GTEST_DIR)/src/gtest-all.cc gtest
 	$(CXX) $(TEST_CFLAGS) -c $(INCPATH) -o $@ $<
 
 unit_test: $(OBJECTS) $(TEST_OBJECTS) $(GTEST_DIR)/src/gtest-all.o
