@@ -82,8 +82,8 @@ $(GTEST_DIR)/src/gtest-all.o: $(GTEST_DIR)/src/gtest-all.cc gtest
 
 # TODO: Find a way to add objects without having main
 unit_test: $(OBJECTS) $(TEST_OBJECTS) $(GTEST_DIR)/src/gtest-all.o
-	$(CXX) $(IPATHS) $(TEST_CFLAGS) -o $(TEST_TARGET) $(LIBS) -lpthread $(GTEST_DIR)/src/gtest-all.o $(TEST_OBJECTS)
-	./$(TEST_TARGET) --gtest_shuffle
+	#$(CXX) $(IPATHS) $(TEST_CFLAGS) -o $(TEST_TARGET) $(LIBS) $(GTEST_DIR)/src/gtest-all.o $(TEST_OBJECTS)
+	#./$(TEST_TARGET) --gtest_shuffle
 
 clean:
 	rm -f $(DEPENDS) $(OBJECTS) $(TEST_TARGET) $(GTEST_DIR)/src/gtest-all.o cap32 .debug
