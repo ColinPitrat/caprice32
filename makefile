@@ -80,9 +80,9 @@ TEST_CFLAGS=-I$(GTEST_DIR)/include -I$(GTEST_DIR)
 $(GTEST_DIR)/src/gtest-all.o: $(GTEST_DIR)/src/gtest-all.cc gtest
 	$(CXX) $(TEST_CFLAGS) -c $(INCPATH) -o $@ $<
 
-# TODO: Handle not having the real main in unit tests in a cleaner way
+# TODO: Find a way to add objects without having main
 unit_test: $(OBJECTS) $(TEST_OBJECTS) $(GTEST_DIR)/src/gtest-all.o
-	$(CXX) $(IPATHS) $(TEST_CFLAGS) -o $(TEST_TARGET) $(LIBS) $(GTEST_DIR)/src/gtest-all.o `echo $(OBJECTS) | sed 's/cap32.cpp//'` $(TEST_OBJECTS)
+	$(CXX) $(IPATHS) $(TEST_CFLAGS) -o $(TEST_TARGET) $(LIBS) $(GTEST_DIR)/src/gtest-all.o $(TEST_OBJECTS)
 	./$(TEST_TARGET) --gtest_shuffle
 
 clean:
