@@ -30,7 +30,7 @@
 #include <errno.h>
 #include <string.h>
 
-#define VERSION_STRING "v4.2.0"
+#define VERSION_STRING "v4.3.0"
 
 #include "CapriceGui.h"
 #include "CapriceGuiView.h"
