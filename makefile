@@ -7,8 +7,12 @@ SOURCES:=$(wildcard *.cpp gui/src/*.cpp)
 DEPENDS:=$(SOURCES:.cpp=.d)
 OBJECTS:=$(SOURCES:.cpp=.o)
 
-IPATHS	= -I. -Igui/includes `freetype-config --cflags` 
-LIBS = `sdl-config --libs` -lz `freetype-config --libs` 
+TEST_SOURCES:=$(shell find test -name \*.cpp)
+TEST_DEPENDS:=$(TEST_SOURCES:.cpp=.d)
+TEST_OBJECTS:=$(TEST_SOURCES:.cpp=.o)
+
+IPATHS	= -I. -Igui/includes `freetype-config --cflags`
+LIBS = `sdl-config --libs` -lz `freetype-config --libs`
 
 .PHONY: all clean debug debug_flag
 
@@ -41,11 +45,11 @@ endif
 
 CFLAGS = $(CFLAGS_3) $(IPATHS)
 
-$(DEPENDS): %.d: %.cpp
+$(DEPENDS) $(TEST_DEPENDS): %.d: %.cpp
 	@echo Computing dependencies for $<
 	@$(CXX) -MM $(CFLAGS) $< | { sed 's#^[^:]*\.o[ :]*#$*.o $*.d : #g' ; echo "%.h:;" ; echo "" ; } > $@
 
-$(OBJECTS): %.o: %.cpp
+$(OBJECTS) $(TEST_OBJECTS): %.o: %.cpp
 	$(CXX) -c $(CFLAGS) -o $@ $<
 
 debug: debug_flag cap32 gtest unit_test
@@ -73,8 +77,8 @@ TEST_CFLAGS=-I$(GTEST_DIR)/include -I$(GTEST_DIR)
 $(GTEST_DIR)/src/gtest-all.o: $(GTEST_DIR)/src/gtest-all.cc
 	$(CXX) $(TEST_CFLAGS) -c $(INCPATH) -o $@ $<
 
-unit_test: $(GTEST_DIR)/src/gtest-all.o $(OBJECTS)
-	$(CXX) $(IPATHS) $(TEST_CFLAGS) -o $(TEST_TARGET) $(LIBS) $(GTEST_DIR)/src/gtest-all.o test/unit/main.cpp
+unit_test: $(OBJECTS) $(TEST_OBJECTS) $(GTEST_DIR)/src/gtest-all.o
+	$(CXX) $(IPATHS) $(TEST_CFLAGS) -o $(TEST_TARGET) $(LIBS) $(GTEST_DIR)/src/gtest-all.o $(OBJECTS) $(TEST_OBJECTS)
 	./$(TEST_TARGET) --gtest_shuffle
 
 clean:
