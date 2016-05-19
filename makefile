@@ -74,7 +74,7 @@ TEST_TARGET=test/unit/unit_tester
 GTEST_DIR=googletest/googletest/
 TEST_CFLAGS=-I$(GTEST_DIR)/include -I$(GTEST_DIR)
 
-$(GTEST_DIR)/src/gtest-all.o: $(GTEST_DIR)/src/gtest-all.cc gtest
+$(GTEST_DIR)/src/gtest-all.o: gtest $(GTEST_DIR)/src/gtest-all.cc
 	$(CXX) $(TEST_CFLAGS) -c $(INCPATH) -o $@ $<
 
 unit_test: $(OBJECTS) $(TEST_OBJECTS) $(GTEST_DIR)/src/gtest-all.o
