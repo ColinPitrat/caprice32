@@ -125,37 +125,37 @@ public:
 
 	// CWindow overrides
 	//! Draws the button and renders the button label
-	virtual void Draw(void) const;
+	virtual void Draw(void) const override;
 
 	//! Giving a control a new WindowRect will move and resize the control
 	//! \param WindowRect A CRect that defines the outer limits of the control
-	virtual void SetWindowRect(const CRect& WindowRect);
+	virtual void SetWindowRect(const CRect& WindowRect) override;
 
 	//! Blit the window to the given surface, using m_WindowRect as the offset into the surface
 	//! \param ScreenSurface A reference to the surface that the window will be copied to
 	//! \param FloatingSurface A reference to the floating surface which is overlayed at the very end (used for tooltips, menus and such)
 	//! \param Offset This is the current offset into the Surface that should be used as reference
-	virtual void PaintToSurface(SDL_Surface& ScreenSurface, SDL_Surface& FloatingSurface, const CPoint& Offset) const;
+	virtual void PaintToSurface(SDL_Surface& ScreenSurface, SDL_Surface& FloatingSurface, const CPoint& Offset) const override;
 
 	//! This is called whenever the listbox is clicked on by the mouse
 	//! Only the topmost window that bounds the point will be called by the system
 	//! \param Point The point where the mouse clicked
 	//! \param Button A bitfield indicating which button the window was clicked with
 	//! \return True if it's in the bounds of the listbox
-	virtual bool OnMouseButtonDown(CPoint Point, unsigned int Button);
+	virtual bool OnMouseButtonDown(CPoint Point, unsigned int Button) override;
 
 	//! This is called whenever the a mouse button is released in the listbox
 	//! Only the topmost window that bounds the point will be called by the system
 	//! \param Point The point where the mouse clicked
 	//! \param Button A bitfield indicating which button the window was clicked with
 	//! \return True if it's in the bounds of the listbox
-	virtual bool OnMouseButtonUp(CPoint Point, unsigned int Button);
+	virtual bool OnMouseButtonUp(CPoint Point, unsigned int Button) override;
 
 
 	// CMessageClient overrides
 	//! CListBoxes handle MOUSE_BUTTONDOWN, MOUSE_BUTTONUP and CTRL_VALUECHANGE messages
 	//! \param pMessage A pointer to the message
-	virtual bool HandleMessage(CMessage* pMessage);
+	virtual bool HandleMessage(CMessage* pMessage) override;
 
 
 protected:

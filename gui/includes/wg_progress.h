@@ -57,7 +57,7 @@ public:
 
 	// CWindow overrides
 	//! Draws the progress bar
-	virtual void Draw(void) const;
+	virtual void Draw(void) const override;
 
 
 protected:

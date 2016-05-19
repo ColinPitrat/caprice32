@@ -102,21 +102,21 @@ public:
 	// CWindow overrides
 	//! Giving a control a new WindowRect will move and resize the control
 	//! \param WindowRect A CRect that defines the outer limits of the control
-	virtual void SetWindowRect(const CRect& WindowRect);
+	virtual void SetWindowRect(const CRect& WindowRect) override;
 
 	//! Set the WindowText of the control
 	//! \param sWindowText The text to assign to the window
 	virtual void SetWindowText(std::string sWindowText);
 
 	//! Get the WindowText of the control
-	virtual std::string GetWindowText();
+	virtual std::string GetWindowText() override;
 
 	//! Move the window and any child windows
 	//! \param MoveDistance The relative distance to move the window
-	virtual void MoveWindow(const CPoint& MoveDistance);
+	virtual void MoveWindow(const CPoint& MoveDistance) override;
 
 	// slight override from CWindow: if visible is set to "true", the dropdown part should stay invisible:
-	void SetVisible(bool bVisible);
+	void SetVisible(bool bVisible) override;
 
   // Override the default behaviour: a focused drop-down list is in fact it's button being focused
   virtual void SetIsFocusable(bool bFocused) override;
@@ -124,7 +124,7 @@ public:
 	// CMessageClient overrides
 	//! CDropDown will handle MOUSE_BUTTONDOWN messages
 	//! \param pMessage A pointer to the message that needs to be handled
-	virtual bool HandleMessage(CMessage* pMessage);
+	virtual bool HandleMessage(CMessage* pMessage) override;
 
 
 protected:

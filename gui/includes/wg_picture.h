@@ -65,11 +65,11 @@ public:
 
 	// CWindow overrides
 	//! Draws the button and renders the button label
-	virtual void Draw(void) const;
+	virtual void Draw(void) const override;
 
 	//! Giving a control a new WindowRect will move and resize the control
 	//! \param WindowRect A CRect that defines the outer limits of the control
-	virtual void SetWindowRect(const CRect& WindowRect);
+	virtual void SetWindowRect(const CRect& WindowRect) override;
 
 
 protected:

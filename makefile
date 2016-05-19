@@ -16,7 +16,7 @@ ifndef CXX
 CXX	= g++
 endif
 
-CFLAGS_1	= -std=c++11 -Wall -Wzero-as-null-pointer-constant `sdl-config --cflags`
+CFLAGS_1	= -std=c++11 -Wall -Wzero-as-null-pointer-constant -Wsuggest-override `sdl-config --cflags`
 
 ifndef DEBUG
 ifeq ($(LAST_BUILD_IN_DEBUG), 1)

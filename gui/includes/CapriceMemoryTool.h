@@ -18,7 +18,7 @@ namespace wGui
         //! If this is set to 0 it will use the default font engine specified by the CApplication (which must be set before instantiating this object)
         CapriceMemoryTool(const CRect& WindowRect, CWindow* pParent, CFontEngine* pFontEngine);
         ~CapriceMemoryTool(void);
-        bool HandleMessage(CMessage* pMessage);
+        bool HandleMessage(CMessage* pMessage) override;
 
       protected:
         CFontEngine *m_pMonoFontEngine;

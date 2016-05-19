@@ -7,6 +7,6 @@ class CapriceGui : public CApplication
 {
 	public:
 		CapriceGui() : CApplication() {};
-		void Init(void);
+		void Init(void) override;
 };
 

@@ -66,23 +66,23 @@ public:
 
 	// CWindow overrides
 	//! Renders the Window Text, and clips to the Window Rect
-	virtual void Draw(void) const;
+	virtual void Draw(void) const override;
 
 	//! Move the window and any child windows
 	//! \param MoveDistance The relative distance to move the window
-	virtual void MoveWindow(const CPoint& MoveDistance);
+	virtual void MoveWindow(const CPoint& MoveDistance) override;
 
 	//! Blit the window to the given surface, using m_WindowRect as the offset into the surface
 	//! \param ScreenSurface A reference to the surface that the window will be copied to
 	//! \param FloatingSurface A reference to the floating surface which is overlayed at the very end (used for tooltips, menus and such)
 	//! \param Offset This is the current offset into the Surface that should be used as reference
-	virtual void PaintToSurface(SDL_Surface& ScreenSurface, SDL_Surface& FloatingSurface, const CPoint& Offset) const;
+	virtual void PaintToSurface(SDL_Surface& ScreenSurface, SDL_Surface& FloatingSurface, const CPoint& Offset) const override;
 
 
 	// CMessageClient overrides
 	//! CTooltips handle MOUSE_MOVE and CTRL_TIMER messages
 	//! \param pMessage A pointer to the message
-	virtual bool HandleMessage(CMessage* pMessage);
+	virtual bool HandleMessage(CMessage* pMessage) override;
 
 
 protected:

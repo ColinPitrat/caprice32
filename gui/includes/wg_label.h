@@ -70,11 +70,11 @@ public:
 
 	// CWindow overrides
 	//! Renders the Window Text, and clips to the Window Rect
-	virtual void Draw(void) const;
+	virtual void Draw(void) const override;
 
 	//! Set the WindowText of the label
 	//! \param sWindowText The text to assign to the window
-	virtual void SetWindowText(const std::string& sWindowText);
+	virtual void SetWindowText(const std::string& sWindowText) override;
 
 
 protected:

@@ -67,34 +67,34 @@ public:
 	//! Set the current value.
 	//! \param iValue The new value for the control
 	//! \param bRedraw indicates if the control should be redrawn (defaults to true)
-	virtual void SetValue(int iValue, bool bRedraw = true);
+	virtual void SetValue(int iValue, bool bRedraw = true) override;
 
 
 	// CWindow overrides
 	//! Draws the scroll bar
-	virtual void Draw(void) const;
+	virtual void Draw(void) const override;
 
 	//! Giving a control a new WindowRect will move and resize the control
 	//! \param WindowRect A CRect that defines the outer limits of the control
-	virtual void SetWindowRect(const CRect& WindowRect);
+	virtual void SetWindowRect(const CRect& WindowRect) override;
 
 	//! Move the window and any child windows
 	//! \param MoveDistance The relative distance to move the window
-	virtual void MoveWindow(const CPoint& MoveDistance);
+	virtual void MoveWindow(const CPoint& MoveDistance) override;
 
 	//! This is called whenever the scrollbar is clicked on by the mouse
 	//! Only the topmost window that bounds the point will be called by the system
 	//! \param Point The point where the mouse clicked
 	//! \param Button A bitfield indicating which button the window was clicked with
 	//! \return True if it's in the bounds of the scrollbar
-	virtual bool OnMouseButtonDown(CPoint Point, unsigned int Button);
+	virtual bool OnMouseButtonDown(CPoint Point, unsigned int Button) override;
 
   virtual void SetIsFocusable(bool bFocusable) override;
 
 	// CMessageClient overrides
 	//! CScrollBars handle MOUSE_BUTTONDOWN and MOUSE_BUTTONUP messages
 	//! \param pMessage A pointer to the message
-	virtual bool HandleMessage(CMessage* pMessage);
+	virtual bool HandleMessage(CMessage* pMessage) override;
 
 
 protected:

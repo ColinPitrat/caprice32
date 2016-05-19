@@ -100,16 +100,16 @@ public:
 	// CWindow Overrides
 	//! Set the WindowText of the view, which is used as the window caption
 	//! \param sText The text to assign to the view
-	virtual void SetWindowText(const std::string& sText);
+	virtual void SetWindowText(const std::string& sText) override;
 
 	// CWindow Overrides
 	//! Set the WindowRect of the view, which is the size of the view ( it recreates the SDL_surface )
 	//! \param WindowRect The rectangle that specifies the size of the view
- 	virtual void SetWindowRect(const CRect& WindowRect);
+ 	virtual void SetWindowRect(const CRect& WindowRect) override;
 
 	// CMessageClient overrides
 	//! Handles APP_PAINT messages with itself or 0 as the destination, and will redraw all of it's children as well as itself
-	virtual bool HandleMessage(CMessage* pMessage);
+	virtual bool HandleMessage(CMessage* pMessage) override;
 
 protected:
 	bool m_bResizable;  //!< Indicates if the view is resizable

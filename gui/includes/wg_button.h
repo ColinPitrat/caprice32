@@ -71,31 +71,31 @@ public:
 
 	// CWindow overrides
 	//! Draws the button and renders the button label
-	virtual void Draw(void) const;
+	virtual void Draw(void) const override;
 
 	//! Set the WindowText of the button
 	//! \param sWindowText The text to assign to the window
-	virtual void SetWindowText(const std::string& sWindowText);
+	virtual void SetWindowText(const std::string& sWindowText) override;
 
 	//! This is called whenever the button is clicked on by the mouse
 	//! Only the topmost window that bounds the point will be called by the system
 	//! \param Point The point where the mouse clicked
 	//! \param Button A bitfield indicating which button the window was clicked with
 	//! \return True if it's in the bounds of the button
-	virtual bool OnMouseButtonDown(CPoint Point, unsigned int Button);
+	virtual bool OnMouseButtonDown(CPoint Point, unsigned int Button) override;
 
 	//! This is called whenever the a mouse button is released in the button
 	//! Only the topmost window that bounds the point will be called by the system
 	//! \param Point The point where the mouse clicked
 	//! \param Button A bitfield indicating which button the window was clicked with
 	//! \return True if it's in the bounds of the button
-	virtual bool OnMouseButtonUp(CPoint Point, unsigned int Button);
+	virtual bool OnMouseButtonUp(CPoint Point, unsigned int Button) override;
 
 
 	// CMessageClient overrides
 	//! CButtons handle MOUSE_BUTTONDOWN and MOUSE_BUTTONUP messages
 	//! \param pMessage A pointer to the message
-	virtual bool HandleMessage(CMessage* pMessage);
+	virtual bool HandleMessage(CMessage* pMessage) override;
 
 
 protected:
@@ -141,7 +141,7 @@ public:
 
 	// CWindow overrides
 	//! Draws the button and renders the button label
-	virtual void Draw(void) const;
+	virtual void Draw(void) const override;
 
 
 private:

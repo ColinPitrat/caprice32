@@ -64,20 +64,20 @@ public:
 
 	// CWindow overrides
 	//! Renders the Window Text, and clips to the Window Rect
-	virtual void Draw(void) const;
+	virtual void Draw(void) const override;
 
 	//! Set the WindowText of the label
 	//! \param sWindowText The text to assign to the window
-	virtual void SetWindowText(const std::string& sWindowText);
+	virtual void SetWindowText(const std::string& sWindowText) override;
 
 	//! Giving a control a new WindowRect will move and resize the control
 	//! \param WindowRect A CRect that defines the outer limits of the control
-	virtual void SetWindowRect(const CRect& WindowRect);
+	virtual void SetWindowRect(const CRect& WindowRect) override;
 
 	// CMessageClient overrides
 	//! CGroupBox will forward keyboard events to its parent
 	//! \param pMessage A pointer to the message that needs to be handled
-	virtual bool HandleMessage(CMessage* pMessage);
+	virtual bool HandleMessage(CMessage* pMessage) override;
 
 protected:
 	CFontEngine* m_pFontEngine;  //!< A pointer to the font engine to use to render the text

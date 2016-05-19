@@ -65,27 +65,27 @@ public:
 
 	// CWindow overrides
 	//! Draws the radiobutton
-	virtual void Draw(void) const;
+	virtual void Draw(void) const override;
 
 	//! This is called whenever the radiobutton is clicked on by the mouse
 	//! Only the topmost window that bounds the point will be called by the system
 	//! \param Point The point where the mouse clicked
 	//! \param Button A bitfield indicating which button the window was clicked with
 	//! \return True if it's in the bounds of the radiobutton
-	virtual bool OnMouseButtonDown(CPoint Point, unsigned int Button);
+	virtual bool OnMouseButtonDown(CPoint Point, unsigned int Button) override;
 
 	//! This is called whenever the a mouse button is released in the radiobutton
 	//! Only the topmost window that bounds the point will be called by the system
 	//! \param Point The point where the mouse clicked
 	//! \param Button A bitfield indicating which button the window was clicked with
 	//! \return True if it's in the bounds of the radiobutton
-	virtual bool OnMouseButtonUp(CPoint Point, unsigned int Button);
+	virtual bool OnMouseButtonUp(CPoint Point, unsigned int Button) override;
 
 
 	// CMessageClient overrides
 	//! CRadioButtons handle MOUSE_BUTTONDOWN, MOUSE_BUTTONUP, and it's own CTRL_SINGLELCLICK messages
 	//! \param pMessage A pointer to the message
-	virtual bool HandleMessage(CMessage* pMessage);
+	virtual bool HandleMessage(CMessage* pMessage) override;
 
 
 protected:

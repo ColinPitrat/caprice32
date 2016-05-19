@@ -47,7 +47,7 @@ public:
 
 	//! Gets a text description of the exception
 	//! \return A string describing what caused the exception
-	virtual const char* what() const throw() { return m_sWhat.c_str(); }
+	virtual const char* what() const throw() override { return m_sWhat.c_str(); }
 
 	//! Gets a text description of the exception
 	//! \return A std::string reference describing what caused the exception

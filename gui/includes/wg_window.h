@@ -213,7 +213,7 @@ public:
 	//! Attempt to handle the given message
 	//! CWindows handle any APP_PAINT messages that have them marked as the destination
 	//! \return true if the object handled the message (the message will not be given to any other handlers)
-	virtual bool HandleMessage(CMessage* pMessage);
+	virtual bool HandleMessage(CMessage* pMessage) override;
 
   virtual void AddFocusableWidget(CWindow *pWidget);
 

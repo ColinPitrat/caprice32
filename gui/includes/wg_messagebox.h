@@ -57,7 +57,7 @@ public:
 	// CMessageClient overrides
 	//! CScrollBars handle MOUSE_BUTTONDOWN and MOUSE_BUTTONUP messages
 	//! \param pMessage A pointer to the message
-	virtual bool HandleMessage(CMessage* pMessage);
+	virtual bool HandleMessage(CMessage* pMessage) override;
 
 
 protected:

@@ -43,7 +43,7 @@ namespace wGui
       CapriceMenu(const CRect& WindowRect, CWindow* pParent, SDL_Surface* screen, CFontEngine* pFontEngine);
       ~CapriceMenu(void);
 
-      bool HandleMessage(CMessage* pMessage);
+      bool HandleMessage(CMessage* pMessage) override;
 
     protected:
       std::list<CapriceGuiViewButton> m_buttons;

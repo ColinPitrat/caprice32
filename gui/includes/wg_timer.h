@@ -81,7 +81,7 @@ public:
 	// CMessageClient overrides
 	//! Attempt to handle the given message
 	//! \return true if the object handled the message (the message will not be given to any other handlers)
-	virtual bool HandleMessage(CMessage* pMessage);
+	virtual bool HandleMessage(CMessage* pMessage) override;
 
 
 protected:

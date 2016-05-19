@@ -101,28 +101,28 @@ public:
 
 	// CWindow overrides
 	//! Renders the text contents of a control, and the cursor
-	virtual void Draw(void) const;
+	virtual void Draw(void) const override;
 
 	//! Giving a control a new WindowRect will move and resize the control
 	//! \param WindowRect A CRect that defines the outer limits of the control
-	virtual void SetWindowRect(const CRect& WindowRect);
+	virtual void SetWindowRect(const CRect& WindowRect) override;
 
 	//! Set the WindowText of the control
 	//! \param sText The text to assign to the window
-	virtual void SetWindowText(const std::string& sText);
+	virtual void SetWindowText(const std::string& sText) override;
 
 	//! This is called whenever the editbox is clicked on by the mouse
 	//! Only the topmost window that bounds the point will be called by the system
 	//! \param Point The point where the mouse clicked
 	//! \param Button A bitfield indicating which button the window was clicked with
 	//! \return True if it's in the bounds of the editbox
-	virtual bool OnMouseButtonDown(CPoint Point, unsigned int Button);
+	virtual bool OnMouseButtonDown(CPoint Point, unsigned int Button) override;
 
 
 	// CMessageClient overrides
 	//! CTextBox will handle MOUSE_BUTTONDOWN and KEYBOARD_KEYDOWN messages
 	//! \param pMessage A pointer to the message that needs to be handled
-	virtual bool HandleMessage(CMessage* pMessage);
+	virtual bool HandleMessage(CMessage* pMessage) override;
 
 
 protected:

@@ -26,7 +26,7 @@ namespace wGui
         CapriceOptions(const CRect& WindowRect, CWindow* pParent, CFontEngine* pFontEngine);
         ~CapriceOptions(void);
 
-        bool HandleMessage(CMessage* pMessage);
+        bool HandleMessage(CMessage* pMessage) override;
 
         // activate the specified tab (make its controls visible)
         void EnableTab(std::string sTabName);

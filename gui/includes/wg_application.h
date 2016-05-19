@@ -205,7 +205,7 @@ public:
 	// CMessageClient overrides
 	//! CApplication will handle the APP_EXIT message, and will close the application on it's receipt
 	//! \param pMessage A pointer the the message to handle
-	virtual bool HandleMessage(CMessage* pMessage);
+	virtual bool HandleMessage(CMessage* pMessage) override;
 
 protected:
 

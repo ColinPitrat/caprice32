@@ -17,7 +17,7 @@ namespace wGui
         //! If this is set to 0 it will use the default font engine specified by the CApplication (which must be set before instantiating this object)
         // selectedRomButton is the button that was clicked to open this dialog (not the nicest solution, but it works...)
         CapriceRomSlots(const CRect& WindowRect, CWindow* pParent, CFontEngine* pFontEngine, std::string sTitle, int selectedRomSlot, CButton* pSelectedRomButton);
-        bool HandleMessage(CMessage* pMessage);
+        bool HandleMessage(CMessage* pMessage) override;
         // Returns a list with the available ROM files (filenames)
         std::vector<std::string> getAvailableRoms();
 
