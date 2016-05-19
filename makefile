@@ -82,7 +82,7 @@ $(GTEST_DIR)/src/gtest-all.o: $(GTEST_DIR)/src/gtest-all.cc gtest
 
 # TODO: Handle not having the real main in unit tests in a cleaner way
 unit_test: $(OBJECTS) $(TEST_OBJECTS) $(GTEST_DIR)/src/gtest-all.o
-	$(CXX) $(IPATHS) $(TEST_CFLAGS) -o $(TEST_TARGET) $(LIBS) $(GTEST_DIR)/src/gtest-all.o `echo $(OBJECTS) | sed 's/cap32.cpp//` $(TEST_OBJECTS)
+	$(CXX) $(IPATHS) $(TEST_CFLAGS) -o $(TEST_TARGET) $(LIBS) $(GTEST_DIR)/src/gtest-all.o `echo $(OBJECTS) | sed 's/cap32.cpp//'` $(TEST_OBJECTS)
 	./$(TEST_TARGET) --gtest_shuffle
 
 clean:
