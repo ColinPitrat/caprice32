@@ -53,7 +53,7 @@ $(OBJECTS): %.o: %.cpp
 	$(CXX) -c $(CFLAGS) -o $@ $<
 
 $(TEST_OBJECTS): %.o: %.cpp gtest
-	$(CXX) -c $(CFLAGS) $(TEST_CFLAGS) -o $@ $<
+	$(CXX) -c $(TEST_CFLAGS) -o $@ $<
 
 debug: debug_flag cap32 unit_test
 
