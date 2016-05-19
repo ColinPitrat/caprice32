@@ -49,8 +49,11 @@ $(DEPENDS) $(TEST_DEPENDS): %.d: %.cpp
 	@echo Computing dependencies for $<
 	@$(CXX) -MM $(CFLAGS) $< | { sed 's#^[^:]*\.o[ :]*#$*.o $*.d : #g' ; echo "%.h:;" ; echo "" ; } > $@
 
-$(OBJECTS) $(TEST_OBJECTS): %.o: %.cpp
+$(OBJECTS): %.o: %.cpp
 	$(CXX) -c $(CFLAGS) -o $@ $<
+
+$(TEST_OBJECTS): %.o: %.cpp gtest
+	$(CXX) -c $(CFLAGS) $(TEST_CFLAGS) -o $@ $<
 
 debug: debug_flag cap32 unit_test
 
