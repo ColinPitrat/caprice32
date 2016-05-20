@@ -72,6 +72,7 @@ endif
 
 cap32: $(OBJECTS) $(MAIN)
 	echo "`sdl-config --libs`"
+	ls -l /usr/lib/x86_64-linux-gnu
 	$(CXX) $(LDFLAGS) -o cap32 $(LIBS) $(OBJECTS) $(MAIN)
 
 ####################################
@@ -88,16 +89,16 @@ GTEST_DIR=googletest/googletest/
 $(TEST_DEPENDS): $(OBJDIR)/%.d: %.cpp
 	@echo Computing dependencies for $<
 	@mkdir -p `dirname $@`
-	@$(CXX) -MM $(TEST_CFLAGS) $< | { sed 's#^[^:]*\.o[ :]*#$(OBJDIR)/$*.o $(OBJDIR)/$*.d : #g' ; echo "%.h:;" ; echo "" ; } > $@
+	@$(CXX) -MM $(TEST_CFLAGS) $(IPATHS) $< | { sed 's#^[^:]*\.o[ :]*#$(OBJDIR)/$*.o $(OBJDIR)/$*.d : #g' ; echo "%.h:;" ; echo "" ; } > $@
 
 $(TEST_OBJECTS): $(OBJDIR)/%.o: %.cpp gtest
-	$(CXX) -c $(TEST_CFLAGS) -o $@ $<
+	$(CXX) -c $(TEST_CFLAGS) $(IPATHS) -o $@ $<
 
 $(GTEST_DIR)/src/gtest-all.o: $(GTEST_DIR)/src/gtest-all.cc gtest
 	$(CXX) $(TEST_CFLAGS) -c $(INCPATH) -o $@ $<
 
 unit_test: $(OBJECTS) $(TEST_OBJECTS) $(GTEST_DIR)/src/gtest-all.o
-	$(CXX) $(TEST_CFLAGS) -o $(TEST_TARGET) $(LIBS) $(GTEST_DIR)/src/gtest-all.o $(TEST_OBJECTS)
+	$(CXX) $(TEST_CFLAGS) -o $(TEST_TARGET) $(LIBS) $(GTEST_DIR)/src/gtest-all.o $(TEST_OBJECTS) $(OBJECTS)
 	./$(TEST_TARGET) --gtest_shuffle
 
 clean:
