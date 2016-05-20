@@ -71,6 +71,7 @@ endif
 	@touch .debug
 
 cap32: $(OBJECTS) $(MAIN)
+  echo `sdl-config --libs`
 	$(CXX) $(LDFLAGS) -o cap32 $(LIBS) $(OBJECTS) $(MAIN)
 
 ####################################
