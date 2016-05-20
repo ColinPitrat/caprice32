@@ -98,7 +98,7 @@ $(GTEST_DIR)/src/gtest-all.o: $(GTEST_DIR)/src/gtest-all.cc gtest
 	$(CXX) $(TEST_CFLAGS) -c $(INCPATH) -o $@ $<
 
 unit_test: $(OBJECTS) $(TEST_OBJECTS) $(GTEST_DIR)/src/gtest-all.o
-	$(CXX) $(TEST_CFLAGS) -o $(TEST_TARGET) $(LIBS) $(GTEST_DIR)/src/gtest-all.o $(TEST_OBJECTS) $(OBJECTS)
+	$(CXX) $(TEST_CFLAGS) -o $(TEST_TARGET) $(GTEST_DIR)/src/gtest-all.o $(TEST_OBJECTS) $(OBJECTS) $(LIBS) 
 	./$(TEST_TARGET) --gtest_shuffle
 
 clean:
