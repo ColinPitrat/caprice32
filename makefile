@@ -72,7 +72,6 @@ endif
 
 cap32: $(OBJECTS) $(MAIN)
 	echo "`sdl-config --libs`"
-	nm /usr/lib/x86_64-linux-gnu/libSDL.so | grep SDL_QuitSubSystem
 	strings /usr/lib/x86_64-linux-gnu/libSDL.so | grep SDL_QuitSubSystem
 	$(CXX) $(LDFLAGS) -o cap32 $(OBJECTS) $(MAIN) $(LIBS)
 
