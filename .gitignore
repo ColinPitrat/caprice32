@@ -1,5 +1,4 @@
-*.o
-*.d
+/obj
 /cap32
 /printer.dat
 /tags

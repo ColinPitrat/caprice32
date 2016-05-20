@@ -460,6 +460,7 @@ int tape_insert (const char *pchFileName);
 int tape_insert_voc (const char *pchFileName);
 void tape_eject (void);
 
+int cap32_main(int argc, char **argv);
 
 // fdc.c
 void fdc_write_data(unsigned char val);

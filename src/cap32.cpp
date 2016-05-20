@@ -4277,7 +4277,7 @@ void doCleanUp (void)
 
 
 
-int main (int argc, char **argv)
+int cap32_main (int argc, char **argv)
 {
    dword dwOffset;
    int iExitCondition;

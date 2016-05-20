@@ -10,7 +10,9 @@ addons:
     - g++-4.8
 before_script:
     - export CXX=g++-4.8
+# Build and test both in release and debug to ensure both works fine
 script: 
  - make
+ - make unit_test
  - make clean
  - make debug

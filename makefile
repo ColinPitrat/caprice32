@@ -3,15 +3,21 @@
 
 LAST_BUILD_IN_DEBUG=$(shell [ -e .debug ] && echo 1 || echo 0)
 
-SOURCES:=$(wildcard *.cpp gui/src/*.cpp)
-DEPENDS:=$(SOURCES:.cpp=.d)
-OBJECTS:=$(SOURCES:.cpp=.o)
+OBJDIR:=obj
+SRCDIR:=src
+TSTDIR:=test
 
-TEST_SOURCES:=$(shell find test -name \*.cpp)
-TEST_DEPENDS:=$(TEST_SOURCES:.cpp=.d)
-TEST_OBJECTS:=$(TEST_SOURCES:.cpp=.o)
+MAIN:=$(OBJDIR)/main.o
 
-IPATHS	= -I. -Igui/includes `freetype-config --cflags`
+SOURCES:=$(shell find $(SRCDIR) -name \*.cpp)
+DEPENDS:=$(foreach file,$(SOURCES:.cpp=.d),$(shell echo "$(OBJDIR)/$(file)"))
+OBJECTS:=$(DEPENDS:.d=.o)
+
+TEST_SOURCES:=$(shell find $(TSTDIR) -name \*.cpp)
+TEST_DEPENDS:=$(foreach file,$(TEST_SOURCES:.cpp=.d),$(shell echo "$(OBJDIR)/$(file)"))
+TEST_OBJECTS:=$(TEST_DEPENDS:.d=.o)
+
+IPATHS	= -Isrc/ -Isrc/gui/includes `freetype-config --cflags`
 LIBS = `sdl-config --libs` -lz `freetype-config --libs`
 
 .PHONY: all clean debug debug_flag
@@ -45,17 +51,18 @@ endif
 
 CFLAGS = $(CFLAGS_3) $(IPATHS)
 
-$(DEPENDS) $(TEST_DEPENDS): %.d: %.cpp
-	@echo Computing dependencies for $<
-	@$(CXX) -MM $(CFLAGS) $< | { sed 's#^[^:]*\.o[ :]*#$*.o $*.d : #g' ; echo "%.h:;" ; echo "" ; } > $@
+$(MAIN): main.cpp cap32.h
+	@$(CXX) -c $(CFLAGS) -o $(MAIN) main.cpp
 
-$(OBJECTS): %.o: %.cpp
+$(DEPENDS): $(OBJDIR)/%.d: %.cpp
+	@echo Computing dependencies for $<
+	@mkdir -p `dirname $@`
+	@$(CXX) -MM $(CFLAGS) $< | { sed 's#^[^:]*\.o[ :]*#$(OBJDIR)/$*.o $(OBJDIR)/$*.d : #g' ; echo "%.h:;" ; echo "" ; } > $@
+
+$(OBJECTS): $(OBJDIR)/%.o: %.cpp
 	$(CXX) -c $(CFLAGS) -o $@ $<
 
-$(TEST_OBJECTS): %.o: %.cpp gtest
-	$(CXX) -c $(TEST_CFLAGS) -o $@ $<
-
-debug: debug_flag cap32 unit_test
+debug: debug_flag cap32 unit_test debug_flag
 
 debug_flag:
 ifdef FORCED_DEBUG
@@ -63,8 +70,8 @@ ifdef FORCED_DEBUG
 endif
 	@touch .debug
 
-cap32: $(OBJECTS)
-	$(CXX) $(LDFLAGS) -o cap32 $(OBJECTS) $(LIBS)
+cap32: $(OBJECTS) $(MAIN)
+	$(CXX) $(LDFLAGS) -o cap32 $(LIBS) $(OBJECTS) $(MAIN)
 
 ####################################
 ### Tests
@@ -73,19 +80,27 @@ cap32: $(OBJECTS)
 gtest:
 	[ -d googletest ] || git clone https://github.com/google/googletest.git
 
-TEST_TARGET=test/unit/unit_tester
-GTEST_DIR=googletest/googletest/
 TEST_CFLAGS=-I$(GTEST_DIR)/include -I$(GTEST_DIR)
+TEST_TARGET=$(TSTDIR)/test_runner
+GTEST_DIR=googletest/googletest/
+
+$(TEST_DEPENDS): $(OBJDIR)/%.d: %.cpp
+	@echo Computing dependencies for $<
+	@mkdir -p `dirname $@`
+	@$(CXX) -MM $(TEST_CFLAGS) $< | { sed 's#^[^:]*\.o[ :]*#$(OBJDIR)/$*.o $(OBJDIR)/$*.d : #g' ; echo "%.h:;" ; echo "" ; } > $@
+
+$(TEST_OBJECTS): $(OBJDIR)/%.o: %.cpp gtest
+	$(CXX) -c $(TEST_CFLAGS) -o $@ $<
 
 $(GTEST_DIR)/src/gtest-all.o: $(GTEST_DIR)/src/gtest-all.cc gtest
 	$(CXX) $(TEST_CFLAGS) -c $(INCPATH) -o $@ $<
 
-# TODO: Find a way to add objects without having main
 unit_test: $(OBJECTS) $(TEST_OBJECTS) $(GTEST_DIR)/src/gtest-all.o
-	#$(CXX) $(IPATHS) $(TEST_CFLAGS) -o $(TEST_TARGET) $(LIBS) $(GTEST_DIR)/src/gtest-all.o $(TEST_OBJECTS)
-	#./$(TEST_TARGET) --gtest_shuffle
+	$(CXX) $(TEST_CFLAGS) -o $(TEST_TARGET) $(LIBS) $(GTEST_DIR)/src/gtest-all.o $(TEST_OBJECTS)
+	./$(TEST_TARGET) --gtest_shuffle
 
 clean:
-	rm -f $(DEPENDS) $(OBJECTS) $(TEST_TARGET) $(GTEST_DIR)/src/gtest-all.o cap32 .debug
+	rm -rf $(OBJDIR)
+	rm -f $(TEST_TARGET) $(GTEST_DIR)/src/gtest-all.o cap32 .debug
 
--include $(DEPENDS)
+-include $(DEPENDS) $(TEST_DEPENDS)
