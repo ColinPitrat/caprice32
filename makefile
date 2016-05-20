@@ -71,8 +71,6 @@ endif
 	@touch .debug
 
 cap32: $(OBJECTS) $(MAIN)
-	echo "`sdl-config --libs`"
-	strings /usr/lib/x86_64-linux-gnu/libSDL.so | grep SDL_QuitSubSystem
 	$(CXX) $(LDFLAGS) -o cap32 $(OBJECTS) $(MAIN) $(LIBS)
 
 ####################################
