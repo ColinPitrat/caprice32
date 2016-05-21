@@ -4,3 +4,4 @@
 /tags
 /.debug
 /googletest
+test/test_runner
