@@ -3912,7 +3912,7 @@ int input_init (void)
 
 
 
-int getConfigValueInt (const char* pchFileName, const char* pchSection, const char* pchKey, int iDefaultValue)
+int getConfigValueInt (const char* pchFileName, const char* pchSection, const char* pchKey, const int iDefaultValue)
 {
    FILE* pfoConfigFile;
    char chLine[MAX_LINE_LEN + 1];
@@ -3942,7 +3942,7 @@ int getConfigValueInt (const char* pchFileName, const char* pchSection, const ch
 
 
 
-void getConfigValueString (const char* pchFileName, const char* pchSection, const char* pchKey, char* pchValue, int iSize, char* pchDefaultValue)
+void getConfigValueString (const char* pchFileName, const char* pchSection, const char* pchKey, char* pchValue, int iSize, const char* pchDefaultValue)
 {
    FILE* pfoConfigFile;
    char chLine[MAX_LINE_LEN + 1];

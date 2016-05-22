@@ -460,8 +460,8 @@ int tape_insert (const char *pchFileName);
 int tape_insert_voc (const char *pchFileName);
 void tape_eject (void);
 
-int getConfigValueInt (const char* pchFileName, const char* pchSection, const char* pchKey, int iDefaultValue);
-void getConfigValueString (const char* pchFileName, const char* pchSection, const char* pchKey, char* pchValue, int iSize, char* pchDefaultValue);
+int getConfigValueInt (const char* pchFileName, const char* pchSection, const char* pchKey, const int iDefaultValue);
+void getConfigValueString (const char* pchFileName, const char* pchSection, const char* pchKey, char* pchValue, int iSize, const char* pchDefaultValue);
 
 int cap32_main(int argc, char **argv);
 

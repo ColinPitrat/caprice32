@@ -20,7 +20,7 @@ TEST_OBJECTS:=$(TEST_DEPENDS:.d=.o)
 IPATHS	= -Isrc/ -Isrc/gui/includes `freetype-config --cflags`
 LIBS = `sdl-config --libs` -lz `freetype-config --libs`
 
-.PHONY: all clean debug debug_flag
+.PHONY: all clean debug debug_flag gtest
 
 ifndef CXX
 CXX	= g++
@@ -51,7 +51,7 @@ endif
 
 CFLAGS = $(CFLAGS_3) $(IPATHS)
 
-$(MAIN): main.cpp cap32.h
+$(MAIN): main.cpp src/cap32.h
 	@$(CXX) -c $(CFLAGS) -o $(MAIN) main.cpp
 
 $(DEPENDS): $(OBJDIR)/%.d: %.cpp
@@ -78,9 +78,9 @@ cap32: $(OBJECTS) $(MAIN)
 ####################################
 
 gtest:
-	[ -d googletest ] || git clone https://github.com/google/googletest.git
+	@[ -d googletest ] || git clone https://github.com/google/googletest.git
 
-TEST_CFLAGS=-I$(GTEST_DIR)/include -I$(GTEST_DIR)
+TEST_CFLAGS=-std=c++11 -I$(GTEST_DIR)/include -I$(GTEST_DIR)
 TEST_TARGET=$(TSTDIR)/test_runner
 GTEST_DIR=googletest/googletest/
 
