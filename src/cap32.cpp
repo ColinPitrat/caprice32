@@ -2010,7 +2010,7 @@ int zip_dir (t_zip_info *zi)
    dword dwOffset;
 
    iFileCount = 0;
-   if ((pfileObject = fopen(zi->pchZipFile, "rb")) == nullptr) {
+   if ((pfileObject = fopen(zi->filename.c_str(), "rb")) == nullptr) {
       return ERR_FILE_NOT_FOUND;
    }
 
@@ -2058,7 +2058,7 @@ int zip_dir (t_zip_info *zi)
       dwOffset = *(dword *)(pbPtr + 42);
       dwNextEntry = wFilenameLength + *(word *)(pbPtr + 30) + *(word *)(pbPtr + 32);
       pbPtr += 46;
-      char *pchThisExtension = zi->pchExtension;
+      const char *pchThisExtension = zi->extension.c_str();
       while (*pchThisExtension != '\0') { // loop for all extensions to be checked
          if (strncasecmp((char *)pbPtr + (wFilenameLength - 4), pchThisExtension, 4) == 0) {
             strncpy(pchStrPtr, (char *)pbPtr, wFilenameLength); // copy filename from zip directory
@@ -2085,7 +2085,7 @@ int zip_dir (t_zip_info *zi)
 
 
 
-int zip_extract (const char *pchZipFile, const char *pchFileName, dword dwOffset)
+int zip_extract (std::string zipFile, const char *pchFileName, dword dwOffset)
 {
    int iStatus, iCount;
    dword dwSize;
@@ -2097,7 +2097,7 @@ int zip_extract (const char *pchZipFile, const char *pchFileName, dword dwOffset
    if (pfileOut == nullptr) {
       return ERR_FILE_UNZIP_FAILED; // couldn't create output file
    }
-   pfileIn = fopen(pchZipFile, "rb"); // open ZIP file for reading
+   pfileIn = fopen(zipFile.c_str(), "rb"); // open ZIP file for reading
    fseek(pfileIn, dwOffset, SEEK_SET); // move file pointer to beginning of data block
    if(fread(pbGPBuffer, 30, 1, pfileIn) != 1) { // read local header
       fclose(pfileIn);
@@ -2693,7 +2693,7 @@ int dsk_load (const char *pchFileName, t_drive *drive, char chID)
 /*    {
          char *pchTmpBuffer = new char[MAX_LINE_LEN];
          LoadString(hAppInstance, MSG_DSK_LOAD, chMsgBuffer, sizeof(chMsgBuffer));
-         snprintf(pchTmpBuffer, _MAX_PATH-1, chMsgBuffer, chID, chID == 'A' ? CPC.drvA_file : CPC.drvB_file);
+         snprintf(pchTmpBuffer, _MAX_PATH-1, chMsgBuffer, chID, chID == 'A' ? CPC.drvA_file.c_str() : CPC.drvB_file.c_str());
          add_message(pchTmpBuffer);
          delete [] pchTmpBuffer;
       } */
@@ -2772,7 +2772,7 @@ int dsk_save (const char *pchFileName, t_drive *drive, char chID)
 
 /* char *pchTmpBuffer = new char[MAX_LINE_LEN];
    LoadString(hAppInstance, MSG_DSK_SAVE, chMsgBuffer, sizeof(chMsgBuffer));
-   snprintf(pchTmpBuffer, _MAX_PATH-1, chMsgBuffer, chID, chID == 'A' ? CPC.drvA_file : CPC.drvB_file);
+   snprintf(pchTmpBuffer, _MAX_PATH-1, chMsgBuffer, chID, chID == 'A' ? CPC.drvA_file.c_str() : CPC.drvB_file.c_str());
    add_message(pchTmpBuffer);
    delete [] pchTmpBuffer; */
    return 0;
@@ -2997,7 +2997,7 @@ int tape_insert (const char *pchFileName)
 
 /* char *pchTmpBuffer = new char[MAX_LINE_LEN];
    LoadString(hAppInstance, MSG_TAP_INSERT, chMsgBuffer, sizeof(chMsgBuffer));
-   snprintf(pchTmpBuffer, _MAX_PATH-1, chMsgBuffer, CPC.tape_file);
+   snprintf(pchTmpBuffer, _MAX_PATH-1, chMsgBuffer, CPC.tape_file.c_str());
    add_message(pchTmpBuffer);
    delete [] pchTmpBuffer; */
    return 0;
@@ -3233,7 +3233,7 @@ int tape_insert_voc (const char *pchFileName)
 
 /* char *pchTmpBuffer = new char[MAX_LINE_LEN];
    LoadString(hAppInstance, MSG_TAP_INSERT, chMsgBuffer, sizeof(chMsgBuffer));
-   snprintf(pchTmpBuffer, _MAX_PATH-1, chMsgBuffer, CPC.tape_file);
+   snprintf(pchTmpBuffer, _MAX_PATH-1, chMsgBuffer, CPC.tape_file.c_str());
    add_message(pchTmpBuffer);
    delete [] pchTmpBuffer; */
    return 0;
@@ -4047,20 +4047,16 @@ void loadConfiguration (t_CPC &CPC, const std::string& configFilename)
    CPC.snap_path = conf.getStringValue("file", "snap_path", appPath + "/snap");
    CPC.snap_file = conf.getStringValue("file", "snap_file", "");
    CPC.snap_zip = conf.getIntValue("file", "snap_zip", 0) & 1;
-   strncpy(chPath, chAppPath, sizeof(chPath)-7);
-   strcat(chPath, "/disk");
-   getConfigValueString(chFileName, "file", "drvA_path", CPC.drvA_path, sizeof(CPC.drvA_path)-1, chPath);
-   getConfigValueString(chFileName, "file", "drvA_file", CPC.drvA_file, sizeof(CPC.drvA_file)-1, chNoFile);
+   CPC.drvA_path = conf.getStringValue("file", "drvA_path", appPath + "/disk");
+   CPC.drvA_file = conf.getStringValue("file", "drvA_file", "");
    CPC.drvA_zip = conf.getIntValue("file", "drvA_zip", 0) & 1;
    CPC.drvA_format = conf.getIntValue("file", "drvA_format", DEFAULT_DISK_FORMAT);
-   getConfigValueString(chFileName, "file", "drvB_path", CPC.drvB_path, sizeof(CPC.drvB_path)-1, chPath);
-   getConfigValueString(chFileName, "file", "drvB_file", CPC.drvB_file, sizeof(CPC.drvB_file)-1, chNoFile);
+   CPC.drvB_path = conf.getStringValue("file", "drvB_path", appPath + "/disk");
+   CPC.drvB_file = conf.getStringValue("file", "drvB_file", "");
    CPC.drvB_zip = conf.getIntValue("file", "drvB_zip", 0) & 1;
    CPC.drvB_format = conf.getIntValue("file", "drvB_format", DEFAULT_DISK_FORMAT);
-   strncpy(chPath, chAppPath, sizeof(chPath)-7);
-   strcat(chPath, "/tape");
-   getConfigValueString(chFileName, "file", "tape_path", CPC.tape_path, sizeof(CPC.tape_path)-1, chPath);
-   getConfigValueString(chFileName, "file", "tape_file", CPC.tape_file, sizeof(CPC.tape_file)-1, chNoFile);
+   CPC.tape_path = conf.getStringValue("file", "tape_path", appPath + "/tape");
+   CPC.tape_file = conf.getStringValue("file", "tape_file", "");
    CPC.tape_zip = conf.getIntValue("file", "tape_zip", 0) & 1;
 
    int iFmt = FIRST_CUSTOM_DISK_FORMAT;
@@ -4301,8 +4297,8 @@ int cap32_main (int argc, char **argv)
             strncpy(extension, &path[pos], 4); // grab the extension
             extension[4] = '\0'; // zero terminate string
             if (strcasecmp(extension, ".zip") == 0) { // are we dealing with a zip archive?
-               zip_info.pchZipFile = path;
-               zip_info.pchExtension = strdup(".dsk.sna.cdt.voc");
+               zip_info.filename = path;
+               zip_info.extension = ".dsk.sna.cdt.voc";
                if (zip_dir(&zip_info)) {
                   continue; // error or nothing relevant found
                } else {
@@ -4321,8 +4317,8 @@ int cap32_main (int argc, char **argv)
                   zip_info.dwOffset = *(dword *)(pchPtr + (strlen(pchPtr)+1)); // get the offset into the zip archive
                   if (!zip_extract(path, chFileName, zip_info.dwOffset)) {
                      if (!dsk_load(chFileName, &driveA, 'A')) {
-                        strcpy(CPC.drvA_path, path); // if the image loads, copy the infos to the config structure
-                        strcpy(CPC.drvA_file, file_name);
+                        CPC.drvA_path = path; // if the image loads, copy the infos to the config structure
+                        CPC.drvA_file = file_name;
                         CPC.drvA_zip = 1;
                         have_DSK = true;
                      }
@@ -4331,8 +4327,8 @@ int cap32_main (int argc, char **argv)
                } else {
                   strcat(path, file_name);
                   if(!dsk_load(path, &driveA, 'A')) {
-                     strcpy(CPC.drvA_path, path);
-                     strcpy(CPC.drvA_file, file_name);
+                     CPC.drvA_path = path;
+                     CPC.drvA_file = file_name;
                      CPC.drvA_zip = 0;
                      have_DSK = true;
                   }
@@ -4369,8 +4365,8 @@ int cap32_main (int argc, char **argv)
                   zip_info.dwOffset = *(dword *)(pchPtr + (strlen(pchPtr)+1));
                   if (!zip_extract(path, chFileName, zip_info.dwOffset)) {
                      if (!tape_insert(chFileName)) {
-                        strcpy(CPC.tape_path, path);
-                        strcpy(CPC.tape_file, file_name);
+                        CPC.tape_path = path;
+                        CPC.tape_file = file_name;
                         CPC.tape_zip = 1;
                         have_TAP = true;
                      }
@@ -4379,8 +4375,8 @@ int cap32_main (int argc, char **argv)
                } else {
                   strcat(path, file_name);
                   if(!tape_insert(path)) {
-                     strcpy(CPC.tape_path, path);
-                     strcpy(CPC.tape_file, file_name);
+                     CPC.tape_path = path;
+                     CPC.tape_file = file_name;
                      CPC.tape_zip = 0;
                      have_TAP = true;
                   }
@@ -4393,8 +4389,8 @@ int cap32_main (int argc, char **argv)
                   zip_info.dwOffset = *(dword *)(pchPtr + (strlen(pchPtr)+1));
                   if (!zip_extract(path, chFileName, zip_info.dwOffset)) {
                      if (!tape_insert_voc(chFileName)) {
-                        strcpy(CPC.tape_path, path);
-                        strcpy(CPC.tape_file, file_name);
+                        CPC.tape_path = path;
+                        CPC.tape_file = file_name;
                         CPC.tape_zip = 1;
                         have_TAP = true;
                      }
@@ -4403,8 +4399,8 @@ int cap32_main (int argc, char **argv)
                } else {
                   strcat(path, file_name);
                   if(!tape_insert_voc(path)) {
-                     strcpy(CPC.tape_path, path);
-                     strcpy(CPC.tape_file, file_name);
+                     CPC.tape_path = path;
+                     CPC.tape_file = file_name;
                      CPC.tape_zip = 0;
                      have_TAP = true;
                   }
@@ -4414,18 +4410,18 @@ int cap32_main (int argc, char **argv)
       }
    }
 
-   if ((!have_DSK) && (CPC.drvA_file[0])) { // insert disk in drive A?
+   if ((!have_DSK) && (!CPC.drvA_file.empty())) { // insert disk in drive A?
       char chFileName[_MAX_PATH + 1];
       char *pchPtr;
 
       if (CPC.drvA_zip) { // compressed image?
-         zip_info.pchZipFile = CPC.drvA_path; // pchPath already has path and zip file combined
-         zip_info.pchExtension = strdup(".dsk");
+         zip_info.filename = CPC.drvA_path; // pchPath already has path and zip file combined
+         zip_info.extension = ".dsk";
          if (!zip_dir(&zip_info)) { // parse the zip for relevant files
             dword n;
             pchPtr = zip_info.pchFileNames;
             for (n = zip_info.iFiles; n; n--) { // loop through all entries
-               if (!strcasecmp(CPC.drvA_file, pchPtr)) { // do we have a match?
+               if (!strcasecmp(CPC.drvA_file.c_str(), pchPtr)) { // do we have a match?
                   break;
                }
                pchPtr += strlen(pchPtr) + 5; // skip offset
@@ -4441,24 +4437,24 @@ int cap32_main (int argc, char **argv)
             CPC.drvA_zip = 0;
          }
       } else {
-         strncpy(chFileName, CPC.drvA_path, sizeof(chFileName)-1);
-         strncat(chFileName, CPC.drvA_file, sizeof(chFileName)-1 - strlen(chFileName));
+         strncpy(chFileName, CPC.drvA_path.c_str(), sizeof(chFileName)-1);
+         strncat(chFileName, CPC.drvA_file.c_str(), sizeof(chFileName)-1 - strlen(chFileName));
          dsk_load(chFileName, &driveA, 'A');
       }
    }
    memset(&driveB, 0, sizeof(t_drive)); // clear disk drive B data structure
-   if (CPC.drvB_file[0]) { // insert disk in drive B?
+   if (!CPC.drvB_file.empty()) { // insert disk in drive B?
       char chFileName[_MAX_PATH + 1];
       char *pchPtr;
 
       if (CPC.drvB_zip) { // compressed image?
-         zip_info.pchZipFile = CPC.drvB_path; // pchPath already has path and zip file combined
-         zip_info.pchExtension = strdup(".dsk");
+         zip_info.filename = CPC.drvB_path; // pchPath already has path and zip file combined
+         zip_info.extension = ".dsk";
          if (!zip_dir(&zip_info)) { // parse the zip for relevant files
             dword n;
             pchPtr = zip_info.pchFileNames;
             for (n = zip_info.iFiles; n; n--) { // loop through all entries
-               if (!strcasecmp(CPC.drvB_file, pchPtr)) { // do we have a match?
+               if (!strcasecmp(CPC.drvB_file.c_str(), pchPtr)) { // do we have a match?
                   break;
                }
                pchPtr += strlen(pchPtr) + 5; // skip offset
@@ -4476,25 +4472,25 @@ int cap32_main (int argc, char **argv)
          }
       }
       else {
-         strncpy(chFileName, CPC.drvB_path, sizeof(chFileName)-1);
-         strncat(chFileName, CPC.drvB_file, sizeof(chFileName)-1 - strlen(chFileName));
+         strncpy(chFileName, CPC.drvB_path.c_str(), sizeof(chFileName)-1);
+         strncat(chFileName, CPC.drvB_file.c_str(), sizeof(chFileName)-1 - strlen(chFileName));
          dsk_load(chFileName, &driveB, 'B');
       }
    }
-   if ((!have_TAP) && (CPC.tape_file[0])) { // insert a tape?
+   if ((!have_TAP) && (!CPC.tape_file.empty())) { // insert a tape?
       int iErrorCode = 0;
       char chFileName[_MAX_PATH + 1];
       char *pchPtr;
 
       if (CPC.tape_zip) { // compressed image?
-         zip_info.pchZipFile = CPC.tape_path; // pchPath already has path and zip file combined
-         zip_info.pchExtension = strdup(".cdt.voc");
+         zip_info.filename = CPC.tape_path; // pchPath already has path and zip file combined
+         zip_info.extension = ".cdt.voc";
          iErrorCode = zip_dir(&zip_info);
          if (!iErrorCode) { // parse the zip for relevant files
             dword n;
             pchPtr = zip_info.pchFileNames;
             for (n = zip_info.iFiles; n; n--) { // loop through all entries
-               if (!strcasecmp(CPC.tape_file, pchPtr)) { // do we have a match?
+               if (!strcasecmp(CPC.tape_file.c_str(), pchPtr)) { // do we have a match?
                   break;
                }
                pchPtr += strlen(pchPtr) + 5; // skip offset
@@ -4513,11 +4509,11 @@ int cap32_main (int argc, char **argv)
          }
       }
       else {
-         strncpy(chFileName, CPC.tape_path, sizeof(chFileName)-1);
-         strncat(chFileName, CPC.tape_file, sizeof(chFileName)-1 - strlen(chFileName));
+         strncpy(chFileName, CPC.tape_path.c_str(), sizeof(chFileName)-1);
+         strncat(chFileName, CPC.tape_file.c_str(), sizeof(chFileName)-1 - strlen(chFileName));
       }
       if (!iErrorCode) {
-         int iOffset = strlen(CPC.tape_file) - 3;
+         int iOffset = CPC.tape_file.length() - 3;
          char *pchExt = &CPC.tape_file[iOffset > 0 ? iOffset : 0]; // pointer to the extension
          if (strncasecmp(pchExt, "cdt", 3) == 0) { // is it a cdt file?
             iErrorCode = tape_insert(chFileName);

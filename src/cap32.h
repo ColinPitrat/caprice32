@@ -256,16 +256,16 @@ typedef struct {
    std::string snap_path;
    std::string snap_file;
    bool snap_zip;
-   char drvA_path[_MAX_PATH + 1];
-   char drvA_file[_MAX_PATH + 1];
+   std::string drvA_path;
+   std::string drvA_file;
    bool drvA_zip;
    unsigned int drvA_format;
-   char drvB_path[_MAX_PATH + 1];
-   char drvB_file[_MAX_PATH + 1];
+   std::string drvB_path;
+   std::string drvB_file;
    bool drvB_zip;
    unsigned int drvB_format;
-   char tape_path[_MAX_PATH + 1];
-   char tape_file[_MAX_PATH + 1];
+   std::string tape_path;
+   std::string tape_file;
    bool tape_zip;
    std::string printer_file;
    std::string sdump_file;
@@ -417,8 +417,8 @@ typedef struct {
 } t_drive;
 
 typedef struct {
-   char *pchZipFile;
-   char *pchExtension;
+   std::string filename;
+   std::string extension;
    char *pchFileNames;
    char *pchSelection;
    int iFiles;
