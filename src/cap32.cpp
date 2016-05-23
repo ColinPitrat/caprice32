@@ -3913,36 +3913,6 @@ int input_init (void)
 
 
 
-int getConfigValueInt (const char* pchFileName, const char* pchSection, const char* pchKey, const int iDefaultValue)
-{
-   FILE* pfoConfigFile;
-   char chLine[MAX_LINE_LEN + 1];
-   char* pchToken;
-
-   if ((pfoConfigFile = fopen(pchFileName, "r")) != nullptr) { // open the config file
-      while(fgets(chLine, MAX_LINE_LEN, pfoConfigFile) != nullptr) { // grab one line
-         pchToken = strtok(chLine, "[]"); // check if there's a section key
-         if((pchToken != nullptr) && (pchToken[0] != '#') && (strcmp(pchToken, pchSection) == 0)) {
-            while(fgets(chLine, MAX_LINE_LEN, pfoConfigFile) != nullptr) { // get the next line
-               pchToken = strtok(chLine, "\t =\n\r"); // check if it has a key=value pair
-               if((pchToken != nullptr) && (pchToken[0] != '#') && (strcmp(pchToken, pchKey) == 0)) {
-                  char* pchPtr = strtok(nullptr, "\t =#\n\r"); // get the value if it matches our key
-                  if (pchPtr != nullptr) {
-                     return (strtol(pchPtr, nullptr, 0)); // return as integer
-                  } else {
-                     return iDefaultValue; // no value found
-                  }
-               }
-            }
-         }
-      }
-      fclose(pfoConfigFile);
-   }
-   return iDefaultValue; // no value found
-}
-
-
-
 void getConfigValueString (const char* pchFileName, const char* pchSection, const char* pchKey, char* pchValue, int iSize, const char* pchDefaultValue)
 {
    FILE* pfoConfigFile;
@@ -4029,9 +3999,8 @@ void loadConfiguration (t_CPC &CPC, const std::string& configFilename)
    }
    CPC.joystick_emulation = conf.getIntValue("system", "joystick_emulation", 0) & 1;
    CPC.joysticks = conf.getIntValue("system", "joysticks", 1) & 1;
-   strncpy(chPath, chAppPath, sizeof(chPath)-10);
-   strcat(chPath, "/resources");
-   getConfigValueString(chFileName, "system", "resources_path", CPC.resources_path, sizeof(CPC.resources_path)-1, chPath);
+   std::string defaultResourcePath = std::string(chAppPath) + "/resources";
+   CPC.resources_path = conf.getStringValue("system", "resources_path", defaultResourcePath);
 
    CPC.scr_fs_width = conf.getIntValue("video", "scr_width", 800);
    CPC.scr_fs_height = conf.getIntValue("video", "scr_height", 600);

@@ -24,12 +24,12 @@ CapriceOptions::CapriceOptions(const CRect& WindowRect, CWindow* pParent, CFontE
 
     // Navigation bar
     m_pNavigationBar = new CNavigationBar(this, CPoint(10, 5), 6, 50, 50);
-    m_pNavigationBar->AddItem(SNavBarItem("General", std::string(CPC.resources_path) + "/general.bmp"));
-    m_pNavigationBar->AddItem(SNavBarItem("ROMs",    std::string(CPC.resources_path) + "/rom.bmp"));
-    m_pNavigationBar->AddItem(SNavBarItem("Video",   std::string(CPC.resources_path) + "/video.bmp"));
-    m_pNavigationBar->AddItem(SNavBarItem("Audio",   std::string(CPC.resources_path) + "/audio.bmp"));
-    m_pNavigationBar->AddItem(SNavBarItem("Disk",    std::string(CPC.resources_path) + "/disk.bmp"));
-    m_pNavigationBar->AddItem(SNavBarItem("Input",   std::string(CPC.resources_path) + "/input.bmp"));
+    m_pNavigationBar->AddItem(SNavBarItem("General", CPC.resources_path + "/general.bmp"));
+    m_pNavigationBar->AddItem(SNavBarItem("ROMs",    CPC.resources_path + "/rom.bmp"));
+    m_pNavigationBar->AddItem(SNavBarItem("Video",   CPC.resources_path + "/video.bmp"));
+    m_pNavigationBar->AddItem(SNavBarItem("Audio",   CPC.resources_path + "/audio.bmp"));
+    m_pNavigationBar->AddItem(SNavBarItem("Disk",    CPC.resources_path + "/disk.bmp"));
+    m_pNavigationBar->AddItem(SNavBarItem("Input",   CPC.resources_path + "/input.bmp"));
     m_pNavigationBar->SelectItem(0);
     m_pNavigationBar->SetIsFocusable(true);
 

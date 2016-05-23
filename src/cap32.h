@@ -208,7 +208,7 @@ typedef struct {
    unsigned int joystick_emulation;
    unsigned int joysticks;
    int cycle_count;
-   char resources_path[_MAX_PATH + 1];
+   std::string resources_path;
 
    unsigned int scr_fs_width;
    unsigned int scr_fs_height;
@@ -461,7 +461,6 @@ int tape_insert (const char *pchFileName);
 int tape_insert_voc (const char *pchFileName);
 void tape_eject (void);
 
-int getConfigValueInt (const char* pchFileName, const char* pchSection, const char* pchKey, const int iDefaultValue);
 void getConfigValueString (const char* pchFileName, const char* pchSection, const char* pchKey, char* pchValue, int iSize, const char* pchDefaultValue);
 
 // Return the path to the best (i.e: most specific) configuration file.

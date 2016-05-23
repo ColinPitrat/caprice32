@@ -71,10 +71,6 @@ TEST_F(ConfigurationTest, oldConfigLogic)
 
   std::string defaultPathValue = "./default";
 
-  ASSERT_EQ(42, getConfigValueInt(tmpFilename_.c_str(), "system", "model", 0));
-  ASSERT_EQ(8, getConfigValueInt(tmpFilename_.c_str(), "video", "model", 0));
-  ASSERT_EQ(10, getConfigValueInt(tmpFilename_.c_str(), "sound", "model", 10));
-
   char chPath[256];
   getConfigValueString(tmpFilename_.c_str(), "system", "resources_path", chPath, sizeof(chPath)-1, defaultPathValue.c_str());
   ASSERT_STREQ("./resources", chPath);

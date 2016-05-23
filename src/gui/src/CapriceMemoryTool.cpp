@@ -15,7 +15,7 @@ CapriceMemoryTool::CapriceMemoryTool(const CRect& WindowRect, CWindow* pParent, 
 	CFrame(WindowRect, pParent, pFontEngine, "Memory Tool", false)
 {
     SetModal(true);
-    m_pMonoFontEngine = CApplication::Instance()->GetFontEngine(std::string(CPC.resources_path) + "/vera_mono.ttf", 8);
+    m_pMonoFontEngine = CApplication::Instance()->GetFontEngine(CPC.resources_path + "/vera_mono.ttf", 8);
 
     // Make this window listen to incoming CTRL_VALUECHANGING messages for dropdown list update
     CMessageServer::Instance().RegisterMessageClient(this, CMessage::CTRL_VALUECHANGE);
