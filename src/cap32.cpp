@@ -2355,7 +2355,7 @@ int snapshot_load (const char *pchFileName)
 
 /* char *pchTmpBuffer = new char[MAX_LINE_LEN];
    LoadString(hAppInstance, MSG_SNA_LOAD, chMsgBuffer, sizeof(chMsgBuffer));
-   snprintf(pchTmpBuffer, _MAX_PATH-1, chMsgBuffer, CPC.snap_file);
+   snprintf(pchTmpBuffer, _MAX_PATH-1, chMsgBuffer, CPC.snap_file.c_str());
    add_message(pchTmpBuffer);
    delete [] pchTmpBuffer; */
    return 0;
@@ -2531,7 +2531,7 @@ int snapshot_save (const char *pchFileName)
 
 /* char *pchTmpBuffer = new char[MAX_LINE_LEN];
    LoadString(hAppInstance, MSG_SNA_SAVE, chMsgBuffer, sizeof(chMsgBuffer));
-   snprintf(pchTmpBuffer, _MAX_PATH-1, chMsgBuffer, CPC.snap_file);
+   snprintf(pchTmpBuffer, _MAX_PATH-1, chMsgBuffer, CPC.snap_file.c_str());
    add_message(pchTmpBuffer);
    delete [] pchTmpBuffer; */
    return 0;
@@ -3479,7 +3479,7 @@ void emulator_shutdown (void)
 int printer_start (void)
 {
    if (!pfoPrinter) {
-      if(!(pfoPrinter = fopen(CPC.printer_file, "wb"))) {
+      if(!(pfoPrinter = fopen(CPC.printer_file.c_str(), "wb"))) {
          return 0; // failed to open/create file
       }
    }
@@ -3968,6 +3968,7 @@ void loadConfiguration (t_CPC &CPC, const std::string& configFilename)
    config::Config conf;
    conf.parseFile(configFilename);
 
+   std::string appPath = chAppPath;
    const char *chFileName = configFilename.c_str();
    char chPath[_MAX_PATH + 1];
    char chNoFile[1];
@@ -3999,8 +4000,7 @@ void loadConfiguration (t_CPC &CPC, const std::string& configFilename)
    }
    CPC.joystick_emulation = conf.getIntValue("system", "joystick_emulation", 0) & 1;
    CPC.joysticks = conf.getIntValue("system", "joysticks", 1) & 1;
-   std::string defaultResourcePath = std::string(chAppPath) + "/resources";
-   CPC.resources_path = conf.getStringValue("system", "resources_path", defaultResourcePath);
+   CPC.resources_path = conf.getStringValue("system", "resources_path", appPath + "/resources");
 
    CPC.scr_fs_width = conf.getIntValue("video", "scr_width", 800);
    CPC.scr_fs_height = conf.getIntValue("video", "scr_height", 600);
@@ -4044,36 +4044,22 @@ void loadConfiguration (t_CPC &CPC, const std::string& configFilename)
    }
 
    CPC.max_tracksize = conf.getIntValue("file", "max_track_size", 6144-154);
-   strncpy(chPath, chAppPath, sizeof(chPath)-7);
-   strcat(chPath, "/snap");
-   getConfigValueString(chFileName, "file", "snap_path", CPC.snap_path, sizeof(CPC.snap_path)-1, chPath);
-   if (CPC.snap_path[0] == '\0') {
-      strcpy(CPC.snap_path, chPath);
-   }
-   getConfigValueString(chFileName, "file", "snap_file", CPC.snap_file, sizeof(CPC.snap_file)-1, chNoFile);
+   CPC.snap_path = conf.getStringValue("file", "snap_path", appPath + "/snap");
+   CPC.snap_file = conf.getStringValue("file", "snap_file", "");
    CPC.snap_zip = conf.getIntValue("file", "snap_zip", 0) & 1;
    strncpy(chPath, chAppPath, sizeof(chPath)-7);
    strcat(chPath, "/disk");
    getConfigValueString(chFileName, "file", "drvA_path", CPC.drvA_path, sizeof(CPC.drvA_path)-1, chPath);
-   if (CPC.drvA_path[0] == '\0') {
-      strcpy(CPC.drvA_path, chPath);
-   }
    getConfigValueString(chFileName, "file", "drvA_file", CPC.drvA_file, sizeof(CPC.drvA_file)-1, chNoFile);
    CPC.drvA_zip = conf.getIntValue("file", "drvA_zip", 0) & 1;
    CPC.drvA_format = conf.getIntValue("file", "drvA_format", DEFAULT_DISK_FORMAT);
    getConfigValueString(chFileName, "file", "drvB_path", CPC.drvB_path, sizeof(CPC.drvB_path)-1, chPath);
-   if (CPC.drvB_path[0] == '\0') {
-      strcpy(CPC.drvB_path, chPath);
-   }
    getConfigValueString(chFileName, "file", "drvB_file", CPC.drvB_file, sizeof(CPC.drvB_file)-1, chNoFile);
    CPC.drvB_zip = conf.getIntValue("file", "drvB_zip", 0) & 1;
    CPC.drvB_format = conf.getIntValue("file", "drvB_format", DEFAULT_DISK_FORMAT);
    strncpy(chPath, chAppPath, sizeof(chPath)-7);
    strcat(chPath, "/tape");
    getConfigValueString(chFileName, "file", "tape_path", CPC.tape_path, sizeof(CPC.tape_path)-1, chPath);
-   if (CPC.tape_path[0] == '\0') {
-      strcpy(CPC.tape_path, chPath);
-   }
    getConfigValueString(chFileName, "file", "tape_file", CPC.tape_file, sizeof(CPC.tape_file)-1, chNoFile);
    CPC.tape_zip = conf.getIntValue("file", "tape_zip", 0) & 1;
 
@@ -4156,18 +4142,8 @@ void loadConfiguration (t_CPC &CPC, const std::string& configFilename)
          iFmt++; // entry is valid
       }
    }
-   strncpy(chPath, chAppPath, sizeof(chPath)-13);
-   strcat(chPath, "/printer.dat");
-   getConfigValueString(chFileName, "file", "printer_file", CPC.printer_file, sizeof(CPC.printer_file)-1, chPath);
-   if (CPC.printer_file[0] == '\0') {
-      strcpy(CPC.printer_file, chPath);
-   }
-   strncpy(chPath, chAppPath, sizeof(chPath)-12);
-   strcat(chPath, "/screen.png");
-   getConfigValueString(chFileName, "file", "sdump_file", CPC.sdump_file, sizeof(CPC.sdump_file)-1, chPath);
-   if (CPC.sdump_file[0] == '\0') {
-      strcpy(CPC.sdump_file, chPath);
-   }
+   CPC.printer_file = conf.getStringValue("file", "printer_file", appPath + "/printer.dat");
+   CPC.sdump_file = conf.getStringValue("file", "sdump_file", appPath + "/screen.png");
 
    strncpy(chPath, chAppPath, sizeof(chPath)-5);
    strcat(chPath, "/rom");
@@ -4369,8 +4345,8 @@ int cap32_main (int argc, char **argv)
                   zip_info.dwOffset = *(dword *)(pchPtr + (strlen(pchPtr)+1));
                   if (!zip_extract(path, chFileName, zip_info.dwOffset)) {
                      if (!snapshot_load(chFileName)) {
-                        strcpy(CPC.snap_path, path);
-                        strcpy(CPC.snap_file, file_name);
+                        CPC.snap_path = path;
+                        CPC.snap_file = file_name;
                         CPC.snap_zip = 1;
                         have_SNA = true;
                      }
@@ -4379,8 +4355,8 @@ int cap32_main (int argc, char **argv)
                } else {
                   strcat(path, file_name);
                   if(!snapshot_load(path)) {
-                     strcpy(CPC.snap_path, path);
-                     strcpy(CPC.snap_file, file_name);
+                     CPC.snap_path = path;
+                     CPC.snap_file = file_name;
                      CPC.snap_zip = 0;
                      have_SNA = true;
                   }

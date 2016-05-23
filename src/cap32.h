@@ -253,8 +253,8 @@ typedef struct {
    unsigned int kbd_layout;
 
    unsigned int max_tracksize;
-   char snap_path[_MAX_PATH + 1];
-   char snap_file[_MAX_PATH + 1];
+   std::string snap_path;
+   std::string snap_file;
    bool snap_zip;
    char drvA_path[_MAX_PATH + 1];
    char drvA_file[_MAX_PATH + 1];
@@ -267,8 +267,8 @@ typedef struct {
    char tape_path[_MAX_PATH + 1];
    char tape_file[_MAX_PATH + 1];
    bool tape_zip;
-   char printer_file[_MAX_PATH + 1];
-   char sdump_file[_MAX_PATH + 1];
+   std::string printer_file;
+   std::string sdump_file;
 
    char rom_path[_MAX_PATH + 1];
    char rom_file[16][_MAX_PATH + 1];
