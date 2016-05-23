@@ -25,9 +25,9 @@
     and my own Z80 x86 assembly code (Caprice32 up to version 2.00b2)
 */
 
-#include "z80.h"
 #include "cap32.h"
 #include "tape.h"
+#include "z80.h"
 
 extern t_CPC CPC;
 extern t_FDC FDC;

@@ -5,32 +5,13 @@
 #include <unistd.h>
 #include <fstream>
 
+// TODO(cpitrat): Cleaner way to handle this
+extern char chAppPath[_MAX_PATH + 1];
+
 class ConfigurationTest : public testing::Test
 {
   public:
-    void SetUp()
-    {
-      // TODO(cpitrat): remove all this once migrated to config::Config
-      std::ofstream configFile(getTmpFilename());
-      configFile << "# A comment in top\n"
-                 << "[system] # A comment at the end of the line\n"
-                 << "model=42\n"
-                 << "# This is an unused param:\n"
-                 << "unused=1\n"
-                 << "# Here is an empty line:\n"
-                 << "\n"
-                 << "resources_path=./resources\n"
-                 << "\n"
-                 << "[video]\n"
-                 << "resources_path=./toto\n"
-                 << "model = 8\n"
-                 << "[input]\n"
-                 << "resources_path=./directory with spaces\n"
-                 << "[sound]\n"
-                 << "enabled=1";
-
-      defaultPathValue_ = "./default";
-    }
+    void SetUp() {}
 
     void TearDown()
     {
@@ -51,7 +32,6 @@ class ConfigurationTest : public testing::Test
 
   protected:
     std::string tmpFilename_;
-    std::string defaultPathValue_;
     config::Config configuration_;
 
   private:
@@ -68,47 +48,45 @@ class ConfigurationTest : public testing::Test
 // "Integrated" tests (on a real file)
 // TODO(cpitrat): Remove this once fully migrated to config::Config 
 // --8<-------
-TEST_F(ConfigurationTest, getConfigValueAsInt)
+TEST_F(ConfigurationTest, oldConfigLogic)
 {
+  std::ofstream configFile(getTmpFilename());
+  configFile << "# A comment in top\n"
+             << "[system] # A comment at the end of the line\n"
+             << "model=42\n"
+             << "# This is an unused param:\n"
+             << "unused=1\n"
+             << "# Here is an empty line:\n"
+             << "\n"
+             << "resources_path=./resources\n"
+             << "\n"
+             << "[video]\n"
+             << "resources_path=./toto\n"
+             << "model = 8\n"
+             << "[input]\n"
+             << "resources_path=./directory with spaces\n"
+             << "[sound]\n"
+             << "enabled=1";
+  configFile.close();
+
+  std::string defaultPathValue = "./default";
+
   ASSERT_EQ(42, getConfigValueInt(tmpFilename_.c_str(), "system", "model", 0));
-};
-
-TEST_F(ConfigurationTest, getConfigValueAsIntMatchesRightSection)
-{
   ASSERT_EQ(8, getConfigValueInt(tmpFilename_.c_str(), "video", "model", 0));
-};
-
-TEST_F(ConfigurationTest, getConfigValueAsIntReturnsDefault)
-{
   ASSERT_EQ(10, getConfigValueInt(tmpFilename_.c_str(), "sound", "model", 10));
-};
 
-TEST_F(ConfigurationTest, getConfigValueAsString)
-{
   char chPath[256];
-  getConfigValueString(tmpFilename_.c_str(), "system", "resources_path", chPath, sizeof(chPath)-1, defaultPathValue_.c_str());
+  getConfigValueString(tmpFilename_.c_str(), "system", "resources_path", chPath, sizeof(chPath)-1, defaultPathValue.c_str());
   ASSERT_STREQ("./resources", chPath);
-};
 
-TEST_F(ConfigurationTest, getConfigValueAsStringMatchesRightSection)
-{
-  char chPath[256];
-  getConfigValueString(tmpFilename_.c_str(), "video", "resources_path", chPath, sizeof(chPath)-1, defaultPathValue_.c_str());
+  getConfigValueString(tmpFilename_.c_str(), "video", "resources_path", chPath, sizeof(chPath)-1, defaultPathValue.c_str());
   ASSERT_STREQ("./toto", chPath);
-};
 
-TEST_F(ConfigurationTest, getConfigValueAsStringWithSpaces)
-{
-  char chPath[256];
-  getConfigValueString(tmpFilename_.c_str(), "input", "resources_path", chPath, sizeof(chPath)-1, defaultPathValue_.c_str());
+  getConfigValueString(tmpFilename_.c_str(), "input", "resources_path", chPath, sizeof(chPath)-1, defaultPathValue.c_str());
   ASSERT_STREQ("./directory with spaces", chPath);
-};
 
-TEST_F(ConfigurationTest, getConfigValueAsStringReturnsDefault)
-{
-  char chPath[256];
-  getConfigValueString(tmpFilename_.c_str(), "sound", "resources_path", chPath, sizeof(chPath)-1, defaultPathValue_.c_str());
-  ASSERT_STREQ(defaultPathValue_.c_str(), chPath);
+  getConfigValueString(tmpFilename_.c_str(), "sound", "resources_path", chPath, sizeof(chPath)-1, defaultPathValue.c_str());
+  ASSERT_STREQ(defaultPathValue.c_str(), chPath);
 };
 // ------>8--
 
@@ -133,7 +111,7 @@ TEST_F(ConfigurationTest, parseFileAndMore)
              << "enabled=1";
   configFile.close();
 
-  configuration_.parseFile(tmpFilename_);
+  configuration_.parseFile(getTmpFilename());
 
   ASSERT_EQ(42, configuration_.getIntValue("system", "model", 0));
   ASSERT_EQ(8, configuration_.getIntValue("video", "model", 0));
@@ -155,11 +133,64 @@ TEST_F(ConfigurationTest, saveToFileAndMore)
 
   configuration_.saveToFile(getTmpFilename());
 
-  std::ifstream ifs(tmpFilename_);
+  std::ifstream ifs(getTmpFilename());
   std::stringstream buffer;
   buffer << ifs.rdbuf();
   ASSERT_EQ(expectedConfig, buffer.str());
 };
+
+// TODO(cpitrat): test about every value in conf ?
+TEST_F(ConfigurationTest, loadConfigurationWithValidContent)
+{
+  std::ofstream configFile(getTmpFilename());
+  configFile << "[system]\n"
+             << "model=1\n"
+             << "jumpers=30\n"
+             << "ram_size=128\n"
+             << "speed=32\n"
+             << "printer=1\n"
+             << "resources_path=./resources\n"
+             ;
+  configFile.close();
+
+  t_CPC CPC;
+  loadConfiguration(CPC, getTmpFilename());
+
+  ASSERT_EQ(1, CPC.model);
+  ASSERT_EQ(30, CPC.jumpers);
+  ASSERT_EQ(128, CPC.ram_size);
+  ASSERT_EQ(32, CPC.speed);
+  ASSERT_EQ(1, CPC.limit_speed);
+  ASSERT_EQ(1, CPC.printer);
+  ASSERT_EQ("./resources", std::string(CPC.resources_path));
+}
+
+// TODO(cpitrat): test about every value in conf ?
+TEST_F(ConfigurationTest, loadConfigurationWithInvalidValues)
+{
+  std::ofstream configFile(getTmpFilename());
+  configFile << "[system]\n"
+             << "model=3\n" // model should be <= 2 - default to 2
+             << "jumpers=255\n" // jumpers is & with 0x1e == 30
+             << "ram_size=704\n" // max ram size is 576 - moreover it's & with 704
+             << "speed=64\n" // max speed is 32 - will default to 4
+             << "printer=2\n" // printer should be 0 or 1 - it's & with 1
+             << "resources_path=\n"
+             ;
+  configFile.close();
+  getcwd(chAppPath, sizeof(chAppPath)-1);
+
+  t_CPC CPC;
+  loadConfiguration(CPC, getTmpFilename());
+
+  ASSERT_EQ(2, CPC.model);
+  ASSERT_EQ(30, CPC.jumpers);
+  ASSERT_EQ(576, CPC.ram_size);
+  ASSERT_EQ(4, CPC.speed);
+  ASSERT_EQ(1, CPC.limit_speed);
+  ASSERT_EQ(0, CPC.printer);
+  ASSERT_EQ(std::string(chAppPath) + "/resources", std::string(CPC.resources_path));
+}
 
 // Real unit tests
 

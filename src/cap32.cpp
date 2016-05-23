@@ -26,6 +26,7 @@
 #include "tape.h"
 #include "video.h"
 #include "z80.h"
+#include "configuration.h"
 
 #include <errno.h>
 #include <string.h>
@@ -3974,103 +3975,106 @@ void getConfigValueString (const char* pchFileName, const char* pchSection, cons
 
 
 
-void loadConfiguration (void)
+std::string getConfigurationFilename()
 {
-   char chFileName[_MAX_PATH + 1];
+  // First look for cap32.cfg in the same directory as executable
+  std::string configFilename = std::string(chAppPath) + "/cap32.cfg";
+  if(access(configFilename.c_str(), F_OK) != 0) {
+    // If not found, look for .cap32.cfg in the home of current user
+    configFilename = std::string(getenv("HOME")) + "/.cap32.cfg";
+    // If still not found, look for cap32.cfg in /etc
+    if(access(configFilename.c_str(), F_OK) != 0) {
+      configFilename = "/etc/cap32.cfg";
+    }
+  }
+  std::cout << "Using configuration file: " << configFilename << std::endl;
+  return configFilename;
+}
+
+
+
+void loadConfiguration (t_CPC &CPC, const std::string& configFilename)
+{
+   config::Config conf;
+   conf.parseFile(configFilename);
+
+   const char *chFileName = configFilename.c_str();
    char chPath[_MAX_PATH + 1];
    char chNoFile[1];
    chNoFile[0] = '\0';
 
-   // First look for cap32.cfg in the same directory as executable
-   strncpy(chFileName, chAppPath, sizeof(chFileName)-11);
-   strcat(chFileName, "/cap32.cfg");
-   if(access(chFileName, F_OK) != 0) {
-     // If not found, look for .cap32.cfg in the home of current user
-     strncpy(chFileName, getenv("HOME"), sizeof(chFileName)-12);
-     strcat(chFileName, "/.cap32.cfg");
-     // If still not found, look for cap32.cfg in /etc
-     if(access(chFileName, F_OK) != 0) {
-       strncpy(chFileName, "/etc/cap32.cfg", sizeof(chFileName)-1);
-       chFileName[_MAX_PATH] = '\0';
-     }
-   }
-   std::cout << "Using configuration file: " << chFileName << std::endl;
-
    memset(&CPC, 0, sizeof(CPC));
-   CPC.model = getConfigValueInt(chFileName, "system", "model", 2); // CPC 6128
+   CPC.model = conf.getIntValue("system", "model", 2); // CPC 6128
    if (CPC.model > 2) {
       CPC.model = 2;
    }
-   CPC.jumpers = getConfigValueInt(chFileName, "system", "jumpers", 0x1e) & 0x1e; // OEM is Amstrad, video refresh is 50Hz
-   CPC.ram_size = getConfigValueInt(chFileName, "system", "ram_size", 128) & 0x02c0; // 128KB RAM
+   CPC.jumpers = conf.getIntValue("system", "jumpers", 0x1e) & 0x1e; // OEM is Amstrad, video refresh is 50Hz
+   CPC.ram_size = conf.getIntValue("system", "ram_size", 128) & 0x02c0; // 128KB RAM
    if (CPC.ram_size > 576) {
       CPC.ram_size = 576;
    } else if ((CPC.model == 2) && (CPC.ram_size < 128)) {
       CPC.ram_size = 128; // minimum RAM size for CPC 6128 is 128KB
    }
-   CPC.speed = getConfigValueInt(chFileName, "system", "speed", DEF_SPEED_SETTING); // original CPC speed
+   CPC.speed = conf.getIntValue("system", "speed", DEF_SPEED_SETTING); // original CPC speed
    if ((CPC.speed < MIN_SPEED_SETTING) || (CPC.speed > MAX_SPEED_SETTING)) {
       CPC.speed = DEF_SPEED_SETTING;
    }
    CPC.limit_speed = 1;
-   CPC.auto_pause = getConfigValueInt(chFileName, "system", "auto_pause", 1) & 1;
-   CPC.printer = getConfigValueInt(chFileName, "system", "printer", 0) & 1;
-   CPC.mf2 = getConfigValueInt(chFileName, "system", "mf2", 0) & 1;
-   CPC.keyboard = getConfigValueInt(chFileName, "system", "keyboard", 0);
+   CPC.auto_pause = conf.getIntValue("system", "auto_pause", 1) & 1;
+   CPC.printer = conf.getIntValue("system", "printer", 0) & 1;
+   CPC.mf2 = conf.getIntValue("system", "mf2", 0) & 1;
+   CPC.keyboard = conf.getIntValue("system", "keyboard", 0);
    if (CPC.keyboard > MAX_ROM_MODS) {
       CPC.keyboard = 0;
    }
-   CPC.joystick_emulation = getConfigValueInt(chFileName, "system", "joystick_emulation", 0) & 1;
-   CPC.joysticks = getConfigValueInt(chFileName, "system", "joysticks", 1) & 1;
-   strncpy(chPath, chAppPath, sizeof(chPath)-5);
+   CPC.joystick_emulation = conf.getIntValue("system", "joystick_emulation", 0) & 1;
+   CPC.joysticks = conf.getIntValue("system", "joysticks", 1) & 1;
+   strncpy(chPath, chAppPath, sizeof(chPath)-10);
    strcat(chPath, "/resources");
    getConfigValueString(chFileName, "system", "resources_path", CPC.resources_path, sizeof(CPC.resources_path)-1, chPath);
-   if (CPC.resources_path[0] == '\0') { // if the path is empty, set it to the default
-      strcpy(CPC.rom_path, chPath);
-   }
 
-   CPC.scr_fs_width = getConfigValueInt(chFileName, "video", "scr_width", 800);
-   CPC.scr_fs_height = getConfigValueInt(chFileName, "video", "scr_height", 600);
-   CPC.scr_fs_bpp = getConfigValueInt(chFileName, "video", "scr_bpp", 8);
-   CPC.scr_style = getConfigValueInt(chFileName, "video", "scr_style", 0);
+   CPC.scr_fs_width = conf.getIntValue("video", "scr_width", 800);
+   CPC.scr_fs_height = conf.getIntValue("video", "scr_height", 600);
+   CPC.scr_fs_bpp = conf.getIntValue("video", "scr_bpp", 8);
+   CPC.scr_style = conf.getIntValue("video", "scr_style", 0);
    if (CPC.scr_style >= nb_video_plugins) {
     CPC.scr_style = 0;
    }
-   CPC.scr_oglfilter = getConfigValueInt(chFileName, "video", "scr_oglfilter", 1) & 1;
-   CPC.scr_oglscanlines = getConfigValueInt(chFileName, "video", "scr_oglscanlines", 30);
+   CPC.scr_oglfilter = conf.getIntValue("video", "scr_oglfilter", 1) & 1;
+   CPC.scr_oglscanlines = conf.getIntValue("video", "scr_oglscanlines", 30);
    if ((CPC.scr_oglscanlines < 0) || (CPC.scr_oglscanlines > 100)) {
       CPC.scr_oglscanlines = 30;
    }
-   CPC.scr_vsync = getConfigValueInt(chFileName, "video", "scr_vsync", 1) & 1;
-   CPC.scr_led = getConfigValueInt(chFileName, "video", "scr_led", 1) & 1;
-   CPC.scr_fps = getConfigValueInt(chFileName, "video", "scr_fps", 0) & 1;
-   CPC.scr_tube = getConfigValueInt(chFileName, "video", "scr_tube", 0) & 1;
-   CPC.scr_intensity = getConfigValueInt(chFileName, "video", "scr_intensity", 10);
-   CPC.scr_remanency = getConfigValueInt(chFileName, "video", "scr_remanency", 0) & 1;
+   CPC.scr_vsync = conf.getIntValue("video", "scr_vsync", 1) & 1;
+   CPC.scr_led = conf.getIntValue("video", "scr_led", 1) & 1;
+   CPC.scr_fps = conf.getIntValue("video", "scr_fps", 0) & 1;
+   CPC.scr_tube = conf.getIntValue("video", "scr_tube", 0) & 1;
+   CPC.scr_intensity = conf.getIntValue("video", "scr_intensity", 10);
+   CPC.scr_remanency = conf.getIntValue("video", "scr_remanency", 0) & 1;
    if ((CPC.scr_intensity < 5) || (CPC.scr_intensity > 15)) {
       CPC.scr_intensity = 10;
    }
-   CPC.scr_window = getConfigValueInt(chFileName, "video", "scr_window", 0) & 1;
+   CPC.scr_window = conf.getIntValue("video", "scr_window", 0) & 1;
 
-   CPC.snd_enabled = getConfigValueInt(chFileName, "sound", "enabled", 1) & 1;
-   CPC.snd_playback_rate = getConfigValueInt(chFileName, "sound", "playback_rate", 2);
+   CPC.snd_enabled = conf.getIntValue("sound", "enabled", 1) & 1;
+   CPC.snd_playback_rate = conf.getIntValue("sound", "playback_rate", 2);
    if (CPC.snd_playback_rate > (MAX_FREQ_ENTRIES-1)) {
       CPC.snd_playback_rate = 2;
    }
-   CPC.snd_bits = getConfigValueInt(chFileName, "sound", "bits", 1) & 1;
-   CPC.snd_stereo = getConfigValueInt(chFileName, "sound", "stereo", 1) & 1;
-   CPC.snd_volume = getConfigValueInt(chFileName, "sound", "volume", 80);
+   CPC.snd_bits = conf.getIntValue("sound", "bits", 1) & 1;
+   CPC.snd_stereo = conf.getIntValue("sound", "stereo", 1) & 1;
+   CPC.snd_volume = conf.getIntValue("sound", "volume", 80);
    if ((CPC.snd_volume < 0) || (CPC.snd_volume > 100)) {
       CPC.snd_volume = 80;
    }
-   CPC.snd_pp_device = getConfigValueInt(chFileName, "sound", "pp_device", 0) & 1;
+   CPC.snd_pp_device = conf.getIntValue("sound", "pp_device", 0) & 1;
 
-   CPC.kbd_layout = getConfigValueInt(chFileName, "control", "kbd_layout", 0);
+   CPC.kbd_layout = conf.getIntValue("control", "kbd_layout", 0);
    if (CPC.kbd_layout > 3) {
       CPC.kbd_layout = 0;
    }
 
-   CPC.max_tracksize = getConfigValueInt(chFileName, "file", "max_track_size", 6144-154);
+   CPC.max_tracksize = conf.getIntValue("file", "max_track_size", 6144-154);
    strncpy(chPath, chAppPath, sizeof(chPath)-7);
    strcat(chPath, "/snap");
    getConfigValueString(chFileName, "file", "snap_path", CPC.snap_path, sizeof(CPC.snap_path)-1, chPath);
@@ -4078,7 +4082,7 @@ void loadConfiguration (void)
       strcpy(CPC.snap_path, chPath);
    }
    getConfigValueString(chFileName, "file", "snap_file", CPC.snap_file, sizeof(CPC.snap_file)-1, chNoFile);
-   CPC.snap_zip = getConfigValueInt(chFileName, "file", "snap_zip", 0) & 1;
+   CPC.snap_zip = conf.getIntValue("file", "snap_zip", 0) & 1;
    strncpy(chPath, chAppPath, sizeof(chPath)-7);
    strcat(chPath, "/disk");
    getConfigValueString(chFileName, "file", "drvA_path", CPC.drvA_path, sizeof(CPC.drvA_path)-1, chPath);
@@ -4086,15 +4090,15 @@ void loadConfiguration (void)
       strcpy(CPC.drvA_path, chPath);
    }
    getConfigValueString(chFileName, "file", "drvA_file", CPC.drvA_file, sizeof(CPC.drvA_file)-1, chNoFile);
-   CPC.drvA_zip = getConfigValueInt(chFileName, "file", "drvA_zip", 0) & 1;
-   CPC.drvA_format = getConfigValueInt(chFileName, "file", "drvA_format", DEFAULT_DISK_FORMAT);
+   CPC.drvA_zip = conf.getIntValue("file", "drvA_zip", 0) & 1;
+   CPC.drvA_format = conf.getIntValue("file", "drvA_format", DEFAULT_DISK_FORMAT);
    getConfigValueString(chFileName, "file", "drvB_path", CPC.drvB_path, sizeof(CPC.drvB_path)-1, chPath);
    if (CPC.drvB_path[0] == '\0') {
       strcpy(CPC.drvB_path, chPath);
    }
    getConfigValueString(chFileName, "file", "drvB_file", CPC.drvB_file, sizeof(CPC.drvB_file)-1, chNoFile);
-   CPC.drvB_zip = getConfigValueInt(chFileName, "file", "drvB_zip", 0) & 1;
-   CPC.drvB_format = getConfigValueInt(chFileName, "file", "drvB_format", DEFAULT_DISK_FORMAT);
+   CPC.drvB_zip = conf.getIntValue("file", "drvB_zip", 0) & 1;
+   CPC.drvB_format = conf.getIntValue("file", "drvB_format", DEFAULT_DISK_FORMAT);
    strncpy(chPath, chAppPath, sizeof(chPath)-7);
    strcat(chPath, "/tape");
    getConfigValueString(chFileName, "file", "tape_path", CPC.tape_path, sizeof(CPC.tape_path)-1, chPath);
@@ -4102,7 +4106,7 @@ void loadConfiguration (void)
       strcpy(CPC.tape_path, chPath);
    }
    getConfigValueString(chFileName, "file", "tape_file", CPC.tape_file, sizeof(CPC.tape_file)-1, chNoFile);
-   CPC.tape_zip = getConfigValueInt(chFileName, "file", "tape_zip", 0) & 1;
+   CPC.tape_zip = conf.getIntValue("file", "tape_zip", 0) & 1;
 
    int iFmt = FIRST_CUSTOM_DISK_FORMAT;
    for (int i = iFmt; i < MAX_DISK_FORMAT; i++) { // loop through all user definable disk formats
@@ -4204,9 +4208,6 @@ void loadConfiguration (void)
       sprintf(chRomId, "slot%02d", iRomNum); // build ROM ID
       getConfigValueString(chFileName, "rom", chRomId, CPC.rom_file[iRomNum], sizeof(CPC.rom_file[iRomNum])-1, chNoFile);
    }
-   if (CPC.rom_path[0] == '\0') { // if the path is empty, set it to the default
-      strcpy(CPC.rom_path, chPath);
-   }
    if ((pfileObject = fopen(chFileName, "rt")) == nullptr) {
       strcpy(CPC.rom_file[7], "amsdos.rom"); // insert AMSDOS in slot 7 if the config file does not exist yet
    } else {
@@ -4295,7 +4296,7 @@ int cap32_main (int argc, char **argv)
       exit(-1);
    }
 
-   loadConfiguration(); // retrieve the emulator configuration
+   loadConfiguration(CPC, getConfigurationFilename()); // retrieve the emulator configuration
    if (CPC.printer) {
       if (!printer_start()) { // start capturing printer output, if enabled
          CPC.printer = 0;

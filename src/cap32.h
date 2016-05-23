@@ -26,6 +26,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <string>
 
 //#define DEBUG
 //#define DEBUG_CRTC
@@ -462,6 +463,14 @@ void tape_eject (void);
 
 int getConfigValueInt (const char* pchFileName, const char* pchSection, const char* pchKey, const int iDefaultValue);
 void getConfigValueString (const char* pchFileName, const char* pchSection, const char* pchKey, char* pchValue, int iSize, const char* pchDefaultValue);
+
+// Return the path to the best (i.e: most specific) configuration file.
+// Priority order is:
+//  - cap32.cfg in the same directory as cap32 binary
+//  - $HOME/.cap32.cfg
+//  - /etc/cap32.cfg
+std::string getConfigurationFilename();
+void loadConfiguration (t_CPC &CPC, const std::string& configFilename);
 
 int cap32_main(int argc, char **argv);
 
