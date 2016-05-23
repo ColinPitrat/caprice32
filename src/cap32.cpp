@@ -1299,7 +1299,7 @@ static int joy_layout[12][2] = {
 
 char chAppPath[_MAX_PATH + 1];
 char chROMSelected[_MAX_PATH + 1];
-char chROMFile[3][14] = {
+std::string chROMFile[3] = {
    "cpc464.rom",
    "cpc664.rom",
    "cpc6128.rom"
@@ -2149,7 +2149,6 @@ int snapshot_load (const char *pchFileName)
 {
    int n;
    dword dwSnapSize, dwModel, dwFlags;
-   char chPath[_MAX_PATH + 1];
    byte val;
    reg_pair port;
    t_SNA_header sh;
@@ -2274,10 +2273,8 @@ int snapshot_load (const char *pchFileName)
                emulator_reset(false);
                return ERR_SNA_CPC_TYPE;
             }
-            strncpy(chPath, CPC.rom_path, sizeof(chPath)-2);
-            strcat(chPath, "/");
-            strncat(chPath, chROMFile[dwModel], sizeof(chPath)-1 - strlen(chPath)); // path to the required ROM image
-            if ((pfileObject = fopen(chPath, "rb")) != nullptr) {
+            std::string romFilename = CPC.rom_path + "/" + chROMFile[dwModel];
+            if ((pfileObject = fopen(romFilename.c_str(), "rb")) != nullptr) {
                n = fread(pbROMlo, 2*16384, 1, pfileObject);
                fclose(pfileObject);
                if (!n) {
@@ -3245,13 +3242,10 @@ int tape_insert_voc (const char *pchFileName)
 
 int emulator_patch_ROM (void)
 {
-   char chPath[_MAX_PATH + 1];
    byte *pbPtr;
 
-   strncpy(chPath, CPC.rom_path, sizeof(chPath)-2);
-   strcat(chPath, "/");
-   strncat(chPath, chROMFile[CPC.model], sizeof(chPath)-1 - strlen(chPath)); // determine the ROM image name for the selected model
-   if ((pfileObject = fopen(chPath, "rb")) != nullptr) { // load CPC OS + Basic
+   std::string romFilename = CPC.rom_path + "/" + chROMFile[CPC.model];
+   if ((pfileObject = fopen(romFilename.c_str(), "rb")) != nullptr) { // load CPC OS + Basic
       if(fread(pbROMlo, 2*16384, 1, pfileObject) != 1) {
         fclose(pfileObject);
         return ERR_NOT_A_CPC_ROM;
@@ -3356,7 +3350,6 @@ void emulator_reset (bool bolMF2Reset)
 int emulator_init (void)
 {
    int iErr, iRomNum;
-   char chPath[_MAX_PATH + 1];
    char *pchRomData;
 
    pbGPBuffer = new byte [128*1024]; // attempt to allocate the general purpose buffer
@@ -3374,13 +3367,11 @@ int emulator_init (void)
    }
 
    for (iRomNum = 0; iRomNum < 16; iRomNum++) { // loop for ROMs 0-15
-      if (CPC.rom_file[iRomNum][0]) { // is a ROM image specified for this slot?
+      if (!CPC.rom_file[iRomNum].empty()) { // is a ROM image specified for this slot?
          pchRomData = new char [16384]; // allocate 16K
          memset(pchRomData, 0, 16384); // clear memory
-         strncpy(chPath, CPC.rom_path, sizeof(chPath)-2);
-         strcat(chPath, "/");
-         strncat(chPath, CPC.rom_file[iRomNum], sizeof(chPath)-1 - strlen(chPath));
-         if ((pfileObject = fopen(chPath, "rb")) != nullptr) { // attempt to open the ROM image
+         std::string romFilename = CPC.rom_path + "/" + CPC.rom_file[iRomNum];
+         if ((pfileObject = fopen(romFilename.c_str(), "rb")) != nullptr) { // attempt to open the ROM image
             if(fread(pchRomData, 128, 1, pfileObject) != 1) { // read 128 bytes of ROM data
               fclose(pfileObject);
               return ERR_NOT_A_CPC_ROM;
@@ -3402,15 +3393,15 @@ int emulator_init (void)
                }
                memmap_ROM[iRomNum] = (byte *)pchRomData; // update the ROM map
             } else { // not a valid ROM file
-               fprintf(stderr, "ERROR: %s is not a CPC ROM file - clearing ROM slot %d.\n", CPC.rom_file[iRomNum], iRomNum);
+               fprintf(stderr, "ERROR: %s is not a CPC ROM file - clearing ROM slot %d.\n", CPC.rom_file[iRomNum].c_str(), iRomNum);
                delete [] pchRomData; // free memory on error
-               CPC.rom_file[iRomNum][0] = 0;
+               CPC.rom_file[iRomNum] = "";
             }
             fclose(pfileObject);
          } else { // file not found
-            fprintf(stderr, "ERROR: The %s file is missing - clearing ROM slot %d.\n", CPC.rom_file[iRomNum], iRomNum);
+            fprintf(stderr, "ERROR: The %s file is missing - clearing ROM slot %d.\n", CPC.rom_file[iRomNum].c_str(), iRomNum);
             delete [] pchRomData; // free memory on error
-            CPC.rom_file[iRomNum][0] = 0;
+            CPC.rom_file[iRomNum] = "";
          }
       }
    }
@@ -3422,18 +3413,16 @@ int emulator_init (void)
             return ERR_OUT_OF_MEMORY;
          }
          memset(pbMF2ROM, 0, 16384); // clear memory
-         strncpy(chPath, CPC.rom_path, sizeof(chPath)-2);
-         strcat(chPath, "/");
-         strncat(chPath, CPC.rom_mf2, sizeof(chPath)-1 - strlen(chPath)); // combine path and file name
+         std::string romFilename = CPC.rom_path + "/" + CPC.rom_mf2;
          bool MF2error = false;
-         if ((pfileObject = fopen(chPath, "rb")) != nullptr) { // attempt to open the ROM image
+         if ((pfileObject = fopen(romFilename.c_str(), "rb")) != nullptr) { // attempt to open the ROM image
             if((fread(pbMF2ROMbackup, 8192, 1, pfileObject) != 1) || (memcmp(pbMF2ROMbackup+0x0d32, "MULTIFACE 2", 11) != 0)) { // does it have the required signature?
                fprintf(stderr, "ERROR: The file selected as the MF2 ROM is either corrupt or invalid.\n");
                MF2error = true;
             }
             fclose(pfileObject);
          } else { // error opening file
-            fprintf(stderr, "ERROR: The file selected as the MF2 ROM (%s) couldn't be opened.\n", chPath);
+            fprintf(stderr, "ERROR: The file selected as the MF2 ROM (%s) couldn't be opened.\n", romFilename.c_str());
             MF2error = true;
          }
          if(MF2error) {
@@ -3441,7 +3430,7 @@ int emulator_init (void)
            delete [] pbMF2ROM;
            pbMF2ROM = nullptr;
            pbMF2ROMbackup = nullptr;
-           CPC.rom_mf2[0] = 0;
+           CPC.rom_mf2 = "";
            CPC.mf2 = 0; // disable MF2 support
          }
       }
@@ -3970,9 +3959,6 @@ void loadConfiguration (t_CPC &CPC, const std::string& configFilename)
 
    std::string appPath = chAppPath;
    const char *chFileName = configFilename.c_str();
-   char chPath[_MAX_PATH + 1];
-   char chNoFile[1];
-   chNoFile[0] = '\0';
 
    memset(&CPC, 0, sizeof(CPC));
    CPC.model = conf.getIntValue("system", "model", 2); // CPC 6128
@@ -4059,6 +4045,7 @@ void loadConfiguration (t_CPC &CPC, const std::string& configFilename)
    CPC.tape_file = conf.getStringValue("file", "tape_file", "");
    CPC.tape_zip = conf.getIntValue("file", "tape_zip", 0) & 1;
 
+   // TODO(cpitrat): unit test a conf with custom disk format before migrating it to config::Config::getStringValue
    int iFmt = FIRST_CUSTOM_DISK_FORMAT;
    for (int i = iFmt; i < MAX_DISK_FORMAT; i++) { // loop through all user definable disk formats
       dword dwVal;
@@ -4067,7 +4054,7 @@ void loadConfiguration (t_CPC &CPC, const std::string& configFilename)
       disk_format[iFmt].label[0] = 0; // clear slot
       sprintf(chFmtId, "fmt%02d", i); // build format ID
       char chFmtStr[256];
-      getConfigValueString(chFileName, "file", chFmtId, chFmtStr, sizeof(chFmtStr)-1, chNoFile);
+      getConfigValueString(chFileName, "file", chFmtId, chFmtStr, sizeof(chFmtStr)-1, "");
       if (chFmtStr[0] != 0) { // found format definition for this slot?
          char chDelimiters[] = ",";
          char *pchToken;
@@ -4141,20 +4128,18 @@ void loadConfiguration (t_CPC &CPC, const std::string& configFilename)
    CPC.printer_file = conf.getStringValue("file", "printer_file", appPath + "/printer.dat");
    CPC.sdump_file = conf.getStringValue("file", "sdump_file", appPath + "/screen.png");
 
-   strncpy(chPath, chAppPath, sizeof(chPath)-5);
-   strcat(chPath, "/rom");
-   getConfigValueString(chFileName, "rom", "rom_path", CPC.rom_path, sizeof(CPC.rom_path)-1, chPath);
+   CPC.rom_path = conf.getStringValue("rom", "rom_path", appPath + "/rom");
    for (int iRomNum = 0; iRomNum < 16; iRomNum++) { // loop for ROMs 0-15
       char chRomId[14];
       sprintf(chRomId, "slot%02d", iRomNum); // build ROM ID
-      getConfigValueString(chFileName, "rom", chRomId, CPC.rom_file[iRomNum], sizeof(CPC.rom_file[iRomNum])-1, chNoFile);
+      CPC.rom_file[iRomNum] = conf.getStringValue("rom", chRomId, "");
    }
    if ((pfileObject = fopen(chFileName, "rt")) == nullptr) {
-      strcpy(CPC.rom_file[7], "amsdos.rom"); // insert AMSDOS in slot 7 if the config file does not exist yet
+      CPC.rom_file[7] = "amsdos.rom"; // insert AMSDOS in slot 7 if the config file does not exist yet
    } else {
       fclose(pfileObject);
    }
-   getConfigValueString(chFileName, "rom", "rom_mf2", CPC.rom_mf2, sizeof(CPC.rom_mf2)-1, chNoFile);
+   CPC.rom_mf2 = conf.getStringValue("rom", "rom_mf2", "");
 }
 
 

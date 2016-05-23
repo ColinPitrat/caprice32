@@ -270,9 +270,9 @@ typedef struct {
    std::string printer_file;
    std::string sdump_file;
 
-   char rom_path[_MAX_PATH + 1];
-   char rom_file[16][_MAX_PATH + 1];
-   char rom_mf2[_MAX_PATH + 1];
+   std::string rom_path;
+   std::string rom_file[16];
+   std::string rom_mf2;
 } t_CPC;
 
 typedef struct {

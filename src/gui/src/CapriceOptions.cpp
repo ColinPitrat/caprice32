@@ -100,7 +100,7 @@ CapriceOptions::CapriceOptions(const CRect& WindowRect, CWindow* pParent, CFontE
     for (unsigned int i = 0; i < 16; i ++) { // create 16 'ROM' buttons
       new CLabel(CPoint((i<8)?5:135, 4 + 18*(i%8)), m_pGroupBoxTabExpansion, stdex::itoa(i));
 
-      if (CPC.rom_file[i][0]) { // if CPC.rom_file[i] is not empty
+      if (!CPC.rom_file[i].empty()) { // if CPC.rom_file[i] is not empty
           romFileName = CPC.rom_file[i];
       } else {
           romFileName = "...";
@@ -298,10 +298,9 @@ bool CapriceOptions::HandleMessage(CMessage* pMessage)
               for (unsigned int i = 0; i < m_pButtonRoms.size(); i ++) {
                 std::string romFileName = m_pButtonRoms.at(i)->GetWindowText();
                 if (romFileName == "...") {
-                  strcpy (CPC.rom_file[i], "");
+                  CPC.rom_file[i] = "";
                 } else {
-                  strcpy (CPC.rom_file[i], romFileName.c_str()); // c_str() converts from std::string to C
-                  // string.
+                  CPC.rom_file[i] = romFileName;
                 }
               }
               // 'Video' settings
@@ -461,7 +460,7 @@ void CapriceOptions::ProcessOptionChanges(t_CPC& CPC) {
     // compare the ROM configuration & call emulator_init if required:
     bool bRomsChanged = false;
     for (int i = 0; i < 16; i ++) {
-        if (strcmp(CPC.rom_file[i], m_oldCPCsettings.rom_file[i])) {
+        if (CPC.rom_file[i] != m_oldCPCsettings.rom_file[i]) {
             bRomsChanged = true;
         }
     }
