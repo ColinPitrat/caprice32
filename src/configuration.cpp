@@ -91,7 +91,7 @@ namespace config
     return defaultValue;
   }
 
-  std::string Config::getStringValue(const std::string& section, const std::string& key, const std::string& defaultValue) const
+  std::string Config::getStringValue(const std::string& section, const std::string& key, const std::string defaultValue) const
   {
     if(hasValue(section, key))
     {

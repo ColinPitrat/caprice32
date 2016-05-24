@@ -426,14 +426,14 @@ typedef struct {
 } t_zip_info;
 
 typedef struct {
-   unsigned char label[40]; // label to display in options dialog
+   std::string label; // label to display in options dialog
    unsigned int tracks; // number of tracks
    unsigned int sides; // number of sides
    unsigned int sectors; // sectors per track
    unsigned int sector_size; // sector size as N value
    unsigned int gap3_length; // GAP#3 size
    unsigned char filler_byte; // default byte to use
-   unsigned char sector_ids[2][16]; // sector IDs
+   unsigned char sector_ids[2][16]; // sector IDs - indices: side, sector
 } t_disk_format;
 
 
@@ -461,15 +461,16 @@ int tape_insert (const char *pchFileName);
 int tape_insert_voc (const char *pchFileName);
 void tape_eject (void);
 
-void getConfigValueString (const char* pchFileName, const char* pchSection, const char* pchKey, char* pchValue, int iSize, const char* pchDefaultValue);
-
 // Return the path to the best (i.e: most specific) configuration file.
 // Priority order is:
 //  - cap32.cfg in the same directory as cap32 binary
 //  - $HOME/.cap32.cfg
 //  - /etc/cap32.cfg
-std::string getConfigurationFilename();
+std::string getConfigurationFilename(bool forWrite = false);
+t_disk_format parseDiskFormat(const std::string& format);
+std::string serializeDiskFormat(const t_disk_format& format);
 void loadConfiguration (t_CPC &CPC, const std::string& configFilename);
+void saveConfiguration (t_CPC &CPC, const std::string& configFilename);
 
 int cap32_main(int argc, char **argv);
 

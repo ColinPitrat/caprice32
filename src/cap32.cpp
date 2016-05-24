@@ -17,6 +17,7 @@
 */
 
 #include <iostream>
+#include <sstream>
 
 #include <zlib.h>
 #include "SDL.h"
@@ -27,6 +28,7 @@
 #include "video.h"
 #include "z80.h"
 #include "configuration.h"
+#include "stringutils.h"
 
 #include <errno.h>
 #include <string.h>
@@ -3902,39 +3904,7 @@ int input_init (void)
 
 
 
-void getConfigValueString (const char* pchFileName, const char* pchSection, const char* pchKey, char* pchValue, int iSize, const char* pchDefaultValue)
-{
-   FILE* pfoConfigFile;
-   char chLine[MAX_LINE_LEN + 1];
-   char* pchToken;
-
-   if ((pfoConfigFile = fopen(pchFileName, "r")) != nullptr) { // open the config file
-      while(fgets(chLine, MAX_LINE_LEN, pfoConfigFile) != nullptr) { // grab one line
-         pchToken = strtok(chLine, "[]"); // check if there's a section key
-         if((pchToken != nullptr) && (pchToken[0] != '#') && (strcmp(pchToken, pchSection) == 0)) {
-            while(fgets(chLine, MAX_LINE_LEN, pfoConfigFile) != nullptr) { // get the next line
-               pchToken = strtok(chLine, "\t =\n\r"); // check if it has a key=value pair
-               if((pchToken != nullptr) && (pchToken[0] != '#') && (strcmp(pchToken, pchKey) == 0)) {
-                  char* pchPtr = strtok(nullptr, "\t=#\n\r"); // get the value if it matches our key
-                  if (pchPtr != nullptr) {
-                     strncpy(pchValue, pchPtr, iSize); // copy to destination
-                     return;
-                  } else {
-                     strncpy(pchValue, pchDefaultValue, iSize); // no value found, return the default
-                     return;
-                  }
-               }
-            }
-         }
-      }
-      fclose(pfoConfigFile);
-   }
-   strncpy(pchValue, pchDefaultValue, iSize); // no value found, return the default
-}
-
-
-
-std::string getConfigurationFilename()
+std::string getConfigurationFilename(bool forWrite)
 {
   // First look for cap32.cfg in the same directory as executable
   std::string configFilename = std::string(chAppPath) + "/cap32.cfg";
@@ -3942,12 +3912,85 @@ std::string getConfigurationFilename()
     // If not found, look for .cap32.cfg in the home of current user
     configFilename = std::string(getenv("HOME")) + "/.cap32.cfg";
     // If still not found, look for cap32.cfg in /etc
-    if(access(configFilename.c_str(), F_OK) != 0) {
+    if(!forWrite && access(configFilename.c_str(), F_OK) != 0) {
       configFilename = "/etc/cap32.cfg";
     }
   }
-  std::cout << "Using configuration file: " << configFilename << std::endl;
+  std::cout << "Using configuration file" << (forWrite ? " to save" : "") << ": " << configFilename << std::endl;
   return configFilename;
+}
+
+
+
+t_disk_format parseDiskFormat(const std::string& format)
+{
+  t_disk_format result;
+  dword dwVal;
+  std::vector<std::string> tokens = stringutils::split(format, ',');
+  if (tokens.size() < 7) { // Minimum number of values required
+    return result;
+  }
+  dwVal = strtoul(tokens[1].c_str(), nullptr, 0);
+  if ((dwVal < 1) || (dwVal > DSK_TRACKMAX)) { // invalid value?
+    return result;
+  }
+  result.tracks = dwVal;
+  dwVal = strtoul(tokens[2].c_str(), nullptr, 0);
+  if ((dwVal < 1) || (dwVal > DSK_SIDEMAX)) { // invalid value?
+    return result;
+  }
+  result.sides = dwVal;
+  dwVal = strtoul(tokens[3].c_str(), nullptr, 0);
+  if ((dwVal < 1) || (dwVal > DSK_SECTORMAX)) { // invalid value?
+    return result;
+  }
+  result.sectors = dwVal;
+  dwVal = strtoul(tokens[4].c_str(), nullptr, 0);
+  if ((dwVal < 1) || (dwVal > 6)) { // invalid value?
+    return result;
+  }
+  result.sector_size = dwVal;
+  dwVal = strtoul(tokens[5].c_str(), nullptr, 0);
+  if ((dwVal < 1) || (dwVal > 255)) { // invalid value?
+    return result;
+  }
+  result.gap3_length = dwVal;
+  dwVal = strtoul(tokens[6].c_str(), nullptr, 0);
+  result.filler_byte = (byte)dwVal;
+  unsigned int i = 7;
+  for (int iSide = 0; iSide < (int)result.sides; iSide++) {
+    for (int iSector = 0; iSector < (int)result.sectors; iSector++) {
+      if (i >= tokens.size()) { // value missing?
+        dwVal = iSector+1;
+      } else {
+        dwVal = strtoul(tokens[i++].c_str(), nullptr, 0);
+      }
+      result.sector_ids[iSide][iSector] = (byte)dwVal;
+    }
+  }
+  // Fill the label only if the disk format is valid
+  result.label = tokens[0];
+  return result;
+}
+
+
+
+std::string serializeDiskFormat(const t_disk_format& format)
+{
+  std::ostringstream oss;
+  oss << format.label << ",";
+  oss << format.tracks << ",";
+  oss << format.sides << ",";
+  oss << format.sectors << ",";
+  oss << format.sector_size << ",";
+  oss << format.gap3_length << ",";
+  oss << static_cast<unsigned int>(format.filler_byte);
+  for (int iSide = 0; iSide < (int)format.sides; iSide++) {
+    for (int iSector = 0; iSector < (int)format.sectors; iSector++) {
+      oss << "," << static_cast<unsigned int>(format.sector_ids[iSide][iSector]);
+    }
+  }
+  return oss.str();
 }
 
 
@@ -4045,83 +4088,13 @@ void loadConfiguration (t_CPC &CPC, const std::string& configFilename)
    CPC.tape_file = conf.getStringValue("file", "tape_file", "");
    CPC.tape_zip = conf.getIntValue("file", "tape_zip", 0) & 1;
 
-   // TODO(cpitrat): unit test a conf with custom disk format before migrating it to config::Config::getStringValue
    int iFmt = FIRST_CUSTOM_DISK_FORMAT;
    for (int i = iFmt; i < MAX_DISK_FORMAT; i++) { // loop through all user definable disk formats
-      dword dwVal;
-      char *pchTail;
       char chFmtId[14];
-      disk_format[iFmt].label[0] = 0; // clear slot
       sprintf(chFmtId, "fmt%02d", i); // build format ID
-      char chFmtStr[256];
-      getConfigValueString(chFileName, "file", chFmtId, chFmtStr, sizeof(chFmtStr)-1, "");
-      if (chFmtStr[0] != 0) { // found format definition for this slot?
-         char chDelimiters[] = ",";
-         char *pchToken;
-         pchToken = strtok(chFmtStr, chDelimiters); // format label
-         strncpy((char *)disk_format[iFmt].label, pchToken, sizeof(disk_format[iFmt].label)-1);
-         pchToken = strtok(nullptr, chDelimiters); // number of tracks
-         if (pchToken == nullptr) { // value missing?
-            continue;
-         }
-         dwVal = strtoul(pchToken, &pchTail, 0);
-         if ((dwVal < 1) || (dwVal > DSK_TRACKMAX)) { // invalid value?
-            continue;
-         }
-         disk_format[iFmt].tracks = dwVal;
-         pchToken = strtok(nullptr, chDelimiters); // number of sides
-         if (pchToken == nullptr) { // value missing?
-            continue;
-         }
-         dwVal = strtoul(pchToken, &pchTail, 0);
-         if ((dwVal < 1) || (dwVal > DSK_SIDEMAX)) { // invalid value?
-            continue;
-         }
-         disk_format[iFmt].sides = dwVal;
-         pchToken = strtok(nullptr, chDelimiters); // number of sectors
-         if (pchToken == nullptr) { // value missing?
-            continue;
-         }
-         dwVal = strtoul(pchToken, &pchTail, 0);
-         if ((dwVal < 1) || (dwVal > DSK_SECTORMAX)) { // invalid value?
-            continue;
-         }
-         disk_format[iFmt].sectors = dwVal;
-         pchToken = strtok(nullptr, chDelimiters); // sector size as N value
-         if (pchToken == nullptr) { // value missing?
-            continue;
-         }
-         dwVal = strtoul(pchToken, &pchTail, 0);
-         if ((dwVal < 1) || (dwVal > 6)) { // invalid value?
-            continue;
-         }
-         disk_format[iFmt].sector_size = dwVal;
-         pchToken = strtok(nullptr, chDelimiters); // gap#3 length
-         if (pchToken == nullptr) { // value missing?
-            continue;
-         }
-         dwVal = strtoul(pchToken, &pchTail, 0);
-         if ((dwVal < 1) || (dwVal > 255)) { // invalid value?
-            continue;
-         }
-         disk_format[iFmt].gap3_length = dwVal;
-         pchToken = strtok(nullptr, chDelimiters); // filler byte
-         if (pchToken == nullptr) { // value missing?
-            continue;
-         }
-         dwVal = strtoul(pchToken, &pchTail, 0);
-         disk_format[iFmt].filler_byte = (byte)dwVal;
-         for (int iSide = 0; iSide < (int)disk_format[iFmt].sides; iSide++) {
-            for (int iSector = 0; iSector < (int)disk_format[iFmt].sectors; iSector++) {
-               pchToken = strtok(nullptr, chDelimiters); // sector ID
-               if (pchToken == nullptr) { // value missing?
-                  dwVal = iSector+1;
-               } else {
-                  dwVal = strtoul(pchToken, &pchTail, 0);
-               }
-               disk_format[iFmt].sector_ids[iSide][iSector] = (byte)dwVal;
-            }
-         }
+      std::string formatString = conf.getStringValue("file", chFmtId, "");
+      disk_format[iFmt] = parseDiskFormat(formatString);
+      if (!disk_format[iFmt].label.empty()) { // found format definition for this slot?
          iFmt++; // entry is valid
       }
    }
@@ -4140,6 +4113,83 @@ void loadConfiguration (t_CPC &CPC, const std::string& configFilename)
       fclose(pfileObject);
    }
    CPC.rom_mf2 = conf.getStringValue("rom", "rom_mf2", "");
+}
+
+
+
+void saveConfiguration (t_CPC &CPC, const std::string& configFilename)
+{
+   config::Config conf;
+
+   conf.setIntValue("system", "model", CPC.model);
+   conf.setIntValue("system", "jumpers", CPC.jumpers);
+
+   conf.setIntValue("system", "ram_size", CPC.ram_size); // 128KB RAM
+   conf.setIntValue("system", "speed", CPC.speed); // original CPC speed
+   conf.setIntValue("system", "auto_pause", CPC.auto_pause);
+   conf.setIntValue("system", "printer", CPC.printer);
+   conf.setIntValue("system", "mf2", CPC.mf2);
+   conf.setIntValue("system", "keyboard", CPC.keyboard);
+   conf.setIntValue("system", "joystick_emulation", CPC.joystick_emulation);
+   conf.setIntValue("system", "joysticks", CPC.joysticks);
+   conf.setStringValue("system", "resources_path", CPC.resources_path);
+
+   conf.setIntValue("video", "scr_width", CPC.scr_fs_width);
+   conf.setIntValue("video", "scr_height", CPC.scr_fs_height);
+   conf.setIntValue("video", "scr_bpp", CPC.scr_fs_bpp);
+   conf.setIntValue("video", "scr_style", CPC.scr_style);
+   conf.setIntValue("video", "scr_oglfilter", CPC.scr_oglfilter);
+   conf.setIntValue("video", "scr_oglscanlines", CPC.scr_oglscanlines);
+   conf.setIntValue("video", "scr_vsync", CPC.scr_vsync);
+   conf.setIntValue("video", "scr_led", CPC.scr_led);
+   conf.setIntValue("video", "scr_fps", CPC.scr_fps);
+   conf.setIntValue("video", "scr_tube", CPC.scr_tube);
+   conf.setIntValue("video", "scr_intensity", CPC.scr_intensity);
+   conf.setIntValue("video", "scr_remanency", CPC.scr_remanency);
+   conf.setIntValue("video", "scr_window", CPC.scr_window);
+
+   conf.setIntValue("sound", "enabled", CPC.snd_enabled);
+   conf.setIntValue("sound", "playback_rate", CPC.snd_playback_rate);
+   conf.setIntValue("sound", "bits", CPC.snd_bits);
+   conf.setIntValue("sound", "stereo", CPC.snd_stereo);
+   conf.setIntValue("sound", "volume", CPC.snd_volume);
+   conf.setIntValue("sound", "pp_device", CPC.snd_pp_device);
+
+   conf.setIntValue("control", "kbd_layout", CPC.kbd_layout);
+
+   conf.setIntValue("file", "max_track_size", CPC.max_tracksize);
+   conf.setStringValue("file", "snap_path", CPC.snap_path);
+   conf.setStringValue("file", "snap_file", CPC.snap_file);
+   conf.setIntValue("file", "snap_zip", CPC.snap_zip);
+   conf.setStringValue("file", "drvA_path", CPC.drvA_path);
+   conf.setStringValue("file", "drvA_file", CPC.drvA_file);
+   conf.setIntValue("file", "drvA_zip", CPC.drvA_zip);
+   conf.setIntValue("file", "drvA_format", CPC.drvA_format);
+   conf.setStringValue("file", "drvB_path", CPC.drvB_path);
+   conf.setStringValue("file", "drvB_file", CPC.drvB_file);
+   conf.setIntValue("file", "drvB_zip", CPC.drvB_zip);
+   conf.setIntValue("file", "drvB_format", CPC.drvB_format);
+   conf.setStringValue("file", "tape_path", CPC.tape_path);
+   conf.setStringValue("file", "tape_file", CPC.tape_file);
+   conf.setIntValue("file", "tape_zip", CPC.tape_zip);
+
+   for (int iFmt = FIRST_CUSTOM_DISK_FORMAT; iFmt < MAX_DISK_FORMAT; iFmt++) { // loop through all user definable disk formats
+      char chFmtId[14];
+      sprintf(chFmtId, "fmt%02d", iFmt); // build format ID
+      conf.setStringValue("file", chFmtId, serializeDiskFormat(disk_format[iFmt]));
+   }
+   conf.setStringValue("file", "printer_file", CPC.printer_file);
+   conf.setStringValue("file", "sdump_file", CPC.sdump_file);
+
+   conf.setStringValue("rom", "rom_path", CPC.rom_path);
+   for (int iRomNum = 0; iRomNum < 16; iRomNum++) { // loop for ROMs 0-15
+      char chRomId[14];
+      sprintf(chRomId, "slot%02d", iRomNum); // build ROM ID
+      conf.setStringValue("rom", chRomId, CPC.rom_file[iRomNum]);
+   }
+   conf.setStringValue("rom", "rom_mf2", CPC.rom_mf2);
+
+   conf.saveToFile(configFilename);
 }
 
 
