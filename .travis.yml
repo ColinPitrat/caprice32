@@ -22,9 +22,7 @@ script:
  - make
  - make unit_test
  - make clean
-#To uncomment in case a core occurs:
- - rm -f ./core
  - make debug
 #To uncomment in case a core occurs:
  - find ./ -name 'core*'
- - for i in $(find ./ -name 'core*' -print); do gdb cap32 $i -ex "thread apply all bt" -ex "set pagination 0" -batch; done;
+ - for i in $(find ./ -name 'core*' -print); do gdb ./test/test_runner $i -ex "thread apply all bt" -ex "set pagination 0" -batch; done;
