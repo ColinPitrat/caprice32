@@ -26,7 +26,8 @@ ifndef CXX
 CXX	= g++
 endif
 
-CFLAGS_1	= -std=c++11 -Wall -Wzero-as-null-pointer-constant `sdl-config --cflags`
+COMMON_CFLAGS_1 = -std=c++11
+CFLAGS_1	= -Wall -Wzero-as-null-pointer-constant `sdl-config --cflags`
 
 ifndef DEBUG
 ifeq ($(LAST_BUILD_IN_DEBUG), 1)
@@ -36,20 +37,21 @@ endif
 endif
 
 ifdef DEBUG
-CFLAGS_2	= $(CFLAGS_1) -g -Og
+COMMON_CFLAGS_2	= $(COMMON_CFLAGS_1) -g -Og
 all: debug
 else
-CFLAGS_2	= $(CFLAGS_1) -O2 -funroll-loops -ffast-math -fomit-frame-pointer -fno-strength-reduce -finline-functions -s
+COMMON_CFLAGS_2	= $(COMMON_CFLAGS_1) -O2 -funroll-loops -ffast-math -fomit-frame-pointer -fno-strength-reduce -finline-functions -s
 all: cap32
 endif
 
 ifdef WITHOUT_GL
-CFLAGS_3 = $(CFLAGS_2)
+CFLAGS_2 = $(CFLAGS_1)
 else
-CFLAGS_3 = $(CFLAGS_2) -DHAVE_GL
+CFLAGS_2 = $(CFLAGS_1) -DHAVE_GL
 endif
 
-CFLAGS = $(CFLAGS_3) $(IPATHS)
+COMMON_CFLAGS=$(COMMON_CFLAGS_2)
+CFLAGS = $(COMMON_CFLAGS) $(CFLAGS_3) $(IPATHS)
 
 $(MAIN): main.cpp src/cap32.h
 	@$(CXX) -c $(CFLAGS) -o $(MAIN) main.cpp
@@ -80,7 +82,7 @@ cap32: $(OBJECTS) $(MAIN)
 googletest:
 	@[ -d googletest ] || git clone https://github.com/google/googletest.git
 
-TEST_CFLAGS=-std=c++11 -I$(GTEST_DIR)/include -I$(GTEST_DIR)
+TEST_CFLAGS=$(COMMON_CFLAGS) -I$(GTEST_DIR)/include -I$(GTEST_DIR)
 TEST_TARGET=$(TSTDIR)/test_runner
 GTEST_DIR=googletest/googletest/
 
