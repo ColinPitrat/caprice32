@@ -22,7 +22,7 @@ namespace config
       int getIntValue(const std::string& section, const std::string& key, const int defaultValue) const;
       void setIntValue(const std::string& section, const std::string& key, const int value);
 
-      std::string getStringValue(const std::string& section, const std::string& key, const std::string defaultValue) const;
+      std::string getStringValue(const std::string& section, const std::string& key, const std::string& defaultValue) const;
       void setStringValue(const std::string& section, const std::string& key, const std::string& value);
 
     private:
