@@ -51,7 +51,7 @@ CFLAGS_2 = $(CFLAGS_1) -DHAVE_GL
 endif
 
 COMMON_CFLAGS=$(COMMON_CFLAGS_2)
-CFLAGS = $(COMMON_CFLAGS) $(CFLAGS_3) $(IPATHS)
+CFLAGS = $(COMMON_CFLAGS) $(CFLAGS_2) $(IPATHS)
 
 $(MAIN): main.cpp src/cap32.h
 	@$(CXX) -c $(CFLAGS) -o $(MAIN) main.cpp
