@@ -20,7 +20,7 @@ TEST_OBJECTS:=$(TEST_DEPENDS:.d=.o)
 IPATHS	= -Isrc/ -Isrc/gui/includes `freetype-config --cflags`
 LIBS = `sdl-config --libs` -lz `freetype-config --libs`
 
-.PHONY: all clean debug debug_flag gtest
+.PHONY: all clean debug debug_flag
 
 ifndef CXX
 CXX	= g++
@@ -77,7 +77,7 @@ cap32: $(OBJECTS) $(MAIN)
 ### Tests
 ####################################
 
-gtest:
+googletest:
 	@[ -d googletest ] || git clone https://github.com/google/googletest.git
 
 TEST_CFLAGS=-std=c++11 -I$(GTEST_DIR)/include -I$(GTEST_DIR)
@@ -89,10 +89,10 @@ $(TEST_DEPENDS): $(OBJDIR)/%.d: %.cpp
 	@mkdir -p `dirname $@`
 	@$(CXX) -MM $(TEST_CFLAGS) $(IPATHS) $< | { sed 's#^[^:]*\.o[ :]*#$(OBJDIR)/$*.o $(OBJDIR)/$*.d : #g' ; echo "%.h:;" ; echo "" ; } > $@
 
-$(TEST_OBJECTS): $(OBJDIR)/%.o: %.cpp gtest
+$(TEST_OBJECTS): $(OBJDIR)/%.o: %.cpp googletest
 	$(CXX) -c $(TEST_CFLAGS) $(IPATHS) -o $@ $<
 
-$(GTEST_DIR)/src/gtest-all.o: $(GTEST_DIR)/src/gtest-all.cc gtest
+$(GTEST_DIR)/src/gtest-all.o: $(GTEST_DIR)/src/gtest-all.cc googletest
 	$(CXX) $(TEST_CFLAGS) -c $(INCPATH) -o $@ $<
 
 unit_test: $(OBJECTS) $(TEST_OBJECTS) $(GTEST_DIR)/src/gtest-all.o
