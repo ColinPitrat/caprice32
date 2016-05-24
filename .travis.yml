@@ -19,10 +19,10 @@ script:
 #To uncomment in case a core occurs:
  - ulimit -c unlimited
  - sudo sysctl kernel.core_pattern=core
- - make
- - make unit_test
- - make clean
- - make debug
+# - make
+# - make unit_test
+# - make clean
+ - make DEBUG=1
 #To uncomment in case a core occurs:
  - find ./ -name 'core*'
  - for i in $(find ./ -name 'core*' -print); do gdb ./test/test_runner $i -ex "thread apply all bt" -ex "set pagination 0" -batch; done;
