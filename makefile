@@ -29,6 +29,8 @@ endif
 COMMON_CFLAGS_1 = -std=c++11
 CFLAGS_1	= -Wall -Wzero-as-null-pointer-constant `sdl-config --cflags`
 
+debug: DEBUG=1
+
 ifndef DEBUG
 ifeq ($(LAST_BUILD_IN_DEBUG), 1)
 FORCED_DEBUG=1
@@ -97,8 +99,10 @@ $(TEST_OBJECTS): $(OBJDIR)/%.o: %.cpp googletest
 $(GTEST_DIR)/src/gtest-all.o: $(GTEST_DIR)/src/gtest-all.cc googletest
 	$(CXX) $(TEST_CFLAGS) -c $(INCPATH) -o $@ $<
 
-unit_test: $(OBJECTS) $(TEST_OBJECTS) $(GTEST_DIR)/src/gtest-all.o
+$(TEST_TARGET): $(OBJECTS) $(TEST_OBJECTS) $(GTEST_DIR)/src/gtest-all.o
 	$(CXX) $(TEST_CFLAGS) -o $(TEST_TARGET) $(GTEST_DIR)/src/gtest-all.o $(TEST_OBJECTS) $(OBJECTS) $(LIBS) 
+
+unit_test: $(TEST_TARGET)
 	./$(TEST_TARGET) --gtest_shuffle
 
 clean:
