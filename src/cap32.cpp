@@ -4003,7 +4003,6 @@ void loadConfiguration (t_CPC &CPC, const std::string& configFilename)
    std::string appPath = chAppPath;
    const char *chFileName = configFilename.c_str();
 
-   memset(&CPC, 0, sizeof(CPC));
    CPC.model = conf.getIntValue("system", "model", 2); // CPC 6128
    if (CPC.model > 2) {
       CPC.model = 2;

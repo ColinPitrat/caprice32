@@ -100,7 +100,7 @@ $(GTEST_DIR)/src/gtest-all.o: $(GTEST_DIR)/src/gtest-all.cc googletest
 	$(CXX) $(TEST_CFLAGS) -c $(INCPATH) -o $@ $<
 
 $(TEST_TARGET): $(OBJECTS) $(TEST_OBJECTS) $(GTEST_DIR)/src/gtest-all.o
-	$(CXX) $(TEST_CFLAGS) -o $(TEST_TARGET) $(GTEST_DIR)/src/gtest-all.o $(TEST_OBJECTS) $(OBJECTS) $(LIBS) 
+	$(CXX) $(LDFLAGS) -o $(TEST_TARGET) $(GTEST_DIR)/src/gtest-all.o $(TEST_OBJECTS) $(OBJECTS) $(LIBS) -lpthread
 
 unit_test: $(TEST_TARGET)
 	./$(TEST_TARGET) --gtest_shuffle
