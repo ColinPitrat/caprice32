@@ -4253,6 +4253,79 @@ void doCleanUp (void)
 
 
 
+// Retrieve files that are passed as argument and update CPC fields so that they will be loaded properly
+// TODO(cpitrat): tests and refactor
+// TODO(cpitrat): support 2 dsk (drive A and B)
+// TODO(cpitrat): support SNA
+void parseArgs (int argc, char **argv, t_CPC& CPC)
+{
+   bool have_DSK = false;
+   bool have_SNA = false;
+   bool have_TAP = false;
+
+   for (int i = 1; i < argc; i++) { // loop for all command line arguments
+      int length = strlen(argv[i]);
+      if (length > 5) { // minumum for a valid filename
+         char path[_MAX_PATH + 1];
+         char extension[5];
+         if (argv[i][0] == '"') { // argument passed with quotes?
+            length -= 2;
+            strncpy(path, &argv[i][1], length); // strip the quotes
+         } else {
+            strncpy(path, &argv[i][0], sizeof(path)-1); // take it as is
+         }
+         int pos = length - 4;
+         if (pos > 0) {
+            char file_name[_MAX_PATH + 1];
+            bool zip = false;
+            strncpy(extension, &path[pos], 4); // grab the extension
+            extension[4] = '\0'; // zero terminate string
+            if (strcasecmp(extension, ".zip") == 0) { // are we dealing with a zip archive?
+               zip_info.filename = path;
+               zip_info.extension = ".dsk.sna.cdt.voc";
+               if (zip_dir(&zip_info)) {
+                  continue; // error or nothing relevant found
+               } else {
+                 char zipcontent_file_name[_MAX_PATH + 1];
+                  strncpy(zipcontent_file_name, zip_info.pchFileNames, sizeof(zipcontent_file_name)-1); // name of the 1st file in the archive
+                  pos = strlen(zipcontent_file_name) - 4;
+                  strncpy(extension, &file_name[pos], 4); // grab the extension
+                  zip = true;
+               }
+            } else {
+               splitPathFileName(path, path, file_name); // split into components
+            }
+            if ((!have_DSK) && (strcasecmp(extension, ".dsk") == 0)) { // a disk image?
+               CPC.drvA_path = path; // if the image loads, copy the infos to the config structure
+               CPC.drvA_file = file_name;
+               CPC.drvA_zip = (zip ? 1 : 0);
+               have_DSK = true;
+            }
+            if ((!have_SNA) && (strcasecmp(extension, ".sna") == 0)) {
+               CPC.snap_path = path;
+               CPC.snap_file = file_name;
+               CPC.snap_zip = (zip ? 1 : 0);
+               have_SNA = true;
+            }
+            if ((!have_TAP) && (strcasecmp(extension, ".cdt") == 0)) {
+               CPC.tape_path = path;
+               CPC.tape_file = file_name;
+               CPC.tape_zip = (zip ? 1 : 0);
+               have_TAP = true;
+            }
+            if ((!have_TAP) && (strcasecmp(extension, ".voc") == 0)) {
+               CPC.tape_path = path;
+               CPC.tape_file = file_name;
+               CPC.tape_zip = (zip ? 1 : 0);
+               have_TAP = true;
+            }
+         }
+      }
+   }
+}
+
+
+
 int cap32_main (int argc, char **argv)
 {
    dword dwOffset;
@@ -4309,142 +4382,10 @@ int cap32_main (int argc, char **argv)
    pfoDebug = fopen("./debug.txt", "wt");
    #endif
 
-   bool have_DSK = false;
-   bool have_SNA = false;
-   bool have_TAP = false;
-   memset(&driveA, 0, sizeof(t_drive)); // clear disk drive A data structure
-   for (int i = 1; i < argc; i++) { // loop for all command line arguments
-      int length = strlen(argv[i]);
-      if (length > 5) { // minumum for a valid filename
-         char path[_MAX_PATH + 1];
-         char extension[5];
-         if (argv[i][0] == '"') { // argument passed with quotes?
-            length -= 2;
-            strncpy(path, &argv[i][1], length); // strip the quotes
-         } else {
-            strncpy(path, &argv[i][0], sizeof(path)-1); // take it as is
-         }
-         int pos = length - 4;
-         if (pos > 0) {
-            char file_name[_MAX_PATH + 1];
-            bool zip = false;
-            strncpy(extension, &path[pos], 4); // grab the extension
-            extension[4] = '\0'; // zero terminate string
-            if (strcasecmp(extension, ".zip") == 0) { // are we dealing with a zip archive?
-               zip_info.filename = path;
-               zip_info.extension = ".dsk.sna.cdt.voc";
-               if (zip_dir(&zip_info)) {
-                  continue; // error or nothing relevant found
-               } else {
-                  strncpy(file_name, zip_info.pchFileNames, sizeof(file_name)-1); // name of the 1st file in the archive
-                  pos = strlen(file_name) - 4;
-                  strncpy(extension, &file_name[pos], 4); // grab the extension
-                  zip = true;
-               }
-            } else {
-               splitPathFileName(path, path, file_name); // split into components
-            }
-            if ((!have_DSK) && (strcasecmp(extension, ".dsk") == 0)) { // a disk image?
-               if (zip) {
-                  char chFileName[_MAX_PATH + 1];
-                  char *pchPtr = zip_info.pchFileNames;
-                  zip_info.dwOffset = *(dword *)(pchPtr + (strlen(pchPtr)+1)); // get the offset into the zip archive
-                  if (!zip_extract(path, chFileName, zip_info.dwOffset)) {
-                     if (!dsk_load(chFileName, &driveA, 'A')) {
-                        CPC.drvA_path = path; // if the image loads, copy the infos to the config structure
-                        CPC.drvA_file = file_name;
-                        CPC.drvA_zip = 1;
-                        have_DSK = true;
-                     }
-                     remove(chFileName);
-                  }
-               } else {
-                  strcat(path, file_name);
-                  if(!dsk_load(path, &driveA, 'A')) {
-                     CPC.drvA_path = path;
-                     CPC.drvA_file = file_name;
-                     CPC.drvA_zip = 0;
-                     have_DSK = true;
-                  }
-               }
-            }
-            if ((!have_SNA) && (strcasecmp(extension, ".sna") == 0)) {
-               if (zip) {
-                  char chFileName[_MAX_PATH + 1];
-                  char *pchPtr = zip_info.pchFileNames;
-                  zip_info.dwOffset = *(dword *)(pchPtr + (strlen(pchPtr)+1));
-                  if (!zip_extract(path, chFileName, zip_info.dwOffset)) {
-                     if (!snapshot_load(chFileName)) {
-                        CPC.snap_path = path;
-                        CPC.snap_file = file_name;
-                        CPC.snap_zip = 1;
-                        have_SNA = true;
-                     }
-                     remove(chFileName);
-                  }
-               } else {
-                  strcat(path, file_name);
-                  if(!snapshot_load(path)) {
-                     CPC.snap_path = path;
-                     CPC.snap_file = file_name;
-                     CPC.snap_zip = 0;
-                     have_SNA = true;
-                  }
-               }
-            }
-            if ((!have_TAP) && (strcasecmp(extension, ".cdt") == 0)) {
-               if (zip) {
-                  char chFileName[_MAX_PATH + 1];
-                  char *pchPtr = zip_info.pchFileNames;
-                  zip_info.dwOffset = *(dword *)(pchPtr + (strlen(pchPtr)+1));
-                  if (!zip_extract(path, chFileName, zip_info.dwOffset)) {
-                     if (!tape_insert(chFileName)) {
-                        CPC.tape_path = path;
-                        CPC.tape_file = file_name;
-                        CPC.tape_zip = 1;
-                        have_TAP = true;
-                     }
-                     remove(chFileName);
-                  }
-               } else {
-                  strcat(path, file_name);
-                  if(!tape_insert(path)) {
-                     CPC.tape_path = path;
-                     CPC.tape_file = file_name;
-                     CPC.tape_zip = 0;
-                     have_TAP = true;
-                  }
-               }
-            }
-            if ((!have_TAP) && (strcasecmp(extension, ".voc") == 0)) {
-               if (zip) {
-                  char chFileName[_MAX_PATH + 1];
-                  char *pchPtr = zip_info.pchFileNames;
-                  zip_info.dwOffset = *(dword *)(pchPtr + (strlen(pchPtr)+1));
-                  if (!zip_extract(path, chFileName, zip_info.dwOffset)) {
-                     if (!tape_insert_voc(chFileName)) {
-                        CPC.tape_path = path;
-                        CPC.tape_file = file_name;
-                        CPC.tape_zip = 1;
-                        have_TAP = true;
-                     }
-                     remove(chFileName);
-                  }
-               } else {
-                  strcat(path, file_name);
-                  if(!tape_insert_voc(path)) {
-                     CPC.tape_path = path;
-                     CPC.tape_file = file_name;
-                     CPC.tape_zip = 0;
-                     have_TAP = true;
-                  }
-               }
-            }
-         }
-      }
-   }
+   parseArgs(argc, argv, CPC);
 
-   if ((!have_DSK) && (!CPC.drvA_file.empty())) { // insert disk in drive A?
+   memset(&driveA, 0, sizeof(t_drive)); // clear disk drive A data structure
+   if (!CPC.drvA_file.empty()) { // insert disk in drive A?
       char chFileName[_MAX_PATH + 1];
       char *pchPtr;
 
@@ -4511,7 +4452,7 @@ int cap32_main (int argc, char **argv)
          dsk_load(chFileName, &driveB, 'B');
       }
    }
-   if ((!have_TAP) && (!CPC.tape_file.empty())) { // insert a tape?
+   if (!CPC.tape_file.empty()) { // insert a tape?
       int iErrorCode = 0;
       char chFileName[_MAX_PATH + 1];
       char *pchPtr;
