@@ -2001,6 +2001,7 @@ int file_size (int file_num)
 
 
 
+// TODO(cpitrat): Needs to be tested with a zip containing multiple files
 int zip_dir (t_zip_info *zi)
 {
    int n, iFileCount;
@@ -2087,6 +2088,7 @@ int zip_dir (t_zip_info *zi)
 
 
 
+// TODO(cpitrat): Incomplete: pchFileName is unused, tmpfile is deleted at the end of the method
 int zip_extract (std::string zipFile, const char *pchFileName, dword dwOffset)
 {
    int iStatus, iCount;
@@ -4193,41 +4195,6 @@ void saveConfiguration (t_CPC &CPC, const std::string& configFilename)
 
 
 
-void splitPathFileName(char *pchCombined, char *pchPath, char *pchFile)
-{
-   char *pchPtr;
-
-   pchPtr = strrchr(pchCombined, '/'); // start from the end and find the first path delimiter
-   if (!pchPtr) {
-      pchPtr = strrchr(pchCombined, '\\'); // try again with the alternate form
-   }
-   if (pchPtr) {
-      pchPtr++; // advance the pointer to the next character
-      if (pchFile) {
-         strcpy(pchFile, pchPtr); // copy the filename
-      }
-      char chOld = *pchPtr;
-      *pchPtr = 0; // cut off the filename part
-      if (pchPath != pchCombined) {
-         if (pchPath) {
-            strcpy(pchPath, pchCombined); // copy the path
-         }
-         *pchPtr = chOld; // restore original string
-      }
-   } else {
-      if (pchFile) {
-         *pchFile = 0; // no filename found
-      }
-      if (pchPath != pchCombined) {
-         if (pchPath) {
-            strcpy(pchPath, pchCombined); // copy the path
-         }
-      }
-   }
-}
-
-
-
 void doCleanUp (void)
 {
    printer_stop();
@@ -4253,72 +4220,61 @@ void doCleanUp (void)
 
 
 
-// Retrieve files that are passed as argument and update CPC fields so that they will be loaded properly
-// TODO(cpitrat): tests and refactor
-// TODO(cpitrat): support 2 dsk (drive A and B)
-// TODO(cpitrat): support SNA
-void parseArgs (int argc, char **argv, t_CPC& CPC)
+// TODO(cpitrat): refactor
+void parseArgs (int argc, const char **argv, t_CPC& CPC)
 {
-   bool have_DSK = false;
+   bool have_DSKA = false;
+   bool have_DSKB = false;
    bool have_SNA = false;
    bool have_TAP = false;
 
    for (int i = 1; i < argc; i++) { // loop for all command line arguments
-      int length = strlen(argv[i]);
-      if (length > 5) { // minumum for a valid filename
-         char path[_MAX_PATH + 1];
-         char extension[5];
-         if (argv[i][0] == '"') { // argument passed with quotes?
-            length -= 2;
-            strncpy(path, &argv[i][1], length); // strip the quotes
-         } else {
-            strncpy(path, &argv[i][0], sizeof(path)-1); // take it as is
-         }
-         int pos = length - 4;
-         if (pos > 0) {
-            char file_name[_MAX_PATH + 1];
-            bool zip = false;
-            strncpy(extension, &path[pos], 4); // grab the extension
-            extension[4] = '\0'; // zero terminate string
-            if (strcasecmp(extension, ".zip") == 0) { // are we dealing with a zip archive?
-               zip_info.filename = path;
-               zip_info.extension = ".dsk.sna.cdt.voc";
-               if (zip_dir(&zip_info)) {
-                  continue; // error or nothing relevant found
-               } else {
-                 char zipcontent_file_name[_MAX_PATH + 1];
-                  strncpy(zipcontent_file_name, zip_info.pchFileNames, sizeof(zipcontent_file_name)-1); // name of the 1st file in the archive
-                  pos = strlen(zipcontent_file_name) - 4;
-                  strncpy(extension, &file_name[pos], 4); // grab the extension
-                  zip = true;
-               }
+      std::string fullpath = stringutils::trim(argv[i], '"'); // remove quotes if arguments quoted
+      if (fullpath.length() > 5) { // minumum for a valid filename
+         int pos = fullpath.length() - 4;
+         std::string dirname;
+         std::string filename;
+         bool zip = false;
+         std::string extension = stringutils::lower(fullpath.substr(pos));
+         stringutils::splitPath(fullpath, dirname, filename);
+         if (extension == ".zip") { // are we dealing with a zip archive?
+            zip_info.filename = fullpath;
+            zip_info.extension = ".dsk.sna.cdt.voc";
+            if (zip_dir(&zip_info)) {
+               continue; // error or nothing relevant found
             } else {
-               splitPathFileName(path, path, file_name); // split into components
+            // TODO(cpitrat): Tests with multiple dsk files in a same zip - define how to behave
+               dirname = fullpath;
+               filename = zip_info.pchFileNames;
+               pos = filename.length() - 4;
+               extension = filename.substr(pos); // grab the extension
+               zip = true;
             }
-            if ((!have_DSK) && (strcasecmp(extension, ".dsk") == 0)) { // a disk image?
-               CPC.drvA_path = path; // if the image loads, copy the infos to the config structure
-               CPC.drvA_file = file_name;
+         }
+         if (extension == ".dsk") { // a disk image?
+            if(!have_DSKA) {
+               CPC.drvA_path = dirname; // if the image loads, copy the infos to the config structure
+               CPC.drvA_file = filename;
                CPC.drvA_zip = (zip ? 1 : 0);
-               have_DSK = true;
+               have_DSKA = true;
+            } else if(!have_DSKB) {
+               CPC.drvB_path = dirname; // if the image loads, copy the infos to the config structure
+               CPC.drvB_file = filename;
+               CPC.drvB_zip = (zip ? 1 : 0);
+               have_DSKB = true;
             }
-            if ((!have_SNA) && (strcasecmp(extension, ".sna") == 0)) {
-               CPC.snap_path = path;
-               CPC.snap_file = file_name;
-               CPC.snap_zip = (zip ? 1 : 0);
-               have_SNA = true;
-            }
-            if ((!have_TAP) && (strcasecmp(extension, ".cdt") == 0)) {
-               CPC.tape_path = path;
-               CPC.tape_file = file_name;
-               CPC.tape_zip = (zip ? 1 : 0);
-               have_TAP = true;
-            }
-            if ((!have_TAP) && (strcasecmp(extension, ".voc") == 0)) {
-               CPC.tape_path = path;
-               CPC.tape_file = file_name;
-               CPC.tape_zip = (zip ? 1 : 0);
-               have_TAP = true;
-            }
+         }
+         if ((!have_SNA) && (extension == ".sna")) {
+            CPC.snap_path = dirname;
+            CPC.snap_file = filename;
+            CPC.snap_zip = (zip ? 1 : 0);
+            have_SNA = true;
+         }
+         if ((!have_TAP) && (extension == ".cdt" || extension == ".voc")) {
+            CPC.tape_path = dirname;
+            CPC.tape_file = filename;
+            CPC.tape_zip = (zip ? 1 : 0);
+            have_TAP = true;
          }
       }
    }
@@ -4382,7 +4338,7 @@ int cap32_main (int argc, char **argv)
    pfoDebug = fopen("./debug.txt", "wt");
    #endif
 
-   parseArgs(argc, argv, CPC);
+   parseArgs(argc, const_cast<const char**>(argv), CPC);
 
    memset(&driveA, 0, sizeof(t_drive)); // clear disk drive A data structure
    if (!CPC.drvA_file.empty()) { // insert disk in drive A?
@@ -4497,6 +4453,48 @@ int cap32_main (int argc, char **argv)
             iErrorCode = tape_insert_voc(chFileName);
          }
          if (CPC.tape_zip) {
+            remove(chFileName); // dispose of the temp file
+         }
+      }
+   }
+   if (!CPC.snap_file.empty()) { // load a snapshot ?
+      int iErrorCode = 0;
+      char chFileName[_MAX_PATH + 1];
+      char *pchPtr;
+
+      if (CPC.snap_zip) { // compressed image?
+         zip_info.filename = CPC.snap_path; // pchPath already has path and zip file combined
+         zip_info.extension = ".sna";
+         iErrorCode = zip_dir(&zip_info);
+         if (!iErrorCode) { // parse the zip for relevant files
+            dword n;
+            pchPtr = zip_info.pchFileNames;
+            for (n = zip_info.iFiles; n; n--) { // loop through all entries
+               if (!strcasecmp(CPC.snap_file.c_str(), pchPtr)) { // do we have a match?
+                  break;
+               }
+               pchPtr += strlen(pchPtr) + 5; // skip offset
+            }
+            if (n) {
+               zip_info.dwOffset = *(dword *)(pchPtr + (strlen(pchPtr)+1)); // get the offset into the zip archive
+               iErrorCode = zip_extract(CPC.snap_path, chFileName, zip_info.dwOffset);
+            }
+            else {
+               CPC.snap_zip = 0;
+               iErrorCode = 1; // file not found
+            }
+         }
+         else {
+            CPC.snap_zip = 0;
+         }
+      }
+      else {
+         strncpy(chFileName, CPC.snap_path.c_str(), sizeof(chFileName)-1);
+         strncat(chFileName, CPC.snap_file.c_str(), sizeof(chFileName)-1 - strlen(chFileName));
+      }
+      if (!iErrorCode) {
+         iErrorCode = snapshot_load(chFileName);
+         if (CPC.snap_zip) {
             remove(chFileName); // dispose of the temp file
          }
       }

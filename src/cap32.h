@@ -472,6 +472,9 @@ std::string serializeDiskFormat(const t_disk_format& format);
 void loadConfiguration (t_CPC &CPC, const std::string& configFilename);
 void saveConfiguration (t_CPC &CPC, const std::string& configFilename);
 
+// Retrieve files that are passed as argument and update CPC fields so that they will be loaded properly
+void parseArgs (int argc, const char **argv, t_CPC& CPC);
+
 int cap32_main(int argc, char **argv);
 
 // fdc.c
