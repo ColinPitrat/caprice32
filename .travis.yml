@@ -1,6 +1,6 @@
 language: cpp
 #To uncomment in case a core occurs:
-sudo: required
+#sudo: required
 addons:
  apt:
   sources:
@@ -11,18 +11,18 @@ addons:
     - gcc-4.8
     - g++-4.8
 #To uncomment in case a core occurs:
-    - gdb
+#    - gdb
 before_script:
     - export CXX=g++-4.8
 # Build and test both in release and debug to ensure both works fine
 script: 
 #To uncomment in case a core occurs:
- - ulimit -c unlimited
- - sudo sysctl kernel.core_pattern=core
-# - make
-# - make unit_test
-# - make clean
- - make DEBUG=1
+# - ulimit -c unlimited
+# - sudo sysctl kernel.core_pattern=core
+ - make
+ - make unit_test
+ - make clean
+ - make debug
 #To uncomment in case a core occurs:
- - find ./ -name 'core*'
- - for i in $(find ./ -name 'core*' -print); do gdb ./test/test_runner $i -ex "thread apply all bt" -ex "set pagination 0" -batch; done;
+# - find ./ -name 'core*'
+# - for i in $(find ./ -name 'core*' -print); do gdb ./test/test_runner $i -ex "thread apply all bt" -ex "set pagination 0" -batch; done;
