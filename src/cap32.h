@@ -417,15 +417,6 @@ typedef struct {
 } t_drive;
 
 typedef struct {
-   std::string filename;
-   std::string extension;
-   char *pchFileNames;
-   char *pchSelection;
-   int iFiles;
-   unsigned int dwOffset;
-} t_zip_info;
-
-typedef struct {
    std::string label; // label to display in options dialog
    unsigned int tracks; // number of tracks
    unsigned int sides; // number of sides
@@ -435,8 +426,6 @@ typedef struct {
    unsigned char filler_byte; // default byte to use
    unsigned char sector_ids[2][16]; // sector IDs - indices: side, sector
 } t_disk_format;
-
-
 
 // cap32.cpp
 void emulator_reset(bool bolMF2Reset);
@@ -451,14 +440,18 @@ void audio_pause (void);
 void audio_resume (void);
 int video_init (void);
 void video_shutdown (void);
+int snapshot_load (FILE *pfile);
 int snapshot_load (const char *pchFileName);
 int snapshot_save (const char *pchFileName);
-int dsk_load (const char *pchFileName, t_drive *drive, char chID);
-int dsk_save (const char *pchFileName, t_drive *drive, char chID);
+int dsk_load (FILE *pfile, t_drive *drive);
+int dsk_load (const char *pchFileName, t_drive *drive);
+int dsk_save (const char *pchFileName, t_drive *drive);
 void dsk_eject (t_drive *drive);
 int dsk_format (t_drive *drive, int iFormat);
+int tape_insert (FILE *pfile);
 int tape_insert (const char *pchFileName);
-int tape_insert_voc (const char *pchFileName);
+int tape_insert_cdt (FILE *pfile);
+int tape_insert_voc (FILE *pfile);
 void tape_eject (void);
 
 // Return the path to the best (i.e: most specific) configuration file.

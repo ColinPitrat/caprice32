@@ -216,17 +216,15 @@ TEST(StringUtils, SplitPathOnUnixWithBackslash)
   ASSERT_EQ("test\\ disk.dsk", filename);
 }
 
-// This is an akward behaviour, but it's how it used to be
-// It may make more sense to consider the path as ./ and the file as path
 TEST(StringUtils, SplitPathWithoutDelimiter)
 {
-  std::string path = "not_a_path";
+  std::string path = "filename";
   std::string dirname, filename;
 
   stringutils::splitPath(path, dirname, filename);
 
-  ASSERT_EQ("not_a_path", dirname);
-  ASSERT_EQ("", filename);
+  ASSERT_EQ("./", dirname);
+  ASSERT_EQ("filename", filename);
 }
 
 TEST(StringUtils, SplitPathOnWindows)

@@ -19,7 +19,6 @@
 #include <iostream>
 #include <sstream>
 
-#include <zlib.h>
 #include "SDL.h"
 
 #include "cap32.h"
@@ -29,6 +28,7 @@
 #include "z80.h"
 #include "configuration.h"
 #include "stringutils.h"
+#include "zip.h"
 
 #include <errno.h>
 #include <string.h>
@@ -38,54 +38,7 @@
 #include "CapriceGui.h"
 #include "CapriceGuiView.h"
 
-#define ERR_INPUT_INIT           1
-#define ERR_VIDEO_INIT           2
-#define ERR_VIDEO_SET_MODE       3
-#define ERR_VIDEO_SURFACE        4
-#define ERR_VIDEO_PALETTE        5
-#define ERR_VIDEO_COLOUR_DEPTH   6
-#define ERR_AUDIO_INIT           7
-#define ERR_AUDIO_RATE           8
-#define ERR_OUT_OF_MEMORY        9
-#define ERR_CPC_ROM_MISSING      10
-#define ERR_NOT_A_CPC_ROM        11
-#define ERR_ROM_NOT_FOUND        12
-#define ERR_FILE_NOT_FOUND       13
-#define ERR_FILE_BAD_ZIP         14
-#define ERR_FILE_EMPTY_ZIP       15
-#define ERR_FILE_UNZIP_FAILED    16
-#define ERR_SNA_INVALID          17
-#define ERR_SNA_SIZE             18
-#define ERR_SNA_CPC_TYPE         19
-#define ERR_SNA_WRITE            20
-#define ERR_DSK_INVALID          21
-#define ERR_DSK_SIDES            22
-#define ERR_DSK_SECTORS          23
-#define ERR_DSK_WRITE            24
-#define MSG_DSK_ALTERED          25
-#define ERR_TAP_INVALID          26
-#define ERR_TAP_UNSUPPORTED      27
-#define ERR_TAP_BAD_VOC          28
-#define ERR_PRINTER              29
-#define ERR_BAD_MF2_ROM          30
-#define ERR_SDUMP                31
-
-#define MSG_SNA_LOAD             32
-#define MSG_SNA_SAVE             33
-#define MSG_DSK_LOAD             34
-#define MSG_DSK_SAVE             35
-#define MSG_JOY_ENABLE           36
-#define MSG_JOY_DISABLE          37
-#define MSG_SPD_NORMAL           38
-#define MSG_SPD_FULL             39
-#define MSG_TAP_INSERT           40
-#define MSG_SDUMP_SAVE           41
-#define MSG_PAUSED               42
-#define MSG_TAP_PLAY             43
-#define MSG_TAP_STOP             44
-
-#define ERR_JOYSTICKS_INIT       45
-
+#include "errors.h"
 
 #define MAX_LINE_LEN 256
 
@@ -94,6 +47,12 @@
 #define DEF_SPEED_SETTING 4
 
 #define MAX_NB_JOYSTICKS 2
+
+#ifdef DEBUG
+#define LOG(x) std::cout << __FILE__ << ":" << __LINE__ << " - " << x << std::endl;
+#else
+#define LOG(x)
+#endif
 
 
 extern byte bTapeLevel;
@@ -1318,7 +1277,7 @@ t_VDU VDU;
 t_drive driveA;
 t_drive driveB;
 
-t_zip_info zip_info;
+zip::t_zip_info zip_info;
 
 #define MAX_DISK_FORMAT 8
 #define DEFAULT_DISK_FORMAT 0
@@ -2001,365 +1960,212 @@ int file_size (int file_num)
 
 
 
-// TODO(cpitrat): Needs to be tested with a zip containing multiple files
-int zip_dir (t_zip_info *zi)
+int snapshot_load (FILE *pfile)
 {
-   int n, iFileCount;
-   long lFilePosition;
-   dword dwCentralDirPosition, dwNextEntry;
-   word wCentralDirEntries, wCentralDirSize, wFilenameLength;
-   byte *pbPtr;
-   char *pchStrPtr;
-   dword dwOffset;
+  int n;
+  dword dwSnapSize, dwModel, dwFlags;
+  byte val;
+  reg_pair port;
+  t_SNA_header sh;
 
-   iFileCount = 0;
-   if ((pfileObject = fopen(zi->filename.c_str(), "rb")) == nullptr) {
-      return ERR_FILE_NOT_FOUND;
-   }
+  memset(&sh, 0, sizeof(sh));
+  if(fread(&sh, sizeof(sh), 1, pfile) != 1) { // read snapshot header
+    return ERR_SNA_INVALID;
+  }
+  if (memcmp(sh.id, "MV - SNA", 8) != 0) { // valid SNApshot image?
+    return ERR_SNA_INVALID;
+  }
+  dwSnapSize = sh.ram_size[0] + (sh.ram_size[1] * 256); // memory dump size
+  dwSnapSize &= ~0x3f; // limit to multiples of 64
+  if (!dwSnapSize) {
+    return ERR_SNA_SIZE;
+  }
+  if (dwSnapSize > CPC.ram_size) { // memory dump size differs from current RAM size?
+    byte *pbTemp;
 
-   wCentralDirEntries = 0;
-   wCentralDirSize = 0;
-   dwCentralDirPosition = 0;
-   lFilePosition = -256;
-   do {
-      fseek(pfileObject, lFilePosition, SEEK_END);
-      if (fread(pbGPBuffer, 256, 1, pfileObject) == 0) {
-         fclose(pfileObject);
-         return ERR_FILE_BAD_ZIP; // exit if loading of data chunck failed
+    pbTemp = new byte [dwSnapSize*1024];
+    if (pbTemp) {
+      delete [] pbRAM;
+      CPC.ram_size = dwSnapSize;
+      pbRAM = pbTemp;
+    } else {
+      return ERR_OUT_OF_MEMORY;
+    }
+  }
+  emulator_reset(false);
+  n = fread(pbRAM, dwSnapSize*1024, 1, pfile); // read memory dump into CPC RAM
+  if (!n) {
+    emulator_reset(false);
+    return ERR_SNA_INVALID;
+  }
+
+  // Z80
+  _A = sh.AF[1];
+  _F = sh.AF[0];
+  _B = sh.BC[1];
+  _C = sh.BC[0];
+  _D = sh.DE[1];
+  _E = sh.DE[0];
+  _H = sh.HL[1];
+  _L = sh.HL[0];
+  _R = sh.R & 0x7f;
+  _Rb7 = sh.R & 0x80; // bit 7 of R
+  _I = sh.I;
+  if (sh.IFF0)
+    _IFF1 = Pflag;
+  if (sh.IFF1)
+    _IFF2 = Pflag;
+  _IXh = sh.IX[1];
+  _IXl = sh.IX[0];
+  _IYh = sh.IY[1];
+  _IYl = sh.IY[0];
+  z80.SP.b.h = sh.SP[1];
+  z80.SP.b.l = sh.SP[0];
+  z80.PC.b.h = sh.PC[1];
+  z80.PC.b.l = sh.PC[0];
+  _IM = sh.IM; // interrupt mode
+  z80.AFx.b.h = sh.AFx[1];
+  z80.AFx.b.l = sh.AFx[0];
+  z80.BCx.b.h = sh.BCx[1];
+  z80.BCx.b.l = sh.BCx[0];
+  z80.DEx.b.h = sh.DEx[1];
+  z80.DEx.b.l = sh.DEx[0];
+  z80.HLx.b.h = sh.HLx[1];
+  z80.HLx.b.l = sh.HLx[0];
+  // Gate Array
+  port.b.h = 0x7f;
+  for (n = 0; n < 17; n++) { // loop for all colours + border
+    GateArray.pen = n;
+    val = sh.ga_ink_values[n]; // GA palette entry
+    z80_OUT_handler(port, val | (1<<6));
+  }
+  val = sh.ga_pen; // GA pen
+  z80_OUT_handler(port, (val & 0x3f));
+  val = sh.ga_ROM_config; // GA ROM configuration
+  z80_OUT_handler(port, (val & 0x3f) | (2<<6));
+  val = sh.ga_RAM_config; // GA RAM configuration
+  z80_OUT_handler(port, (val & 0x3f) | (3<<6));
+  // CRTC
+  port.b.h = 0xbd;
+  for (n = 0; n < 18; n++) { // loop for all CRTC registers
+    val = sh.crtc_registers[n];
+    CRTC.reg_select = n;
+    z80_OUT_handler(port, val);
+  }
+  port.b.h = 0xbc;
+  val = sh.crtc_reg_select; // CRTC register select
+  z80_OUT_handler(port, val);
+  // ROM select
+  port.b.h = 0xdf;
+  val = sh.upper_ROM; // upper ROM number
+  z80_OUT_handler(port, val);
+  // PPI
+  port.b.h = 0xf4; // port A
+  z80_OUT_handler(port, sh.ppi_A);
+  port.b.h = 0xf5; // port B
+  z80_OUT_handler(port, sh.ppi_B);
+  port.b.h = 0xf6; // port C
+  z80_OUT_handler(port, sh.ppi_C);
+  port.b.h = 0xf7; // control
+  z80_OUT_handler(port, sh.ppi_control);
+  // PSG
+  PSG.control = PPI.portC;
+  PSG.reg_select = sh.psg_reg_select;
+  for (n = 0; n < 16; n++) { // loop for all PSG registers
+    SetAYRegister(n, sh.psg_registers[n]);
+  }
+
+  if (sh.version > 1) { // does the snapshot have version 2 data?
+    dwModel = sh.cpc_model; // determine the model it was saved for
+    if (dwModel != CPC.model) { // different from what we're currently running?
+      if (dwModel > 2) { // not one of the known models?
+        emulator_reset(false);
+        return ERR_SNA_CPC_TYPE;
       }
-      pbPtr = pbGPBuffer + (256 - 22); // pointer to end of central directory (under ideal conditions)
-      while (pbPtr != (byte *)pbGPBuffer) {
-         if (*(dword *)pbPtr == 0x06054b50) { // check for end of central directory signature
-            wCentralDirEntries = *(word *)(pbPtr + 10);
-            wCentralDirSize = *(word *)(pbPtr + 12);
-            dwCentralDirPosition = *(dword *)(pbPtr + 16);
-            break;
-         }
-         pbPtr--; // move backwards through buffer
+      std::string romFilename = CPC.rom_path + "/" + chROMFile[dwModel];
+      if ((pfileObject = fopen(romFilename.c_str(), "rb")) != nullptr) {
+        n = fread(pbROMlo, 2*16384, 1, pfileObject);
+        fclose(pfileObject);
+        if (!n) {
+          emulator_reset(false);
+          return ERR_CPC_ROM_MISSING;
+        }
+        CPC.model = dwModel;
+      } else { // ROM image load failed
+        emulator_reset(false);
+        return ERR_CPC_ROM_MISSING;
       }
-      lFilePosition -= 256; // move backwards through ZIP file
-   } while (wCentralDirEntries == 0);
-   if (wCentralDirSize == 0) {
-      fclose(pfileObject);
-      return ERR_FILE_BAD_ZIP; // exit if no central directory was found
-   }
-   fseek(pfileObject, dwCentralDirPosition, SEEK_SET);
-   if (fread(pbGPBuffer, wCentralDirSize, 1, pfileObject) == 0) {
-      fclose(pfileObject);
-      return ERR_FILE_BAD_ZIP; // exit if loading of data chunck failed
-   }
-
-   pbPtr = pbGPBuffer;
-   if (zi->pchFileNames) {
-      free(zi->pchFileNames); // dealloc old string table
-   }
-   zi->pchFileNames = (char *)malloc(wCentralDirSize); // approximate space needed by using the central directory size
-   pchStrPtr = zi->pchFileNames;
-
-   for (n = wCentralDirEntries; n; n--) {
-      wFilenameLength = *(word *)(pbPtr + 28);
-      dwOffset = *(dword *)(pbPtr + 42);
-      dwNextEntry = wFilenameLength + *(word *)(pbPtr + 30) + *(word *)(pbPtr + 32);
-      pbPtr += 46;
-      const char *pchThisExtension = zi->extension.c_str();
-      while (*pchThisExtension != '\0') { // loop for all extensions to be checked
-         if (strncasecmp((char *)pbPtr + (wFilenameLength - 4), pchThisExtension, 4) == 0) {
-            strncpy(pchStrPtr, (char *)pbPtr, wFilenameLength); // copy filename from zip directory
-            pchStrPtr[wFilenameLength] = 0; // zero terminate string
-            pchStrPtr += wFilenameLength+1;
-            *(dword *)pchStrPtr = dwOffset; // associate offset with string
-            pchStrPtr += 4;
-            iFileCount++;
-            break;
-         }
-         pchThisExtension += 4; // advance to next extension
+    }
+  }
+  if (sh.version > 2) { // does the snapshot have version 3 data?
+    FDC.motor = sh.fdc_motor;
+    driveA.current_track = sh.drvA_current_track;
+    driveB.current_track = sh.drvB_current_track;
+    CPC.printer_port = sh.printer_data ^ 0x80; // invert bit 7 again
+    PSG.AmplitudeEnv = sh.psg_env_step << 1; // multiply by 2 to bring it into the 0 - 30 range
+    PSG.FirstPeriod = false;
+    if (sh.psg_env_direction == 0x01) { // up
+      switch (PSG.RegisterAY.EnvType)
+      {
+        case 4:
+        case 5:
+        case 6:
+        case 7:
+        case 13:
+        case 14:
+        case 15:
+          PSG.FirstPeriod = true;
+          break;
       }
-      pbPtr += dwNextEntry;
-   }
-   fclose(pfileObject);
-
-   if (iFileCount == 0) { // no files found?
-      return ERR_FILE_EMPTY_ZIP;
-   }
-
-   zi->iFiles = iFileCount;
-   return 0; // operation completed successfully
-}
-
-
-
-// TODO(cpitrat): Incomplete: pchFileName is unused, tmpfile is deleted at the end of the method
-int zip_extract (std::string zipFile, const char *pchFileName, dword dwOffset)
-{
-   int iStatus, iCount;
-   dword dwSize;
-   byte *pbInputBuffer, *pbOutputBuffer;
-   FILE *pfileOut, *pfileIn;
-   z_stream z;
-
-   pfileOut = tmpfile();
-   if (pfileOut == nullptr) {
-      return ERR_FILE_UNZIP_FAILED; // couldn't create output file
-   }
-   pfileIn = fopen(zipFile.c_str(), "rb"); // open ZIP file for reading
-   fseek(pfileIn, dwOffset, SEEK_SET); // move file pointer to beginning of data block
-   if(fread(pbGPBuffer, 30, 1, pfileIn) != 1) { // read local header
-      fclose(pfileIn);
-      fclose(pfileOut);
-      return ERR_FILE_UNZIP_FAILED;
-   }
-   dwSize = *(dword *)(pbGPBuffer + 18); // length of compressed data
-   dwOffset += 30 + *(word *)(pbGPBuffer + 26) + *(word *)(pbGPBuffer + 28);
-   fseek(pfileIn, dwOffset, SEEK_SET); // move file pointer to start of compressed data
-
-   pbInputBuffer = pbGPBuffer; // space for compressed data chunck
-   pbOutputBuffer = pbInputBuffer + 16384; // space for uncompressed data chunck
-   z.zalloc = (alloc_func)nullptr;
-   z.zfree = (free_func)nullptr;
-   z.opaque = (voidpf)nullptr;
-   iStatus = inflateInit2(&z, -MAX_WBITS); // init zlib stream (no header)
-   do {
-      z.next_in = pbInputBuffer;
-      if (dwSize > 16384) { // limit input size to max 16K or remaining bytes
-         z.avail_in = 16384;
-      } else {
-         z.avail_in = dwSize;
+    } else if (sh.psg_env_direction == 0xff) { // down
+      switch (PSG.RegisterAY.EnvType)
+      {
+        case 0:
+        case 1:
+        case 2:
+        case 3:
+        case 9:
+        case 10:
+        case 11:
+          PSG.FirstPeriod = true;
+          break;
       }
-      z.avail_in = fread(pbInputBuffer, 1, z.avail_in, pfileIn); // load compressed data chunck from ZIP file
-      while ((z.avail_in) && (iStatus == Z_OK)) { // loop until all data has been processed
-         z.next_out = pbOutputBuffer;
-         z.avail_out = 16384;
-         iStatus = inflate(&z, Z_NO_FLUSH); // decompress data
-         iCount = 16384 - z.avail_out;
-         if (iCount) { // save data to file if output buffer is full
-            fwrite(pbOutputBuffer, 1, iCount, pfileOut);
-         }
+    }
+    CRTC.addr = sh.crtc_addr[0] + (sh.crtc_addr[1] * 256);
+    VDU.scanline = sh.crtc_scanline[0] + (sh.crtc_scanline[1] * 256);
+    if (VDU.scanline > MaxVSync) {
+      VDU.scanline = MaxVSync; // limit to max value
+    }
+    CRTC.char_count = sh.crtc_char_count[0];
+    CRTC.line_count = sh.crtc_line_count & 127;
+    CRTC.raster_count = sh.crtc_raster_count & 31;
+    CRTC.hsw_count = sh.crtc_hsw_count & 15;
+    CRTC.vsw_count = sh.crtc_vsw_count & 15;
+    dwFlags = sh.crtc_flags[0] + (sh.crtc_flags[1] * 256);
+    CRTC.flag_invsync = dwFlags & 1 ? 1 : 0; // vsync active?
+    if (dwFlags & 2) { // hsync active?
+      flags1.inHSYNC = 0xff;
+      CRTC.flag_hadhsync = 1;
+      if ((CRTC.hsw_count >= 3) && (CRTC.hsw_count < 7)) {
+        CRTC.flag_inmonhsync = 1;
       }
-      dwSize -= 16384; // advance to next chunck
-   } while ((dwSize > 0) && (iStatus == Z_OK)) ; // loop until done
-   if (iStatus != Z_STREAM_END) {
-      return ERR_FILE_UNZIP_FAILED; // abort on error
-   }
-   iStatus = inflateEnd(&z); // clean up
-   fclose(pfileIn);
-   fclose(pfileOut);
-
-   return 0; // data was successfully decompressed
+    }
+    CRTC.flag_invta = dwFlags & 0x80 ? 1 : 0; // in vertical total adjust?
+    GateArray.hs_count = sh.ga_int_delay & 3;
+    GateArray.sl_count = sh.ga_sl_count;
+    z80.int_pending = sh.z80_int_pending;
+  }
+  return 0;
 }
 
 
 
 int snapshot_load (const char *pchFileName)
 {
-   int n;
-   dword dwSnapSize, dwModel, dwFlags;
-   byte val;
-   reg_pair port;
-   t_SNA_header sh;
-
-   memset(&sh, 0, sizeof(sh));
    if ((pfileObject = fopen(pchFileName, "rb")) != nullptr) {
-      if(fread(&sh, sizeof(sh), 1, pfileObject) != 1) { // read snapshot header
-        fclose(pfileObject);
-        return ERR_SNA_INVALID;
-      }
-      if (memcmp(sh.id, "MV - SNA", 8) != 0) { // valid SNApshot image?
-         fclose(pfileObject);
-         return ERR_SNA_INVALID;
-      }
-      dwSnapSize = sh.ram_size[0] + (sh.ram_size[1] * 256); // memory dump size
-      dwSnapSize &= ~0x3f; // limit to multiples of 64
-      if (!dwSnapSize) {
-         fclose(pfileObject);
-         return ERR_SNA_SIZE;
-      }
-      if (dwSnapSize > CPC.ram_size) { // memory dump size differs from current RAM size?
-         byte *pbTemp;
-
-         pbTemp = new byte [dwSnapSize*1024];
-         if (pbTemp) {
-            delete [] pbRAM;
-            CPC.ram_size = dwSnapSize;
-            pbRAM = pbTemp;
-         } else {
-            fclose(pfileObject);
-            return ERR_OUT_OF_MEMORY;
-         }
-      }
-      emulator_reset(false);
-      n = fread(pbRAM, dwSnapSize*1024, 1, pfileObject); // read memory dump into CPC RAM
-      fclose(pfileObject);
-      if (!n) {
-         emulator_reset(false);
-         return ERR_SNA_INVALID;
-      }
-
-// Z80
-      _A = sh.AF[1];
-      _F = sh.AF[0];
-      _B = sh.BC[1];
-      _C = sh.BC[0];
-      _D = sh.DE[1];
-      _E = sh.DE[0];
-      _H = sh.HL[1];
-      _L = sh.HL[0];
-      _R = sh.R & 0x7f;
-      _Rb7 = sh.R & 0x80; // bit 7 of R
-      _I = sh.I;
-      if (sh.IFF0)
-         _IFF1 = Pflag;
-      if (sh.IFF1)
-         _IFF2 = Pflag;
-      _IXh = sh.IX[1];
-      _IXl = sh.IX[0];
-      _IYh = sh.IY[1];
-      _IYl = sh.IY[0];
-      z80.SP.b.h = sh.SP[1];
-      z80.SP.b.l = sh.SP[0];
-      z80.PC.b.h = sh.PC[1];
-      z80.PC.b.l = sh.PC[0];
-      _IM = sh.IM; // interrupt mode
-      z80.AFx.b.h = sh.AFx[1];
-      z80.AFx.b.l = sh.AFx[0];
-      z80.BCx.b.h = sh.BCx[1];
-      z80.BCx.b.l = sh.BCx[0];
-      z80.DEx.b.h = sh.DEx[1];
-      z80.DEx.b.l = sh.DEx[0];
-      z80.HLx.b.h = sh.HLx[1];
-      z80.HLx.b.l = sh.HLx[0];
-// Gate Array
-      port.b.h = 0x7f;
-      for (n = 0; n < 17; n++) { // loop for all colours + border
-         GateArray.pen = n;
-         val = sh.ga_ink_values[n]; // GA palette entry
-         z80_OUT_handler(port, val | (1<<6));
-      }
-      val = sh.ga_pen; // GA pen
-      z80_OUT_handler(port, (val & 0x3f));
-      val = sh.ga_ROM_config; // GA ROM configuration
-      z80_OUT_handler(port, (val & 0x3f) | (2<<6));
-      val = sh.ga_RAM_config; // GA RAM configuration
-      z80_OUT_handler(port, (val & 0x3f) | (3<<6));
-// CRTC
-      port.b.h = 0xbd;
-      for (n = 0; n < 18; n++) { // loop for all CRTC registers
-         val = sh.crtc_registers[n];
-         CRTC.reg_select = n;
-         z80_OUT_handler(port, val);
-      }
-      port.b.h = 0xbc;
-      val = sh.crtc_reg_select; // CRTC register select
-      z80_OUT_handler(port, val);
-// ROM select
-      port.b.h = 0xdf;
-      val = sh.upper_ROM; // upper ROM number
-      z80_OUT_handler(port, val);
-// PPI
-      port.b.h = 0xf4; // port A
-      z80_OUT_handler(port, sh.ppi_A);
-      port.b.h = 0xf5; // port B
-      z80_OUT_handler(port, sh.ppi_B);
-      port.b.h = 0xf6; // port C
-      z80_OUT_handler(port, sh.ppi_C);
-      port.b.h = 0xf7; // control
-      z80_OUT_handler(port, sh.ppi_control);
-// PSG
-      PSG.control = PPI.portC;
-      PSG.reg_select = sh.psg_reg_select;
-      for (n = 0; n < 16; n++) { // loop for all PSG registers
-         SetAYRegister(n, sh.psg_registers[n]);
-      }
-
-      if (sh.version > 1) { // does the snapshot have version 2 data?
-         dwModel = sh.cpc_model; // determine the model it was saved for
-         if (dwModel != CPC.model) { // different from what we're currently running?
-            if (dwModel > 2) { // not one of the known models?
-               emulator_reset(false);
-               return ERR_SNA_CPC_TYPE;
-            }
-            std::string romFilename = CPC.rom_path + "/" + chROMFile[dwModel];
-            if ((pfileObject = fopen(romFilename.c_str(), "rb")) != nullptr) {
-               n = fread(pbROMlo, 2*16384, 1, pfileObject);
-               fclose(pfileObject);
-               if (!n) {
-                  emulator_reset(false);
-                  return ERR_CPC_ROM_MISSING;
-               }
-               CPC.model = dwModel;
-            } else { // ROM image load failed
-               emulator_reset(false);
-               return ERR_CPC_ROM_MISSING;
-            }
-         }
-      }
-      if (sh.version > 2) { // does the snapshot have version 3 data?
-         FDC.motor = sh.fdc_motor;
-         driveA.current_track = sh.drvA_current_track;
-         driveB.current_track = sh.drvB_current_track;
-         CPC.printer_port = sh.printer_data ^ 0x80; // invert bit 7 again
-         PSG.AmplitudeEnv = sh.psg_env_step << 1; // multiply by 2 to bring it into the 0 - 30 range
-         PSG.FirstPeriod = false;
-         if (sh.psg_env_direction == 0x01) { // up
-            switch (PSG.RegisterAY.EnvType)
-            {
-               case 4:
-               case 5:
-               case 6:
-               case 7:
-               case 13:
-               case 14:
-               case 15:
-                  PSG.FirstPeriod = true;
-                  break;
-            }
-         } else if (sh.psg_env_direction == 0xff) { // down
-            switch (PSG.RegisterAY.EnvType)
-            {
-               case 0:
-               case 1:
-               case 2:
-               case 3:
-               case 9:
-               case 10:
-               case 11:
-                  PSG.FirstPeriod = true;
-                  break;
-            }
-         }
-         CRTC.addr = sh.crtc_addr[0] + (sh.crtc_addr[1] * 256);
-         VDU.scanline = sh.crtc_scanline[0] + (sh.crtc_scanline[1] * 256);
-         if (VDU.scanline > MaxVSync) {
-            VDU.scanline = MaxVSync; // limit to max value
-         }
-         CRTC.char_count = sh.crtc_char_count[0];
-         CRTC.line_count = sh.crtc_line_count & 127;
-         CRTC.raster_count = sh.crtc_raster_count & 31;
-         CRTC.hsw_count = sh.crtc_hsw_count & 15;
-         CRTC.vsw_count = sh.crtc_vsw_count & 15;
-         dwFlags = sh.crtc_flags[0] + (sh.crtc_flags[1] * 256);
-         CRTC.flag_invsync = dwFlags & 1 ? 1 : 0; // vsync active?
-         if (dwFlags & 2) { // hsync active?
-            flags1.inHSYNC = 0xff;
-            CRTC.flag_hadhsync = 1;
-            if ((CRTC.hsw_count >= 3) && (CRTC.hsw_count < 7)) {
-               CRTC.flag_inmonhsync = 1;
-            }
-         }
-         CRTC.flag_invta = dwFlags & 0x80 ? 1 : 0; // in vertical total adjust?
-         GateArray.hs_count = sh.ga_int_delay & 3;
-         GateArray.sl_count = sh.ga_sl_count;
-         z80.int_pending = sh.z80_int_pending;
-      }
-   } else {
-      return ERR_FILE_NOT_FOUND;
+     return snapshot_load(pfileObject);
    }
-
-/* char *pchTmpBuffer = new char[MAX_LINE_LEN];
-   LoadString(hAppInstance, MSG_SNA_LOAD, chMsgBuffer, sizeof(chMsgBuffer));
-   snprintf(pchTmpBuffer, _MAX_PATH-1, chMsgBuffer, CPC.snap_file.c_str());
-   add_message(pchTmpBuffer);
-   delete [] pchTmpBuffer; */
-   return 0;
+   return ERR_FILE_NOT_FOUND;
 }
 
 
@@ -2530,11 +2336,6 @@ int snapshot_save (const char *pchFileName)
       return ERR_SNA_WRITE;
    }
 
-/* char *pchTmpBuffer = new char[MAX_LINE_LEN];
-   LoadString(hAppInstance, MSG_SNA_SAVE, chMsgBuffer, sizeof(chMsgBuffer));
-   snprintf(pchTmpBuffer, _MAX_PATH-1, chMsgBuffer, CPC.snap_file.c_str());
-   add_message(pchTmpBuffer);
-   delete [] pchTmpBuffer; */
    return 0;
 }
 
@@ -2558,148 +2359,148 @@ void dsk_eject (t_drive *drive)
 
 
 
-int dsk_load (const char *pchFileName, t_drive *drive, char chID)
+int dsk_load (FILE *pfile, t_drive *drive)
+{
+  dword dwTrackSize, track, side, sector, dwSectorSize, dwSectors;
+  byte *pbPtr, *pbDataPtr, *pbTempPtr, *pbTrackSizeTable;
+  if(fread(pbGPBuffer, 0x100, 1, pfile) != 1) { // read DSK header
+    return ERR_DSK_INVALID;
+  }
+  pbPtr = pbGPBuffer;
+
+  if (memcmp(pbPtr, "MV - CPC", 8) == 0) { // normal DSK image?
+    drive->tracks = *(pbPtr + 0x30); // grab number of tracks
+    if (drive->tracks > DSK_TRACKMAX) { // compare against upper limit
+      drive->tracks = DSK_TRACKMAX; // limit to maximum
+    }
+    drive->sides = *(pbPtr + 0x31); // grab number of sides
+    if (drive->sides > DSK_SIDEMAX) { // abort if more than maximum
+      dsk_eject(drive);
+      return ERR_DSK_SIDES;
+    }
+    dwTrackSize = (*(pbPtr + 0x32) + (*(pbPtr + 0x33) << 8)) - 0x100; // determine track size in bytes, minus track header
+    drive->sides--; // zero base number of sides
+    for (track = 0; track < drive->tracks; track++) { // loop for all tracks
+      for (side = 0; side <= drive->sides; side++) { // loop for all sides
+        if(fread(pbGPBuffer+0x100, 0x100, 1, pfile) != 1) { // read track header
+          dsk_eject(drive);
+          return ERR_DSK_INVALID;
+        }
+        pbPtr = pbGPBuffer + 0x100;
+        if (memcmp(pbPtr, "Track-Info", 10) != 0) { // abort if ID does not match
+          dsk_eject(drive);
+          return ERR_DSK_INVALID;
+        }
+        dwSectorSize = 0x80 << *(pbPtr + 0x14); // determine sector size in bytes
+        dwSectors = *(pbPtr + 0x15); // grab number of sectors
+        if (dwSectors > DSK_SECTORMAX) { // abort if sector count greater than maximum
+          dsk_eject(drive);
+          return ERR_DSK_SECTORS;
+        }
+        drive->track[track][side].sectors = dwSectors; // store sector count
+        drive->track[track][side].size = dwTrackSize; // store track size
+        drive->track[track][side].data = (byte *)malloc(dwTrackSize); // attempt to allocate the required memory
+        if (drive->track[track][side].data == nullptr) { // abort if not enough
+          dsk_eject(drive);
+          return ERR_OUT_OF_MEMORY;
+        }
+        pbDataPtr = drive->track[track][side].data; // pointer to start of memory buffer
+        pbTempPtr = pbDataPtr; // keep a pointer to the beginning of the buffer for the current track
+        for (sector = 0; sector < dwSectors; sector++) { // loop for all sectors
+          memcpy(drive->track[track][side].sector[sector].CHRN, (pbPtr + 0x18), 4); // copy CHRN
+          memcpy(drive->track[track][side].sector[sector].flags, (pbPtr + 0x1c), 2); // copy ST1 & ST2
+          drive->track[track][side].sector[sector].size = dwSectorSize;
+          drive->track[track][side].sector[sector].data = pbDataPtr; // store pointer to sector data
+          pbDataPtr += dwSectorSize;
+          pbPtr += 8;
+        }
+        if (!fread(pbTempPtr, dwTrackSize, 1, pfile)) { // read entire track data in one go
+          dsk_eject(drive);
+          return ERR_DSK_INVALID;
+        }
+      }
+    }
+    drive->altered = 0; // disk is as yet unmodified
+  } else {
+    if (memcmp(pbPtr, "EXTENDED", 8) == 0) { // extended DSK image?
+      drive->tracks = *(pbPtr + 0x30); // number of tracks
+      if (drive->tracks > DSK_TRACKMAX) {  // limit to maximum possible
+        drive->tracks = DSK_TRACKMAX;
+      }
+      drive->random_DEs = *(pbPtr + 0x31) & 0x80; // simulate random Data Errors?
+      drive->sides = *(pbPtr + 0x31) & 3; // number of sides
+      if (drive->sides > DSK_SIDEMAX) { // abort if more than maximum
+        dsk_eject(drive);
+        return ERR_DSK_SIDES;
+      }
+      pbTrackSizeTable = pbPtr + 0x34; // pointer to track size table in DSK header
+      drive->sides--; // zero base number of sides
+      for (track = 0; track < drive->tracks; track++) { // loop for all tracks
+        for (side = 0; side <= drive->sides; side++) { // loop for all sides
+          dwTrackSize = (*pbTrackSizeTable++ << 8); // track size in bytes
+          if (dwTrackSize != 0) { // only process if track contains data
+            dwTrackSize -= 0x100; // compensate for track header
+            if(fread(pbGPBuffer+0x100, 0x100, 1, pfile) != 1) { // read track header
+              dsk_eject(drive);
+              return ERR_DSK_INVALID;
+            }
+            pbPtr = pbGPBuffer + 0x100;
+            if (memcmp(pbPtr, "Track-Info", 10) != 0) { // valid track header?
+              dsk_eject(drive);
+              return ERR_DSK_INVALID;
+            }
+            dwSectors = *(pbPtr + 0x15); // number of sectors for this track
+            if (dwSectors > DSK_SECTORMAX) { // abort if sector count greater than maximum
+              dsk_eject(drive);
+              return ERR_DSK_SECTORS;
+            }
+            drive->track[track][side].sectors = dwSectors; // store sector count
+            drive->track[track][side].size = dwTrackSize; // store track size
+            drive->track[track][side].data = (byte *)malloc(dwTrackSize); // attempt to allocate the required memory
+            if (drive->track[track][side].data == nullptr) { // abort if not enough
+              dsk_eject(drive);
+              return ERR_OUT_OF_MEMORY;
+            }
+            pbDataPtr = drive->track[track][side].data; // pointer to start of memory buffer
+            pbTempPtr = pbDataPtr; // keep a pointer to the beginning of the buffer for the current track
+            for (sector = 0; sector < dwSectors; sector++) { // loop for all sectors
+              memcpy(drive->track[track][side].sector[sector].CHRN, (pbPtr + 0x18), 4); // copy CHRN
+              memcpy(drive->track[track][side].sector[sector].flags, (pbPtr + 0x1c), 2); // copy ST1 & ST2
+              dwSectorSize = *(pbPtr + 0x1e) + (*(pbPtr + 0x1f) << 8); // sector size in bytes
+              drive->track[track][side].sector[sector].size = dwSectorSize;
+              drive->track[track][side].sector[sector].data = pbDataPtr; // store pointer to sector data
+              pbDataPtr += dwSectorSize;
+              pbPtr += 8;
+            }
+            if (!fread(pbTempPtr, dwTrackSize, 1, pfile)) { // read entire track data in one go
+              dsk_eject(drive);
+              return ERR_DSK_INVALID;
+            }
+          } else {
+            memset(&drive->track[track][side], 0, sizeof(t_track)); // track not formatted
+          }
+        }
+      }
+      drive->altered = 0; // disk is as yet unmodified
+    } else {
+      dsk_eject(drive);
+      return ERR_DSK_INVALID; // file could not be identified as a valid DSK
+    }
+  }
+  return 0;
+}
+
+
+
+int dsk_load (const char *pchFileName, t_drive *drive)
 {
    int iRetCode;
-   dword dwTrackSize, track, side, sector, dwSectorSize, dwSectors;
-   byte *pbPtr, *pbDataPtr, *pbTempPtr, *pbTrackSizeTable;
 
    iRetCode = 0;
    dsk_eject(drive);
    if ((pfileObject = fopen(pchFileName, "rb")) != nullptr) {
-      if(fread(pbGPBuffer, 0x100, 1, pfileObject) != 1) { // read DSK header
-        iRetCode = ERR_DSK_INVALID;
-        goto exit;
-      }
-      pbPtr = pbGPBuffer;
-
-      if (memcmp(pbPtr, "MV - CPC", 8) == 0) { // normal DSK image?
-         drive->tracks = *(pbPtr + 0x30); // grab number of tracks
-         if (drive->tracks > DSK_TRACKMAX) { // compare against upper limit
-            drive->tracks = DSK_TRACKMAX; // limit to maximum
-         }
-         drive->sides = *(pbPtr + 0x31); // grab number of sides
-         if (drive->sides > DSK_SIDEMAX) { // abort if more than maximum
-            iRetCode = ERR_DSK_SIDES;
-            goto exit;
-         }
-         dwTrackSize = (*(pbPtr + 0x32) + (*(pbPtr + 0x33) << 8)) - 0x100; // determine track size in bytes, minus track header
-         drive->sides--; // zero base number of sides
-         for (track = 0; track < drive->tracks; track++) { // loop for all tracks
-            for (side = 0; side <= drive->sides; side++) { // loop for all sides
-               if(fread(pbGPBuffer+0x100, 0x100, 1, pfileObject) != 1) { // read track header
-                iRetCode = ERR_DSK_INVALID;
-                goto exit;
-               }
-               pbPtr = pbGPBuffer + 0x100;
-               if (memcmp(pbPtr, "Track-Info", 10) != 0) { // abort if ID does not match
-                  iRetCode = ERR_DSK_INVALID;
-                  goto exit;
-               }
-               dwSectorSize = 0x80 << *(pbPtr + 0x14); // determine sector size in bytes
-               dwSectors = *(pbPtr + 0x15); // grab number of sectors
-               if (dwSectors > DSK_SECTORMAX) { // abort if sector count greater than maximum
-                  iRetCode = ERR_DSK_SECTORS;
-                  goto exit;
-               }
-               drive->track[track][side].sectors = dwSectors; // store sector count
-               drive->track[track][side].size = dwTrackSize; // store track size
-               drive->track[track][side].data = (byte *)malloc(dwTrackSize); // attempt to allocate the required memory
-               if (drive->track[track][side].data == nullptr) { // abort if not enough
-                  iRetCode = ERR_OUT_OF_MEMORY;
-                  goto exit;
-               }
-               pbDataPtr = drive->track[track][side].data; // pointer to start of memory buffer
-               pbTempPtr = pbDataPtr; // keep a pointer to the beginning of the buffer for the current track
-               for (sector = 0; sector < dwSectors; sector++) { // loop for all sectors
-                  memcpy(drive->track[track][side].sector[sector].CHRN, (pbPtr + 0x18), 4); // copy CHRN
-                  memcpy(drive->track[track][side].sector[sector].flags, (pbPtr + 0x1c), 2); // copy ST1 & ST2
-                  drive->track[track][side].sector[sector].size = dwSectorSize;
-                  drive->track[track][side].sector[sector].data = pbDataPtr; // store pointer to sector data
-                  pbDataPtr += dwSectorSize;
-                  pbPtr += 8;
-               }
-               if (!fread(pbTempPtr, dwTrackSize, 1, pfileObject)) { // read entire track data in one go
-                  iRetCode = ERR_DSK_INVALID;
-                  goto exit;
-               }
-            }
-         }
-         drive->altered = 0; // disk is as yet unmodified
-      } else {
-         if (memcmp(pbPtr, "EXTENDED", 8) == 0) { // extended DSK image?
-            drive->tracks = *(pbPtr + 0x30); // number of tracks
-            if (drive->tracks > DSK_TRACKMAX) {  // limit to maximum possible
-               drive->tracks = DSK_TRACKMAX;
-            }
-            drive->random_DEs = *(pbPtr + 0x31) & 0x80; // simulate random Data Errors?
-            drive->sides = *(pbPtr + 0x31) & 3; // number of sides
-            if (drive->sides > DSK_SIDEMAX) { // abort if more than maximum
-               iRetCode = ERR_DSK_SIDES;
-               goto exit;
-            }
-            pbTrackSizeTable = pbPtr + 0x34; // pointer to track size table in DSK header
-            drive->sides--; // zero base number of sides
-            for (track = 0; track < drive->tracks; track++) { // loop for all tracks
-               for (side = 0; side <= drive->sides; side++) { // loop for all sides
-                  dwTrackSize = (*pbTrackSizeTable++ << 8); // track size in bytes
-                  if (dwTrackSize != 0) { // only process if track contains data
-                     dwTrackSize -= 0x100; // compensate for track header
-                     if(fread(pbGPBuffer+0x100, 0x100, 1, pfileObject) != 1) { // read track header
-                       iRetCode = ERR_DSK_INVALID;
-                       goto exit;
-                     }
-                     pbPtr = pbGPBuffer + 0x100;
-                     if (memcmp(pbPtr, "Track-Info", 10) != 0) { // valid track header?
-                        iRetCode = ERR_DSK_INVALID;
-                        goto exit;
-                     }
-                     dwSectors = *(pbPtr + 0x15); // number of sectors for this track
-                     if (dwSectors > DSK_SECTORMAX) { // abort if sector count greater than maximum
-                        iRetCode = ERR_DSK_SECTORS;
-                        goto exit;
-                     }
-                     drive->track[track][side].sectors = dwSectors; // store sector count
-                     drive->track[track][side].size = dwTrackSize; // store track size
-                     drive->track[track][side].data = (byte *)malloc(dwTrackSize); // attempt to allocate the required memory
-                     if (drive->track[track][side].data == nullptr) { // abort if not enough
-                        iRetCode = ERR_OUT_OF_MEMORY;
-                        goto exit;
-                     }
-                     pbDataPtr = drive->track[track][side].data; // pointer to start of memory buffer
-                     pbTempPtr = pbDataPtr; // keep a pointer to the beginning of the buffer for the current track
-                     for (sector = 0; sector < dwSectors; sector++) { // loop for all sectors
-                        memcpy(drive->track[track][side].sector[sector].CHRN, (pbPtr + 0x18), 4); // copy CHRN
-                        memcpy(drive->track[track][side].sector[sector].flags, (pbPtr + 0x1c), 2); // copy ST1 & ST2
-                        dwSectorSize = *(pbPtr + 0x1e) + (*(pbPtr + 0x1f) << 8); // sector size in bytes
-                        drive->track[track][side].sector[sector].size = dwSectorSize;
-                        drive->track[track][side].sector[sector].data = pbDataPtr; // store pointer to sector data
-                        pbDataPtr += dwSectorSize;
-                        pbPtr += 8;
-                     }
-                     if (!fread(pbTempPtr, dwTrackSize, 1, pfileObject)) { // read entire track data in one go
-                        iRetCode = ERR_DSK_INVALID;
-                        goto exit;
-                     }
-                  } else {
-                     memset(&drive->track[track][side], 0, sizeof(t_track)); // track not formatted
-                  }
-               }
-            }
-            drive->altered = 0; // disk is as yet unmodified
-         } else {
-            iRetCode = ERR_DSK_INVALID; // file could not be identified as a valid DSK
-         }
-      }
-/*    {
-         char *pchTmpBuffer = new char[MAX_LINE_LEN];
-         LoadString(hAppInstance, MSG_DSK_LOAD, chMsgBuffer, sizeof(chMsgBuffer));
-         snprintf(pchTmpBuffer, _MAX_PATH-1, chMsgBuffer, chID, chID == 'A' ? CPC.drvA_file.c_str() : CPC.drvB_file.c_str());
-         add_message(pchTmpBuffer);
-         delete [] pchTmpBuffer;
-      } */
-exit:
-      fclose(pfileObject);
+     iRetCode = dsk_load(pfileObject, drive);
+     fclose(pfileObject);
    } else {
       iRetCode = ERR_FILE_NOT_FOUND;
    }
@@ -2712,7 +2513,7 @@ exit:
 
 
 
-int dsk_save (const char *pchFileName, t_drive *drive, char chID)
+int dsk_save (const char *pchFileName, t_drive *drive)
 {
    t_DSK_header dh;
    t_track_header th;
@@ -2771,11 +2572,6 @@ int dsk_save (const char *pchFileName, t_drive *drive, char chID)
       return ERR_DSK_WRITE; // write attempt failed
    }
 
-/* char *pchTmpBuffer = new char[MAX_LINE_LEN];
-   LoadString(hAppInstance, MSG_DSK_SAVE, chMsgBuffer, sizeof(chMsgBuffer));
-   snprintf(pchTmpBuffer, _MAX_PATH-1, chMsgBuffer, chID, chID == 'A' ? CPC.drvA_file.c_str() : CPC.drvB_file.c_str());
-   add_message(pchTmpBuffer);
-   delete [] pchTmpBuffer; */
    return 0;
 }
 
@@ -2845,43 +2641,76 @@ void tape_eject (void)
 
 
 
+int tape_insert (FILE *pfile)
+{
+   tape_eject();
+   if(fread(pbGPBuffer, 10, 1, pfile) != 1) { // read beginning of header
+      return ERR_TAP_INVALID;
+   }
+   // Reset so that the next method can recheck the header
+   fseek(pfile, 0, SEEK_SET);
+   byte *pbPtr = pbGPBuffer;
+   if (memcmp(pbPtr, "ZXTape!\032", 8) == 0) { // CDT file?
+      LOG("tape_insert CDT file");
+      return tape_insert_cdt(pfile);
+   } else if (memcmp(pbPtr, "Creative", 8) == 0) { // VOC file ?
+      LOG("tape_insert VOC file");
+      return tape_insert_voc(pfile);
+   } else { // Unknown file
+      LOG("tape_insert unknown file");
+      return ERR_TAP_INVALID;
+   }
+}
+
+
+
 int tape_insert (const char *pchFileName)
+{
+   LOG("tape_insert " << pchFileName);
+   FILE *pfile;
+   if ((pfile = fopen(pchFileName, "rb")) == nullptr) {
+      return ERR_FILE_NOT_FOUND;
+   }
+
+   int iRetCode = tape_insert(pfile);
+
+   Tape_Rewind();
+
+   return iRetCode;
+}
+
+int tape_insert_cdt (FILE *pfile)
 {
    long lFileSize;
    int iBlockLength;
    byte bID;
    byte *pbPtr, *pbBlock;
 
-   tape_eject();
-   if ((pfileObject = fopen(pchFileName, "rb")) == nullptr) {
-      return ERR_FILE_NOT_FOUND;
-   }
-   if(fread(pbGPBuffer, 10, 1, pfileObject) != 1) { // read CDT header
-      fclose(pfileObject);
+   if(fread(pbGPBuffer, 10, 1, pfile) != 1) { // read CDT header
+      LOG("Couldn't read CDT header");
       return ERR_TAP_INVALID;
    }
    pbPtr = pbGPBuffer;
    if (memcmp(pbPtr, "ZXTape!\032", 8) != 0) { // valid CDT file?
-      fclose(pfileObject);
+      LOG("Invalid CDT header '" << pbPtr << "'");
       return ERR_TAP_INVALID;
    }
    if (*(pbPtr + 0x08) != 1) { // major version must be 1
-      fclose(pfileObject);
+      LOG("Invalid CDT major version");
       return ERR_TAP_INVALID;
    }
-   lFileSize = file_size(fileno(pfileObject)) - 0x0a;
+   lFileSize = file_size(fileno(pfile)) - 0x0a;
    if (lFileSize <= 0) { // the tape image should have at least one block...
-      fclose(pfileObject);
+      LOG("Invalid CDT file size");
       return ERR_TAP_INVALID;
    }
    pbTapeImage = (byte *)malloc(lFileSize+6);
    *pbTapeImage = 0x20; // start off with a pause block
    *(word *)(pbTapeImage+1) = 2000; // set the length to 2 seconds
-   if(fread(pbTapeImage+3, lFileSize, 1, pfileObject) != 1) { // append the entire CDT file
-     fclose(pfileObject);
+   if(fread(pbTapeImage+3, lFileSize, 1, pfile) != 1) { // append the entire CDT file
+      LOG("Couldn't read CDT file");
      return ERR_TAP_INVALID;
    }
-   fclose(pfileObject);
    *(pbTapeImage+lFileSize+3) = 0x20; // end with a pause block
    *(word *)(pbTapeImage+lFileSize+3+1) = 2000; // set the length to 2 seconds
 
@@ -2931,27 +2760,33 @@ int tape_insert (const char *pchFileName)
             iBlockLength = 0;
             break;
          case 0x23: // jump to block
-   return ERR_TAP_UNSUPPORTED;
+            LOG("Couldn't load CDT file: unsupported " << bID);
+            return ERR_TAP_UNSUPPORTED;
             iBlockLength = 2;
             break;
          case 0x24: // loop start
-   return ERR_TAP_UNSUPPORTED;
+            LOG("Couldn't load CDT file: unsupported " << bID);
+            return ERR_TAP_UNSUPPORTED;
             iBlockLength = 2;
             break;
          case 0x25: // loop end
-   return ERR_TAP_UNSUPPORTED;
+            LOG("Couldn't load CDT file: unsupported " << bID);
+            return ERR_TAP_UNSUPPORTED;
             iBlockLength = 0;
             break;
          case 0x26: // call sequence
-   return ERR_TAP_UNSUPPORTED;
+            LOG("Couldn't load CDT file: unsupported " << bID);
+            return ERR_TAP_UNSUPPORTED;
             iBlockLength = (*(word *)pbBlock * 2) + 2;
             break;
          case 0x27: // return from sequence
-   return ERR_TAP_UNSUPPORTED;
+            LOG("Couldn't load CDT file: unsupported " << bID);
+            return ERR_TAP_UNSUPPORTED;
             iBlockLength = 0;
             break;
          case 0x28: // select block
-   return ERR_TAP_UNSUPPORTED;
+            LOG("Couldn't load CDT file: unsupported " << bID);
+            return ERR_TAP_UNSUPPORTED;
             iBlockLength = *(word *)pbBlock + 2;
             break;
          case 0x30: // text description
@@ -2990,23 +2825,16 @@ int tape_insert (const char *pchFileName)
       pbBlock += iBlockLength;
    }
    if (pbBlock != pbTapeImageEnd) {
+      LOG("CDT file error: Didn't reach end of tape");
       tape_eject();
       return ERR_TAP_INVALID;
    }
-
-   Tape_Rewind();
-
-/* char *pchTmpBuffer = new char[MAX_LINE_LEN];
-   LoadString(hAppInstance, MSG_TAP_INSERT, chMsgBuffer, sizeof(chMsgBuffer));
-   snprintf(pchTmpBuffer, _MAX_PATH-1, chMsgBuffer, CPC.tape_file.c_str());
-   add_message(pchTmpBuffer);
-   delete [] pchTmpBuffer; */
    return 0;
 }
 
 
 
-int tape_insert_voc (const char *pchFileName)
+int tape_insert_voc (FILE *pfile)
 {
    long lFileSize, lOffset, lInitialOffset, lSampleLength;
    int iBlockLength;
@@ -3014,23 +2842,17 @@ int tape_insert_voc (const char *pchFileName)
    bool bolDone;
 
    tape_eject();
-   if ((pfileObject = fopen(pchFileName, "rb")) == nullptr) {
-      return ERR_FILE_NOT_FOUND;
-   }
-   if(fread(pbGPBuffer, 26, 1, pfileObject) != 1) { // read VOC header
-     fclose(pfileObject);
+   if(fread(pbGPBuffer, 26, 1, pfile) != 1) { // read VOC header
      return ERR_TAP_BAD_VOC;
    }
    pbPtr = pbGPBuffer;
    if (memcmp(pbPtr, "Creative Voice File\032", 20) != 0) { // valid VOC file?
-      fclose(pfileObject);
       return ERR_TAP_BAD_VOC;
    }
    lOffset =
    lInitialOffset = *(word *)(pbPtr + 0x14);
-   lFileSize = file_size(fileno(pfileObject));
+   lFileSize = file_size(fileno(pfile));
    if ((lFileSize-26) <= 0) { // should have at least one block...
-      fclose(pfileObject);
       return ERR_TAP_BAD_VOC;
    }
 
@@ -3042,9 +2864,8 @@ int tape_insert_voc (const char *pchFileName)
    byte bSampleRate = 0;
    bolDone = false;
    while ((!bolDone) && (lOffset < lFileSize)) {
-      fseek(pfileObject, lOffset, SEEK_SET);
-      if(fread(pbPtr, 16, 1, pfileObject) != 1) { // read block ID + size
-        fclose(pfileObject);
+      fseek(pfile, lOffset, SEEK_SET);
+      if(fread(pbPtr, 16, 1, pfile) != 1) { // read block ID + size
         return ERR_TAP_BAD_VOC;
       }
       #ifdef DEBUG_TAPE
@@ -3058,12 +2879,10 @@ int tape_insert_voc (const char *pchFileName)
             iBlockLength = (*(dword *)(pbPtr+0x01) & 0x00ffffff) + 4;
             lSampleLength += iBlockLength - 6;
             if ((bSampleRate) && (bSampleRate != *(pbPtr+0x04))) { // no change in sample rate allowed
-               fclose(pfileObject);
                return ERR_TAP_BAD_VOC;
             }
             bSampleRate = *(pbPtr+0x04);
             if (*(pbPtr+0x05) != 0) { // must be 8 bits wide
-               fclose(pfileObject);
                return ERR_TAP_BAD_VOC;
             }
             break;
@@ -3075,7 +2894,6 @@ int tape_insert_voc (const char *pchFileName)
             iBlockLength = 4;
             lSampleLength += *(word *)(pbPtr+0x01) + 1;
             if ((bSampleRate) && (bSampleRate != *(pbPtr+0x03))) { // no change in sample rate allowed
-               fclose(pfileObject);
                return ERR_TAP_BAD_VOC;
             }
             bSampleRate = *(pbPtr+0x03);
@@ -3087,7 +2905,6 @@ int tape_insert_voc (const char *pchFileName)
             iBlockLength = (*(dword *)(pbPtr+0x01) & 0x00ffffff) + 4;
             break;
          default:
-            fclose(pfileObject);
             return ERR_TAP_BAD_VOC;
       }
       lOffset += iBlockLength;
@@ -3099,12 +2916,10 @@ int tape_insert_voc (const char *pchFileName)
    dword dwTapePulseCycles = 3500000L / (1000000L / (256 - bSampleRate)); // length of one pulse in ZX Spectrum T states
    dword dwCompressedSize = lSampleLength >> 3; // 8x data reduction
    if (dwCompressedSize > 0x00ffffff) { // we only support one direct recording block right now
-      fclose(pfileObject);
       return ERR_TAP_BAD_VOC;
    }
    pbTapeImage = (byte *)malloc(dwCompressedSize+1+8+6);
    if (pbTapeImage == nullptr) { // check if the memory allocation has failed
-      fclose(pfileObject);
       return ERR_OUT_OF_MEMORY;
    }
    *pbTapeImage = 0x20; // start off with a pause block
@@ -3122,9 +2937,8 @@ int tape_insert_voc (const char *pchFileName)
    dword dwBit = 8;
    byte bByte = 0;
    while ((!bolDone) && (lOffset < lFileSize)) {
-      fseek(pfileObject, lOffset, SEEK_SET);
-      if(fread(pbPtr, 1, 1, pfileObject) != 1) { // read block ID
-        fclose(pfileObject);
+      fseek(pfile, lOffset, SEEK_SET);
+      if(fread(pbPtr, 1, 1, pfile) != 1) { // read block ID
         return ERR_TAP_BAD_VOC;
       }
       switch(*pbPtr) {
@@ -3132,20 +2946,17 @@ int tape_insert_voc (const char *pchFileName)
             bolDone = true;
             break;
          case 0x1: // sound data
-            if(fread(pbPtr, 3+2, 1, pfileObject) != 1) { // get block size and sound info
-              fclose(pfileObject);
+            if(fread(pbPtr, 3+2, 1, pfile) != 1) { // get block size and sound info
               return ERR_TAP_BAD_VOC;
             }
             iBlockLength = (*(dword *)(pbPtr) & 0x00ffffff) + 4;
             lSampleLength = iBlockLength - 6;
             pbVocDataBlock = (byte *)malloc(lSampleLength);
             if (pbVocDataBlock == nullptr) {
-               fclose(pfileObject);
                tape_eject();
                return ERR_OUT_OF_MEMORY;
             }
-            if(fread(pbVocDataBlock, lSampleLength, 1, pfileObject) != 1) {
-              fclose(pfileObject);
+            if(fread(pbVocDataBlock, lSampleLength, 1, pfile) != 1) {
               return ERR_TAP_BAD_VOC;
             }
             pbVocDataBlockPtr = pbVocDataBlock;
@@ -3164,20 +2975,17 @@ int tape_insert_voc (const char *pchFileName)
             free(pbVocDataBlock);
             break;
          case 0x2: // sound continue
-            if(fread(pbPtr, 3, 1, pfileObject) != 1) { // get block size
-              fclose(pfileObject);
+            if(fread(pbPtr, 3, 1, pfile) != 1) { // get block size
               return ERR_TAP_BAD_VOC;
             }
             iBlockLength = (*(dword *)(pbPtr) & 0x00ffffff) + 4;
             lSampleLength = iBlockLength - 4;
             pbVocDataBlock = (byte *)malloc(lSampleLength);
             if (pbVocDataBlock == nullptr) {
-               fclose(pfileObject);
                tape_eject();
                return ERR_OUT_OF_MEMORY;
             }
-            if(fread(pbVocDataBlock, lSampleLength, 1, pfileObject) != 1) {
-              fclose(pfileObject);
+            if(fread(pbVocDataBlock, lSampleLength, 1, pfile) != 1) {
               return ERR_TAP_BAD_VOC;
             }
             pbVocDataBlockPtr = pbVocDataBlock;
@@ -3216,31 +3024,14 @@ int tape_insert_voc (const char *pchFileName)
       }
       lOffset += iBlockLength;
    }
-   fclose(pfileObject);
 
    *pbTapeImagePtr = 0x20; // end with a pause block
    *(word *)(pbTapeImagePtr+1) = 2000; // set the length to 2 seconds
 
    pbTapeImageEnd = pbTapeImagePtr + 3;
-/*
-   #ifdef DEBUG_TAPE
-   if ((pfileObject = fopen("./test.cdt", "wb")) != nullptr) {
-      fwrite(pbTapeImage, (int)((pbTapeImagePtr+3)-pbTapeImage), 1, pfileObject);
-      fclose(pfileObject);
-   }
-   #endif
-*/
-   Tape_Rewind();
 
-/* char *pchTmpBuffer = new char[MAX_LINE_LEN];
-   LoadString(hAppInstance, MSG_TAP_INSERT, chMsgBuffer, sizeof(chMsgBuffer));
-   snprintf(pchTmpBuffer, _MAX_PATH-1, chMsgBuffer, CPC.tape_file.c_str());
-   add_message(pchTmpBuffer);
-   delete [] pchTmpBuffer; */
    return 0;
 }
-
-
 
 
 
@@ -4239,11 +4030,10 @@ void parseArgs (int argc, const char **argv, t_CPC& CPC)
          stringutils::splitPath(fullpath, dirname, filename);
          if (extension == ".zip") { // are we dealing with a zip archive?
             zip_info.filename = fullpath;
-            zip_info.extension = ".dsk.sna.cdt.voc";
-            if (zip_dir(&zip_info)) {
+            zip_info.extensions = ".dsk.sna.cdt.voc";
+            if (zip::dir(&zip_info)) {
                continue; // error or nothing relevant found
             } else {
-            // TODO(cpitrat): Tests with multiple dsk files in a same zip - define how to behave
                dirname = fullpath;
                filename = zip_info.pchFileNames;
                pos = filename.length() - 4;
@@ -4340,6 +4130,7 @@ int cap32_main (int argc, char **argv)
 
    parseArgs(argc, const_cast<const char**>(argv), CPC);
 
+   // TODO(cpitrat): refactor this: duplication + should be tested + cleanup
    memset(&driveA, 0, sizeof(t_drive)); // clear disk drive A data structure
    if (!CPC.drvA_file.empty()) { // insert disk in drive A?
       char chFileName[_MAX_PATH + 1];
@@ -4347,8 +4138,8 @@ int cap32_main (int argc, char **argv)
 
       if (CPC.drvA_zip) { // compressed image?
          zip_info.filename = CPC.drvA_path; // pchPath already has path and zip file combined
-         zip_info.extension = ".dsk";
-         if (!zip_dir(&zip_info)) { // parse the zip for relevant files
+         zip_info.extensions = ".dsk";
+         if (!zip::dir(&zip_info)) { // parse the zip for relevant files
             dword n;
             pchPtr = zip_info.pchFileNames;
             for (n = zip_info.iFiles; n; n--) { // loop through all entries
@@ -4358,10 +4149,11 @@ int cap32_main (int argc, char **argv)
                pchPtr += strlen(pchPtr) + 5; // skip offset
             }
             if (n) {
+               FILE *file = nullptr;
                zip_info.dwOffset = *(dword *)(pchPtr + (strlen(pchPtr)+1)); // get the offset into the zip archive
-               if (!zip_extract(CPC.drvA_path, chFileName, zip_info.dwOffset)) {
-                  dsk_load(chFileName, &driveA, 'A');
-                  remove(chFileName);
+               if (!zip::extract(zip_info, &file)) {
+                  dsk_load(file, &driveA);
+                  fclose(file);
                }
             }
          } else {
@@ -4370,7 +4162,7 @@ int cap32_main (int argc, char **argv)
       } else {
          strncpy(chFileName, CPC.drvA_path.c_str(), sizeof(chFileName)-1);
          strncat(chFileName, CPC.drvA_file.c_str(), sizeof(chFileName)-1 - strlen(chFileName));
-         dsk_load(chFileName, &driveA, 'A');
+         dsk_load(chFileName, &driveA);
       }
    }
    memset(&driveB, 0, sizeof(t_drive)); // clear disk drive B data structure
@@ -4380,8 +4172,8 @@ int cap32_main (int argc, char **argv)
 
       if (CPC.drvB_zip) { // compressed image?
          zip_info.filename = CPC.drvB_path; // pchPath already has path and zip file combined
-         zip_info.extension = ".dsk";
-         if (!zip_dir(&zip_info)) { // parse the zip for relevant files
+         zip_info.extensions = ".dsk";
+         if (!zip::dir(&zip_info)) { // parse the zip for relevant files
             dword n;
             pchPtr = zip_info.pchFileNames;
             for (n = zip_info.iFiles; n; n--) { // loop through all entries
@@ -4391,10 +4183,11 @@ int cap32_main (int argc, char **argv)
                pchPtr += strlen(pchPtr) + 5; // skip offset
             }
             if (n) {
+               FILE *file = nullptr;
                zip_info.dwOffset = *(dword *)(pchPtr + (strlen(pchPtr)+1)); // get the offset into the zip archive
-               if (!zip_extract(CPC.drvB_path, chFileName, zip_info.dwOffset)) {
-                  dsk_load(chFileName, &driveB, 'B');
-                  remove(chFileName);
+               if (!zip::extract(zip_info, &file)) {
+                  dsk_load(file, &driveB);
+                  fclose(file);
                }
             }
          }
@@ -4405,19 +4198,17 @@ int cap32_main (int argc, char **argv)
       else {
          strncpy(chFileName, CPC.drvB_path.c_str(), sizeof(chFileName)-1);
          strncat(chFileName, CPC.drvB_file.c_str(), sizeof(chFileName)-1 - strlen(chFileName));
-         dsk_load(chFileName, &driveB, 'B');
+         dsk_load(chFileName, &driveB);
       }
    }
    if (!CPC.tape_file.empty()) { // insert a tape?
-      int iErrorCode = 0;
       char chFileName[_MAX_PATH + 1];
       char *pchPtr;
 
       if (CPC.tape_zip) { // compressed image?
          zip_info.filename = CPC.tape_path; // pchPath already has path and zip file combined
-         zip_info.extension = ".cdt.voc";
-         iErrorCode = zip_dir(&zip_info);
-         if (!iErrorCode) { // parse the zip for relevant files
+         zip_info.extensions = ".cdt.voc";
+         if (!zip::dir(&zip_info)) { // parse the zip for relevant files
             dword n;
             pchPtr = zip_info.pchFileNames;
             for (n = zip_info.iFiles; n; n--) { // loop through all entries
@@ -4427,12 +4218,15 @@ int cap32_main (int argc, char **argv)
                pchPtr += strlen(pchPtr) + 5; // skip offset
             }
             if (n) {
+               FILE *file = nullptr;
                zip_info.dwOffset = *(dword *)(pchPtr + (strlen(pchPtr)+1)); // get the offset into the zip archive
-               iErrorCode = zip_extract(CPC.tape_path, chFileName, zip_info.dwOffset);
+               if(!zip::extract(zip_info, &file)) {
+                 std::cerr << "ERROR: Loading zipped tape not supported yet !" << std::endl;
+                 tape_insert(file);
+               }
             }
             else {
                CPC.tape_zip = 0;
-               iErrorCode = 1; // file not found
             }
          }
          else {
@@ -4442,31 +4236,17 @@ int cap32_main (int argc, char **argv)
       else {
          strncpy(chFileName, CPC.tape_path.c_str(), sizeof(chFileName)-1);
          strncat(chFileName, CPC.tape_file.c_str(), sizeof(chFileName)-1 - strlen(chFileName));
-      }
-      if (!iErrorCode) {
-         int iOffset = CPC.tape_file.length() - 3;
-         char *pchExt = &CPC.tape_file[iOffset > 0 ? iOffset : 0]; // pointer to the extension
-         if (strncasecmp(pchExt, "cdt", 3) == 0) { // is it a cdt file?
-            iErrorCode = tape_insert(chFileName);
-         }
-         else if (strncasecmp(pchExt, "voc", 3) == 0) { // is it a voc file?
-            iErrorCode = tape_insert_voc(chFileName);
-         }
-         if (CPC.tape_zip) {
-            remove(chFileName); // dispose of the temp file
-         }
+         tape_insert(chFileName);
       }
    }
    if (!CPC.snap_file.empty()) { // load a snapshot ?
-      int iErrorCode = 0;
       char chFileName[_MAX_PATH + 1];
       char *pchPtr;
 
       if (CPC.snap_zip) { // compressed image?
          zip_info.filename = CPC.snap_path; // pchPath already has path and zip file combined
-         zip_info.extension = ".sna";
-         iErrorCode = zip_dir(&zip_info);
-         if (!iErrorCode) { // parse the zip for relevant files
+         zip_info.extensions = ".sna";
+         if(!zip::dir(&zip_info)) { // parse the zip for relevant files
             dword n;
             pchPtr = zip_info.pchFileNames;
             for (n = zip_info.iFiles; n; n--) { // loop through all entries
@@ -4476,12 +4256,15 @@ int cap32_main (int argc, char **argv)
                pchPtr += strlen(pchPtr) + 5; // skip offset
             }
             if (n) {
+              FILE *file = nullptr;
                zip_info.dwOffset = *(dword *)(pchPtr + (strlen(pchPtr)+1)); // get the offset into the zip archive
-               iErrorCode = zip_extract(CPC.snap_path, chFileName, zip_info.dwOffset);
+               if (!zip::extract(zip_info, &file)) {
+                  snapshot_load(file);
+                  fclose(file);
+               }
             }
             else {
                CPC.snap_zip = 0;
-               iErrorCode = 1; // file not found
             }
          }
          else {
@@ -4491,12 +4274,7 @@ int cap32_main (int argc, char **argv)
       else {
          strncpy(chFileName, CPC.snap_path.c_str(), sizeof(chFileName)-1);
          strncat(chFileName, CPC.snap_file.c_str(), sizeof(chFileName)-1 - strlen(chFileName));
-      }
-      if (!iErrorCode) {
-         iErrorCode = snapshot_load(chFileName);
-         if (CPC.snap_zip) {
-            remove(chFileName); // dispose of the temp file
-         }
+         snapshot_load(chFileName);
       }
    }
 
@@ -4598,10 +4376,13 @@ int cap32_main (int argc, char **argv)
                            break;
 
                         case CAP32_TAPEPLAY:
+                           LOG("Request to play tape");
                            if (pbTapeImage) {
                               if (CPC.tape_play_button) {
+                                 LOG("Play button released");
                                  CPC.tape_play_button = 0;
                               } else {
+                                 LOG("Play button pushed");
                                  CPC.tape_play_button = 0x10;
                               }
                            }

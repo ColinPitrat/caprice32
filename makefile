@@ -39,7 +39,7 @@ endif
 endif
 
 ifdef DEBUG
-COMMON_CFLAGS_2	= $(COMMON_CFLAGS_1) -g -O0
+COMMON_CFLAGS_2	= $(COMMON_CFLAGS_1) -g -O0 -DDEBUG
 all: debug
 else
 COMMON_CFLAGS_2	= $(COMMON_CFLAGS_1) -O2 -funroll-loops -ffast-math -fomit-frame-pointer -fno-strength-reduce -finline-functions -s

@@ -53,8 +53,8 @@ namespace stringutils
       dirname = path.substr(0, delimiter);
       filename = path.substr(delimiter);
     } else {
-      dirname = path;
-      filename = "";
+      dirname = "./";
+      filename = path;
     }
   }
 }

@@ -105,12 +105,12 @@ bool CapriceLoadSave::HandleMessage(CMessage* pMessage)
                         break;
                       case 1: // Drive A
                         std::cout << "Load dsk A" << std::endl;
-                        dsk_load(filename.c_str(), &driveA, 'A');
+                        dsk_load(filename.c_str(), &driveA);
                         actionDone = true;
                         break;
                       case 2: // Drive B
                         std::cout << "Load dsk B" << std::endl;
-                        dsk_load(filename.c_str(), &driveB, 'B');
+                        dsk_load(filename.c_str(), &driveB);
                         actionDone = true;
                         break;
                       case 3: // Tape
@@ -129,12 +129,12 @@ bool CapriceLoadSave::HandleMessage(CMessage* pMessage)
                         break;
                       case 1: // Drive A
                         std::cout << "Save dsk A" << std::endl;
-                        dsk_save(filename.c_str(), &driveA, 'A');
+                        dsk_save(filename.c_str(), &driveA);
                         actionDone = true;
                         break;
                       case 2: // Drive B
                         std::cout << "Save dsk B" << std::endl;
-                        dsk_save(filename.c_str(), &driveB, 'B');
+                        dsk_save(filename.c_str(), &driveB);
                         actionDone = true;
                         break;
                       case 3: // Tape
