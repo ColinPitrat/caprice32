@@ -2673,8 +2673,7 @@ int tape_insert (const char *pchFileName)
    }
 
    int iRetCode = tape_insert(pfile);
-
-   Tape_Rewind();
+   fclose(pfile);
 
    return iRetCode;
 }
@@ -2829,6 +2828,7 @@ int tape_insert_cdt (FILE *pfile)
       tape_eject();
       return ERR_TAP_INVALID;
    }
+   Tape_Rewind();
    return 0;
 }
 
@@ -3030,6 +3030,7 @@ int tape_insert_voc (FILE *pfile)
 
    pbTapeImageEnd = pbTapeImagePtr + 3;
 
+   Tape_Rewind();
    return 0;
 }
 
@@ -4221,8 +4222,8 @@ int cap32_main (int argc, char **argv)
                FILE *file = nullptr;
                zip_info.dwOffset = *(dword *)(pchPtr + (strlen(pchPtr)+1)); // get the offset into the zip archive
                if(!zip::extract(zip_info, &file)) {
-                 std::cerr << "ERROR: Loading zipped tape not supported yet !" << std::endl;
                  tape_insert(file);
+                 fclose(file);
                }
             }
             else {
@@ -4377,6 +4378,7 @@ int cap32_main (int argc, char **argv)
 
                         case CAP32_TAPEPLAY:
                            LOG("Request to play tape");
+                           Tape_Rewind();
                            if (pbTapeImage) {
                               if (CPC.tape_play_button) {
                                  LOG("Play button released");
