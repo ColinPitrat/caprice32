@@ -25,7 +25,6 @@
 #include "wgui_include_config.h"
 #include "wg_application.h"
 #include "wg_groupbox.h"
-#include <iostream> // TODO: remove
 
 
 namespace wGui

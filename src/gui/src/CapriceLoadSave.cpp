@@ -34,7 +34,7 @@ CapriceLoadSave::CapriceLoadSave(const CRect& WindowRect, CWindow* pParent, CFon
   m_pTypeValue->AddItem(SListItem("Snapshot (.sna)"));
   m_pTypeValue->AddItem(SListItem("Drive A (.dsk)"));
   m_pTypeValue->AddItem(SListItem("Drive B (.dsk)"));
-  m_pTypeValue->AddItem(SListItem("Tape (.tap)"));
+  m_pTypeValue->AddItem(SListItem("Tape (.cdt/.voc)"));
   m_pTypeValue->SetListboxHeight(4);
   m_pTypeValue->SelectItem(0);
   m_pTypeValue->SetIsFocusable(true);
@@ -190,7 +190,9 @@ bool CapriceLoadSave::HandleMessage(CMessage* pMessage)
               break;
             case 3: // Tape
               m_pDirectoryValue->SetWindowText(simplifyPath(CPC.tape_path));
-              m_currentExt = ".tap";
+              // TODO(cpitrat): Support multiple extension for CDT & VOC
+              // For now CDT only as this is the most used
+              m_currentExt = ".cdt";
               UpdateFilesList();
               break;
           }
