@@ -257,10 +257,12 @@ CapriceOptions::CapriceOptions(const CRect& WindowRect, CWindow* pParent, CFontE
 
     EnableTab("general");
 
-    m_pButtonOk     = new CButton(CRect(CPoint(100, m_ClientRect.Height() - 20), 50, 15), this, "OK");
-    m_pButtonOk->SetIsFocusable(true);
-    m_pButtonCancel = new CButton(CRect(CPoint(160, m_ClientRect.Height() - 20), 50, 15), this, "Cancel");
+    m_pButtonSave   = new CButton(CRect(CPoint(70, m_ClientRect.Height() - 20), 50, 15), this, "Save");
+    m_pButtonSave->SetIsFocusable(true);
+    m_pButtonCancel = new CButton(CRect(CPoint(130, m_ClientRect.Height() - 20), 50, 15), this, "Cancel");
     m_pButtonCancel->SetIsFocusable(true);
+    m_pButtonApply   = new CButton(CRect(CPoint(190, m_ClientRect.Height() - 20), 50, 15), this, "Apply");
+    m_pButtonApply->SetIsFocusable(true);
 }
 
 CapriceOptions::~CapriceOptions(void) {
@@ -283,7 +285,7 @@ bool CapriceOptions::HandleMessage(CMessage* pMessage)
               bHandled = true;
               break;
             }
-            if (pMessage->Source() == m_pButtonOk) {
+            if (pMessage->Source() == m_pButtonSave || pMessage->Source() == m_pButtonApply) {
               // save settings + close
 
               // 'General' settings
@@ -327,9 +329,12 @@ bool CapriceOptions::HandleMessage(CMessage* pMessage)
               CPC.kbd_layout = m_pDropDownPCLanguage->GetSelectedIndex();
 
               // Check if any reset or re-init is required, e.g. emulator reset, sound system reset...
-              ProcessOptionChanges(CPC);
+              ProcessOptionChanges(CPC, pMessage->Source() == m_pButtonSave);
 
-              CloseFrame();
+              if(pMessage->Source() == m_pButtonSave)
+              {
+                CloseFrame();
+              }
               bHandled = true;
               break;
             }
@@ -447,7 +452,7 @@ void CapriceOptions::EnableTab(std::string sTabName) {
 
 
 // Reinitialize parts of Caprice32 depending on options that have changed.
-void CapriceOptions::ProcessOptionChanges(t_CPC& CPC) {
+void CapriceOptions::ProcessOptionChanges(t_CPC& CPC, bool saveChanges) {
     // if one of the following options has changed, re-init the CPC emulation :
     //  - CPC Model
     //  - amount of RAM
@@ -522,6 +527,11 @@ void CapriceOptions::ProcessOptionChanges(t_CPC& CPC) {
         audio_resume();
 
         CMessageServer::Instance().QueueMessage(new CMessage(CMessage::APP_EXIT, nullptr, this));
+    }
+
+    if (saveChanges)
+    {
+        saveConfiguration(CPC, getConfigurationFilename());
     }
 }
 

@@ -32,8 +32,9 @@ namespace wGui
         void EnableTab(std::string sTabName);
 
       protected:
-        CButton* m_pButtonOk;
+        CButton* m_pButtonSave;
         CButton* m_pButtonCancel;
+        CButton* m_pButtonApply;
 
         // subdialogs that can be opened from the options dialog, e.g. ROM selection:
         CapriceRomSlots* pRomSlotsDialog;
@@ -126,7 +127,7 @@ namespace wGui
       t_CPC m_oldCPCsettings;  // we will store the current CPC settings in this variable, and 
                                // when clicking OK in the options screen, check what options have changed
                                // and take a required action (e.g. emulator reset, sound system reset...)
-      void ProcessOptionChanges(t_CPC& CPC); // see m_oldCPCsettings
+      void ProcessOptionChanges(t_CPC& CPC, bool saveChanges); // see m_oldCPCsettings
 
       private:
 
