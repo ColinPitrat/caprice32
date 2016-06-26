@@ -81,6 +81,76 @@ void CApplication::HandleSDLEvent(SDL_Event Event)
 			CPoint((int)((Event.button.x-vid_plugin->x_offset)*vid_plugin->x_scale),(int)((Event.button.y-vid_plugin->y_offset)*vid_plugin->y_scale)), CPoint(),
 			CMouseMessage::TranslateSDLButtonState(Event.motion.state)));
 		break;
+  case SDL_JOYAXISMOTION:
+    {
+      SDLKey key;
+      switch(Event.jaxis.axis) {
+        case 0:
+        case 2:
+          // TODO: validate with a joystick with non-binary axis
+          // should we add some timing or consider only state changes ?
+          if(Event.jaxis.value < -JOYSTICK_AXIS_THRESHOLD) {
+            key = SDLK_LEFT;
+          } else if(Event.jaxis.value > JOYSTICK_AXIS_THRESHOLD) {
+            key = SDLK_RIGHT;
+          }
+          break;
+        case 1:
+        case 3:
+          if(Event.jaxis.value < -JOYSTICK_AXIS_THRESHOLD) {
+            key = SDLK_UP;
+          } else if(Event.jaxis.value > JOYSTICK_AXIS_THRESHOLD) {
+            key = SDLK_DOWN;
+          }
+          break;
+      }
+      CMessageServer::Instance().QueueMessage(new CKeyboardMessage(
+            CMessage::KEYBOARD_KEYDOWN, CApplication::Instance()->GetKeyFocus(), this,
+            0, KMOD_NONE, key, 0));
+      CMessageServer::Instance().QueueMessage(new CKeyboardMessage(
+            CMessage::KEYBOARD_KEYUP, CApplication::Instance()->GetKeyFocus(), this,
+            0, KMOD_NONE, key, 0));
+      break;
+    }
+  case SDL_JOYBUTTONUP:
+  case SDL_JOYBUTTONDOWN:
+    {
+      CMessage::EMessageType type = CMessage::KEYBOARD_KEYDOWN;
+      if (Event.type == SDL_JOYBUTTONUP) {
+        type = CMessage::KEYBOARD_KEYUP;
+      }
+      SDLKey key;
+      SDLMod mod = KMOD_NONE;
+      bool ignore_event = false;
+      // TODO: arbitrary binding: validate with various joystick models
+      switch (Event.jbutton.button) {
+        case 0:
+          key = SDLK_RETURN;
+          break;
+        case 1:
+        case 4:
+          key = SDLK_TAB;
+          break;
+        case 2:
+        case 5:
+          key = SDLK_TAB;
+          mod = KMOD_RSHIFT;
+          break;
+        case 3:
+          key = SDLK_ESCAPE;
+          break;
+        default:
+          ignore_event = true;
+          break;
+      }
+      if (!ignore_event) {
+        CMessageServer::Instance().QueueMessage(new CKeyboardMessage(
+              type, CApplication::Instance()->GetKeyFocus(), this,
+              0, mod, key, 0));
+      }
+      break;
+    }
+
 	case SDL_QUIT:
 //		CMessageServer::Instance().QueueMessage(new CMessage(CMessage::APP_EXIT, nullptr, this));
     exit(0);

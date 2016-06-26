@@ -97,6 +97,8 @@
 #define MF2_RUNNING     2
 #define MF2_INVISIBLE   4
 
+// TODO: Tune threshold based on different joysticks or make it configurable ?
+#define JOYSTICK_AXIS_THRESHOLD 16384
 
 
 typedef struct {
@@ -207,6 +209,7 @@ typedef struct {
    unsigned int keyboard;
    unsigned int joystick_emulation;
    unsigned int joysticks;
+   unsigned int joystick_menu_button;
    int cycle_count;
    std::string resources_path;
 

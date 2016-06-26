@@ -1802,7 +1802,7 @@ void z80_OUT_handler (reg_pair port, byte val)
       else if (port.b.l == 0xea) { // page out MF2 ROM?
          dwMF2Flags &= ~MF2_ACTIVE;
          ga_memory_manager();
-      } 
+      }
    }
 }
 
@@ -3622,7 +3622,7 @@ void joysticks_shutdown (void)
 
 
 
-void input_swap_joy (void) 
+void input_swap_joy (void)
 {
    dword n, pc_idx, val;
 
@@ -3637,7 +3637,7 @@ void input_swap_joy (void)
 }
 
 // Recalculate emulation speed (to verify, seems to work reasonably well)
-void update_cpc_speed(void) 
+void update_cpc_speed(void)
 {
    dwTicksOffset = (int)(20.0 / (double)((CPC.speed * 25) / 100.0));
    dwTicksTarget = SDL_GetTicks();
@@ -3822,6 +3822,7 @@ void loadConfiguration (t_CPC &CPC, const std::string& configFilename)
    }
    CPC.joystick_emulation = conf.getIntValue("system", "joystick_emulation", 0) & 1;
    CPC.joysticks = conf.getIntValue("system", "joysticks", 1) & 1;
+   CPC.joystick_menu_button = conf.getIntValue("system", "joystick_menu_button", 9) - 1;
    CPC.resources_path = conf.getStringValue("system", "resources_path", appPath + "/resources");
 
    CPC.scr_fs_width = conf.getIntValue("video", "scr_width", 800);
@@ -4069,6 +4070,28 @@ void parseArgs (int argc, const char **argv, t_CPC& CPC)
          }
       }
    }
+}
+
+
+
+void showGui()
+{
+  // Activate gui
+  audio_pause();
+  SDL_ShowCursor(SDL_ENABLE);
+  CapriceGui capriceGui;
+  capriceGui.Init();
+  // guiBackSurface will allow the GUI to capture the current frame
+  SDL_Surface* guiBackSurface(SDL_CreateRGBSurface(SDL_SWSURFACE, back_surface->w, back_surface->h, 32, 0x000000FF, 0x0000FF00, 0x00FF0000, 0x00000000));
+  SDL_BlitSurface(back_surface, nullptr, guiBackSurface, nullptr);
+  CapriceGuiView capriceGuiView(back_surface, guiBackSurface, CRect(0, 0, back_surface->w, back_surface->h));
+  capriceGui.SetMouseVisibility(true);
+  capriceGui.Exec();
+  SDL_FreeSurface(guiBackSurface);
+  // Clear SDL surface:
+  SDL_FillRect(back_surface, nullptr, SDL_MapRGB(back_surface->format, 0, 0, 0));
+  SDL_ShowCursor(SDL_DISABLE);
+  audio_resume();
 }
 
 
@@ -4345,22 +4368,7 @@ int cap32_main (int argc, char **argv)
 
                         case CAP32_GUI:
                           {
-                            // Activate gui
-                            audio_pause();                                
-                            SDL_ShowCursor(SDL_ENABLE);
-                            CapriceGui capriceGui;
-                            capriceGui.Init();
-                            // guiBackSurface will allow the GUI to capture the current frame
-                            SDL_Surface* guiBackSurface(SDL_CreateRGBSurface(SDL_SWSURFACE, back_surface->w, back_surface->h, 32, 0x000000FF, 0x0000FF00, 0x00FF0000, 0x00000000));
-                            SDL_BlitSurface(back_surface, nullptr, guiBackSurface, nullptr);
-                            CapriceGuiView capriceGuiView(back_surface, guiBackSurface, CRect(0, 0, back_surface->w, back_surface->h));
-                            capriceGui.SetMouseVisibility(true);
-                            capriceGui.Exec();
-                            SDL_FreeSurface(guiBackSurface);
-                            // Clear SDL surface:
-                            SDL_FillRect(back_surface, nullptr, SDL_MapRGB(back_surface->format, 0, 0, 0));
-                            SDL_ShowCursor(SDL_DISABLE);
-                            audio_resume();
+                            showGui();
                             break;
                           }
 
@@ -4396,7 +4404,7 @@ int cap32_main (int argc, char **argv)
 
                              // Set mode to activate ROM_config
                              //port.b.h = 0x40;
-                             //z80_OUT_handler(port, 128); 
+                             //z80_OUT_handler(port, 128);
 
                              // Attempt to load MF2 in lower ROM (can fail if lower ROM is not active)
                              port.b.h = 0xfe;
@@ -4473,6 +4481,12 @@ int cap32_main (int argc, char **argv)
                       break;
                   }
                   break;
+                default:
+                  if (event.jbutton.button == CPC.joystick_menu_button)
+                  {
+                    showGui();
+                  }
+                  break;
               }
               // TODO: deduplicate this from SDL_KEYDOWN, SDL_KEYUP, SDL_JOYBUTTONDOWN, SDL_JOYBUTTONUP and SDL_JOYAXISMOTION
               if (!CPC.paused && cpc_key != 0xff) {
@@ -4526,6 +4540,7 @@ int cap32_main (int argc, char **argv)
 
             case SDL_JOYAXISMOTION:
             {
+              // TODO: make axis configurable
               dword cpc_key(0xff), cpc_key2(0xff);
               bool release = false;
               switch(event.jaxis.axis) {
