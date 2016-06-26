@@ -4540,31 +4540,31 @@ int cap32_main (int argc, char **argv)
 
             case SDL_JOYAXISMOTION:
             {
-              // TODO: make axis configurable
               dword cpc_key(0xff), cpc_key2(0xff);
               bool release = false;
               switch(event.jaxis.axis) {
                 case 0:
+                case 2:
                   switch(event.jaxis.which) {
                     case 0:
-                      if(event.jaxis.value < -2000) {
+                      if(event.jaxis.value < -JOYSTICK_AXIS_THRESHOLD) {
                         cpc_key = cpc_kbd[CPC.keyboard][CPC_J0_LEFT];
-                      } else if(event.jaxis.value > 2000) {
+                      } else if(event.jaxis.value > JOYSTICK_AXIS_THRESHOLD) {
                         cpc_key = cpc_kbd[CPC.keyboard][CPC_J0_RIGHT];
                       } else {
-                        // LEFT or RIGHT ?!
+                        // release both LEFT and RIGHT
                         cpc_key = cpc_kbd[CPC.keyboard][CPC_J0_LEFT];
                         cpc_key2 = cpc_kbd[CPC.keyboard][CPC_J0_RIGHT];
                         release = true;
                       }
                       break;
                     case 1:
-                      if(event.jaxis.value < -2000) {
+                      if(event.jaxis.value < -JOYSTICK_AXIS_THRESHOLD) {
                         cpc_key = cpc_kbd[CPC.keyboard][CPC_J1_LEFT];
-                      } else if(event.jaxis.value > 2000) {
+                      } else if(event.jaxis.value > JOYSTICK_AXIS_THRESHOLD) {
                         cpc_key = cpc_kbd[CPC.keyboard][CPC_J1_RIGHT];
                       } else {
-                        // LEFT or RIGHT ?!
+                        // release both LEFT and RIGHT
                         cpc_key = cpc_kbd[CPC.keyboard][CPC_J1_LEFT];
                         cpc_key2 = cpc_kbd[CPC.keyboard][CPC_J1_RIGHT];
                         release = true;
@@ -4573,26 +4573,27 @@ int cap32_main (int argc, char **argv)
                   }
                   break;
                 case 1:
+                case 3:
                   switch(event.jaxis.which) {
                     case 0:
-                      if(event.jaxis.value < -2000) {
+                      if(event.jaxis.value < -JOYSTICK_AXIS_THRESHOLD) {
                         cpc_key = cpc_kbd[CPC.keyboard][CPC_J0_UP];
-                      } else if(event.jaxis.value > 2000) {
+                      } else if(event.jaxis.value > JOYSTICK_AXIS_THRESHOLD) {
                         cpc_key = cpc_kbd[CPC.keyboard][CPC_J0_DOWN];
                       } else {
-                        // UP or DOWN ?!
+                        // release both UP and DOWN
                         cpc_key = cpc_kbd[CPC.keyboard][CPC_J0_UP];
                         cpc_key2 = cpc_kbd[CPC.keyboard][CPC_J0_DOWN];
                         release = true;
                       }
                       break;
                     case 1:
-                      if(event.jaxis.value < -2000) {
+                      if(event.jaxis.value < -JOYSTICK_AXIS_THRESHOLD) {
                         cpc_key = cpc_kbd[CPC.keyboard][CPC_J1_UP];
-                      } else if(event.jaxis.value > 2000) {
+                      } else if(event.jaxis.value > JOYSTICK_AXIS_THRESHOLD) {
                         cpc_key = cpc_kbd[CPC.keyboard][CPC_J1_DOWN];
                       } else {
-                        // UP or DOWN ?!
+                        // release both UP and DOWN
                         cpc_key = cpc_kbd[CPC.keyboard][CPC_J1_UP];
                         cpc_key2 = cpc_kbd[CPC.keyboard][CPC_J1_DOWN];
                         release = true;
