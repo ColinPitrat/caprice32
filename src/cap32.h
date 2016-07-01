@@ -210,6 +210,7 @@ typedef struct {
    unsigned int joystick_emulation;
    unsigned int joysticks;
    unsigned int joystick_menu_button;
+   unsigned int joystick_vkeyboard_button;
    int cycle_count;
    std::string resources_path;
 

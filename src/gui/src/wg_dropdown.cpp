@@ -92,7 +92,7 @@ void CDropDown::SetWindowText(std::string sWindowText)
 }
 
 
-std::string CDropDown::GetWindowText()
+std::string CDropDown::GetWindowText() const
 {
 	return m_pEditBox->GetWindowText();
 }

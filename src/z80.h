@@ -20,10 +20,7 @@
 #define Z80_H
 
 #include "SDL.h"
-
-typedef unsigned char byte;
-typedef unsigned short word;
-typedef unsigned int dword;
+#include "types.h"
 
 typedef union {
 #if SDL_BYTEORDER == SDL_LIL_ENDIAN

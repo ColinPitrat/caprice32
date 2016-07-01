@@ -171,7 +171,7 @@ public:
 
 	//! Return the WindowText for the current window
 	//! \return The WindowText
-	virtual std::string GetWindowText(void) { return m_sWindowText; }
+	virtual std::string GetWindowText(void) const { return m_sWindowText; }
 
     // judb return list of children
 	std::list<CWindow*> GetChildWindows() { return m_ChildWindows; }

@@ -41,8 +41,9 @@ namespace wGui
       //! \param pFontEngine A pointer to the font engine to use when drawing the control
       //! If this is set to 0 it will use the default font engine specified by the CApplication (which must be set before instantiating this object)
       CapriceMenu(const CRect& WindowRect, CWindow* pParent, SDL_Surface* screen, CFontEngine* pFontEngine);
-      ~CapriceMenu(void);
+      ~CapriceMenu();
 
+      void CloseFrame(void) override;
       bool HandleMessage(CMessage* pMessage) override;
 
     protected:
@@ -50,7 +51,6 @@ namespace wGui
       SDL_Surface *m_pScreenSurface;
       
       void operator=(CapriceMenu) { }  //!< The assignment operator is not allowed for CWindow derived objects
-
   };
 }
 

@@ -109,7 +109,7 @@ public:
 	virtual void SetWindowText(std::string sWindowText);
 
 	//! Get the WindowText of the control
-	virtual std::string GetWindowText() override;
+	virtual std::string GetWindowText() const override;
 
 	//! Move the window and any child windows
 	//! \param MoveDistance The relative distance to move the window

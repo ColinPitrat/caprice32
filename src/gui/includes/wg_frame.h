@@ -77,7 +77,7 @@ public:
 	CMenu* GetMenu(void) const { return m_pMenu; }
 
 	//! Closes the frame and causes it to delete itself
-	void CloseFrame(void);
+	virtual void CloseFrame(void);
 
 	//! Indicates if the frame is modal (doesn't allow input to any other windows)
 	//! \return true if the frame is modal

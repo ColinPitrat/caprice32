@@ -42,6 +42,11 @@ CapriceMenu::CapriceMenu(const CRect& WindowRect, CWindow* pParent, SDL_Surface*
 CapriceMenu::~CapriceMenu(void) {
 }
 
+void CapriceMenu::CloseFrame(void) {
+  // Exit gui
+  CMessageServer::Instance().QueueMessage(new CMessage(CMessage::APP_EXIT, nullptr, this));
+}
+
 bool CapriceMenu::HandleMessage(CMessage* pMessage)
 {
   bool bHandled = false;
@@ -53,9 +58,9 @@ bool CapriceMenu::HandleMessage(CMessage* pMessage)
     {
     case CMessage::CTRL_SINGLELCLICK:
       if (pMessage->Destination() == this) {
-        bHandled = true;
         for(auto& b : m_buttons) {
           if (pMessage->Source() == b.GetButton()) {
+            bHandled = true;
             selected = b.GetItem();
             break;
           }
