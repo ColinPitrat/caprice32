@@ -27,7 +27,7 @@ CXX	= g++
 endif
 
 COMMON_CFLAGS_1 = -std=c++11
-CFLAGS_1	= -Wall -Wzero-as-null-pointer-constant `sdl-config --cflags`
+CFLAGS_1	= -Wall -Wzero-as-null-pointer-constant -Wformat=2 -Wold-style-cast `sdl-config --cflags`
 
 debug: DEBUG=1
 

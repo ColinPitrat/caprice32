@@ -429,9 +429,9 @@ void z80_OUT_handler (reg_pair port, byte val)
                GateArray.palette[GateArray.pen] = SDL_MapRGB(back_surface->format,
                 colours[colour].r, colours[colour].g, colours[colour].b);
                if (GateArray.pen < 2) {
-                  byte r = ((dword)colours[GateArray.ink_values[0]].r + (dword)colours[GateArray.ink_values[1]].r) >> 1;
-                  byte g = ((dword)colours[GateArray.ink_values[0]].g + (dword)colours[GateArray.ink_values[1]].g) >> 1;
-                  byte b = ((dword)colours[GateArray.ink_values[0]].b + (dword)colours[GateArray.ink_values[1]].b) >> 1;
+                  byte r = (static_cast<dword>(colours[GateArray.ink_values[0]].r) + static_cast<dword>(colours[GateArray.ink_values[1]].r)) >> 1;
+                  byte g = (static_cast<dword>(colours[GateArray.ink_values[0]].g) + static_cast<dword>(colours[GateArray.ink_values[1]].g)) >> 1;
+                  byte b = (static_cast<dword>(colours[GateArray.ink_values[0]].b) + static_cast<dword>(colours[GateArray.ink_values[1]].b)) >> 1;
                   GateArray.palette[18] = SDL_MapRGB(back_surface->format, r, g, b); // update the mode 2 'anti-aliasing' colour
                }
             }
@@ -500,7 +500,7 @@ void z80_OUT_handler (reg_pair port, byte val)
                   break;
                case 4: // vertical total
                   CRTC.registers[4] = val & 0x7f;
-                  if (CRTC.CharInstMR == (void(*)(void))CharMR2) {
+                  if (CRTC.CharInstMR == CharMR2) {
                      if (CRTC.line_count == CRTC.registers[4]) { // matches vertical total?
                         if (CRTC.raster_count == CRTC.registers[9]) { // matches maximum raster address?
                            CRTC.flag_startvta = 1;
@@ -556,7 +556,7 @@ void z80_OUT_handler (reg_pair port, byte val)
                      if (CRTC.r9match != temp) {
                         CRTC.r9match = temp;
                         if (temp) {
-                           CRTC.CharInstMR = (void(*)(void))CharMR1;
+                           CRTC.CharInstMR = CharMR1;
                         }
                      }
                      if (CRTC.raster_count == CRTC.registers[9]) { // matches maximum raster address?
@@ -734,7 +734,7 @@ void print (dword *pdwAddr, char *pchStr, bool bolColour)
          iLen = strlen(pchStr); // number of characters to process
          for (int n = 0; n < iLen; n++) {
             dword *pdwLine, *pdwPixel;
-            iIdx = (int)pchStr[n]; // get the ASCII value
+            iIdx = static_cast<int>(pchStr[n]); // get the ASCII value
             if ((iIdx < FNT_MIN_CHAR) || (iIdx > FNT_MAX_CHAR)) { // limit it to the range of chars in the font
                iIdx = FNT_BAD_CHAR;
             }
@@ -766,19 +766,19 @@ void print (dword *pdwAddr, char *pchStr, bool bolColour)
          for (int n = 0; n < iLen; n++) {
             dword *pdwLine;
             byte *pbPixel;
-            iIdx = (int)pchStr[n]; // get the ASCII value
+            iIdx = static_cast<int>(pchStr[n]); // get the ASCII value
             if ((iIdx < FNT_MIN_CHAR) || (iIdx > FNT_MAX_CHAR)) { // limit it to the range of chars in the font
                iIdx = FNT_BAD_CHAR;
             }
             iIdx -= FNT_MIN_CHAR; // zero base the index
             pdwLine = pdwAddr; // keep a reference to the current screen position
             for (iRow = 0; iRow < FNT_CHAR_HEIGHT; iRow++) { // loop for all rows in the font character
-               pbPixel = (byte *)pdwLine;
+               pbPixel = reinterpret_cast<byte *>(pdwLine);
                bRow = bFont[iIdx]; // get the bitmap information for one row
                for (iCol = 0; iCol < FNT_CHAR_WIDTH; iCol++) { // loop for all columns in the font character
                   if (bRow & 0x80) { // is the bit set?
-                     *((dword *)pbPixel+CPC.scr_line_offs) = 0; // draw the "shadow"
-                     *(dword *)pbPixel = dwColour; // draw the character pixel
+                     *(reinterpret_cast<dword *>(pbPixel+CPC.scr_line_offs)) = 0; // draw the "shadow"
+                     *reinterpret_cast<dword *>(pbPixel) = dwColour; // draw the character pixel
                   }
                   pbPixel += 3; // update the screen position
                   bRow <<= 1; // advance to the next bit
@@ -797,20 +797,20 @@ void print (dword *pdwAddr, char *pchStr, bool bolColour)
          for (int n = 0; n < iLen; n++) {
             dword *pdwLine;
             word *pwPixel;
-            iIdx = (int)pchStr[n]; // get the ASCII value
+            iIdx = static_cast<int>(pchStr[n]); // get the ASCII value
             if ((iIdx < FNT_MIN_CHAR) || (iIdx > FNT_MAX_CHAR)) { // limit it to the range of chars in the font
                iIdx = FNT_BAD_CHAR;
             }
             iIdx -= FNT_MIN_CHAR; // zero base the index
             pdwLine = pdwAddr; // keep a reference to the current screen position
             for (iRow = 0; iRow < FNT_CHAR_HEIGHT; iRow++) { // loop for all rows in the font character
-               pwPixel = (word *)pdwLine;
+               pwPixel = reinterpret_cast<word *>(pdwLine);
                bRow = bFont[iIdx]; // get the bitmap information for one row
                for (iCol = 0; iCol < FNT_CHAR_WIDTH; iCol++) { // loop for all columns in the font character
                   if (bRow & 0x80) { // is the bit set?
                      *(pwPixel+1) = 0; // draw the "shadow"
-                     *(word *)((dword *)pwPixel+CPC.scr_line_offs) = 0;
-                     *((word *)((dword *)pwPixel+CPC.scr_line_offs)+1) = 0;
+                     *reinterpret_cast<word *>(reinterpret_cast<dword *>(pwPixel)+CPC.scr_line_offs) = 0;
+                     *(reinterpret_cast<word *>(reinterpret_cast<dword *>(pwPixel)+CPC.scr_line_offs)+1) = 0;
                      *pwPixel = wColour; // draw the character pixel
                   }
                   pwPixel++; // update the screen position
@@ -829,20 +829,20 @@ void print (dword *pdwAddr, char *pchStr, bool bolColour)
          for (int n = 0; n < iLen; n++) {
             dword *pdwLine;
             byte *pbPixel;
-            iIdx = (int)pchStr[n]; // get the ASCII value
+            iIdx = static_cast<int>(pchStr[n]); // get the ASCII value
             if ((iIdx < FNT_MIN_CHAR) || (iIdx > FNT_MAX_CHAR)) { // limit it to the range of chars in the font
                iIdx = FNT_BAD_CHAR;
             }
             iIdx -= FNT_MIN_CHAR; // zero base the index
             pdwLine = pdwAddr; // keep a reference to the current screen position
             for (iRow = 0; iRow < FNT_CHAR_HEIGHT; iRow++) { // loop for all rows in the font character
-               pbPixel = (byte *)pdwLine;
+               pbPixel = reinterpret_cast<byte *>(pdwLine);
                bRow = bFont[iIdx]; // get the bitmap information for one row
                for (iCol = 0; iCol < FNT_CHAR_WIDTH; iCol++) { // loop for all columns in the font character
                   if (bRow & 0x80) { // is the bit set?
                      *(pbPixel+1) = 0; // draw the "shadow"
-                     *(byte *)((dword *)pbPixel+CPC.scr_line_offs) = 0;
-                     *((byte *)((dword *)pbPixel+CPC.scr_line_offs)+1) = 0;
+                     *reinterpret_cast<byte *>(reinterpret_cast<dword *>(pbPixel)+CPC.scr_line_offs) = 0;
+                     *(reinterpret_cast<byte *>(reinterpret_cast<dword *>(pbPixel)+CPC.scr_line_offs)+1) = 0;
                      *pbPixel = bColour; // draw the character pixel
                   }
                   pbPixel++; // update the screen position
@@ -1311,7 +1311,7 @@ int dsk_load (FILE *pfile, t_drive *drive)
         }
         drive->track[track][side].sectors = dwSectors; // store sector count
         drive->track[track][side].size = dwTrackSize; // store track size
-        drive->track[track][side].data = (byte *)malloc(dwTrackSize); // attempt to allocate the required memory
+        drive->track[track][side].data = static_cast<byte *>(malloc(dwTrackSize)); // attempt to allocate the required memory
         if (drive->track[track][side].data == nullptr) { // abort if not enough
           dsk_eject(drive);
           return ERR_OUT_OF_MEMORY;
@@ -1368,7 +1368,7 @@ int dsk_load (FILE *pfile, t_drive *drive)
             }
             drive->track[track][side].sectors = dwSectors; // store sector count
             drive->track[track][side].size = dwTrackSize; // store track size
-            drive->track[track][side].data = (byte *)malloc(dwTrackSize); // attempt to allocate the required memory
+            drive->track[track][side].data = static_cast<byte *>(malloc(dwTrackSize)); // attempt to allocate the required memory
             if (drive->track[track][side].data == nullptr) { // abort if not enough
               dsk_eject(drive);
               return ERR_OUT_OF_MEMORY;
@@ -1513,7 +1513,7 @@ int dsk_format (t_drive *drive, int iFormat)
          dword dwTrackSize = dwSectorSize * dwSectors; // determine track size in bytes, minus track header
          drive->track[track][side].sectors = dwSectors; // store sector count
          drive->track[track][side].size = dwTrackSize; // store track size
-         drive->track[track][side].data = (byte *)malloc(dwTrackSize); // attempt to allocate the required memory
+         drive->track[track][side].data = static_cast<byte *>(malloc(dwTrackSize)); // attempt to allocate the required memory
          if (drive->track[track][side].data == nullptr) { // abort if not enough
             iRetCode = ERR_OUT_OF_MEMORY;
             goto exit;
@@ -1521,9 +1521,9 @@ int dsk_format (t_drive *drive, int iFormat)
          byte *pbDataPtr = drive->track[track][side].data; // pointer to start of memory buffer
          byte *pbTempPtr = pbDataPtr; // keep a pointer to the beginning of the buffer for the current track
          byte CHRN[4];
-         CHRN[0] = (byte)track;
-         CHRN[1] = (byte)side;
-         CHRN[3] = (byte)disk_format[iFormat].sector_size;
+         CHRN[0] = static_cast<byte>(track);
+         CHRN[1] = static_cast<byte>(side);
+         CHRN[3] = static_cast<byte>(disk_format[iFormat].sector_size);
          for (dword sector = 0; sector < dwSectors; sector++) { // loop for all sectors
             CHRN[2] = disk_format[iFormat].sector_ids[side][sector];
             memcpy(drive->track[track][side].sector[sector].CHRN, CHRN, 4); // copy CHRN
@@ -1615,15 +1615,15 @@ int tape_insert_cdt (FILE *pfile)
       LOG("Invalid CDT file size");
       return ERR_TAP_INVALID;
    }
-   pbTapeImage = (byte *)malloc(lFileSize+6);
+   pbTapeImage = static_cast<byte *>(malloc(lFileSize+6));
    *pbTapeImage = 0x20; // start off with a pause block
-   *(word *)(pbTapeImage+1) = 2000; // set the length to 2 seconds
+   *reinterpret_cast<word *>(pbTapeImage+1) = 2000; // set the length to 2 seconds
    if(fread(pbTapeImage+3, lFileSize, 1, pfile) != 1) { // append the entire CDT file
       LOG("Couldn't read CDT file");
      return ERR_TAP_INVALID;
    }
    *(pbTapeImage+lFileSize+3) = 0x20; // end with a pause block
-   *(word *)(pbTapeImage+lFileSize+3+1) = 2000; // set the length to 2 seconds
+   *reinterpret_cast<word *>(pbTapeImage+lFileSize+3+1) = 2000; // set the length to 2 seconds
 
    #ifdef DEBUG_TAPE
    fputs("--- New Tape\r\n", pfoDebug);
@@ -1635,11 +1635,11 @@ int tape_insert_cdt (FILE *pfile)
       bID = *pbBlock++;
       switch(bID) {
          case 0x10: // standard speed data block
-            iBlockLength = *(word *)(pbBlock+2) + 4;
+            iBlockLength = *reinterpret_cast<word *>(pbBlock+2) + 4;
             bolGotDataBlock = true;
             break;
          case 0x11: // turbo loading data block
-            iBlockLength = (*(dword *)(pbBlock+0x0f) & 0x00ffffff) + 0x12;
+            iBlockLength = (*reinterpret_cast<dword *>(pbBlock+0x0f) & 0x00ffffff) + 0x12;
             bolGotDataBlock = true;
             break;
          case 0x12: // pure tone
@@ -1651,16 +1651,16 @@ int tape_insert_cdt (FILE *pfile)
             bolGotDataBlock = true;
             break;
          case 0x14: // pure data block
-            iBlockLength = (*(dword *)(pbBlock+0x07) & 0x00ffffff) + 0x0a;
+            iBlockLength = (*reinterpret_cast<dword *>(pbBlock+0x07) & 0x00ffffff) + 0x0a;
             bolGotDataBlock = true;
             break;
          case 0x15: // direct recording
-            iBlockLength = (*(dword *)(pbBlock+0x05) & 0x00ffffff) + 0x08;
+            iBlockLength = (*reinterpret_cast<dword *>(pbBlock+0x05) & 0x00ffffff) + 0x08;
             bolGotDataBlock = true;
             break;
          case 0x20: // pause
             if ((!bolGotDataBlock) && (pbBlock != pbTapeImage+1)) {
-               *(word *)pbBlock = 0; // remove any pauses (execept ours) before the data starts
+               *reinterpret_cast<word *>(pbBlock) = 0; // remove any pauses (execept ours) before the data starts
             }
             iBlockLength = 2;
             break;
@@ -1688,7 +1688,7 @@ int tape_insert_cdt (FILE *pfile)
          case 0x26: // call sequence
             LOG("Couldn't load CDT file: unsupported " << bID);
             return ERR_TAP_UNSUPPORTED;
-            iBlockLength = (*(word *)pbBlock * 2) + 2;
+            iBlockLength = (*reinterpret_cast<word *>(pbBlock) * 2) + 2;
             break;
          case 0x27: // return from sequence
             LOG("Couldn't load CDT file: unsupported " << bID);
@@ -1698,7 +1698,7 @@ int tape_insert_cdt (FILE *pfile)
          case 0x28: // select block
             LOG("Couldn't load CDT file: unsupported " << bID);
             return ERR_TAP_UNSUPPORTED;
-            iBlockLength = *(word *)pbBlock + 2;
+            iBlockLength = *reinterpret_cast<word *>(pbBlock) + 2;
             break;
          case 0x30: // text description
             iBlockLength = *pbBlock + 1;
@@ -1707,7 +1707,7 @@ int tape_insert_cdt (FILE *pfile)
             iBlockLength = *(pbBlock+1) + 2;
             break;
          case 0x32: // archive info
-            iBlockLength = *(word *)pbBlock + 2;
+            iBlockLength = *reinterpret_cast<word *>(pbBlock) + 2;
             break;
          case 0x33: // hardware type
             iBlockLength = (*pbBlock * 3) + 1;
@@ -1716,17 +1716,17 @@ int tape_insert_cdt (FILE *pfile)
             iBlockLength = 8;
             break;
          case 0x35: // custom info block
-            iBlockLength = *(dword *)(pbBlock+0x10) + 0x14;
+            iBlockLength = *reinterpret_cast<dword *>(pbBlock+0x10) + 0x14;
             break;
          case 0x40: // snapshot block
-            iBlockLength = (*(dword *)(pbBlock+0x01) & 0x00ffffff) + 0x04;
+            iBlockLength = (*reinterpret_cast<dword *>(pbBlock+0x01) & 0x00ffffff) + 0x04;
             break;
          case 0x5A: // another tzx/cdt file
             iBlockLength = 9;
             break;
 
          default: // "extension rule"
-            iBlockLength = *(dword *)pbBlock + 4;
+            iBlockLength = *reinterpret_cast<dword *>(pbBlock) + 4;
       }
 
       #ifdef DEBUG_TAPE
@@ -1762,7 +1762,7 @@ int tape_insert_voc (FILE *pfile)
       return ERR_TAP_BAD_VOC;
    }
    lOffset =
-   lInitialOffset = *(word *)(pbPtr + 0x14);
+   lInitialOffset = *reinterpret_cast<word *>(pbPtr + 0x14);
    lFileSize = file_size(fileno(pfile));
    if ((lFileSize-26) <= 0) { // should have at least one block...
       return ERR_TAP_BAD_VOC;
@@ -1788,7 +1788,7 @@ int tape_insert_voc (FILE *pfile)
             bolDone = true;
             break;
          case 0x1: // sound data
-            iBlockLength = (*(dword *)(pbPtr+0x01) & 0x00ffffff) + 4;
+            iBlockLength = (*reinterpret_cast<dword *>(pbPtr+0x01) & 0x00ffffff) + 4;
             lSampleLength += iBlockLength - 6;
             if ((bSampleRate) && (bSampleRate != *(pbPtr+0x04))) { // no change in sample rate allowed
                return ERR_TAP_BAD_VOC;
@@ -1799,12 +1799,12 @@ int tape_insert_voc (FILE *pfile)
             }
             break;
          case 0x2: // sound continue
-            iBlockLength = (*(dword *)(pbPtr+0x01) & 0x00ffffff) + 4;
+            iBlockLength = (*reinterpret_cast<dword *>(pbPtr+0x01) & 0x00ffffff) + 4;
             lSampleLength += iBlockLength - 4;
             break;
          case 0x3: // silence
             iBlockLength = 4;
-            lSampleLength += *(word *)(pbPtr+0x01) + 1;
+            lSampleLength += *reinterpret_cast<word *>(pbPtr+0x01) + 1;
             if ((bSampleRate) && (bSampleRate != *(pbPtr+0x03))) { // no change in sample rate allowed
                return ERR_TAP_BAD_VOC;
             }
@@ -1814,7 +1814,7 @@ int tape_insert_voc (FILE *pfile)
             iBlockLength = 3;
             break;
          case 0x5: // ascii
-            iBlockLength = (*(dword *)(pbPtr+0x01) & 0x00ffffff) + 4;
+            iBlockLength = (*reinterpret_cast<dword *>(pbPtr+0x01) & 0x00ffffff) + 4;
             break;
          default:
             return ERR_TAP_BAD_VOC;
@@ -1830,18 +1830,18 @@ int tape_insert_voc (FILE *pfile)
    if (dwCompressedSize > 0x00ffffff) { // we only support one direct recording block right now
       return ERR_TAP_BAD_VOC;
    }
-   pbTapeImage = (byte *)malloc(dwCompressedSize+1+8+6);
+   pbTapeImage = static_cast<byte *>(malloc(dwCompressedSize+1+8+6));
    if (pbTapeImage == nullptr) { // check if the memory allocation has failed
       return ERR_OUT_OF_MEMORY;
    }
    *pbTapeImage = 0x20; // start off with a pause block
-   *(word *)(pbTapeImage+1) = 2000; // set the length to 2 seconds
+   *reinterpret_cast<word *>(pbTapeImage+1) = 2000; // set the length to 2 seconds
 
    *(pbTapeImage+3) = 0x15; // direct recording block
-   *(word *)(pbTapeImage+4) = (word)dwTapePulseCycles; // number of T states per sample
-   *(word *)(pbTapeImage+6) = 0; // pause after block
+   *reinterpret_cast<word *>(pbTapeImage+4) = static_cast<word>(dwTapePulseCycles); // number of T states per sample
+   *reinterpret_cast<word *>(pbTapeImage+6) = 0; // pause after block
    *(pbTapeImage+8) = lSampleLength & 7 ? lSampleLength & 7 : 8; // bits used in last byte
-   *(dword *)(pbTapeImage+9) = dwCompressedSize & 0x00ffffff; // data length
+   *reinterpret_cast<dword *>(pbTapeImage+9) = dwCompressedSize & 0x00ffffff; // data length
    pbTapeImagePtr = pbTapeImage + 12;
 
    lOffset = lInitialOffset;
@@ -1861,9 +1861,9 @@ int tape_insert_voc (FILE *pfile)
             if(fread(pbPtr, 3+2, 1, pfile) != 1) { // get block size and sound info
               return ERR_TAP_BAD_VOC;
             }
-            iBlockLength = (*(dword *)(pbPtr) & 0x00ffffff) + 4;
+            iBlockLength = (*reinterpret_cast<dword *>(pbPtr) & 0x00ffffff) + 4;
             lSampleLength = iBlockLength - 6;
-            pbVocDataBlock = (byte *)malloc(lSampleLength);
+            pbVocDataBlock = static_cast<byte *>(malloc(lSampleLength));
             if (pbVocDataBlock == nullptr) {
                tape_eject();
                return ERR_OUT_OF_MEMORY;
@@ -1890,9 +1890,9 @@ int tape_insert_voc (FILE *pfile)
             if(fread(pbPtr, 3, 1, pfile) != 1) { // get block size
               return ERR_TAP_BAD_VOC;
             }
-            iBlockLength = (*(dword *)(pbPtr) & 0x00ffffff) + 4;
+            iBlockLength = (*reinterpret_cast<dword *>(pbPtr) & 0x00ffffff) + 4;
             lSampleLength = iBlockLength - 4;
-            pbVocDataBlock = (byte *)malloc(lSampleLength);
+            pbVocDataBlock = static_cast<byte *>(malloc(lSampleLength));
             if (pbVocDataBlock == nullptr) {
                tape_eject();
                return ERR_OUT_OF_MEMORY;
@@ -1917,7 +1917,7 @@ int tape_insert_voc (FILE *pfile)
             break;
          case 0x3: // silence
             iBlockLength = 4;
-            lSampleLength = *(word *)(pbPtr) + 1;
+            lSampleLength = *reinterpret_cast<word *>(pbPtr) + 1;
             for (int iBytePos = 0; iBytePos < lSampleLength; iBytePos++) {
                dwBit--;
                if (!dwBit) { // got all 8 bits?
@@ -1931,14 +1931,14 @@ int tape_insert_voc (FILE *pfile)
             iBlockLength = 3;
             break;
          case 0x5: // ascii
-            iBlockLength = (*(dword *)(pbPtr) & 0x00ffffff) + 4;
+            iBlockLength = (*reinterpret_cast<dword *>(pbPtr) & 0x00ffffff) + 4;
             break;
       }
       lOffset += iBlockLength;
    }
 
    *pbTapeImagePtr = 0x20; // end with a pause block
-   *(word *)(pbTapeImagePtr+1) = 2000; // set the length to 2 seconds
+   *reinterpret_cast<word *>(pbTapeImagePtr+1) = 2000; // set the length to 2 seconds
 
    pbTapeImageEnd = pbTapeImagePtr + 3;
 
@@ -2099,7 +2099,7 @@ int emulator_init (void)
                  fclose(pfileObject);
                  return ERR_NOT_A_CPC_ROM;
                }
-               memmap_ROM[iRomNum] = (byte *)pchRomData; // update the ROM map
+               memmap_ROM[iRomNum] = reinterpret_cast<byte *>(pchRomData); // update the ROM map
             } else { // not a valid ROM file
                fprintf(stderr, "ERROR: %s is not a CPC ROM file - clearing ROM slot %d.\n", CPC.rom_file[iRomNum].c_str(), iRomNum);
                delete [] pchRomData; // free memory on error
@@ -2223,8 +2223,8 @@ int audio_init (void)
       return 0;
    }
 
-   desired = (SDL_AudioSpec *)malloc(sizeof(SDL_AudioSpec));
-   obtained = (SDL_AudioSpec *)malloc(sizeof(SDL_AudioSpec));
+   desired = static_cast<SDL_AudioSpec *>(malloc(sizeof(SDL_AudioSpec)));
+   obtained = static_cast<SDL_AudioSpec *>(malloc(sizeof(SDL_AudioSpec)));
 
    desired->freq = freq_table[CPC.snd_playback_rate];
    desired->format = CPC.snd_bits ? AUDIO_S16LSB : AUDIO_S8;
@@ -2242,7 +2242,7 @@ int audio_init (void)
    audio_spec = obtained;
 
    CPC.snd_buffersize = audio_spec->size; // size is samples * channels * bytes per sample (1 or 2)
-   pbSndBuffer = (byte *)malloc(CPC.snd_buffersize); // allocate the sound data buffer
+   pbSndBuffer = static_cast<byte *>(malloc(CPC.snd_buffersize)); // allocate the sound data buffer
    pbSndBufferEnd = pbSndBuffer + CPC.snd_buffersize;
    memset(pbSndBuffer, 0, CPC.snd_buffersize);
    CPC.snd_bufferptr = pbSndBuffer; // init write cursor
@@ -2296,15 +2296,15 @@ int video_set_palette (void)
          if (!CPC.scr_tube) {
             int n;
             for (n = 0; n < 32; n++) {
-               dword red = (dword)(colours_rgb[n][0] * (CPC.scr_intensity / 10.0) * 255);
+               dword red = static_cast<dword>(colours_rgb[n][0] * (CPC.scr_intensity / 10.0) * 255);
                if (red > 255) { // limit to the maximum
                   red = 255;
                }
-               dword green = (dword)(colours_rgb[n][1] * (CPC.scr_intensity / 10.0) * 255);
+               dword green = static_cast<dword>(colours_rgb[n][1] * (CPC.scr_intensity / 10.0) * 255);
                if (green > 255) {
                   green = 255;
                }
-               dword blue = (dword)(colours_rgb[n][2] * (CPC.scr_intensity / 10.0) * 255);
+               dword blue = static_cast<dword>(colours_rgb[n][2] * (CPC.scr_intensity / 10.0) * 255);
                if (blue > 255) {
                   blue = 255;
                }
@@ -2315,7 +2315,7 @@ int video_set_palette (void)
          } else {
             int n;
             for (n = 0; n < 32; n++) {
-               dword green = (dword)(colours_green[n] * (CPC.scr_intensity / 10.0) * 255);
+               dword green = static_cast<dword>(colours_green[n] * (CPC.scr_intensity / 10.0) * 255);
                if (green > 255) {
                   green = 255;
                }
@@ -2351,14 +2351,14 @@ void video_set_style (void)
    }
    switch (dwXScale) {
       case 1:
-         CPC.scr_prerendernorm = (void(*)(void))prerender_normal_half;
-         CPC.scr_prerenderbord = (void(*)(void))prerender_border_half;
-         CPC.scr_prerendersync = (void(*)(void))prerender_sync_half;
+         CPC.scr_prerendernorm = prerender_normal_half;
+         CPC.scr_prerenderbord = prerender_border_half;
+         CPC.scr_prerendersync = prerender_sync_half;
          break;
       case 2:
-         CPC.scr_prerendernorm = (void(*)(void))prerender_normal;
-         CPC.scr_prerenderbord = (void(*)(void))prerender_border;
-         CPC.scr_prerendersync = (void(*)(void))prerender_sync;
+         CPC.scr_prerendernorm = prerender_normal;
+         CPC.scr_prerenderbord = prerender_border;
+         CPC.scr_prerendersync = prerender_sync;
          break;
    }
 
@@ -2367,10 +2367,10 @@ void video_set_style (void)
       case 32:
                switch(dwYScale) {
                  case 1:
-                   CPC.scr_render = (void(*)(void))render32bpp;
+                   CPC.scr_render = render32bpp;
                    break;
                  case 2:
-                   CPC.scr_render = (void(*)(void))render32bpp_doubleY;
+                   CPC.scr_render = render32bpp_doubleY;
                    break;
                }
                break;
@@ -2378,10 +2378,10 @@ void video_set_style (void)
       case 24:
                switch(dwYScale) {
                  case 1:
-                   CPC.scr_render = (void(*)(void))render24bpp;
+                   CPC.scr_render = render24bpp;
                    break;
                  case 2:
-                   CPC.scr_render = (void(*)(void))render24bpp_doubleY;
+                   CPC.scr_render = render24bpp_doubleY;
                    break;
                }
                break;
@@ -2390,10 +2390,10 @@ void video_set_style (void)
       case 15:
                switch(dwYScale) {
                  case 1:
-                   CPC.scr_render = (void(*)(void))render16bpp;
+                   CPC.scr_render = render16bpp;
                    break;
                  case 2:
-                   CPC.scr_render = (void(*)(void))render16bpp_doubleY;
+                   CPC.scr_render = render16bpp_doubleY;
                    break;
                }
                break;
@@ -2401,10 +2401,10 @@ void video_set_style (void)
       case 8:
                switch(dwYScale) {
                  case 1:
-                   CPC.scr_render = (void(*)(void))render8bpp;
+                   CPC.scr_render = render8bpp;
                    break;
                  case 2:
-                   CPC.scr_render = (void(*)(void))render8bpp_doubleY;
+                   CPC.scr_render = render8bpp_doubleY;
                    break;
                }
                break;
@@ -2439,7 +2439,7 @@ int video_init (void)
    CPC.scr_bps = back_surface->pitch / 4; // rendered screen line length (changing bytes to dwords)
    CPC.scr_line_offs = CPC.scr_bps * dwYScale;
    CPC.scr_pos =
-   CPC.scr_base = (dword *)back_surface->pixels; // memory address of back buffer
+   CPC.scr_base = static_cast<dword *>(back_surface->pixels); // memory address of back buffer
 
    vid_plugin->unlock();
 
@@ -2551,7 +2551,7 @@ void input_swap_joy (void)
 // Recalculate emulation speed (to verify, seems to work reasonably well)
 void update_cpc_speed(void)
 {
-   dwTicksOffset = (int)(20.0 / (double)((CPC.speed * 25) / 100.0));
+   dwTicksOffset = static_cast<int>(20.0 / ((CPC.speed * 25) / 100.0));
    dwTicksTarget = SDL_GetTicks();
    dwTicksTargetFPS = dwTicksTarget;
    dwTicksTarget += dwTicksOffset;
@@ -2662,16 +2662,16 @@ t_disk_format parseDiskFormat(const std::string& format)
   }
   result.gap3_length = dwVal;
   dwVal = strtoul(tokens[6].c_str(), nullptr, 0);
-  result.filler_byte = (byte)dwVal;
+  result.filler_byte = static_cast<byte>(dwVal);
   unsigned int i = 7;
-  for (int iSide = 0; iSide < (int)result.sides; iSide++) {
-    for (int iSector = 0; iSector < (int)result.sectors; iSector++) {
+  for (int iSide = 0; iSide < static_cast<int>(result.sides); iSide++) {
+    for (int iSector = 0; iSector < static_cast<int>(result.sectors); iSector++) {
       if (i >= tokens.size()) { // value missing?
         dwVal = iSector+1;
       } else {
         dwVal = strtoul(tokens[i++].c_str(), nullptr, 0);
       }
-      result.sector_ids[iSide][iSector] = (byte)dwVal;
+      result.sector_ids[iSide][iSector] = static_cast<byte>(dwVal);
     }
   }
   // Fill the label only if the disk format is valid
@@ -2691,8 +2691,8 @@ std::string serializeDiskFormat(const t_disk_format& format)
   oss << format.sector_size << ",";
   oss << format.gap3_length << ",";
   oss << static_cast<unsigned int>(format.filler_byte);
-  for (int iSide = 0; iSide < (int)format.sides; iSide++) {
-    for (int iSector = 0; iSector < (int)format.sectors; iSector++) {
+  for (int iSide = 0; iSide < static_cast<int>(format.sides); iSide++) {
+    for (int iSector = 0; iSector < static_cast<int>(format.sectors); iSector++) {
       oss << "," << static_cast<unsigned int>(format.sector_ids[iSide][iSector]);
     }
   }
@@ -3111,7 +3111,7 @@ int cap32_main (int argc, char **argv)
             }
             if (n) {
                FILE *file = nullptr;
-               zip_info.dwOffset = *(dword *)(pchPtr + (strlen(pchPtr)+1)); // get the offset into the zip archive
+               zip_info.dwOffset = *reinterpret_cast<dword *>(pchPtr + (strlen(pchPtr)+1)); // get the offset into the zip archive
                if (!zip::extract(zip_info, &file)) {
                   dsk_load(file, &driveA);
                   fclose(file);
@@ -3145,7 +3145,7 @@ int cap32_main (int argc, char **argv)
             }
             if (n) {
                FILE *file = nullptr;
-               zip_info.dwOffset = *(dword *)(pchPtr + (strlen(pchPtr)+1)); // get the offset into the zip archive
+               zip_info.dwOffset = *reinterpret_cast<dword *>(pchPtr + (strlen(pchPtr)+1)); // get the offset into the zip archive
                if (!zip::extract(zip_info, &file)) {
                   dsk_load(file, &driveB);
                   fclose(file);
@@ -3180,7 +3180,7 @@ int cap32_main (int argc, char **argv)
             }
             if (n) {
                FILE *file = nullptr;
-               zip_info.dwOffset = *(dword *)(pchPtr + (strlen(pchPtr)+1)); // get the offset into the zip archive
+               zip_info.dwOffset = *reinterpret_cast<dword *>(pchPtr + (strlen(pchPtr)+1)); // get the offset into the zip archive
                if(!zip::extract(zip_info, &file)) {
                  tape_insert(file);
                  fclose(file);
@@ -3218,7 +3218,7 @@ int cap32_main (int argc, char **argv)
             }
             if (n) {
               FILE *file = nullptr;
-               zip_info.dwOffset = *(dword *)(pchPtr + (strlen(pchPtr)+1)); // get the offset into the zip archive
+               zip_info.dwOffset = *reinterpret_cast<dword *>(pchPtr + (strlen(pchPtr)+1)); // get the offset into the zip archive
                if (!zip::extract(zip_info, &file)) {
                   snapshot_load(file);
                   fclose(file);
@@ -3241,7 +3241,8 @@ int cap32_main (int argc, char **argv)
 
 // ----------------------------------------------------------------------------
 
-   dwTicksOffset = (int)(20.0 / (double)((CPC.speed * 25) / 100.0));
+   // TODO: deduplicate this and update_cpc_speed
+   dwTicksOffset = static_cast<int>(20.0 / (CPC.speed * 25) / 100.0);
    dwTicksTarget = SDL_GetTicks();
    dwTicksTargetFPS = dwTicksTarget;
    dwTicksTarget += dwTicksOffset;
@@ -3272,8 +3273,8 @@ int cap32_main (int argc, char **argv)
                   } else {
                      cpc_key = keyboard_normal[event.key.keysym.sym]; // consult the normal table
                   }
-                  if ((!(cpc_key & MOD_EMU_KEY)) && (!CPC.paused) && ((byte)cpc_key != 0xff)) {
-                     keyboard_matrix[(byte)cpc_key >> 4] &= ~bit_values[(byte)cpc_key & 7]; // key is being held down
+                  if ((!(cpc_key & MOD_EMU_KEY)) && (!CPC.paused) && (static_cast<byte>(cpc_key) != 0xff)) {
+                     keyboard_matrix[static_cast<byte>(cpc_key) >> 4] &= ~bit_values[static_cast<byte>(cpc_key) & 7]; // key is being held down
                      if (cpc_key & MOD_CPC_SHIFT) { // CPC SHIFT key required?
                         keyboard_matrix[0x25 >> 4] &= ~bit_values[0x25 & 7]; // key needs to be SHIFTed
                      } else {
@@ -3301,8 +3302,8 @@ int cap32_main (int argc, char **argv)
                      cpc_key = keyboard_normal[event.key.keysym.sym]; // consult the normal table
                   }
                   if (!(cpc_key & MOD_EMU_KEY)) { // a key of the CPC keyboard?
-                     if ((!CPC.paused) && ((byte)cpc_key != 0xff)) {
-                        keyboard_matrix[(byte)cpc_key >> 4] |= bit_values[(byte)cpc_key & 7]; // key has been released
+                     if ((!CPC.paused) && (static_cast<byte>(cpc_key) != 0xff)) {
+                        keyboard_matrix[static_cast<byte>(cpc_key) >> 4] |= bit_values[static_cast<byte>(cpc_key) & 7]; // key has been released
                         keyboard_matrix[0x25 >> 4] |= bit_values[0x25 & 7]; // make sure key is unSHIFTed
                         keyboard_matrix[0x27 >> 4] |= bit_values[0x27 & 7]; // make sure CONTROL key is not held down
                      }
@@ -3437,7 +3438,7 @@ int cap32_main (int argc, char **argv)
               }
               // TODO: deduplicate this from SDL_KEYDOWN, SDL_KEYUP, SDL_JOYBUTTONDOWN, SDL_JOYBUTTONUP and SDL_JOYAXISMOTION
               if (!CPC.paused && cpc_key != 0xff) {
-                 keyboard_matrix[(byte)cpc_key >> 4] &= ~bit_values[(byte)cpc_key & 7]; // key is being held down
+                 keyboard_matrix[static_cast<byte>(cpc_key) >> 4] &= ~bit_values[static_cast<byte>(cpc_key) & 7]; // key is being held down
                  if (cpc_key & MOD_CPC_SHIFT) { // CPC SHIFT key required?
                     keyboard_matrix[0x25 >> 4] &= ~bit_values[0x25 & 7]; // key needs to be SHIFTed
                  } else {
@@ -3478,7 +3479,7 @@ int cap32_main (int argc, char **argv)
                   break;
               }
               if (!CPC.paused && cpc_key != 0xff) {
-                 keyboard_matrix[(byte)cpc_key >> 4] |= bit_values[(byte)cpc_key & 7]; // key has been released
+                 keyboard_matrix[static_cast<byte>(cpc_key) >> 4] |= bit_values[static_cast<byte>(cpc_key) & 7]; // key has been released
                  keyboard_matrix[0x25 >> 4] |= bit_values[0x25 & 7]; // make sure key is unSHIFTed
                  keyboard_matrix[0x27 >> 4] |= bit_values[0x27 & 7]; // make sure CONTROL key is not held down
               }
@@ -3551,12 +3552,12 @@ int cap32_main (int argc, char **argv)
               }
               if (!CPC.paused && cpc_key != 0xff) {
                 if(release) {
-                 keyboard_matrix[(byte)cpc_key >> 4] |= bit_values[(byte)cpc_key & 7]; // key has been released
-                 keyboard_matrix[(byte)cpc_key2 >> 4] |= bit_values[(byte)cpc_key2 & 7]; // key has been released
+                 keyboard_matrix[static_cast<byte>(cpc_key) >> 4] |= bit_values[static_cast<byte>(cpc_key) & 7]; // key has been released
+                 keyboard_matrix[static_cast<byte>(cpc_key2) >> 4] |= bit_values[static_cast<byte>(cpc_key2) & 7]; // key has been released
                  keyboard_matrix[0x25 >> 4] |= bit_values[0x25 & 7]; // make sure key is unSHIFTed
                  keyboard_matrix[0x27 >> 4] |= bit_values[0x27 & 7]; // make sure CONTROL key is not held down
                 } else {
-                 keyboard_matrix[(byte)cpc_key >> 4] &= ~bit_values[(byte)cpc_key & 7]; // key is being held down
+                 keyboard_matrix[static_cast<byte>(cpc_key) >> 4] &= ~bit_values[static_cast<byte>(cpc_key) & 7]; // key is being held down
                  if (cpc_key & MOD_CPC_SHIFT) { // CPC SHIFT key required?
                     keyboard_matrix[0x25 >> 4] &= ~bit_values[0x25 & 7]; // key needs to be SHIFTed
                  } else {
@@ -3607,9 +3608,9 @@ int cap32_main (int argc, char **argv)
          }
          dwOffset = CPC.scr_pos - CPC.scr_base; // offset in current surface row
          if (VDU.scrln > 0) {
-            CPC.scr_base = (dword *)back_surface->pixels + (VDU.scrln * CPC.scr_line_offs); // determine current position
+            CPC.scr_base = static_cast<dword *>(back_surface->pixels) + (VDU.scrln * CPC.scr_line_offs); // determine current position
          } else {
-            CPC.scr_base = (dword *)back_surface->pixels; // reset to surface start
+            CPC.scr_base = static_cast<dword *>(back_surface->pixels); // reset to surface start
          }
          CPC.scr_pos = CPC.scr_base + dwOffset; // update current rendering position
 
@@ -3619,8 +3620,8 @@ int cap32_main (int argc, char **argv)
             dwFrameCount++;
             if (CPC.scr_fps) {
                char chStr[15];
-               sprintf(chStr, "%3dFPS %3d%%", (int)dwFPS, (int)dwFPS * 100 / 50);
-               print((dword *)back_surface->pixels + CPC.scr_line_offs, chStr, true); // display the frames per second counter
+               sprintf(chStr, "%3dFPS %3d%%", static_cast<int>(dwFPS), static_cast<int>(dwFPS) * 100 / 50);
+               print(static_cast<dword *>(back_surface->pixels) + CPC.scr_line_offs, chStr, true); // display the frames per second counter
             }
             vid_plugin->unlock();
             video_display(); // update PC display
