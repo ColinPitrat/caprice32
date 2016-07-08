@@ -58,7 +58,7 @@ static bool have_gl_extension (const char *nom_ext)
 {
 #ifdef HAVE_GL
    const char *ext;
-   ext = (const char *) (eglGetString (GL_EXTENSIONS));
+   ext = reinterpret_cast<const char *> (eglGetString (GL_EXTENSIONS));
    const char *f;
    if (ext == nullptr)
       return false;
@@ -138,8 +138,8 @@ SDL_Surface* half_init(video_plugin* t,int w,int h, int bpp,bool fs)
 	{
 		t->x_scale=1.0;
 		t->y_scale=1.0;
-		t->x_offset=(int)(w-CPC_VISIBLE_SCR_WIDTH/t->x_scale)/2;
-		t->y_offset=(int)(h-CPC_VISIBLE_SCR_HEIGHT/t->y_scale)/2;
+		t->x_offset=static_cast<int>((w-CPC_VISIBLE_SCR_WIDTH/t->x_scale)/2);
+		t->y_offset=static_cast<int>((h-CPC_VISIBLE_SCR_HEIGHT/t->y_scale)/2);
 	}
 	else
 	{
@@ -251,8 +251,8 @@ SDL_Surface* double_init(video_plugin* t,int w,int h, int bpp, bool fs)
 	{
 		t->x_scale=1.0;
 		t->y_scale=1.0;
-		t->x_offset=(int)(w-CPC_VISIBLE_SCR_WIDTH*2/t->x_scale)/2;
-		t->y_offset=(int)(h-CPC_VISIBLE_SCR_HEIGHT*2/t->y_scale)/2;
+		t->x_offset=static_cast<int>((w-CPC_VISIBLE_SCR_WIDTH*2/t->x_scale)/2);
+		t->y_offset=static_cast<int>((h-CPC_VISIBLE_SCR_HEIGHT*2/t->y_scale)/2);
 	}
 	else
 	{
@@ -390,14 +390,14 @@ SDL_Surface* glscale_init(video_plugin* t,int w,int h, int bpp, bool fs)
 		return nullptr;
 	}
 
-	t->x_scale=CPC_VISIBLE_SCR_WIDTH/(float)w;
-	t->y_scale=CPC_VISIBLE_SCR_HEIGHT/(float)h;
+	t->x_scale=CPC_VISIBLE_SCR_WIDTH/static_cast<float>(w);
+	t->y_scale=CPC_VISIBLE_SCR_HEIGHT/static_cast<float>(h);
 	t->x_offset=0;
 	t->y_offset=0;
 
 	int major, minor;
 	const char *version;
-	version = (char *) eglGetString(GL_VERSION); 
+	version = reinterpret_cast<const char *>(eglGetString(GL_VERSION));
 	if (sscanf(version, "%d.%d", &major, &minor) != 2) {
 		fprintf(stderr, "Unable to get OpenGL version\n");
 		return nullptr;
@@ -506,7 +506,7 @@ void glscale_setpal(SDL_Color* c)
 	SDL_SetPalette(pub, SDL_LOGPAL | SDL_PHYSPAL, c, 0, 32);
 	if (pub->format->palette)
 	{
-		Uint8* pal=(Uint8*)malloc(sizeof(Uint8)*256*3);
+		Uint8* pal=static_cast<Uint8*>(malloc(sizeof(Uint8)*256*3));
 		for(int i=0;i<256;i++)
 		{
 			pal[3*i  ] = pub->format->palette->colors[i].r;
@@ -556,17 +556,17 @@ void glscale_flip()
 			eglMultiTexCoord2fARB(GL_TEXTURE1_ARB,0.f, 0.f);
 		eglVertex2i(0, 0);
 
-		eglTexCoord2f(0.f, (float)(pub->h)/tex_y);
+		eglTexCoord2f(0.f, static_cast<float>(pub->h)/tex_y);
 		if (gl_scanlines!=0)
 			eglMultiTexCoord2fARB(GL_TEXTURE1_ARB,0.f, vid->h/2);
 		eglVertex2i(0, vid->h);
 
-		eglTexCoord2f((float)(pub->w)/tex_x, (float)(pub->h)/tex_y);
+		eglTexCoord2f(static_cast<float>(pub->w)/tex_x, static_cast<float>(pub->h)/tex_y);
 		if (gl_scanlines!=0)
 			eglMultiTexCoord2fARB(GL_TEXTURE1_ARB,vid->w, vid->h/2);
 		eglVertex2i(vid->w, vid->h);
 
-		eglTexCoord2f((float)(pub->w)/tex_x, 0.f);
+		eglTexCoord2f(static_cast<float>(pub->w)/tex_x, 0.f);
 		if (gl_scanlines!=0)
 			eglMultiTexCoord2fARB(GL_TEXTURE1_ARB,vid->w, 0);
 		eglVertex2i(vid->w, 0);
@@ -609,17 +609,17 @@ void glscale_flip()
 		eglMultiTexCoord2fARB(GL_TEXTURE1_ARB,0.f, 0.f);
 	eglVertex2i(0, 0);
 
-	eglTexCoord2f(0.f, (float)(pub->h)/tex_y);
+	eglTexCoord2f(0.f, static_cast<float>(pub->h)/tex_y);
 	if (gl_scanlines!=0)
 		eglMultiTexCoord2fARB(GL_TEXTURE1_ARB,0.f, vid->h/2);
 	eglVertex2i(0, vid->h);
 
-	eglTexCoord2f((float)(pub->w)/tex_x, (float)(pub->h)/tex_y);
+	eglTexCoord2f(static_cast<float>(pub->w)/tex_x, static_cast<float>(pub->h)/tex_y);
 	if (gl_scanlines!=0)
 		eglMultiTexCoord2fARB(GL_TEXTURE1_ARB,vid->w, vid->h/2);
 	eglVertex2i(vid->w, vid->h);
 
-	eglTexCoord2f((float)(pub->w)/tex_x, 0.f);
+	eglTexCoord2f(static_cast<float>(pub->w)/tex_x, 0.f);
 	if (gl_scanlines!=0)
 		eglMultiTexCoord2fARB(GL_TEXTURE1_ARB,vid->w, 0);
 	eglVertex2i(vid->w, 0);
@@ -750,7 +750,7 @@ void filter_supereagle(Uint8 *srcPtr, Uint32 srcPitch, /* Uint8 *deltaPtr,  */
 
 	for (; height ; height--)
 	{
-	    bP = (Uint16 *) srcPtr;
+	    bP = reinterpret_cast<Uint16 *>(srcPtr);
 	    dP = dstPtr;
 	    for (finish = width; finish; finish -= inc_bP)
 	    {
@@ -878,8 +878,8 @@ void filter_supereagle(Uint8 *srcPtr, Uint32 srcPitch, /* Uint8 *deltaPtr,  */
     product2a = (product2a << 16) | product2b;
 #endif
 
-		*((Uint32 *) dP) = product1a;
-		*((Uint32 *) (dP + dstPitch)) = product2a;
+		*(reinterpret_cast<Uint32 *>(dP)) = product1a;
+		*(reinterpret_cast<Uint32 *>(dP + dstPitch)) = product2a;
 
 		bP += inc_bP;
 		dP += sizeof (Uint32);
@@ -907,8 +907,8 @@ SDL_Surface* seagle_init(video_plugin* t,int w,int h, int bpp, bool fs)
 	{
 		t->x_scale=0.5;
 		t->y_scale=0.5;
-		t->x_offset=(int)(w-CPC_VISIBLE_SCR_WIDTH/t->x_scale)/2;
-		t->y_offset=(int)(h-CPC_VISIBLE_SCR_HEIGHT/t->y_scale)/2;
+		t->x_offset=static_cast<int>(w-CPC_VISIBLE_SCR_WIDTH/t->x_scale)/2;
+		t->y_offset=static_cast<int>(h-CPC_VISIBLE_SCR_HEIGHT/t->y_scale)/2;
 	}
 	else
 	{
@@ -944,8 +944,8 @@ void seagle_flip()
 	SDL_Rect src;
 	SDL_Rect dst;
 	compute_rects(&src,&dst);
-	filter_supereagle((Uint8*)pub->pixels + (2*src.x+src.y*pub->pitch) + (pub->pitch), pub->pitch,
-		 (Uint8*)vid->pixels + (2*dst.x+dst.y*vid->pitch), vid->pitch, src.w, src.h);
+	filter_supereagle(static_cast<Uint8*>(pub->pixels) + (2*src.x+src.y*pub->pitch) + (pub->pitch), pub->pitch,
+		 static_cast<Uint8*>(vid->pixels) + (2*dst.x+dst.y*vid->pitch), vid->pitch, src.w, src.h);
 	if (SDL_MUSTLOCK(vid))
 		SDL_UnlockSurface(vid);
 	SDL_UpdateRects(vid,1,&dst);
@@ -966,10 +966,10 @@ void filter_scale2x(Uint8 *srcPtr, Uint32 srcPitch,
 		      int width, int height)
 {
 	unsigned int nextlineSrc = srcPitch / sizeof(short);
-	short *p = (short *)srcPtr;
+	short *p = reinterpret_cast<short *>(srcPtr);
 
 	unsigned int nextlineDst = dstPitch / sizeof(short);
-	short *q = (short *)dstPtr;
+	short *q = reinterpret_cast<short *>(dstPtr);
 
 	while(height--) {
 		int i = 0, j = 0;
@@ -1008,8 +1008,8 @@ SDL_Surface* scale2x_init(video_plugin* t,int w,int h, int bpp, bool fs)
 	{
 		t->x_scale=0.5;
 		t->y_scale=0.5;
-		t->x_offset=(int)(w-CPC_VISIBLE_SCR_WIDTH/t->x_scale)/2;
-		t->y_offset=(int)(h-CPC_VISIBLE_SCR_HEIGHT/t->y_scale)/2;
+		t->x_offset=static_cast<int>(w-CPC_VISIBLE_SCR_WIDTH/t->x_scale)/2;
+		t->y_offset=static_cast<int>(h-CPC_VISIBLE_SCR_HEIGHT/t->y_scale)/2;
 	}
 	else
 	{
@@ -1045,8 +1045,8 @@ void scale2x_flip()
 	SDL_Rect src;
 	SDL_Rect dst;
 	compute_rects(&src,&dst);
-	filter_scale2x((Uint8*)pub->pixels + (2*src.x+src.y*pub->pitch) + (pub->pitch), pub->pitch,
-		 (Uint8*)vid->pixels + (2*dst.x+dst.y*vid->pitch), vid->pitch, src.w, src.h);
+	filter_scale2x(static_cast<Uint8*>(pub->pixels) + (2*src.x+src.y*pub->pitch) + (pub->pitch), pub->pitch,
+		 static_cast<Uint8*>(vid->pixels) + (2*dst.x+dst.y*vid->pitch), vid->pitch, src.w, src.h);
 	if (SDL_MUSTLOCK(vid))
 		SDL_UnlockSurface(vid);
 	SDL_UpdateRects(vid,1,&dst);
@@ -1077,7 +1077,7 @@ void filter_ascale2x (Uint8 *srcPtr, Uint32 srcPitch,
 
 	for (; height; height--)
 	{
-	    bP = (Uint16 *) srcPtr;
+	    bP = reinterpret_cast<Uint16 *>(srcPtr);
 	    dP = dstPtr;
 
 	    for (finish = width; finish; finish -= inc_bP)
@@ -1249,8 +1249,8 @@ void filter_ascale2x (Uint8 *srcPtr, Uint32 srcPitch,
     product = (colorA << 16) | product;
     product1 = (product1 << 16) | product2;
 #endif
-		*((Uint32 *) dP) = product;
-		*((Uint32 *) (dP + dstPitch)) = product1;
+		*(reinterpret_cast<Uint32 *>(dP)) = product;
+		*(reinterpret_cast<Uint32 *>(dP + dstPitch)) = product1;
 
 		bP += inc_bP;
 		dP += sizeof (Uint32);
@@ -1281,8 +1281,8 @@ SDL_Surface* ascale2x_init(video_plugin* t,int w,int h, int bpp, bool fs)
 	{
 		t->x_scale=0.5;
 		t->y_scale=0.5;
-		t->x_offset=(int)(w-CPC_VISIBLE_SCR_WIDTH/t->x_scale)/2;
-		t->y_offset=(int)(h-CPC_VISIBLE_SCR_HEIGHT/t->y_scale)/2;
+		t->x_offset=static_cast<int>(w-CPC_VISIBLE_SCR_WIDTH/t->x_scale)/2;
+		t->y_offset=static_cast<int>(h-CPC_VISIBLE_SCR_HEIGHT/t->y_scale)/2;
 	}
 	else
 	{
@@ -1318,8 +1318,8 @@ void ascale2x_flip()
 	SDL_Rect src;
 	SDL_Rect dst;
 	compute_rects(&src,&dst);
-	filter_ascale2x((Uint8*)pub->pixels + (2*src.x+src.y*pub->pitch) + (pub->pitch), pub->pitch,
-		 (Uint8*)vid->pixels + (2*dst.x+dst.y*vid->pitch), vid->pitch, src.w, src.h);
+	filter_ascale2x(static_cast<Uint8*>(pub->pixels) + (2*src.x+src.y*pub->pitch) + (pub->pitch), pub->pitch,
+		 static_cast<Uint8*>(vid->pixels) + (2*dst.x+dst.y*vid->pitch), vid->pitch, src.w, src.h);
 	if (SDL_MUSTLOCK(vid))
 		SDL_UnlockSurface(vid);
 	SDL_UpdateRects(vid,1,&dst);
@@ -1341,10 +1341,10 @@ void filter_tv2x(Uint8 *srcPtr, Uint32 srcPitch,
 		int width, int height)
 {
 	unsigned int nextlineSrc = srcPitch / sizeof(Uint16);
-	Uint16 *p = (Uint16 *)srcPtr;
+	Uint16 *p = reinterpret_cast<Uint16 *>(srcPtr);
 
 	unsigned int nextlineDst = dstPitch / sizeof(Uint16);
-	Uint16 *q = (Uint16 *)dstPtr;
+	Uint16 *q = reinterpret_cast<Uint16 *>(dstPtr);
 
 	while(height--) {
 		int i = 0, j = 0;
@@ -1383,8 +1383,8 @@ SDL_Surface* tv2x_init(video_plugin* t,int w,int h, int bpp, bool fs)
 	{
 		t->x_scale=0.5;
 		t->y_scale=0.5;
-		t->x_offset=(int)(w-CPC_VISIBLE_SCR_WIDTH/t->x_scale)/2;
-		t->y_offset=(int)(h-CPC_VISIBLE_SCR_HEIGHT/t->y_scale)/2;
+		t->x_offset=static_cast<int>(w-CPC_VISIBLE_SCR_WIDTH/t->x_scale)/2;
+		t->y_offset=static_cast<int>(h-CPC_VISIBLE_SCR_HEIGHT/t->y_scale)/2;
 	}
 	else
 	{
@@ -1420,8 +1420,8 @@ void tv2x_flip()
 	SDL_Rect src;
 	SDL_Rect dst;
 	compute_rects(&src,&dst);
-	filter_tv2x((Uint8*)pub->pixels + (2*src.x+src.y*pub->pitch) + (pub->pitch), pub->pitch,
-		 (Uint8*)vid->pixels + (2*dst.x+dst.y*vid->pitch), vid->pitch, src.w, src.h);
+	filter_tv2x(static_cast<Uint8*>(pub->pixels) + (2*src.x+src.y*pub->pitch) + (pub->pitch), pub->pitch,
+		 static_cast<Uint8*>(vid->pixels) + (2*dst.x+dst.y*vid->pitch), vid->pitch, src.w, src.h);
 	if (SDL_MUSTLOCK(vid))
 		SDL_UnlockSurface(vid);
 	SDL_UpdateRects(vid,1,&dst);
@@ -1442,9 +1442,9 @@ void filter_bilinear(Uint8 *srcPtr, Uint32 srcPitch,
 		int width, int height)
 {
 	unsigned int nextlineSrc = srcPitch / sizeof(Uint16);
-	Uint16 *p = (Uint16 *)srcPtr;
+	Uint16 *p = reinterpret_cast<Uint16 *>(srcPtr);
 	unsigned int nextlineDst = dstPitch / sizeof(Uint16);
-	Uint16 *q = (Uint16 *)dstPtr;
+	Uint16 *q = reinterpret_cast<Uint16 *>(dstPtr);
 
 	while(height--) {
 		int i, ii;
@@ -1481,8 +1481,8 @@ SDL_Surface* swbilin_init(video_plugin* t,int w,int h, int bpp, bool fs)
 	{
 		t->x_scale=0.5;
 		t->y_scale=0.5;
-		t->x_offset=(int)(w-CPC_VISIBLE_SCR_WIDTH/t->x_scale)/2;
-		t->y_offset=(int)(h-CPC_VISIBLE_SCR_HEIGHT/t->y_scale)/2;
+		t->x_offset=static_cast<int>(w-CPC_VISIBLE_SCR_WIDTH/t->x_scale)/2;
+		t->y_offset=static_cast<int>(h-CPC_VISIBLE_SCR_HEIGHT/t->y_scale)/2;
 	}
 	else
 	{
@@ -1518,8 +1518,8 @@ void swbilin_flip()
 	SDL_Rect src;
 	SDL_Rect dst;
 	compute_rects(&src,&dst);
-	filter_bilinear((Uint8*)pub->pixels + (2*src.x+src.y*pub->pitch) + (pub->pitch), pub->pitch,
-		 (Uint8*)vid->pixels + (2*dst.x+dst.y*vid->pitch), vid->pitch, src.w, src.h);
+	filter_bilinear(static_cast<Uint8*>(pub->pixels) + (2*src.x+src.y*pub->pitch) + (pub->pitch), pub->pitch,
+		 static_cast<Uint8*>(vid->pixels) + (2*dst.x+dst.y*vid->pitch), vid->pitch, src.w, src.h);
 	if (SDL_MUSTLOCK(vid))
 		SDL_UnlockSurface(vid);
 	SDL_UpdateRects(vid,1,&dst);
@@ -1551,9 +1551,9 @@ __inline__ static void MULT(Uint16 c, float* r, float* g, float* b, float alpha)
 
 __inline__ static Uint16 MAKE_RGB565(float r, float g, float b) {
   return 
-  ((((Uint8)r) << 11) & RED_MASK565  ) |
-  ((((Uint8)g) <<  5) & GREEN_MASK565) |
-  ((((Uint8)b) <<  0) & BLUE_MASK565 );
+  (((static_cast<Uint8>(r)) << 11) & RED_MASK565  ) |
+  (((static_cast<Uint8>(g)) <<  5) & GREEN_MASK565) |
+  (((static_cast<Uint8>(b)) <<  0) & BLUE_MASK565 );
 }
 
 __inline__ float CUBIC_WEIGHT(float x) {
@@ -1564,7 +1564,7 @@ __inline__ float CUBIC_WEIGHT(float x) {
   if(x + 1 > 0) r += -4 * pow(x + 1, 3);
   if(x     > 0) r +=  6 * pow(x    , 3);
   if(x - 1 > 0) r += -4 * pow(x - 1, 3);
-  return (float)r / 6;
+  return static_cast<float>(r) / 6;
 }
 
 void filter_bicubic(Uint8 *srcPtr, Uint32 srcPitch, 
@@ -1572,21 +1572,21 @@ void filter_bicubic(Uint8 *srcPtr, Uint32 srcPitch,
                     int width, int height)
 {
   unsigned int nextlineSrc = srcPitch / sizeof(Uint16);
-  Uint16 *p = (Uint16 *)srcPtr;
+  Uint16 *p = reinterpret_cast<Uint16 *>(srcPtr);
   unsigned int nextlineDst = dstPitch / sizeof(Uint16);
-  Uint16 *q = (Uint16 *)dstPtr;
+  Uint16 *q = reinterpret_cast<Uint16 *>(dstPtr);
   int dx = width << 1, dy = height << 1;
-  float fsx = (float)width / dx;
-	float fsy = (float)height / dy;
+  float fsx = static_cast<float>(width) / dx;
+	float fsy = static_cast<float>(height) / dy;
 	float v = 0.0f;
 	int j = 0;
 	for(; j < dy; ++j) {
 	  float u = 0.0f;
-	  int iv = (int)v;
+	  int iv = static_cast<int>(v);
     float decy = v - iv;
     int i = 0;
 	  for(; i < dx; ++i) {
-		  int iu = (int)u;
+		  int iu = static_cast<int>(u);
 		  float decx = u - iu;
       float r, g, b;
       int m;
@@ -1626,8 +1626,8 @@ SDL_Surface* swbicub_init(video_plugin* t,int w,int h, int bpp, bool fs)
 	{
 		t->x_scale=0.5;
 		t->y_scale=0.5;
-		t->x_offset=(int)(w-CPC_VISIBLE_SCR_WIDTH/t->x_scale)/2;
-		t->y_offset=(int)(h-CPC_VISIBLE_SCR_HEIGHT/t->y_scale)/2;
+		t->x_offset=static_cast<int>(w-CPC_VISIBLE_SCR_WIDTH/t->x_scale)/2;
+		t->y_offset=static_cast<int>(h-CPC_VISIBLE_SCR_HEIGHT/t->y_scale)/2;
 	}
 	else
 	{
@@ -1663,8 +1663,8 @@ void swbicub_flip()
 	SDL_Rect src;
 	SDL_Rect dst;
 	compute_rects(&src,&dst);
-	filter_bicubic((Uint8*)pub->pixels + (2*src.x+src.y*pub->pitch) + (pub->pitch), pub->pitch,
-		 (Uint8*)vid->pixels + (2*dst.x+dst.y*vid->pitch), vid->pitch, src.w, src.h);
+	filter_bicubic(static_cast<Uint8*>(pub->pixels) + (2*src.x+src.y*pub->pitch) + (pub->pitch), pub->pitch,
+		 static_cast<Uint8*>(vid->pixels) + (2*dst.x+dst.y*vid->pitch), vid->pitch, src.w, src.h);
 	if (SDL_MUSTLOCK(vid))
 		SDL_UnlockSurface(vid);
 	SDL_UpdateRects(vid,1,&dst);
@@ -1696,10 +1696,10 @@ void filter_dotmatrix(Uint8 *srcPtr, Uint32 srcPitch,
 		int width, int height)
 {
 	unsigned int nextlineSrc = srcPitch / sizeof(Uint16);
-	Uint16 *p = (Uint16 *)srcPtr;
+	Uint16 *p = reinterpret_cast<Uint16 *>(srcPtr);
 
 	unsigned int nextlineDst = dstPitch / sizeof(Uint16);
-	Uint16 *q = (Uint16 *)dstPtr;
+	Uint16 *q = reinterpret_cast<Uint16 *>(dstPtr);
 
 	int i, ii, j, jj;
 	for(j = 0, jj = 0; j < height; ++j, jj += 2) {
@@ -1733,8 +1733,8 @@ SDL_Surface* dotmat_init(video_plugin* t,int w,int h, int bpp, bool fs)
 	{
 		t->x_scale=0.5;
 		t->y_scale=0.5;
-		t->x_offset=(int)(w-CPC_VISIBLE_SCR_WIDTH/t->x_scale)/2;
-		t->y_offset=(int)(h-CPC_VISIBLE_SCR_HEIGHT/t->y_scale)/2;
+		t->x_offset=static_cast<int>(w-CPC_VISIBLE_SCR_WIDTH/t->x_scale)/2;
+		t->y_offset=static_cast<int>(h-CPC_VISIBLE_SCR_HEIGHT/t->y_scale)/2;
 	}
 	else
 	{
@@ -1770,8 +1770,8 @@ void dotmat_flip()
 	SDL_Rect src;
 	SDL_Rect dst;
 	compute_rects(&src,&dst);
-	filter_dotmatrix((Uint8*)pub->pixels + (2*src.x+src.y*pub->pitch) + (pub->pitch), pub->pitch,
-		 (Uint8*)vid->pixels + (2*dst.x+dst.y*vid->pitch), vid->pitch, src.w, src.h);
+	filter_dotmatrix(static_cast<Uint8*>(pub->pixels) + (2*src.x+src.y*pub->pitch) + (pub->pitch), pub->pitch,
+		 static_cast<Uint8*>(vid->pixels) + (2*dst.x+dst.y*vid->pitch), vid->pitch, src.w, src.h);
 	if (SDL_MUSTLOCK(vid))
 		SDL_UnlockSurface(vid);
 	SDL_UpdateRects(vid,1,&dst);

@@ -92,7 +92,7 @@ unsigned int CRenderedString::GetMaxFontHeight()
 		FT_Glyph_Metrics* pMetrics;
 		for(int i = 0; i < 256; i++)
 		{
-			pMetrics = m_pFontEngine->GetMetrics((char)i);
+			pMetrics = m_pFontEngine->GetMetrics(static_cast<char>(i));
 			if ((pMetrics->height >> 6) > maxHeight)
 			{
 				maxHeight = (pMetrics->height >> 6);
@@ -111,7 +111,7 @@ unsigned int CRenderedString::GetMaxFontWidth()
 		FT_Glyph_Metrics* pMetrics;
 		for(int i = 0; i < 256; i++)
 		{
-			pMetrics = m_pFontEngine->GetMetrics((char)i);
+			pMetrics = m_pFontEngine->GetMetrics(static_cast<char>(i));
 			if ((pMetrics->width >> 6) > maxWidth)
 			{
 				maxWidth = (pMetrics->width >> 6);

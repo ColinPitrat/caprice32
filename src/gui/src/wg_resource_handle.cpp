@@ -25,6 +25,7 @@
 #include "wg_resource_handle.h"
 #include "wg_error.h"
 #include "wutil_debug.h"
+#include "wg_application.h"
 
 namespace wGui
 {
@@ -71,7 +72,7 @@ CResourceHandle::~CResourceHandle(void)
 	}
 	else
 	{
-		throw(Wg_Ex_App("CResourceHandle::~CResourceHandle : Trying to decrement refcount of zero!"));
+    CApplication::Instance()->GetApplicationLog().AddLogEntry("CResourceHandle::~CResourceHandle : Trying to decrement refcount of zero!", APP_LOG_ERROR);
 	}
 }
 

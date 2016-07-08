@@ -326,17 +326,17 @@ void SetAYRegister(int Num, byte Value)
 inline void Synthesizer_Logic_Q(void)
 {
    Ton_Counter_A.Hi++;
-   if (Ton_Counter_A.Hi >= *(word *)&PSG.RegisterAY.TonALo) {
+   if (Ton_Counter_A.Hi >= *reinterpret_cast<word *>(&PSG.RegisterAY.TonALo)) {
       Ton_Counter_A.Hi = 0;
       Ton_A ^= 1;
    }
    Ton_Counter_B.Hi++;
-   if (Ton_Counter_B.Hi >= *(word *)&PSG.RegisterAY.TonBLo) {
+   if (Ton_Counter_B.Hi >= *reinterpret_cast<word *>(&PSG.RegisterAY.TonBLo)) {
       Ton_Counter_B.Hi = 0;
       Ton_B ^= 1;
    }
    Ton_Counter_C.Hi++;
-   if (Ton_Counter_C.Hi >= *(word *)&PSG.RegisterAY.TonCLo) {
+   if (Ton_Counter_C.Hi >= *reinterpret_cast<word *>(&PSG.RegisterAY.TonCLo)) {
       Ton_Counter_C.Hi = 0;
       Ton_C ^= 1;
    }
@@ -349,7 +349,7 @@ inline void Synthesizer_Logic_Q(void)
       Case_EnvType();
    }
    Envelope_Counter.Hi++;
-   if (Envelope_Counter.Hi >= *(word *)&PSG.RegisterAY.EnvelopeLo) {
+   if (Envelope_Counter.Hi >= *reinterpret_cast<word *>(&PSG.RegisterAY.EnvelopeLo)) {
       Envelope_Counter.Hi = 0;
    }
 }
@@ -367,7 +367,7 @@ inline void Synthesizer_Mixer_Q(void)
 
    LevR = LevL;
    if (Ton_EnA) {
-      if ((!Envelope_EnA) || (*(word *)&PSG.RegisterAY.TonALo > 4)) {
+      if ((!Envelope_EnA) || (*reinterpret_cast<word *>(&PSG.RegisterAY.TonALo) > 4)) {
          k = Ton_A;
       }
       else {
@@ -392,7 +392,7 @@ inline void Synthesizer_Mixer_Q(void)
    }
 
    if (Ton_EnB) {
-      if ((!Envelope_EnB) || (*(word *)&PSG.RegisterAY.TonBLo > 4)) {
+      if ((!Envelope_EnB) || (*reinterpret_cast<word *>(&PSG.RegisterAY.TonBLo) > 4)) {
          k = Ton_B;
       }
       else {
@@ -417,7 +417,7 @@ inline void Synthesizer_Mixer_Q(void)
    }
 
    if (Ton_EnC) {
-      if ((!Envelope_EnC) || (*(word *)&PSG.RegisterAY.TonCLo > 4)) {
+      if ((!Envelope_EnC) || (*reinterpret_cast<word *>(&PSG.RegisterAY.TonCLo) > 4)) {
          k = Ton_C;
       }
       else {
@@ -460,7 +460,7 @@ void Synthesizer_Stereo16(void)
    reg_pair val;
    val.w.l = Left_Chan / Tick_Counter;
    val.w.h = Right_Chan / Tick_Counter;
-   *(dword *)CPC.snd_bufferptr = val.d; // write to mixing buffer
+   *reinterpret_cast<dword *>(CPC.snd_bufferptr) = val.d; // write to mixing buffer
    CPC.snd_bufferptr += 4;
    Left_Chan = 0;
    Right_Chan = Left_Chan;
@@ -485,7 +485,7 @@ void Synthesizer_Stereo8(void)
    reg_pair val;
    val.b.l = 128 + Left_Chan / Tick_Counter;
    val.b.h = 128 + Right_Chan / Tick_Counter;
-   *(word *)CPC.snd_bufferptr = val.w.l; // write to mixing buffer
+   *reinterpret_cast<word *>(CPC.snd_bufferptr) = val.w.l; // write to mixing buffer
    CPC.snd_bufferptr += 2;
    Left_Chan = 0;
    Right_Chan = Left_Chan;
@@ -507,7 +507,7 @@ inline void Synthesizer_Mixer_Q_Mono(void)
    }
 
    if (Ton_EnA) {
-      if ((!Envelope_EnA) || (*(word *)&PSG.RegisterAY.TonALo > 4)) {
+      if ((!Envelope_EnA) || (*reinterpret_cast<word *>(&PSG.RegisterAY.TonALo) > 4)) {
          k = Ton_A;
       }
       else {
@@ -530,7 +530,7 @@ inline void Synthesizer_Mixer_Q_Mono(void)
    }
 
    if (Ton_EnB) {
-      if ((!Envelope_EnB) || (*(word *)&PSG.RegisterAY.TonBLo > 4)) {
+      if ((!Envelope_EnB) || (*reinterpret_cast<word *>(&PSG.RegisterAY.TonBLo) > 4)) {
          k = Ton_B;
       }
       else {
@@ -553,7 +553,7 @@ inline void Synthesizer_Mixer_Q_Mono(void)
    }
 
    if (Ton_EnC) {
-      if ((!Envelope_EnC) || (*(word *)&PSG.RegisterAY.TonCLo > 4)) {
+      if ((!Envelope_EnC) || (*reinterpret_cast<word *>(&PSG.RegisterAY.TonCLo) > 4)) {
          k = Ton_C;
       }
       else {
@@ -590,7 +590,7 @@ void Synthesizer_Mono16(void)
       LoopCount.Hi--;
    }
    LoopCount.Re += LoopCountInit;
-   *(word *)CPC.snd_bufferptr = Left_Chan / Tick_Counter; // write to mixing buffer
+   *reinterpret_cast<word *>(CPC.snd_bufferptr) = Left_Chan / Tick_Counter; // write to mixing buffer
    CPC.snd_bufferptr += 2;
    Left_Chan = 0;
    if (CPC.snd_bufferptr >= pbSndBufferEnd) {
@@ -611,7 +611,7 @@ void Synthesizer_Mono8(void)
       LoopCount.Hi--;
    }
    LoopCount.Re += LoopCountInit;
-   *(byte *)CPC.snd_bufferptr = 128 + Left_Chan / Tick_Counter; // write to mixing buffer
+   *reinterpret_cast<byte *>(CPC.snd_bufferptr) = 128 + Left_Chan / Tick_Counter; // write to mixing buffer
    CPC.snd_bufferptr++;
    Left_Chan = 0;
    if (CPC.snd_bufferptr >= pbSndBufferEnd) {
@@ -655,48 +655,48 @@ void Calculate_Level_Tables(void)
    }
    l = 255 * r / l;
    for (i = 0; i < 16; i++) {
-      b = (int)rint(Index_A / 255.0 * Amplitudes_AY[i]);
-      b = (int)rint(b / 65535.0 * l);
+      b = static_cast<int>(rint(Index_A / 255.0 * Amplitudes_AY[i]));
+      b = static_cast<int>(rint(b / 65535.0 * l));
       Level_AL[i * 2] = b;
       Level_AL[i * 2 + 1] = b;
-      b = (int)rint(Index_AR / 255.0 * Amplitudes_AY[i]);
-      b = (int)rint(b / 65535.0 * l);
+      b = static_cast<int>(rint(Index_AR / 255.0 * Amplitudes_AY[i]));
+      b = static_cast<int>(rint(b / 65535.0 * l));
       Level_AR[i * 2] = b;
       Level_AR[i * 2 + 1] = b;
-      b = (int)rint(Index_B / 255.0 * Amplitudes_AY[i]);
-      b = (int)rint(b / 65535.0 * l);
+      b = static_cast<int>(rint(Index_B / 255.0 * Amplitudes_AY[i]));
+      b = static_cast<int>(rint(b / 65535.0 * l));
       Level_BL[i * 2] = b;
       Level_BL[i * 2 + 1] = b;
-      b = (int)rint(Index_BR / 255.0 * Amplitudes_AY[i]);
-      b = (int)rint(b / 65535.0 * l);
+      b = static_cast<int>(rint(Index_BR / 255.0 * Amplitudes_AY[i]));
+      b = static_cast<int>(rint(b / 65535.0 * l));
       Level_BR[i * 2] = b;
       Level_BR[i * 2 + 1] = b;
-      b = (int)rint(Index_C / 255.0 * Amplitudes_AY[i]);
-      b = (int)rint(b / 65535.0 * l);
+      b = static_cast<int>(rint(Index_C / 255.0 * Amplitudes_AY[i]));
+      b = static_cast<int>(rint(b / 65535.0 * l));
       Level_CL[i * 2] = b;
       Level_CL[i * 2 + 1] = b;
-      b = (int)rint(Index_CR / 255.0 * Amplitudes_AY[i]);
-      b = (int)rint(b / 65535.0 * l);
+      b = static_cast<int>(rint(Index_CR / 255.0 * Amplitudes_AY[i]));
+      b = static_cast<int>(rint(b / 65535.0 * l));
       Level_CR[i * 2] = b;
       Level_CR[i * 2 + 1] = b;
    }
    k = exp(CPC.snd_volume * log(2) / PreAmpMax) - 1;
    for (i = 0; i < 32; i++) {
-      Level_AL[i] = (int)rint(Level_AL[i] * k);
-      Level_AR[i] = (int)rint(Level_AR[i] * k);
-      Level_BL[i] = (int)rint(Level_BL[i] * k);
-      Level_BR[i] = (int)rint(Level_BR[i] * k);
-      Level_CL[i] = (int)rint(Level_CL[i] * k);
-      Level_CR[i] = (int)rint(Level_CR[i] * k);
+      Level_AL[i] = static_cast<int>(rint(Level_AL[i] * k));
+      Level_AR[i] = static_cast<int>(rint(Level_AR[i] * k));
+      Level_BL[i] = static_cast<int>(rint(Level_BL[i] * k));
+      Level_BR[i] = static_cast<int>(rint(Level_BR[i] * k));
+      Level_CL[i] = static_cast<int>(rint(Level_CL[i] * k));
+      Level_CR[i] = static_cast<int>(rint(Level_CR[i] * k));
    }
    if (!CPC.snd_bits) { // 8 bits per sample?
-      LevelTape = -(int)rint((TAPE_VOLUME / 2) * k);
+      LevelTape = -static_cast<int>(rint((TAPE_VOLUME / 2) * k));
    }
    else {
-      LevelTape = -(int)rint((TAPE_VOLUME * 128) * k);
+      LevelTape = -static_cast<int>(rint((TAPE_VOLUME * 128) * k));
    }
    for (i = 0, b = 255; i < 256; i++) { // calculate the 256 levels of the Digiblaster/Soundplayer
-      Level_PP[i] = -(int)rint(((b << 8) / 65535.0 * l) * k);
+      Level_PP[i] = -static_cast<int>(rint(((b << 8) / 65535.0 * l) * k));
       b--;
    }
 }
@@ -722,10 +722,10 @@ void ResetAYChipEmulation(void)
 
 void InitAYCounterVars(void)
 {
-   CPC.snd_cycle_count_init.both = (int64_t)rint((4000000 * ((CPC.speed * 25) / 100.0)) /
-      freq_table[CPC.snd_playback_rate] * 4294967296.0); // number of Z80 cycles per sample
-   LoopCountInit = (int64_t)rint(1000000.0 / (4000000.0 * ((CPC.speed * 25) / 100.0)) / 8.0 *
-      CPC.snd_cycle_count_init.both); // number of AY counter increments per sample
+   CPC.snd_cycle_count_init.both = static_cast<int64_t>(rint((4000000 * ((CPC.speed * 25) / 100.0)) /
+      freq_table[CPC.snd_playback_rate] * 4294967296.0)); // number of Z80 cycles per sample
+   LoopCountInit = static_cast<int64_t>(rint(1000000.0 / (4000000.0 * ((CPC.speed * 25) / 100.0)) / 8.0 *
+      CPC.snd_cycle_count_init.both)); // number of AY counter increments per sample
    LoopCount.Re = LoopCountInit;
 }
 

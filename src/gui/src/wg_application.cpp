@@ -66,24 +66,24 @@ void CApplication::HandleSDLEvent(SDL_Event Event)
 	case SDL_MOUSEBUTTONDOWN:
 		CMessageServer::Instance().QueueMessage(new CMouseMessage(
 			CMessage::MOUSE_BUTTONDOWN, CApplication::Instance()->GetMouseFocus(), this,
-			CPoint((int)((Event.button.x-vid_plugin->x_offset)*vid_plugin->x_scale),(int)((Event.button.y-vid_plugin->y_offset)*vid_plugin->y_scale)), CPoint(),
+			CPoint(static_cast<int>((Event.button.x-vid_plugin->x_offset)*vid_plugin->x_scale), static_cast<int>((Event.button.y-vid_plugin->y_offset)*vid_plugin->y_scale)), CPoint(),
 			CMouseMessage::TranslateSDLButton(Event.button.button)));
 		break;
 	case SDL_MOUSEBUTTONUP:
 		CMessageServer::Instance().QueueMessage(new CMouseMessage(
 			CMessage::MOUSE_BUTTONUP, CApplication::Instance()->GetMouseFocus(), this,
-			CPoint((int)((Event.button.x-vid_plugin->x_offset)*vid_plugin->x_scale),(int)((Event.button.y-vid_plugin->y_offset)*vid_plugin->y_scale)), CPoint(),
+			CPoint(static_cast<int>((Event.button.x-vid_plugin->x_offset)*vid_plugin->x_scale), static_cast<int>((Event.button.y-vid_plugin->y_offset)*vid_plugin->y_scale)), CPoint(),
 			CMouseMessage::TranslateSDLButton(Event.button.button)));
 		break;
 	case SDL_MOUSEMOTION:
 		CMessageServer::Instance().QueueMessage(new CMouseMessage(
 			CMessage::MOUSE_MOVE, CApplication::Instance()->GetMouseFocus(), this,
-			CPoint((int)((Event.button.x-vid_plugin->x_offset)*vid_plugin->x_scale),(int)((Event.button.y-vid_plugin->y_offset)*vid_plugin->y_scale)), CPoint(),
+			CPoint(static_cast<int>((Event.button.x-vid_plugin->x_offset)*vid_plugin->x_scale), static_cast<int>((Event.button.y-vid_plugin->y_offset)*vid_plugin->y_scale)), CPoint(),
 			CMouseMessage::TranslateSDLButtonState(Event.motion.state)));
 		break;
   case SDL_JOYAXISMOTION:
     {
-      SDLKey key;
+      SDLKey key(SDLK_UNKNOWN);
       switch(Event.jaxis.axis) {
         case 0:
         case 2:
@@ -104,12 +104,14 @@ void CApplication::HandleSDLEvent(SDL_Event Event)
           }
           break;
       }
-      CMessageServer::Instance().QueueMessage(new CKeyboardMessage(
-            CMessage::KEYBOARD_KEYDOWN, CApplication::Instance()->GetKeyFocus(), this,
-            0, KMOD_NONE, key, 0));
-      CMessageServer::Instance().QueueMessage(new CKeyboardMessage(
-            CMessage::KEYBOARD_KEYUP, CApplication::Instance()->GetKeyFocus(), this,
-            0, KMOD_NONE, key, 0));
+      if (key != SDLK_UNKNOWN) {
+        CMessageServer::Instance().QueueMessage(new CKeyboardMessage(
+              CMessage::KEYBOARD_KEYDOWN, CApplication::Instance()->GetKeyFocus(), this,
+              0, KMOD_NONE, key, 0));
+        CMessageServer::Instance().QueueMessage(new CKeyboardMessage(
+              CMessage::KEYBOARD_KEYUP, CApplication::Instance()->GetKeyFocus(), this,
+              0, KMOD_NONE, key, 0));
+      }
       break;
     }
   case SDL_JOYBUTTONUP:

@@ -521,7 +521,7 @@ void fdc_write_data(byte val)
 
                      track_size = sector_size * FDC.command[CMD_H];
                      active_track->sectors = FDC.command[CMD_H];
-                     active_track->data = (byte *)malloc(track_size); // attempt to allocate the required memory
+                     active_track->data = static_cast<byte *>(malloc(track_size)); // attempt to allocate the required memory
                      pbDataPtr = active_track->data;
                      pbPtr = pbGPBuffer;
                      for (sector = 0; sector < FDC.command[CMD_H]; sector++) {

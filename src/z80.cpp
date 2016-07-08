@@ -379,9 +379,9 @@ inline void write_mem(word addr, byte val) {
 { \
    unsigned val = value; \
    unsigned res = _A + val; \
-   _F = SZ[(byte)res] | ((res >> 8) & Cflag) | ((_A ^ res ^ val) & Hflag) | \
+   _F = SZ[static_cast<byte>(res)] | ((res >> 8) & Cflag) | ((_A ^ res ^ val) & Hflag) | \
       (((val ^ _A ^ 0x80) & (val ^ res) & 0x80) >> 5); \
-   _A = (byte)res; \
+   _A = static_cast<byte>(res); \
 }
 
 #define ADD16(dest, src) \
@@ -389,7 +389,7 @@ inline void write_mem(word addr, byte val) {
    dword res = z80.dest.d + z80.src.d; \
    _F = (_F & (Sflag | Zflag | Vflag)) | (((z80.dest.d ^ res ^ z80.src.d) >> 8) & Hflag) | \
       ((res >> 16) & Cflag) | ((res >> 8) & Xflags); \
-   z80.dest.w.l = (word)res; \
+   z80.dest.w.l = static_cast<word>(res); \
 }
 
 #define AND(val) \
@@ -437,7 +437,7 @@ inline void write_mem(word addr, byte val) {
 #define JR \
 { \
    signed char offset; \
-   offset = (signed char)(read_mem(_PC)); /* grab signed jump offset */ \
+   offset = static_cast<signed char>(read_mem(_PC)); /* grab signed jump offset */ \
    _PC += offset + 1; /* add offset & correct PC */ \
 }
 
@@ -674,7 +674,7 @@ inline byte SRL(byte val) {
       ((res >> 8) & (Sflag | Xflags)) | \
       ((res & 0xffff) ? 0 : Zflag) | \
       (((z80.reg.d ^ _HLdword ^ 0x8000) & (z80.reg.d ^ res) & 0x8000) >> 13); \
-   _HL = (word)res; \
+   _HL = static_cast<word>(res); \
 }
 
 #define CPD \
@@ -878,7 +878,7 @@ inline byte SRL(byte val) {
       ((res >> 8) & (Sflag | Xflags)) | \
       ((res & 0xffff) ? 0 : Zflag) | \
       (((z80.reg.d ^ _HLdword) & (_HLdword ^ res) &0x8000) >> 13); \
-   _HL = (word)res; \
+   _HL = static_cast<word>(res); \
 }
 
 

@@ -36,11 +36,11 @@ namespace zip
         return ERR_FILE_BAD_ZIP; // exit if loading of data chunck failed
       }
       pbPtr = pbGPBuffer + (256 - 22); // pointer to end of central directory (under ideal conditions)
-      while (pbPtr != (byte *)pbGPBuffer) {
-        if (*(dword *)pbPtr == 0x06054b50) { // check for end of central directory signature
-          wCentralDirEntries = *(word *)(pbPtr + 10);
-          wCentralDirSize = *(word *)(pbPtr + 12);
-          dwCentralDirPosition = *(dword *)(pbPtr + 16);
+      while (pbPtr != static_cast<byte *>(pbGPBuffer)) {
+        if (*reinterpret_cast<dword *>(pbPtr) == 0x06054b50) { // check for end of central directory signature
+          wCentralDirEntries = *reinterpret_cast<word *>(pbPtr + 10);
+          wCentralDirSize = *reinterpret_cast<word *>(pbPtr + 12);
+          dwCentralDirPosition = *reinterpret_cast<dword *>(pbPtr + 16);
           break;
         }
         pbPtr--; // move backwards through buffer
@@ -60,22 +60,22 @@ namespace zip
     if (zi->pchFileNames) {
       free(zi->pchFileNames); // dealloc old string table
     }
-    zi->pchFileNames = (char *)malloc(wCentralDirSize); // approximate space needed by using the central directory size
+    zi->pchFileNames = static_cast<char *>(malloc(wCentralDirSize)); // approximate space needed by using the central directory size
     pchStrPtr = zi->pchFileNames;
 
     for (n = wCentralDirEntries; n; n--) {
-      wFilenameLength = *(word *)(pbPtr + 28);
-      dwOffset = *(dword *)(pbPtr + 42);
-      dwNextEntry = wFilenameLength + *(word *)(pbPtr + 30) + *(word *)(pbPtr + 32);
+      wFilenameLength = *reinterpret_cast<word *>(pbPtr + 28);
+      dwOffset = *reinterpret_cast<dword *>(pbPtr + 42);
+      dwNextEntry = wFilenameLength + *reinterpret_cast<word *>(pbPtr + 30) + *reinterpret_cast<word *>(pbPtr + 32);
       pbPtr += 46;
       const char *pchThisExtension = zi->extensions.c_str();
       while (*pchThisExtension != '\0') { // loop for all extensions to be checked
-        if (strncasecmp((char *)pbPtr + (wFilenameLength - 4), pchThisExtension, 4) == 0) {
-          strncpy(pchStrPtr, (char *)pbPtr, wFilenameLength); // copy filename from zip directory
+        if (strncasecmp(reinterpret_cast<char*>(pbPtr) + (wFilenameLength - 4), pchThisExtension, 4) == 0) {
+          strncpy(pchStrPtr, reinterpret_cast<char*>(pbPtr), wFilenameLength); // copy filename from zip directory
           pchStrPtr[wFilenameLength] = 0; // zero terminate string
           pchStrPtr += wFilenameLength+1;
           zi->dwOffset = dwOffset;
-          *(dword *)pchStrPtr = dwOffset; // associate offset with string
+          *reinterpret_cast<dword *>(pchStrPtr) = dwOffset; // associate offset with string
           pchStrPtr += 4;
           zi->iFiles++;
           break;
@@ -116,15 +116,15 @@ namespace zip
       fclose(*pfileOut);
       return ERR_FILE_UNZIP_FAILED;
     }
-    dwSize = *(dword *)(pbGPBuffer + 18); // length of compressed data
-    dwOffset += 30 + *(word *)(pbGPBuffer + 26) + *(word *)(pbGPBuffer + 28);
+    dwSize = *reinterpret_cast<dword *>(pbGPBuffer + 18); // length of compressed data
+    dwOffset += 30 + *reinterpret_cast<word *>(pbGPBuffer + 26) + *reinterpret_cast<word *>(pbGPBuffer + 28);
     fseek(pfileIn, dwOffset, SEEK_SET); // move file pointer to start of compressed data
 
     pbInputBuffer = pbGPBuffer; // space for compressed data chunck
     pbOutputBuffer = pbInputBuffer + 16384; // space for uncompressed data chunck
-    z.zalloc = (alloc_func)nullptr;
-    z.zfree = (free_func)nullptr;
-    z.opaque = (voidpf)nullptr;
+    z.zalloc = nullptr;
+    z.zfree = nullptr;
+    z.opaque = nullptr;
     iStatus = inflateInit2(&z, -MAX_WBITS); // init zlib stream (no header)
     do {
       z.next_in = pbInputBuffer;

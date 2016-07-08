@@ -705,14 +705,14 @@ void NoChar(void)
 void CharSL2(void)
 {
    CRTC.reg5 = CRTC.registers[5];
-   CRTC.CharInstSL = (void(*)(void))NoChar;
+   CRTC.CharInstSL = NoChar;
 }
 
 
 
 void CharSL1(void)
 {
-   CRTC.CharInstSL = (void(*)(void))CharSL2;
+   CRTC.CharInstSL = CharSL2;
 }
 
 
@@ -726,7 +726,7 @@ void CharMR2(void)
          }
       }
    }
-   CRTC.CharInstMR = (void(*)(void))NoChar;
+   CRTC.CharInstMR = NoChar;
 }
 
 
@@ -739,7 +739,7 @@ void CharMR1(void)
    } else {
       CRTC.flag_startvta = 0; // not yet at end of frame
    }
-   CRTC.CharInstMR = (void(*)(void))CharMR2;
+   CRTC.CharInstMR = CharMR2;
 }
 
 
@@ -839,7 +839,7 @@ void set_prerender(void)
    if (LastPreRend == 0x03ff0000) {
       PreRender = CPC.scr_prerendernorm;
    } else {
-      if (!(word)LastPreRend) {
+      if (!static_cast<word>(LastPreRend)) {
          PreRender = CPC.scr_prerenderbord;
       } else {
          PreRender = CPC.scr_prerendersync;
@@ -851,19 +851,19 @@ void set_prerender(void)
 
 void render8bpp(void)
 {
-   register byte *pbPos = (byte *)CPC.scr_pos;
+   register byte *pbPos = reinterpret_cast<byte *>(CPC.scr_pos);
    register byte bCount = *RendWid++;
    while (bCount--) {
       *pbPos++ = GateArray.palette[*RendOut++];
    }
-   CPC.scr_pos = (dword *)pbPos;
+   CPC.scr_pos = reinterpret_cast<dword *>(pbPos);
 }
 
 
 
 void render8bpp_doubleY(void)
 {
-   register byte *pbPos = (byte *)CPC.scr_pos;
+   register byte *pbPos = reinterpret_cast<byte *>(CPC.scr_pos);
    register dword dwLineOffs = CPC.scr_bps << 2;
    register byte bCount = *RendWid++;
    while (bCount--) {
@@ -871,26 +871,26 @@ void render8bpp_doubleY(void)
       *(pbPos + dwLineOffs) = val;
       *pbPos++ = val;
    }
-   CPC.scr_pos = (dword *)pbPos;
+   CPC.scr_pos = reinterpret_cast<dword *>(pbPos);
 }
 
 
 
 void render16bpp(void)
 {
-   register word *pwPos = (word *)CPC.scr_pos;
+   register word *pwPos = reinterpret_cast<word *>(CPC.scr_pos);
    register byte bCount = *RendWid++;
    while (bCount--) {
       *pwPos++ = GateArray.palette[*RendOut++];
    }
-   CPC.scr_pos = (dword *)pwPos;
+   CPC.scr_pos = reinterpret_cast<dword *>(pwPos);
 }
 
 
 
 void render16bpp_doubleY(void)
 {
-   register word *pwPos = (word *)CPC.scr_pos;
+   register word *pwPos = reinterpret_cast<word *>(CPC.scr_pos);
    register dword dwLineOffs = CPC.scr_bps << 1;
    register byte bCount = *RendWid++;
    while (bCount--) {
@@ -898,41 +898,41 @@ void render16bpp_doubleY(void)
       *(pwPos + dwLineOffs) = val;
       *pwPos++ = val;
    }
-   CPC.scr_pos = (dword *)pwPos;
+   CPC.scr_pos = reinterpret_cast<dword *>(pwPos);
 }
 
 
 
 void render24bpp(void)
 {
-   register byte *pbPos = (byte *)CPC.scr_pos;
+   register byte *pbPos = reinterpret_cast<byte *>(CPC.scr_pos);
    register byte bCount = *RendWid++;
    while (bCount--) {
       register dword val = GateArray.palette[*RendOut++];
-      *(word *)pbPos = (word)val;
-      *(pbPos + 2) = (byte)(val >> 16);
+      *reinterpret_cast<word *>(pbPos) = static_cast<word>(val);
+      *(pbPos + 2) = static_cast<byte>(val >> 16);
       pbPos += 3;
    }
-   CPC.scr_pos = (dword *)pbPos;
+   CPC.scr_pos = reinterpret_cast<dword *>(pbPos);
 }
 
 
 
 void render24bpp_doubleY(void)
 {
-   register byte *pbPos = (byte *)CPC.scr_pos;
+   register byte *pbPos = reinterpret_cast<byte *>(CPC.scr_pos);
    register dword dwLineOffs = CPC.scr_bps << 2;
    register byte bCount = *RendWid++;
    while (bCount--) {
       register dword val = GateArray.palette[*RendOut++];
-      *(word *)(pbPos + dwLineOffs) = (word)val;
-      *(word *)pbPos = (word)val;
+      *reinterpret_cast<word *>(pbPos + dwLineOffs) = static_cast<word>(val);
+      *reinterpret_cast<word *>(pbPos) = static_cast<word>(val);
       val >>= 16;
-      *(pbPos + dwLineOffs + 2) = (byte)val;
-      *(pbPos + 2) = (byte)val;
+      *(pbPos + dwLineOffs + 2) = static_cast<byte>(val);
+      *(pbPos + 2) = static_cast<byte>(val);
       pbPos += 3;
    }
-   CPC.scr_pos = (dword *)pbPos;
+   CPC.scr_pos = reinterpret_cast<dword *>(pbPos);
 }
 
 
@@ -1065,18 +1065,18 @@ void crtc_cycle(int repeat_count)
             RendPos = RendStart;
             HorzChar--;
          } else {
-            RendPos = (dword *)&RendBuff[val];
-            int tmp = (byte *)RendStart - (byte *)RendPos;
-            HorzPix[48] = (byte)tmp;
-            HorzPix[0] = HorzPix[1] - (byte)tmp;
+            RendPos = reinterpret_cast<dword *>(&RendBuff[val]);
+            int tmp = reinterpret_cast<byte *>(RendStart) - reinterpret_cast<byte *>(RendPos);
+            HorzPix[48] = static_cast<byte>(tmp);
+            HorzPix[0] = HorzPix[1] - static_cast<byte>(tmp);
             HorzMax = 49;
          }
-         RendOut = (byte *)RendStart;
+         RendOut = reinterpret_cast<byte *>(RendStart);
          RendWid = &HorzPix[0];
          CPC.scr_pos = CPC.scr_base;
          VDU.scrln++;
          VDU.scanline++;
-         if ((dword)VDU.scrln >= MAX_DRAWN) {
+         if (static_cast<dword>(VDU.scrln) >= MAX_DRAWN) {
             VDU.flag_drawing = 0;
          } else {
             VDU.flag_drawing = 1;
@@ -1167,7 +1167,7 @@ void crtc_cycle(int repeat_count)
             }
          }
 
-         CRTC.CharInstSL = (void(*)(void))CharSL1;
+         CRTC.CharInstSL = CharSL1;
 
          register dword temp = 0;
          if (CRTC.raster_count == CRTC.registers[9]) { // matches maximum raster address?
@@ -1178,7 +1178,7 @@ void crtc_cycle(int repeat_count)
             CRTC.r9match = temp;
          }
          if (temp) {
-            CRTC.CharInstMR = (void(*)(void))CharMR1;
+            CRTC.CharInstMR = CharMR1;
          }
 
          if (CRTC.flag_invta) { // in vertical total adjust?
@@ -1270,9 +1270,9 @@ void crtc_reset(void)
       HorzPix[i] = Wid;
    }
    HorzPix[48] = 0;
-   RendStart = (dword *)&RendBuff[Wid];
-   RendPos = (dword *)&RendBuff[0];
-   RendOut = (byte *)RendStart;
+   RendStart = reinterpret_cast<dword *>(&RendBuff[Wid]);
+   RendPos = reinterpret_cast<dword *>(&RendBuff[0]);
+   RendOut = reinterpret_cast<byte *>(RendStart);
    RendWid = &HorzPix[0];
 
    HorzPos = 0x500;
@@ -1288,10 +1288,10 @@ void crtc_reset(void)
    flags1.dt.HDSPTIMG = 0x03;
    new_dt.NewDISPTIMG = 0xff;
    new_dt.NewHDSPTIMG = 0x03;
-   CRTC.CharInstSL = (void(*)(void))NoChar;
-   CRTC.CharInstMR = (void(*)(void))NoChar;
+   CRTC.CharInstSL = NoChar;
+   CRTC.CharInstMR = NoChar;
 
    MinVSync = MID_VHOLD;
-   MaxVSync = MinVSync + MIN_VHOLD_RANGE + (int)ceil((float)((MinVSync - MIN_VHOLD) *
-    (MAX_VHOLD_RANGE - MIN_VHOLD_RANGE) / (MAX_VHOLD - MIN_VHOLD)));
+   MaxVSync = MinVSync + MIN_VHOLD_RANGE + static_cast<int>(ceil(static_cast<float>((MinVSync - MIN_VHOLD) *
+    (MAX_VHOLD_RANGE - MIN_VHOLD_RANGE) / (MAX_VHOLD - MIN_VHOLD))));
 }
