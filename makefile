@@ -27,7 +27,7 @@ CXX	= g++
 endif
 
 COMMON_CFLAGS_1 = -std=c++11
-CFLAGS_1	= -Werror -Wall -Wextra -Wzero-as-null-pointer-constant -Wformat=2 -Wold-style-cast -Wmissing-include-dirs -Winline -Wlogical-op -Woverloaded-virtual -Wpointer-arith -Wredundant-decls
+CFLAGS_1	= -Werror -Wall -Wextra -Wzero-as-null-pointer-constant -Wformat=2 -Wold-style-cast -Wmissing-include-dirs -Wlogical-op -Woverloaded-virtual -Wpointer-arith -Wredundant-decls
 
 debug: DEBUG=1
 
