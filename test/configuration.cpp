@@ -4,6 +4,8 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <fstream>
+#include <string.h>
+#include <errno.h>
 
 // TODO(cpitrat): Cleaner way to handle this
 extern char chAppPath[_MAX_PATH + 1];
@@ -174,7 +176,7 @@ TEST_F(ConfigurationTest, loadConfigurationWithInvalidValues)
              << "resources_path=\n"
              ;
   configFile.close();
-  getcwd(chAppPath, sizeof(chAppPath)-1);
+  ASSERT_NE(nullptr, getcwd(chAppPath, sizeof(chAppPath)-1)) << "getcwd error: " << strerror(errno);
 
   t_CPC CPC;
   loadConfiguration(CPC, getTmpFilename(0));
