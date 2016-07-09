@@ -76,9 +76,9 @@ namespace wGui {
     CMessageServer::Instance().QueueMessage(new CMessage(CMessage::APP_EXIT, nullptr, this));
   }
 
-  std::list<SDL_Event> CapriceVKeyboard::GetEvents() {
+  std::list<SDL_Event> CapriceVKeyboard::StringToEvents(std::string toTranslate) {
     std::list<SDL_Event> result;
-    for(auto c : m_result->GetWindowText()) {
+    for(auto c : toTranslate) {
       SDL_Event key;
       // key.key.keysym.scancode = ;
       key.key.keysym.sym = m_keyFromChar[c].first;
@@ -94,6 +94,10 @@ namespace wGui {
       result.push_back(key);
     }
     return result;
+  }
+
+  std::list<SDL_Event> CapriceVKeyboard::GetEvents() {
+    return StringToEvents(m_result->GetWindowText());
   }
 
   void CapriceVKeyboard::moveFocus(int dy, int dx) {

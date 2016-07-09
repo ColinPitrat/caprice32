@@ -17,7 +17,7 @@ TEST_SOURCES:=$(shell find $(TSTDIR) -name \*.cpp)
 TEST_DEPENDS:=$(foreach file,$(TEST_SOURCES:.cpp=.d),$(shell echo "$(OBJDIR)/$(file)"))
 TEST_OBJECTS:=$(TEST_DEPENDS:.d=.o)
 
-IPATHS	= -Isrc/ -Isrc/gui/includes `freetype-config --cflags`
+IPATHS	= -Isrc/ -Isrc/gui/includes `freetype-config --cflags` `sdl-config --cflags`
 LIBS = `sdl-config --libs` -lz `freetype-config --libs`
 
 .PHONY: all clean debug debug_flag
@@ -27,7 +27,7 @@ CXX	= g++
 endif
 
 COMMON_CFLAGS_1 = -std=c++11
-CFLAGS_1	= -Wall -Wzero-as-null-pointer-constant -Wformat=2 -Wold-style-cast `sdl-config --cflags`
+CFLAGS_1	= -Wall -Wzero-as-null-pointer-constant -Wformat=2 -Wold-style-cast
 
 debug: DEBUG=1
 

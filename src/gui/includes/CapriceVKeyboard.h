@@ -20,6 +20,7 @@ namespace wGui
       bool HandleMessage(CMessage* pMessage) override;
       std::list<SDL_Event> GetEvents();
 
+      std::list<SDL_Event> StringToEvents(std::string toTranslate);
     protected:
       void moveFocus(int dx, int dy);
 

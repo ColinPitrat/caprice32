@@ -62,7 +62,7 @@ CFrame::CFrame(const CRect& WindowRect, CWindow* pParent, CFontEngine* pFontEngi
 }
 
 
- CFrame::~CFrame(void)  // virtual
+CFrame::~CFrame(void)  // virtual
 {
 	if (m_bModal)
 	{
@@ -84,7 +84,7 @@ void CFrame::SetModal(bool bModal)
 	if (m_bModal) {
 		CApplication::Instance()->SetMouseFocus(this);
 		CApplication::Instance()->SetKeyFocus(this);
-	} else {
+	} else if (m_pParentWindow) {
 		CApplication::Instance()->SetMouseFocus(m_pParentWindow);
 		CApplication::Instance()->SetKeyFocus(m_pParentWindow);
 	}

@@ -228,7 +228,7 @@ CApplication::~CApplication(void)
 
 void CApplication::SetKeyFocus(CWindow* pWindow)
 {
-	if (m_pKeyFocusWindow != pWindow)
+	if (pWindow && m_pKeyFocusWindow != pWindow)
 	{
     if (pWindow->IsVisible())
     {
