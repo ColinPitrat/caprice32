@@ -66,7 +66,7 @@ $(DEPENDS): $(OBJDIR)/%.d: %.cpp
 $(OBJECTS): $(OBJDIR)/%.o: %.cpp
 	$(CXX) -c $(CFLAGS) -o $@ $<
 
-debug: debug_flag cap32 unit_test debug_flag tags
+debug: debug_flag tags cap32 unit_test debug_flag
 
 debug_flag:
 ifdef FORCED_DEBUG
@@ -75,7 +75,7 @@ endif
 	@touch .debug
 
 tags:
-	ctags -R .
+	@ctags -R . || echo -e "!!!!!!!!!!!\n!! Warning: ctags not found - if you are a developer, you might want to install it.\n!!!!!!!!!!!"
 
 cap32: $(OBJECTS) $(MAIN)
 	$(CXX) $(LDFLAGS) -o cap32 $(OBJECTS) $(MAIN) $(LIBS)
@@ -110,6 +110,6 @@ unit_test: $(TEST_TARGET)
 
 clean:
 	rm -rf $(OBJDIR)
-	rm -f $(TEST_TARGET) $(GTEST_DIR)/src/gtest-all.o cap32 .debug
+	rm -f $(TEST_TARGET) $(GTEST_DIR)/src/gtest-all.o cap32 .debug tags
 
 -include $(DEPENDS) $(TEST_DEPENDS)
