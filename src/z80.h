@@ -21,6 +21,7 @@
 
 #include "SDL.h"
 #include "types.h"
+#include "crtc.h"
 
 typedef union {
 #if SDL_BYTEORDER == SDL_LIL_ENDIAN
@@ -95,7 +96,7 @@ typedef struct {
 
 byte read_mem(word addr);
 void write_mem(word addr, byte val);
-void crtc_cycle(int repeat_count); // not provided by Z80.c
+// TODO: put declaration or definition of these two methods somewhere else !!!
 byte z80_IN_handler(reg_pair port); // not provided by Z80.c
 void z80_OUT_handler(reg_pair port, byte val); // not provided by Z80.c
 

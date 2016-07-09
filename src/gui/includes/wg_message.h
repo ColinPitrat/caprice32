@@ -86,7 +86,7 @@ public:
 
 	//! Gets the message type
 	//! \return The message type of the message
-	const EMessageType MessageType(void) { return m_MessageType; }
+	EMessageType MessageType(void) { return m_MessageType; }
 
 	//! Gets the intended destination for the message
 	//! \return A pointer to the destination of the message (0 for no specific destination, or to broadcast to all)

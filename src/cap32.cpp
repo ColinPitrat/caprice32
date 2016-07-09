@@ -2195,7 +2195,7 @@ void printer_stop (void)
 
 
 
-void audio_update (void *userdata, byte *stream, int len)
+void audio_update (void *userdata __attribute__((unused)), byte *stream, int len)
 {
    memcpy(stream, pbSndBuffer, len);
    dwSndBufferCopied = 1;
@@ -2747,7 +2747,7 @@ void loadConfiguration (t_CPC &CPC, const std::string& configFilename)
    }
    CPC.scr_oglfilter = conf.getIntValue("video", "scr_oglfilter", 1) & 1;
    CPC.scr_oglscanlines = conf.getIntValue("video", "scr_oglscanlines", 30);
-   if ((CPC.scr_oglscanlines < 0) || (CPC.scr_oglscanlines > 100)) {
+   if (CPC.scr_oglscanlines > 100) {
       CPC.scr_oglscanlines = 30;
    }
    CPC.scr_vsync = conf.getIntValue("video", "scr_vsync", 1) & 1;
@@ -2769,7 +2769,7 @@ void loadConfiguration (t_CPC &CPC, const std::string& configFilename)
    CPC.snd_bits = conf.getIntValue("sound", "bits", 1) & 1;
    CPC.snd_stereo = conf.getIntValue("sound", "stereo", 1) & 1;
    CPC.snd_volume = conf.getIntValue("sound", "volume", 80);
-   if ((CPC.snd_volume < 0) || (CPC.snd_volume > 100)) {
+   if (CPC.snd_volume > 100) {
       CPC.snd_volume = 80;
    }
    CPC.snd_pp_device = conf.getIntValue("sound", "pp_device", 0) & 1;

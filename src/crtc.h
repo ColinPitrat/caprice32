@@ -19,7 +19,7 @@
 #ifndef CRTC_H
 #define CRTC_H
 
-#include "z80.h"
+#include "types.h"
 
 // The next 4 bytes must remain together
 typedef union {

@@ -189,13 +189,8 @@ void half_close()
 /* ------------------------------------------------------------------------------------ */
 /* Half size with hardware flip video plugin ------------------------------------------ */
 /* ------------------------------------------------------------------------------------ */
-SDL_Surface* halfhw_init(video_plugin* t,int w,int h, int bpp, bool fs)
+SDL_Surface* halfhw_init(video_plugin* t, int w __attribute__((unused)), int h __attribute__((unused)), int bpp, bool fs)
 {
-	if (!fs)
-	{
-		w=CPC_VISIBLE_SCR_WIDTH;
-		h=CPC_VISIBLE_SCR_HEIGHT;
-	}
 	vid=SDL_SetVideoMode(CPC_VISIBLE_SCR_WIDTH,CPC_VISIBLE_SCR_HEIGHT,bpp,SDL_ANYFORMAT | SDL_DOUBLEBUF | SDL_HWSURFACE | SDL_HWPALETTE | (fs?SDL_FULLSCREEN:0));
 	if (!vid)
 		return nullptr;
@@ -302,13 +297,8 @@ void double_close()
 /* ------------------------------------------------------------------------------------ */
 /* Double size with hardware flip video plugin ---------------------------------------- */
 /* ------------------------------------------------------------------------------------ */
-SDL_Surface* doublehw_init(video_plugin* t,int w,int h, int bpp, bool fs)
+SDL_Surface* doublehw_init(video_plugin* t, int w __attribute__((unused)), int h __attribute__((unused)), int bpp, bool fs)
 {
-	if (!fs)
-	{
-		w=CPC_VISIBLE_SCR_WIDTH*2;
-		h=CPC_VISIBLE_SCR_HEIGHT*2;
-	}
 	vid=SDL_SetVideoMode(CPC_VISIBLE_SCR_WIDTH*2,CPC_VISIBLE_SCR_HEIGHT*2,bpp,SDL_ANYFORMAT | SDL_DOUBLEBUF | SDL_HWSURFACE | SDL_HWPALETTE | (fs?SDL_FULLSCREEN:0));
 	if (!vid)
 		return nullptr;
@@ -648,7 +638,7 @@ static Uint32 qlowpixelMask = 0x18631863;
 static Uint32 redblueMask = 0xF81F;
 static Uint32 greenMask = 0x7E0;
 
-__inline__ int GetResult1 (Uint32 A, Uint32 B, Uint32 C, Uint32 D, Uint32 E)
+__inline__ int GetResult1 (Uint32 A, Uint32 B, Uint32 C, Uint32 D)
 {
 	int x = 0;
 	int y = 0;
@@ -669,7 +659,7 @@ __inline__ int GetResult1 (Uint32 A, Uint32 B, Uint32 C, Uint32 D, Uint32 E)
 	return r;
 }
 
-__inline__ int GetResult2 (Uint32 A, Uint32 B, Uint32 C, Uint32 D, Uint32 E)
+__inline__ int GetResult2 (Uint32 A, Uint32 B, Uint32 C, Uint32 D)
 {
 	int x = 0;
 	int y = 0;
@@ -1088,7 +1078,7 @@ void filter_ascale2x (Uint8 *srcPtr, Uint32 srcPitch,
 		    colorE, colorF, colorG, colorH,
 		    colorI, colorJ, colorK, colorL,
 
-		    colorM, colorN, colorO, colorP;
+		    colorM, colorN, colorO;
 		Uint32 product, product1, product2;
 
 //---------------------------------------
@@ -1114,7 +1104,6 @@ void filter_ascale2x (Uint8 *srcPtr, Uint32 srcPitch,
 		colorM = *(bP + Nextline + Nextline - 1);
 		colorN = *(bP + Nextline + Nextline);
 		colorO = *(bP + Nextline + Nextline + 1);
-		colorP = *(bP + Nextline + Nextline + 2);
 
 		if ((colorA == colorD) && (colorB != colorC))
 		{
@@ -1181,18 +1170,10 @@ void filter_ascale2x (Uint8 *srcPtr, Uint32 srcPitch,
 			product1 = INTERPOLATE (colorA, colorC);
 			product = INTERPOLATE (colorA, colorB);
 
-			r +=
-			    GetResult1 (colorA, colorB, colorG, colorE,
-					colorI);
-			r +=
-			    GetResult2 (colorB, colorA, colorK, colorF,
-					colorJ);
-			r +=
-			    GetResult2 (colorB, colorA, colorH, colorN,
-					colorM);
-			r +=
-			    GetResult1 (colorA, colorB, colorL, colorO,
-					colorP);
+			r += GetResult1 (colorA, colorB, colorG, colorE);
+			r += GetResult2 (colorB, colorA, colorK, colorF);
+			r += GetResult2 (colorB, colorA, colorH, colorN);
+			r += GetResult1 (colorA, colorB, colorL, colorO);
 
 			if (r > 0)
 			    product2 = colorA;
@@ -1791,22 +1772,22 @@ void dotmat_close()
 
 video_plugin video_plugin_list[]=
 {
-/* Name					Init func	Palette func 	Lock func		Unlock func		Flip func	Close func 		Pixel formats	Half size ?		*/
-{"Half size with hardware flip",	halfhw_init,	halfhw_setpal,	halfhw_lock,		halfhw_unlock,		halfhw_flip,	half_close,		ALL,		1			},
-{"Double size with hardware flip",	doublehw_init,	doublehw_setpal,	doublehw_lock,		doublehw_unlock,		doublehw_flip,	doublehw_close,		ALL,		0			},
-{"Half size",				half_init,	half_setpal,	half_lock,		half_unlock,		half_flip,	half_close,		ALL,		1			},
-{"Double size",				double_init,	double_setpal,	double_lock,		double_unlock,		double_flip,	double_close,		ALL,		0			},
-{"Super eagle",				seagle_init,	seagle_setpal,	seagle_lock,		seagle_unlock,		seagle_flip,	seagle_close,		F16_BPP,	1			},
-{"Scale2x",				scale2x_init,	scale2x_setpal,	scale2x_lock,		scale2x_unlock,		scale2x_flip,	scale2x_close,		F16_BPP,	1			},
-{"Advanced Scale2x",			ascale2x_init,	ascale2x_setpal,ascale2x_lock,		ascale2x_unlock,	ascale2x_flip,	ascale2x_close,		F16_BPP,	1			},
-{"TV 2x",				tv2x_init,	tv2x_setpal,	tv2x_lock,		tv2x_unlock,		tv2x_flip,	tv2x_close,		F16_BPP,	1			},
-{"Software bilinear",			swbilin_init,	swbilin_setpal,	swbilin_lock,		swbilin_unlock,		swbilin_flip,	swbilin_close,		F16_BPP,	1			},
-{"Software bicubic",			swbicub_init,	swbicub_setpal,	swbicub_lock,		swbicub_unlock,		swbicub_flip,	swbicub_close,		F16_BPP,	1			},
-{"Dot matrix",				dotmat_init,	dotmat_setpal,	dotmat_lock,		dotmat_unlock,		dotmat_flip,	dotmat_close,		F16_BPP,	1			},
+/* Name                            Init func      Palette func     Lock func      Unlock func      Flip func      Close func      Pixel formats  Half size  X, Y offsets   X, Y scale  */
+{"Half size with hardware flip",   halfhw_init,   halfhw_setpal,   halfhw_lock,   halfhw_unlock,   halfhw_flip,   half_close,     ALL,           1,         0, 0,          0, 0   },
+{"Double size with hardware flip", doublehw_init, doublehw_setpal, doublehw_lock, doublehw_unlock, doublehw_flip, doublehw_close, ALL,           0,         0, 0,          0, 0   },
+{"Half size",                      half_init,     half_setpal,     half_lock,     half_unlock,     half_flip,     half_close,     ALL,           1,         0, 0,          0, 0   },
+{"Double size",                    double_init,   double_setpal,   double_lock,   double_unlock,   double_flip,   double_close,   ALL,           0,         0, 0,          0, 0   },
+{"Super eagle",                    seagle_init,   seagle_setpal,   seagle_lock,   seagle_unlock,   seagle_flip,   seagle_close,   F16_BPP,       1,         0, 0,          0, 0   },
+{"Scale2x",                        scale2x_init,  scale2x_setpal,  scale2x_lock,  scale2x_unlock,  scale2x_flip,  scale2x_close,  F16_BPP,       1,         0, 0,          0, 0   },
+{"Advanced Scale2x",               ascale2x_init, ascale2x_setpal, ascale2x_lock, ascale2x_unlock, ascale2x_flip, ascale2x_close, F16_BPP,       1,         0, 0,          0, 0   },
+{"TV 2x",                          tv2x_init,     tv2x_setpal,     tv2x_lock,     tv2x_unlock,     tv2x_flip,     tv2x_close,     F16_BPP,       1,         0, 0,          0, 0   },
+{"Software bilinear",              swbilin_init,  swbilin_setpal,  swbilin_lock,  swbilin_unlock,  swbilin_flip,  swbilin_close,  F16_BPP,       1,         0, 0,          0, 0   },
+{"Software bicubic",               swbicub_init,  swbicub_setpal,  swbicub_lock,  swbicub_unlock,  swbicub_flip,  swbicub_close,  F16_BPP,       1,         0, 0,          0, 0   },
+{"Dot matrix",                     dotmat_init,   dotmat_setpal,   dotmat_lock,   dotmat_unlock,   dotmat_flip,   dotmat_close,   F16_BPP,       1,         0, 0,          0, 0   },
 #ifdef HAVE_GL
-{"OpenGL scaling",			glscale_init,	glscale_setpal,	glscale_lock,		glscale_unlock,		glscale_flip,	glscale_close,		ALL,		1			},
+{"OpenGL scaling",                 glscale_init,  glscale_setpal,  glscale_lock,  glscale_unlock,  glscale_flip,  glscale_close,  ALL,           1,         0, 0,          0, 0   },
 #endif
-{nullptr,					nullptr,		nullptr,		nullptr,			nullptr,			nullptr,		nullptr,			0,		0			}
+{nullptr,                          nullptr,       nullptr,         nullptr,       nullptr,         nullptr,       nullptr,        0,             0,         0, 0,          0, 0   }
 };
 
 unsigned int nb_video_plugins = sizeof(video_plugin_list)/sizeof(video_plugin_list[0]);

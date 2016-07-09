@@ -268,7 +268,7 @@ void CEditBox::Draw(void) const
 				{
 					CursorPos += CharRects.back().Right();
 				}
-				else if (m_SelStart + m_SelLength >= 0 && m_SelStart + m_SelLength < CharRects.size())
+				else if (m_SelStart + m_SelLength < CharRects.size())
 				{
 					CursorPos += CharRects.at(m_SelStart + m_SelLength).Left();
 				}

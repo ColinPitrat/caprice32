@@ -106,7 +106,7 @@ public:
 
 	//! Set the WindowText of the control
 	//! \param sWindowText The text to assign to the window
-	virtual void SetWindowText(std::string sWindowText);
+	virtual void SetWindowText(const std::string& sWindowText) override;
 
 	//! Get the WindowText of the control
 	virtual std::string GetWindowText() const override;

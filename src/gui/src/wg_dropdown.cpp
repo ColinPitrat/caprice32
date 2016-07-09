@@ -86,7 +86,7 @@ void CDropDown::SetWindowRect(const CRect& WindowRect)
 }
 
 
-void CDropDown::SetWindowText(std::string sWindowText)
+void CDropDown::SetWindowText(const std::string& sWindowText)
 {
 	m_pEditBox->SetWindowText(sWindowText);
 }
