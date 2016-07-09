@@ -892,11 +892,14 @@ SDL_Surface* seagle_init(video_plugin* t,int w,int h, int bpp, bool fs)
 		w=CPC_VISIBLE_SCR_WIDTH*2;
 		h=CPC_VISIBLE_SCR_HEIGHT*2;
 	}
-	vid=SDL_SetVideoMode(w,h,bpp,SDL_ANYFORMAT | SDL_HWSURFACE | SDL_HWPALETTE | (fs?SDL_FULLSCREEN:0));
+	vid=SDL_SetVideoMode(w,h,bpp,SDL_HWSURFACE | SDL_HWPALETTE | (fs?SDL_FULLSCREEN:0));
 	if (!vid)
 		return nullptr;
 	if (vid->format->BitsPerPixel!=16)
+  {
+    std::cerr << t->name << ": SDL didn't return a 16 bpp surface but a " << static_cast<int>(vid->format->BitsPerPixel) << " bpp one." << std::endl;
 		return nullptr;
+  }
 	if (fs)
 	{
 		t->x_scale=0.5;
@@ -996,11 +999,14 @@ SDL_Surface* scale2x_init(video_plugin* t,int w,int h, int bpp, bool fs)
 		w=CPC_VISIBLE_SCR_WIDTH*2;
 		h=CPC_VISIBLE_SCR_HEIGHT*2;
 	}
-	vid=SDL_SetVideoMode(w,h,bpp,SDL_ANYFORMAT | SDL_HWSURFACE | SDL_HWPALETTE | (fs?SDL_FULLSCREEN:0));
+	vid=SDL_SetVideoMode(w,h,bpp,SDL_HWSURFACE | SDL_HWPALETTE | (fs?SDL_FULLSCREEN:0));
 	if (!vid)
 		return nullptr;
 	if (vid->format->BitsPerPixel!=16)
+  {
+    std::cerr << t->name << ": SDL didn't return a 16 bpp surface but a " << static_cast<int>(vid->format->BitsPerPixel) << " bpp one." << std::endl;
 		return nullptr;
+  }
 	if (fs)
 	{
 		t->x_scale=0.5;
@@ -1263,11 +1269,14 @@ SDL_Surface* ascale2x_init(video_plugin* t,int w,int h, int bpp, bool fs)
 		w=CPC_VISIBLE_SCR_WIDTH*2;
 		h=CPC_VISIBLE_SCR_HEIGHT*2;
 	}
-	vid=SDL_SetVideoMode(w,h,bpp,SDL_ANYFORMAT | SDL_HWSURFACE | SDL_HWPALETTE | (fs?SDL_FULLSCREEN:0));
+	vid=SDL_SetVideoMode(w,h,bpp,SDL_HWSURFACE | SDL_HWPALETTE | (fs?SDL_FULLSCREEN:0));
 	if (!vid)
 		return nullptr;
 	if (vid->format->BitsPerPixel!=16)
+  {
+    std::cerr << t->name << ": SDL didn't return a 16 bpp surface but a " << static_cast<int>(vid->format->BitsPerPixel) << " bpp one." << std::endl;
 		return nullptr;
+  }
 	if (fs)
 	{
 		t->x_scale=0.5;
@@ -1368,11 +1377,14 @@ SDL_Surface* tv2x_init(video_plugin* t,int w,int h, int bpp, bool fs)
 		w=CPC_VISIBLE_SCR_WIDTH*2;
 		h=CPC_VISIBLE_SCR_HEIGHT*2;
 	}
-	vid=SDL_SetVideoMode(w,h,bpp,SDL_ANYFORMAT | SDL_HWSURFACE | SDL_HWPALETTE | (fs?SDL_FULLSCREEN:0));
+	vid=SDL_SetVideoMode(w,h,bpp,SDL_HWSURFACE | SDL_HWPALETTE | (fs?SDL_FULLSCREEN:0));
 	if (!vid)
 		return nullptr;
 	if (vid->format->BitsPerPixel!=16)
+  {
+    std::cerr << t->name << ": SDL didn't return a 16 bpp surface but a " << static_cast<int>(vid->format->BitsPerPixel) << " bpp one." << std::endl;
 		return nullptr;
+  }
 	if (fs)
 	{
 		t->x_scale=0.5;
@@ -1469,11 +1481,14 @@ SDL_Surface* swbilin_init(video_plugin* t,int w,int h, int bpp, bool fs)
 		w=CPC_VISIBLE_SCR_WIDTH*2;
 		h=CPC_VISIBLE_SCR_HEIGHT*2;
 	}
-	vid=SDL_SetVideoMode(w,h,bpp,SDL_ANYFORMAT | SDL_HWSURFACE | SDL_HWPALETTE | (fs?SDL_FULLSCREEN:0));
+	vid=SDL_SetVideoMode(w,h,bpp,SDL_HWSURFACE | SDL_HWPALETTE | (fs?SDL_FULLSCREEN:0));
 	if (!vid)
 		return nullptr;
 	if (vid->format->BitsPerPixel!=16)
+  {
+    std::cerr << t->name << ": SDL didn't return a 16 bpp surface but a " << static_cast<int>(vid->format->BitsPerPixel) << " bpp one." << std::endl;
 		return nullptr;
+  }
 	if (fs)
 	{
 		t->x_scale=0.5;
@@ -1617,11 +1632,14 @@ SDL_Surface* swbicub_init(video_plugin* t,int w,int h, int bpp, bool fs)
 		w=CPC_VISIBLE_SCR_WIDTH*2;
 		h=CPC_VISIBLE_SCR_HEIGHT*2;
 	}
-	vid=SDL_SetVideoMode(w,h,bpp,SDL_ANYFORMAT | SDL_HWSURFACE | SDL_HWPALETTE | (fs?SDL_FULLSCREEN:0));
+	vid=SDL_SetVideoMode(w,h,bpp,SDL_HWSURFACE | SDL_HWPALETTE | (fs?SDL_FULLSCREEN:0));
 	if (!vid)
 		return nullptr;
 	if (vid->format->BitsPerPixel!=16)
+  {
+    std::cerr << t->name << ": SDL didn't return a 16 bpp surface but a " << static_cast<int>(vid->format->BitsPerPixel) << " bpp one." << std::endl;
 		return nullptr;
+  }
 	if (fs)
 	{
 		t->x_scale=0.5;
@@ -1727,11 +1745,14 @@ SDL_Surface* dotmat_init(video_plugin* t,int w,int h, int bpp, bool fs)
 		w=CPC_VISIBLE_SCR_WIDTH*2;
 		h=CPC_VISIBLE_SCR_HEIGHT*2;
 	}
-	vid=SDL_SetVideoMode(w,h,bpp,SDL_ANYFORMAT | SDL_HWSURFACE | SDL_HWPALETTE | (fs?SDL_FULLSCREEN:0));
+	vid=SDL_SetVideoMode(w,h,bpp,SDL_HWSURFACE | SDL_HWPALETTE | (fs?SDL_FULLSCREEN:0));
 	if (!vid)
 		return nullptr;
 	if (vid->format->BitsPerPixel!=16)
+  {
+    std::cerr << t->name << ": SDL didn't return a 16 bpp surface but a " << static_cast<int>(vid->format->BitsPerPixel) << " bpp one." << std::endl;
 		return nullptr;
+  }
 	if (fs)
 	{
 		t->x_scale=0.5;
