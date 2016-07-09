@@ -27,7 +27,7 @@ CXX	= g++
 endif
 
 COMMON_CFLAGS_1 = -std=c++11
-CFLAGS_1	= -Werror -Wall -Wextra -Wzero-as-null-pointer-constant -Wformat=2 -Wold-style-cast -Wmissing-include-dirs -Wlogical-op -Woverloaded-virtual -Wpointer-arith -Wredundant-decls
+CFLAGS_1	= -Wall -Wextra -Wzero-as-null-pointer-constant -Wformat=2 -Wold-style-cast -Wmissing-include-dirs -Wlogical-op -Woverloaded-virtual -Wpointer-arith -Wredundant-decls
 
 debug: DEBUG=1
 
@@ -39,7 +39,7 @@ endif
 endif
 
 ifdef DEBUG
-COMMON_CFLAGS_2	= $(COMMON_CFLAGS_1) -g -O0 -DDEBUG
+COMMON_CFLAGS_2	= $(COMMON_CFLAGS_1) -Werror -g -O0 -DDEBUG
 all: debug
 else
 COMMON_CFLAGS_2	= $(COMMON_CFLAGS_1) -O2 -funroll-loops -ffast-math -fomit-frame-pointer -fno-strength-reduce -finline-functions -s
