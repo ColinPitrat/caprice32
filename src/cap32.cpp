@@ -3262,7 +3262,6 @@ int cap32_main (int argc, char **argv)
          switch (event.type) {
             case SDL_KEYDOWN:
                {
-                 std::cout << "Received key " << event.key.keysym.sym << "(" << event.key.keysym.mod << ")" << std::endl;
                   dword cpc_key;
                   if (event.key.keysym.mod & KMOD_SHIFT) { // PC SHIFT key held down?
                      cpc_key = keyboard_shift[event.key.keysym.sym]; // consult the SHIFT table
