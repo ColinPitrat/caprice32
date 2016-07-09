@@ -72,7 +72,6 @@ namespace wGui {
 
   void CapriceVKeyboard::CloseFrame(void) {
     // Exit gui
-    std::cout << "CloseFrame" << std::endl;
     CMessageServer::Instance().QueueMessage(new CMessage(CMessage::APP_EXIT, nullptr, this));
   }
 
@@ -137,7 +136,6 @@ namespace wGui {
         case CMessage::CTRL_SINGLELCLICK:
           if (pMessage->Destination() == this) {
             std::string pressed = static_cast<const CWindow*>(pMessage->Source())->GetWindowText();
-            std::cout << "Pressed: " << pressed << std::endl;
             if(pressed == "SPACE") {
               pressed = " ";
             }

@@ -105,7 +105,7 @@ FILE *pfoPrinter;
 #ifdef DEBUG
 #define DEBUG_KEY SDLK_F12
 dword dwDebugFlag = 0;
-FILE *pfoDebug;
+FILE *pfoDebug = nullptr;
 #endif
 
 #define MAX_FREQ_ENTRIES 5
@@ -2918,7 +2918,9 @@ void doCleanUp (void)
    video_shutdown();
 
    #ifdef DEBUG
-   fclose(pfoDebug);
+   if(pfoDebug) {
+     fclose(pfoDebug);
+   }
    #endif
 
    SDL_Quit();

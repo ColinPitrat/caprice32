@@ -37,6 +37,7 @@
 #include "glfuncs.h"
 #endif
 #include <math.h>
+#include <iostream>
 
 // the real video surface
 SDL_Surface* vid;
@@ -882,7 +883,10 @@ void filter_supereagle(Uint8 *srcPtr, Uint32 srcPitch, /* Uint8 *deltaPtr,  */
 SDL_Surface* seagle_init(video_plugin* t,int w,int h, int bpp, bool fs)
 {
 	if (bpp!=16)
+  {
+    std::cerr << t->name << " only works in 16 bits color mode" << std::endl;
 		return nullptr;
+  }
 	if (!fs)
 	{
 		w=CPC_VISIBLE_SCR_WIDTH*2;
@@ -983,7 +987,10 @@ void filter_scale2x(Uint8 *srcPtr, Uint32 srcPitch,
 SDL_Surface* scale2x_init(video_plugin* t,int w,int h, int bpp, bool fs)
 {
 	if (bpp!=16)
+  {
+    std::cerr << t->name << " only works in 16 bits color mode" << std::endl;
 		return nullptr;
+  }
 	if (!fs)
 	{
 		w=CPC_VISIBLE_SCR_WIDTH*2;
@@ -1247,7 +1254,10 @@ void filter_ascale2x (Uint8 *srcPtr, Uint32 srcPitch,
 SDL_Surface* ascale2x_init(video_plugin* t,int w,int h, int bpp, bool fs)
 {
 	if (bpp!=16)
+  {
+    std::cerr << t->name << " only works in 16 bits color mode" << std::endl;
 		return nullptr;
+  }
 	if (!fs)
 	{
 		w=CPC_VISIBLE_SCR_WIDTH*2;
@@ -1349,7 +1359,10 @@ void filter_tv2x(Uint8 *srcPtr, Uint32 srcPitch,
 SDL_Surface* tv2x_init(video_plugin* t,int w,int h, int bpp, bool fs)
 {
 	if (bpp!=16)
+  {
+    std::cerr << t->name << " only works in 16 bits color mode" << std::endl;
 		return nullptr;
+  }
 	if (!fs)
 	{
 		w=CPC_VISIBLE_SCR_WIDTH*2;
@@ -1447,7 +1460,10 @@ void filter_bilinear(Uint8 *srcPtr, Uint32 srcPitch,
 SDL_Surface* swbilin_init(video_plugin* t,int w,int h, int bpp, bool fs)
 {
 	if (bpp!=16)
+  {
+    std::cerr << t->name << " only works in 16 bits color mode" << std::endl;
 		return nullptr;
+  }
 	if (!fs)
 	{
 		w=CPC_VISIBLE_SCR_WIDTH*2;
@@ -1592,7 +1608,10 @@ void filter_bicubic(Uint8 *srcPtr, Uint32 srcPitch,
 SDL_Surface* swbicub_init(video_plugin* t,int w,int h, int bpp, bool fs)
 {
 	if (bpp!=16)
+  {
+    std::cerr << t->name << " only works in 16 bits color mode" << std::endl;
 		return nullptr;
+  }
 	if (!fs)
 	{
 		w=CPC_VISIBLE_SCR_WIDTH*2;
@@ -1699,7 +1718,10 @@ void filter_dotmatrix(Uint8 *srcPtr, Uint32 srcPitch,
 SDL_Surface* dotmat_init(video_plugin* t,int w,int h, int bpp, bool fs)
 {
 	if (bpp!=16)
+  {
+    std::cerr << t->name << " only works in 16 bits color mode" << std::endl;
 		return nullptr;
+  }
 	if (!fs)
 	{
 		w=CPC_VISIBLE_SCR_WIDTH*2;
