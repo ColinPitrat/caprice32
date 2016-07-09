@@ -380,6 +380,13 @@ typedef struct {
          unsigned char PortA;
          unsigned char PortB;
       };
+      struct {
+         unsigned short TonA;
+         unsigned short TonB;
+         unsigned short TonC;
+         unsigned char _noise, _mixer, _ampa, _ampb, _ampc;
+         unsigned short Envelope;
+      };
    } RegisterAY;
    int AmplitudeEnv;
    bool FirstPeriod;

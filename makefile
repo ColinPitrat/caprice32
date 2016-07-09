@@ -66,13 +66,16 @@ $(DEPENDS): $(OBJDIR)/%.d: %.cpp
 $(OBJECTS): $(OBJDIR)/%.o: %.cpp
 	$(CXX) -c $(CFLAGS) -o $@ $<
 
-debug: debug_flag cap32 unit_test debug_flag
+debug: debug_flag cap32 unit_test debug_flag tags
 
 debug_flag:
 ifdef FORCED_DEBUG
 	@echo -e '\n!!!!!!!!!!!\n!! Warning: previous build was in debug - rebuilding in debug.\n!! Use make clean before running make to rebuild in release.\n!!!!!!!!!!!\n'
 endif
 	@touch .debug
+
+tags:
+	ctags -R .
 
 cap32: $(OBJECTS) $(MAIN)
 	$(CXX) $(LDFLAGS) -o cap32 $(OBJECTS) $(MAIN) $(LIBS)

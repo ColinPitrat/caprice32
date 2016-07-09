@@ -326,17 +326,17 @@ void SetAYRegister(int Num, byte Value)
 inline void Synthesizer_Logic_Q(void)
 {
    Ton_Counter_A.Hi++;
-   if (Ton_Counter_A.Hi >= *reinterpret_cast<word *>(&PSG.RegisterAY.TonALo)) {
+   if (Ton_Counter_A.Hi >= PSG.RegisterAY.TonA) {
       Ton_Counter_A.Hi = 0;
       Ton_A ^= 1;
    }
    Ton_Counter_B.Hi++;
-   if (Ton_Counter_B.Hi >= *reinterpret_cast<word *>(&PSG.RegisterAY.TonBLo)) {
+   if (Ton_Counter_B.Hi >= PSG.RegisterAY.TonB) {
       Ton_Counter_B.Hi = 0;
       Ton_B ^= 1;
    }
    Ton_Counter_C.Hi++;
-   if (Ton_Counter_C.Hi >= *reinterpret_cast<word *>(&PSG.RegisterAY.TonCLo)) {
+   if (Ton_Counter_C.Hi >= PSG.RegisterAY.TonC) {
       Ton_Counter_C.Hi = 0;
       Ton_C ^= 1;
    }
@@ -349,7 +349,7 @@ inline void Synthesizer_Logic_Q(void)
       Case_EnvType();
    }
    Envelope_Counter.Hi++;
-   if (Envelope_Counter.Hi >= *reinterpret_cast<word *>(&PSG.RegisterAY.EnvelopeLo)) {
+   if (Envelope_Counter.Hi >= PSG.RegisterAY.Envelope) {
       Envelope_Counter.Hi = 0;
    }
 }
@@ -367,7 +367,7 @@ inline void Synthesizer_Mixer_Q(void)
 
    LevR = LevL;
    if (Ton_EnA) {
-      if ((!Envelope_EnA) || (*reinterpret_cast<word *>(&PSG.RegisterAY.TonALo) > 4)) {
+      if ((!Envelope_EnA) || (PSG.RegisterAY.TonA > 4)) {
          k = Ton_A;
       }
       else {
@@ -392,7 +392,7 @@ inline void Synthesizer_Mixer_Q(void)
    }
 
    if (Ton_EnB) {
-      if ((!Envelope_EnB) || (*reinterpret_cast<word *>(&PSG.RegisterAY.TonBLo) > 4)) {
+      if ((!Envelope_EnB) || (PSG.RegisterAY.TonB > 4)) {
          k = Ton_B;
       }
       else {
@@ -417,7 +417,7 @@ inline void Synthesizer_Mixer_Q(void)
    }
 
    if (Ton_EnC) {
-      if ((!Envelope_EnC) || (*reinterpret_cast<word *>(&PSG.RegisterAY.TonCLo) > 4)) {
+      if ((!Envelope_EnC) || (PSG.RegisterAY.TonC > 4)) {
          k = Ton_C;
       }
       else {
@@ -507,7 +507,7 @@ inline void Synthesizer_Mixer_Q_Mono(void)
    }
 
    if (Ton_EnA) {
-      if ((!Envelope_EnA) || (*reinterpret_cast<word *>(&PSG.RegisterAY.TonALo) > 4)) {
+      if ((!Envelope_EnA) || (PSG.RegisterAY.TonA > 4)) {
          k = Ton_A;
       }
       else {
@@ -530,7 +530,7 @@ inline void Synthesizer_Mixer_Q_Mono(void)
    }
 
    if (Ton_EnB) {
-      if ((!Envelope_EnB) || (*reinterpret_cast<word *>(&PSG.RegisterAY.TonBLo) > 4)) {
+      if ((!Envelope_EnB) || (PSG.RegisterAY.TonB > 4)) {
          k = Ton_B;
       }
       else {
@@ -553,7 +553,7 @@ inline void Synthesizer_Mixer_Q_Mono(void)
    }
 
    if (Ton_EnC) {
-      if ((!Envelope_EnC) || (*reinterpret_cast<word *>(&PSG.RegisterAY.TonCLo) > 4)) {
+      if ((!Envelope_EnC) || (PSG.RegisterAY.TonC > 4)) {
          k = Ton_C;
       }
       else {

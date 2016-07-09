@@ -313,7 +313,7 @@ bool CListBox::HandleMessage(CMessage* pMessage)
 						{
 							m_iFocusedItem++;
 							int diff = m_iFocusedItem - m_pVScrollbar->GetValue();
-							if (m_iItemHeight * (m_pVScrollbar->GetValue() + diff + 1) > m_ClientRect.Height())
+							if (m_iItemHeight * (m_pVScrollbar->GetValue() + diff + 1) > static_cast<unsigned int>(m_ClientRect.Height()))
 							{
 								m_pVScrollbar->SetValue(m_pVScrollbar->GetValue() + 1);
 							}
@@ -328,7 +328,7 @@ bool CListBox::HandleMessage(CMessage* pMessage)
 						if ( m_iFocusedItem > 0 )
 						{
 							m_iFocusedItem--;
-							if (m_iFocusedItem < m_pVScrollbar->GetValue())
+							if (m_iFocusedItem < static_cast<unsigned int>(m_pVScrollbar->GetValue()))
 							{
 								m_pVScrollbar->SetValue(m_pVScrollbar->GetValue() - 1);
 							}

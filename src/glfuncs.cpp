@@ -28,7 +28,7 @@
 
 #define GL_FUNC(ret,func,params) \
 do { \
-	e##func = ( ptr##func ) SDL_GL_GetProcAddress(#func); \
+	e##func = reinterpret_cast<ptr##func>(SDL_GL_GetProcAddress(#func)); \
 	if ( ! e##func ) { \
 		printf("Unable to load GL function %s\n", #func); \
 		return(1); \
@@ -37,7 +37,7 @@ do { \
 
 #define GL_FUNC_OPTIONAL(ret,func,params) \
 do { \
-	e##func = ( ptr##func ) SDL_GL_GetProcAddress(#func); \
+	e##func = reinterpret_cast<ptr##func>(SDL_GL_GetProcAddress(#func)); \
 } while ( 0 );
 
 int init_glfuncs()
