@@ -105,7 +105,7 @@ protected:
 	unsigned int m_MouseButton;  //!< The last mouse button to be pushed over the control, it's used internally
 
 private:
-	void operator=(CButton) { }  //!< The assignment operator is not allowed for CWindow derived objects
+	CButton operator=(CButton) = delete;
 };
 
 
