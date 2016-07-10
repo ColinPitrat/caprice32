@@ -28,7 +28,6 @@
 #define _WGUI_H_
 
 #include "std_ex.h"
-#include "wutil_config_store.h"
 #include "wutil_debug.h"
 #include "wutil_log.h"
 #include "wg_error.h"
