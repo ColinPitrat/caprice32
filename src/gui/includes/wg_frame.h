@@ -144,7 +144,7 @@ private:
 	bool m_bDragMode;  //!< Indicates if the window is currently being dragged
 	CPoint m_DragPointerStart;  //!< The location of the cursor when the drag was started
 	CRect m_FrameGhostRect;  //!< The rect of the frame while being dragged in a semi-transparent state
-	void operator=(CFrame) { }  //!< The assignment operator is not allowed for CWindow derived objects
+	CFrame& operator=(CFrame) = delete;
 };
 
 }

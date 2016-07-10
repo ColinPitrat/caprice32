@@ -37,7 +37,7 @@ namespace wGui
         CListBox* m_pListBoxRoms;  // Lists the available ROM files (in the ROMS subdirectory)
 
       private:
-        void operator=(CapriceRomSlots) { }  //!< The assignment operator is not allowed for CWindow derived objects
+        CapriceRomSlots& operator=(CapriceRomSlots) = delete;
     };
 }
 

@@ -263,7 +263,7 @@ protected:
   bool m_bIsFocusable;
 
 private:
-	void operator=(CWindow) { }  //!< The assignment operator is not allowed for CWindow objects
+	CWindow& operator=(CWindow) = delete;
 };
 
 }

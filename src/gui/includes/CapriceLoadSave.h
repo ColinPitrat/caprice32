@@ -34,7 +34,7 @@ namespace wGui
         CButton  *m_pLoadSaveButton;
 
       private:
-        void operator=(CapriceLoadSave) { }  //!< The assignment operator is not allowed for CWindow derived objects
+        CapriceLoadSave& operator=(CapriceLoadSave) = delete;
     };
 }
 

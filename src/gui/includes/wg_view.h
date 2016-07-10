@@ -124,7 +124,7 @@ protected:
 private:
 	//! A pointer to the one allowed view, this is due to the SDL limitation of having only one window
 	static CView* m_pInstance;
-	void operator=(CView) { }  //!< The assignment operator is not allowed for CWindow derived objects
+	CView& operator=(CView) = delete;
 };
 
 }

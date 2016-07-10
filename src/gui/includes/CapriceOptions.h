@@ -133,8 +133,7 @@ namespace wGui
 
         std::map<std::string, CGroupBox*> TabMap;  // mapping: <tab name> -> <groupbox that contains the 'tab'>.
         
-        void operator=(CapriceOptions) { }  //!< The assignment operator is not allowed for CWindow derived objects
-
+        CapriceOptions& operator=(CapriceOptions) = delete;
     };
 }
 

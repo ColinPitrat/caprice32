@@ -19,7 +19,7 @@ namespace wGui
         CapriceAbout(const CRect& WindowRect, CWindow* pParent, CFontEngine* pFontEngine);
 
       private:
-        void operator=(CapriceAbout) { }  //!< The assignment operator is not allowed for CWindow derived objects
+        CapriceAbout& operator=(CapriceAbout) = delete;
     };
 }
 

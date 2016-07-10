@@ -159,7 +159,7 @@ protected:
 	std::vector<CBitmapResourceHandle *> m_Bitmaps;  //!< A vector of the pictures (optional)
 
 private:
-	void operator=(CNavigationBar) { }  //!< The assignment operator is not allowed for CWindow derived objects
+	CNavigationBar& operator=(CNavigationBar) = delete;
 };
 
 }

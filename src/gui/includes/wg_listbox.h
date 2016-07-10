@@ -171,7 +171,7 @@ protected:
 
 
 private:
-	void operator=(CListBox) { }  //!< The assignment operator is not allowed for CWindow derived objects
+	CListBox operator=(CListBox) = delete;
 };
 
 }

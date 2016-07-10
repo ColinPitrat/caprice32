@@ -146,7 +146,7 @@ public:
 
 private:
 	std::unique_ptr<CBitmapResourceHandle> m_phBitmap;  //!< An auto pointer to a handle for the bitmap resource
-	void operator=(CPictureButton) { }  //!< The assignment operator is not allowed for CWindow derived objects
+	CPictureButton& operator=(CPictureButton) = delete;
 };
 
 }

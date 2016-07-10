@@ -84,7 +84,7 @@ protected:
 
 
 private:
-	void operator=(CLabel) { }  //!< The assignment operator is not allowed for CWindow derived objects
+	CLabel& operator=(CLabel) = delete;
 };
 
 }

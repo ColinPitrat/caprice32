@@ -65,7 +65,7 @@ protected:
 
 
 private:
-	void operator=(CProgress) { }  //!< The assignment operator is not allowed for CWindow derived objects
+	CProgress& operator=(CProgress) = delete;
 };
 
 }

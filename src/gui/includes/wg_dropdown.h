@@ -142,8 +142,8 @@ protected:
 
 
 private:
-	void operator=(CDropDown) { }  //!< The assignment operator is not allowed for CWindow derived objects
-    CView* m_pCViewAncestor;   // pointer to the (unique) CView of the application.
+	CDropDown& operator=(CDropDown) = delete;
+  CView* m_pCViewAncestor;   // pointer to the (unique) CView of the application.
 };
 
 }

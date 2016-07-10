@@ -48,7 +48,7 @@ namespace wGui
 
       private:
         void UpdateTextMemory();
-        void operator=(CapriceMemoryTool) { }  //!< The assignment operator is not allowed for CWindow derived objects
+        CapriceMemoryTool& operator=(CapriceMemoryTool) = delete;
     };
 }
 

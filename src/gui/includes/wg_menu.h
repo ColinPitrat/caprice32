@@ -210,7 +210,7 @@ protected:
 
 
 private:
-	void operator=(CMenu) { }  //!< The assignment operator is not allowed for CWindow derived objects
+	CMenu& operator=(CMenu) = delete;
 };
 
 
@@ -293,7 +293,7 @@ protected:
 
 
 private:
-	void operator=(CPopupMenu) { }  //!< The assignment operator is not allowed for CWindow derived objects
+	CPopupMenu& operator=(CPopupMenu) = delete;
 };
 
 }

@@ -107,7 +107,7 @@ protected:
 	const CMessageClient* m_pSource;
 
 private:
-	void operator=(CMessage) { }  //!< The assignment operator is not allowed for CMessage objects
+	CMessage& operator=(CMessage) = delete;
 };
 
 

@@ -100,7 +100,7 @@ protected:
 
 
 private:
-	void operator=(CCheckBox) { }  //!< The assignment operator is not allowed for CWindow derived objects
+	CCheckBox operator=(CCheckBox) = delete;
 };
 
 }

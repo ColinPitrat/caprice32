@@ -35,7 +35,6 @@
 #include "wg_message_client.h"
 #include "wg_fontengine.h"
 #include "wg_resources.h"
-#include "wutil_config_store.h"
 #include "wutil_log.h"
 #include "std_ex.h"
 
@@ -186,17 +185,6 @@ public:
 	//! \param bVisible if the mouse has to be drawn or not
 	virtual void SetMouseVisibility( bool bVisible ) { SDL_ShowCursor(bVisible); }
 
-	//! Returns the Global Configuration, which is read in from the wGui.conf file
-	//! This Global config is read-only.  Any changes should be made to the wGui.conf file outside of the app
-	//! wGui will search directories for the wGui.conf file in the following order, and will include the settings from each:
-	//! - 1) &lt;system settings&gt; (for *nix this is probably /etc/wGui/, for windows systems this is c:\\documents and settings\\default user\\application data\\wGui)
-	//! - 2) ~/ (home directory, for Windows NT builds, this is c:\\documents and settings\\&lt;username&gt;\\application data\\wGui)
-	//! - 3) Current Directory
-	//! .
-	//! So any settings found in the current directory will override the settings in the global directory
-	//! \return A const reference to the Global Configration
-	virtual const wUtil::CConfigStore& GetGlobalConfig(void) { return m_GlobalConfig; }
-
 	//!Returns the application log, which is output to wGui.log on application exit
 	//! \return A reference to the application log, which gets any wGui log messages
 	virtual wUtil::CLog& GetApplicationLog(void) { return m_AppLog; }
@@ -237,7 +225,6 @@ protected:
 	std::list<CResourceHandle> m_ResourceHandlePool;  //!< The resource handle pool which keeps commonly used resources alive
 	std::unique_ptr<CCursorResourceHandle> m_pCurrentCursorResourceHandle;  //!< An autopointer to the handle for the current mouse cursor
 	SDL_Cursor* m_pSystemDefaultCursor;  //!< A pointer to the default system cursor
-	wUtil::CConfigStore m_GlobalConfig;  //!< A CConfigStore object that has the Global configuration
 	wUtil::CLog m_AppLog;  //!< A log for wGui stuff
 };
 

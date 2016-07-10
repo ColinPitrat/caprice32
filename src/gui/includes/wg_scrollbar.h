@@ -110,7 +110,7 @@ protected:
 
 
 private:
-	void operator=(CScrollBar) { }  //!< The assignment operator is not allowed for CWindow derived objects
+	CScrollBar& operator=(CScrollBar) = delete;
 };
 
 }

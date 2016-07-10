@@ -50,7 +50,7 @@ namespace wGui
       std::list<CapriceGuiViewButton> m_buttons;
       SDL_Surface *m_pScreenSurface;
       
-      void operator=(CapriceMenu) { }  //!< The assignment operator is not allowed for CWindow derived objects
+      CapriceMenu& operator=(CapriceMenu) = delete;
   };
 }
 

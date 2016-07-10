@@ -86,14 +86,9 @@ protected:
 
 
 private:
-	void operator=(CGroupBox) { }  //!< The assignment operator is not allowed for CWindow derived objects
+	CGroupBox& operator=(CGroupBox) = delete;
 };
 
 }
 
-
 #endif // _WG_GROUPBOX_H_
-
-
-
-

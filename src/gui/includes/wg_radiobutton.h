@@ -95,7 +95,7 @@ protected:
 
 
 private:
-	void operator=(CRadioButton) { }  //!< The assignment operator is not allowed for CWindow derived objects
+	CRadioButton& operator=(CRadioButton) = delete;
 };
 
 }

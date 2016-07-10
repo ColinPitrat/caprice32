@@ -96,7 +96,7 @@ protected:
 
 
 private:
-	void operator=(CToolTip) { }  //!< The assignment operator is not allowed for CWindow derived objects
+	CToolTip& operator=(CToolTip) = delete;
 };
 
 }

@@ -79,7 +79,7 @@ protected:
 
 
 private:
-	void operator=(CPicture) { }  //!< The assignment operator is not allowed for CWindow derived objects
+	CPicture& operator=(CPicture) = delete;
 };
 
 }

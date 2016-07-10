@@ -145,7 +145,7 @@ protected:
 
 
 private:
-	void operator=(CEditBox) { }  //!< The assignment operator is not allowed for CWindow derived objects
+	CEditBox operator=(CEditBox) = delete;
 	bool m_bDrawCursor;
 	CTimer* m_pDblClickTimer; //!< Timer to decide if we've double clicked or not.
 	CTimer* m_pCursorTimer; //!< Timer to blink the cursor

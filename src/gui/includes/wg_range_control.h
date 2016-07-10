@@ -124,7 +124,7 @@ protected:
 
 
 private:
-	void operator=(CRangeControl) { }  //!< The assignment operator is not allowed for CWindow derived objects
+	CRangeControl& operator=(CRangeControl) = delete;
 };
 
 }

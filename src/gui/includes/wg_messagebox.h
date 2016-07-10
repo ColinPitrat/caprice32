@@ -68,7 +68,7 @@ protected:
 
 
 private:
-	void operator=(CMessageBox) { }  //!< The assignment operator is not allowed for CWindow derived objects
+	CMessageBox& operator=(CMessageBox) = delete;
 };
 
 }
