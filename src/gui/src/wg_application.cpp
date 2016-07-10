@@ -386,38 +386,13 @@ CFontEngine* CApplication::GetFontEngine(std::string sFontFileName, unsigned cha
         // Requested font engine doesn't exist, so create one and add it to the map
 		try
 		{
-			if (sFontFileName.find_first_of("\\/") != std::string::npos)
-			{
-				// if the Font File name that was passed in includes a path, just check there
-				std::ifstream FileTest(sFontFileName.c_str());
-				bool bFileExists = FileTest.is_open();
-				FileTest.close();
-				if (bFileExists)
-				{
-					pFontEngine = new CFontEngine(sFontFileName, iFontSize);
-				}
-			}
-			else
-			{
-				// otherwise check the Font Path from the global config
-				std::list<std::string> FontPaths = stdex::DetokenizeString(m_GlobalConfig.GetStringEntry("FONTPATH").second, ";");
-				for(std::list<std::string>::iterator iter = FontPaths.begin(); iter != FontPaths.end(); ++iter)
-				{
-					std::string sFullPath = *iter;
-					if (!iter->empty()  && (*iter)[iter->length()] != '\\' && (*iter)[iter->length()] != '/')
-					{
-						sFullPath += "/";
-					}
-					sFullPath += sFontFileName;
-					std::ifstream FileTest(sFullPath.c_str());
-					bool bFileExists = FileTest.is_open();
-					FileTest.close();
-					if (bFileExists)
-					{
-						pFontEngine = new CFontEngine(sFullPath, iFontSize);
-					}
-				}
-			}
+      std::ifstream FileTest(sFontFileName.c_str());
+      bool bFileExists = FileTest.is_open();
+      FileTest.close();
+      if (bFileExists)
+      {
+        pFontEngine = new CFontEngine(sFontFileName, iFontSize);
+      }
 			if (pFontEngine)
 			{
 				m_FontEngines.insert(std::make_pair(std::make_pair(sFontFileName, iFontSize), pFontEngine));
