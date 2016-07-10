@@ -108,7 +108,8 @@ protected:
 
 
 private:
-	CToolBar& operator=(CToolBar) = delete;
+  CToolBar(const CToolBar&) = delete;
+	CToolBar& operator=(const CToolBar&) = delete;
 };
 
 }

@@ -33,7 +33,8 @@ namespace wGui
       SDL_Surface *m_pScreenSurface;
 
     private:
-      CapriceVKeyboard operator=(CapriceVKeyboard) = delete;
+      CapriceVKeyboard(const CapriceVKeyboard&) = delete;
+      CapriceVKeyboard& operator=(const CapriceVKeyboard&) = delete;
   };
 }
 

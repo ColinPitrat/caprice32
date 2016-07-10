@@ -171,7 +171,8 @@ protected:
 
 
 private:
-	CListBox operator=(CListBox) = delete;
+  CListBox(const CListBox&) = delete;
+	CListBox& operator=(const CListBox&) = delete;
 };
 
 }

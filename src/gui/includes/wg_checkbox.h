@@ -96,11 +96,12 @@ public:
 protected:
 	EState m_eCheckBoxState;  //!< The checkbox's state
 	unsigned int m_MouseButton;  //!< The last mouse button to be pushed over the control, it's used internally
-    CBitmapResourceHandle m_hBitmapCheck; // CheckMark defined as a bitmap resource.
+  CBitmapResourceHandle m_hBitmapCheck; // CheckMark defined as a bitmap resource.
 
 
 private:
-	CCheckBox operator=(CCheckBox) = delete;
+  CCheckBox(const CCheckBox&) = delete;
+	CCheckBox& operator=(const CCheckBox&) = delete;
 };
 
 }

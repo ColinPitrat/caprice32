@@ -48,7 +48,8 @@ namespace wGui
 
       private:
         void UpdateTextMemory();
-        CapriceMemoryTool& operator=(CapriceMemoryTool) = delete;
+        CapriceMemoryTool(const CapriceMemoryTool&) = delete;
+        CapriceMemoryTool& operator=(const CapriceMemoryTool&) = delete;
     };
 }
 

@@ -110,7 +110,8 @@ protected:
 
 
 private:
-	CScrollBar& operator=(CScrollBar) = delete;
+  CScrollBar(const CScrollBar&) = delete;
+	CScrollBar& operator=(const CScrollBar&) = delete;
 };
 
 }

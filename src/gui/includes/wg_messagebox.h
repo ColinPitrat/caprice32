@@ -68,7 +68,8 @@ protected:
 
 
 private:
-	CMessageBox& operator=(CMessageBox) = delete;
+  CMessageBox(const CMessageBox&) = delete;
+	CMessageBox& operator=(const CMessageBox&) = delete;
 };
 
 }

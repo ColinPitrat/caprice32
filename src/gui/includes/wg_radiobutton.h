@@ -95,7 +95,8 @@ protected:
 
 
 private:
-	CRadioButton& operator=(CRadioButton) = delete;
+  CRadioButton(const CRadioButton&) = delete;
+	CRadioButton& operator=(const CRadioButton&) = delete;
 };
 
 }

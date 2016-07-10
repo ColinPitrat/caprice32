@@ -96,7 +96,8 @@ protected:
 
 
 private:
-	CToolTip& operator=(CToolTip) = delete;
+  CToolTip(const CToolTip&) = delete;
+	CToolTip& operator=(const CToolTip&) = delete;
 };
 
 }

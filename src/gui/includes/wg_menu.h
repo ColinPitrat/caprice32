@@ -156,7 +156,8 @@ protected:
 
 
 private:
-	//void operator=(CMenuBase) { }  //!< The assignment operator is not allowed for CWindow derived objects
+	CMenuBase(const CMenuBase&) = delete;
+	CMenuBase& operator=(const CMenuBase&) = delete;
 };
 
 
@@ -210,7 +211,8 @@ protected:
 
 
 private:
-	CMenu& operator=(CMenu) = delete;
+  CMenu(const CMenu&) = delete;
+	CMenu& operator=(const CMenu&) = delete;
 };
 
 
@@ -293,7 +295,8 @@ protected:
 
 
 private:
-	CPopupMenu& operator=(CPopupMenu) = delete;
+  CPopupMenu(const CPopupMenu&) = delete;
+	CPopupMenu& operator=(const CPopupMenu&) = delete;
 };
 
 }

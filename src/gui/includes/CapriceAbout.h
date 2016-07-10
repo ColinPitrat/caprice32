@@ -19,7 +19,8 @@ namespace wGui
         CapriceAbout(const CRect& WindowRect, CWindow* pParent, CFontEngine* pFontEngine);
 
       private:
-        CapriceAbout& operator=(CapriceAbout) = delete;
+        CapriceAbout(const CapriceAbout&) = delete;
+        CapriceAbout& operator=(const CapriceAbout&) = delete;
     };
 }
 

@@ -263,7 +263,8 @@ protected:
   bool m_bIsFocusable;
 
 private:
-	CWindow& operator=(CWindow) = delete;
+  CWindow(const CWindow&) = delete;
+	CWindow& operator=(const CWindow&) = delete;
 };
 
 }

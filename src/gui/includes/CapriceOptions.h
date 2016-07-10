@@ -133,7 +133,8 @@ namespace wGui
 
         std::map<std::string, CGroupBox*> TabMap;  // mapping: <tab name> -> <groupbox that contains the 'tab'>.
         
-        CapriceOptions& operator=(CapriceOptions) = delete;
+        CapriceOptions(const CapriceOptions&) = delete;
+        CapriceOptions& operator=(const CapriceOptions&) = delete;
     };
 }
 

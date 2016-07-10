@@ -86,7 +86,8 @@ protected:
 
 
 private:
-	CGroupBox& operator=(CGroupBox) = delete;
+  CGroupBox(const CGroupBox&) = delete;
+	CGroupBox& operator=(const CGroupBox&) = delete;
 };
 
 }

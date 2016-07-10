@@ -105,7 +105,8 @@ protected:
 	unsigned int m_MouseButton;  //!< The last mouse button to be pushed over the control, it's used internally
 
 private:
-	CButton operator=(CButton) = delete;
+  CButton(const CButton&) = delete;
+	CButton& operator=(const CButton&) = delete;
 };
 
 
@@ -146,7 +147,8 @@ public:
 
 private:
 	std::unique_ptr<CBitmapResourceHandle> m_phBitmap;  //!< An auto pointer to a handle for the bitmap resource
-	CPictureButton& operator=(CPictureButton) = delete;
+  CPictureButton(const CPictureButton&) = delete;
+	CPictureButton& operator=(const CPictureButton&) = delete;
 };
 
 }

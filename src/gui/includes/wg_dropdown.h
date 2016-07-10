@@ -142,7 +142,8 @@ protected:
 
 
 private:
-	CDropDown& operator=(CDropDown) = delete;
+  CDropDown(const CDropDown&) = delete;
+	CDropDown& operator=(const CDropDown&) = delete;
   CView* m_pCViewAncestor;   // pointer to the (unique) CView of the application.
 };
 

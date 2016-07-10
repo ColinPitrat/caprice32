@@ -170,7 +170,8 @@ protected:
 
 
 private:
-	CTextBox& operator=(CTextBox) = delete;
+  CTextBox(const CTextBox&) = delete;
+	CTextBox& operator=(const CTextBox&) = delete;
 	bool m_bDrawCursor;  //!< Used to indicate if the cursor should be drawn on the next draw pass (used for the cursor blinking)
 	mutable bool m_bScrollToCursor;  //!< Will force the text area to scroll so the cursor is visible on the next draw pass
 	CTimer* m_pDblClickTimer;  //!< Timer to decide if we've double clicked or not.

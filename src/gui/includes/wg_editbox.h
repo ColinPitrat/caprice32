@@ -145,7 +145,8 @@ protected:
 
 
 private:
-	CEditBox operator=(CEditBox) = delete;
+  CEditBox(const CEditBox&) = delete;
+	CEditBox& operator=(const CEditBox&) = delete;
 	bool m_bDrawCursor;
 	CTimer* m_pDblClickTimer; //!< Timer to decide if we've double clicked or not.
 	CTimer* m_pCursorTimer; //!< Timer to blink the cursor

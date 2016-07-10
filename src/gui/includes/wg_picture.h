@@ -79,7 +79,8 @@ protected:
 
 
 private:
-	CPicture& operator=(CPicture) = delete;
+  CPicture(const CPicture&) = delete;
+	CPicture& operator=(const CPicture&) = delete;
 };
 
 }

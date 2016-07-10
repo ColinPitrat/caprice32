@@ -34,7 +34,8 @@ namespace wGui
         CButton  *m_pLoadSaveButton;
 
       private:
-        CapriceLoadSave& operator=(CapriceLoadSave) = delete;
+        CapriceLoadSave(const CapriceLoadSave&) = delete;
+        CapriceLoadSave& operator=(const CapriceLoadSave&) = delete;
     };
 }
 

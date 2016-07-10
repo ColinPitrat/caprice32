@@ -107,7 +107,8 @@ protected:
 	const CMessageClient* m_pSource;
 
 private:
-	CMessage& operator=(CMessage) = delete;
+  CMessage(const CMessage&) = delete;
+	CMessage& operator=(const CMessage&) = delete;
 };
 
 

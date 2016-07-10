@@ -124,7 +124,8 @@ protected:
 
 
 private:
-	CRangeControl& operator=(CRangeControl) = delete;
+  CRangeControl(const CRangeControl&) = delete;
+	CRangeControl& operator=(const CRangeControl&) = delete;
 };
 
 }

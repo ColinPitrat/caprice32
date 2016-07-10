@@ -84,7 +84,8 @@ protected:
 
 
 private:
-	CLabel& operator=(CLabel) = delete;
+  CLabel(const CLabel&) = delete;
+	CLabel& operator=(const CLabel&) = delete;
 };
 
 }

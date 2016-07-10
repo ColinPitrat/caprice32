@@ -65,7 +65,8 @@ protected:
 
 
 private:
-	CProgress& operator=(CProgress) = delete;
+	CProgress(const CProgress&) = delete;
+	CProgress& operator=(const CProgress&) = delete;
 };
 
 }

@@ -70,7 +70,7 @@ protected:
 
 private:
 	//! Resource handles are not assignable
-	CResourceHandle& operator=(CResourceHandle) = delete;
+	CResourceHandle& operator=(const CResourceHandle&) = delete;
 
 	//! The refcount for all the resources
 	static std::map<TResourceId, unsigned int> m_RefCountMap;
@@ -107,7 +107,7 @@ protected:
 
 private:
 	//! Resource handles are not assignable
-	CBitmapResourceHandle& operator=(CBitmapResourceHandle) = delete;
+	CBitmapResourceHandle& operator=(const CBitmapResourceHandle&) = delete;
 };
 
 
@@ -125,7 +125,7 @@ protected:
 
 private:
 	//! Resource handles are not assignable
-	CBitmapFileResourceHandle& operator=(CBitmapFileResourceHandle) = delete;
+	CBitmapFileResourceHandle& operator=(const CBitmapFileResourceHandle&) = delete;
 };
 
 
@@ -155,7 +155,7 @@ protected:
 
 private:
 	//! Resource handles are not assignable
-	CStringResourceHandle operator=(CStringResourceHandle) = delete;
+	CStringResourceHandle& operator=(const CStringResourceHandle&) = delete;
 };
 
 
@@ -185,7 +185,7 @@ protected:
 
 private:
 	//! Resource handles are not assignable
-	CCursorResourceHandle& operator=(CCursorResourceHandle) = delete;
+	CCursorResourceHandle& operator=(const CCursorResourceHandle&) = delete;
 };
 
 }
