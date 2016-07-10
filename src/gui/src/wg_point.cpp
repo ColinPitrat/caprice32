@@ -54,7 +54,7 @@ CPoint CPoint::operator-(const CPoint& p) const
 
 
 // assignment operator
-CPoint CPoint::operator=(const CPoint& p)
+CPoint& CPoint::operator=(const CPoint& p)
 {
 	m_XPos = p.XPos();
 	m_YPos = p.YPos();

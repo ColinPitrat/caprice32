@@ -75,7 +75,7 @@ public:
 	CPoint operator-(const CPoint& p) const;
 
 	//! Assign the value of point p to the point
-	CPoint operator=(const CPoint& p);
+	CPoint& operator=(const CPoint& p);
 
 	//! Equality operator evaluates to true if the x and y coordinates are the same for both points
 	bool operator==(const CPoint& p) const { return ((m_XPos == p.m_XPos) && (m_YPos == p.m_YPos)); }

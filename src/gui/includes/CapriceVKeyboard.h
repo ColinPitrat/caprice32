@@ -32,7 +32,8 @@ namespace wGui
 
       SDL_Surface *m_pScreenSurface;
 
-      void operator=(CapriceVKeyboard) { }  //!< The assignment operator is not allowed for CWindow derived objects
+    private:
+      CapriceVKeyboard operator=(CapriceVKeyboard) = delete;
   };
 }
 
