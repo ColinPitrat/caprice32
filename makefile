@@ -20,7 +20,7 @@ TEST_OBJECTS:=$(TEST_DEPENDS:.d=.o)
 IPATHS	= -Isrc/ -Isrc/gui/includes `freetype-config --cflags` `sdl-config --cflags`
 LIBS = `sdl-config --libs` -lz `freetype-config --libs`
 
-.PHONY: all clean debug debug_flag
+.PHONY: all clean debug debug_flag check_deps
 
 ifndef CXX
 CXX	= g++
@@ -40,10 +40,10 @@ endif
 
 ifdef DEBUG
 COMMON_CFLAGS_2	= $(COMMON_CFLAGS_1) -Werror -g -O0 -DDEBUG
-all: debug
+all: check_deps debug
 else
 COMMON_CFLAGS_2	= $(COMMON_CFLAGS_1) -O2 -funroll-loops -ffast-math -fomit-frame-pointer -fno-strength-reduce -finline-functions -s
-all: cap32
+all: check_deps cap32
 endif
 
 ifdef WITHOUT_GL
@@ -73,6 +73,10 @@ ifdef FORCED_DEBUG
 	@echo -e '\n!!!!!!!!!!!\n!! Warning: previous build was in debug - rebuilding in debug.\n!! Use make clean before running make to rebuild in release.\n!!!!!!!!!!!\n'
 endif
 	@touch .debug
+
+check_deps:
+	@sdl-config --cflags >/dev/null 2>&1 || (echo "Error: missing dependency libsdl-1.2. Try installing libsdl 1.2 development package (e.g: libsdl1.2-dev)" && false)
+	@freetype-config --cflags >/dev/null 2>&1 || (echo "Error: missing dependency libfreetype. Try installing libfreetype development package (e.g: libfreetype6-dev)" && false)
 
 tags:
 	@ctags -R . || echo -e "!!!!!!!!!!!\n!! Warning: ctags not found - if you are a developer, you might want to install it.\n!!!!!!!!!!!"
