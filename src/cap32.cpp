@@ -2684,16 +2684,18 @@ t_disk_format parseDiskFormat(const std::string& format)
 std::string serializeDiskFormat(const t_disk_format& format)
 {
   std::ostringstream oss;
-  oss << format.label << ",";
-  oss << format.tracks << ",";
-  oss << format.sides << ",";
-  oss << format.sectors << ",";
-  oss << format.sector_size << ",";
-  oss << format.gap3_length << ",";
-  oss << static_cast<unsigned int>(format.filler_byte);
-  for (int iSide = 0; iSide < static_cast<int>(format.sides); iSide++) {
-    for (int iSector = 0; iSector < static_cast<int>(format.sectors); iSector++) {
-      oss << "," << static_cast<unsigned int>(format.sector_ids[iSide][iSector]);
+  if (!format.label.empty()) {
+    oss << format.label << ",";
+    oss << format.tracks << ",";
+    oss << format.sides << ",";
+    oss << format.sectors << ",";
+    oss << format.sector_size << ",";
+    oss << format.gap3_length << ",";
+    oss << static_cast<unsigned int>(format.filler_byte);
+    for (int iSide = 0; iSide < static_cast<int>(format.sides); iSide++) {
+	    for (int iSector = 0; iSector < static_cast<int>(format.sectors); iSector++) {
+		    oss << "," << static_cast<unsigned int>(format.sector_ids[iSide][iSector]);
+	    }
     }
   }
   return oss.str();

@@ -151,3 +151,49 @@ TEST(Cap32Test, parseArgsManyFilesOfEachKind)
   ASSERT_EQ(0, CPC.snap_zip);
 }
 
+TEST(Cap32Test, serializeDiskFormat)
+{
+  t_disk_format fmt;
+  fmt.label = "test";
+  fmt.tracks = 42;
+  fmt.sides = 2;
+  fmt.sectors = 4;
+  fmt.sector_size = 1;
+  fmt.gap3_length = 82;
+  fmt.filler_byte = 229;
+  fmt.sector_ids[0][0] = 193;
+  fmt.sector_ids[0][1] = 198;
+  fmt.sector_ids[0][2] = 194;
+  fmt.sector_ids[0][3] = 199;
+  fmt.sector_ids[1][0] = 195;
+  fmt.sector_ids[1][1] = 200;
+  fmt.sector_ids[1][2] = 196;
+  fmt.sector_ids[1][3] = 201;
+
+  auto result = serializeDiskFormat(fmt);
+
+  ASSERT_EQ("test,42,2,4,1,82,229,193,198,194,199,195,200,196,201", result);
+}
+
+TEST(Cap32Test, serializeUnnamedDiskFormatReturnsEmptyString)
+{
+  t_disk_format fmt;
+  fmt.tracks = 42;
+  fmt.sides = 2;
+  fmt.sectors = 4;
+  fmt.sector_size = 1;
+  fmt.gap3_length = 82;
+  fmt.filler_byte = 229;
+  fmt.sector_ids[0][0] = 193;
+  fmt.sector_ids[0][1] = 198;
+  fmt.sector_ids[0][2] = 194;
+  fmt.sector_ids[0][3] = 199;
+  fmt.sector_ids[1][0] = 195;
+  fmt.sector_ids[1][1] = 200;
+  fmt.sector_ids[1][2] = 196;
+  fmt.sector_ids[1][3] = 201;
+
+  auto result = serializeDiskFormat(fmt);
+
+  ASSERT_EQ("", result);
+}
