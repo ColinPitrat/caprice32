@@ -42,6 +42,7 @@
 #include "CapriceVKeyboardView.h"
 
 #include "errors.h"
+#include "log.h"
 
 #define MAX_LINE_LEN 256
 
@@ -50,12 +51,6 @@
 #define DEF_SPEED_SETTING 4
 
 #define MAX_NB_JOYSTICKS 2
-
-#ifdef DEBUG
-#define LOG(x) std::cout << __FILE__ << ":" << __LINE__ << " - " << x << std::endl;
-#else
-#define LOG(x)
-#endif
 
 
 extern byte bTapeLevel;
@@ -68,6 +63,7 @@ extern t_flags1 flags1;
 extern t_new_dt new_dt;
 
 extern byte* pbCartridgeImage;
+extern byte* pbCartridgePages[];
 
 SDL_AudioSpec *audio_spec = nullptr;
 
@@ -612,18 +608,27 @@ void z80_OUT_handler (reg_pair port, byte val)
       }
    }
 // ROM select -----------------------------------------------------------------
-// 6128+ need something to be changed here ?
    if (!(port.b.h & 0x20)) { // ROM select?
       GateArray.upper_ROM = val;
-      pbExpansionROM = memmap_ROM[val];
-      if (pbExpansionROM == nullptr) { // selected expansion ROM not present?
-         pbExpansionROM = pbROMhi; // revert to BASIC ROM
-      }
-      if (!(GateArray.ROM_config & 0x08)) { // upper/expansion ROM is enabled?
-         membank_read[3] = pbExpansionROM; // 'page in' upper/expansion ROM
-      }
-      if (CPC.mf2) { // MF2 enabled?
-         *(pbMF2ROM + 0x03aac) = val;
+      if (CPC.model <= 2) {
+         pbExpansionROM = memmap_ROM[val];
+         if (pbExpansionROM == nullptr) { // selected expansion ROM not present?
+            pbExpansionROM = pbROMhi; // revert to BASIC ROM
+         }
+         if (!(GateArray.ROM_config & 0x08)) { // upper/expansion ROM is enabled?
+            membank_read[3] = pbExpansionROM; // 'page in' upper/expansion ROM
+         }
+         if (CPC.mf2) { // MF2 enabled?
+            *(pbMF2ROM + 0x03aac) = val;
+         }
+      } else {
+         uint32_t page = 1; // Default to basic page
+         if (val == 7) {
+            page = 3;
+         } else if (val >= 128) {
+            page = val & 31;
+         }
+         pbExpansionROM = pbCartridgePages[page];
       }
    }
 // printer port ---------------------------------------------------------------
@@ -1970,8 +1975,7 @@ int emulator_patch_ROM (void)
       }
    } else {
       if (pbCartridgeImage == nullptr) {
-         //cpr_load("rom/system.cpr");
-         if (cpr_load("rom/testplus.cpr") != 0) {
+         if (cpr_load("rom/system.cpr") != 0) {
             return ERR_CPC_ROM_MISSING;
          }
       }
@@ -2954,6 +2958,7 @@ void parseArgs (int argc, const char **argv, t_CPC& CPC)
    bool have_DSKB = false;
    bool have_SNA = false;
    bool have_TAP = false;
+   bool have_CPR = false;
 
    for (int i = 1; i < argc; i++) { // loop for all command line arguments
       std::string fullpath = stringutils::trim(argv[i], '"'); // remove quotes if arguments quoted
@@ -2966,7 +2971,7 @@ void parseArgs (int argc, const char **argv, t_CPC& CPC)
          stringutils::splitPath(fullpath, dirname, filename);
          if (extension == ".zip") { // are we dealing with a zip archive?
             zip_info.filename = fullpath;
-            zip_info.extensions = ".dsk.sna.cdt.voc";
+            zip_info.extensions = ".dsk.sna.cdt.voc.cpr";
             if (zip::dir(&zip_info)) {
                continue; // error or nothing relevant found
             } else {
@@ -3001,6 +3006,12 @@ void parseArgs (int argc, const char **argv, t_CPC& CPC)
             CPC.tape_file = filename;
             CPC.tape_zip = (zip ? 1 : 0);
             have_TAP = true;
+         }
+         if ((!have_CPR) && (extension == ".cpr")) {
+            CPC.cart_path = dirname;
+            CPC.cart_file = filename;
+            CPC.cart_zip = (zip ? 1 : 0);
+            have_CPR = true;
          }
       }
    }

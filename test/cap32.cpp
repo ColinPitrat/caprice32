@@ -7,8 +7,10 @@ TEST(Cap32Test, parseArgsNoArg)
   const char *argv[] = { "./cap32" };
   t_CPC CPC;
 
-  parseArgs(sizeof(argv)/sizeof(char*), argv, CPC); 
+  parseArgs(sizeof(argv)/sizeof(char*), argv, CPC);
 
+  ASSERT_EQ("", CPC.cart_path);
+  ASSERT_EQ("", CPC.cart_file);
   ASSERT_EQ("", CPC.drvA_path);
   ASSERT_EQ("", CPC.drvA_file);
   ASSERT_EQ("", CPC.drvB_path);
@@ -24,8 +26,10 @@ TEST(Cap32Test, parseArgsOneLocalDskFile)
   const char *argv[] = { "./cap32", "./test.dsk" };
   t_CPC CPC;
 
-  parseArgs(sizeof(argv)/sizeof(char*), argv, CPC); 
+  parseArgs(sizeof(argv)/sizeof(char*), argv, CPC);
 
+  ASSERT_EQ("", CPC.cart_path);
+  ASSERT_EQ("", CPC.cart_file);
   ASSERT_EQ("./", CPC.drvA_path);
   ASSERT_EQ("test.dsk", CPC.drvA_file);
   ASSERT_EQ(0, CPC.drvA_zip);
@@ -42,8 +46,10 @@ TEST(Cap32Test, parseArgsTwoDskFiles)
   const char *argv[] = { "./cap32", "/tmp/foo.dsk", "/var/bar.dsk" };
   t_CPC CPC;
 
-  parseArgs(sizeof(argv)/sizeof(char*), argv, CPC); 
+  parseArgs(sizeof(argv)/sizeof(char*), argv, CPC);
 
+  ASSERT_EQ("", CPC.cart_path);
+  ASSERT_EQ("", CPC.cart_file);
   ASSERT_EQ("/tmp/", CPC.drvA_path);
   ASSERT_EQ("foo.dsk", CPC.drvA_file);
   ASSERT_EQ(0, CPC.drvA_zip);
@@ -61,8 +67,10 @@ TEST(Cap32Test, parseArgsOneLocalCdtFile)
   const char *argv[] = { "./cap32", "./test.cdt" };
   t_CPC CPC;
 
-  parseArgs(sizeof(argv)/sizeof(char*), argv, CPC); 
+  parseArgs(sizeof(argv)/sizeof(char*), argv, CPC);
 
+  ASSERT_EQ("", CPC.cart_path);
+  ASSERT_EQ("", CPC.cart_file);
   ASSERT_EQ("", CPC.drvA_path);
   ASSERT_EQ("", CPC.drvA_file);
   ASSERT_EQ("", CPC.drvB_path);
@@ -79,8 +87,10 @@ TEST(Cap32Test, parseArgsOneLocalVocFile)
   const char *argv[] = { "./cap32", "./test.voc" };
   t_CPC CPC;
 
-  parseArgs(sizeof(argv)/sizeof(char*), argv, CPC); 
+  parseArgs(sizeof(argv)/sizeof(char*), argv, CPC);
 
+  ASSERT_EQ("", CPC.cart_path);
+  ASSERT_EQ("", CPC.cart_file);
   ASSERT_EQ("", CPC.drvA_path);
   ASSERT_EQ("", CPC.drvA_file);
   ASSERT_EQ("", CPC.drvB_path);
@@ -97,8 +107,10 @@ TEST(Cap32Test, parseArgsOneLocalSnaFile)
   const char *argv[] = { "./cap32", "./test.sna" };
   t_CPC CPC;
 
-  parseArgs(sizeof(argv)/sizeof(char*), argv, CPC); 
+  parseArgs(sizeof(argv)/sizeof(char*), argv, CPC);
 
+  ASSERT_EQ("", CPC.cart_path);
+  ASSERT_EQ("", CPC.cart_file);
   ASSERT_EQ("", CPC.drvA_path);
   ASSERT_EQ("", CPC.drvA_file);
   ASSERT_EQ("", CPC.drvB_path);
@@ -110,13 +122,55 @@ TEST(Cap32Test, parseArgsOneLocalSnaFile)
   ASSERT_EQ(0, CPC.snap_zip);
 }
 
-TEST(Cap32Test, parseArgsOneFileOfEachKind)
+TEST(Cap32Test, parseArgsOneCprFile)
 {
-  const char *argv[] = { "./cap32", "/tmp/foo.dsk", "/var/bar.cdt", "/usr/test.sna" };
+  const char *argv[] = { "./cap32", "./test.cpr" };
   t_CPC CPC;
 
-  parseArgs(sizeof(argv)/sizeof(char*), argv, CPC); 
+  parseArgs(sizeof(argv)/sizeof(char*), argv, CPC);
 
+  ASSERT_EQ("./", CPC.cart_path);
+  ASSERT_EQ("test.cpr", CPC.cart_file);
+  ASSERT_EQ(0, CPC.cart_zip);
+  ASSERT_EQ("", CPC.drvA_path);
+  ASSERT_EQ("", CPC.drvA_file);
+  ASSERT_EQ("", CPC.drvB_path);
+  ASSERT_EQ("", CPC.drvB_file);
+  ASSERT_EQ("", CPC.tape_path);
+  ASSERT_EQ("", CPC.tape_file);
+  ASSERT_EQ("", CPC.snap_path);
+  ASSERT_EQ("", CPC.snap_file);
+}
+
+TEST(Cap32Test, parseArgsOneZippedCprFile)
+{
+  const char *argv[] = { "./cap32", "test/cartridge/testplus.zip" };
+  t_CPC CPC;
+
+  parseArgs(sizeof(argv)/sizeof(char*), argv, CPC);
+
+  ASSERT_EQ("test/cartridge/testplus.zip", CPC.cart_path);
+  ASSERT_EQ("testplus.cpr", CPC.cart_file);
+  ASSERT_EQ(1, CPC.cart_zip);
+  ASSERT_EQ("", CPC.drvA_path);
+  ASSERT_EQ("", CPC.drvA_file);
+  ASSERT_EQ("", CPC.drvB_path);
+  ASSERT_EQ("", CPC.drvB_file);
+  ASSERT_EQ("", CPC.tape_path);
+  ASSERT_EQ("", CPC.tape_file);
+  ASSERT_EQ("", CPC.snap_path);
+  ASSERT_EQ("", CPC.snap_file);
+}
+
+TEST(Cap32Test, parseArgsOneFileOfEachKind)
+{
+  const char *argv[] = { "./cap32", "/tmp/foo.dsk", "/var/bar.cdt", "/usr/test.sna", "/home/cart.cpr" };
+  t_CPC CPC;
+
+  parseArgs(sizeof(argv)/sizeof(char*), argv, CPC);
+
+  ASSERT_EQ("/home/", CPC.cart_path);
+  ASSERT_EQ("cart.cpr", CPC.cart_file);
   ASSERT_EQ("/tmp/", CPC.drvA_path);
   ASSERT_EQ("foo.dsk", CPC.drvA_file);
   ASSERT_EQ(0, CPC.drvA_zip);
@@ -132,11 +186,13 @@ TEST(Cap32Test, parseArgsOneFileOfEachKind)
 
 TEST(Cap32Test, parseArgsManyFilesOfEachKind)
 {
-  const char *argv[] = { "./cap32", "/tmp/foo.dsk", "/var/test.dsk", "/tmp/other.dsk", "/var/bar.cdt", "/tmp/test.voc", "/usr/test.sna", "/tmp/other.sna" };
+  const char *argv[] = { "./cap32", "rom/system.cpr", "/tmp/foo.dsk", "/var/test.dsk", "/tmp/other.dsk", "/var/bar.cdt", "/tmp/test.voc", "/usr/test.sna", "/tmp/other.sna", "test/test.cpr" };
   t_CPC CPC;
 
-  parseArgs(sizeof(argv)/sizeof(char*), argv, CPC); 
+  parseArgs(sizeof(argv)/sizeof(char*), argv, CPC);
 
+  ASSERT_EQ("rom/", CPC.cart_path);
+  ASSERT_EQ("system.cpr", CPC.cart_file);
   ASSERT_EQ("/tmp/", CPC.drvA_path);
   ASSERT_EQ("foo.dsk", CPC.drvA_file);
   ASSERT_EQ(0, CPC.drvA_zip);

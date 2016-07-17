@@ -260,6 +260,9 @@ typedef struct {
    std::string snap_path;
    std::string snap_file;
    bool snap_zip;
+   std::string cart_path;
+   std::string cart_file;
+   bool cart_zip;
    std::string drvA_path;
    std::string drvA_file;
    bool drvA_zip;

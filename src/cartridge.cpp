@@ -1,25 +1,40 @@
 #include "cartridge.h"
 #include "types.h"
 #include "errors.h"
+#include "log.h"
 #include <iostream>
 #include <stdio.h>
 #include <cstring>
 #include <algorithm>
 
-// TODO: avoid double definition, find cleaner solution
-#ifdef DEBUG
-#define LOG(x) std::cout << __FILE__ << ":" << __LINE__ << " - " << x << std::endl;
-#else
-#define LOG(x)
-#endif
+const uint32_t CARTRIDGE_NB_PAGES = 32;
+const uint32_t CARTRIDGE_PAGE_SIZE = 16*1024;
+const uint32_t CARTRIDGE_MAX_SIZE = CARTRIDGE_NB_PAGES*CARTRIDGE_PAGE_SIZE;
 
 byte *pbCartridgeImage = nullptr;
+byte *pbCartridgePages[CARTRIDGE_NB_PAGES];
+
 extern byte* pbGPBuffer;
 
 void cpr_eject (void)
 {
    delete[] pbCartridgeImage;
    pbCartridgeImage = nullptr;
+   for(uint32_t i = 0; i < CARTRIDGE_NB_PAGES; ++i) {
+      pbCartridgePages[i] = nullptr;
+   }
+}
+
+int cartridge_init()
+{
+   pbCartridgeImage = new byte [CARTRIDGE_MAX_SIZE]; // attempt to allocate the general purpose buffer
+   if (pbCartridgeImage == nullptr) {
+      return ERR_OUT_OF_MEMORY;
+   }
+   for(uint32_t i = 0; i < CARTRIDGE_NB_PAGES; ++i) {
+      pbCartridgePages[i] = &pbCartridgeImage[i*CARTRIDGE_PAGE_SIZE];
+   }
+   return 0;
 }
 
 int cpr_load (const std::string &filename)
@@ -50,16 +65,13 @@ int cpr_load (FILE *pfile)
    const int CPR_HEADER_SIZE = 12;
    const int CPR_CHUNK_ID_SIZE = 4;
    const int CPR_CHUNK_HEADER_SIZE = 8;
-   const uint32_t CPR_MAX_CHUNK_SIZE = 16*1024;
-   const uint32_t CPR_MAX_NB_CHUNKS = 32;
-   const uint32_t CPR_MAX_CARTRIDGE_SIZE = CPR_MAX_NB_CHUNKS*CPR_MAX_CHUNK_SIZE;
 
    cpr_eject();
-
-   pbCartridgeImage = new byte [CPR_MAX_CARTRIDGE_SIZE]; // attempt to allocate the general purpose buffer
-   if (pbCartridgeImage == nullptr) {
-      return ERR_OUT_OF_MEMORY;
+   int rc = cartridge_init();
+   if (rc != 0) {
+      return rc;
    }
+
    // Check RIFF header
    if(fread(pbGPBuffer, CPR_HEADER_SIZE, 1, pfile) != 1) { // read RIFF header
       LOG("Cartridge file less than " << CPR_HEADER_SIZE << " bytes long !");
@@ -97,7 +109,7 @@ int cpr_load (FILE *pfile)
       // Normal chunk size is 16kB
       // If smaller, it must be filled with 0 up to this limit
       // If bigger, what is after must be ignored
-      uint32_t chunkKept = std::min(chunkSize, CPR_MAX_CHUNK_SIZE);
+      uint32_t chunkKept = std::min(chunkSize, CARTRIDGE_PAGE_SIZE);
       // If chunk size is not even, there's a pad byte at the end of it
       if (chunkKept % 2 != 0) {
          chunkKept++;
@@ -108,11 +120,11 @@ int cpr_load (FILE *pfile)
             LOG("Failed reading chunk content");
             return ERR_CPR_INVALID;
          }
-         if(chunkKept < CPR_MAX_CHUNK_SIZE) {
+         if(chunkKept < CARTRIDGE_PAGE_SIZE) {
             // TODO: use the chunkId to identify the cartridge page to set (cbXX with XX between 00 and 31)
             // This would require intializing the whole to 0 before instead of filling what remains at the end
             // Not sure if there are some CPR with unordered pages but this seems to be allowed in theory
-            memset(&pbCartridgeImage[cartridgeOffset+chunkKept], 0, CPR_MAX_CHUNK_SIZE-chunkKept);
+            memset(&pbCartridgeImage[cartridgeOffset+chunkKept], 0, CARTRIDGE_PAGE_SIZE-chunkKept);
          } else if(chunkKept < chunkSize) {
             LOG("This chunk is bigger than the max allowed size !!!");
             if(fread(pbGPBuffer, chunkSize-chunkKept, 1, pfile) != 1) { // read excessive chunk content
@@ -120,12 +132,12 @@ int cpr_load (FILE *pfile)
                return ERR_CPR_INVALID;
             }
          }
-         cartridgeOffset += CPR_MAX_CHUNK_SIZE;
+         cartridgeOffset += CARTRIDGE_PAGE_SIZE;
          offset += chunkSize;
       }
    }
    LOG("Final offset: " << offset);
    LOG("Final cartridge offset: " << cartridgeOffset);
-   memset(&pbCartridgeImage[cartridgeOffset], 0, CPR_MAX_CARTRIDGE_SIZE-cartridgeOffset);
+   memset(&pbCartridgeImage[cartridgeOffset], 0, CARTRIDGE_MAX_SIZE-cartridgeOffset);
    return 0;
 }
