@@ -2078,7 +2078,7 @@ void emulator_reset (bool bolMF2Reset)
 int emulator_init (void)
 {
    int iErr, iRomNum;
-   char *pchRomData;
+   byte *pchRomData;
 
    pbGPBuffer = new byte [128*1024]; // attempt to allocate the general purpose buffer
    pbRAM = new byte [CPC.ram_size*1024]; // allocate memory for desired amount of RAM
@@ -2097,7 +2097,7 @@ int emulator_init (void)
 
    for (iRomNum = 0; iRomNum < 16; iRomNum++) { // loop for ROMs 0-15
       if (!CPC.rom_file[iRomNum].empty()) { // is a ROM image specified for this slot?
-         pchRomData = new char [16384]; // allocate 16K
+         pchRomData = new byte [16384]; // allocate 16K
          memset(pchRomData, 0, 16384); // clear memory
          std::string romFilename = CPC.rom_path + "/" + CPC.rom_file[iRomNum];
          if ((pfileObject = fopen(romFilename.c_str(), "rb")) != nullptr) { // attempt to open the ROM image
@@ -2120,7 +2120,7 @@ int emulator_init (void)
                  fclose(pfileObject);
                  return ERR_NOT_A_CPC_ROM;
                }
-               memmap_ROM[iRomNum] = reinterpret_cast<byte *>(pchRomData); // update the ROM map
+               memmap_ROM[iRomNum] = pchRomData; // update the ROM map
             } else { // not a valid ROM file
                fprintf(stderr, "ERROR: %s is not a CPC ROM file - clearing ROM slot %d.\n", CPC.rom_file[iRomNum].c_str(), iRomNum);
                delete [] pchRomData; // free memory on error
