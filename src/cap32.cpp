@@ -393,6 +393,7 @@ byte z80_IN_handler (reg_pair port)
          } else { // FDC data register
             ret_val = fdc_read_data();
          }
+         LOG("FDC read access: " << static_cast<int>(port.b.l) << " - " << static_cast<int>(ret_val));
       }
    }
    return ret_val;
@@ -471,9 +472,22 @@ void z80_OUT_handler (reg_pair port, byte val)
       }
    }
 // CRTC -----------------------------------------------------------------------
+   static const byte lockSeq[] = { 0xff, 0x77, 0xb3,0x51, 0xa8, 0xd4, 0x62, 0x39, 0x9c, 0x46, 0x2b, 0x15, 0x8a, 0xcd, 0xee };
+   static int lockPos = 0;
    if (!(port.b.h & 0x40)) { // CRTC chip select?
       byte crtc_port = port.b.h & 3;
       if (crtc_port == 0) { // CRTC register select?
+         // 6128+: this is where we should detect the ASIC (un)locking sequence
+         if (val == lockSeq[lockPos]) {
+            LOG("Received " << std::hex << static_cast<int>(val) << std::dec);
+            lockPos++;
+            if (lockPos == sizeof(lockSeq)/sizeof(lockSeq[0])) {
+               lockPos = 0;
+               LOG("ASIC should be (un)locked");
+            }
+         } else {
+            lockPos = 0;
+         }
          CRTC.reg_select = val;
          if (CPC.mf2) { // MF2 enabled?
             *(pbMF2ROM + 0x03cff) = val;
@@ -623,6 +637,7 @@ void z80_OUT_handler (reg_pair port, byte val)
          }
       } else {
          uint32_t page = 1; // Default to basic page
+         LOG("ROM select: " << static_cast<int>(val));
          if (val == 7) {
             page = 3;
          } else if (val >= 128) {
@@ -706,6 +721,7 @@ void z80_OUT_handler (reg_pair port, byte val)
    }
 // ----------------------------------------------------------------------------
    if ((port.b.h == 0xfa) && (!(port.b.l & 0x80))) { // floppy motor control?
+      LOG("FDC motor control access: " << static_cast<int>(port.b.l) << " - " << static_cast<int>(val));
       FDC.motor = val & 0x01;
       #ifdef DEBUG_FDC
       fputs(FDC.motor ? "\r\n--- motor on" : "\r\n--- motor off", pfoDebug);
@@ -713,6 +729,7 @@ void z80_OUT_handler (reg_pair port, byte val)
       FDC.flags |= STATUSDRVA_flag | STATUSDRVB_flag;
    }
    else if ((port.b.h == 0xfb) && (!(port.b.l & 0x80))) { // FDC data register?
+      LOG("FDC write access: " << static_cast<int>(port.b.l) << " - " << static_cast<int>(val));
       fdc_write_data(val);
    }
    else if ((CPC.mf2) && (port.b.h == 0xfe)) { // Multiface 2?
@@ -1961,8 +1978,7 @@ int emulator_patch_ROM (void)
 {
    byte *pbPtr;
 
-   // TODO: cleaner handling of 6128+
-   if(CPC.model <= 2) {
+   if(CPC.model <= 2) { // Normal CPC range
       std::string romFilename = CPC.rom_path + "/" + chROMFile[CPC.model];
       if ((pfileObject = fopen(romFilename.c_str(), "rb")) != nullptr) { // load CPC OS + Basic
          if(fread(pbROMlo, 2*16384, 1, pfileObject) != 1) {
@@ -1973,13 +1989,12 @@ int emulator_patch_ROM (void)
       } else {
          return ERR_CPC_ROM_MISSING;
       }
-   } else {
+   } else { // Plus range
       if (pbCartridgeImage != nullptr) {
          memcpy(pbROMlo, pbCartridgeImage, 2*16*1024);
       }
    }
 
-   // TODO: handle 6128+
    if (CPC.keyboard) {
       pbPtr = pbROMlo;
       switch(CPC.model) {
@@ -1988,6 +2003,7 @@ int emulator_patch_ROM (void)
             break;
          case 1: // 664
          case 2: // 6128
+         case 3: // 6128+
             pbPtr += 0x1eef; // location of the keyboard translation table
             break;
       }
@@ -3160,6 +3176,16 @@ int cap32_main (int argc, char **argv)
          }
       }
    }
+
+   // emulator_init must be called before loading files as they require
+   // pbGPBuffer to be initialized but after cartridge is installed as
+   // it requires the ROM to be present
+   if (emulator_init()) {
+      fprintf(stderr, "emulator_init() failed. Aborting.\n");
+      exit(-1);
+   }
+
+   // TODO(cpitrat): refactor this: duplication + should be tested + cleanup
    memset(&driveA, 0, sizeof(t_drive)); // clear disk drive A data structure
    if (!CPC.drvA_file.empty()) { // insert disk in drive A?
       char chFileName[_MAX_PATH + 1];
@@ -3305,11 +3331,6 @@ int cap32_main (int argc, char **argv)
          strncat(chFileName, CPC.snap_file.c_str(), sizeof(chFileName)-1 - strlen(chFileName));
          snapshot_load(chFileName);
       }
-   }
-
-   if (emulator_init()) {
-      fprintf(stderr, "emulator_init() failed. Aborting.\n");
-      exit(-1);
    }
 
 // ----------------------------------------------------------------------------
