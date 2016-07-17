@@ -1971,7 +1971,7 @@ int emulator_patch_ROM (void)
    } else {
       if (pbCartridgeImage == nullptr) {
          //cpr_load("rom/system.cpr");
-         if (cpr_load("/home/cpitrat/Downloads/Cartridges/testplus.cpr") != 0) {
+         if (cpr_load("rom/testplus.cpr") != 0) {
             return ERR_CPC_ROM_MISSING;
          }
       }
