@@ -1974,12 +1974,9 @@ int emulator_patch_ROM (void)
          return ERR_CPC_ROM_MISSING;
       }
    } else {
-      if (pbCartridgeImage == nullptr) {
-         if (cpr_load("rom/system.cpr") != 0) {
-            return ERR_CPC_ROM_MISSING;
-         }
+      if (pbCartridgeImage != nullptr) {
+         memcpy(pbROMlo, pbCartridgeImage, 2*16*1024);
       }
-      memcpy(pbROMlo, pbCartridgeImage, 2*16*1024);
    }
 
    // TODO: handle 6128+
@@ -2806,6 +2803,9 @@ void loadConfiguration (t_CPC &CPC, const std::string& configFilename)
    CPC.snap_path = conf.getStringValue("file", "snap_path", appPath + "/snap");
    CPC.snap_file = conf.getStringValue("file", "snap_file", "");
    CPC.snap_zip = conf.getIntValue("file", "snap_zip", 0) & 1;
+   CPC.cart_path = conf.getStringValue("file", "cart_path", appPath + "/rom");
+   CPC.cart_file = conf.getStringValue("file", "cart_file", "system.cpr");
+   CPC.cart_zip = conf.getIntValue("file", "cart_zip", 0) & 1;
    CPC.drvA_path = conf.getStringValue("file", "drvA_path", appPath + "/disk");
    CPC.drvA_file = conf.getStringValue("file", "drvA_file", "");
    CPC.drvA_zip = conf.getIntValue("file", "drvA_zip", 0) & 1;
@@ -3112,11 +3112,6 @@ int cap32_main (int argc, char **argv)
       CPC.joysticks = 0;
    }
 
-   if (emulator_init()) {
-      fprintf(stderr, "emulator_init() failed. Aborting.\n");
-      exit(-1);
-   }
-
    #ifdef DEBUG
    pfoDebug = fopen("./debug.txt", "wt");
    #endif
@@ -3124,6 +3119,47 @@ int cap32_main (int argc, char **argv)
    parseArgs(argc, const_cast<const char**>(argv), CPC);
 
    // TODO(cpitrat): refactor this: duplication + should be tested + cleanup
+   if (CPC.model >= 3) {
+      if (!CPC.cart_file.empty()) { // load a cartridge ?
+         char chFileName[_MAX_PATH + 1];
+         char *pchPtr;
+
+         if (CPC.cart_zip) { // compressed image?
+            zip_info.filename = CPC.cart_path; // pchPath already has path and zip file combined
+            zip_info.extensions = ".cpr";
+            if (!zip::dir(&zip_info)) { // parse the zip for relevant files
+               dword n;
+               pchPtr = zip_info.pchFileNames;
+               for (n = zip_info.iFiles; n; n--) { // loop through all entries
+                  if (!strcasecmp(CPC.cart_file.c_str(), pchPtr)) { // do we have a match?
+                     break;
+                  }
+                  pchPtr += strlen(pchPtr) + 5; // skip offset
+               }
+               if (n) {
+                  FILE *file = nullptr;
+                  zip_info.dwOffset = *reinterpret_cast<dword *>(pchPtr + (strlen(pchPtr)+1)); // get the offset into the zip archive
+                  if (!zip::extract(zip_info, &file)) {
+                     if (cpr_load(file) != 0) {
+                        fprintf(stderr, "Load of cartridge failed. Aborting.\n");
+                        exit(-1);
+                     }
+                     fclose(file);
+                  }
+               }
+            } else {
+               CPC.cart_zip = 0;
+            }
+         } else {
+            strncpy(chFileName, CPC.cart_path.c_str(), sizeof(chFileName)-1);
+            strncat(chFileName, CPC.cart_file.c_str(), sizeof(chFileName)-1 - strlen(chFileName));
+            if(cpr_load(chFileName) != 0) {
+               fprintf(stderr, "Load of cartridge failed. Aborting.\n");
+               exit(-1);
+            }
+         }
+      }
+   }
    memset(&driveA, 0, sizeof(t_drive)); // clear disk drive A data structure
    if (!CPC.drvA_file.empty()) { // insert disk in drive A?
       char chFileName[_MAX_PATH + 1];
@@ -3269,6 +3305,11 @@ int cap32_main (int argc, char **argv)
          strncat(chFileName, CPC.snap_file.c_str(), sizeof(chFileName)-1 - strlen(chFileName));
          snapshot_load(chFileName);
       }
+   }
+
+   if (emulator_init()) {
+      fprintf(stderr, "emulator_init() failed. Aborting.\n");
+      exit(-1);
    }
 
 // ----------------------------------------------------------------------------

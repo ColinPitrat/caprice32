@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <cstring>
 #include <algorithm>
+#include <memory>
 
 const uint32_t CARTRIDGE_NB_PAGES = 32;
 const uint32_t CARTRIDGE_PAGE_SIZE = 16*1024;
@@ -13,8 +14,6 @@ const uint32_t CARTRIDGE_MAX_SIZE = CARTRIDGE_NB_PAGES*CARTRIDGE_PAGE_SIZE;
 
 byte *pbCartridgeImage = nullptr;
 byte *pbCartridgePages[CARTRIDGE_NB_PAGES];
-
-extern byte* pbGPBuffer;
 
 void cpr_eject (void)
 {
@@ -72,38 +71,40 @@ int cpr_load (FILE *pfile)
       return rc;
    }
 
+   std::unique_ptr<byte> tmpBuffer(new byte[CARTRIDGE_MAX_SIZE]);
+   byte *pbTmpBuffer = tmpBuffer.get();
+
    // Check RIFF header
-   if(fread(pbGPBuffer, CPR_HEADER_SIZE, 1, pfile) != 1) { // read RIFF header
+   if(fread(pbTmpBuffer, CPR_HEADER_SIZE, 1, pfile) != 1) { // read RIFF header
       LOG("Cartridge file less than " << CPR_HEADER_SIZE << " bytes long !");
       return ERR_CPR_INVALID;
    }
-   byte *pbPtr = pbGPBuffer;
-   if (memcmp(pbPtr, "RIFF", 4) != 0) { // RIFF file
+   if (memcmp(pbTmpBuffer, "RIFF", 4) != 0) { // RIFF file
       LOG("Cartridge file is not a RIFF file");
       return ERR_CPR_INVALID;
    }
-   if (memcmp(pbPtr + 8, "AMS!", 4) != 0) { // CPR file
+   if (memcmp(pbTmpBuffer + 8, "AMS!", 4) != 0) { // CPR file
       LOG("Cartridge file is not a CPR file");
       return ERR_CPR_INVALID;
    }
-   uint32_t totalSize = extractChunkSize(pbPtr);
+   uint32_t totalSize = extractChunkSize(pbTmpBuffer);
    LOG("CPR size: " << totalSize)
 
    // Extract all chunks
    uint32_t offset = CPR_HEADER_SIZE;
    uint32_t cartridgeOffset = 0;
    while(offset < totalSize) {
-      if(fread(pbGPBuffer, CPR_CHUNK_HEADER_SIZE, 1, pfile) != 1) { // read chunk header
+      if(fread(pbTmpBuffer, CPR_CHUNK_HEADER_SIZE, 1, pfile) != 1) { // read chunk header
          LOG("Failed reading chunk header");
          return ERR_CPR_INVALID;
       }
       offset += CPR_CHUNK_HEADER_SIZE;
 
       byte chunkId[CPR_CHUNK_ID_SIZE+1];
-      memcpy(chunkId, pbGPBuffer, CPR_CHUNK_ID_SIZE);
+      memcpy(chunkId, pbTmpBuffer, CPR_CHUNK_ID_SIZE);
       chunkId[CPR_CHUNK_ID_SIZE] = '\0';
 
-      uint32_t chunkSize = extractChunkSize(pbGPBuffer);
+      uint32_t chunkSize = extractChunkSize(pbTmpBuffer);
       LOG("Chunk '" << chunkId << "' at offset " << offset << " of size " << chunkSize);
 
       // Normal chunk size is 16kB
@@ -127,7 +128,7 @@ int cpr_load (FILE *pfile)
             memset(&pbCartridgeImage[cartridgeOffset+chunkKept], 0, CARTRIDGE_PAGE_SIZE-chunkKept);
          } else if(chunkKept < chunkSize) {
             LOG("This chunk is bigger than the max allowed size !!!");
-            if(fread(pbGPBuffer, chunkSize-chunkKept, 1, pfile) != 1) { // read excessive chunk content
+            if(fread(pbTmpBuffer, chunkSize-chunkKept, 1, pfile) != 1) { // read excessive chunk content
                LOG("Failed reading chunk content");
                return ERR_CPR_INVALID;
             }
