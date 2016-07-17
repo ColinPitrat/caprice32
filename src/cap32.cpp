@@ -30,6 +30,7 @@
 #include "stringutils.h"
 #include "zip.h"
 #include "keyboard.h"
+#include "cartridge.h"
 
 #include <errno.h>
 #include <string.h>
@@ -65,6 +66,8 @@ extern dword *ScanStart;
 extern word MaxVSync;
 extern t_flags1 flags1;
 extern t_new_dt new_dt;
+
+extern byte* pbCartridgeImage;
 
 SDL_AudioSpec *audio_spec = nullptr;
 
@@ -609,6 +612,7 @@ void z80_OUT_handler (reg_pair port, byte val)
       }
    }
 // ROM select -----------------------------------------------------------------
+// 6128+ need something to be changed here ?
    if (!(port.b.h & 0x20)) { // ROM select?
       GateArray.upper_ROM = val;
       pbExpansionROM = memmap_ROM[val];
@@ -990,7 +994,7 @@ int snapshot_load (FILE *pfile)
   if (sh.version > 1) { // does the snapshot have version 2 data?
     dwModel = sh.cpc_model; // determine the model it was saved for
     if (dwModel != CPC.model) { // different from what we're currently running?
-      if (dwModel > 2) { // not one of the known models?
+      if (dwModel > 3) { // not one of the known models?
         emulator_reset(false);
         return ERR_SNA_CPC_TYPE;
       }
@@ -1952,17 +1956,29 @@ int emulator_patch_ROM (void)
 {
    byte *pbPtr;
 
-   std::string romFilename = CPC.rom_path + "/" + chROMFile[CPC.model];
-   if ((pfileObject = fopen(romFilename.c_str(), "rb")) != nullptr) { // load CPC OS + Basic
-      if(fread(pbROMlo, 2*16384, 1, pfileObject) != 1) {
-        fclose(pfileObject);
-        return ERR_NOT_A_CPC_ROM;
+   // TODO: cleaner handling of 6128+
+   if(CPC.model <= 2) {
+      std::string romFilename = CPC.rom_path + "/" + chROMFile[CPC.model];
+      if ((pfileObject = fopen(romFilename.c_str(), "rb")) != nullptr) { // load CPC OS + Basic
+         if(fread(pbROMlo, 2*16384, 1, pfileObject) != 1) {
+            fclose(pfileObject);
+            return ERR_NOT_A_CPC_ROM;
+         }
+         fclose(pfileObject);
+      } else {
+         return ERR_CPC_ROM_MISSING;
       }
-      fclose(pfileObject);
    } else {
-      return ERR_CPC_ROM_MISSING;
+      if (pbCartridgeImage == nullptr) {
+         //cpr_load("rom/system.cpr");
+         if (cpr_load("/home/cpitrat/Downloads/Cartridges/testplus.cpr") != 0) {
+            return ERR_CPC_ROM_MISSING;
+         }
+      }
+      memcpy(pbROMlo, pbCartridgeImage, 2*16*1024);
    }
 
+   // TODO: handle 6128+
    if (CPC.keyboard) {
       pbPtr = pbROMlo;
       switch(CPC.model) {
@@ -2068,6 +2084,7 @@ int emulator_init (void)
    }
    pbROMhi =
    pbExpansionROM = pbROMlo + 16384;
+   // 6128+ needs to put ROM from the cartridge in memmap_ROM + initialize roms 0 & 7
    memset(memmap_ROM, 0, sizeof(memmap_ROM[0]) * 256); // clear the expansion ROM map
    ga_init_banking(); // init the CPC memory banking map
    if ((iErr = emulator_patch_ROM())) {
@@ -2712,14 +2729,14 @@ void loadConfiguration (t_CPC &CPC, const std::string& configFilename)
    const char *chFileName = configFilename.c_str();
 
    CPC.model = conf.getIntValue("system", "model", 2); // CPC 6128
-   if (CPC.model > 2) {
+   if (CPC.model > 3) {
       CPC.model = 2;
    }
    CPC.jumpers = conf.getIntValue("system", "jumpers", 0x1e) & 0x1e; // OEM is Amstrad, video refresh is 50Hz
    CPC.ram_size = conf.getIntValue("system", "ram_size", 128) & 0x02c0; // 128KB RAM
    if (CPC.ram_size > 576) {
       CPC.ram_size = 576;
-   } else if ((CPC.model == 2) && (CPC.ram_size < 128)) {
+   } else if ((CPC.model >= 2) && (CPC.ram_size < 128)) {
       CPC.ram_size = 128; // minimum RAM size for CPC 6128 is 128KB
    }
    CPC.speed = conf.getIntValue("system", "speed", DEF_SPEED_SETTING); // original CPC speed

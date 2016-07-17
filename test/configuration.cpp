@@ -136,13 +136,13 @@ TEST_F(ConfigurationTest, loadConfigurationWithValidContent)
 
   for(int i = 0; i < 2; ++i)
   {
-    ASSERT_EQ(1, CPC[i].model);
-    ASSERT_EQ(30, CPC[i].jumpers);
-    ASSERT_EQ(128, CPC[i].ram_size);
-    ASSERT_EQ(32, CPC[i].speed);
-    ASSERT_EQ(1, CPC[i].limit_speed);
-    ASSERT_EQ(1, CPC[i].printer);
-    ASSERT_EQ("./resources", std::string(CPC[i].resources_path));
+    ASSERT_EQ(1, CPC[i].model) << "with i = " << i;
+    ASSERT_EQ(30, CPC[i].jumpers) << "with i = " << i;
+    ASSERT_EQ(128, CPC[i].ram_size) << "with i = " << i;
+    ASSERT_EQ(32, CPC[i].speed) << "with i = " << i;
+    ASSERT_EQ(1, CPC[i].limit_speed) << "with i = " << i;
+    ASSERT_EQ(1, CPC[i].printer) << "with i = " << i;
+    ASSERT_EQ("./resources", std::string(CPC[i].resources_path)) << "with i = " << i;
     // TODO(cpitrat): move disk_format array in t_CPC
     ASSERT_EQ("Test disk format", disk_format[2].label);
     ASSERT_EQ(40, disk_format[0].tracks);
@@ -168,7 +168,7 @@ TEST_F(ConfigurationTest, loadConfigurationWithInvalidValues)
 {
   std::ofstream configFile(getTmpFilename(0));
   configFile << "[system]\n"
-             << "model=3\n" // model should be <= 2 - default to 2
+             << "model=4\n" // model should be <= 3 - default to 2
              << "jumpers=255\n" // jumpers is & with 0x1e == 30
              << "ram_size=704\n" // max ram size is 576 - moreover it's & with 704
              << "speed=64\n" // max speed is 32 - will default to 4

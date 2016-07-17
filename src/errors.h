@@ -32,21 +32,7 @@
 #define ERR_PRINTER              29
 #define ERR_BAD_MF2_ROM          30
 #define ERR_SDUMP                31
-
-// TODO(cpitrat): All those MSG_* are not used
-#define MSG_SNA_LOAD             32
-#define MSG_SNA_SAVE             33
-#define MSG_DSK_LOAD             34
-#define MSG_DSK_SAVE             35
-#define MSG_JOY_ENABLE           36
-#define MSG_JOY_DISABLE          37
-#define MSG_SPD_NORMAL           38
-#define MSG_SPD_FULL             39
-#define MSG_TAP_INSERT           40
-#define MSG_SDUMP_SAVE           41
-#define MSG_PAUSED               42
-#define MSG_TAP_PLAY             43
-#define MSG_TAP_STOP             44
+#define ERR_CPR_INVALID          32
 
 #define ERR_JOYSTICKS_INIT       45
 
