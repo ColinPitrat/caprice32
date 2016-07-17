@@ -3,8 +3,10 @@
 
 #include <iostream>
 
+bool log_verbose;
+
 #ifdef DEBUG
-#define LOG(x) std::cout << __FILE__ << ":" << __LINE__ << " - " << x << std::endl;
+#define LOG(x) if(log_verbose) { std::cout << __FILE__ << ":" << __LINE__ << " - " << x << std::endl; }
 #else
 #define LOG(x)
 #endif
