@@ -11,7 +11,6 @@ namespace wGui {
     CFrame(WindowRect, pParent, pFontEngine, "Caprice32 - Virtual Keyboard", false), m_pScreenSurface(screen)
   {
     SetModal(true);
-    // TODO: TAB ?
     m_keyFromChar = keysFromChars[CPC.kbd_layout];
     std::vector<std::string> keys{ "ABCDEFGHIJ", "KLMNOPQRST", "UVWXYZabcd", "efghijklmn", "opqrstuvwx", "yz01234567", "89&#\"'(-_)", "=,.:!|?./*", "+%<>[]{}\\`"};
     // TODO: make this configurable
@@ -54,14 +53,18 @@ namespace wGui {
       m_buttons[i++].push_back(button);
       y += 20;
     }
-    // Add SPACE, DELETE and RETURN buttons
+    // Add ESC, SPACE, DELETE and RETURN buttons
+    // TODO: TAB ? COPY ?
     std::vector<CButton*> line;
-    CButton *space = new CButton(CRect(CPoint(10,  y), 55, 15), this, "SPACE");
-    CButton *retur = new CButton(CRect(CPoint(80,  y), 55, 15), this, "RETURN");
-    CButton *backs = new CButton(CRect(CPoint(150, y), 55, 15), this, "DELETE");
+    CButton *esc = new CButton(CRect(CPoint(10,  y), 41, 15), this, "ESC");
+    CButton *space = new CButton(CRect(CPoint(62,  y), 41, 15), this, "SPACE");
+    CButton *retur = new CButton(CRect(CPoint(113,  y), 41, 15), this, "RETURN");
+    CButton *backs = new CButton(CRect(CPoint(164, y), 41, 15), this, "DELETE");
+    esc->SetIsFocusable(true);
     space->SetIsFocusable(true);
     retur->SetIsFocusable(true);
     backs->SetIsFocusable(true);
+    line.push_back(esc);
     line.push_back(space);
     line.push_back(retur);
     line.push_back(backs);
@@ -77,13 +80,24 @@ namespace wGui {
 
   std::list<SDL_Event> CapriceVKeyboard::StringToEvents(std::string toTranslate) {
     std::list<SDL_Event> result;
+    bool escaped = false;
     for(auto c : toTranslate) {
+      if(c == '\a') {
+        // Escape prefix: next char is a special one
+        escaped = true;
+        continue;
+      }
       SDL_Event key;
-      // key.key.keysym.scancode = ;
-      key.key.keysym.sym = m_keyFromChar[c].first;
-      key.key.keysym.mod = m_keyFromChar[c].second;
-      // key.key.keysym.unicode = c;
-
+      if(escaped) {
+        key.key.keysym.sym = static_cast<SDLKey>(kbd_layout[CPC.kbd_layout][static_cast<int>(c)][1] & 0xffff);
+        key.key.keysym.mod = static_cast<SDLMod>(kbd_layout[CPC.kbd_layout][static_cast<int>(c)][1] >> 16);
+        escaped = false;
+      } else {
+        // key.key.keysym.scancode = ;
+        key.key.keysym.sym = m_keyFromChar[c].first;
+        key.key.keysym.mod = m_keyFromChar[c].second;
+        // key.key.keysym.unicode = c;
+      }
       key.key.type = SDL_KEYDOWN;
       key.key.state = SDL_PRESSED;
       result.push_back(key);
@@ -142,11 +156,20 @@ namespace wGui {
             else if(pressed == "RETURN") {
               pressed = "\n";
             }
+            else if(pressed == "ESC") {
+              pressed = "\a";
+              pressed += CPC_ESC;
+            }
             else if(pressed == "DELETE") {
               std::string result = m_result->GetWindowText();
               // If the string is not empty, and last char is not backspace remove it
               if(!result.empty() && result[result.size()-1] != '\b') {
-                m_result->SetWindowText(result.substr(0, result.size()-1));
+                result = result.substr(0, result.size()-1);
+                // If the char was a special char, also remove the escaping char
+                if(!result.empty() && result[result.size()-1] != '\a') {
+                  result = result.substr(0, result.size()-1);
+                }
+                m_result->SetWindowText(result);
                 break;
               }
               // Otherwise put backspace in the output
