@@ -441,20 +441,25 @@ void z80_OUT_handler (reg_pair port, byte val)
             }
             break;
          case 2: // set mode
-            #ifdef DEBUG_GA
-            if (dwDebugFlag) {
-               fprintf(pfoDebug, "rom 0x%02x\r\n", val);
-            }
-            #endif
-            GateArray.ROM_config = val;
-            GateArray.requested_scr_mode = val & 0x03; // request a new CPC screen mode
-            ga_memory_manager();
-            if (val & 0x10) { // delay Z80 interrupt?
-               z80.int_pending = 0; // clear pending interrupts
-               GateArray.sl_count = 0; // reset GA scanline counter
-            }
-            if (CPC.mf2) { // MF2 enabled?
-               *(pbMF2ROM + 0x03fef) = val;
+            if (val & 0x32) {
+               // 6128+ RMR2 register
+               LOG("Call to RMR2 register of 6128+ - not yet implemented. val = " << std::hex << static_cast<int>(val) << std::dec);
+            } else {
+               #ifdef DEBUG_GA
+               if (dwDebugFlag) {
+                  fprintf(pfoDebug, "rom 0x%02x\r\n", val);
+               }
+               #endif
+               GateArray.ROM_config = val;
+               GateArray.requested_scr_mode = val & 0x03; // request a new CPC screen mode
+               ga_memory_manager();
+               if (val & 0x10) { // delay Z80 interrupt?
+                  z80.int_pending = 0; // clear pending interrupts
+                  GateArray.sl_count = 0; // reset GA scanline counter
+               }
+               if (CPC.mf2) { // MF2 enabled?
+                  *(pbMF2ROM + 0x03fef) = val;
+               }
             }
             break;
          case 3: // set memory configuration
@@ -472,7 +477,7 @@ void z80_OUT_handler (reg_pair port, byte val)
       }
    }
 // CRTC -----------------------------------------------------------------------
-   static const byte lockSeq[] = { 0xff, 0x77, 0xb3,0x51, 0xa8, 0xd4, 0x62, 0x39, 0x9c, 0x46, 0x2b, 0x15, 0x8a, 0xcd, 0xee };
+   static const byte lockSeq[] = { 0x00, 0xff, 0x77, 0xb3, 0x51, 0xa8, 0xd4, 0x62, 0x39, 0x9c, 0x46, 0x2b, 0x15, 0x8a, 0xcd, 0xee };
    static int lockPos = 0;
    if (!(port.b.h & 0x40)) { // CRTC chip select?
       byte crtc_port = port.b.h & 3;
@@ -2101,7 +2106,6 @@ int emulator_init (void)
    }
    pbROMhi =
    pbExpansionROM = pbROMlo + 16384;
-   // 6128+ needs to put ROM from the cartridge in memmap_ROM + initialize roms 0 & 7
    memset(memmap_ROM, 0, sizeof(memmap_ROM[0]) * 256); // clear the expansion ROM map
    ga_init_banking(); // init the CPC memory banking map
    if ((iErr = emulator_patch_ROM())) {
