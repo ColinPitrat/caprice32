@@ -31,6 +31,7 @@
 #include "zip.h"
 #include "keyboard.h"
 #include "cartridge.h"
+#include "asic.h"
 
 #include <errno.h>
 #include <string.h>
@@ -84,6 +85,7 @@ byte *pbSndBufferEnd = nullptr;
 byte *pbSndStream = nullptr;
 byte *membank_read[4], *membank_write[4], *memmap_ROM[256];
 byte *pbRAM = nullptr;
+byte *pbROM = nullptr;
 byte *pbROMlo = nullptr;
 byte *pbROMhi = nullptr;
 byte *pbExpansionROM = nullptr;
@@ -295,11 +297,19 @@ void ga_memory_manager (void)
    }
    if (!(GateArray.ROM_config & 0x04)) { // lower ROM is enabled?
       if (dwMF2Flags & MF2_ACTIVE) { // is the Multiface 2 paged in?
-         membank_read[0] = pbMF2ROM;
-         membank_write[0] = pbMF2ROM;
+         // TODO: I think this is why the MF2 doesn't work properly:
+         // ROM should be loaded R/O in lower ROM bank (i.e not loaded in membank_write)
+         // Writes should probably be disabled in membank_write (pointing to a dummy buffer, but not MF2 ROM !)
+         // MF2 also has a RAM (8kB) that should be loaded as R/W in bank 1
+         membank_read[GateArray.lower_ROM_bank] = pbMF2ROM;
+         membank_write[GateArray.lower_ROM_bank] = pbMF2ROM;
       } else {
-         membank_read[0] = pbROMlo; // 'page in' lower ROM
+         membank_read[GateArray.lower_ROM_bank] = pbROMlo; // 'page in' lower ROM
       }
+   }
+   if (CPC.model >= 3 && GateArray.registerPageOn) {
+      membank_read[1] = pbRegisterPage;
+      membank_write[1] = pbRegisterPage;
    }
    if (!(GateArray.ROM_config & 0x08)) { // upper/expansion ROM is enabled?
       membank_read[3] = pbExpansionROM; // 'page in' upper/expansion ROM
@@ -393,7 +403,6 @@ byte z80_IN_handler (reg_pair port)
          } else { // FDC data register
             ret_val = fdc_read_data();
          }
-         LOG("FDC read access: " << static_cast<int>(port.b.l) << " - " << static_cast<int>(ret_val));
       }
    }
    return ret_val;
@@ -441,9 +450,24 @@ void z80_OUT_handler (reg_pair port, byte val)
             }
             break;
          case 2: // set mode
-            if (val & 0x32) {
+            if (val & 0x20) {
                // 6128+ RMR2 register
-               LOG("Call to RMR2 register of 6128+ - not yet implemented. val = " << std::hex << static_cast<int>(val) << std::dec);
+               if (!asic_locked) {
+                  int membank = (val >> 3) & 3;
+                  if (membank == 3) { // Map register page at 0x4000
+                     //LOG("Register page on");
+                     GateArray.registerPageOn = true;
+                     membank = 0;
+                  } else {
+                     //LOG("Register page off");
+                     GateArray.registerPageOn = false;
+                  }
+                  int page = (val & 0x7);
+                  //LOG("Low bank rom = 0x" << std::hex << (4*membank) << std::dec << "000 - page " << page);
+                  GateArray.lower_ROM_bank = membank;
+                  pbROMlo = pbCartridgePages[page];
+                  ga_memory_manager();
+               }
             } else {
                #ifdef DEBUG_GA
                if (dwDebugFlag) {
@@ -477,22 +501,11 @@ void z80_OUT_handler (reg_pair port, byte val)
       }
    }
 // CRTC -----------------------------------------------------------------------
-   static const byte lockSeq[] = { 0x00, 0xff, 0x77, 0xb3, 0x51, 0xa8, 0xd4, 0x62, 0x39, 0x9c, 0x46, 0x2b, 0x15, 0x8a, 0xcd, 0xee };
-   static int lockPos = 0;
    if (!(port.b.h & 0x40)) { // CRTC chip select?
       byte crtc_port = port.b.h & 3;
       if (crtc_port == 0) { // CRTC register select?
-         // 6128+: this is where we should detect the ASIC (un)locking sequence
-         if (val == lockSeq[lockPos]) {
-            LOG("Received " << std::hex << static_cast<int>(val) << std::dec);
-            lockPos++;
-            if (lockPos == sizeof(lockSeq)/sizeof(lockSeq[0])) {
-               lockPos = 0;
-               LOG("ASIC should be (un)locked");
-            }
-         } else {
-            lockPos = 0;
-         }
+         // 6128+: this is where we detect the ASIC (un)locking sequence
+         asic_poke_lock_sequence(val);
          CRTC.reg_select = val;
          if (CPC.mf2) { // MF2 enabled?
             *(pbMF2ROM + 0x03cff) = val;
@@ -734,7 +747,6 @@ void z80_OUT_handler (reg_pair port, byte val)
       FDC.flags |= STATUSDRVA_flag | STATUSDRVB_flag;
    }
    else if ((port.b.h == 0xfb) && (!(port.b.l & 0x80))) { // FDC data register?
-      LOG("FDC write access: " << static_cast<int>(port.b.l) << " - " << static_cast<int>(val));
       fdc_write_data(val);
    }
    else if ((CPC.mf2) && (port.b.h == 0xfe)) { // Multiface 2?
@@ -1027,7 +1039,7 @@ int snapshot_load (FILE *pfile)
       }
       std::string romFilename = CPC.rom_path + "/" + chROMFile[dwModel];
       if ((pfileObject = fopen(romFilename.c_str(), "rb")) != nullptr) {
-        n = fread(pbROMlo, 2*16384, 1, pfileObject);
+        n = fread(pbROM, 2*16384, 1, pfileObject);
         fclose(pfileObject);
         if (!n) {
           emulator_reset(false);
@@ -1986,17 +1998,18 @@ int emulator_patch_ROM (void)
    if(CPC.model <= 2) { // Normal CPC range
       std::string romFilename = CPC.rom_path + "/" + chROMFile[CPC.model];
       if ((pfileObject = fopen(romFilename.c_str(), "rb")) != nullptr) { // load CPC OS + Basic
-         if(fread(pbROMlo, 2*16384, 1, pfileObject) != 1) {
+         if(fread(pbROM, 2*16384, 1, pfileObject) != 1) {
             fclose(pfileObject);
             return ERR_NOT_A_CPC_ROM;
          }
+         pbROMlo = pbROM;
          fclose(pfileObject);
       } else {
          return ERR_CPC_ROM_MISSING;
       }
    } else { // Plus range
       if (pbCartridgeImage != nullptr) {
-         memcpy(pbROMlo, pbCartridgeImage, 2*16*1024);
+         pbROMlo = &pbCartridgeImage[0];
       }
    }
 
@@ -2100,12 +2113,14 @@ int emulator_init (void)
 
    pbGPBuffer = new byte [128*1024]; // attempt to allocate the general purpose buffer
    pbRAM = new byte [CPC.ram_size*1024]; // allocate memory for desired amount of RAM
-   pbROMlo = new byte [32*1024]; // allocate memory for 32K of ROM
-   if ((!pbGPBuffer) || (!pbRAM) || (!pbROMlo)) {
+   pbROM = new byte [32*1024]; // allocate memory for 32K of ROM
+   pbRegisterPage = new byte [16*1024];
+   if ((!pbGPBuffer) || (!pbRAM) || (!pbROM) || (!pbRegisterPage)) {
       return ERR_OUT_OF_MEMORY;
    }
+   pbROMlo = pbROM;
    pbROMhi =
-   pbExpansionROM = pbROMlo + 16384;
+   pbExpansionROM = pbROM + 16384;
    memset(memmap_ROM, 0, sizeof(memmap_ROM[0]) * 256); // clear the expansion ROM map
    ga_init_banking(); // init the CPC memory banking map
    if ((iErr = emulator_patch_ROM())) {
@@ -2204,7 +2219,7 @@ void emulator_shutdown (void)
          delete [] memmap_ROM[iRomNum]; // if so, release the associated memory
    }
 
-   delete [] pbROMlo;
+   delete [] pbROM;
    delete [] pbRAM;
    delete [] pbGPBuffer;
 }
