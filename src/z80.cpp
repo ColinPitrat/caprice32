@@ -28,6 +28,7 @@
 #include "cap32.h"
 #include "tape.h"
 #include "z80.h"
+#include "asic.h"
 
 extern t_CPC CPC;
 extern t_FDC FDC;
@@ -328,7 +329,11 @@ inline byte read_mem(word addr) {
 }
 
 inline void write_mem(word addr, byte val) {
+   // 6128+: handle write to register page when mapped
    *(membank_write[addr >> 14] + (addr & 0x3fff)) = val; // writes a byte to a 16KB memory bank
+   if (GateArray.registerPageOn) {
+      asic_register_page_write(addr, val);
+   }
 }
 
 

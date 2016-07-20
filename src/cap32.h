@@ -339,6 +339,8 @@ typedef struct {
 typedef struct {
 	unsigned int hs_count;
    unsigned char ROM_config;
+   unsigned char lower_ROM_bank;
+   bool registerPageOn;
    unsigned char RAM_bank;
    unsigned char RAM_config;
    unsigned char upper_ROM;

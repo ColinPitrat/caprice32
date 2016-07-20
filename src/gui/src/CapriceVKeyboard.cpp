@@ -10,6 +10,8 @@ namespace wGui {
   CapriceVKeyboard::CapriceVKeyboard(const CRect& WindowRect, CWindow* pParent, SDL_Surface* screen, CFontEngine* pFontEngine) :
     CFrame(WindowRect, pParent, pFontEngine, "Caprice32 - Virtual Keyboard", false), m_pScreenSurface(screen)
   {
+    // TODO: This became ugly with time ... Make this more generic by creating a
+    // class key that has a displayable string and SDL events associated
     SetModal(true);
     m_keyFromChar = keysFromChars[CPC.kbd_layout];
     std::vector<std::string> keys{ "ABCDEFGHIJ", "KLMNOPQRST", "UVWXYZabcd", "efghijklmn", "opqrstuvwx", "yz01234567", "89&#\"'(-_)", "=,.:!|?./*", "+%<>[]{}\\`"};
@@ -36,22 +38,39 @@ namespace wGui {
       y += 20;
       m_buttons.push_back(line);
     }
+    // Add function keys
+    {
+      std::vector<CButton*> line;
+      int x = 10;
+      for(int i = 0; i < 10; i++)
+      {
+        char fn = '0' + i;
+        std::string label = std::string("F") + std::string(1, fn);
+        CButton *button = new CButton(CRect(CPoint(x, y), 15, 15), this, label);
+        button->SetIsFocusable(true);
+        line.push_back(button);
+        x += 20;
+      }
+      y += 20;
+      m_buttons.push_back(line);
+    }
     // Add keywords
-    int x = 150;
+    int kx = 150;
+    int ky = 0;
     int nb_lines = m_buttons.size();
     int i = m_buttons.size();
     for(auto& w : keywords)
     {
       if(i >= nb_lines) {
-        if(x > 300) break;
+        if(kx > 300) break;
         i -= nb_lines;
-        y = 40;
-        x += 90;
+        ky = 40;
+        kx += 90;
       }
-      CButton *button = new CButton(CRect(CPoint(x, y), 70, 15), this, w);
+      CButton *button = new CButton(CRect(CPoint(kx, ky), 70, 15), this, w);
       button->SetIsFocusable(true);
       m_buttons[i++].push_back(button);
-      y += 20;
+      ky += 20;
     }
     // Add ESC, SPACE, DELETE and RETURN buttons
     // TODO: TAB ? COPY ?
@@ -174,6 +193,14 @@ namespace wGui {
               }
               // Otherwise put backspace in the output
               pressed = "\b";
+            } else if(pressed == "F1") {
+               std::cout << "Pressed F1" << std::endl;
+               pressed = "\a";
+               pressed += CPC_F1;
+            } else if(pressed == "F2") {
+               std::cout << "Pressed F2" << std::endl;
+               pressed = "\a";
+               pressed += CPC_F2;
             }
             std::string result = m_result->GetWindowText() + pressed;
             m_result->SetWindowText(result);
