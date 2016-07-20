@@ -176,7 +176,7 @@ CwgBitmapResourceHandle::CwgBitmapResourceHandle(EwgResourceId resId) :
 			case INVALID_RESOURCE_ID:
 			case AUTO_CREATE_RESOURCE_ID:
 			default:
-				throw(Wg_Ex_App("CwgBitmapResourceHandle::AllocateResource : Invalid Resource ID."));
+				throw(Wg_Ex_App("Invalid Resource ID.", "CwgBitmapResourceHandle::AllocateResource"));
 				break;
 		}
 		CResourceHandle TempHandle(m_ResourceId);
@@ -225,7 +225,7 @@ CwgStringResourceHandle::CwgStringResourceHandle(EwgResourceId resId) :
 			case INVALID_RESOURCE_ID:
 			case AUTO_CREATE_RESOURCE_ID:
 			default:
-				throw(Wg_Ex_App("CwgBitmapResourceHandle::AllocateResource : Invalid Resource ID."));
+				throw(Wg_Ex_App("Invalid Resource ID.", "CwgBitmapResourceHandle::AllocateResource"));
 				break;
 		}
 		CResourceHandle TempHandle(m_ResourceId);
@@ -435,7 +435,7 @@ CwgCursorResourceHandle::CwgCursorResourceHandle(EwgResourceId resId) :
 			case INVALID_RESOURCE_ID:
 			case AUTO_CREATE_RESOURCE_ID:
 			default:
-				throw(Wg_Ex_App("CwgBitmapResourceHandle::AllocateResource : Invalid Resource ID."));
+				throw(Wg_Ex_App("Invalid Resource ID.", "CwgBitmapResourceHandle::AllocateResource"));
 				break;
 		}
 		CResourceHandle TempHandle(m_ResourceId);
@@ -448,7 +448,7 @@ SDL_Cursor* CwgCursorResourceHandle::CreateCursor(const char DataIn[], int iData
 {
 	if (iWidth % 8)
 	{
-		throw(Wg_Ex_App("CwgCursorResourceHandle::CreateCursor : Cursors must be multiples of 8 bits wide."));
+		throw(Wg_Ex_App("Cursors must be multiples of 8 bits wide.", "CwgCursorResourceHandle::CreateCursor"));
 	}
 
 	int iDataSize = iWidth * iHeight / 8;

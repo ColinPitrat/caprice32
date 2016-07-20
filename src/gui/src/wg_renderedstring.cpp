@@ -43,7 +43,7 @@ CRenderedString::CRenderedString(CFontEngine* pFontEngine, const std::string& sS
 {
 	if (! m_pFontEngine)
 	{
-		throw(Wg_Ex_App("CRenderedString::CRenderedString : Bad pFontEngine pointer! (This is usually the result of the wgui.conf file missing or misconfigured.  See the Global Config section of the docs.)"));
+		throw(Wg_Ex_App("Bad pFontEngine pointer! (This is usually the result of the wgui.conf file missing or misconfigured.  See the Global Config section of the docs.)", "CRenderedString::CRenderedString"));
 	}
 }
 

@@ -377,7 +377,7 @@ void CMenu::ShowActivePopup(const CRect& ParentRect, const CRect& BoundingRect)
 	// TODO: Add bounds checking for all edges.	Apply this same bounds checking logic to the popup root menu too.
 	if (!m_pActivePopup)
 	{
-		throw(Wg_Ex_App("CMenu::ShowActivePopup() : Trying to show active popup menu when pActivePopup is NULL!"));
+		throw(Wg_Ex_App("Trying to show active popup menu when pActivePopup is NULL!", "CMenu::ShowActivePopup"));
 	}
 	CRect MenuRect = m_pActivePopup->GetWindowRect();
 	if (BoundingRect.HitTest(ParentRect.BottomLeft() + CPoint(MenuRect.Width(), 0)) & CRect::RELPOS_RIGHT)
@@ -719,7 +719,7 @@ void CPopupMenu::ShowActivePopup(const CRect& ParentRect, const CRect& BoundingR
 	// TODO: Add bounds checking for all edges.	Apply this same bounds checking logic to the popup root menu too.
 	if (!m_pActivePopup)
 	{
-		throw(Wg_Ex_App("CPopupMenu::ShowActivePopup() : Trying to show active popup menu when pActivePopup is NULL!"));
+		throw(Wg_Ex_App("Trying to show active popup menu when pActivePopup is NULL!", "CPopupMenu::ShowActivePopup"));
 	}
 
 	CRect MenuRect = m_pActivePopup->GetWindowRect();

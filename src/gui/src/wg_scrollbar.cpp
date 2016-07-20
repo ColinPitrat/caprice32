@@ -60,7 +60,7 @@ CScrollBar::CScrollBar(const CRect& WindowRect, CWindow* pParent, EScrollBarType
 			this, CwgBitmapResourceHandle(WGRES_RIGHT_ARROW_BITMAP));
 		break;
 	default:
-		throw(Wg_Ex_App("CScrollBar::CScrollBar:  Unrecognized ScrollBar Type."));
+		throw(Wg_Ex_App("Unrecognized ScrollBar Type.", "CScrollBar::CScrollBar"));
 		break;
 	}
 	m_ThumbRect = m_ClientRect;
@@ -130,7 +130,7 @@ void CScrollBar::SetWindowRect(const CRect& WindowRect)
 		break;
 	}
 	default:
-		throw(Wg_Ex_App("CScrollBar::SetWindowRect:  Unrecognized ScrollBar Type."));
+		throw(Wg_Ex_App("Unrecognized ScrollBar Type.", "CScrollBar::SetWindowRect"));
 		break;
 	}
 	SetValue(m_Value);
@@ -239,7 +239,7 @@ bool CScrollBar::HandleMessage(CMessage* pMessage)
 							(m_MaxLimit - m_MinLimit) / (m_ClientRect.Width() - m_ThumbRect.Width()) + m_MinLimit);
 						break;
 					default:
-						throw(Wg_Ex_App("CScrollBar::HandleMessage:  Unrecognized ScrollBar Type."));
+						throw(Wg_Ex_App("Unrecognized ScrollBar Type.", "CScrollBar::HandleMessage"));
 						break;
 					}
 					if (iOldPosition != m_Value)
@@ -309,7 +309,7 @@ void CScrollBar::RepositionThumb(void)  // virtual
 			break;
 		}
 		default:
-			throw(Wg_Ex_App("CScrollBar::RepositionThumb:  Unrecognized ScrollBar Type."));
+			throw(Wg_Ex_App("Unrecognized ScrollBar Type.", "CScrollBar::RepositionThumb"));
 			break;
 		}
 	}

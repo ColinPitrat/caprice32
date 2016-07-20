@@ -48,7 +48,7 @@ CWindow::CWindow(const CRect& WindowRect, CWindow* pParent) :
 {
 	if (!CApplication::Instance())
 	{
-		throw(Wg_Ex_App("CWindow Constructor: No Application instance!"));
+		throw(Wg_Ex_App("No Application instance!", "CWindow::CWindow"));
 	}
 
 	SetWindowRect(WindowRect);
@@ -68,7 +68,7 @@ CWindow::CWindow(CWindow* pParent) :
 {
 	if (!CApplication::Instance())
 	{
-		throw(Wg_Ex_App("CWindow Constructor: No Application instance!"));
+		throw(Wg_Ex_App("No Application instance!", "CWindow::CWindow"));
 	}
 	m_BackgroundColor = CApplication::Instance()->GetDefaultBackgroundColor();
 	SetNewParent(pParent);

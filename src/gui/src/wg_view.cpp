@@ -52,7 +52,7 @@ CView::CView(const CRect& WindowRect, std::string sTitle, bool bResizable, bool 
 {
 	if (m_pInstance)
 	{
-		throw(Wg_Ex_App("Cannot have more than one view at a time!"));
+		throw(Wg_Ex_App("Cannot have more than one view at a time!", "CView::CView"));
 	}
 	m_pInstance = this;
 
@@ -78,7 +78,7 @@ CView::CView(SDL_Surface* surface, SDL_Surface* backSurface, const CRect& Window
 {
 	if (m_pInstance)
 	{
-		throw(Wg_Ex_App("Cannot have more than one view at a time!"));
+		throw(Wg_Ex_App("Cannot have more than one view at a time!", "CView::CView"));
 	}
 	m_pInstance = this;
 
@@ -100,7 +100,7 @@ CView::CView(SDL_Surface* surface, SDL_Surface* backSurface, const CRect& Window
 
 	// judb should not happen:-)
 	if (m_pScreenSurface == nullptr)
-		throw( Wg_Ex_SDL(std::string("Surface not created? : ") + SDL_GetError()));
+		throw( Wg_Ex_SDL(std::string("Surface not created? : ") + SDL_GetError(), "CView::CView"));
 
 	CApplication::Instance()->GetApplicationLog().AddLogEntry("Created new CView ", APP_LOG_INFO);
 	Draw();
@@ -161,7 +161,7 @@ void CView::SetWindowRect(const CRect& WindowRect)
 
 	m_pScreenSurface = SDL_SetVideoMode(m_WindowRect.Width(), m_WindowRect.Height(), CApplication::Instance()->GetBitsPerPixel(), iFlags);
 	if (m_pScreenSurface == nullptr)
-		throw( Wg_Ex_SDL(std::string("Could not set video mode: ") + SDL_GetError()) );
+		throw( Wg_Ex_SDL(std::string("Could not set video mode: ") + SDL_GetError(), "CView::SetWindowRect") );
 }
 
 
@@ -237,7 +237,7 @@ bool CView::HandleMessage(CMessage* pMessage)
 
 				m_pScreenSurface = SDL_SetVideoMode(m_WindowRect.Width(), m_WindowRect.Height(), DEFAULT_BPP, iFlags);
 				if (m_pScreenSurface == nullptr)
-					throw( Wg_Ex_SDL(std::string("Could not set video mode : ") + SDL_GetError()) );
+					throw( Wg_Ex_SDL(std::string("Could not set video mode : ") + SDL_GetError(), "CView::HandleMessage") );
 
 				bHandled = true;
 			}

@@ -183,7 +183,7 @@ CApplication::CApplication(std::string sFontFileName, bool bHandleExceptionsInte
 {
 	if (m_pInstance)
 	{
-		throw(Wg_Ex_App("CApplication::CApplication : An instance of the CApplication already exists."));
+		throw(Wg_Ex_App("An instance of the CApplication already exists.", "CApplication::CApplication"));
 	}
 
 	m_pInstance = this;
@@ -191,12 +191,12 @@ CApplication::CApplication(std::string sFontFileName, bool bHandleExceptionsInte
 	// judb
   //if(SDL_Init(SDL_INIT_TIMER | SDL_INIT_VIDEO | SDL_INIT_NOPARACHUTE ) == -1)
 	//{
-	//	throw(Wg_Ex_SDL(std::string("CApplication::CApplication : Could not initialize SDL: ") + SDL_GetError()));
+	//	throw(Wg_Ex_SDL(std::string("Could not initialize SDL: ") + SDL_GetError(), "CApplication::CApplication"));
 	//}
 	//Setting the keyboard repeat rate using the SDL Default rates
 	//if(SDL_EnableKeyRepeat(SDL_DEFAULT_REPEAT_DELAY, SDL_DEFAULT_REPEAT_INTERVAL) == -1)
 	//{
-	//	throw(Wg_Ex_SDL(std::string("CApplication::Capplication : Error setting SDL keyboard repeat rate.")));
+	//	throw(Wg_Ex_SDL("Error setting SDL keyboard repeat rate.", "CApplication::Capplication"));
 	//}
 
 	m_pSystemDefaultCursor = SDL_GetCursor();
@@ -284,7 +284,7 @@ void CApplication::Exec(void)
 	{
 		if (!m_bInited)
 		{
-			throw(Wg_Ex_App("CApplication::Exec : Application Init() was not called!"));
+			throw(Wg_Ex_App("Application Init() was not called!", "CApplication::Exec"));
 		}
 
 		m_bRunning = true;
@@ -392,6 +392,10 @@ CFontEngine* CApplication::GetFontEngine(std::string sFontFileName, unsigned cha
       if (bFileExists)
       {
         pFontEngine = new CFontEngine(sFontFileName, iFontSize);
+      }
+      else
+      {
+        throw(Wg_Ex_App("File not found: " + sFontFileName, "CApplication::GetFontEngine"));
       }
 			if (pFontEngine)
 			{

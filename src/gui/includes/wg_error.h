@@ -40,7 +40,7 @@ class Wg_Ex_Base : public std::exception
 public:
 	//! Standard constructor
 	//! \param sWhat A string for more information on what caused the exception
-	Wg_Ex_Base(const std::string& sWhat) : m_sWhat(sWhat) { }
+	Wg_Ex_Base(const std::string& sWhat, const std::string& sWhere) : m_sWhat(sWhat), m_sWhere(sWhere) { }
 
 	//! Standard Destructor
 	virtual ~Wg_Ex_Base(void) throw() { }
@@ -49,12 +49,17 @@ public:
 	//! \return A string describing what caused the exception
 	virtual const char* what() const throw() override { return m_sWhat.c_str(); }
 
+	//! Gets a text description of where the exception happened
+	//! \return A string describing where the exception was raised
+	virtual const char* where() const throw() { return m_sWhere.c_str(); }
+
 	//! Gets a text description of the exception
 	//! \return A std::string reference describing what caused the exception
 	virtual const std::string& std_what() const throw() { return m_sWhat; }
 
 private:
 	std::string m_sWhat;
+	std::string m_sWhere;
 };
 
 
@@ -64,7 +69,7 @@ class Wg_Ex_SDL : public Wg_Ex_Base
 public:
 	//! Standard constructor
 	//! \param sWhat A string for more information on what caused the exception
-	Wg_Ex_SDL(const std::string& sWhat) : Wg_Ex_Base(sWhat) { }
+	Wg_Ex_SDL(const std::string& sWhat, const std::string& sWhere = "") : Wg_Ex_Base(sWhat, sWhere) { }
 };
 
 
@@ -74,7 +79,7 @@ class Wg_Ex_FreeType : public Wg_Ex_Base
 public:
 	//! Standard constructor
 	//! \param sWhat A string for more information on what caused the exception
-	Wg_Ex_FreeType(const std::string& sWhat) : Wg_Ex_Base(sWhat) { }
+	Wg_Ex_FreeType(const std::string& sWhat, const std::string& sWhere = "") : Wg_Ex_Base(sWhat, sWhere) { }
 };
 
 
@@ -84,7 +89,7 @@ class Wg_Ex_App : public Wg_Ex_Base
 public:
 	//! Standard constructor
 	//! \param sWhat A string for more information on what caused the exception
-	Wg_Ex_App(const std::string& sWhat) : Wg_Ex_Base(sWhat) { }
+	Wg_Ex_App(const std::string& sWhat, const std::string& sWhere = "") : Wg_Ex_Base(sWhat, sWhere) { }
 };
 
 
@@ -94,7 +99,7 @@ class Wg_Ex_Range : public Wg_Ex_Base
 public:
 	//! Standard constructor
 	//! \param sWhat A string for more information on what caused the exception
-	Wg_Ex_Range(const std::string& sWhat) : Wg_Ex_Base(sWhat) { }
+	Wg_Ex_Range(const std::string& sWhat, const std::string& sWhere = "") : Wg_Ex_Base(sWhat, sWhere) { }
 };
 
 }

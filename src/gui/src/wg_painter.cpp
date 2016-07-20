@@ -37,7 +37,7 @@ CPainter::CPainter(SDL_Surface* pSurface, EPaintMode ePaintMode) :
 {
 	if (!m_pSurface)
 	{
-		throw Wg_Ex_App("CPainter::CPainter : Invalid pointer to surface.");
+		throw Wg_Ex_App("Invalid pointer to surface.", "CPainter::CPainter");
 	}
 }
 
@@ -49,12 +49,12 @@ CPainter::CPainter(CWindow* pWindow, EPaintMode ePaintMode) :
 {
 	if (!m_pWindow)
 	{
-		throw Wg_Ex_App("CPainter::CPainter : Invalid pointer to window.");
+		throw Wg_Ex_App("Invalid pointer to window.", "CPainter::CPainter");
 	}
 	m_pSurface = pWindow->GetSDLSurface();
 	if (!m_pSurface)
 	{
-		throw Wg_Ex_App("CPainter::CPainter : Invalid pointer to surface.");
+		throw Wg_Ex_App("Invalid pointer to surface.", "CPainter::CPainter");
 	}
 }
 
@@ -233,7 +233,7 @@ void CPainter::DrawPoint(const CPoint& Point, const CRGBColor& PointColor)
 			*reinterpret_cast<Uint32*>(PixelOffset) = static_cast<Uint32>(MixColor(ReadPoint(Point), PointColor).SDLColor(m_pSurface->format));
 			break;
 		default:
-			throw(Wg_Ex_SDL("CPainter::DrawPoint : Unrecognized BytesPerPixel."));
+			throw(Wg_Ex_SDL("Unrecognized BytesPerPixel.", "CPainter::DrawPoint"));
 			break;
 		}
 		UnlockSurface();
@@ -270,7 +270,7 @@ CRGBColor CPainter::ReadPoint(const CPoint& Point)
 			PixelColor = *reinterpret_cast<Uint32*>(PixelOffset);
 			break;
 		default:
-			throw(Wg_Ex_SDL("CPainter::DrawPoint : Unrecognized BytesPerPixel."));
+			throw(Wg_Ex_SDL("Unrecognized BytesPerPixel.", "CPainter::DrawPoint"));
 			break;
 		}
 	}
@@ -287,7 +287,7 @@ void CPainter::LockSurface(void)
 			SDL_Delay(10);
 			if (SDL_LockSurface(m_pSurface) < 0)
 			{
-				throw(Wg_Ex_SDL("Unable to lock surface."));
+				throw(Wg_Ex_SDL("Unable to lock surface.", "CPainter::LockSurface"));
 			}
 		}
 	}

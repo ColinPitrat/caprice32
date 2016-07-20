@@ -59,7 +59,7 @@ CMessageServer& CMessageServer::Instance(void)
 		m_pInstance = new CMessageServer;
 		if (!m_pInstance)
 		{
-			throw(Wg_Ex_App("CMessageServer::Instance : Unable to instantiate Message Server!"));
+			throw(Wg_Ex_App("Unable to instantiate Message Server!", "CMessageServer::Instance"));
 		}
 	}
 

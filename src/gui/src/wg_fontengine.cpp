@@ -41,17 +41,17 @@ CFontEngine::CFontEngine(const std::string& sFontFileName, unsigned char FontSiz
 	{
 		if (FT_Init_FreeType(&m_FTLibrary))
 		{
-			throw(Wg_Ex_FreeType("CFontEngine::CFontEngine : Unable to initialize FreeType library."));
+			throw(Wg_Ex_FreeType("Unable to initialize FreeType library.", "CFontEngine::CFontEngine"));
 		}
 		m_bFTLibraryLoaded = true;
 	}
 	if (FT_New_Face(m_FTLibrary, sFontFileName.c_str(), 0, &m_FontFace))
 	{
-		throw(Wg_Ex_FreeType("CFontEngine::CFontEngine : Unable to create font face."));
+		throw(Wg_Ex_FreeType("Unable to create font face.", "CFontEngine::CFontEngine"));
 	}
 	if (FT_Set_Char_Size(m_FontFace, 0, FontSize * 64, 0, 0))
 	{
-		throw(Wg_Ex_FreeType("CFontEngine::CFontEngine : Unable to set character size."));
+		throw(Wg_Ex_FreeType("Unable to set character size.", "CFontEngine::CFontEngine"));
 	}
 	CApplication::Instance()->GetApplicationLog().
 		AddLogEntry("CFontEngine - Loaded new font : " + stdex::itoa(FontSize) + " point, " + sFontFileName, APP_LOG_INFO);
@@ -71,16 +71,16 @@ FT_BitmapGlyphRec* CFontEngine::RenderGlyph(char Char)
 	{
 		if (FT_Load_Char(m_FontFace, Char, FT_LOAD_DEFAULT))
 		{
-			throw(Wg_Ex_FreeType("CFontEngine::RenderGlyph : Unable to render glyph."));
+			throw(Wg_Ex_FreeType("Unable to render glyph.", "CFontEngine::RenderGlyph"));
 		}
 		FT_Glyph glyph;
 		if (FT_Get_Glyph(m_FontFace->glyph, &glyph))
 		{
-			throw(Wg_Ex_FreeType("CFontEngine::RenderGlyph : Unable to copy glyph."));
+			throw(Wg_Ex_FreeType("Unable to copy glyph.", "CFontEngine::RenderGlyph"));
 		}
 		if (FT_Glyph_To_Bitmap(&glyph, ft_render_mode_normal, nullptr, 1))
 		{
-			throw(Wg_Ex_FreeType("CFontEngine::RenderGlyph : Unable to render glyph."));
+			throw(Wg_Ex_FreeType("Unable to render glyph.", "CFontEngine::RenderGlyph"));
 		}
 		glyphIter = m_CachedGlyphMap.insert(std::make_pair(Char, *reinterpret_cast<FT_BitmapGlyph>(glyph))).first;
 	}
@@ -94,7 +94,7 @@ FT_Glyph_Metrics* CFontEngine::GetMetrics(char Char)
 	{
 		if (FT_Load_Char(m_FontFace, Char, FT_LOAD_DEFAULT))
 		{
-			throw(Wg_Ex_FreeType("CFontEngine::RenderGlyph : Unable to render glyph."));
+			throw(Wg_Ex_FreeType("Unable to render glyph.", "CFontEngine::RenderGlyph"));
 		}
 		glyphIter = m_CachedMetricsMap.insert(std::make_pair(Char, m_FontFace->glyph->metrics)).first;
 	}
