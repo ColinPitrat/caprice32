@@ -3072,6 +3072,7 @@ void showVKeyboard()
     auto newEvents = capriceVKeyboardView.GetEvents();
     virtualKeyboardEvents.splice(virtualKeyboardEvents.end(), newEvents);
   } catch(wGui::Wg_Ex_App& e) {
+    // TODO: improve: this is pretty silent if people don't look at the console
     std::cout << "Failed displaying the virtual keyboard: " << e.what() << std::endl;
   }
   SDL_FreeSurface(guiBackSurface);
@@ -3098,6 +3099,7 @@ void showGui()
     capriceGui.SetMouseVisibility(true);
     capriceGui.Exec();
   } catch(wGui::Wg_Ex_App& e) {
+    // TODO: improve: this is pretty silent if people don't look at the console
     std::cout << "Failed displaying the GUI: " << e.what() << std::endl;
   }
   SDL_FreeSurface(guiBackSurface);
