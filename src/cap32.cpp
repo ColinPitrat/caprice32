@@ -3409,6 +3409,12 @@ int cap32_main (int argc, char **argv)
                             break;
                           }
 
+                        case CAP32_VKBD:
+                          {
+                            showVKeyboard();
+                            break;
+                          }
+
                         case CAP32_FULLSCRN:
                            audio_pause();
                            SDL_Delay(20);
