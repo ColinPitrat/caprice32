@@ -5,7 +5,7 @@
 
 CapriceVKeyboardView::CapriceVKeyboardView(SDL_Surface* surface, SDL_Surface* backSurface, const CRect& WindowRect) : CView(surface, backSurface, WindowRect)
 {
-  m_kbdFrame = new CapriceVKeyboard(CRect(CPoint(0, 0), 430, 270), this, m_pScreenSurface, nullptr);
+  m_kbdFrame = new CapriceVKeyboard(CRect(CPoint(0, 0), 384, 270), this, m_pScreenSurface, nullptr);
 }
 
 std::list<SDL_Event> CapriceVKeyboardView::GetEvents()

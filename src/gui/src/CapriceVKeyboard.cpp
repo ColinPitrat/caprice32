@@ -20,10 +20,10 @@ namespace wGui {
     // TODO: add files that are on disk
     m_focused.first = 0;
     m_focused.second = 0;
-    m_result = new CEditBox(CRect(CPoint(11, 15), 390, 15), this);
+    m_result = new CEditBox(CRect(CPoint(10, 10), 364, 15), this);
     m_result->SetReadOnly(true);
     // Add one char keys
-    int y = 40;
+    int y = 30;
     for(auto& l : keys)
     {
       std::vector<CButton*> line;
@@ -51,26 +51,8 @@ namespace wGui {
         line.push_back(button);
         x += 20;
       }
-      y += 20;
+      y += 18;
       m_buttons.push_back(line);
-    }
-    // Add keywords
-    int kx = 150;
-    int ky = 0;
-    int nb_lines = m_buttons.size();
-    int i = m_buttons.size();
-    for(auto& w : keywords)
-    {
-      if(i >= nb_lines) {
-        if(kx > 300) break;
-        i -= nb_lines;
-        ky = 40;
-        kx += 90;
-      }
-      CButton *button = new CButton(CRect(CPoint(kx, ky), 70, 15), this, w);
-      button->SetIsFocusable(true);
-      m_buttons[i++].push_back(button);
-      ky += 20;
     }
     // Add ESC, SPACE, DELETE and RETURN buttons
     // TODO: TAB ? COPY ?
@@ -88,6 +70,24 @@ namespace wGui {
     line.push_back(retur);
     line.push_back(backs);
     m_buttons.push_back(line);
+    // Add keywords
+    int kx = 160;
+    int ky = 0;
+    int nb_lines = m_buttons.size();
+    int i = nb_lines;
+    for(auto& w : keywords)
+    {
+      if(i >= nb_lines) {
+        if(kx > 290) break;
+        i -= nb_lines;
+        ky = 30;
+        kx += 70;
+      }
+      CButton *button = new CButton(CRect(CPoint(kx, ky), 60, 15), this, w);
+      button->SetIsFocusable(true);
+      m_buttons[i++].push_back(button);
+      ky += 18;
+    }
   }
 
   CapriceVKeyboard::~CapriceVKeyboard() { };
@@ -167,7 +167,7 @@ namespace wGui {
           CloseFrame();
           break;
         case CMessage::CTRL_SINGLELCLICK:
-          if (pMessage->Destination() == this) {
+          if (pMessage->Destination() == this && pMessage->Source() != m_pFrameCloseButton) {
             std::string pressed = static_cast<const CWindow*>(pMessage->Source())->GetWindowText();
             if(pressed == "SPACE") {
               pressed = " ";
