@@ -316,6 +316,11 @@ typedef struct {
    void (*CharInstSL)(void);
    unsigned char reg_select;
    unsigned char registers[18];
+   // 6128+ split screen support
+   unsigned int split_addr;
+   unsigned char split_sl;
+   unsigned int sl_count;
+   unsigned char interrupt_sl;
 } t_CRTC;
 
 typedef struct {

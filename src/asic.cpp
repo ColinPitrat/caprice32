@@ -7,6 +7,7 @@ byte *pbRegisterPage;
 extern double colours_rgb[32][3];
 extern SDL_Color colours[32];
 extern t_GateArray GateArray;
+extern t_CRTC CRTC;
 extern SDL_Surface *back_surface;
 
 bool asic_locked = true;
@@ -70,7 +71,25 @@ void asic_register_page_write(word addr, byte val) {
          }
       }
    } else if (addr >= 0x6800 && addr < 0x6806) {
-      //LOG("Received raster interrupt stuff: " << std::hex << addr << " - val: " << static_cast<int>(val) << std::dec);
+      if (addr == 0x6800) {
+         //LOG("Received programmable raster interrupt scan line: " << static_cast<int>(val));
+         CRTC.interrupt_sl = val;
+      } else if (addr == 0x6801) {
+         LOG("Received scan line for split: " << static_cast<int>(val));
+         CRTC.split_sl = val;
+      } else if (addr == 0x6802) {
+         CRTC.split_addr &= 0x00FF;
+         CRTC.split_addr |= (val << 8);
+         LOG("Received address for split: " << std::hex << CRTC.split_addr << std::dec);
+      } else if (addr == 0x6803) {
+         CRTC.split_addr &= 0x3F00;
+         CRTC.split_addr |= val;
+         LOG("Received address for split: " << std::hex << CRTC.split_addr << std::dec);
+      } else if (addr == 0x6804) {
+         LOG("Received soft scroll control: " << static_cast<int>(val));
+      } else if (addr == 0x6805) {
+         LOG("Received interrupt vector: " << static_cast<int>(val));
+      }
    } else if (addr >= 0x6808 && addr < 0x6810) {
       //LOG("Received analog input stuff");
    } else if (addr >= 0x6C00 && addr < 0x6C10) {

@@ -25,6 +25,7 @@
 #include "cap32.h"
 #include "crtc.h"
 #include "z80.h"
+#include "log.h"
 
 extern t_CPC CPC;
 extern t_CRTC CRTC;
@@ -649,6 +650,7 @@ inline void restart_frame(void)
    CRTC.raster_count = 0; // reset raster line counter
    CRTC.scr_base = 0;
    CRTC.line_count = 0; // reset character line counter
+   CRTC.sl_count = 0; // reset scan line counter
    reload_addr();
 }
 
@@ -659,13 +661,17 @@ inline void match_hsw(void)
    if (CRTC.hsw_count == CRTC.hsw) { // matches horizontal sync width?
       GateArray.sl_count++; // update GA scan line counter
       if (GateArray.sl_count == 52) { // trigger interrupt?
-         z80.int_pending = 1; // queue Z80 interrupt
+         if (CRTC.interrupt_sl == 0) {
+            z80.int_pending = 1; // queue Z80 interrupt
+         }
          GateArray.sl_count = 0; // clear counter
+      } else if (CRTC.sl_count == CRTC.interrupt_sl && CRTC.interrupt_sl != 0) {
+         z80.int_pending = 1;
       }
       if (GateArray.hs_count) { // delaying on VSYNC?
          GateArray.hs_count--;
          if (!GateArray.hs_count) {
-            if (GateArray.sl_count >= 32) { // counter above save margin?
+            if (GateArray.sl_count >= 32 && CRTC.interrupt_sl == 0) { // counter above save margin?
                z80.int_pending = 1; // queue interrupt
             }
             GateArray.sl_count = 0; // clear counter
@@ -1140,6 +1146,10 @@ void crtc_cycle(int repeat_count)
       if (CRTC.flag_newscan) { // scanline change requested?
          CRTC.flag_newscan = 0;
          CRTC.addr = CRTC.next_addr;
+         CRTC.sl_count++;
+         if (CRTC.split_sl && CRTC.sl_count == CRTC.split_sl) {
+            CRTC.next_addr = CRTC.split_addr;
+         }
 
          if (CRTC.flag_invsync) { // VSYNC active?
             CRTC.vsw_count++; // update counter
@@ -1290,6 +1300,10 @@ void crtc_reset(void)
    new_dt.NewHDSPTIMG = 0x03;
    CRTC.CharInstSL = NoChar;
    CRTC.CharInstMR = NoChar;
+   CRTC.split_addr = 0;
+   CRTC.split_sl = 0;
+   CRTC.sl_count = 0;
+   CRTC.interrupt_sl = 0;
 
    MinVSync = MID_VHOLD;
    MaxVSync = MinVSync + MIN_VHOLD_RANGE + static_cast<int>(ceil(static_cast<float>((MinVSync - MIN_VHOLD) *

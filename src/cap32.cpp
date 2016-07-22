@@ -462,7 +462,23 @@ void z80_OUT_handler (reg_pair port, byte val)
             }
             break;
          case 2: // set mode
-            if (asic_locked) {
+            if (val & 0x20) {
+               // 6128+ RMR2 register
+               int membank = (val >> 3) & 3;
+               if (membank == 3) { // Map register page at 0x4000
+                  //LOG("Register page on");
+                  GateArray.registerPageOn = true;
+                  membank = 0;
+               } else {
+                  //LOG("Register page off");
+                  GateArray.registerPageOn = false;
+               }
+               int page = (val & 0x7);
+               //LOG("Low bank rom = 0x" << std::hex << (4*membank) << std::dec << "000 - page " << page);
+               GateArray.lower_ROM_bank = membank;
+               pbROMlo = pbCartridgePages[page];
+               ga_memory_manager();
+            } else {
                #ifdef DEBUG_GA
                if (dwDebugFlag) {
                   fprintf(pfoDebug, "rom 0x%02x\r\n", val);
@@ -477,36 +493,6 @@ void z80_OUT_handler (reg_pair port, byte val)
                }
                if (CPC.mf2) { // MF2 enabled?
                   *(pbMF2ROM + 0x03fef) = val;
-               }
-            } else {
-               if (val & 0x20) {
-                  // 6128+ RMR2 register
-                  int membank = (val >> 3) & 3;
-                  if (membank == 3) { // Map register page at 0x4000
-                     //LOG("Register page on");
-                     GateArray.registerPageOn = true;
-                     membank = 0;
-                  } else {
-                     //LOG("Register page off");
-                     GateArray.registerPageOn = false;
-                  }
-                  int page = (val & 0x7);
-                  //LOG("Low bank rom = 0x" << std::hex << (4*membank) << std::dec << "000 - page " << page);
-                  GateArray.lower_ROM_bank = membank;
-                  pbROMlo = pbCartridgePages[page];
-                  ga_memory_manager();
-               } else {
-                  // 6128+ MRER
-                  LOG("6128+ MRER set mode " << static_cast<int>(val & 0x03));
-                  // TODO: clarify: same as non plus ? different ?
-                  // I have to comment requested_scr_mode to get colors in burnin' rubber but it may be just because I don't support split screen
-                  GateArray.ROM_config = val;
-                  //GateArray.requested_scr_mode = val & 0x03; // request a new CPC screen mode
-                  ga_memory_manager();
-                  if (val & 0x10) { // delay Z80 interrupt?
-                     z80.int_pending = 0; // clear pending interrupts
-                     GateArray.sl_count = 0; // reset GA scanline counter
-                  }
                }
             }
             break;
