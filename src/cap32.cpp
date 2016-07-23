@@ -174,10 +174,11 @@ static int joy_layout[12][2] = {
 
 char chAppPath[_MAX_PATH + 1];
 char chROMSelected[_MAX_PATH + 1];
-std::string chROMFile[3] = {
+std::string chROMFile[4] = {
    "cpc464.rom",
    "cpc664.rom",
-   "cpc6128.rom"
+   "cpc6128.rom",
+   "system.cpr"
 };
 
 t_CPC CPC;
@@ -462,7 +463,7 @@ void z80_OUT_handler (reg_pair port, byte val)
             }
             break;
          case 2: // set mode
-            if (val & 0x20) {
+            if (!asic_locked && (val & 0x20)) {
                // 6128+ RMR2 register
                int membank = (val >> 3) & 3;
                if (membank == 3) { // Map register page at 0x4000
@@ -2036,8 +2037,12 @@ int emulator_patch_ROM (void)
             break;
          case 1: // 664
          case 2: // 6128
-         case 3: // 6128+
             pbPtr += 0x1eef; // location of the keyboard translation table
+            break;
+         case 3: // 6128+
+            if(CPC.cart_file == chROMFile[3]) { // Only patch system cartridge - we don't want to break another one by messing with it
+               pbPtr += 0x1eef; // location of the keyboard translation table
+            }
             break;
       }
       if (pbPtr != pbROMlo) {
@@ -2057,10 +2062,18 @@ void emulator_reset (bool bolMF2Reset)
    int n;
 
 // ASIC
+// TODO: asic_reset
    asic_locked = true;
    for(int i = 0; i < 32; i++) {
       for(int j = 0; j < 3; j++) {
          colours_rgb[i][j] = colours_rgb_init[i][j];
+      }
+   }
+   for(int i = 0; i < 16; i++) {
+      for(int j = 0; j < 16; j++) {
+         for(int k = 0; k < 16; k++) {
+            asic_sprites[i][j][k] = 0;
+         }
       }
    }
    video_set_palette();
@@ -2090,6 +2103,7 @@ void emulator_reset (bool bolMF2Reset)
    memset(&GateArray, 0, sizeof(GateArray)); // clear GA data structure
    GateArray.scr_mode =
    GateArray.requested_scr_mode = 1; // set to mode 1
+   GateArray.registerPageOn = false;
    ga_init_banking();
 
 // PPI
@@ -2859,21 +2873,21 @@ void loadConfiguration (t_CPC &CPC, const std::string& configFilename)
    }
 
    CPC.max_tracksize = conf.getIntValue("file", "max_track_size", 6144-154);
-   CPC.snap_path = conf.getStringValue("file", "snap_path", appPath + "/snap");
+   CPC.snap_path = conf.getStringValue("file", "snap_path", appPath + "/snap/");
    CPC.snap_file = conf.getStringValue("file", "snap_file", "");
    CPC.snap_zip = conf.getIntValue("file", "snap_zip", 0) & 1;
-   CPC.cart_path = conf.getStringValue("file", "cart_path", appPath + "/rom");
+   CPC.cart_path = conf.getStringValue("file", "cart_path", appPath + "/rom/");
    CPC.cart_file = conf.getStringValue("file", "cart_file", "system.cpr");
    CPC.cart_zip = conf.getIntValue("file", "cart_zip", 0) & 1;
-   CPC.drvA_path = conf.getStringValue("file", "drvA_path", appPath + "/disk");
+   CPC.drvA_path = conf.getStringValue("file", "drvA_path", appPath + "/disk/");
    CPC.drvA_file = conf.getStringValue("file", "drvA_file", "");
    CPC.drvA_zip = conf.getIntValue("file", "drvA_zip", 0) & 1;
    CPC.drvA_format = conf.getIntValue("file", "drvA_format", DEFAULT_DISK_FORMAT);
-   CPC.drvB_path = conf.getStringValue("file", "drvB_path", appPath + "/disk");
+   CPC.drvB_path = conf.getStringValue("file", "drvB_path", appPath + "/disk/");
    CPC.drvB_file = conf.getStringValue("file", "drvB_file", "");
    CPC.drvB_zip = conf.getIntValue("file", "drvB_zip", 0) & 1;
    CPC.drvB_format = conf.getIntValue("file", "drvB_format", DEFAULT_DISK_FORMAT);
-   CPC.tape_path = conf.getStringValue("file", "tape_path", appPath + "/tape");
+   CPC.tape_path = conf.getStringValue("file", "tape_path", appPath + "/tape/");
    CPC.tape_file = conf.getStringValue("file", "tape_file", "");
    CPC.tape_zip = conf.getIntValue("file", "tape_zip", 0) & 1;
 
@@ -2890,7 +2904,7 @@ void loadConfiguration (t_CPC &CPC, const std::string& configFilename)
    CPC.printer_file = conf.getStringValue("file", "printer_file", appPath + "/printer.dat");
    CPC.sdump_file = conf.getStringValue("file", "sdump_file", appPath + "/screen.png");
 
-   CPC.rom_path = conf.getStringValue("rom", "rom_path", appPath + "/rom");
+   CPC.rom_path = conf.getStringValue("rom", "rom_path", appPath + "/rom/");
    for (int iRomNum = 0; iRomNum < 16; iRomNum++) { // loop for ROMs 0-15
       char chRomId[14];
       sprintf(chRomId, "slot%02d", iRomNum); // build ROM ID

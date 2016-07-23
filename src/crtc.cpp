@@ -26,6 +26,7 @@
 #include "crtc.h"
 #include "z80.h"
 #include "log.h"
+#include "asic.h"
 
 extern t_CPC CPC;
 extern t_CRTC CRTC;
@@ -815,12 +816,16 @@ void prerender_sync_half(void)
 
 
 
+static inline byte getRAMByte(unsigned int video_address) {
+   return *(pbRAM + video_address);
+}
+
 void prerender_normal(void)
 {
-   register byte bVidMem = *(pbRAM + CRTC.next_address);
+   register byte bVidMem = getRAMByte(CRTC.next_address);
    *RendPos = *(ModeMap + (bVidMem * 2));
    *(RendPos + 1) = *(ModeMap + (bVidMem * 2) + 1);
-   bVidMem = *(pbRAM + CRTC.next_address + 1);
+   bVidMem = getRAMByte(CRTC.next_address + 1);
    *(RendPos + 2) = *(ModeMap + (bVidMem * 2));
    *(RendPos + 3) = *(ModeMap + (bVidMem * 2) + 1);
    RendPos += 4;
@@ -830,9 +835,9 @@ void prerender_normal(void)
 
 void prerender_normal_half(void)
 {
-   register byte bVidMem = *(pbRAM + CRTC.next_address);
+   register byte bVidMem = getRAMByte(CRTC.next_address);
    *RendPos = *(ModeMap + bVidMem);
-   bVidMem = *(pbRAM + CRTC.next_address + 1);
+   bVidMem = getRAMByte(CRTC.next_address + 1);
    *(RendPos + 1) = *(ModeMap + bVidMem);
    RendPos += 2;
 }
@@ -855,12 +860,45 @@ void set_prerender(void)
 
 
 
+unsigned int getPixel()
+{
+   const int borderWidth = 64;
+   const int borderHeight = 40;
+   const int screenWidth = 640;
+   const int screenHeight = 200;
+   int x = (CPC.scr_pos - CPC.scr_base) - borderWidth;
+   int y = VDU.scrln - borderHeight;
+   if (x >= 0 && x < screenWidth && y >= 0 && y < screenHeight) {
+      for(int i = 0; i <= 16; i++) {
+         int sx = asic_sprites_x[i];
+         int mx = asic_sprites_mag_x[i];
+         if(mx > 0 && x >= sx && x < sx + 16 * mx) {
+            int sy = asic_sprites_y[i];
+            int my = asic_sprites_mag_y[i];
+            if(my > 0 && y >= sy && y < sy + 16 * my) {
+               int px = (x - sx) / mx;
+               int py = (y - sy) / my;
+               byte pcol = asic_sprites[i][px][py];
+               if(pcol != 0) {
+                  RendOut++;
+                  return GateArray.palette[pcol];
+               }
+            }
+         }
+      }
+   }
+   return GateArray.palette[*RendOut++];
+}
+
+
+
 void render8bpp(void)
 {
    register byte *pbPos = reinterpret_cast<byte *>(CPC.scr_pos);
    register byte bCount = *RendWid++;
    while (bCount--) {
-      *pbPos++ = GateArray.palette[*RendOut++];
+      register byte val = getPixel();
+      *pbPos++ = val;
    }
    CPC.scr_pos = reinterpret_cast<dword *>(pbPos);
 }
@@ -873,7 +911,7 @@ void render8bpp_doubleY(void)
    register dword dwLineOffs = CPC.scr_bps << 2;
    register byte bCount = *RendWid++;
    while (bCount--) {
-      register byte val = GateArray.palette[*RendOut++];
+      register byte val = getPixel();
       *(pbPos + dwLineOffs) = val;
       *pbPos++ = val;
    }
@@ -887,7 +925,8 @@ void render16bpp(void)
    register word *pwPos = reinterpret_cast<word *>(CPC.scr_pos);
    register byte bCount = *RendWid++;
    while (bCount--) {
-      *pwPos++ = GateArray.palette[*RendOut++];
+      register word val = getPixel();
+      *pwPos++ = val;
    }
    CPC.scr_pos = reinterpret_cast<dword *>(pwPos);
 }
@@ -900,7 +939,7 @@ void render16bpp_doubleY(void)
    register dword dwLineOffs = CPC.scr_bps << 1;
    register byte bCount = *RendWid++;
    while (bCount--) {
-      register word val = GateArray.palette[*RendOut++];
+      register word val = getPixel();
       *(pwPos + dwLineOffs) = val;
       *pwPos++ = val;
    }
@@ -914,7 +953,7 @@ void render24bpp(void)
    register byte *pbPos = reinterpret_cast<byte *>(CPC.scr_pos);
    register byte bCount = *RendWid++;
    while (bCount--) {
-      register dword val = GateArray.palette[*RendOut++];
+      register dword val = getPixel();
       *reinterpret_cast<word *>(pbPos) = static_cast<word>(val);
       *(pbPos + 2) = static_cast<byte>(val >> 16);
       pbPos += 3;
@@ -930,7 +969,7 @@ void render24bpp_doubleY(void)
    register dword dwLineOffs = CPC.scr_bps << 2;
    register byte bCount = *RendWid++;
    while (bCount--) {
-      register dword val = GateArray.palette[*RendOut++];
+      register dword val = getPixel();
       *reinterpret_cast<word *>(pbPos + dwLineOffs) = static_cast<word>(val);
       *reinterpret_cast<word *>(pbPos) = static_cast<word>(val);
       val >>= 16;
@@ -947,7 +986,8 @@ void render32bpp(void)
 {
    register byte bCount = *RendWid++;
    while (bCount--) {
-      *CPC.scr_pos++ = GateArray.palette[*RendOut++];
+      register dword val = getPixel();
+      *CPC.scr_pos++ = val;
    }
 }
 
@@ -957,7 +997,7 @@ void render32bpp_doubleY(void)
 {
    register byte bCount = *RendWid++;
    while (bCount--) {
-      register dword val = GateArray.palette[*RendOut++];
+      register dword val = getPixel();
       *(CPC.scr_pos + CPC.scr_bps) = val;
       *CPC.scr_pos++ = val;
    }
