@@ -120,8 +120,7 @@ dword freq_table[MAX_FREQ_ENTRIES] = {
 
 #include "font.h"
 
-double colours_rgb[32][3];
-double colours_rgb_init[32][3] = {
+double colours_rgb[32][3] = {
    { 0.5, 0.5, 0.5 }, { 0.5, 0.5, 0.5 },{ 0.0, 1.0, 0.5 }, { 1.0, 1.0, 0.5 },
    { 0.0, 0.0, 0.5 }, { 1.0, 0.0, 0.5 },{ 0.0, 0.5, 0.5 }, { 1.0, 0.5, 0.5 },
    { 1.0, 0.0, 0.5 }, { 1.0, 1.0, 0.5 },{ 1.0, 1.0, 0.0 }, { 1.0, 1.0, 1.0 },
@@ -418,48 +417,40 @@ void z80_OUT_handler (reg_pair port, byte val)
    if ((port.b.h & 0xc0) == 0x40) { // GA chip select?
       switch (val >> 6) {
          case 0: // select pen
-            if(asic_locked) {
-               #ifdef DEBUG_GA
-               if (dwDebugFlag) {
-                  fprintf(pfoDebug, "pen 0x%02x\r\n", val);
-               }
-               #endif
-               GateArray.pen = val & 0x10 ? 0x10 : val & 0x0f; // if bit 5 is set, pen indexes the border colour
-               if (CPC.mf2) { // MF2 enabled?
-                  *(pbMF2ROM + 0x03fcf) = val;
-               }
-            } else {
-               // 6128+ Palette pointer register
-               LOG("Palette pointer register");
+            #ifdef DEBUG_GA
+            if (dwDebugFlag) {
+               fprintf(pfoDebug, "pen 0x%02x\r\n", val);
+            }
+            #endif
+            GateArray.pen = val & 0x10 ? 0x10 : val & 0x0f; // if bit 5 is set, pen indexes the border colour
+            //LOG("Set pen value to " << static_cast<int>(GateArray.pen));
+            if (CPC.mf2) { // MF2 enabled?
+               *(pbMF2ROM + 0x03fcf) = val;
             }
             break;
          case 1: // set colour
-            if(asic_locked) {
-               #ifdef DEBUG_GA
-               if (dwDebugFlag) {
-                  fprintf(pfoDebug, "clr 0x%02x\r\n", val);
+            #ifdef DEBUG_GA
+            if (dwDebugFlag) {
+               fprintf(pfoDebug, "clr 0x%02x\r\n", val);
+            }
+            #endif
+            {
+               byte colour = val & 0x1f; // isolate colour value
+               LOG("Set ink value " << static_cast<int>(GateArray.pen) << " to " << static_cast<int>(colour));
+               GateArray.ink_values[GateArray.pen] = colour;
+               GateArray.palette[GateArray.pen] = SDL_MapRGB(back_surface->format,
+                     colours[colour].r, colours[colour].g, colours[colour].b);
+               if (GateArray.pen < 2) {
+                  byte r = (static_cast<dword>(colours[GateArray.ink_values[0]].r) + static_cast<dword>(colours[GateArray.ink_values[1]].r)) >> 1;
+                  byte g = (static_cast<dword>(colours[GateArray.ink_values[0]].g) + static_cast<dword>(colours[GateArray.ink_values[1]].g)) >> 1;
+                  byte b = (static_cast<dword>(colours[GateArray.ink_values[0]].b) + static_cast<dword>(colours[GateArray.ink_values[1]].b)) >> 1;
+                  GateArray.palette[18] = SDL_MapRGB(back_surface->format, r, g, b); // update the mode 2 'anti-aliasing' colour
                }
-               #endif
-               {
-                  byte colour = val & 0x1f; // isolate colour value
-                  //LOG("Set ink value " << static_cast<int>(GateArray.pen) << " to " << static_cast<int>(colour));
-                  GateArray.ink_values[GateArray.pen] = colour;
-                  GateArray.palette[GateArray.pen] = SDL_MapRGB(back_surface->format,
-                   colours[colour].r, colours[colour].g, colours[colour].b);
-                  if (GateArray.pen < 2) {
-                     byte r = (static_cast<dword>(colours[GateArray.ink_values[0]].r) + static_cast<dword>(colours[GateArray.ink_values[1]].r)) >> 1;
-                     byte g = (static_cast<dword>(colours[GateArray.ink_values[0]].g) + static_cast<dword>(colours[GateArray.ink_values[1]].g)) >> 1;
-                     byte b = (static_cast<dword>(colours[GateArray.ink_values[0]].b) + static_cast<dword>(colours[GateArray.ink_values[1]].b)) >> 1;
-                     GateArray.palette[18] = SDL_MapRGB(back_surface->format, r, g, b); // update the mode 2 'anti-aliasing' colour
-                  }
-               }
-               if (CPC.mf2) { // MF2 enabled?
-                  int iPen = *(pbMF2ROM + 0x03fcf);
-                  *(pbMF2ROM + (0x03f90 | ((iPen & 0x10) << 2) | (iPen & 0x0f))) = val;
-               }
-            } else {
-               // 6128+ Palette memory
-               LOG("Palette memory");
+               // TODO: update pbRegisterPage
+            }
+            if (CPC.mf2) { // MF2 enabled?
+               int iPen = *(pbMF2ROM + 0x03fcf);
+               *(pbMF2ROM + (0x03f90 | ((iPen & 0x10) << 2) | (iPen & 0x0f))) = val;
             }
             break;
          case 2: // set mode
@@ -475,7 +466,7 @@ void z80_OUT_handler (reg_pair port, byte val)
                   GateArray.registerPageOn = false;
                }
                int page = (val & 0x7);
-               //LOG("Low bank rom = 0x" << std::hex << (4*membank) << std::dec << "000 - page " << page);
+               //LOG("RMR2: Low bank rom = 0x" << std::hex << (4*membank) << std::dec << "000 - page " << page);
                GateArray.lower_ROM_bank = membank;
                pbROMlo = pbCartridgePages[page];
                ga_memory_manager();
@@ -485,6 +476,7 @@ void z80_OUT_handler (reg_pair port, byte val)
                   fprintf(pfoDebug, "rom 0x%02x\r\n", val);
                }
                #endif
+               //LOG("MRER: ROM config = " << std::hex << static_cast<int>(val) << std::dec << " - mode=" << static_cast<int>(val & 0x03));
                GateArray.ROM_config = val;
                GateArray.requested_scr_mode = val & 0x03; // request a new CPC screen mode
                ga_memory_manager();
@@ -504,6 +496,7 @@ void z80_OUT_handler (reg_pair port, byte val)
                   fprintf(pfoDebug, "mem 0x%02x\r\n", val);
                }
                #endif
+               LOG("RAM config: " << static_cast<int>(val));
                GateArray.RAM_config = val;
                ga_memory_manager();
                if (CPC.mf2) { // MF2 enabled?
@@ -657,8 +650,8 @@ void z80_OUT_handler (reg_pair port, byte val)
    }
 // ROM select -----------------------------------------------------------------
    if (!(port.b.h & 0x20)) { // ROM select?
-      GateArray.upper_ROM = val;
       if (CPC.model <= 2) {
+         GateArray.upper_ROM = val;
          pbExpansionROM = memmap_ROM[val];
          if (pbExpansionROM == nullptr) { // selected expansion ROM not present?
             pbExpansionROM = pbROMhi; // revert to BASIC ROM
@@ -677,6 +670,7 @@ void z80_OUT_handler (reg_pair port, byte val)
          } else if (val >= 128) {
             page = val & 31;
          }
+         GateArray.upper_ROM = page;
          pbExpansionROM = pbCartridgePages[page];
       }
    }
@@ -2064,11 +2058,6 @@ void emulator_reset (bool bolMF2Reset)
 // ASIC
 // TODO: asic_reset
    asic_locked = true;
-   for(int i = 0; i < 32; i++) {
-      for(int j = 0; j < 3; j++) {
-         colours_rgb[i][j] = colours_rgb_init[i][j];
-      }
-   }
    for(int i = 0; i < 16; i++) {
       for(int j = 0; j < 16; j++) {
          for(int k = 0; k < 16; k++) {
@@ -2382,7 +2371,7 @@ void audio_resume (void)
 
 int video_set_palette (void)
 {
-            int n;
+         int n;
 
          if (!CPC.scr_tube) {
             int n;
@@ -2418,7 +2407,7 @@ int video_set_palette (void)
 
          vid_plugin->set_palette(colours);
 
-   for (n = 0; n < 17; n++) { // loop for all colours + border
+   for (n = 0; n < 32; n++) { // loop for all colours + border
      int i=GateArray.ink_values[n];
      GateArray.palette[n] = SDL_MapRGB(back_surface->format,colours[i].r,colours[i].g,colours[i].b);
    }

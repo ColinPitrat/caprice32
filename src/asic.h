@@ -21,6 +21,6 @@ extern short int asic_sprites_mag_x[16];
 extern short int asic_sprites_mag_y[16];
 
 void asic_poke_lock_sequence(byte val);
-void asic_register_page_write(word addr, byte val);
+bool asic_register_page_write(word addr, byte val);
 
 #endif

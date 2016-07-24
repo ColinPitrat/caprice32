@@ -4,10 +4,10 @@
 #include "SDL.h"
 
 byte *pbRegisterPage;
-extern double colours_rgb[32][3];
 extern SDL_Color colours[32];
 extern t_GateArray GateArray;
 extern t_CRTC CRTC;
+extern t_CPC CPC;
 extern SDL_Surface *back_surface;
 
 bool asic_locked = true;
@@ -16,6 +16,7 @@ int asic_sprites_x[16];
 int asic_sprites_y[16];
 short int asic_sprites_mag_x[16];
 short int asic_sprites_mag_y[16];
+double asic_colours[32][3];
 
 void asic_poke_lock_sequence(byte val) {
    static const byte lockSeq[] = { 0x00, 0xff, 0x77, 0xb3, 0x51, 0xa8, 0xd4, 0x62, 0x39, 0x9c, 0x46, 0x2b, 0x15, 0x8a, 0xcd };
@@ -52,12 +53,14 @@ static inline unsigned short decode_magnification(byte val) {
    return mag;
 }
 
-void asic_register_page_write(word addr, byte val) {
+// Return true if byte should be written in memory
+bool asic_register_page_write(word addr, byte val) {
    if (addr < 0x4000 || addr > 0x7FFF) {
-      return;
+      return true;
    }
+   // TODO:double check the writes (more cases with mirroring / write only ?)
    if (addr >= 0x4000 && addr < 0x5000) {
-      int id = ((addr - 0x4000) >> 8);
+      int id = ((addr & 0xF00) >> 8);
       int y = ((addr & 0xF0) >> 4);
       int x = (addr & 0xF);
       byte color = (val & 0xF);
@@ -65,7 +68,7 @@ void asic_register_page_write(word addr, byte val) {
          color += 16;
       }
       asic_sprites[id][x][y] = color;
-      //LOG("Received sprite data for sprite " << id << ": x=" << x << ", y=" << y << ", color=" << static_cast<int>(color));
+      //LOG("Received sprite data for sprite " << id << ": x=" << x << ", y=" << y << ", color=" << static_cast<int>(val));
    } else if (addr >= 0x6000 && addr < 0x607D) {
       int id = ((addr - 0x6000) >> 3);
       int type = (addr & 0x7);
@@ -74,49 +77,69 @@ void asic_register_page_write(word addr, byte val) {
             // X position
             asic_sprites_x[id] = (asic_sprites_x[id] & 0xFF00) | val;
             //LOG("Received sprite X for sprite " << id << " x=" << asic_sprites_x[id]);
+            // Mirrored in RAM image 4 bytes after
+            pbRegisterPage[(addr & 0x3FFF) + 4] = val;
             break;
          case 1:
             // X position
             asic_sprites_x[id] = (asic_sprites_x[id] & 0x00FF) | (val << 8);
             //LOG("Received sprite X for sprite " << id << " x=" << asic_sprites_x[id]);
+            // Mirrored in RAM image 4 bytes after
+            pbRegisterPage[(addr & 0x3FFF) + 4] = val;
             break;
          case 2:
             // Y position
             asic_sprites_y[id] = ((asic_sprites_y[id] & 0xFF00) | val);
             //LOG("Received sprite Y for sprite " << id << " y=" << asic_sprites_y[id]);
+            // Mirrored in RAM image 4 bytes after
+            pbRegisterPage[(addr & 0x3FFF) + 4] = val;
             break;
          case 3:
             // Y position
             asic_sprites_y[id] = ((asic_sprites_y[id] & 0x00FF) | (val << 8));
             //LOG("Received sprite Y for sprite " << id << " y=" << asic_sprites_y[id]);
+            // Affect RAM image
+            // Mirrored in RAM image 4 bytes after
+            pbRegisterPage[(addr & 0x3FFF) + 4] = val;
             break;
          case 4:
             // Magnification
             asic_sprites_mag_x[id] = decode_magnification(val >> 2);
             asic_sprites_mag_y[id] = decode_magnification(val);
-            //LOG("Received sprite magnification for sprite " << id << " mx=" << asic_sprites_mag_x[id] << ", my=" << asic_sprites_mag_y[id]);
-            break;
+            // Write-only: does not affect pbRegisterPage
+            return false;
          default:
             //LOG("Received sprite operation of unsupported type: " << type << " addr=" << std::hex << addr << " - val=" << static_cast<int>(val) << std::dec);
             break;
       }
    } else if (addr >= 0x6400 && addr < 0x6440) {
-      int colour = (addr - 0x6400) / 2;
+      int colour = (addr & 0x3F) >> 1;
       if ((addr % 2) == 1) {
          double green = static_cast<double>(val & 0x0F)/16;
          //LOG("Received color operation: color " << colour << " has green = " << green);
-         colours_rgb[colour][1] = green;
+         asic_colours[colour][1] = green;
          // TODO: find a cleaner way to do this - this is a copy paste from "Set ink value" in cap32.cpp
       } else {
          double red   = static_cast<double>((val & 0xF0) >> 4)/16;
          double blue  = static_cast<double>(val & 0x0F)/16;
          //LOG("Received color operation: color " << colour << " has red = " << red << " and blue = " << blue);
-         colours_rgb[colour][0] = red;
-         colours_rgb[colour][2] = blue;
+         asic_colours[colour][0] = red;
+         asic_colours[colour][2] = blue;
       }
-      video_set_palette();
-      GateArray.ink_values[colour] = colour;
-      GateArray.palette[colour] = SDL_MapRGB(back_surface->format, colours[colour].r, colours[colour].g, colours[colour].b);
+      // TODO: deduplicate with code in video_set_palette + make it work in monochrome
+               dword red = static_cast<dword>(asic_colours[colour][0] * (CPC.scr_intensity / 10.0) * 255);
+               if (red > 255) { // limit to the maximum
+                  red = 255;
+               }
+               dword green = static_cast<dword>(asic_colours[colour][1] * (CPC.scr_intensity / 10.0) * 255);
+               if (green > 255) {
+                  green = 255;
+               }
+               dword blue = static_cast<dword>(asic_colours[colour][2] * (CPC.scr_intensity / 10.0) * 255);
+               if (blue > 255) {
+                  blue = 255;
+               }
+      GateArray.palette[colour] = SDL_MapRGB(back_surface->format, red, green, blue);
 /*
       if (colour < 2) {
          byte r = (static_cast<dword>(colours[GateArray.ink_values[0]].r) + static_cast<dword>(colours[GateArray.ink_values[1]].r)) >> 1;
@@ -152,5 +175,5 @@ void asic_register_page_write(word addr, byte val) {
    } else {
       //LOG("Received unused write at " << std::hex << addr << " - val: " << static_cast<int>(val) << std::dec);
    }
-   pbRegisterPage[addr - 0x4000] = val;
+   return true;
 }
