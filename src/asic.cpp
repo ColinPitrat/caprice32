@@ -19,6 +19,7 @@ short int asic_sprites_mag_y[16];
 double asic_colours[32][3];
 
 void asic_poke_lock_sequence(byte val) {
+   LOG("val=" << std::hex << static_cast<int>(val) << std::dec);
    static const byte lockSeq[] = { 0x00, 0xff, 0x77, 0xb3, 0x51, 0xa8, 0xd4, 0x62, 0x39, 0x9c, 0x46, 0x2b, 0x15, 0x8a, 0xcd };
    static int lockPos = -1;
    // Lock sequence can only start after a non zero value
@@ -55,6 +56,7 @@ static inline unsigned short decode_magnification(byte val) {
 
 // Return true if byte should be written in memory
 bool asic_register_page_write(word addr, byte val) {
+   LOG("addr=" << std::hex << addr << ", val=" << static_cast<int>(val) << std::dec);
    if (addr < 0x4000 || addr > 0x7FFF) {
       return true;
    }
@@ -169,9 +171,9 @@ bool asic_register_page_write(word addr, byte val) {
          LOG("Received interrupt vector: " << static_cast<int>(val));
       }
    } else if (addr >= 0x6808 && addr < 0x6810) {
-      //LOG("Received analog input stuff");
+      LOG("Received analog input stuff");
    } else if (addr >= 0x6C00 && addr < 0x6C10) {
-      //LOG("Received DMA stuff");
+      LOG("Received DMA stuff");
    } else {
       //LOG("Received unused write at " << std::hex << addr << " - val: " << static_cast<int>(val) << std::dec);
    }

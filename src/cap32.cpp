@@ -406,6 +406,7 @@ byte z80_IN_handler (reg_pair port)
          }
       }
    }
+   LOG("port.b.h3=" << std::hex << static_cast<int>(port.b.h3) << ", port.b.h2=" << static_cast<int>(port.b.h2) << ", port.b.h=" << std::hex << static_cast<int>(port.b.h) << ", port.b.l=" << static_cast<int>(port.b.l) << ", ret_val=" << static_cast<int>(ret_val) << std::dec);
    return ret_val;
 }
 
@@ -413,6 +414,7 @@ byte z80_IN_handler (reg_pair port)
 
 void z80_OUT_handler (reg_pair port, byte val)
 {
+   LOG("port.b.h3=" << std::hex << static_cast<int>(port.b.h3) << ", port.b.h2=" << static_cast<int>(port.b.h2) << ", port.b.h=" << std::hex << static_cast<int>(port.b.h) << ", port.b.l=" << static_cast<int>(port.b.l) << ", val=" << static_cast<int>(val) << std::dec);
 // Gate Array -----------------------------------------------------------------
    if ((port.b.h & 0xc0) == 0x40) { // GA chip select?
       switch (val >> 6) {
@@ -436,7 +438,7 @@ void z80_OUT_handler (reg_pair port, byte val)
             #endif
             {
                byte colour = val & 0x1f; // isolate colour value
-               LOG("Set ink value " << static_cast<int>(GateArray.pen) << " to " << static_cast<int>(colour));
+               //LOG("Set ink value " << static_cast<int>(GateArray.pen) << " to " << static_cast<int>(colour));
                GateArray.ink_values[GateArray.pen] = colour;
                GateArray.palette[GateArray.pen] = SDL_MapRGB(back_surface->format,
                      colours[colour].r, colours[colour].g, colours[colour].b);
@@ -656,12 +658,6 @@ void z80_OUT_handler (reg_pair port, byte val)
          if (pbExpansionROM == nullptr) { // selected expansion ROM not present?
             pbExpansionROM = pbROMhi; // revert to BASIC ROM
          }
-         if (!(GateArray.ROM_config & 0x08)) { // upper/expansion ROM is enabled?
-            membank_read[3] = pbExpansionROM; // 'page in' upper/expansion ROM
-         }
-         if (CPC.mf2) { // MF2 enabled?
-            *(pbMF2ROM + 0x03aac) = val;
-         }
       } else {
          uint32_t page = 1; // Default to basic page
          LOG("ROM select: " << static_cast<int>(val));
@@ -672,6 +668,12 @@ void z80_OUT_handler (reg_pair port, byte val)
          }
          GateArray.upper_ROM = page;
          pbExpansionROM = pbCartridgePages[page];
+      }
+      if (!(GateArray.ROM_config & 0x08)) { // upper/expansion ROM is enabled?
+         membank_read[3] = pbExpansionROM; // 'page in' upper/expansion ROM
+      }
+      if (CPC.mf2) { // MF2 enabled?
+         *(pbMF2ROM + 0x03aac) = val;
       }
    }
 // printer port ---------------------------------------------------------------
