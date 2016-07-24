@@ -406,7 +406,7 @@ byte z80_IN_handler (reg_pair port)
          }
       }
    }
-   LOG("port.b.h3=" << std::hex << static_cast<int>(port.b.h3) << ", port.b.h2=" << static_cast<int>(port.b.h2) << ", port.b.h=" << std::hex << static_cast<int>(port.b.h) << ", port.b.l=" << static_cast<int>(port.b.l) << ", ret_val=" << static_cast<int>(ret_val) << std::dec);
+   //LOG("port.b.h3=" << std::hex << static_cast<int>(port.b.h3) << ", port.b.h2=" << static_cast<int>(port.b.h2) << ", port.b.h=" << std::hex << static_cast<int>(port.b.h) << ", port.b.l=" << static_cast<int>(port.b.l) << ", ret_val=" << static_cast<int>(ret_val) << std::dec);
    return ret_val;
 }
 
@@ -414,7 +414,7 @@ byte z80_IN_handler (reg_pair port)
 
 void z80_OUT_handler (reg_pair port, byte val)
 {
-   LOG("port.b.h3=" << std::hex << static_cast<int>(port.b.h3) << ", port.b.h2=" << static_cast<int>(port.b.h2) << ", port.b.h=" << std::hex << static_cast<int>(port.b.h) << ", port.b.l=" << static_cast<int>(port.b.l) << ", val=" << static_cast<int>(val) << std::dec);
+   //LOG("port.b.h3=" << std::hex << static_cast<int>(port.b.h3) << ", port.b.h2=" << static_cast<int>(port.b.h2) << ", port.b.h=" << std::hex << static_cast<int>(port.b.h) << ", port.b.l=" << static_cast<int>(port.b.l) << ", val=" << static_cast<int>(val) << std::dec);
 // Gate Array -----------------------------------------------------------------
    if ((port.b.h & 0xc0) == 0x40) { // GA chip select?
       switch (val >> 6) {
@@ -2505,6 +2505,7 @@ void video_set_style (void)
 int video_init (void)
 {
    if (SDL_InitSubSystem(SDL_INIT_VIDEO) < 0) { // initialize the video subsystem
+      std::cerr << "Init of video subsystem failed: " << SDL_GetError() << std::endl;
       return ERR_VIDEO_INIT;
    }
 
@@ -2513,7 +2514,7 @@ int video_init (void)
    back_surface=vid_plugin->init(vid_plugin,CPC.scr_fs_width, CPC.scr_fs_height, CPC.scr_fs_bpp, CPC.scr_window==0);
 
    if (!back_surface) { // attempt to set the required video mode
-      fprintf(stderr, "Could not set requested video mode: %s\n", SDL_GetError());
+      std::cerr << "Could not set requested video mode: " << SDL_GetError() << std::endl;
       return ERR_VIDEO_SET_MODE;
    }
 
