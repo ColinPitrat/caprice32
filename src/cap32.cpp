@@ -2442,12 +2442,20 @@ void video_set_style (void)
    }
    switch (dwXScale) {
       case 1:
-         CPC.scr_prerendernorm = prerender_normal_half;
+         if (CPC.model > 2) {
+            CPC.scr_prerendernorm = prerender_normal_half_plus;
+         } else {
+            CPC.scr_prerendernorm = prerender_normal_half;
+         }
          CPC.scr_prerenderbord = prerender_border_half;
          CPC.scr_prerendersync = prerender_sync_half;
          break;
       case 2:
-         CPC.scr_prerendernorm = prerender_normal;
+         if (CPC.model > 2) {
+            CPC.scr_prerendernorm = prerender_normal_plus;
+         } else {
+            CPC.scr_prerendernorm = prerender_normal;
+         }
          CPC.scr_prerenderbord = prerender_border;
          CPC.scr_prerendersync = prerender_sync;
          break;
