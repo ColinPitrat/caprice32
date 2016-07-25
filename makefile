@@ -26,10 +26,14 @@ ifndef CXX
 CXX	= g++
 endif
 
-COMMON_CFLAGS_1 = -std=c++11
-CFLAGS_1	= -Wall -Wextra -Wzero-as-null-pointer-constant -Wformat=2 -Wold-style-cast -Wmissing-include-dirs -Wlogical-op -Woverloaded-virtual -Wpointer-arith -Wredundant-decls
+COMMON_CFLAGS = -std=c++11
+WARNINGS = -Wall -Wextra -Wzero-as-null-pointer-constant -Wformat=2 -Wold-style-cast -Wmissing-include-dirs -Wlogical-op -Woverloaded-virtual -Wpointer-arith -Wredundant-decls
+CFLAGS = $(COMMON_CFLAGS) $(IPATHS) $(WARNINGS)
+DEBUG_FLAGS=-Werror -g -O0 -DDEBUG
+RELEASE_FLAGS=-O2 -funroll-loops -ffast-math -fomit-frame-pointer -fno-strength-reduce -finline-functions -s
+BUILD_FLAGS=$(RELEASE_FLAGS)
 
-debug: DEBUG=1
+debug: BUILD_FLAGS:=$(DEBUG_FLAGS)
 
 ifndef DEBUG
 ifeq ($(LAST_BUILD_IN_DEBUG), 1)
@@ -38,33 +42,28 @@ DEBUG=1
 endif
 endif
 
+ifndef WITHOUT_GL
+CFLAGS += -DHAVE_GL
+endif
+
+
 ifdef DEBUG
-COMMON_CFLAGS_2	= $(COMMON_CFLAGS_1) -Werror -g -O0 -DDEBUG
+BUILD_FLAGS=$(DEBUG_FLAGS)
 all: check_deps debug
 else
-COMMON_CFLAGS_2	= $(COMMON_CFLAGS_1) -O2 -funroll-loops -ffast-math -fomit-frame-pointer -fno-strength-reduce -finline-functions -s
 all: check_deps cap32
 endif
 
-ifdef WITHOUT_GL
-CFLAGS_2 = $(CFLAGS_1)
-else
-CFLAGS_2 = $(CFLAGS_1) -DHAVE_GL
-endif
-
-COMMON_CFLAGS=$(COMMON_CFLAGS_2)
-CFLAGS = $(COMMON_CFLAGS) $(CFLAGS_2) $(IPATHS)
-
 $(MAIN): main.cpp src/cap32.h
-	@$(CXX) -c $(CFLAGS) -o $(MAIN) main.cpp
+	@$(CXX) -c $(BUILD_FLAGS) $(CFLAGS) -o $(MAIN) main.cpp
 
 $(DEPENDS): $(OBJDIR)/%.d: %.cpp
 	@echo Computing dependencies for $<
 	@mkdir -p `dirname $@`
-	@$(CXX) -MM $(CFLAGS) $< | { sed 's#^[^:]*\.o[ :]*#$(OBJDIR)/$*.o $(OBJDIR)/$*.d : #g' ; echo "%.h:;" ; echo "" ; } > $@
+	@$(CXX) -MM $(BUILD_FLAGS) $(CFLAGS) $< | { sed 's#^[^:]*\.o[ :]*#$(OBJDIR)/$*.o $(OBJDIR)/$*.d : #g' ; echo "%.h:;" ; echo "" ; } > $@
 
 $(OBJECTS): $(OBJDIR)/%.o: %.cpp
-	$(CXX) -c $(CFLAGS) -o $@ $<
+	$(CXX) -c $(BUILD_FLAGS) $(CFLAGS) -o $@ $<
 
 debug: debug_flag tags cap32 unit_test debug_flag
 
@@ -99,13 +98,13 @@ GTEST_DIR=googletest/googletest/
 $(TEST_DEPENDS): $(OBJDIR)/%.d: %.cpp
 	@echo Computing dependencies for $<
 	@mkdir -p `dirname $@`
-	@$(CXX) -MM $(TEST_CFLAGS) $(IPATHS) $< | { sed 's#^[^:]*\.o[ :]*#$(OBJDIR)/$*.o $(OBJDIR)/$*.d : #g' ; echo "%.h:;" ; echo "" ; } > $@
+	@$(CXX) -MM $(BUILD_FLAGS) $(TEST_CFLAGS) $(IPATHS) $< | { sed 's#^[^:]*\.o[ :]*#$(OBJDIR)/$*.o $(OBJDIR)/$*.d : #g' ; echo "%.h:;" ; echo "" ; } > $@
 
 $(TEST_OBJECTS): $(OBJDIR)/%.o: %.cpp googletest
-	$(CXX) -c $(TEST_CFLAGS) $(IPATHS) -o $@ $<
+	$(CXX) -c $(BUILD_FLAGS) $(TEST_CFLAGS) $(IPATHS) -o $@ $<
 
 $(GTEST_DIR)/src/gtest-all.o: $(GTEST_DIR)/src/gtest-all.cc googletest
-	$(CXX) $(TEST_CFLAGS) -c $(INCPATH) -o $@ $<
+	$(CXX) $(BUILD_FLAGS) $(TEST_CFLAGS) -c $(INCPATH) -o $@ $<
 
 $(TEST_TARGET): $(OBJECTS) $(TEST_OBJECTS) $(GTEST_DIR)/src/gtest-all.o
 	$(CXX) $(LDFLAGS) -o $(TEST_TARGET) $(GTEST_DIR)/src/gtest-all.o $(TEST_OBJECTS) $(OBJECTS) $(LIBS) -lpthread
