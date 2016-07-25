@@ -55,7 +55,8 @@ CapriceOptions::CapriceOptions(const CRect& WindowRect, CWindow* pParent, CFontE
     m_pDropDownCPCModel->AddItem(SListItem("CPC 464"));
     m_pDropDownCPCModel->AddItem(SListItem("CPC 664"));
     m_pDropDownCPCModel->AddItem(SListItem("CPC 6128"));
-    m_pDropDownCPCModel->SetListboxHeight(3);
+    m_pDropDownCPCModel->AddItem(SListItem("CPC 464+"));
+    m_pDropDownCPCModel->SetListboxHeight(4);
        // index and model match, i.e. 0 -> 464, 1 -> 664, 2 -> 6128:
     m_pDropDownCPCModel->SelectItem(CPC.model);
     m_pDropDownCPCModel->SetIsFocusable(true);
@@ -255,6 +256,20 @@ CapriceOptions::CapriceOptions(const CRect& WindowRect, CWindow* pParent, CFontE
     m_pDropDownPCLanguage->SelectItem(CPC.kbd_layout);
     m_pDropDownPCLanguage->SetIsFocusable(true);
 
+    m_pCheckBoxJoystickEmulation   = new CCheckBox(CRect(CPoint(10, 62), 10, 10), m_pGroupBoxTabInput);
+    if (CPC.joystick_emulation == 1) {
+        m_pCheckBoxJoystickEmulation->SetCheckBoxState(CCheckBox::CHECKED);
+    }
+    m_pLabelJoystickEmulation      = new CLabel(CPoint(27, 63), m_pGroupBoxTabInput, "Joystick emulation");
+    m_pCheckBoxJoystickEmulation->SetIsFocusable(true);
+
+    m_pCheckBoxJoysticks           = new CCheckBox(CRect(CPoint(10, 92), 10, 10), m_pGroupBoxTabInput);
+    if (CPC.joysticks == 1) {
+        m_pCheckBoxJoysticks->SetCheckBoxState(CCheckBox::CHECKED);
+    }
+    m_pLabelJoysticks              = new CLabel(CPoint(27, 93), m_pGroupBoxTabInput, "Joysticks support");
+    m_pCheckBoxJoysticks->SetIsFocusable(true);
+
     EnableTab("general");
 
     m_pButtonSave   = new CButton(CRect(CPoint(70, m_ClientRect.Height() - 20), 50, 15), this, "Save");
@@ -327,6 +342,8 @@ bool CapriceOptions::HandleMessage(CMessage* pMessage)
               // 'Input' settings
               CPC.keyboard = m_pDropDownCPCLanguage->GetSelectedIndex();
               CPC.kbd_layout = m_pDropDownPCLanguage->GetSelectedIndex();
+              CPC.joysticks = (m_pCheckBoxJoysticks->GetCheckBoxState() == CCheckBox::CHECKED)?1:0;
+              CPC.joystick_emulation = (m_pCheckBoxJoystickEmulation->GetCheckBoxState() == CCheckBox::CHECKED)?1:0;
 
               // Check if any reset or re-init is required, e.g. emulator reset, sound system reset...
               ProcessOptionChanges(CPC, pMessage->Source() == m_pButtonSave);
@@ -527,6 +544,12 @@ void CapriceOptions::ProcessOptionChanges(t_CPC& CPC, bool saveChanges) {
         audio_resume();
 
         CMessageServer::Instance().QueueMessage(new CMessage(CMessage::APP_EXIT, nullptr, this));
+    }
+
+    // Activate/deactivate joystick emulation
+    if (CPC.joystick_emulation != m_oldCPCsettings.joystick_emulation)
+    {
+       input_swap_joy();
     }
 
     if (saveChanges)

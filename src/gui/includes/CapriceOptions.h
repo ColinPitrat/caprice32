@@ -123,6 +123,10 @@ namespace wGui
       CDropDown* m_pDropDownCPCLanguage;
       CLabel* m_pLabelPCLanguage;
       CDropDown* m_pDropDownPCLanguage;
+      CLabel* m_pLabelJoystickEmulation;
+      CCheckBox* m_pCheckBoxJoystickEmulation;
+      CLabel* m_pLabelJoysticks;
+      CCheckBox* m_pCheckBoxJoysticks;
 
       t_CPC m_oldCPCsettings;  // we will store the current CPC settings in this variable, and 
                                // when clicking OK in the options screen, check what options have changed

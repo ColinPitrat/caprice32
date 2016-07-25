@@ -451,7 +451,8 @@ typedef struct {
 // cap32.cpp
 void emulator_reset(bool bolMF2Reset);
 int  emulator_init(void);
-int  video_set_palette (void);
+int  video_set_palette(void);
+void input_swap_joy(void);
 void update_cpc_speed(void);
 int  printer_start(void);
 void printer_stop(void);
