@@ -2061,6 +2061,7 @@ void emulator_reset (bool bolMF2Reset)
 // TODO: asic_reset
    asic_locked = true;
    for(int i = 0; i < 16; i++) {
+      asic_sprites_x[i] = asic_sprites_y[i] = asic_sprites_mag_x[i] = asic_sprites_mag_y[i] = 0;
       for(int j = 0; j < 16; j++) {
          for(int k = 0; k < 16; k++) {
             asic_sprites[i][j][k] = 0;
@@ -2409,7 +2410,7 @@ int video_set_palette (void)
 
          vid_plugin->set_palette(colours);
 
-   for (n = 0; n < 32; n++) { // loop for all colours + border
+   for (n = 0; n < 17; n++) { // loop for all colours + border
      int i=GateArray.ink_values[n];
      GateArray.palette[n] = SDL_MapRGB(back_surface->format,colours[i].r,colours[i].g,colours[i].b);
    }

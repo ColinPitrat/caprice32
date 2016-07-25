@@ -816,7 +816,7 @@ void prerender_sync_half(void)
 
 
 
-static inline byte getSpriteVal(unsigned short offset) {
+static byte getSpriteVal(unsigned short offset) {
    if (CPC.model > 2) {
       const int borderWidth = 64;
       const int borderHeight = 40;
@@ -825,7 +825,7 @@ static inline byte getSpriteVal(unsigned short offset) {
       int x = 2 * (CPC.scr_pos + offset - CPC.scr_base) / dwXScale - borderWidth;
       int y = VDU.scrln - borderHeight;
       if (x >= 0 && x < screenWidth && y >= 0 && y < screenHeight) {
-         for(int i = 0; i <= 16; i++) {
+         for(int i = 0; i < 16; i++) {
             int sx = asic_sprites_x[i];
             int mx = asic_sprites_mag_x[i];
             if(mx > 0 && x >= sx && x < sx + 16 * mx) {
@@ -859,7 +859,7 @@ void prerender_normal_plus(void)
    *(RendPos + 2) = *(ModeMap + (bVidMem * 2));
    *(RendPos + 3) = *(ModeMap + (bVidMem * 2) + 1);
 
-   int offset = 0;
+   unsigned short offset = 0;
    for(unsigned int i = 0; i < 4; i++) {
       byte c1 = getSpriteVal(offset++);
       byte c2 = getSpriteVal(offset++);
@@ -901,23 +901,23 @@ void prerender_normal_half_plus(void)
    bVidMem = getRAMByte(CRTC.next_address + 1);
    *(RendPos + 1) = *(ModeMap + bVidMem);
 
-   int offset = 0;
+   unsigned short offset = 0;
    for(int i = 0; i < 2; i++) {
       byte c1 = getSpriteVal(offset++);
       byte c2 = getSpriteVal(offset++);
       byte c3 = getSpriteVal(offset++);
       byte c4 = getSpriteVal(offset++);
       if (c4) {
-         *RendPos = (*RendPos & 0x00FFFFFF) | (c4 << 24);
+         *RendPos = ((*RendPos) & 0x00FFFFFF) | (c4 << 24);
       }
       if (c3) {
-         *RendPos = (*RendPos & 0xFF00FFFF) | (c3 << 16);
+         *RendPos = ((*RendPos) & 0xFF00FFFF) | (c3 << 16);
       }
       if (c2) {
-         *RendPos = (*RendPos & 0xFFFF00FF) | (c2 << 8);
+         *RendPos = ((*RendPos) & 0xFFFF00FF) | (c2 << 8);
       }
       if (c1) {
-         *RendPos = (*RendPos & 0xFFFFFF00) | c1;
+         *RendPos = ((*RendPos) & 0xFFFFFF00) | c1;
       }
       RendPos++;
    }

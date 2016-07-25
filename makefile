@@ -8,10 +8,12 @@ SRCDIR:=src
 TSTDIR:=test
 
 MAIN:=$(OBJDIR)/main.o
+WINMAIN:=$(OBJDIR)/main.os
 
 SOURCES:=$(shell find $(SRCDIR) -name \*.cpp)
 DEPENDS:=$(foreach file,$(SOURCES:.cpp=.d),$(shell echo "$(OBJDIR)/$(file)"))
 OBJECTS:=$(DEPENDS:.d=.o)
+WINOBJECTS:=$(DEPENDS:.d=.os)
 
 TEST_SOURCES:=$(shell find $(TSTDIR) -name \*.cpp)
 TEST_DEPENDS:=$(foreach file,$(TEST_SOURCES:.cpp=.d),$(shell echo "$(OBJDIR)/$(file)"))
@@ -19,6 +21,9 @@ TEST_OBJECTS:=$(TEST_DEPENDS:.d=.o)
 
 IPATHS	= -Isrc/ -Isrc/gui/includes `freetype-config --cflags` `sdl-config --cflags`
 LIBS = `sdl-config --libs` -lz `freetype-config --libs`
+MINGW_PATH=/usr/i686-w64-mingw32
+WININCS = -Isrc/ -Isrc/gui/includes -I$(MINGW_PATH)/include -I$(MINGW_PATH)/include/SDL -I$(MINGW_PATH)/include/freetype2 
+WINLIBS=$(MINGW_PATH)/lib/libSDL.dll.a $(MINGW_PATH)/lib/libfreetype.dll.a $(MINGW_PATH)/lib/libz.dll.a
 
 .PHONY: all clean debug debug_flag check_deps
 
@@ -26,9 +31,14 @@ ifndef CXX
 CXX	= g++
 endif
 
+ifndef WINCXX
+WINCXX	= i686-w64-mingw32-g++
+endif
+
 COMMON_CFLAGS = -std=c++11
 WARNINGS = -Wall -Wextra -Wzero-as-null-pointer-constant -Wformat=2 -Wold-style-cast -Wmissing-include-dirs -Wlogical-op -Woverloaded-virtual -Wpointer-arith -Wredundant-decls
 CFLAGS = $(COMMON_CFLAGS) $(IPATHS) $(WARNINGS)
+WINCFLAGS = $(COMMON_CFLAGS) $(WININCS) $(WARNINGS)
 DEBUG_FLAGS=-Werror -g -O0 -DDEBUG
 RELEASE_FLAGS=-O2 -funroll-loops -ffast-math -fomit-frame-pointer -fno-strength-reduce -finline-functions -s
 BUILD_FLAGS=$(RELEASE_FLAGS)
@@ -57,13 +67,19 @@ endif
 $(MAIN): main.cpp src/cap32.h
 	@$(CXX) -c $(BUILD_FLAGS) $(CFLAGS) -o $(MAIN) main.cpp
 
+$(WINMAIN): main.cpp src/cap32.h
+	@$(WINCXX) -c $(WINCFLAGS) -o $(WINMAIN) main.cpp
+
 $(DEPENDS): $(OBJDIR)/%.d: %.cpp
 	@echo Computing dependencies for $<
 	@mkdir -p `dirname $@`
-	@$(CXX) -MM $(BUILD_FLAGS) $(CFLAGS) $< | { sed 's#^[^:]*\.o[ :]*#$(OBJDIR)/$*.o $(OBJDIR)/$*.d : #g' ; echo "%.h:;" ; echo "" ; } > $@
+	@$(CXX) -MM $(BUILD_FLAGS) $(CFLAGS) $< | { sed 's#^[^:]*\.o[ :]*#$(OBJDIR)/$*.o $(OBJDIR)/$*.os $(OBJDIR)/$*.d : #g' ; echo "%.h:;" ; echo "" ; } > $@
 
 $(OBJECTS): $(OBJDIR)/%.o: %.cpp
 	$(CXX) -c $(BUILD_FLAGS) $(CFLAGS) -o $@ $<
+
+$(WINOBJECTS): $(OBJDIR)/%.os: %.cpp
+	$(WINCXX) -c $(WINCFLAGS) -o $@ $<
 
 debug: debug_flag tags cap32 unit_test debug_flag
 
@@ -83,6 +99,24 @@ tags:
 
 cap32: $(OBJECTS) $(MAIN)
 	$(CXX) $(LDFLAGS) -o cap32 $(OBJECTS) $(MAIN) $(LIBS)
+
+windows: cap32.exe win
+	cp cap32.exe win/
+	cp $(MINGW_PATH)/bin/SDL.dll win/
+	cp $(MINGW_PATH)/bin/libbz2-1.dll win/
+	cp $(MINGW_PATH)/bin/libfreetype-6.dll win/
+	cp $(MINGW_PATH)/bin/libgcc_s_sjlj-1.dll win/
+	cp $(MINGW_PATH)/bin/libstdc++-6.dll win/
+	cp $(MINGW_PATH)/bin/libwinpthread-1.dll win/
+	cp $(MINGW_PATH)/bin/zlib1.dll win/
+	cp cap32.cfg win/
+	cp -r resources/ rom/ win/
+
+win:
+	mkdir -p win
+
+cap32.exe: $(WINOBJECTS) $(WINMAIN)
+	$(WINCXX) $(LDFLAGS) -o cap32.exe $(WINOBJECTS) $(WINMAIN) $(WINLIBS)
 
 ####################################
 ### Tests
@@ -114,6 +148,6 @@ unit_test: $(TEST_TARGET)
 
 clean:
 	rm -rf $(OBJDIR)
-	rm -f $(TEST_TARGET) $(GTEST_DIR)/src/gtest-all.o cap32 .debug tags
+	rm -f $(TEST_TARGET) $(GTEST_DIR)/src/gtest-all.o cap32 cap32.exe .debug tags
 
 -include $(DEPENDS) $(TEST_DEPENDS)
