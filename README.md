@@ -1,5 +1,7 @@
 # Caprice32 - Amstrad CPC Emulator
 
+![Caprice32 logo](https://raw.githubusercontent.com/ColinPitrat/caprice32/master/resources/cap32logo.bmp)
+
 (c) Copyright 1997-2015 Ulrich Doewich
 
 (c) Copyright 2016 Colin Pitrat
