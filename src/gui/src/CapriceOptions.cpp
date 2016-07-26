@@ -55,7 +55,7 @@ CapriceOptions::CapriceOptions(const CRect& WindowRect, CWindow* pParent, CFontE
     m_pDropDownCPCModel->AddItem(SListItem("CPC 464"));
     m_pDropDownCPCModel->AddItem(SListItem("CPC 664"));
     m_pDropDownCPCModel->AddItem(SListItem("CPC 6128"));
-    m_pDropDownCPCModel->AddItem(SListItem("CPC 464+"));
+    m_pDropDownCPCModel->AddItem(SListItem("CPC 6128+"));
     m_pDropDownCPCModel->SetListboxHeight(4);
        // index and model match, i.e. 0 -> 464, 1 -> 664, 2 -> 6128:
     m_pDropDownCPCModel->SelectItem(CPC.model);
