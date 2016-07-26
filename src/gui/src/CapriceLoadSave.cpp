@@ -3,6 +3,7 @@
 
 #include "CapriceLoadSave.h"
 #include "cap32.h"
+#include "cartridge.h"
 
 #include <iostream>
 #include <sys/types.h>
@@ -35,7 +36,8 @@ CapriceLoadSave::CapriceLoadSave(const CRect& WindowRect, CWindow* pParent, CFon
   m_pTypeValue->AddItem(SListItem("Drive A (.dsk)"));
   m_pTypeValue->AddItem(SListItem("Drive B (.dsk)"));
   m_pTypeValue->AddItem(SListItem("Tape (.cdt/.voc)"));
-  m_pTypeValue->SetListboxHeight(4);
+  m_pTypeValue->AddItem(SListItem("Cartridge (.cpr)"));
+  m_pTypeValue->SetListboxHeight(5);
   m_pTypeValue->SelectItem(0);
   m_pTypeValue->SetIsFocusable(true);
   m_currentExt = ".sna";
@@ -99,23 +101,29 @@ bool CapriceLoadSave::HandleMessage(CMessage* pMessage)
                   case 0: // Load
                     switch (m_pTypeValue->GetSelectedIndex()) {
                       case 0: // Snapshot
-                        std::cout << "Load snapshot" << std::endl;
+                        std::cout << "Load snapshot: " << filename << std::endl;
                         snapshot_load(filename.c_str());
                         actionDone = true;
                         break;
                       case 1: // Drive A
-                        std::cout << "Load dsk A" << std::endl;
+                        std::cout << "Load dsk A: " << filename << std::endl;
                         dsk_load(filename.c_str(), &driveA);
                         actionDone = true;
                         break;
                       case 2: // Drive B
-                        std::cout << "Load dsk B" << std::endl;
+                        std::cout << "Load dsk B: " << filename << std::endl;
                         dsk_load(filename.c_str(), &driveB);
                         actionDone = true;
                         break;
                       case 3: // Tape
-                        std::cout << "Load tape" << std::endl;
+                        std::cout << "Load tape: " << filename << std::endl;
                         tape_insert(filename.c_str());
+                        actionDone = true;
+                        break;
+                      case 4: // Cartridge
+                        std::cout << "Load cartridge: " << filename << std::endl;
+                        cpr_load(filename.c_str());
+                        emulator_reset(false);
                         actionDone = true;
                         break;
                     }
@@ -123,27 +131,38 @@ bool CapriceLoadSave::HandleMessage(CMessage* pMessage)
                   case 1: // Save
                     switch (m_pTypeValue->GetSelectedIndex()) {
                       case 0: // Snapshot
-                        std::cout << "Save snapshot" << std::endl;
+                        std::cout << "Save snapshot: " << filename << std::endl;
                         snapshot_save(filename.c_str());
                         actionDone = true;
                         break;
                       case 1: // Drive A
-                        std::cout << "Save dsk A" << std::endl;
+                        std::cout << "Save dsk A: " << filename << std::endl;
                         dsk_save(filename.c_str(), &driveA);
                         actionDone = true;
                         break;
                       case 2: // Drive B
-                        std::cout << "Save dsk B" << std::endl;
+                        std::cout << "Save dsk B: " << filename << std::endl;
                         dsk_save(filename.c_str(), &driveB);
                         actionDone = true;
                         break;
                       case 3: // Tape
-                        std::cout << "Save tape" << std::endl;
-                        // Unsupported
-                        wGui::CMessageBox *pMessageBox = new wGui::CMessageBox(CRect(CPoint(m_ClientRect.Width() /2 - 125, m_ClientRect.Height() /2 - 30), 250, 60), this, nullptr, "Not implemented", "Saving tape not  yet implemented", CMessageBox::BUTTON_OK);
-                        pMessageBox->SetModal(true);
-                        //tape_save(filename.c_str());
-                        break;
+                        {
+                          std::cout << "Save tape: " << filename << std::endl;
+                          // Unsupported
+                          wGui::CMessageBox *pMessageBox = new wGui::CMessageBox(CRect(CPoint(m_ClientRect.Width() /2 - 125, m_ClientRect.Height() /2 - 30), 250, 60), this, nullptr, "Not implemented", "Saving tape not yet implemented", CMessageBox::BUTTON_OK);
+                          pMessageBox->SetModal(true);
+                          //tape_save(filename.c_str());
+                          break;
+                        }
+                      case 4: // Cartridge
+                        {
+                          std::cout << "Save cartridge: " << filename << std::endl;
+                          // Unsupported
+                          wGui::CMessageBox *pMessageBox = new wGui::CMessageBox(CRect(CPoint(m_ClientRect.Width() /2 - 125, m_ClientRect.Height() /2 - 30), 250, 60), this, nullptr, "Not implemented", "Saving cartridge not yet implemented", CMessageBox::BUTTON_OK);
+                          pMessageBox->SetModal(true);
+                          //cpr_save(filename.c_str());
+                          break;
+                        }
                     }
                     break;
                 }
@@ -193,6 +212,11 @@ bool CapriceLoadSave::HandleMessage(CMessage* pMessage)
               // TODO(cpitrat): Support multiple extension for CDT & VOC
               // For now CDT only as this is the most used
               m_currentExt = ".cdt";
+              UpdateFilesList();
+              break;
+            case 4: // Cartridge
+              m_pDirectoryValue->SetWindowText(simplifyPath(CPC.cart_path));
+              m_currentExt = ".cpr";
               UpdateFilesList();
               break;
           }
