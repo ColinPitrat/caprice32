@@ -2,7 +2,7 @@
 
 (c) Copyright 1997-2015 Ulrich Doewich
 
-(c) Copyright 2016-2016 Colin Pitrat
+(c) Copyright 2016 Colin Pitrat
 
 https://github.com/ColinPitrat/caprice32
 
@@ -37,8 +37,8 @@ To build with default options, use :
 
 The following options are available:
 
- * DEBUG=TRUE
- * WITHOUT_GL=TRUE
+ * `DEBUG=TRUE`
+ * `WITHOUT_GL=TRUE`
 
 For example, for a debug build, use:
 
@@ -46,7 +46,7 @@ For example, for a debug build, use:
 
 #### Windows target:
 
-Edit the makefile to update the MINGW_PATH, WINCXX, WININCS and WINLIBS directive with the correct location of the SDL include and library files.
+Edit the makefile to update the `MINGW_PATH`, `WINCXX`, `WININCS` and `WINLIBS` directive with the correct location of the SDL include and library files.
 To build with default options, use:
 
 `make windows`
