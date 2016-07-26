@@ -2136,8 +2136,56 @@ void emulator_reset (bool bolMF2Reset)
 
 
 
+void cartridge_load (void)
+{
+  if (CPC.model >= 3) {
+    if (!CPC.cart_file.empty()) { // load a cartridge ?
+      char chFileName[_MAX_PATH + 1];
+      char *pchPtr;
+
+      if (CPC.cart_zip) { // compressed image?
+        zip_info.filename = CPC.cart_path; // pchPath already has path and zip file combined
+        zip_info.extensions = ".cpr";
+        if (!zip::dir(&zip_info)) { // parse the zip for relevant files
+          dword n;
+          pchPtr = zip_info.pchFileNames;
+          for (n = zip_info.iFiles; n; n--) { // loop through all entries
+            if (!strcasecmp(CPC.cart_file.c_str(), pchPtr)) { // do we have a match?
+              break;
+            }
+            pchPtr += strlen(pchPtr) + 5; // skip offset
+          }
+          if (n) {
+            FILE *file = nullptr;
+            zip_info.dwOffset = *reinterpret_cast<dword *>(pchPtr + (strlen(pchPtr)+1)); // get the offset into the zip archive
+            if (!zip::extract(zip_info, &file)) {
+              if (cpr_load(file) != 0) {
+                fprintf(stderr, "Load of cartridge failed. Aborting.\n");
+                exit(-1);
+              }
+              fclose(file);
+            }
+          }
+        } else {
+          CPC.cart_zip = 0;
+        }
+      } else {
+        strncpy(chFileName, CPC.cart_path.c_str(), sizeof(chFileName)-1);
+        strncat(chFileName, CPC.cart_file.c_str(), sizeof(chFileName)-1 - strlen(chFileName));
+        if(cpr_load(chFileName) != 0) {
+          fprintf(stderr, "Load of cartridge failed. Aborting.\n");
+          exit(-1);
+        }
+      }
+    }
+  }
+}
+
+
+
 int emulator_init (void)
 {
+   cartridge_load();
    int iErr, iRomNum;
    byte *pchRomData;
 
@@ -3204,48 +3252,6 @@ int cap32_main (int argc, char **argv)
    parseArgs(argc, const_cast<const char**>(argv), CPC);
 
    // TODO(cpitrat): refactor this: duplication + should be tested + cleanup
-   if (CPC.model >= 3) {
-      if (!CPC.cart_file.empty()) { // load a cartridge ?
-         char chFileName[_MAX_PATH + 1];
-         char *pchPtr;
-
-         if (CPC.cart_zip) { // compressed image?
-            zip_info.filename = CPC.cart_path; // pchPath already has path and zip file combined
-            zip_info.extensions = ".cpr";
-            if (!zip::dir(&zip_info)) { // parse the zip for relevant files
-               dword n;
-               pchPtr = zip_info.pchFileNames;
-               for (n = zip_info.iFiles; n; n--) { // loop through all entries
-                  if (!strcasecmp(CPC.cart_file.c_str(), pchPtr)) { // do we have a match?
-                     break;
-                  }
-                  pchPtr += strlen(pchPtr) + 5; // skip offset
-               }
-               if (n) {
-                  FILE *file = nullptr;
-                  zip_info.dwOffset = *reinterpret_cast<dword *>(pchPtr + (strlen(pchPtr)+1)); // get the offset into the zip archive
-                  if (!zip::extract(zip_info, &file)) {
-                     if (cpr_load(file) != 0) {
-                        fprintf(stderr, "Load of cartridge failed. Aborting.\n");
-                        exit(-1);
-                     }
-                     fclose(file);
-                  }
-               }
-            } else {
-               CPC.cart_zip = 0;
-            }
-         } else {
-            strncpy(chFileName, CPC.cart_path.c_str(), sizeof(chFileName)-1);
-            strncat(chFileName, CPC.cart_file.c_str(), sizeof(chFileName)-1 - strlen(chFileName));
-            if(cpr_load(chFileName) != 0) {
-               fprintf(stderr, "Load of cartridge failed. Aborting.\n");
-               exit(-1);
-            }
-         }
-      }
-   }
-
    // emulator_init must be called before loading files as they require
    // pbGPBuffer to be initialized but after cartridge is installed as
    // it requires the ROM to be present

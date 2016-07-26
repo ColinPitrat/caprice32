@@ -530,7 +530,7 @@ void CapriceOptions::ProcessOptionChanges(t_CPC& CPC, bool saveChanges) {
     }
 
     // Restart video subsystem
-    if (CPC.scr_window != m_oldCPCsettings.scr_window || CPC.scr_style != m_oldCPCsettings.scr_style)
+    if (CPC.model != m_oldCPCsettings.model || CPC.scr_window != m_oldCPCsettings.scr_window || CPC.scr_style != m_oldCPCsettings.scr_style)
     {
         audio_pause();
         SDL_Delay(20);
