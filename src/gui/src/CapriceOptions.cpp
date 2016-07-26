@@ -412,7 +412,7 @@ bool CapriceOptions::HandleMessage(CMessage* pMessage)
           if (pMessage->Source() == m_pScrollBarRamSize) {
             // if CPC.model = 2 (CPC 6128), minimum RAM size is 128k:
             int newRamSize = m_pScrollBarRamSize->GetValue();
-            if (m_pDropDownCPCModel->GetSelectedIndex() == 2) { // selection in Dropdown is 'CPC 6128'
+            if (m_pDropDownCPCModel->GetSelectedIndex() >= 2) { // selection in Dropdown is 'CPC 6128'
               if (newRamSize < 2) {
                 newRamSize = 2; // *64k
                 m_pScrollBarRamSize->SetValue(2);
@@ -422,7 +422,7 @@ bool CapriceOptions::HandleMessage(CMessage* pMessage)
           }
 
           if (pMessage->Source() == m_pDropDownCPCModel) {
-            if (m_pDropDownCPCModel->GetSelectedIndex() == 2) { // selection changes to 'CPC 6128'
+            if (m_pDropDownCPCModel->GetSelectedIndex() >= 2) { // selection changes to 'CPC 6128'
               if (m_pScrollBarRamSize->GetValue() < 2) {
                 m_pScrollBarRamSize->SetValue(2);  // *64k
                 m_pLabelRamSizeValue->SetWindowText("128k     ");
