@@ -35,7 +35,7 @@ ifndef WINCXX
 WINCXX	= i686-w64-mingw32-g++
 endif
 
-COMMON_CFLAGS = -std=c++11
+COMMON_CFLAGS = $(CUSTOM_CFLAGS) -std=c++11
 WARNINGS = -Wall -Wextra -Wzero-as-null-pointer-constant -Wformat=2 -Wold-style-cast -Wmissing-include-dirs -Wlogical-op -Woverloaded-virtual -Wpointer-arith -Wredundant-decls
 CFLAGS = $(COMMON_CFLAGS) $(IPATHS) $(WARNINGS)
 WINCFLAGS = $(COMMON_CFLAGS) $(WININCS) $(WARNINGS)
