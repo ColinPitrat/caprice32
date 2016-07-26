@@ -352,7 +352,7 @@ void CFrame::RemoveFocusableWidget(CWindow *pWidget)
 }
 
 CWindow *CFrame::GetFocused() {
-  auto focused = std::find_if(m_FocusableWidgets.begin(), m_FocusableWidgets.end(), [](CWindow *w) { return w->HasFocus();});
+  auto focused = std::find_if(m_FocusableWidgets.begin(), m_FocusableWidgets.end(), [](CWindow *w) { return w->HasFocus(); });
   if(focused == m_FocusableWidgets.end()) {
     return nullptr;
   }

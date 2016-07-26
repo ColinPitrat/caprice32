@@ -40,7 +40,7 @@ CapriceLoadSave::CapriceLoadSave(const CRect& WindowRect, CWindow* pParent, CFon
   m_pTypeValue->SetListboxHeight(5);
   m_pTypeValue->SelectItem(0);
   m_pTypeValue->SetIsFocusable(true);
-  m_currentExt = ".sna";
+  m_fileSpec = { ".sna" };
 
   // Action: load / save
   m_pActionLabel = new CLabel(          CPoint(15, 55),             this, "Action: ");
@@ -73,6 +73,9 @@ CapriceLoadSave::CapriceLoadSave(const CRect& WindowRect, CWindow* pParent, CFon
   m_pCancelButton->SetIsFocusable(true);
   m_pLoadSaveButton = new CButton(  CRect( CPoint(250, 210), 50, 20), this, "Load");
   m_pLoadSaveButton->SetIsFocusable(true);
+}
+
+CapriceLoadSave::~CapriceLoadSave() {
 }
 
 bool CapriceLoadSave::HandleMessage(CMessage* pMessage)
@@ -194,29 +197,27 @@ bool CapriceLoadSave::HandleMessage(CMessage* pMessage)
           switch (m_pTypeValue->GetSelectedIndex()) {
             case 0: // Snapshot
               m_pDirectoryValue->SetWindowText(simplifyPath(CPC.snap_path));
-              m_currentExt = ".sna";
+              m_fileSpec = { ".sna" };
               UpdateFilesList();
               break;
             case 1: // Drive A
               m_pDirectoryValue->SetWindowText(simplifyPath(CPC.drvA_path));
-              m_currentExt = ".dsk";
+              m_fileSpec = { ".dsk" };
               UpdateFilesList();
               break;
             case 2: // Drive B
               m_pDirectoryValue->SetWindowText(simplifyPath(CPC.drvB_path));
-              m_currentExt = ".dsk";
+              m_fileSpec = { ".dsk" };
               UpdateFilesList();
               break;
             case 3: // Tape
               m_pDirectoryValue->SetWindowText(simplifyPath(CPC.tape_path));
-              // TODO(cpitrat): Support multiple extension for CDT & VOC
-              // For now CDT only as this is the most used
-              m_currentExt = ".cdt";
+              m_fileSpec = { ".cdt", ".voc" };
               UpdateFilesList();
               break;
             case 4: // Cartridge
               m_pDirectoryValue->SetWindowText(simplifyPath(CPC.cart_path));
-              m_currentExt = ".cpr";
+              m_fileSpec = { ".cpr" };
               UpdateFilesList();
               break;
           }
@@ -253,6 +254,16 @@ std::string CapriceLoadSave::simplifyPath(std::string path)
   return std::string(simplepath);
 }
 
+bool CapriceLoadSave::MatchCurrentFileSpec(const char* filename)
+{
+  for(const auto &ext : m_fileSpec) {
+    if (strncmp(&(filename[strlen(filename)-ext.size()]), ext.c_str(), ext.size()) == 0) {
+      return true;
+    }
+  }
+  return false;
+}
+
 void CapriceLoadSave::UpdateFilesList()
 {
   m_pFilesList->ClearItems();
@@ -276,7 +287,7 @@ void CapriceLoadSave::UpdateFilesList()
       }
       if(/*ep->d_type == DT_DIR*/S_ISDIR(entry_infos.st_mode) && (ep->d_name[0] != '.' || entry_name == "..")) {
         directories.push_back(entry_name + "/");
-      } else if(/*ep->d_type == DT_REG*/S_ISREG(entry_infos.st_mode) && strncmp(&(ep->d_name[strlen(ep->d_name)-m_currentExt.size()]), m_currentExt.c_str(), m_currentExt.size()) == 0) {
+      } else if(/*ep->d_type == DT_REG*/S_ISREG(entry_infos.st_mode) && MatchCurrentFileSpec(ep->d_name)) {
         files.push_back(entry_name);
       }
     }

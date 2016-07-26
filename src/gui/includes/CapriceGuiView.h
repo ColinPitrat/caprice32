@@ -1,15 +1,12 @@
 #include "wgui.h"
 
-using namespace std;
-using namespace wGui;
-
-class CapriceGuiView : public CView
+class CapriceGuiView : public wGui::CView
 {
   protected:
-    CFrame *m_menuFrame;
+    wGui::CFrame *m_menuFrame;
 
   public:
-    CapriceGuiView(SDL_Surface* surface, SDL_Surface* backSurface, const CRect& WindowRect);
+    CapriceGuiView(SDL_Surface* surface, SDL_Surface* backSurface, const wGui::CRect& WindowRect);
 
-    virtual void PaintToSurface(SDL_Surface& ScreenSurface, SDL_Surface& FloatingSurface, const CPoint& Offset) const override;
+    virtual void PaintToSurface(SDL_Surface& ScreenSurface, SDL_Surface& FloatingSurface, const wGui::CPoint& Offset) const override;
 };
