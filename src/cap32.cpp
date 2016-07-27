@@ -3226,7 +3226,7 @@ int cap32_main (int argc, char **argv)
                   zip_info.dwOffset = *reinterpret_cast<dword *>(pchPtr + (strlen(pchPtr)+1)); // get the offset into the zip archive
                   if (!zip::extract(zip_info, &file)) {
                      if (cpr_load(file) != 0) {
-                        fprintf(stderr, "Load of cartridge failed. Aborting.\n");
+                        fprintf(stderr, "Load of zipped cartridge failed. Aborting.\n");
                         exit(-1);
                      }
                      fclose(file);
