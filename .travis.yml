@@ -20,9 +20,9 @@ script:
 # - ulimit -c unlimited
 # - sudo sysctl kernel.core_pattern=core
  - make
- - make unit_test
+ - make unit_test CUSTOM_CFLAGS=-DGTEST_ELLIPSIS_NEEDS_POD_
  - make clean
- - make debug
+ - make debug CUSTOM_CFLAGS=-DGTEST_ELLIPSIS_NEEDS_POD_
 #To uncomment in case a core occurs:
 # - find ./ -name 'core*'
 # - for i in $(find ./ -name 'core*' -print); do gdb ./test/test_runner $i -ex "thread apply all bt" -ex "set pagination 0" -batch; done;

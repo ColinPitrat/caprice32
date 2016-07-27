@@ -21,7 +21,9 @@ TEST_OBJECTS:=$(TEST_DEPENDS:.d=.o)
 
 IPATHS	= -Isrc/ -Isrc/gui/includes `freetype-config --cflags` `sdl-config --cflags`
 LIBS = `sdl-config --libs` -lz `freetype-config --libs`
+
 MINGW_PATH=/usr/i686-w64-mingw32
+WINCXX	= i686-w64-mingw32-g++
 WININCS = -Isrc/ -Isrc/gui/includes -I$(MINGW_PATH)/include -I$(MINGW_PATH)/include/SDL -I$(MINGW_PATH)/include/freetype2 
 WINLIBS=$(MINGW_PATH)/lib/libSDL.dll.a $(MINGW_PATH)/lib/libfreetype.dll.a $(MINGW_PATH)/lib/libz.dll.a
 
@@ -31,11 +33,7 @@ ifndef CXX
 CXX	= g++
 endif
 
-ifndef WINCXX
-WINCXX	= i686-w64-mingw32-g++
-endif
-
-COMMON_CFLAGS = -std=c++11
+COMMON_CFLAGS = $(CUSTOM_CFLAGS) -std=c++11
 WARNINGS = -Wall -Wextra -Wzero-as-null-pointer-constant -Wformat=2 -Wold-style-cast -Wmissing-include-dirs -Wlogical-op -Woverloaded-virtual -Wpointer-arith -Wredundant-decls
 CFLAGS = $(COMMON_CFLAGS) $(IPATHS) $(WARNINGS)
 WINCFLAGS = $(COMMON_CFLAGS) $(WININCS) $(WARNINGS)

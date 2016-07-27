@@ -1,6 +1,8 @@
 #include "CapriceGuiView.h"
 #include "CapriceMenu.h"
 
+using namespace wGui;
+
 // Make caprice32 functions available here.
 extern void emulator_reset(bool);
 

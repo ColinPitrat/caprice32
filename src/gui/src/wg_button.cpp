@@ -61,7 +61,10 @@ CButton::CButton(const CRect& WindowRect, CWindow* pParent, std::string sText, C
 
 CButton::~CButton(void)
 {
-  m_pParentWindow->RemoveFocusableWidget(this);
+  if(m_pParentWindow)
+  {
+    m_pParentWindow->RemoveFocusableWidget(this);
+  }
 }
 
 

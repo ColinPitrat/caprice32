@@ -63,10 +63,13 @@ CDropDown::CDropDown(const CRect& WindowRect, CWindow* pParent, bool bAllowEdit,
 
 CDropDown::~CDropDown(void)
 {
+  if(m_pCViewAncestor)
+  {
     // Reset floating window (see HideListBox() and ShowListBox()), otherwise the FloatingWindow 
     // would point to 'nothing' -> memory errors. This could occur when you open the dropdown list 
     // and immediately close the window with the keyboard.
     m_pCViewAncestor->SetFloatingWindow(nullptr);
+  }
 }
 
 

@@ -5,9 +5,6 @@
 #include "wg_frame.h"
 #include "wg_button.h"
 
-using namespace std;
-using namespace wGui;
-
 namespace wGui
 {
   class CapriceVKeyboard : public CFrame

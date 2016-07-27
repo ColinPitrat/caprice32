@@ -4,6 +4,8 @@
 #include "cap32.h"
 #include "keyboard.h"
 
+using namespace wGui;
+
 extern t_CPC CPC;
 
 class CapriceVKeyboardTest : public testing::Test {

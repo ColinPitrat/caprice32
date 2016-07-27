@@ -7,6 +7,8 @@
 #include "wg_frame.h"
 #include "wg_navigationbar.h"
 
+class CapriceLoadSaveTest;
+
 namespace wGui
 {
     class CapriceLoadSave : public CFrame {
@@ -15,12 +17,16 @@ namespace wGui
         //! \param pFontEngine A pointer to the font engine to use when drawing the control
         //! If this is set to 0 it will use the default font engine specified by the CApplication (which must be set before instantiating this object)
         CapriceLoadSave(const CRect& WindowRect, CWindow* pParent, CFontEngine* pFontEngine);
+        ~CapriceLoadSave();
         bool HandleMessage(CMessage* pMessage) override;
         std::string simplifyPath(std::string path);
         void UpdateFilesList();
+        bool MatchCurrentFileSpec(const char* filename);
 
       protected:
-        std::string m_currentExt;
+        friend CapriceLoadSaveTest;
+
+        std::list<std::string> m_fileSpec;
         CLabel   *m_pTypeLabel;
         CDropDown *m_pTypeValue;
         CLabel   *m_pActionLabel;

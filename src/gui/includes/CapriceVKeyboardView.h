@@ -1,7 +1,6 @@
 #include "wgui.h"
 #include "CapriceVKeyboard.h"
 
-using namespace std;
 using namespace wGui;
 
 class CapriceVKeyboardView : public CView

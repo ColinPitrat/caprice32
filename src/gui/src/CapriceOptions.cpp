@@ -55,7 +55,7 @@ CapriceOptions::CapriceOptions(const CRect& WindowRect, CWindow* pParent, CFontE
     m_pDropDownCPCModel->AddItem(SListItem("CPC 464"));
     m_pDropDownCPCModel->AddItem(SListItem("CPC 664"));
     m_pDropDownCPCModel->AddItem(SListItem("CPC 6128"));
-    m_pDropDownCPCModel->AddItem(SListItem("CPC 464+"));
+    m_pDropDownCPCModel->AddItem(SListItem("CPC 6128+"));
     m_pDropDownCPCModel->SetListboxHeight(4);
        // index and model match, i.e. 0 -> 464, 1 -> 664, 2 -> 6128:
     m_pDropDownCPCModel->SelectItem(CPC.model);
@@ -412,7 +412,7 @@ bool CapriceOptions::HandleMessage(CMessage* pMessage)
           if (pMessage->Source() == m_pScrollBarRamSize) {
             // if CPC.model = 2 (CPC 6128), minimum RAM size is 128k:
             int newRamSize = m_pScrollBarRamSize->GetValue();
-            if (m_pDropDownCPCModel->GetSelectedIndex() == 2) { // selection in Dropdown is 'CPC 6128'
+            if (m_pDropDownCPCModel->GetSelectedIndex() >= 2) { // selection in Dropdown is 'CPC 6128'
               if (newRamSize < 2) {
                 newRamSize = 2; // *64k
                 m_pScrollBarRamSize->SetValue(2);
@@ -422,7 +422,7 @@ bool CapriceOptions::HandleMessage(CMessage* pMessage)
           }
 
           if (pMessage->Source() == m_pDropDownCPCModel) {
-            if (m_pDropDownCPCModel->GetSelectedIndex() == 2) { // selection changes to 'CPC 6128'
+            if (m_pDropDownCPCModel->GetSelectedIndex() >= 2) { // selection changes to 'CPC 6128'
               if (m_pScrollBarRamSize->GetValue() < 2) {
                 m_pScrollBarRamSize->SetValue(2);  // *64k
                 m_pLabelRamSizeValue->SetWindowText("128k     ");
@@ -530,7 +530,7 @@ void CapriceOptions::ProcessOptionChanges(t_CPC& CPC, bool saveChanges) {
     }
 
     // Restart video subsystem
-    if (CPC.scr_window != m_oldCPCsettings.scr_window || CPC.scr_style != m_oldCPCsettings.scr_style)
+    if (CPC.model != m_oldCPCsettings.model || CPC.scr_window != m_oldCPCsettings.scr_window || CPC.scr_style != m_oldCPCsettings.scr_style)
     {
         audio_pause();
         SDL_Delay(20);

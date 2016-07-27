@@ -1,6 +1,9 @@
-Caprice32 - Amstrad CPC Emulator 
+![Caprice32 logo](https://raw.githubusercontent.com/ColinPitrat/caprice32/master/resources/cap32logo.bmp)
+# Caprice32 - Amstrad CPC Emulator
 
-(c) Copyright 1997-2004 Ulrich Doewich
+(c) Copyright 1997-2015 Ulrich Doewich
+
+(c) Copyright 2016 Colin Pitrat
 
 https://github.com/ColinPitrat/caprice32
 
@@ -22,6 +25,7 @@ You will need the following to successfully compile an executable:
 
   * MinGW (only for Windows) - http://sourceforge.net/projects/mingw/
   * SDL - http://www.libsdl.org/index.php
+  * FreeType - https://www.freetype.org/
   * zLib - http://www.gzip.org/zlib/
 
 # Compiling
@@ -30,32 +34,23 @@ You will need the following to successfully compile an executable:
 
 To build with default options, use :
 
-`make` 
+`make`
 
 The following options are available:
 
- * DEBUG=TRUE
- * WITHOUT_GL=TRUE
+ * `DEBUG=TRUE`
+ * `WITHOUT_GL=TRUE`
 
 For example, for a debug build, use:
 
-`make DEBUG=TRUE` 
+`make DEBUG=TRUE`
 
 #### Windows target:
 
-Edit the makefile to update the IPATHS directive with the correct location of the SDL include and library files.
+Edit the makefile to update the `MINGW_PATH`, `WINCXX`, `WININCS` and `WINLIBS` directive with the correct location of the SDL include and library files.
 To build with default options, use:
 
-`make -f makefile.windows` (or `mingw32-make -f makefile.windows`, depending on how you have your MinGW installed) 
-
-The following options are available:
-
- * DEBUG=TRUE
- * WITHOUT_GL=TRUE
-
-For example, for a debug build, use:
-
-`make -f makefile.windows DEBUG=TRUE` 
+`make windows`
 
 # Comments or ready to contribute?
 

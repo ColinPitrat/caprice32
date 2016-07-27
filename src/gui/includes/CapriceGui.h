@@ -1,12 +1,9 @@
 #include "wgui.h"
 
-using namespace std;
-using namespace wGui;
-
-class CapriceGui : public CApplication
+class CapriceGui : public wGui::CApplication
 {
 	public:
-		CapriceGui() : CApplication() {};
+		CapriceGui() : wGui::CApplication() {};
 		void Init(void) override;
 };
 
