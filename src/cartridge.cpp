@@ -13,7 +13,9 @@ const uint32_t CARTRIDGE_PAGE_SIZE = 16*1024;
 const uint32_t CARTRIDGE_MAX_SIZE = CARTRIDGE_NB_PAGES*CARTRIDGE_PAGE_SIZE;
 
 byte *pbCartridgeImage = nullptr;
-byte *pbCartridgePages[CARTRIDGE_NB_PAGES];
+byte *pbCartridgePages[CARTRIDGE_NB_PAGES] = { nullptr };
+
+extern byte* pbROMlo;
 
 void cpr_eject (void)
 {
@@ -140,5 +142,6 @@ int cpr_load (FILE *pfile)
    LOG("Final offset: " << offset);
    LOG("Final cartridge offset: " << cartridgeOffset);
    memset(&pbCartridgeImage[cartridgeOffset], 0, CARTRIDGE_MAX_SIZE-cartridgeOffset);
+   pbROMlo = &pbCartridgeImage[0];
    return 0;
 }
