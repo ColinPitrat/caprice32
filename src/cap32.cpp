@@ -63,7 +63,6 @@ extern word MaxVSync;
 extern t_flags1 flags1;
 extern t_new_dt new_dt;
 
-extern byte* pbCartridgeImage;
 extern byte* pbCartridgePages[];
 
 SDL_AudioSpec *audio_spec = nullptr;
@@ -349,27 +348,36 @@ byte z80_IN_handler (reg_pair port)
                         } else {
                            ret_val = PSG.RegisterAY.Index[14] & (keyboard_matrix[CPC.keyboard_line & 0x0f]); // return last value w/ logic AND of input
                         }
+                        LOG("PPI read from portA (keyboard_line): " << CPC.keyboard_line << " - " << static_cast<int>(ret_val));
                      } else if (PSG.reg_select == 15) { // PSG port B?
                         if ((PSG.RegisterAY.Index[7] & 0x80)) { // port B in output mode?
                            ret_val = PSG.RegisterAY.Index[15]; // return stored value
+                           LOG("PPI read from portA (PSG portB): " << CPC.keyboard_line << " - " << static_cast<int>(ret_val));
                         }
                      } else {
                         ret_val = PSG.RegisterAY.Index[PSG.reg_select]; // read PSG register
+                        LOG("PPI read from portA (registers): " << CPC.keyboard_line << " - " << static_cast<int>(ret_val));
                      }
                   }
                }
             } else {
                ret_val = PPI.portA; // return last programmed value
+               LOG("PPI read from portA (last value): " << CPC.keyboard_line << " - " << static_cast<int>(ret_val));
             }
             break;
 
          case 1: // read from port B?
-            if (PPI.control & 2) { // port B set to input?
+            // 6128+: always use port B as input as this fixes Tintin on the moon.
+            // This should always be the case anyway but do not activate it for other model for now, let's validate it before.
+            // TODO: verify with CPC (non-plus) if we go in the else in some cases
+            if (CPC.model > 2 || PPI.control & 2) { // port B set to input?
+               LOG("PPI read from portB: bTapeLevel=" << static_cast<int>(bTapeLevel) << ", CPC.printer=" << CPC.printer << ", CPC.jumpers=" << CPC.jumpers << ", CRTC.flag_invsync=" << CRTC.flag_invsync)
                ret_val = bTapeLevel | // tape level when reading
                          (CPC.printer ? 0 : 0x40) | // ready line of connected printer
                          (CPC.jumpers & 0x7f) | // manufacturer + 50Hz
                          (CRTC.flag_invsync ? 1 : 0); // VSYNC status
             } else {
+               LOG("PPI read from portB: " << static_cast<int>(PPI.portB))
                ret_val = PPI.portB; // return last programmed value
             }
             break;
@@ -388,11 +396,14 @@ byte z80_IN_handler (reg_pair port)
                   if (CPC.tape_motor) {
                      ret_val |= 0x10; // set the bit if the tape motor is running
                   }
+                  LOG("PPI read from portC (upper half): " << static_cast<int>(ret_val));
                }
                if (!(direction & 1)) { // lower half set to output?
                   ret_val |= 0x0f; // invalid - set all bits
+                  LOG("PPI read from portC (lower half): " << static_cast<int>(ret_val));
                }
             }
+            LOG("PPI read from portC: " << static_cast<int>(ret_val));
             break;
       }
    }
@@ -406,7 +417,7 @@ byte z80_IN_handler (reg_pair port)
          }
       }
    }
-   //LOG("port.b.h3=" << std::hex << static_cast<int>(port.b.h3) << ", port.b.h2=" << static_cast<int>(port.b.h2) << ", port.b.h=" << std::hex << static_cast<int>(port.b.h) << ", port.b.l=" << static_cast<int>(port.b.l) << ", ret_val=" << static_cast<int>(ret_val) << std::dec);
+   LOG("port.b.h3=" << std::hex << static_cast<int>(port.b.h3) << ", port.b.h2=" << static_cast<int>(port.b.h2) << ", port.b.h=" << std::hex << static_cast<int>(port.b.h) << ", port.b.l=" << static_cast<int>(port.b.l) << ", ret_val=" << static_cast<int>(ret_val) << std::dec);
    return ret_val;
 }
 
@@ -414,7 +425,7 @@ byte z80_IN_handler (reg_pair port)
 
 void z80_OUT_handler (reg_pair port, byte val)
 {
-   //LOG("port.b.h3=" << std::hex << static_cast<int>(port.b.h3) << ", port.b.h2=" << static_cast<int>(port.b.h2) << ", port.b.h=" << std::hex << static_cast<int>(port.b.h) << ", port.b.l=" << static_cast<int>(port.b.l) << ", val=" << static_cast<int>(val) << std::dec);
+   LOG("port.b.h3=" << std::hex << static_cast<int>(port.b.h3) << ", port.b.h2=" << static_cast<int>(port.b.h2) << ", port.b.h=" << std::hex << static_cast<int>(port.b.h) << ", port.b.l=" << static_cast<int>(port.b.l) << ", val=" << static_cast<int>(val) << std::dec);
 // Gate Array -----------------------------------------------------------------
    if ((port.b.h & 0xc0) == 0x40) { // GA chip select?
       switch (val >> 6) {
@@ -524,6 +535,7 @@ void z80_OUT_handler (reg_pair port, byte val)
       }
       else if (crtc_port == 1) { // CRTC write data?
          if (CRTC.reg_select < 16) { // only registers 0 - 15 can be written to
+            LOG("CRTC write to register " << static_cast<int>(CRTC.reg_select) << ": " << static_cast<int>(val));
             switch (CRTC.reg_select) {
                case 0: // horizontal total
                   CRTC.registers[0] = val;
@@ -689,21 +701,27 @@ void z80_OUT_handler (reg_pair port, byte val)
    if (!(port.b.h & 0x08)) { // PPI chip select?
       switch (port.b.h & 3) {
          case 0: // write to port A?
+            LOG("PPI write to portA: " << static_cast<int>(val));
             PPI.portA = val;
             if (!(PPI.control & 0x10)) { // port A set to output?
+               LOG("PPI write to portA (PSG): " << static_cast<int>(val));
                byte psg_data = val;
                psg_write
             }
             break;
          case 1: // write to port B?
+            LOG("PPI write to portB (upper half): " << static_cast<int>(val));
             PPI.portB = val;
             break;
          case 2: // write to port C?
+            LOG("PPI write to portC: " << static_cast<int>(val));
             PPI.portC = val;
             if (!(PPI.control & 1)) { // output lower half?
+               LOG("PPI write to portC (keyboard_line): " << static_cast<int>(val));
                CPC.keyboard_line = val;
             }
             if (!(PPI.control & 8)) { // output upper half?
+               LOG("PPI write to portC (upper half): " << static_cast<int>(val));
                CPC.tape_motor = val & 0x10; // update tape motor control
                PSG.control = val; // change PSG control
                byte psg_data = PPI.portA;
@@ -712,35 +730,29 @@ void z80_OUT_handler (reg_pair port, byte val)
             break;
          case 3: // modify PPI control
             if (val & 0x80) { // change PPI configuration
+               LOG("PPI.control " << static_cast<int>(PPI.control) << " => " << static_cast<int>(val));
                PPI.control = val; // update control byte
                PPI.portA = 0; // clear data for all ports
                PPI.portB = 0;
                PPI.portC = 0;
             } else { // bit manipulation of port C data
+               LOG("PPI.portC update: " << static_cast<int>(val));
+               byte bit = (val >> 1) & 7; // isolate bit to set
                if (val & 1) { // set bit?
-                  byte bit = (val >> 1) & 7; // isolate bit to set
                   PPI.portC |= bit_values[bit]; // set requested bit
-                  if (!(PPI.control & 1)) { // output lower half?
-                     CPC.keyboard_line = PPI.portC;
-                  }
-                  if (!(PPI.control & 8)) { // output upper half?
-                     CPC.tape_motor = PPI.portC & 0x10;
-                     PSG.control = PPI.portC; // change PSG control
-                     byte psg_data = PPI.portA;
-                     psg_write
-                  }
                } else {
-                  byte bit = (val >> 1) & 7; // isolate bit to reset
                   PPI.portC &= ~(bit_values[bit]); // reset requested bit
-                  if (!(PPI.control & 1)) { // output lower half?
-                     CPC.keyboard_line = PPI.portC;
-                  }
-                  if (!(PPI.control & 8)) { // output upper half?
-                     CPC.tape_motor = PPI.portC & 0x10;
-                     PSG.control = PPI.portC; // change PSG control
-                     byte psg_data = PPI.portA;
-                     psg_write
-                  }
+               }
+               if (!(PPI.control & 1)) { // output lower half?
+                  LOG("PPI.portC update (keyboard_line): " << static_cast<int>(PPI.portC));
+                  CPC.keyboard_line = PPI.portC;
+               }
+               if (!(PPI.control & 8)) { // output upper half?
+                  LOG("PPI.portC update (upper half): " << static_cast<int>(PPI.portC));
+                  CPC.tape_motor = PPI.portC & 0x10;
+                  PSG.control = PPI.portC; // change PSG control
+                  byte psg_data = PPI.portA;
+                  psg_write
                }
             }
             if (CPC.mf2) { // MF2 enabled?
@@ -2020,8 +2032,8 @@ int emulator_patch_ROM (void)
          return ERR_CPC_ROM_MISSING;
       }
    } else { // Plus range
-      if (pbCartridgeImage != nullptr) {
-         pbROMlo = &pbCartridgeImage[0];
+      if (pbCartridgePages[0] != nullptr) {
+         pbROMlo = pbCartridgePages[0];
       }
    }
 
