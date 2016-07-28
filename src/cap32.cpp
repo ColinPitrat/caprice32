@@ -1152,7 +1152,6 @@ int snapshot_load (const char *pchFileName)
 int snapshot_save (const char *pchFileName)
 {
    t_SNA_header sh;
-   int n;
    dword dwFlags;
 
    memset(&sh, 0, sizeof(sh));
@@ -1192,14 +1191,14 @@ int snapshot_save (const char *pchFileName)
    sh.HLx[0] = z80.HLx.b.l;
 // Gate Array
    sh.ga_pen = GateArray.pen;
-   for (n = 0; n < 17; n++) { // loop for all colours + border
+   for (int n = 0; n < 17; n++) { // loop for all colours + border
       sh.ga_ink_values[n] = GateArray.ink_values[n];
    }
    sh.ga_ROM_config = GateArray.ROM_config;
    sh.ga_RAM_config = GateArray.RAM_config;
 // CRTC
    sh.crtc_reg_select = CRTC.reg_select;
-   for (n = 0; n < 18; n++) { // loop for all CRTC registers
+   for (int n = 0; n < 18; n++) { // loop for all CRTC registers
       sh.crtc_registers[n] = CRTC.registers[n];
    }
 // ROM select
@@ -1211,7 +1210,7 @@ int snapshot_save (const char *pchFileName)
    sh.ppi_control = PPI.control;
 // PSG
    sh.psg_reg_select = PSG.reg_select;
-   for (n = 0; n < 16; n++) { // loop for all PSG registers
+   for (int n = 0; n < 16; n++) { // loop for all PSG registers
       sh.psg_registers[n] = PSG.RegisterAY.Index[n];
    }
 
@@ -2067,7 +2066,11 @@ int emulator_patch_ROM (void)
 
 void emulator_reset (bool bolMF2Reset)
 {
-   int n;
+   if (CPC.model > 2) {
+      if (pbCartridgePages[0] != nullptr) {
+         pbROMlo = pbCartridgePages[0];
+      }
+   }
 
 // ASIC
 // TODO: asic_reset
@@ -2108,6 +2111,7 @@ void emulator_reset (bool bolMF2Reset)
    GateArray.scr_mode =
    GateArray.requested_scr_mode = 1; // set to mode 1
    GateArray.registerPageOn = false;
+   GateArray.lower_ROM_bank = 0;
    ga_init_banking();
 
 // PPI
@@ -2131,7 +2135,7 @@ void emulator_reset (bool bolMF2Reset)
          memset(pbMF2ROM+8192, 0, 8192); // clear the MF2's RAM area
       }
    }
-   for (n = 0; n < 4; n++) { // initialize active read/write bank configuration
+   for (int n = 0; n < 4; n++) { // initialize active read/write bank configuration
       membank_read[n] = membank_config[0][n];
       membank_write[n] = membank_config[0][n];
    }
@@ -2434,45 +2438,41 @@ void audio_resume (void)
 
 int video_set_palette (void)
 {
-         int n;
-
-         if (!CPC.scr_tube) {
-            int n;
-            for (n = 0; n < 32; n++) {
-               dword red = static_cast<dword>(colours_rgb[n][0] * (CPC.scr_intensity / 10.0) * 255);
-               if (red > 255) { // limit to the maximum
-                  red = 255;
-               }
-               dword green = static_cast<dword>(colours_rgb[n][1] * (CPC.scr_intensity / 10.0) * 255);
-               if (green > 255) {
-                  green = 255;
-               }
-               dword blue = static_cast<dword>(colours_rgb[n][2] * (CPC.scr_intensity / 10.0) * 255);
-               if (blue > 255) {
-                  blue = 255;
-               }
-               colours[n].r = red;
-               colours[n].g = green;
-               colours[n].b = blue;
-            }
-         } else {
-            int n;
-            for (n = 0; n < 32; n++) {
-               dword green = static_cast<dword>(colours_green[n] * (CPC.scr_intensity / 10.0) * 255);
-               if (green > 255) {
-                  green = 255;
-               }
-               colours[n].r = 0;
-               colours[n].g = green;
-               colours[n].b = 0;
-            }
+   if (!CPC.scr_tube) {
+      for (int n = 0; n < 32; n++) {
+         dword red = static_cast<dword>(colours_rgb[n][0] * (CPC.scr_intensity / 10.0) * 255);
+         if (red > 255) { // limit to the maximum
+            red = 255;
          }
+         dword green = static_cast<dword>(colours_rgb[n][1] * (CPC.scr_intensity / 10.0) * 255);
+         if (green > 255) {
+            green = 255;
+         }
+         dword blue = static_cast<dword>(colours_rgb[n][2] * (CPC.scr_intensity / 10.0) * 255);
+         if (blue > 255) {
+            blue = 255;
+         }
+         colours[n].r = red;
+         colours[n].g = green;
+         colours[n].b = blue;
+      }
+   } else {
+      for (int n = 0; n < 32; n++) {
+         dword green = static_cast<dword>(colours_green[n] * (CPC.scr_intensity / 10.0) * 255);
+         if (green > 255) {
+            green = 255;
+         }
+         colours[n].r = 0;
+         colours[n].g = green;
+         colours[n].b = 0;
+      }
+   }
 
-         vid_plugin->set_palette(colours);
+   vid_plugin->set_palette(colours);
 
-   for (n = 0; n < 17; n++) { // loop for all colours + border
-     int i=GateArray.ink_values[n];
-     GateArray.palette[n] = SDL_MapRGB(back_surface->format,colours[i].r,colours[i].g,colours[i].b);
+   for (int n = 0; n < 17; n++) { // loop for all colours + border
+      int i=GateArray.ink_values[n];
+      GateArray.palette[n] = SDL_MapRGB(back_surface->format,colours[i].r,colours[i].g,colours[i].b);
    }
 
    return 0;
@@ -2688,12 +2688,10 @@ void joysticks_shutdown (void)
 
 void input_swap_joy (void)
 {
-   dword n, pc_idx, val;
-
-   for (n = 0; n < 6; n++) {
-      pc_idx = joy_layout[n][1]; // get the PC key to change the assignment for
+   for (dword n = 0; n < 6; n++) {
+      dword pc_idx = joy_layout[n][1]; // get the PC key to change the assignment for
       if (pc_idx) {
-         val = keyboard_normal[pc_idx]; // keep old value
+         dword val = keyboard_normal[pc_idx]; // keep old value
          keyboard_normal[pc_idx] = cpc_kbd[CPC.keyboard][joy_layout[n][0]]; // assign new function
          cpc_kbd[CPC.keyboard][joy_layout[n][0]] = val; // store old value
       }
@@ -2713,18 +2711,17 @@ void update_cpc_speed(void)
 
 int input_init (void)
 {
-   dword n, pc_key, pc_idx, cpc_idx, cpc_key;
-
    memset(keyboard_normal, 0xff, sizeof(keyboard_normal));
    memset(keyboard_shift, 0xff, sizeof(keyboard_shift));
    memset(keyboard_ctrl, 0xff, sizeof(keyboard_ctrl));
    memset(keyboard_mode, 0xff, sizeof(keyboard_mode));
 
-   for (n = 0; n < KBD_MAX_ENTRIES; n++) {
-      pc_key = kbd_layout[CPC.kbd_layout][n][1]; // PC key assigned to CPC key
+   for (dword n = 0; n < KBD_MAX_ENTRIES; n++) {
+      dword pc_key = kbd_layout[CPC.kbd_layout][n][1]; // PC key assigned to CPC key
       if (pc_key) {
-         pc_idx = pc_key & 0xffff; // strip off modifier
-         cpc_idx = kbd_layout[CPC.kbd_layout][n][0];
+         dword pc_idx = pc_key & 0xffff; // strip off modifier
+         dword cpc_idx = kbd_layout[CPC.kbd_layout][n][0];
+         dword cpc_key;
          if (cpc_idx & MOD_EMU_KEY) {
             cpc_key = cpc_idx;
          } else {
@@ -3549,6 +3546,7 @@ int cap32_main (int argc, char **argv)
                            break;
 
                         case CAP32_RESET:
+                           LOG("User requested emulator reset");
                            emulator_reset(false);
                            break;
 
