@@ -56,7 +56,7 @@ static inline unsigned short decode_magnification(byte val) {
 
 // Return true if byte should be written in memory
 bool asic_register_page_write(word addr, byte val) {
-   LOG("addr=" << std::hex << addr << ", val=" << static_cast<int>(val) << std::dec);
+   LOG("ASIC register page write: addr=" << std::hex << addr << ", val=" << static_cast<int>(val) << std::dec);
    if (addr < 0x4000 || addr > 0x7FFF) {
       return true;
    }
@@ -111,7 +111,7 @@ bool asic_register_page_write(word addr, byte val) {
             // Write-only: does not affect pbRegisterPage
             return false;
          default:
-            //LOG("Received sprite operation of unsupported type: " << type << " addr=" << std::hex << addr << " - val=" << static_cast<int>(val) << std::dec);
+            LOG("Received sprite operation of unsupported type: " << type << " addr=" << std::hex << addr << " - val=" << static_cast<int>(val) << std::dec);
             break;
       }
    } else if (addr >= 0x6400 && addr < 0x6440) {
