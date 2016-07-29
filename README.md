@@ -11,13 +11,35 @@ https://github.com/ColinPitrat/caprice32
 
 # What is it ?
 
-Caprice32 is a software emulator of the Amstrad CPC 8bit home computer series. The emulator faithfully imitates the CPC464, CPC664, and CPC6128 models. By recreating the operations of all hardware components at a low level, the emulator achieves a high degree of compatibility with original CPC software. These programs or games can be run unmodified at real-time or higher speeds, depending on the emulator host environment.
+Caprice32 is a software emulator of the Amstrad CPC 8bit home computer series running on Linux and Windows. The emulator faithfully imitates the CPC464, CPC664, and CPC6128 models. By recreating the operations of all hardware components at a low level, the emulator achieves a high degree of compatibility with original CPC software. These programs or games can be run unmodified at real-time or higher speeds, depending on the emulator host environment.
 
-# Using the source
+# Features
 
-The source for Caprice32 is distributed under the terms of the GNU General Public License (GNU GPL), which is included in this archive as COPYING.txt. Please make sure that you understand the terms and conditions of the license before using the source.
+Caprice32 provides:
+  * Complete emulation of CPC464, CPC664 and CPC6128
+  * Experimental partial support of CPC6128+ (missing DMA, soft scroll, analog joysticks and 8 bit printer)
+  * Joystick support - it can be fully used with joystick only, thanks to an integrated virtual keyboard.
+  * Joystick emulation - joystick-only games can be played even without joystick
+  * English, French or Spanish keyboards
+  * DSK files for disks - VOC and CDT files for tapes - CPR files for cartridge
+  * Direct load of ZIP files
+  * Custom disk formats
+  * Printer support
+  * Memory tool to inspect and modify memory (peek and poke)
+  * Experimental support of Multiface 2 (you should prefer using memory tool)
 
-I encourage you to get involved in the project.
+You see something missing, do not hesitate to open an issue to suggest it.
+
+# Help needed
+
+Maintaining Caprice is a lot of work and you can help with it.
+You can:
+  * Use it, show it, talk and write about it
+  * Thank the maintainer
+  * Report any bug or missing feature
+  * Write some documentation
+  * Help building and testing the windows version
+  * Port it to iOS so that Mac users can enjoy it too
 
 # Requirements
 
@@ -51,6 +73,12 @@ Edit the makefile to update the `MINGW_PATH`, `WINCXX`, `WININCS` and `WINLIBS` 
 To build with default options, use:
 
 `make windows`
+
+# Using the source
+
+The source for Caprice32 is distributed under the terms of the GNU General Public License (GNU GPL), which is included in this archive as COPYING.txt. Please make sure that you understand the terms and conditions of the license before using the source.
+
+I encourage you to get involved in the project.
 
 # Comments or ready to contribute?
 
