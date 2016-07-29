@@ -76,6 +76,9 @@ dword dwFPS, dwFrameCount;
 dword dwXScale, dwYScale;
 dword dwSndBufferCopied;
 
+dword osd_timing;
+std::string osd_message;
+
 dword dwBreakPoint, dwTrace, dwMF2ExitAddr;
 dword dwMF2Flags = 0;
 byte *pbGPBuffer = nullptr;
@@ -787,9 +790,9 @@ void z80_OUT_handler (reg_pair port, byte val)
 
 
 
-void print (dword *pdwAddr, char *pchStr, bool bolColour)
+void print (dword *pdwAddr, const char *pchStr, bool bolColour)
 {
-   int iLen, iIdx, iRow, iCol;
+   int iLen, iIdx;
    dword dwColour;
    word wColour;
    byte bRow, bColour;
@@ -807,10 +810,10 @@ void print (dword *pdwAddr, char *pchStr, bool bolColour)
             }
             iIdx -= FNT_MIN_CHAR; // zero base the index
             pdwLine = pdwAddr; // keep a reference to the current screen position
-            for (iRow = 0; iRow < FNT_CHAR_HEIGHT; iRow++) { // loop for all rows in the font character
+            for (int iRow = 0; iRow < FNT_CHAR_HEIGHT; iRow++) { // loop for all rows in the font character
                pdwPixel = pdwLine;
                bRow = bFont[iIdx]; // get the bitmap information for one row
-               for (iCol = 0; iCol < FNT_CHAR_WIDTH; iCol++) { // loop for all columns in the font character
+               for (int iCol = 0; iCol < FNT_CHAR_WIDTH; iCol++) { // loop for all columns in the font character
                   if (bRow & 0x80) { // is the bit set?
                      *(pdwPixel+1) = 0; // draw the "shadow"
                      *(pdwPixel+CPC.scr_line_offs) = 0;
@@ -839,10 +842,10 @@ void print (dword *pdwAddr, char *pchStr, bool bolColour)
             }
             iIdx -= FNT_MIN_CHAR; // zero base the index
             pdwLine = pdwAddr; // keep a reference to the current screen position
-            for (iRow = 0; iRow < FNT_CHAR_HEIGHT; iRow++) { // loop for all rows in the font character
+            for (int iRow = 0; iRow < FNT_CHAR_HEIGHT; iRow++) { // loop for all rows in the font character
                pbPixel = reinterpret_cast<byte *>(pdwLine);
                bRow = bFont[iIdx]; // get the bitmap information for one row
-               for (iCol = 0; iCol < FNT_CHAR_WIDTH; iCol++) { // loop for all columns in the font character
+               for (int iCol = 0; iCol < FNT_CHAR_WIDTH; iCol++) { // loop for all columns in the font character
                   if (bRow & 0x80) { // is the bit set?
                      *(reinterpret_cast<dword *>(pbPixel+CPC.scr_line_offs)) = 0; // draw the "shadow"
                      *reinterpret_cast<dword *>(pbPixel) = dwColour; // draw the character pixel
@@ -870,10 +873,10 @@ void print (dword *pdwAddr, char *pchStr, bool bolColour)
             }
             iIdx -= FNT_MIN_CHAR; // zero base the index
             pdwLine = pdwAddr; // keep a reference to the current screen position
-            for (iRow = 0; iRow < FNT_CHAR_HEIGHT; iRow++) { // loop for all rows in the font character
+            for (int iRow = 0; iRow < FNT_CHAR_HEIGHT; iRow++) { // loop for all rows in the font character
                pwPixel = reinterpret_cast<word *>(pdwLine);
                bRow = bFont[iIdx]; // get the bitmap information for one row
-               for (iCol = 0; iCol < FNT_CHAR_WIDTH; iCol++) { // loop for all columns in the font character
+               for (int iCol = 0; iCol < FNT_CHAR_WIDTH; iCol++) { // loop for all columns in the font character
                   if (bRow & 0x80) { // is the bit set?
                      *(pwPixel+1) = 0; // draw the "shadow"
                      *reinterpret_cast<word *>(reinterpret_cast<dword *>(pwPixel)+CPC.scr_line_offs) = 0;
@@ -902,10 +905,10 @@ void print (dword *pdwAddr, char *pchStr, bool bolColour)
             }
             iIdx -= FNT_MIN_CHAR; // zero base the index
             pdwLine = pdwAddr; // keep a reference to the current screen position
-            for (iRow = 0; iRow < FNT_CHAR_HEIGHT; iRow++) { // loop for all rows in the font character
+            for (int iRow = 0; iRow < FNT_CHAR_HEIGHT; iRow++) { // loop for all rows in the font character
                pbPixel = reinterpret_cast<byte *>(pdwLine);
                bRow = bFont[iIdx]; // get the bitmap information for one row
-               for (iCol = 0; iCol < FNT_CHAR_WIDTH; iCol++) { // loop for all columns in the font character
+               for (int iCol = 0; iCol < FNT_CHAR_WIDTH; iCol++) { // loop for all columns in the font character
                   if (bRow & 0x80) { // is the bit set?
                      *(pbPixel+1) = 0; // draw the "shadow"
                      *reinterpret_cast<byte *>(reinterpret_cast<dword *>(pbPixel)+CPC.scr_line_offs) = 0;
@@ -3207,6 +3210,13 @@ void showGui()
 
 
 
+void set_osd_message(const std::string& message) {
+   osd_timing = SDL_GetTicks() + 1000;
+   osd_message = " " + message;
+}
+
+
+
 int cap32_main (int argc, char **argv)
 {
    dword dwOffset;
@@ -3522,6 +3532,7 @@ int cap32_main (int argc, char **argv)
                                  CPC.tape_play_button = 0x10;
                               }
                            }
+                           set_osd_message(std::string("Play tape: ") + (CPC.tape_play_button ? "on" : "off"));
                            break;
 
                         case CAP32_MF2STOP:
@@ -3553,6 +3564,7 @@ int cap32_main (int argc, char **argv)
                         case CAP32_JOY:
                            CPC.joystick_emulation = CPC.joystick_emulation ? 0 : 1;
                            input_swap_joy();
+                           set_osd_message(std::string("Joystick emulation: ") + (CPC.joystick_emulation ? "on" : "off"));
                            break;
 
                         case CAP32_EXIT:
@@ -3561,10 +3573,12 @@ int cap32_main (int argc, char **argv)
 
                         case CAP32_FPS:
                            CPC.scr_fps = CPC.scr_fps ? 0 : 1; // toggle fps display on or off
+                           set_osd_message(std::string("Performances info: ") + (CPC.scr_fps ? "on" : "off"));
                            break;
 
                         case CAP32_SPEED:
                            CPC.limit_speed = CPC.limit_speed ? 0 : 1;
+                           set_osd_message(std::string("Limit speed: ") + (CPC.limit_speed ? "on" : "off"));
                            break;
 
                         #ifdef DEBUG
@@ -3577,6 +3591,7 @@ int cap32_main (int argc, char **argv)
                               }
                            }
                            #endif
+                           set_osd_message(std::string("Debug mode: ") + (dwDebugFlag ? "on" : "off"));
                            break;
                         #endif
                      }
@@ -3801,7 +3816,9 @@ int cap32_main (int argc, char **argv)
 
          if (iExitCondition == EC_FRAME_COMPLETE) { // emulation finished rendering a complete frame?
             dwFrameCount++;
-            if (CPC.scr_fps) {
+            if (SDL_GetTicks() < osd_timing) {
+               print(static_cast<dword *>(back_surface->pixels) + CPC.scr_line_offs, osd_message.c_str(), true);
+            } else if (CPC.scr_fps) {
                char chStr[15];
                sprintf(chStr, "%3dFPS %3d%%", static_cast<int>(dwFPS), static_cast<int>(dwFPS) * 100 / 50);
                print(static_cast<dword *>(back_surface->pixels) + CPC.scr_line_offs, chStr, true); // display the frames per second counter
