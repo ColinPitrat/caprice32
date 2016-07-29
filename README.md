@@ -30,7 +30,7 @@ Caprice32 provides:
   * Experimental support of Multiface 2 (you should prefer using memory tool)
   * Text mode graphics (using [aalib](http://aa-project.sourceforge.net/aalib/) or [libcaca](http://caca.zoy.org/wiki/libcaca))
 
-You see something missing, do not hesitate to open an issue to suggest it.
+You see something missing ? Do not hesitate to open an issue to suggest it.
 
 # Help needed
 
