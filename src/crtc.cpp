@@ -1160,11 +1160,11 @@ void crtc_cycle(int repeat_count)
 
       if (CRTC.flag_newscan) { // scanline change requested?
          CRTC.flag_newscan = 0;
-         CRTC.addr = CRTC.next_addr;
-         CRTC.sl_count++;
          if (CRTC.split_sl && CRTC.sl_count == CRTC.split_sl) {
             CRTC.next_addr = CRTC.split_addr;
          }
+         CRTC.addr = CRTC.next_addr;
+         CRTC.sl_count++;
 
          if (CRTC.flag_invsync) { // VSYNC active?
             CRTC.vsw_count++; // update counter
