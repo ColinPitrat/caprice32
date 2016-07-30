@@ -36,7 +36,7 @@ endif
 COMMON_CFLAGS = $(CUSTOM_CFLAGS) -std=c++11
 WARNINGS = -Wall -Wextra -Wzero-as-null-pointer-constant -Wformat=2 -Wold-style-cast -Wmissing-include-dirs -Wlogical-op -Woverloaded-virtual -Wpointer-arith -Wredundant-decls
 CFLAGS = $(COMMON_CFLAGS) $(IPATHS) $(WARNINGS)
-WINCFLAGS = $(COMMON_CFLAGS) $(WININCS) $(WARNINGS)
+WINCFLAGS = -DWINDOWS $(COMMON_CFLAGS) $(WININCS) $(WARNINGS)
 DEBUG_FLAGS=-Werror -g -O0 -DDEBUG
 RELEASE_FLAGS=-O2 -funroll-loops -ffast-math -fomit-frame-pointer -fno-strength-reduce -finline-functions -s
 BUILD_FLAGS=$(RELEASE_FLAGS)
@@ -99,6 +99,7 @@ cap32: $(OBJECTS) $(MAIN)
 	$(CXX) $(LDFLAGS) -o cap32 $(OBJECTS) $(MAIN) $(LIBS)
 
 windows: cap32.exe win
+	rm -f cap32.zip
 	cp cap32.exe win/
 	cp $(MINGW_PATH)/bin/SDL.dll win/
 	cp $(MINGW_PATH)/bin/libbz2-1.dll win/
@@ -108,7 +109,10 @@ windows: cap32.exe win
 	cp $(MINGW_PATH)/bin/libwinpthread-1.dll win/
 	cp $(MINGW_PATH)/bin/zlib1.dll win/
 	cp cap32.cfg win/
-	cp -r resources/ rom/ win/
+	mkdir -p win/resources win/rom
+	cp resources/{audio.bmp,cap32logo.bmp,general.bmp,input.bmp,rom.bmp,vera_mono.ttf,vera_sans.ttf,video.bmp} win/resources
+	cp rom/{amsdos.rom,cpc464.rom,cpc6128.rom,cpc664.rom,MF2.rom,system.cpr} win/rom/
+	zip -r cap32.zip win
 
 win:
 	mkdir -p win
