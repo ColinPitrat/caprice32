@@ -9,11 +9,12 @@ extern t_GateArray GateArray;
 extern t_CRTC CRTC;
 extern t_CPC CPC;
 extern SDL_Surface *back_surface;
+extern dword dwXScale;
 
 bool asic_locked = true;
 byte asic_sprites[16][16][16];
-int asic_sprites_x[16];
-int asic_sprites_y[16];
+int16_t asic_sprites_x[16];
+int16_t asic_sprites_y[16];
 short int asic_sprites_mag_x[16];
 short int asic_sprites_mag_y[16];
 double asic_colours[32][3];
@@ -178,4 +179,81 @@ bool asic_register_page_write(word addr, byte val) {
       //LOG("Received unused write at " << std::hex << addr << " - val: " << static_cast<int>(val) << std::dec);
    }
    return true;
+}
+
+void putpixel(SDL_Surface *surface, int x, int y, Uint32 pixel)
+{
+   int bpp = surface->format->BytesPerPixel;
+   /* Here p is the address to the pixel we want to set */
+   Uint8 *p = static_cast<Uint8 *>(surface->pixels) + y * surface->pitch + x * bpp;
+
+   switch(bpp) {
+      case 1:
+         *p = pixel;
+         break;
+
+      case 2:
+         *reinterpret_cast<Uint16 *>(p) = pixel;
+         break;
+
+      case 3:
+         if(SDL_BYTEORDER == SDL_BIG_ENDIAN) {
+            p[0] = (pixel >> 16) & 0xff;
+            p[1] = (pixel >> 8) & 0xff;
+            p[2] = pixel & 0xff;
+         } else {
+            p[0] = pixel & 0xff;
+            p[1] = (pixel >> 8) & 0xff;
+            p[2] = (pixel >> 16) & 0xff;
+         }
+         break;
+
+      case 4:
+         *reinterpret_cast<Uint32 *>(p) = pixel;
+         break;
+   }
+}
+
+void asic_draw_sprites() {
+   const int borderWidth = 64;
+   const int borderHeight = 40;
+   const int screenWidth = 640 + borderWidth;
+   const int screenHeight = 200 + borderHeight;
+   for(int i = 15; i >= 0; i--) {
+      int sx = asic_sprites_x[i];
+      int mx = asic_sprites_mag_x[i];
+      if(mx > 0 && (sx + 64*mx) >= borderWidth && sx <= screenWidth) {
+         int sy = asic_sprites_y[i];
+         int my = asic_sprites_mag_y[i];
+         if(my > 0 && (sy + 64*my) >= borderHeight && sy <= screenHeight) {
+            sx += borderWidth;
+            sy += borderHeight;
+            for(int x = 0; x < 16; x++) {
+               if(sx + (x*mx) <= borderWidth) {
+                  continue;
+               }
+               if(sx + (x*mx) >= screenWidth) {
+                  break;
+               }
+               for(int y = 0; y < 16; y++) {
+                  if(sy + (y*my) <= borderHeight) {
+                     continue;
+                  }
+                  if(sy + (y*my) >= screenHeight) {
+                     break;
+                  }
+                  byte p = asic_sprites[i][x][y];
+                  if(p) {
+                     Uint32 pixel = GateArray.palette[p];
+                     for(int dx = 0; dx < mx; dx++) {
+                        for(int dy = 0; dy < my * static_cast<int>(dwXScale); dy++) {
+                           putpixel(back_surface, (sx+(x*mx)+dx) * dwXScale / 2, (sy+(y*my)) * dwXScale + dy, pixel);
+                        }
+                     }
+                  }
+               }
+            }
+         }
+      }
+   }
 }

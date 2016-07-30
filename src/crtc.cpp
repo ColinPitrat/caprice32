@@ -816,69 +816,8 @@ void prerender_sync_half(void)
 
 
 
-static byte getSpriteVal(unsigned short offset) {
-   if (CPC.model > 2) {
-      const int borderWidth = 64;
-      const int borderHeight = 40;
-      const int screenWidth = 640;
-      const int screenHeight = 400;
-      int x = 2 * (CPC.scr_pos + offset - CPC.scr_base) / dwXScale - borderWidth;
-      int y = VDU.scrln - borderHeight;
-      if (x >= 0 && x < screenWidth && y >= 0 && y < screenHeight) {
-         for(int i = 0; i < 16; i++) {
-            int sx = asic_sprites_x[i];
-            int mx = asic_sprites_mag_x[i];
-            if(mx > 0 && x >= sx && x < sx + 16 * mx) {
-               int sy = asic_sprites_y[i];
-               int my = asic_sprites_mag_y[i];
-               if(my > 0 && y >= sy && y < sy + 16 * my) {
-                  int px = (x - sx) / mx;
-                  int py = (y - sy) / my;
-                  byte pcol = asic_sprites[i][px][py];
-                  if(pcol != 0) {
-                     return pcol;
-                  }
-               }
-            }
-         }
-      }
-   }
-   return 0;
-}
-
 static inline byte getRAMByte(unsigned int video_address) {
    return *(pbRAM + video_address);
-}
-
-void prerender_normal_plus(void)
-{
-   register byte bVidMem = getRAMByte(CRTC.next_address);
-   *RendPos = *(ModeMap + (bVidMem * 2));
-   *(RendPos + 1) = *(ModeMap + (bVidMem * 2) + 1);
-   bVidMem = getRAMByte(CRTC.next_address + 1);
-   *(RendPos + 2) = *(ModeMap + (bVidMem * 2));
-   *(RendPos + 3) = *(ModeMap + (bVidMem * 2) + 1);
-
-   unsigned short offset = 0;
-   for(unsigned int i = 0; i < 4; i++) {
-      byte c1 = getSpriteVal(offset++);
-      byte c2 = getSpriteVal(offset++);
-      byte c3 = getSpriteVal(offset++);
-      byte c4 = getSpriteVal(offset++);
-      if (c4) {
-         *RendPos = (*RendPos & 0x00FFFFFF) | (c4 << 24);
-      }
-      if (c3) {
-         *RendPos = (*RendPos & 0xFF00FFFF) | (c3 << 16);
-      }
-      if (c2) {
-         *RendPos = (*RendPos & 0xFFFF00FF) | (c2 << 8);
-      }
-      if (c1) {
-         *RendPos = (*RendPos & 0xFFFFFF00) | c1;
-      }
-      RendPos++;
-   }
 }
 
 void prerender_normal(void)
@@ -893,35 +832,6 @@ void prerender_normal(void)
 }
 
 
-
-void prerender_normal_half_plus(void)
-{
-   register byte bVidMem = getRAMByte(CRTC.next_address);
-   *RendPos = *(ModeMap + bVidMem);
-   bVidMem = getRAMByte(CRTC.next_address + 1);
-   *(RendPos + 1) = *(ModeMap + bVidMem);
-
-   unsigned short offset = 0;
-   for(int i = 0; i < 2; i++) {
-      byte c1 = getSpriteVal(offset++);
-      byte c2 = getSpriteVal(offset++);
-      byte c3 = getSpriteVal(offset++);
-      byte c4 = getSpriteVal(offset++);
-      if (c4) {
-         *RendPos = ((*RendPos) & 0x00FFFFFF) | (c4 << 24);
-      }
-      if (c3) {
-         *RendPos = ((*RendPos) & 0xFF00FFFF) | (c3 << 16);
-      }
-      if (c2) {
-         *RendPos = ((*RendPos) & 0xFFFF00FF) | (c2 << 8);
-      }
-      if (c1) {
-         *RendPos = ((*RendPos) & 0xFFFFFF00) | c1;
-      }
-      RendPos++;
-   }
-}
 
 void prerender_normal_half(void)
 {

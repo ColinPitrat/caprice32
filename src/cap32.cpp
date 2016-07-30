@@ -2497,20 +2497,12 @@ void video_set_style (void)
    }
    switch (dwXScale) {
       case 1:
-         if (CPC.model > 2) {
-            CPC.scr_prerendernorm = prerender_normal_half_plus;
-         } else {
-            CPC.scr_prerendernorm = prerender_normal_half;
-         }
+         CPC.scr_prerendernorm = prerender_normal_half;
          CPC.scr_prerenderbord = prerender_border_half;
          CPC.scr_prerendersync = prerender_sync_half;
          break;
       case 2:
-         if (CPC.model > 2) {
-            CPC.scr_prerendernorm = prerender_normal_plus;
-         } else {
-            CPC.scr_prerendernorm = prerender_normal;
-         }
+         CPC.scr_prerendernorm = prerender_normal;
          CPC.scr_prerenderbord = prerender_border;
          CPC.scr_prerendersync = prerender_sync;
          break;
@@ -3823,6 +3815,7 @@ int cap32_main (int argc, char **argv)
                sprintf(chStr, "%3dFPS %3d%%", static_cast<int>(dwFPS), static_cast<int>(dwFPS) * 100 / 50);
                print(static_cast<dword *>(back_surface->pixels) + CPC.scr_line_offs, chStr, true); // display the frames per second counter
             }
+            asic_draw_sprites();
             vid_plugin->unlock();
             video_display(); // update PC display
          } else {
