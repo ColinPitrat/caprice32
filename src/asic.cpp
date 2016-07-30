@@ -57,10 +57,10 @@ static inline unsigned short decode_magnification(byte val) {
 
 // Return true if byte should be written in memory
 bool asic_register_page_write(word addr, byte val) {
-   LOG("ASIC register page write: addr=" << std::hex << addr << ", val=" << static_cast<int>(val) << std::dec);
    if (addr < 0x4000 || addr > 0x7FFF) {
       return true;
    }
+   LOG("ASIC register page write: addr=" << std::hex << addr << ", val=" << static_cast<int>(val) << std::dec);
    // TODO:double check the writes (more cases with mirroring / write only ?)
    if (addr >= 0x4000 && addr < 0x5000) {
       int id = ((addr & 0xF00) >> 8);
@@ -214,20 +214,25 @@ void putpixel(SDL_Surface *surface, int x, int y, Uint32 pixel)
    }
 }
 
+// TODO: all this could be replaced by pre-computed SDL sprites
 void asic_draw_sprites() {
    const int borderWidth = 64;
    const int borderHeight = 40;
    const int screenWidth = 640 + borderWidth;
    const int screenHeight = 200 + borderHeight;
+   // For each sprite
    for(int i = 15; i >= 0; i--) {
       int sx = asic_sprites_x[i];
       int mx = asic_sprites_mag_x[i];
+      // If some part of the sprite is visible (horizontal check)
       if(mx > 0 && (sx + 64*mx) >= borderWidth && sx <= screenWidth) {
          int sy = asic_sprites_y[i];
          int my = asic_sprites_mag_y[i];
+         // If some part of the sprite is visible (vertical check)
          if(my > 0 && (sy + 64*my) >= borderHeight && sy <= screenHeight) {
             sx += borderWidth;
             sy += borderHeight;
+            // For each column of the sprite
             for(int x = 0; x < 16; x++) {
                if(sx + (x*mx) <= borderWidth) {
                   continue;
@@ -235,6 +240,7 @@ void asic_draw_sprites() {
                if(sx + (x*mx) >= screenWidth) {
                   break;
                }
+               // For each line of the sprite
                for(int y = 0; y < 16; y++) {
                   if(sy + (y*my) <= borderHeight) {
                      continue;
@@ -242,6 +248,7 @@ void asic_draw_sprites() {
                   if(sy + (y*my) >= screenHeight) {
                      break;
                   }
+                  // Draw pixel
                   byte p = asic_sprites[i][x][y];
                   if(p) {
                      Uint32 pixel = GateArray.palette[p];
