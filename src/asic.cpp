@@ -20,31 +20,46 @@ short int asic_sprites_mag_y[16];
 double asic_colours[32][3];
 
 void asic_poke_lock_sequence(byte val) {
-   LOG("val=" << std::hex << static_cast<int>(val) << std::dec);
-   static const byte lockSeq[] = { 0x00, 0xff, 0x77, 0xb3, 0x51, 0xa8, 0xd4, 0x62, 0x39, 0x9c, 0x46, 0x2b, 0x15, 0x8a, 0xcd };
-   static int lockPos = -1;
+   static const byte lockSeq[] = { 0x00, 0x00, 0xff, 0x77, 0xb3, 0x51, 0xa8, 0xd4, 0x62, 0x39, 0x9c, 0x46, 0x2b, 0x15, 0x8a, 0xcd };
+   static const int lockSeqLength = sizeof(lockSeq)/sizeof(lockSeq[0]);
+   static int lockPos = 0;
+   LOG("ASIC poked with val=" << std::hex << static_cast<int>(val) << std::dec << " lockPos = " << lockPos);
    // Lock sequence can only start after a non zero value
-   if (lockPos == -1) {
+   if (lockPos == 0) {
       if (val > 0) {
-         lockPos = 0;
+         lockPos = 1;
       }
    } else {
-      if (val == lockSeq[lockPos]) {
-         LOG("Received " << std::hex << static_cast<int>(val) << std::dec);
-         lockPos++;
-         if (lockPos == sizeof(lockSeq)/sizeof(lockSeq[0])) {
-            LOG("ASIC unlocked");
-            asic_locked = false;
-            lockPos = (val == 0) ? -1 : 0;
+      if(lockPos < lockSeqLength) {
+         if (val == lockSeq[lockPos]) {
+            lockPos++;
+         } else {
+            lockPos++;
+            // If the lock sequence is matched except for the last byte, it means lock
+            if (lockPos == lockSeqLength) {
+               LOG("ASIC locked");
+               asic_locked = true;
+            }
+            if (val == 0) {
+               if (lockPos == 3) {
+                  // We had two 0 in a row, we still need a full sequence
+                  lockPos = 0;
+               } else {
+                  // We had a non 0 then a 0, we're now waiting for 0xFF
+                  lockPos = 2;
+               }
+            } else {
+               // We had a non 0, we're now waiting for 0
+               lockPos = 1;
+            }
          }
       } else {
-         lockPos++;
-         // If the lock sequence is matched except for the last byte, it means lock
-         if (lockPos == sizeof(lockSeq)/sizeof(lockSeq[0])) {
-            LOG("ASIC locked");
-            asic_locked = true;
+         // Full sequence matched and an additional value was written, it means unlock
+         if (lockPos == lockSeqLength) {
+            LOG("ASIC unlocked");
+            asic_locked = false;
+            lockPos = (val == 0) ? 0 : 1;
          }
-         lockPos = (val == 0) ? -1 : 0;
       }
    }
 }
@@ -121,6 +136,7 @@ bool asic_register_page_write(word addr, byte val) {
          double green = static_cast<double>(val & 0x0F)/16;
          //LOG("Received color operation: color " << colour << " has green = " << green);
          asic_colours[colour][1] = green;
+         pbRegisterPage[(addr & 0x3FFF)] = (val & 0x0F);
          // TODO: find a cleaner way to do this - this is a copy paste from "Set ink value" in cap32.cpp
       } else {
          double red   = static_cast<double>((val & 0xF0) >> 4)/16;
@@ -128,6 +144,7 @@ bool asic_register_page_write(word addr, byte val) {
          //LOG("Received color operation: color " << colour << " has red = " << red << " and blue = " << blue);
          asic_colours[colour][0] = red;
          asic_colours[colour][2] = blue;
+         pbRegisterPage[(addr & 0x3FFF)] = val;
       }
       // TODO: deduplicate with code in video_set_palette + make it work in monochrome
                dword red = static_cast<dword>(asic_colours[colour][0] * (CPC.scr_intensity / 10.0) * 255);
@@ -151,6 +168,7 @@ bool asic_register_page_write(word addr, byte val) {
          GateArray.palette[18] = SDL_MapRGB(back_surface->format, r, g, b); // update the mode 2 'anti-aliasing' colour
       }
 */
+      return false;
    } else if (addr >= 0x6800 && addr < 0x6806) {
       if (addr == 0x6800) {
          //LOG("Received programmable raster interrupt scan line: " << static_cast<int>(val));
