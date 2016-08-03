@@ -381,11 +381,6 @@ SDL_Surface* glscale_init(video_plugin* t,int w,int h, int bpp, bool fs)
 		return nullptr;
 	}
 
-	t->x_scale=CPC_VISIBLE_SCR_WIDTH/static_cast<float>(w);
-	t->y_scale=CPC_VISIBLE_SCR_HEIGHT/static_cast<float>(h);
-	t->x_offset=0;
-	t->y_offset=0;
-
 	int major, minor;
 	const char *version;
 	version = reinterpret_cast<const char *>(eglGetString(GL_VERSION));
@@ -396,10 +391,30 @@ SDL_Surface* glscale_init(video_plugin* t,int w,int h, int bpp, bool fs)
 
 	GLint max_texsize;
 	eglGetIntegerv(GL_MAX_TEXTURE_SIZE,&max_texsize);
+	if (max_texsize<1024) {
+      printf("Your OpenGL implementation doesn't support 1024x1024 textures: max size = %d\n", max_texsize);
+      t->half_pixels = 1;
+   }
 	if (max_texsize<512) {
 		fprintf(stderr, "Your OpenGL implementation doesn't support 512x512 textures\n");
 		return nullptr;
 	}
+
+   unsigned int original_width, original_height, tex_size;
+   if (t->half_pixels) {
+      tex_size = 512;
+      original_width = CPC_VISIBLE_SCR_WIDTH;
+      original_height = CPC_VISIBLE_SCR_HEIGHT;
+   } else {
+      tex_size = 1024;
+      original_width = CPC_VISIBLE_SCR_WIDTH * 2;
+      original_height = CPC_VISIBLE_SCR_HEIGHT * 2;
+   }
+
+	t->x_scale=original_width/static_cast<float>(w);
+	t->y_scale=original_height/static_cast<float>(h);
+	t->x_offset=0;
+	t->y_offset=0;
 
 	// We have to react differently to the bpp parameter than with software rendering
 	// Here are the rules :
@@ -423,7 +438,7 @@ SDL_Surface* glscale_init(video_plugin* t,int w,int h, int bpp, bool fs)
 			break;
 	}
 	if (surface_bpp==0) {
-		fprintf(stderr, "Your OpenGL implementation doesn't support %dbpp textures\n",surface_bpp);
+		fprintf(stderr, "Your OpenGL implementation doesn't support %dbpp textures\n", bpp);
 		return nullptr;
 	}
 
@@ -441,8 +456,8 @@ SDL_Surface* glscale_init(video_plugin* t,int w,int h, int bpp, bool fs)
 	eglBindTexture(GL_TEXTURE_2D,screen_texnum);
 	eglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, CPC.scr_oglfilter?GL_LINEAR:GL_NEAREST);
 	eglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, CPC.scr_oglfilter?GL_LINEAR:GL_NEAREST);
-	tex_x=512;
-	tex_y=512;
+	tex_x=tex_size;
+	tex_y=tex_size;
 
 	switch(surface_bpp)
 	{
@@ -488,7 +503,7 @@ SDL_Surface* glscale_init(video_plugin* t,int w,int h, int bpp, bool fs)
 	eglMatrixMode(GL_MODELVIEW);
 	eglLoadIdentity();
 
-	pub=SDL_CreateRGBSurface(SDL_SWSURFACE,CPC_VISIBLE_SCR_WIDTH,CPC_VISIBLE_SCR_HEIGHT,surface_bpp,0,0,0,0);
+   pub=SDL_CreateRGBSurface(SDL_SWSURFACE, original_width, original_height, surface_bpp, 0, 0, 0, 0);
 	return pub;
 }
 
@@ -1828,7 +1843,7 @@ video_plugin video_plugin_list[]=
 {"Software bicubic",               swbicub_init,  swbicub_setpal,  swbicub_lock,  swbicub_unlock,  swbicub_flip,  swbicub_close,  F16_BPP,       1,         0, 0,          0, 0   },
 {"Dot matrix",                     dotmat_init,   dotmat_setpal,   dotmat_lock,   dotmat_unlock,   dotmat_flip,   dotmat_close,   F16_BPP,       1,         0, 0,          0, 0   },
 #ifdef HAVE_GL
-{"OpenGL scaling",                 glscale_init,  glscale_setpal,  glscale_lock,  glscale_unlock,  glscale_flip,  glscale_close,  ALL,           1,         0, 0,          0, 0   },
+{"OpenGL scaling",                 glscale_init,  glscale_setpal,  glscale_lock,  glscale_unlock,  glscale_flip,  glscale_close,  ALL,           0,         0, 0,          0, 0   },
 #endif
 {nullptr,                          nullptr,       nullptr,         nullptr,       nullptr,         nullptr,       nullptr,        0,             0,         0, 0,          0, 0   }
 };
