@@ -353,7 +353,7 @@ typedef struct {
    unsigned int scr_mode;
    unsigned char pen;
    unsigned char ink_values[17];
-   unsigned int palette[32];
+   unsigned int palette[34];
    unsigned char sl_count;
    unsigned char int_delay;
 } t_GateArray;

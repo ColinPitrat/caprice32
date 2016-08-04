@@ -2,6 +2,7 @@
 #include "log.h"
 #include "cap32.h"
 #include "SDL.h"
+#include "crtc.h"
 
 byte *pbRegisterPage;
 extern SDL_Color colours[32];
@@ -18,6 +19,9 @@ int16_t asic_sprites_y[16];
 short int asic_sprites_mag_x[16];
 short int asic_sprites_mag_y[16];
 double asic_colours[32][3];
+int asic_hscroll = 0;
+int asic_vscroll = 0;
+bool asic_extend_border = false;
 
 void asic_poke_lock_sequence(byte val) {
    static const byte lockSeq[] = { 0x00, 0x00, 0xff, 0x77, 0xb3, 0x51, 0xa8, 0xd4, 0x62, 0x39, 0x9c, 0x46, 0x2b, 0x15, 0x8a, 0xcd };
@@ -165,7 +169,7 @@ bool asic_register_page_write(word addr, byte val) {
          byte r = (static_cast<dword>(colours[GateArray.ink_values[0]].r) + static_cast<dword>(colours[GateArray.ink_values[1]].r)) >> 1;
          byte g = (static_cast<dword>(colours[GateArray.ink_values[0]].g) + static_cast<dword>(colours[GateArray.ink_values[1]].g)) >> 1;
          byte b = (static_cast<dword>(colours[GateArray.ink_values[0]].b) + static_cast<dword>(colours[GateArray.ink_values[1]].b)) >> 1;
-         GateArray.palette[18] = SDL_MapRGB(back_surface->format, r, g, b); // update the mode 2 'anti-aliasing' colour
+         GateArray.palette[33] = SDL_MapRGB(back_surface->format, r, g, b); // update the mode 2 'anti-aliasing' colour
       }
 */
       return false;
@@ -185,7 +189,11 @@ bool asic_register_page_write(word addr, byte val) {
          CRTC.split_addr |= val;
          LOG("Received address for split: " << std::hex << CRTC.split_addr << std::dec);
       } else if (addr == 0x6804) {
-         LOG("Received soft scroll control: " << static_cast<int>(val));
+         asic_hscroll = (val & 0xf);
+         asic_vscroll = ((val >> 4) & 0x7);
+         asic_extend_border = (val >> 7);
+         LOG("Received soft scroll control: " << static_cast<int>(val) << ": dx=" << asic_hscroll << ", dy=" << asic_vscroll << ", border=" << asic_extend_border);
+         update_skew();
       } else if (addr == 0x6805) {
          LOG("Received interrupt vector: " << static_cast<int>(val));
       }
@@ -234,8 +242,9 @@ void putpixel(SDL_Surface *surface, int x, int y, Uint32 pixel)
 
 // TODO: all this could be replaced by pre-computed SDL sprites
 void asic_draw_sprites() {
-   const int borderWidth = 64;
-   const int borderHeight = 40;
+   // TODO: this should be affected by other CRTC.registers (reg2 for borderWidth ?, reg1 for screenWidth ? reg6 for screenHeight ?)
+   const int borderWidth = 64 + (asic_extend_border ? 16 : 0);
+   const int borderHeight = 40 + 8*(30 - CRTC.registers[7]);
    const int screenWidth = 640 + borderWidth;
    const int screenHeight = 200 + borderHeight;
    // For each sprite

@@ -87,6 +87,7 @@ byte *pbSndBufferEnd = nullptr;
 byte *pbSndStream = nullptr;
 byte *membank_read[4], *membank_write[4], *memmap_ROM[256];
 byte *pbRAM = nullptr;
+byte *pbRAMbuffer = nullptr;
 byte *pbROM = nullptr;
 byte *pbROMlo = nullptr;
 byte *pbROMhi = nullptr;
@@ -439,7 +440,7 @@ void z80_OUT_handler (reg_pair port, byte val)
             }
             #endif
             GateArray.pen = val & 0x10 ? 0x10 : val & 0x0f; // if bit 5 is set, pen indexes the border colour
-            //LOG("Set pen value to " << static_cast<int>(GateArray.pen));
+            LOG("Set pen value to " << static_cast<int>(GateArray.pen));
             if (CPC.mf2) { // MF2 enabled?
                *(pbMF2ROM + 0x03fcf) = val;
             }
@@ -452,7 +453,7 @@ void z80_OUT_handler (reg_pair port, byte val)
             #endif
             {
                byte colour = val & 0x1f; // isolate colour value
-               //LOG("Set ink value " << static_cast<int>(GateArray.pen) << " to " << static_cast<int>(colour));
+               LOG("Set ink value " << static_cast<int>(GateArray.pen) << " to " << static_cast<int>(colour));
                GateArray.ink_values[GateArray.pen] = colour;
                GateArray.palette[GateArray.pen] = SDL_MapRGB(back_surface->format,
                      colours[colour].r, colours[colour].g, colours[colour].b);
@@ -460,7 +461,7 @@ void z80_OUT_handler (reg_pair port, byte val)
                   byte r = (static_cast<dword>(colours[GateArray.ink_values[0]].r) + static_cast<dword>(colours[GateArray.ink_values[1]].r)) >> 1;
                   byte g = (static_cast<dword>(colours[GateArray.ink_values[0]].g) + static_cast<dword>(colours[GateArray.ink_values[1]].g)) >> 1;
                   byte b = (static_cast<dword>(colours[GateArray.ink_values[0]].b) + static_cast<dword>(colours[GateArray.ink_values[1]].b)) >> 1;
-                  GateArray.palette[18] = SDL_MapRGB(back_surface->format, r, g, b); // update the mode 2 'anti-aliasing' colour
+                  GateArray.palette[33] = SDL_MapRGB(back_surface->format, r, g, b); // update the mode 2 'anti-aliasing' colour
                }
                // TODO: update pbRegisterPage
             }
@@ -474,15 +475,15 @@ void z80_OUT_handler (reg_pair port, byte val)
                // 6128+ RMR2 register
                int membank = (val >> 3) & 3;
                if (membank == 3) { // Map register page at 0x4000
-                  //LOG("Register page on");
+                  LOG("Register page on");
                   GateArray.registerPageOn = true;
                   membank = 0;
                } else {
-                  //LOG("Register page off");
+                  LOG("Register page off");
                   GateArray.registerPageOn = false;
                }
                int page = (val & 0x7);
-               //LOG("RMR2: Low bank rom = 0x" << std::hex << (4*membank) << std::dec << "000 - page " << page);
+               LOG("RMR2: Low bank rom = 0x" << std::hex << (4*membank) << std::dec << "000 - page " << page);
                GateArray.lower_ROM_bank = membank;
                pbROMlo = pbCartridgePages[page];
                ga_memory_manager();
@@ -492,7 +493,7 @@ void z80_OUT_handler (reg_pair port, byte val)
                   fprintf(pfoDebug, "rom 0x%02x\r\n", val);
                }
                #endif
-               //LOG("MRER: ROM config = " << std::hex << static_cast<int>(val) << std::dec << " - mode=" << static_cast<int>(val & 0x03));
+               LOG("MRER: ROM config = " << std::hex << static_cast<int>(val) << std::dec << " - mode=" << static_cast<int>(val & 0x03));
                GateArray.ROM_config = val;
                GateArray.requested_scr_mode = val & 0x03; // request a new CPC screen mode
                ga_memory_manager();
@@ -965,11 +966,13 @@ int snapshot_load (FILE *pfile)
   if (dwSnapSize > CPC.ram_size) { // memory dump size differs from current RAM size?
     byte *pbTemp;
 
-    pbTemp = new byte [dwSnapSize*1024];
+    pbTemp = new byte [dwSnapSize*1024 + 1];
     if (pbTemp) {
-      delete [] pbRAM;
+      delete [] pbRAMbuffer;
       CPC.ram_size = dwSnapSize;
-      pbRAM = pbTemp;
+      pbRAMbuffer = pbTemp;
+      // Ensure 1 byte is available before pbRAM as prerender_normal*_plus can read it
+      pbRAM = pbRAMbuffer + 1;
     } else {
       return ERR_OUT_OF_MEMORY;
     }
@@ -2209,10 +2212,12 @@ int emulator_init (void)
    byte *pchRomData;
 
    pbGPBuffer = new byte [128*1024]; // attempt to allocate the general purpose buffer
-   pbRAM = new byte [CPC.ram_size*1024]; // allocate memory for desired amount of RAM
+   pbRAMbuffer = new byte [CPC.ram_size*1024 + 1]; // allocate memory for desired amount of RAM
+   // Ensure 1 byte is available before pbRAM as prerender_normal*_plus can read it
+   pbRAM = pbRAMbuffer + 1;
    pbROM = new byte [32*1024]; // allocate memory for 32K of ROM
    pbRegisterPage = new byte [16*1024];
-   if ((!pbGPBuffer) || (!pbRAM) || (!pbROM) || (!pbRegisterPage)) {
+   if ((!pbGPBuffer) || (!pbRAMbuffer) || (!pbROM) || (!pbRegisterPage)) {
       return ERR_OUT_OF_MEMORY;
    }
    pbROMlo = pbROM;
@@ -2317,7 +2322,7 @@ void emulator_shutdown (void)
    }
 
    delete [] pbROM;
-   delete [] pbRAM;
+   delete [] pbRAMbuffer;
    delete [] pbGPBuffer;
 }
 
@@ -2497,12 +2502,20 @@ void video_set_style (void)
    }
    switch (dwXScale) {
       case 1:
-         CPC.scr_prerendernorm = prerender_normal_half;
+         if (CPC.model > 2) {
+            CPC.scr_prerendernorm = prerender_normal_half_plus;
+         } else {
+            CPC.scr_prerendernorm = prerender_normal_half;
+         }
          CPC.scr_prerenderbord = prerender_border_half;
          CPC.scr_prerendersync = prerender_sync_half;
          break;
       case 2:
-         CPC.scr_prerendernorm = prerender_normal;
+         if (CPC.model > 2) {
+            CPC.scr_prerendernorm = prerender_normal_plus;
+         } else {
+            CPC.scr_prerendernorm = prerender_normal;
+         }
          CPC.scr_prerenderbord = prerender_border;
          CPC.scr_prerendersync = prerender_sync;
          break;
@@ -2567,7 +2580,7 @@ int video_init (void)
 
    vid_plugin=&video_plugin_list[CPC.scr_style];
 
-   back_surface=vid_plugin->init(vid_plugin,CPC.scr_fs_width, CPC.scr_fs_height, CPC.scr_fs_bpp, CPC.scr_window==0);
+   back_surface=vid_plugin->init(vid_plugin, CPC.scr_fs_width, CPC.scr_fs_height, CPC.scr_fs_bpp, CPC.scr_window==0);
 
    if (!back_surface) { // attempt to set the required video mode
       std::cerr << "Could not set requested video mode: " << SDL_GetError() << std::endl;

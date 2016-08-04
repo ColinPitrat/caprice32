@@ -20,6 +20,9 @@ extern int16_t asic_sprites_x[16];
 extern int16_t asic_sprites_y[16];
 extern short int asic_sprites_mag_x[16];
 extern short int asic_sprites_mag_y[16];
+extern bool asic_extend_border;
+extern int asic_hscroll;
+extern int asic_vscroll;
 
 void asic_poke_lock_sequence(byte val);
 bool asic_register_page_write(word addr, byte val);

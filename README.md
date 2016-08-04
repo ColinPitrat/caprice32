@@ -17,7 +17,7 @@ Caprice32 is a software emulator of the Amstrad CPC 8bit home computer series ru
 
 Caprice32 provides:
   * Complete emulation of CPC464, CPC664 and CPC6128
-  * Experimental partial support of CPC6128+ (missing DMA, soft scroll, analog joysticks and 8 bit printer)
+  * Experimental partial support of CPC6128+ (missing DMA, analog joysticks and 8 bit printer)
   * Joystick support - it can be fully used with joystick only, thanks to an integrated virtual keyboard.
   * Joystick emulation - joystick-only games can be played using the keyboard
   * English, French or Spanish keyboards

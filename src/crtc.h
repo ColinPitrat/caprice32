@@ -59,6 +59,7 @@ void prerender_normal_half_plus(void);
 void crtc_cycle(int repeat_count);
 void crtc_init(void);
 void crtc_reset(void);
+dword shiftLittleEndianDwordTriplet(dword val1, dword val2, dword val3, int offset);
 
 void render8bpp(void);
 void render8bpp_doubleY(void);
