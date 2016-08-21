@@ -1,0 +1,2 @@
+?package(caprice32):needs="X11" section="Applications/Emulators"\
+  title="caprice32" command="/usr/bin/cap32"
