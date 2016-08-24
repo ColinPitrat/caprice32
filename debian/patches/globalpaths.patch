@@ -1,0 +1,52 @@
+--- a/cap32.cfg
++++ b/cap32.cfg
+@@ -11,7 +11,7 @@
+ joystick_emulation=0
+ joystick_menu_button=9
+ joystick_vkeyboard_button=10
+-resources_path=./resources
++resources_path=/usr/share/caprice32/resources
+ [video]
+ scr_width=800
+ scr_height=600
+@@ -37,21 +37,21 @@
+ kbd_layout=1
+ [file]
+ max_track_size=5990
+-cart_path=./rom/
++cart_path=~/.caprice32/rom/
+ cart_file=system.cpr
+ cart_zip=0
+-snap_path=./snap/
++snap_path=~/.caprice32/snap/
+ snap_file=
+ snap_zip=0
+-drvA_path=./disk/
++drvA_path=~/.caprice32/disk/
+ drvA_file=
+ drvA_zip=0
+ drvA_format=0
+-drvB_path=./disk/
++drvB_path=~/.caprice32/disk/
+ drvB_file=
+ drvB_zip=0
+ drvB_format=0
+-tape_path=./tape/
++tape_path=~/.caprice32/tape/
+ tape_file=
+ tape_zip=0
+ fmt02=
+@@ -60,10 +60,10 @@
+ fmt05=
+ fmt06=
+ fmt07=
+-printer_file=./printer.dat
+-sdump_file=./screen.png
++printer_file=~./.caprice32/printer.dat
++sdump_file=~/.caprice32/screen.png
+ [rom]
+-rom_path=./rom
++rom_path=/usr/share/caprice32/rom
+ slot00=
+ slot01=
+ slot02=

@@ -1,0 +1,5 @@
+cap32     usr/bin
+cap32.cfg etc
+licenses/Bitstream*.txt usr/share/doc/caprice32
+resources usr/share/caprice32
+rom       usr/share/caprice32

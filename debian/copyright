@@ -1,0 +1,29 @@
+Format: http://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: caprice32
+Source: https://github.com/ColinPitrat/caprice32.git
+
+Files: *
+Copyright: 1997-2015 Ulrich Doewich
+           2016 Colin Pitrat
+License: GPL-2.0+
+
+Files: resources/vera_*.ttf
+Copyright: 2003 Bitstream Inc
+License: Bitstream Vera License
+
+Files: src/gui/includes/wg*.h
+Copyright: 2002-2004 Rob Wiskow
+License: LGPL-2.0
+
+Files: src/gui/src/wg*.cpp
+Copyright: 2002-2004 Rob Wiskow
+License: LGPL-2.0
+
+Files: rom/*
+Copyright: 1984-1990 Amstrad 
+License: LGPL-2.0
+
+Files: debian/*
+Copyright: 2016 Andreas Wirooks <andreas.wirooks@1und1.de>
+License: GPL-2.0+
+

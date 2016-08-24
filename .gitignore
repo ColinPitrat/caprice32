@@ -6,3 +6,4 @@
 /.debug
 /googletest
 test/test_runner
+.pc
