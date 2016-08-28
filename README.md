@@ -79,6 +79,10 @@ Then build the package with the following command:
 
 `dpkg-buildpackage -rfakeroot -uc -us`
 
+After installation of the package the users should copy the /etc/cap32.cfg file to their homedirectory with the following command:
+
+`cp /etc/cap32.cfg .cap32.cfg`
+
 #### Windows target:
 
 Edit the makefile to update the `MINGW_PATH`, `WINCXX`, `WININCS` and `WINLIBS` directive with the correct location of the SDL include and library files.
