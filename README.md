@@ -69,6 +69,20 @@ For example, for a debug build, use:
 
 `make DEBUG=TRUE`
 
+#### Debian/Ubuntu package:
+
+To build a debian package on Debian/Ubuntu distributions install the dependencies as mentioned above and the dpkg-dev package:
+
+`sudo install dpkg-dev`
+
+Then build the package with the following command:
+
+`dpkg-buildpackage -rfakeroot -uc -us`
+
+After installation of the package the users should copy the /etc/cap32.cfg file to their homedirectory with the following command:
+
+`cp /etc/cap32.cfg .cap32.cfg`
+
 #### Windows target:
 
 Edit the makefile to update the `MINGW_PATH`, `WINCXX`, `WININCS` and `WINLIBS` directive with the correct location of the SDL include and library files.

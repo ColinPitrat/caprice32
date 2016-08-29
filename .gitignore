@@ -7,3 +7,9 @@
 /googletest
 test/test_runner
 .pc
+debian/caprice32.debhelper.log
+debian/caprice32.postinst.debhelper
+debian/caprice32.postrm.debhelper
+debian/caprice32.substvars
+debian/caprice32/
+debian/files

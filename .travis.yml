@@ -7,6 +7,7 @@ addons:
     - ubuntu-toolchain-r-test
   packages:
     - libsdl1.2-dev
+    - libfreetype6-dev
     - zlib1g-dev
     - gcc-4.8
     - g++-4.8
