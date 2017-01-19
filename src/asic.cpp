@@ -22,6 +22,8 @@ double asic_colours[32][3];
 int asic_hscroll = 0;
 int asic_vscroll = 0;
 bool asic_extend_border = false;
+// TODO: Use the DMA info to feed PSG from RAM
+dma_t dma;
 
 void asic_poke_lock_sequence(byte val) {
    static const byte lockSeq[] = { 0x00, 0x00, 0xff, 0x77, 0xb3, 0x51, 0xa8, 0xd4, 0x62, 0x39, 0x9c, 0x46, 0x2b, 0x15, 0x8a, 0xcd };
@@ -199,8 +201,43 @@ bool asic_register_page_write(word addr, byte val) {
       }
    } else if (addr >= 0x6808 && addr < 0x6810) {
       LOG("Received analog input stuff");
-   } else if (addr >= 0x6C00 && addr < 0x6C10) {
-      LOG("Received DMA stuff");
+   } else if (addr >= 0x6C00 && addr < 0x6C0B) {
+      LOG("Received DMA source address: " << std::hex << addr << " " << static_cast<int>(val) << std::dec);
+      dma_channel *channel = nullptr;
+      switch ((addr & 0xc) >> 2) {
+        case 0:
+          channel = &dma.ch0;
+          break;
+        case 1:
+          channel = &dma.ch1;
+          break;
+        case 2:
+          channel = &dma.ch2;
+          break;
+        default:
+          // This should never happen considering addr possible values
+          return true;
+      }
+      switch(addr & 0x3) {
+        case 0:
+          channel->source_address &= 0xFF00;
+          // least significant bit is ignored (address are word-aligned)
+          channel->source_address |= (val & 0xE);
+          break;
+        case 1:
+          channel->source_address &= 0x00FF;
+          channel->source_address |= (val << 8);
+          break;
+        case 2:
+          channel->prescaler = val;
+          break;
+        default:
+          // unused
+          break;
+      }
+   } else if (addr == 0x6C0F) {
+      LOG("Received DMA control register: " << std::hex << static_cast<int>(val) << std::dec);
+      dma.dcsr = val;
    } else {
       //LOG("Received unused write at " << std::hex << addr << " - val: " << static_cast<int>(val) << std::dec);
    }
