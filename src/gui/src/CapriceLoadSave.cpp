@@ -252,7 +252,7 @@ std::string CapriceLoadSave::simplifyPath(std::string path)
   char simplepath[PATH_MAX+1];
   if(realpath(path.c_str(), simplepath) == nullptr) {
     std::cerr << "Couldn't simplify path '" << path << "': " << strerror(errno) << std::endl;
-    return path;
+    return ".";
   } 
   return std::string(simplepath);
 #endif
