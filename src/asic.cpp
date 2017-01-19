@@ -29,7 +29,7 @@ void asic_poke_lock_sequence(byte val) {
    static const byte lockSeq[] = { 0x00, 0x00, 0xff, 0x77, 0xb3, 0x51, 0xa8, 0xd4, 0x62, 0x39, 0x9c, 0x46, 0x2b, 0x15, 0x8a, 0xcd };
    static const int lockSeqLength = sizeof(lockSeq)/sizeof(lockSeq[0]);
    static int lockPos = 0;
-   LOG("ASIC poked with val=" << std::hex << static_cast<int>(val) << std::dec << " lockPos = " << lockPos);
+   LOG_DEBUG("ASIC poked with val=" << std::hex << static_cast<int>(val) << std::dec << " lockPos = " << lockPos);
    // Lock sequence can only start after a non zero value
    if (lockPos == 0) {
       if (val > 0) {
@@ -43,7 +43,7 @@ void asic_poke_lock_sequence(byte val) {
             lockPos++;
             // If the lock sequence is matched except for the last byte, it means lock
             if (lockPos == lockSeqLength) {
-               LOG("ASIC locked");
+               LOG_DEBUG("ASIC locked");
                asic_locked = true;
             }
             if (val == 0) {
@@ -62,7 +62,7 @@ void asic_poke_lock_sequence(byte val) {
       } else {
          // Full sequence matched and an additional value was written, it means unlock
          if (lockPos == lockSeqLength) {
-            LOG("ASIC unlocked");
+            LOG_DEBUG("ASIC unlocked");
             asic_locked = false;
             lockPos = (val == 0) ? 0 : 1;
          }
@@ -81,7 +81,7 @@ bool asic_register_page_write(word addr, byte val) {
    if (addr < 0x4000 || addr > 0x7FFF) {
       return true;
    }
-   LOG("ASIC register page write: addr=" << std::hex << addr << ", val=" << static_cast<int>(val) << std::dec);
+   LOG_DEBUG("ASIC register page write: addr=" << std::hex << addr << ", val=" << static_cast<int>(val) << std::dec);
    // TODO:double check the writes (more cases with mirroring / write only ?)
    if (addr >= 0x4000 && addr < 0x5000) {
       int id = ((addr & 0xF00) >> 8);
@@ -92,7 +92,7 @@ bool asic_register_page_write(word addr, byte val) {
          color += 16;
       }
       asic_sprites[id][x][y] = color;
-      //LOG("Received sprite data for sprite " << id << ": x=" << x << ", y=" << y << ", color=" << static_cast<int>(val));
+      //LOG_DEBUG("Received sprite data for sprite " << id << ": x=" << x << ", y=" << y << ", color=" << static_cast<int>(val));
    } else if (addr >= 0x6000 && addr < 0x607D) {
       int id = ((addr - 0x6000) >> 3);
       int type = (addr & 0x7);
@@ -100,28 +100,28 @@ bool asic_register_page_write(word addr, byte val) {
          case 0:
             // X position
             asic_sprites_x[id] = (asic_sprites_x[id] & 0xFF00) | val;
-            //LOG("Received sprite X for sprite " << id << " x=" << asic_sprites_x[id]);
+            //LOG_DEBUG("Received sprite X for sprite " << id << " x=" << asic_sprites_x[id]);
             // Mirrored in RAM image 4 bytes after
             pbRegisterPage[(addr & 0x3FFF) + 4] = val;
             break;
          case 1:
             // X position
             asic_sprites_x[id] = (asic_sprites_x[id] & 0x00FF) | (val << 8);
-            //LOG("Received sprite X for sprite " << id << " x=" << asic_sprites_x[id]);
+            //LOG_DEBUG("Received sprite X for sprite " << id << " x=" << asic_sprites_x[id]);
             // Mirrored in RAM image 4 bytes after
             pbRegisterPage[(addr & 0x3FFF) + 4] = val;
             break;
          case 2:
             // Y position
             asic_sprites_y[id] = ((asic_sprites_y[id] & 0xFF00) | val);
-            //LOG("Received sprite Y for sprite " << id << " y=" << asic_sprites_y[id]);
+            //LOG_DEBUG("Received sprite Y for sprite " << id << " y=" << asic_sprites_y[id]);
             // Mirrored in RAM image 4 bytes after
             pbRegisterPage[(addr & 0x3FFF) + 4] = val;
             break;
          case 3:
             // Y position
             asic_sprites_y[id] = ((asic_sprites_y[id] & 0x00FF) | (val << 8));
-            //LOG("Received sprite Y for sprite " << id << " y=" << asic_sprites_y[id]);
+            //LOG_DEBUG("Received sprite Y for sprite " << id << " y=" << asic_sprites_y[id]);
             // Affect RAM image
             // Mirrored in RAM image 4 bytes after
             pbRegisterPage[(addr & 0x3FFF) + 4] = val;
@@ -133,21 +133,21 @@ bool asic_register_page_write(word addr, byte val) {
             // Write-only: does not affect pbRegisterPage
             return false;
          default:
-            LOG("Received sprite operation of unsupported type: " << type << " addr=" << std::hex << addr << " - val=" << static_cast<int>(val) << std::dec);
+            LOG_DEBUG("Received sprite operation of unsupported type: " << type << " addr=" << std::hex << addr << " - val=" << static_cast<int>(val) << std::dec);
             break;
       }
    } else if (addr >= 0x6400 && addr < 0x6440) {
       int colour = (addr & 0x3F) >> 1;
       if ((addr % 2) == 1) {
          double green = static_cast<double>(val & 0x0F)/16;
-         //LOG("Received color operation: color " << colour << " has green = " << green);
+         //LOG_DEBUG("Received color operation: color " << colour << " has green = " << green);
          asic_colours[colour][1] = green;
          pbRegisterPage[(addr & 0x3FFF)] = (val & 0x0F);
          // TODO: find a cleaner way to do this - this is a copy paste from "Set ink value" in cap32.cpp
       } else {
          double red   = static_cast<double>((val & 0xF0) >> 4)/16;
          double blue  = static_cast<double>(val & 0x0F)/16;
-         //LOG("Received color operation: color " << colour << " has red = " << red << " and blue = " << blue);
+         //LOG_DEBUG("Received color operation: color " << colour << " has red = " << red << " and blue = " << blue);
          asic_colours[colour][0] = red;
          asic_colours[colour][2] = blue;
          pbRegisterPage[(addr & 0x3FFF)] = val;
@@ -177,32 +177,32 @@ bool asic_register_page_write(word addr, byte val) {
       return false;
    } else if (addr >= 0x6800 && addr < 0x6806) {
       if (addr == 0x6800) {
-         //LOG("Received programmable raster interrupt scan line: " << static_cast<int>(val));
+         //LOG_DEBUG("Received programmable raster interrupt scan line: " << static_cast<int>(val));
          CRTC.interrupt_sl = val;
       } else if (addr == 0x6801) {
-         LOG("Received scan line for split: " << static_cast<int>(val));
+         LOG_DEBUG("Received scan line for split: " << static_cast<int>(val));
          CRTC.split_sl = val;
       } else if (addr == 0x6802) {
          CRTC.split_addr &= 0x00FF;
          CRTC.split_addr |= (val << 8);
-         LOG("Received address for split: " << std::hex << CRTC.split_addr << std::dec);
+         LOG_DEBUG("Received address for split: " << std::hex << CRTC.split_addr << std::dec);
       } else if (addr == 0x6803) {
          CRTC.split_addr &= 0x3F00;
          CRTC.split_addr |= val;
-         LOG("Received address for split: " << std::hex << CRTC.split_addr << std::dec);
+         LOG_DEBUG("Received address for split: " << std::hex << CRTC.split_addr << std::dec);
       } else if (addr == 0x6804) {
          asic_hscroll = (val & 0xf);
          asic_vscroll = ((val >> 4) & 0x7);
          asic_extend_border = (val >> 7);
-         LOG("Received soft scroll control: " << static_cast<int>(val) << ": dx=" << asic_hscroll << ", dy=" << asic_vscroll << ", border=" << asic_extend_border);
+         LOG_DEBUG("Received soft scroll control: " << static_cast<int>(val) << ": dx=" << asic_hscroll << ", dy=" << asic_vscroll << ", border=" << asic_extend_border);
          update_skew();
       } else if (addr == 0x6805) {
-         LOG("Received interrupt vector: " << static_cast<int>(val));
+         LOG_DEBUG("Received interrupt vector: " << static_cast<int>(val));
       }
    } else if (addr >= 0x6808 && addr < 0x6810) {
-      LOG("Received analog input stuff");
+      LOG_DEBUG("Received analog input stuff");
    } else if (addr >= 0x6C00 && addr < 0x6C0B) {
-      LOG("Received DMA source address: " << std::hex << addr << " " << static_cast<int>(val) << std::dec);
+      LOG_DEBUG("Received DMA source address: " << std::hex << addr << " " << static_cast<int>(val) << std::dec);
       dma_channel *channel = nullptr;
       switch ((addr & 0xc) >> 2) {
         case 0:
@@ -236,10 +236,10 @@ bool asic_register_page_write(word addr, byte val) {
           break;
       }
    } else if (addr == 0x6C0F) {
-      LOG("Received DMA control register: " << std::hex << static_cast<int>(val) << std::dec);
+      LOG_DEBUG("Received DMA control register: " << std::hex << static_cast<int>(val) << std::dec);
       dma.dcsr = val;
    } else {
-      //LOG("Received unused write at " << std::hex << addr << " - val: " << static_cast<int>(val) << std::dec);
+      //LOG_DEBUG("Received unused write at " << std::hex << addr << " - val: " << static_cast<int>(val) << std::dec);
    }
    return true;
 }

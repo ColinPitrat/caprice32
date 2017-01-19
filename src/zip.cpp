@@ -23,7 +23,7 @@ namespace zip
 
     zi->iFiles = 0;
     if ((pfileObject = fopen(zi->filename.c_str(), "rb")) == nullptr) {
-      LOG("File not found or not readable: " << zi->filename);
+      LOG_DEBUG("File not found or not readable: " << zi->filename);
       return ERR_FILE_NOT_FOUND;
     }
 
@@ -35,7 +35,7 @@ namespace zip
       fseek(pfileObject, lFilePosition, SEEK_END);
       if (fread(pbGPBuffer, 256, 1, pfileObject) == 0) {
         fclose(pfileObject);
-        LOG("Couldn't read zip file: " << zi->filename);
+        LOG_DEBUG("Couldn't read zip file: " << zi->filename);
         return ERR_FILE_BAD_ZIP; // exit if loading of data chunck failed
       }
       pbPtr = pbGPBuffer + (256 - 22); // pointer to end of central directory (under ideal conditions)
@@ -51,13 +51,13 @@ namespace zip
     } while (wCentralDirEntries == 0);
     if (wCentralDirSize == 0) {
       fclose(pfileObject);
-      LOG("Couldn't read zip file (no central directory): " << zi->filename);
+      LOG_DEBUG("Couldn't read zip file (no central directory): " << zi->filename);
       return ERR_FILE_BAD_ZIP; // exit if no central directory was found
     }
     fseek(pfileObject, dwCentralDirPosition, SEEK_SET);
     if (fread(pbGPBuffer, wCentralDirSize, 1, pfileObject) == 0) {
       fclose(pfileObject);
-      LOG("Couldn't read zip file: " << zi->filename);
+      LOG_DEBUG("Couldn't read zip file: " << zi->filename);
       return ERR_FILE_BAD_ZIP; // exit if loading of data chunck failed
     }
 
@@ -92,7 +92,7 @@ namespace zip
     fclose(pfileObject);
 
     if (zi->iFiles == 0) { // no files found?
-      LOG("Empty zip file: " << zi->filename);
+      LOG_DEBUG("Empty zip file: " << zi->filename);
       return ERR_FILE_EMPTY_ZIP;
     }
 

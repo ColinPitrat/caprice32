@@ -302,9 +302,9 @@ void ga_memory_manager (void)
    if (!(GateArray.ROM_config & 0x04)) { // lower ROM is enabled?
       if (dwMF2Flags & MF2_ACTIVE) { // is the Multiface 2 paged in?
          // TODO: I think this is why the MF2 doesn't work properly:
-         // ROM should be loaded R/O in lower ROM bank (i.e not loaded in membank_write)
-         // Writes should probably be disabled in membank_write (pointing to a dummy buffer, but not MF2 ROM !)
-         // MF2 also has a RAM (8kB) that should be loaded as R/W in bank 1
+         // ROM should be loaded R/O at 0x0000-0x1FFF (i.e not loaded in membank_write ?)
+         // Writes should probably be disabled in membank_write (pointing to a dummy buffer, but not MF2 ROM ?)
+         // MF2 also has a RAM (8kB) that should be loaded as R/W at 0x2000-0x3FFF
          membank_read[GateArray.lower_ROM_bank] = pbMF2ROM;
          membank_write[GateArray.lower_ROM_bank] = pbMF2ROM;
       } else {
@@ -352,21 +352,21 @@ byte z80_IN_handler (reg_pair port)
                         } else {
                            ret_val = PSG.RegisterAY.Index[14] & (keyboard_matrix[CPC.keyboard_line & 0x0f]); // return last value w/ logic AND of input
                         }
-                        LOG("PPI read from portA (keyboard_line): " << CPC.keyboard_line << " - " << static_cast<int>(ret_val));
+                        LOG_DEBUG("PPI read from portA (keyboard_line): " << CPC.keyboard_line << " - " << static_cast<int>(ret_val));
                      } else if (PSG.reg_select == 15) { // PSG port B?
                         if ((PSG.RegisterAY.Index[7] & 0x80)) { // port B in output mode?
                            ret_val = PSG.RegisterAY.Index[15]; // return stored value
-                           LOG("PPI read from portA (PSG portB): " << CPC.keyboard_line << " - " << static_cast<int>(ret_val));
+                           LOG_DEBUG("PPI read from portA (PSG portB): " << CPC.keyboard_line << " - " << static_cast<int>(ret_val));
                         }
                      } else {
                         ret_val = PSG.RegisterAY.Index[PSG.reg_select]; // read PSG register
-                        LOG("PPI read from portA (registers): " << CPC.keyboard_line << " - " << static_cast<int>(ret_val));
+                        LOG_DEBUG("PPI read from portA (registers): " << CPC.keyboard_line << " - " << static_cast<int>(ret_val));
                      }
                   }
                }
             } else {
                ret_val = PPI.portA; // return last programmed value
-               LOG("PPI read from portA (last value): " << CPC.keyboard_line << " - " << static_cast<int>(ret_val));
+               LOG_DEBUG("PPI read from portA (last value): " << CPC.keyboard_line << " - " << static_cast<int>(ret_val));
             }
             break;
 
@@ -375,13 +375,13 @@ byte z80_IN_handler (reg_pair port)
             // This should always be the case anyway but do not activate it for other model for now, let's validate it before.
             // TODO: verify with CPC (non-plus) if we go in the else in some cases
             if (CPC.model > 2 || PPI.control & 2) { // port B set to input?
-               LOG("PPI read from portB: bTapeLevel=" << static_cast<int>(bTapeLevel) << ", CPC.printer=" << CPC.printer << ", CPC.jumpers=" << CPC.jumpers << ", CRTC.flag_invsync=" << CRTC.flag_invsync)
+               LOG_DEBUG("PPI read from portB: bTapeLevel=" << static_cast<int>(bTapeLevel) << ", CPC.printer=" << CPC.printer << ", CPC.jumpers=" << CPC.jumpers << ", CRTC.flag_invsync=" << CRTC.flag_invsync)
                ret_val = bTapeLevel | // tape level when reading
                          (CPC.printer ? 0 : 0x40) | // ready line of connected printer
                          (CPC.jumpers & 0x7f) | // manufacturer + 50Hz
                          (CRTC.flag_invsync ? 1 : 0); // VSYNC status
             } else {
-               LOG("PPI read from portB: " << static_cast<int>(PPI.portB))
+               LOG_DEBUG("PPI read from portB: " << static_cast<int>(PPI.portB))
                ret_val = PPI.portB; // return last programmed value
             }
             break;
@@ -400,14 +400,14 @@ byte z80_IN_handler (reg_pair port)
                   if (CPC.tape_motor) {
                      ret_val |= 0x10; // set the bit if the tape motor is running
                   }
-                  LOG("PPI read from portC (upper half): " << static_cast<int>(ret_val));
+                  LOG_DEBUG("PPI read from portC (upper half): " << static_cast<int>(ret_val));
                }
                if (!(direction & 1)) { // lower half set to output?
                   ret_val |= 0x0f; // invalid - set all bits
-                  LOG("PPI read from portC (lower half): " << static_cast<int>(ret_val));
+                  LOG_DEBUG("PPI read from portC (lower half): " << static_cast<int>(ret_val));
                }
             }
-            LOG("PPI read from portC: " << static_cast<int>(ret_val));
+            LOG_DEBUG("PPI read from portC: " << static_cast<int>(ret_val));
             break;
       }
    }
@@ -421,7 +421,7 @@ byte z80_IN_handler (reg_pair port)
          }
       }
    }
-   LOG("port.b.h3=" << std::hex << static_cast<int>(port.b.h3) << ", port.b.h2=" << static_cast<int>(port.b.h2) << ", port.b.h=" << std::hex << static_cast<int>(port.b.h) << ", port.b.l=" << static_cast<int>(port.b.l) << ", ret_val=" << static_cast<int>(ret_val) << std::dec);
+   LOG_DEBUG("port.b.h3=" << std::hex << static_cast<int>(port.b.h3) << ", port.b.h2=" << static_cast<int>(port.b.h2) << ", port.b.h=" << std::hex << static_cast<int>(port.b.h) << ", port.b.l=" << static_cast<int>(port.b.l) << ", ret_val=" << static_cast<int>(ret_val) << std::dec);
    return ret_val;
 }
 
@@ -429,7 +429,7 @@ byte z80_IN_handler (reg_pair port)
 
 void z80_OUT_handler (reg_pair port, byte val)
 {
-   LOG("port.b.h3=" << std::hex << static_cast<int>(port.b.h3) << ", port.b.h2=" << static_cast<int>(port.b.h2) << ", port.b.h=" << std::hex << static_cast<int>(port.b.h) << ", port.b.l=" << static_cast<int>(port.b.l) << ", val=" << static_cast<int>(val) << std::dec);
+   LOG_DEBUG("port.b.h3=" << std::hex << static_cast<int>(port.b.h3) << ", port.b.h2=" << static_cast<int>(port.b.h2) << ", port.b.h=" << std::hex << static_cast<int>(port.b.h) << ", port.b.l=" << static_cast<int>(port.b.l) << ", val=" << static_cast<int>(val) << std::dec);
 // Gate Array -----------------------------------------------------------------
    if ((port.b.h & 0xc0) == 0x40) { // GA chip select?
       switch (val >> 6) {
@@ -440,7 +440,7 @@ void z80_OUT_handler (reg_pair port, byte val)
             }
             #endif
             GateArray.pen = val & 0x10 ? 0x10 : val & 0x0f; // if bit 5 is set, pen indexes the border colour
-            LOG("Set pen value to " << static_cast<int>(GateArray.pen));
+            LOG_DEBUG("Set pen value to " << static_cast<int>(GateArray.pen));
             if (CPC.mf2) { // MF2 enabled?
                *(pbMF2ROM + 0x03fcf) = val;
             }
@@ -453,7 +453,7 @@ void z80_OUT_handler (reg_pair port, byte val)
             #endif
             {
                byte colour = val & 0x1f; // isolate colour value
-               LOG("Set ink value " << static_cast<int>(GateArray.pen) << " to " << static_cast<int>(colour));
+               LOG_DEBUG("Set ink value " << static_cast<int>(GateArray.pen) << " to " << static_cast<int>(colour));
                GateArray.ink_values[GateArray.pen] = colour;
                GateArray.palette[GateArray.pen] = SDL_MapRGB(back_surface->format,
                      colours[colour].r, colours[colour].g, colours[colour].b);
@@ -475,15 +475,15 @@ void z80_OUT_handler (reg_pair port, byte val)
                // 6128+ RMR2 register
                int membank = (val >> 3) & 3;
                if (membank == 3) { // Map register page at 0x4000
-                  LOG("Register page on");
+                  LOG_DEBUG("Register page on");
                   GateArray.registerPageOn = true;
                   membank = 0;
                } else {
-                  LOG("Register page off");
+                  LOG_DEBUG("Register page off");
                   GateArray.registerPageOn = false;
                }
                int page = (val & 0x7);
-               LOG("RMR2: Low bank rom = 0x" << std::hex << (4*membank) << std::dec << "000 - page " << page);
+               LOG_DEBUG("RMR2: Low bank rom = 0x" << std::hex << (4*membank) << std::dec << "000 - page " << page);
                GateArray.lower_ROM_bank = membank;
                pbROMlo = pbCartridgePages[page];
                ga_memory_manager();
@@ -493,7 +493,7 @@ void z80_OUT_handler (reg_pair port, byte val)
                   fprintf(pfoDebug, "rom 0x%02x\r\n", val);
                }
                #endif
-               LOG("MRER: ROM config = " << std::hex << static_cast<int>(val) << std::dec << " - mode=" << static_cast<int>(val & 0x03));
+               LOG_DEBUG("MRER: ROM config = " << std::hex << static_cast<int>(val) << std::dec << " - mode=" << static_cast<int>(val & 0x03));
                GateArray.ROM_config = val;
                GateArray.requested_scr_mode = val & 0x03; // request a new CPC screen mode
                ga_memory_manager();
@@ -513,7 +513,7 @@ void z80_OUT_handler (reg_pair port, byte val)
                   fprintf(pfoDebug, "mem 0x%02x\r\n", val);
                }
                #endif
-               LOG("RAM config: " << static_cast<int>(val));
+               LOG_DEBUG("RAM config: " << static_cast<int>(val));
                GateArray.RAM_config = val;
                ga_memory_manager();
                if (CPC.mf2) { // MF2 enabled?
@@ -521,7 +521,7 @@ void z80_OUT_handler (reg_pair port, byte val)
                }
             } else {
                // 6128+ memory mapping register
-               LOG("Memory mapping register (RAM)");
+               LOG_DEBUG("Memory mapping register (RAM)");
             }
             break;
       }
@@ -539,7 +539,7 @@ void z80_OUT_handler (reg_pair port, byte val)
       }
       else if (crtc_port == 1) { // CRTC write data?
          if (CRTC.reg_select < 16) { // only registers 0 - 15 can be written to
-            LOG("CRTC write to register " << static_cast<int>(CRTC.reg_select) << ": " << static_cast<int>(val));
+            LOG_DEBUG("CRTC write to register " << static_cast<int>(CRTC.reg_select) << ": " << static_cast<int>(val));
             switch (CRTC.reg_select) {
                case 0: // horizontal total
                   CRTC.registers[0] = val;
@@ -676,7 +676,7 @@ void z80_OUT_handler (reg_pair port, byte val)
          }
       } else {
          uint32_t page = 1; // Default to basic page
-         LOG("ROM select: " << static_cast<int>(val));
+         LOG_DEBUG("ROM select: " << static_cast<int>(val));
          if (val == 7) {
             page = 3;
          } else if (val >= 128) {
@@ -705,27 +705,27 @@ void z80_OUT_handler (reg_pair port, byte val)
    if (!(port.b.h & 0x08)) { // PPI chip select?
       switch (port.b.h & 3) {
          case 0: // write to port A?
-            LOG("PPI write to portA: " << static_cast<int>(val));
+            LOG_DEBUG("PPI write to portA: " << static_cast<int>(val));
             PPI.portA = val;
             if (!(PPI.control & 0x10)) { // port A set to output?
-               LOG("PPI write to portA (PSG): " << static_cast<int>(val));
+               LOG_DEBUG("PPI write to portA (PSG): " << static_cast<int>(val));
                byte psg_data = val;
                psg_write
             }
             break;
          case 1: // write to port B?
-            LOG("PPI write to portB (upper half): " << static_cast<int>(val));
+            LOG_DEBUG("PPI write to portB (upper half): " << static_cast<int>(val));
             PPI.portB = val;
             break;
          case 2: // write to port C?
-            LOG("PPI write to portC: " << static_cast<int>(val));
+            LOG_DEBUG("PPI write to portC: " << static_cast<int>(val));
             PPI.portC = val;
             if (!(PPI.control & 1)) { // output lower half?
-               LOG("PPI write to portC (keyboard_line): " << static_cast<int>(val));
+               LOG_DEBUG("PPI write to portC (keyboard_line): " << static_cast<int>(val));
                CPC.keyboard_line = val;
             }
             if (!(PPI.control & 8)) { // output upper half?
-               LOG("PPI write to portC (upper half): " << static_cast<int>(val));
+               LOG_DEBUG("PPI write to portC (upper half): " << static_cast<int>(val));
                CPC.tape_motor = val & 0x10; // update tape motor control
                PSG.control = val; // change PSG control
                byte psg_data = PPI.portA;
@@ -734,13 +734,13 @@ void z80_OUT_handler (reg_pair port, byte val)
             break;
          case 3: // modify PPI control
             if (val & 0x80) { // change PPI configuration
-               LOG("PPI.control " << static_cast<int>(PPI.control) << " => " << static_cast<int>(val));
+               LOG_DEBUG("PPI.control " << static_cast<int>(PPI.control) << " => " << static_cast<int>(val));
                PPI.control = val; // update control byte
                PPI.portA = 0; // clear data for all ports
                PPI.portB = 0;
                PPI.portC = 0;
             } else { // bit manipulation of port C data
-               LOG("PPI.portC update: " << static_cast<int>(val));
+               LOG_DEBUG("PPI.portC update: " << static_cast<int>(val));
                byte bit = (val >> 1) & 7; // isolate bit to set
                if (val & 1) { // set bit?
                   PPI.portC |= bit_values[bit]; // set requested bit
@@ -748,11 +748,11 @@ void z80_OUT_handler (reg_pair port, byte val)
                   PPI.portC &= ~(bit_values[bit]); // reset requested bit
                }
                if (!(PPI.control & 1)) { // output lower half?
-                  LOG("PPI.portC update (keyboard_line): " << static_cast<int>(PPI.portC));
+                  LOG_DEBUG("PPI.portC update (keyboard_line): " << static_cast<int>(PPI.portC));
                   CPC.keyboard_line = PPI.portC;
                }
                if (!(PPI.control & 8)) { // output upper half?
-                  LOG("PPI.portC update (upper half): " << static_cast<int>(PPI.portC));
+                  LOG_DEBUG("PPI.portC update (upper half): " << static_cast<int>(PPI.portC));
                   CPC.tape_motor = PPI.portC & 0x10;
                   PSG.control = PPI.portC; // change PSG control
                   byte psg_data = PPI.portA;
@@ -767,7 +767,7 @@ void z80_OUT_handler (reg_pair port, byte val)
    }
 // ----------------------------------------------------------------------------
    if ((port.b.h == 0xfa) && (!(port.b.l & 0x80))) { // floppy motor control?
-      LOG("FDC motor control access: " << static_cast<int>(port.b.l) << " - " << static_cast<int>(val));
+      LOG_DEBUG("FDC motor control access: " << static_cast<int>(port.b.l) << " - " << static_cast<int>(val));
       FDC.motor = val & 0x01;
       #ifdef DEBUG_FDC
       fputs(FDC.motor ? "\r\n--- motor on" : "\r\n--- motor off", pfoDebug);
@@ -1345,20 +1345,24 @@ void dsk_eject (t_drive *drive)
 
 int dsk_load (FILE *pfile, t_drive *drive)
 {
+  LOG_DEBUG("Loading disk");
   dword dwTrackSize, track, side, sector, dwSectorSize, dwSectors;
   byte *pbPtr, *pbDataPtr, *pbTempPtr, *pbTrackSizeTable;
   if(fread(pbGPBuffer, 0x100, 1, pfile) != 1) { // read DSK header
+    LOG_ERROR("Couldn't read DSK header");
     return ERR_DSK_INVALID;
   }
   pbPtr = pbGPBuffer;
 
   if (memcmp(pbPtr, "MV - CPC", 8) == 0) { // normal DSK image?
+    LOG_DEBUG("Loading normal disk");
     drive->tracks = *(pbPtr + 0x30); // grab number of tracks
     if (drive->tracks > DSK_TRACKMAX) { // compare against upper limit
       drive->tracks = DSK_TRACKMAX; // limit to maximum
     }
     drive->sides = *(pbPtr + 0x31); // grab number of sides
     if (drive->sides > DSK_SIDEMAX) { // abort if more than maximum
+      LOG_ERROR("DSK header has " << drive->sides << " sides, expected " << DSK_SIDEMAX << " or less");
       dsk_eject(drive);
       return ERR_DSK_SIDES;
     }
@@ -1367,17 +1371,20 @@ int dsk_load (FILE *pfile, t_drive *drive)
     for (track = 0; track < drive->tracks; track++) { // loop for all tracks
       for (side = 0; side <= drive->sides; side++) { // loop for all sides
         if(fread(pbGPBuffer+0x100, 0x100, 1, pfile) != 1) { // read track header
+          LOG_ERROR("Couldn't read DSK track header for track " << track << " side " << side);
           dsk_eject(drive);
           return ERR_DSK_INVALID;
         }
         pbPtr = pbGPBuffer + 0x100;
         if (memcmp(pbPtr, "Track-Info", 10) != 0) { // abort if ID does not match
+          LOG_ERROR("Corrupted DSK track header for track " << track << " side " << side);
           dsk_eject(drive);
           return ERR_DSK_INVALID;
         }
         dwSectorSize = 0x80 << *(pbPtr + 0x14); // determine sector size in bytes
         dwSectors = *(pbPtr + 0x15); // grab number of sectors
         if (dwSectors > DSK_SECTORMAX) { // abort if sector count greater than maximum
+          LOG_ERROR("DSK track with " << dwSectors << " sectors, expected " << DSK_SECTORMAX << "or less");
           dsk_eject(drive);
           return ERR_DSK_SECTORS;
         }
@@ -1385,6 +1392,7 @@ int dsk_load (FILE *pfile, t_drive *drive)
         drive->track[track][side].size = dwTrackSize; // store track size
         drive->track[track][side].data = static_cast<byte *>(malloc(dwTrackSize)); // attempt to allocate the required memory
         if (drive->track[track][side].data == nullptr) { // abort if not enough
+          LOG_ERROR("Couldn't allocate " << dwTrackSize << " bytes to store track " << track << " side " << side);
           dsk_eject(drive);
           return ERR_OUT_OF_MEMORY;
         }
@@ -1399,6 +1407,7 @@ int dsk_load (FILE *pfile, t_drive *drive)
           pbPtr += 8;
         }
         if (!fread(pbTempPtr, dwTrackSize, 1, pfile)) { // read entire track data in one go
+          LOG_ERROR("Couldn't read track data for track " << track << " side " << side);
           dsk_eject(drive);
           return ERR_DSK_INVALID;
         }
@@ -1407,13 +1416,18 @@ int dsk_load (FILE *pfile, t_drive *drive)
     drive->altered = 0; // disk is as yet unmodified
   } else {
     if (memcmp(pbPtr, "EXTENDED", 8) == 0) { // extended DSK image?
+      LOG_DEBUG("Loading extended disk");
       drive->tracks = *(pbPtr + 0x30); // number of tracks
+      LOG_DEBUG("with " << drive->tracks << " tracks");
       if (drive->tracks > DSK_TRACKMAX) {  // limit to maximum possible
         drive->tracks = DSK_TRACKMAX;
       }
+      LOG_DEBUG("with " << drive->tracks << " tracks");
       drive->random_DEs = *(pbPtr + 0x31) & 0x80; // simulate random Data Errors?
       drive->sides = *(pbPtr + 0x31) & 3; // number of sides
+      LOG_DEBUG("with " << drive->sides << " sides");
       if (drive->sides > DSK_SIDEMAX) { // abort if more than maximum
+        LOG_ERROR("DSK header has " << drive->sides << " sides, expected " << DSK_SIDEMAX << " or less");
         dsk_eject(drive);
         return ERR_DSK_SIDES;
       }
@@ -1425,16 +1439,20 @@ int dsk_load (FILE *pfile, t_drive *drive)
           if (dwTrackSize != 0) { // only process if track contains data
             dwTrackSize -= 0x100; // compensate for track header
             if(fread(pbGPBuffer+0x100, 0x100, 1, pfile) != 1) { // read track header
+              LOG_ERROR("Couldn't read DSK track header for track " << track << " side " << side);
               dsk_eject(drive);
               return ERR_DSK_INVALID;
             }
             pbPtr = pbGPBuffer + 0x100;
             if (memcmp(pbPtr, "Track-Info", 10) != 0) { // valid track header?
+              LOG_ERROR("Corrupted DSK track header for track " << track << " side " << side);
               dsk_eject(drive);
               return ERR_DSK_INVALID;
             }
             dwSectors = *(pbPtr + 0x15); // number of sectors for this track
+            LOG_DEBUG("with " << dwSectors << " sectors");
             if (dwSectors > DSK_SECTORMAX) { // abort if sector count greater than maximum
+              LOG_ERROR("DSK track with " << dwSectors << " sectors, expected " << DSK_SECTORMAX << "or less");
               dsk_eject(drive);
               return ERR_DSK_SECTORS;
             }
@@ -1442,6 +1460,7 @@ int dsk_load (FILE *pfile, t_drive *drive)
             drive->track[track][side].size = dwTrackSize; // store track size
             drive->track[track][side].data = static_cast<byte *>(malloc(dwTrackSize)); // attempt to allocate the required memory
             if (drive->track[track][side].data == nullptr) { // abort if not enough
+              LOG_ERROR("Couldn't allocate " << dwTrackSize << " bytes to store track " << track << " side " << side);
               dsk_eject(drive);
               return ERR_OUT_OF_MEMORY;
             }
@@ -1457,16 +1476,19 @@ int dsk_load (FILE *pfile, t_drive *drive)
               pbPtr += 8;
             }
             if (!fread(pbTempPtr, dwTrackSize, 1, pfile)) { // read entire track data in one go
+              LOG_ERROR("Couldn't read track data for track " << track << " side " << side);
               dsk_eject(drive);
               return ERR_DSK_INVALID;
             }
           } else {
+            LOG_DEBUG("empty track");
             memset(&drive->track[track][side], 0, sizeof(t_track)); // track not formatted
           }
         }
       }
       drive->altered = 0; // disk is as yet unmodified
     } else {
+      LOG_ERROR("Unknown DSK type");
       dsk_eject(drive);
       return ERR_DSK_INVALID; // file could not be identified as a valid DSK
     }
@@ -1480,12 +1502,14 @@ int dsk_load (const char *pchFileName, t_drive *drive)
 {
    int iRetCode;
 
+   LOG_DEBUG("Loading disk: " << pchFileName);
    iRetCode = 0;
    dsk_eject(drive);
    if ((pfileObject = fopen(pchFileName, "rb")) != nullptr) {
      iRetCode = dsk_load(pfileObject, drive);
      fclose(pfileObject);
    } else {
+      LOG_ERROR("File not found: " << pchFileName);
       iRetCode = ERR_FILE_NOT_FOUND;
    }
 
@@ -1635,13 +1659,13 @@ int tape_insert (FILE *pfile)
    fseek(pfile, 0, SEEK_SET);
    byte *pbPtr = pbGPBuffer;
    if (memcmp(pbPtr, "ZXTape!\032", 8) == 0) { // CDT file?
-      LOG("tape_insert CDT file");
+      LOG_DEBUG("tape_insert CDT file");
       return tape_insert_cdt(pfile);
    } else if (memcmp(pbPtr, "Creative", 8) == 0) { // VOC file ?
-      LOG("tape_insert VOC file");
+      LOG_DEBUG("tape_insert VOC file");
       return tape_insert_voc(pfile);
    } else { // Unknown file
-      LOG("tape_insert unknown file");
+      LOG_DEBUG("tape_insert unknown file");
       return ERR_TAP_INVALID;
    }
 }
@@ -1650,7 +1674,7 @@ int tape_insert (FILE *pfile)
 
 int tape_insert (const char *pchFileName)
 {
-   LOG("tape_insert " << pchFileName);
+   LOG_DEBUG("tape_insert " << pchFileName);
    FILE *pfile;
    if ((pfile = fopen(pchFileName, "rb")) == nullptr) {
       return ERR_FILE_NOT_FOUND;
@@ -1670,28 +1694,28 @@ int tape_insert_cdt (FILE *pfile)
    byte *pbPtr, *pbBlock;
 
    if(fread(pbGPBuffer, 10, 1, pfile) != 1) { // read CDT header
-      LOG("Couldn't read CDT header");
+      LOG_DEBUG("Couldn't read CDT header");
       return ERR_TAP_INVALID;
    }
    pbPtr = pbGPBuffer;
    if (memcmp(pbPtr, "ZXTape!\032", 8) != 0) { // valid CDT file?
-      LOG("Invalid CDT header '" << pbPtr << "'");
+      LOG_DEBUG("Invalid CDT header '" << pbPtr << "'");
       return ERR_TAP_INVALID;
    }
    if (*(pbPtr + 0x08) != 1) { // major version must be 1
-      LOG("Invalid CDT major version");
+      LOG_DEBUG("Invalid CDT major version");
       return ERR_TAP_INVALID;
    }
    lFileSize = file_size(fileno(pfile)) - 0x0a;
    if (lFileSize <= 0) { // the tape image should have at least one block...
-      LOG("Invalid CDT file size");
+      LOG_DEBUG("Invalid CDT file size");
       return ERR_TAP_INVALID;
    }
    pbTapeImage = static_cast<byte *>(malloc(lFileSize+6));
    *pbTapeImage = 0x20; // start off with a pause block
    *reinterpret_cast<word *>(pbTapeImage+1) = 2000; // set the length to 2 seconds
    if(fread(pbTapeImage+3, lFileSize, 1, pfile) != 1) { // append the entire CDT file
-      LOG("Couldn't read CDT file");
+      LOG_DEBUG("Couldn't read CDT file");
      return ERR_TAP_INVALID;
    }
    *(pbTapeImage+lFileSize+3) = 0x20; // end with a pause block
@@ -1743,32 +1767,32 @@ int tape_insert_cdt (FILE *pfile)
             iBlockLength = 0;
             break;
          case 0x23: // jump to block
-            LOG("Couldn't load CDT file: unsupported " << bID);
+            LOG_DEBUG("Couldn't load CDT file: unsupported " << bID);
             return ERR_TAP_UNSUPPORTED;
             iBlockLength = 2;
             break;
          case 0x24: // loop start
-            LOG("Couldn't load CDT file: unsupported " << bID);
+            LOG_DEBUG("Couldn't load CDT file: unsupported " << bID);
             return ERR_TAP_UNSUPPORTED;
             iBlockLength = 2;
             break;
          case 0x25: // loop end
-            LOG("Couldn't load CDT file: unsupported " << bID);
+            LOG_DEBUG("Couldn't load CDT file: unsupported " << bID);
             return ERR_TAP_UNSUPPORTED;
             iBlockLength = 0;
             break;
          case 0x26: // call sequence
-            LOG("Couldn't load CDT file: unsupported " << bID);
+            LOG_DEBUG("Couldn't load CDT file: unsupported " << bID);
             return ERR_TAP_UNSUPPORTED;
             iBlockLength = (*reinterpret_cast<word *>(pbBlock) * 2) + 2;
             break;
          case 0x27: // return from sequence
-            LOG("Couldn't load CDT file: unsupported " << bID);
+            LOG_DEBUG("Couldn't load CDT file: unsupported " << bID);
             return ERR_TAP_UNSUPPORTED;
             iBlockLength = 0;
             break;
          case 0x28: // select block
-            LOG("Couldn't load CDT file: unsupported " << bID);
+            LOG_DEBUG("Couldn't load CDT file: unsupported " << bID);
             return ERR_TAP_UNSUPPORTED;
             iBlockLength = *reinterpret_cast<word *>(pbBlock) + 2;
             break;
@@ -1808,7 +1832,7 @@ int tape_insert_cdt (FILE *pfile)
       pbBlock += iBlockLength;
    }
    if (pbBlock != pbTapeImageEnd) {
-      LOG("CDT file error: Didn't reach end of tape");
+      LOG_DEBUG("CDT file error: Didn't reach end of tape");
       tape_eject();
       return ERR_TAP_INVALID;
    }
@@ -3100,6 +3124,7 @@ void parseArgs (int argc, const char **argv, t_CPC& CPC)
    bool have_CPR = false;
 
    for (int i = 1; i < argc; i++) { // loop for all command line arguments
+      LOG_DEBUG("Handling arg " << argv[i]);
       std::string fullpath = stringutils::trim(argv[i], '"'); // remove quotes if arguments quoted
       if (fullpath.length() > 5) { // minumum for a valid filename
          int pos = fullpath.length() - 4;
@@ -3123,11 +3148,13 @@ void parseArgs (int argc, const char **argv, t_CPC& CPC)
          }
          if (extension == ".dsk") { // a disk image?
             if(!have_DSKA) {
+               LOG_DEBUG("Loading " << dirname << filename << " in drive A");
                CPC.drvA_path = dirname; // if the image loads, copy the infos to the config structure
                CPC.drvA_file = filename;
                CPC.drvA_zip = (zip ? 1 : 0);
                have_DSKA = true;
             } else if(!have_DSKB) {
+               LOG_DEBUG("Loading " << dirname << filename << " in drive B");
                CPC.drvB_path = dirname; // if the image loads, copy the infos to the config structure
                CPC.drvB_file = filename;
                CPC.drvB_zip = (zip ? 1 : 0);
@@ -3135,18 +3162,21 @@ void parseArgs (int argc, const char **argv, t_CPC& CPC)
             }
          }
          if ((!have_SNA) && (extension == ".sna")) {
+            LOG_DEBUG("Loading snapshot " << dirname << filename);
             CPC.snap_path = dirname;
             CPC.snap_file = filename;
             CPC.snap_zip = (zip ? 1 : 0);
             have_SNA = true;
          }
          if ((!have_TAP) && (extension == ".cdt" || extension == ".voc")) {
+            LOG_DEBUG("Loading tape " << dirname << filename);
             CPC.tape_path = dirname;
             CPC.tape_file = filename;
             CPC.tape_zip = (zip ? 1 : 0);
             have_TAP = true;
          }
          if ((!have_CPR) && (extension == ".cpr")) {
+            LOG_DEBUG("Loading cartridge " << dirname << filename);
             CPC.cart_path = dirname;
             CPC.cart_file = filename;
             CPC.cart_zip = (zip ? 1 : 0);
@@ -3526,14 +3556,14 @@ int cap32_main (int argc, char **argv)
                            break;
 
                         case CAP32_TAPEPLAY:
-                           LOG("Request to play tape");
+                           LOG_DEBUG("Request to play tape");
                            Tape_Rewind();
                            if (pbTapeImage) {
                               if (CPC.tape_play_button) {
-                                 LOG("Play button released");
+                                 LOG_DEBUG("Play button released");
                                  CPC.tape_play_button = 0;
                               } else {
-                                 LOG("Play button pushed");
+                                 LOG_DEBUG("Play button pushed");
                                  CPC.tape_play_button = 0x10;
                               }
                            }
@@ -3562,7 +3592,7 @@ int cap32_main (int argc, char **argv)
                            break;
 
                         case CAP32_RESET:
-                           LOG("User requested emulator reset");
+                           LOG_DEBUG("User requested emulator reset");
                            emulator_reset(false);
                            break;
 

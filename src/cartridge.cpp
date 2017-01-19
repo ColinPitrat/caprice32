@@ -40,10 +40,10 @@ int cartridge_init()
 
 int cpr_load (const std::string &filename)
 {
-   LOG("cpr_load " << filename);
+   LOG_DEBUG("cpr_load " << filename);
    FILE *pfile;
    if ((pfile = fopen(filename.c_str(), "rb")) == nullptr) {
-      LOG("File not found: " << filename);
+      LOG_DEBUG("File not found: " << filename);
       return ERR_FILE_NOT_FOUND;
    }
 
@@ -78,26 +78,26 @@ int cpr_load (FILE *pfile)
 
    // Check RIFF header
    if(fread(pbTmpBuffer, CPR_HEADER_SIZE, 1, pfile) != 1) { // read RIFF header
-      LOG("Cartridge file less than " << CPR_HEADER_SIZE << " bytes long !");
+      LOG_DEBUG("Cartridge file less than " << CPR_HEADER_SIZE << " bytes long !");
       return ERR_CPR_INVALID;
    }
    if (memcmp(pbTmpBuffer, "RIFF", 4) != 0) { // RIFF file
-      LOG("Cartridge file is not a RIFF file");
+      LOG_DEBUG("Cartridge file is not a RIFF file");
       return ERR_CPR_INVALID;
    }
    if (memcmp(pbTmpBuffer + 8, "AMS!", 4) != 0) { // CPR file
-      LOG("Cartridge file is not a CPR file");
+      LOG_DEBUG("Cartridge file is not a CPR file");
       return ERR_CPR_INVALID;
    }
    uint32_t totalSize = extractChunkSize(pbTmpBuffer);
-   LOG("CPR size: " << totalSize)
+   LOG_DEBUG("CPR size: " << totalSize)
 
    // Extract all chunks
    uint32_t offset = CPR_HEADER_SIZE;
    uint32_t cartridgeOffset = 0;
    while(offset < totalSize) {
       if(fread(pbTmpBuffer, CPR_CHUNK_HEADER_SIZE, 1, pfile) != 1) { // read chunk header
-         LOG("Failed reading chunk header");
+         LOG_DEBUG("Failed reading chunk header");
          return ERR_CPR_INVALID;
       }
       offset += CPR_CHUNK_HEADER_SIZE;
@@ -107,7 +107,7 @@ int cpr_load (FILE *pfile)
       chunkId[CPR_CHUNK_ID_SIZE] = '\0';
 
       uint32_t chunkSize = extractChunkSize(pbTmpBuffer);
-      LOG("Chunk '" << chunkId << "' at offset " << offset << " of size " << chunkSize);
+      LOG_DEBUG("Chunk '" << chunkId << "' at offset " << offset << " of size " << chunkSize);
 
       // Normal chunk size is 16kB
       // If smaller, it must be filled with 0 up to this limit
@@ -120,7 +120,7 @@ int cpr_load (FILE *pfile)
       // A chunk can be empty (observed on some CPR files)
       if(chunkKept > 0) {
          if(fread(&pbCartridgeImage[cartridgeOffset], chunkKept, 1, pfile) != 1) { // read chunk content
-            LOG("Failed reading chunk content");
+            LOG_DEBUG("Failed reading chunk content");
             return ERR_CPR_INVALID;
          }
          if(chunkKept < CARTRIDGE_PAGE_SIZE) {
@@ -129,9 +129,9 @@ int cpr_load (FILE *pfile)
             // Not sure if there are some CPR with unordered pages but this seems to be allowed in theory
             memset(&pbCartridgeImage[cartridgeOffset+chunkKept], 0, CARTRIDGE_PAGE_SIZE-chunkKept);
          } else if(chunkKept < chunkSize) {
-            LOG("This chunk is bigger than the max allowed size !!!");
+            LOG_DEBUG("This chunk is bigger than the max allowed size !!!");
             if(fread(pbTmpBuffer, chunkSize-chunkKept, 1, pfile) != 1) { // read excessive chunk content
-               LOG("Failed reading chunk content");
+               LOG_DEBUG("Failed reading chunk content");
                return ERR_CPR_INVALID;
             }
          }
@@ -139,8 +139,8 @@ int cpr_load (FILE *pfile)
          offset += chunkSize;
       }
    }
-   LOG("Final offset: " << offset);
-   LOG("Final cartridge offset: " << cartridgeOffset);
+   LOG_DEBUG("Final offset: " << offset);
+   LOG_DEBUG("Final cartridge offset: " << cartridgeOffset);
    memset(&pbCartridgeImage[cartridgeOffset], 0, CARTRIDGE_MAX_SIZE-cartridgeOffset);
    pbROMlo = &pbCartridgeImage[0];
    return 0;

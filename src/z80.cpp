@@ -29,6 +29,7 @@
 #include "tape.h"
 #include "z80.h"
 #include "asic.h"
+#include "log.h"
 
 extern t_CPC CPC;
 extern t_FDC FDC;
@@ -889,6 +890,7 @@ inline byte SRL(byte val) {
 
 #define z80_int_handler \
 { \
+   LOG_DEBUG("Interrupt handler " << static_cast<int>(_IFF1)); \
    if (_IFF1) { /* process interrupts? */ \
       _R++; \
       _IFF1 = _IFF2 = 0; /* clear interrupt flip-flops */ \
@@ -898,6 +900,7 @@ inline byte SRL(byte val) {
          _HALT = 0; /* exit HALT 'loop' */ \
          _PC++; /* correct PC */ \
       } \
+      LOG_DEBUG("Interrupt mode " << static_cast<int>(_IM)); \
       if (_IM < 2) { /* interrupt mode 0 or 1? (IM0 = IM1 on the CPC) */ \
          iCycleCount = 20; \
          if (iWSAdjust) { \
