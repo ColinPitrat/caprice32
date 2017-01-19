@@ -10,7 +10,7 @@ class AsicTest : public testing::Test {
    public:
       AsicTest() : lockSeq({0x00, 0xff, 0x77, 0xb3, 0x51, 0xa8, 0xd4, 0x62, 0x39, 0x9c, 0x46, 0x2b, 0x15, 0x8a, 0xcd})
       {
-         asic_locked = true;
+         asic.locked = true;
          // DIRTY: to ensure that we reset the sequence
          asic_poke_lock_sequence(0x01);
          asic_poke_lock_sequence(0x00);
@@ -43,7 +43,7 @@ class AsicTest : public testing::Test {
 
 TEST_F(AsicTest, UnlockAsic)
 {
-   ASSERT_TRUE(asic_locked);
+   ASSERT_TRUE(asic.locked);
 
    // Sequence must start with a non null
    asic_poke_lock_sequence(0x01);
@@ -51,16 +51,16 @@ TEST_F(AsicTest, UnlockAsic)
       asic_poke_lock_sequence(val);
    }
    // Only unlock once sequence is complete
-   ASSERT_TRUE(asic_locked);
+   ASSERT_TRUE(asic.locked);
    // And end with any value
    asic_poke_lock_sequence(0x01);
 
-   ASSERT_FALSE(asic_locked);
+   ASSERT_FALSE(asic.locked);
 }
 
 TEST_F(AsicTest, UnlockAsicDoesntUnlockIfNoNonNullByteBeforeSeq)
 {
-   ASSERT_TRUE(asic_locked);
+   ASSERT_TRUE(asic.locked);
 
    asic_poke_lock_sequence(0x00);
    for(const auto& val : lockSeq) {
@@ -68,12 +68,12 @@ TEST_F(AsicTest, UnlockAsicDoesntUnlockIfNoNonNullByteBeforeSeq)
    }
    asic_poke_lock_sequence(0x01);
 
-   ASSERT_TRUE(asic_locked);
+   ASSERT_TRUE(asic.locked);
 }
 
 TEST_F(AsicTest, RelockAsicIfLockSeqReplayedExceptForLastByte)
 {
-   ASSERT_TRUE(asic_locked);
+   ASSERT_TRUE(asic.locked);
 
    asic_poke_lock_sequence(0x01);
    for(const auto& val : lockSeq) {
@@ -81,25 +81,25 @@ TEST_F(AsicTest, RelockAsicIfLockSeqReplayedExceptForLastByte)
    }
    asic_poke_lock_sequence(0x01);
 
-   ASSERT_FALSE(asic_locked);
+   ASSERT_FALSE(asic.locked);
 
    asic_poke_lock_sequence(0x01);
    for(const auto& val : lockSeq) {
       if(val == 0xcd) {
          // Only unlock once sequence is complete
-         ASSERT_FALSE(asic_locked);
+         ASSERT_FALSE(asic.locked);
          asic_poke_lock_sequence(0x0b);
       } else {
          asic_poke_lock_sequence(val);
       }
    }
 
-   ASSERT_TRUE(asic_locked);
+   ASSERT_TRUE(asic.locked);
 }
 
 TEST_F(AsicTest, UnlockWithRepetitionOfFirstTwoBytesOfSequence)
 {
-   ASSERT_TRUE(asic_locked);
+   ASSERT_TRUE(asic.locked);
 
    // This is what Dick Tracy cartridge does
    // (Crazy Cars II also but it checks that the unlock is properly done and retries)
@@ -108,10 +108,53 @@ TEST_F(AsicTest, UnlockWithRepetitionOfFirstTwoBytesOfSequence)
    for(const auto& val : lockSeq) {
       asic_poke_lock_sequence(val);
    }
-   ASSERT_TRUE(asic_locked);
+   ASSERT_TRUE(asic.locked);
    asic_poke_lock_sequence(0xee);
 
-   ASSERT_FALSE(asic_locked);
+   ASSERT_FALSE(asic.locked);
+}
+
+TEST_F(AsicTest, SetDMAControlAndStatusRegister)
+{
+  asic_register_page_write(0x6C0F, 1);
+
+  EXPECT_TRUE(asic.dma.ch0.enabled);
+  EXPECT_FALSE(asic.dma.ch1.enabled);
+  EXPECT_FALSE(asic.dma.ch2.enabled);
+  EXPECT_FALSE(asic.dma.ch2.interrupt);
+  EXPECT_FALSE(asic.dma.ch1.interrupt);
+  EXPECT_FALSE(asic.dma.ch0.interrupt);
+  EXPECT_FALSE(asic.raster_interrupt);
+
+  asic_register_page_write(0x6C0F, 0x41);
+
+  EXPECT_TRUE(asic.dma.ch0.enabled);
+  EXPECT_FALSE(asic.dma.ch1.enabled);
+  EXPECT_FALSE(asic.dma.ch2.enabled);
+  EXPECT_FALSE(asic.dma.ch2.interrupt);
+  EXPECT_FALSE(asic.dma.ch1.interrupt);
+  EXPECT_TRUE(asic.dma.ch0.interrupt);
+  EXPECT_FALSE(asic.raster_interrupt);
+
+  asic_register_page_write(0x6C0F, 0x24);
+
+  EXPECT_FALSE(asic.dma.ch0.enabled);
+  EXPECT_FALSE(asic.dma.ch1.enabled);
+  EXPECT_TRUE(asic.dma.ch2.enabled);
+  EXPECT_FALSE(asic.dma.ch2.interrupt);
+  EXPECT_TRUE(asic.dma.ch1.interrupt);
+  EXPECT_FALSE(asic.dma.ch0.interrupt);
+  EXPECT_FALSE(asic.raster_interrupt);
+
+  asic_register_page_write(0x6C0F, 0x92);
+
+  EXPECT_FALSE(asic.dma.ch0.enabled);
+  EXPECT_TRUE(asic.dma.ch1.enabled);
+  EXPECT_FALSE(asic.dma.ch2.enabled);
+  EXPECT_TRUE(asic.dma.ch2.interrupt);
+  EXPECT_FALSE(asic.dma.ch1.interrupt);
+  EXPECT_FALSE(asic.dma.ch0.interrupt);
+  EXPECT_TRUE(asic.raster_interrupt);
 }
 
 }

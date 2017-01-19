@@ -12,18 +12,8 @@ extern t_CPC CPC;
 extern SDL_Surface *back_surface;
 extern dword dwXScale;
 
-bool asic_locked = true;
-byte asic_sprites[16][16][16];
-int16_t asic_sprites_x[16];
-int16_t asic_sprites_y[16];
-short int asic_sprites_mag_x[16];
-short int asic_sprites_mag_y[16];
+asic_t asic;
 double asic_colours[32][3];
-int asic_hscroll = 0;
-int asic_vscroll = 0;
-bool asic_extend_border = false;
-// TODO: Use the DMA info to feed PSG from RAM
-dma_t dma;
 
 void asic_poke_lock_sequence(byte val) {
    static const byte lockSeq[] = { 0x00, 0x00, 0xff, 0x77, 0xb3, 0x51, 0xa8, 0xd4, 0x62, 0x39, 0x9c, 0x46, 0x2b, 0x15, 0x8a, 0xcd };
@@ -44,7 +34,7 @@ void asic_poke_lock_sequence(byte val) {
             // If the lock sequence is matched except for the last byte, it means lock
             if (lockPos == lockSeqLength) {
                LOG_DEBUG("ASIC locked");
-               asic_locked = true;
+               asic.locked = true;
             }
             if (val == 0) {
                if (lockPos == 3) {
@@ -63,7 +53,7 @@ void asic_poke_lock_sequence(byte val) {
          // Full sequence matched and an additional value was written, it means unlock
          if (lockPos == lockSeqLength) {
             LOG_DEBUG("ASIC unlocked");
-            asic_locked = false;
+            asic.locked = false;
             lockPos = (val == 0) ? 0 : 1;
          }
       }
@@ -91,7 +81,7 @@ bool asic_register_page_write(word addr, byte val) {
       if(color > 0) {
          color += 16;
       }
-      asic_sprites[id][x][y] = color;
+      asic.sprites[id][x][y] = color;
       //LOG_DEBUG("Received sprite data for sprite " << id << ": x=" << x << ", y=" << y << ", color=" << static_cast<int>(val));
    } else if (addr >= 0x6000 && addr < 0x607D) {
       int id = ((addr - 0x6000) >> 3);
@@ -99,37 +89,37 @@ bool asic_register_page_write(word addr, byte val) {
       switch (type) {
          case 0:
             // X position
-            asic_sprites_x[id] = (asic_sprites_x[id] & 0xFF00) | val;
-            //LOG_DEBUG("Received sprite X for sprite " << id << " x=" << asic_sprites_x[id]);
+            asic.sprites_x[id] = (asic.sprites_x[id] & 0xFF00) | val;
+            //LOG_DEBUG("Received sprite X for sprite " << id << " x=" << asic.sprites_x[id]);
             // Mirrored in RAM image 4 bytes after
             pbRegisterPage[(addr & 0x3FFF) + 4] = val;
             break;
          case 1:
             // X position
-            asic_sprites_x[id] = (asic_sprites_x[id] & 0x00FF) | (val << 8);
-            //LOG_DEBUG("Received sprite X for sprite " << id << " x=" << asic_sprites_x[id]);
+            asic.sprites_x[id] = (asic.sprites_x[id] & 0x00FF) | (val << 8);
+            //LOG_DEBUG("Received sprite X for sprite " << id << " x=" << asic.sprites_x[id]);
             // Mirrored in RAM image 4 bytes after
             pbRegisterPage[(addr & 0x3FFF) + 4] = val;
             break;
          case 2:
             // Y position
-            asic_sprites_y[id] = ((asic_sprites_y[id] & 0xFF00) | val);
-            //LOG_DEBUG("Received sprite Y for sprite " << id << " y=" << asic_sprites_y[id]);
+            asic.sprites_y[id] = ((asic.sprites_y[id] & 0xFF00) | val);
+            //LOG_DEBUG("Received sprite Y for sprite " << id << " y=" << asic.sprites_y[id]);
             // Mirrored in RAM image 4 bytes after
             pbRegisterPage[(addr & 0x3FFF) + 4] = val;
             break;
          case 3:
             // Y position
-            asic_sprites_y[id] = ((asic_sprites_y[id] & 0x00FF) | (val << 8));
-            //LOG_DEBUG("Received sprite Y for sprite " << id << " y=" << asic_sprites_y[id]);
+            asic.sprites_y[id] = ((asic.sprites_y[id] & 0x00FF) | (val << 8));
+            //LOG_DEBUG("Received sprite Y for sprite " << id << " y=" << asic.sprites_y[id]);
             // Affect RAM image
             // Mirrored in RAM image 4 bytes after
             pbRegisterPage[(addr & 0x3FFF) + 4] = val;
             break;
          case 4:
             // Magnification
-            asic_sprites_mag_x[id] = decode_magnification(val >> 2);
-            asic_sprites_mag_y[id] = decode_magnification(val);
+            asic.sprites_mag_x[id] = decode_magnification(val >> 2);
+            asic.sprites_mag_y[id] = decode_magnification(val);
             // Write-only: does not affect pbRegisterPage
             return false;
          default:
@@ -191,10 +181,10 @@ bool asic_register_page_write(word addr, byte val) {
          CRTC.split_addr |= val;
          LOG_DEBUG("Received address for split: " << std::hex << CRTC.split_addr << std::dec);
       } else if (addr == 0x6804) {
-         asic_hscroll = (val & 0xf);
-         asic_vscroll = ((val >> 4) & 0x7);
-         asic_extend_border = (val >> 7);
-         LOG_DEBUG("Received soft scroll control: " << static_cast<int>(val) << ": dx=" << asic_hscroll << ", dy=" << asic_vscroll << ", border=" << asic_extend_border);
+         asic.hscroll = (val & 0xf);
+         asic.vscroll = ((val >> 4) & 0x7);
+         asic.extend_border = (val >> 7);
+         LOG_DEBUG("Received soft scroll control: " << static_cast<int>(val) << ": dx=" << asic.hscroll << ", dy=" << asic.vscroll << ", border=" << asic.extend_border);
          update_skew();
       } else if (addr == 0x6805) {
          LOG_DEBUG("Received interrupt vector: " << static_cast<int>(val));
@@ -206,13 +196,13 @@ bool asic_register_page_write(word addr, byte val) {
       dma_channel *channel = nullptr;
       switch ((addr & 0xc) >> 2) {
         case 0:
-          channel = &dma.ch0;
+          channel = &asic.dma.ch0;
           break;
         case 1:
-          channel = &dma.ch1;
+          channel = &asic.dma.ch1;
           break;
         case 2:
-          channel = &dma.ch2;
+          channel = &asic.dma.ch2;
           break;
         default:
           // This should never happen considering addr possible values
@@ -237,7 +227,13 @@ bool asic_register_page_write(word addr, byte val) {
       }
    } else if (addr == 0x6C0F) {
       LOG_DEBUG("Received DMA control register: " << std::hex << static_cast<int>(val) << std::dec);
-      dma.dcsr = val;
+      asic.dma.ch0.enabled = val & 0x1;
+      asic.dma.ch1.enabled = val & 0x2;
+      asic.dma.ch2.enabled = val & 0x4;
+      asic.dma.ch2.interrupt = val & 0x10;
+      asic.dma.ch1.interrupt = val & 0x20;
+      asic.dma.ch0.interrupt = val & 0x40;
+      asic.raster_interrupt = val & 0x80;
    } else {
       //LOG_DEBUG("Received unused write at " << std::hex << addr << " - val: " << static_cast<int>(val) << std::dec);
    }
@@ -280,18 +276,18 @@ void putpixel(SDL_Surface *surface, int x, int y, Uint32 pixel)
 // TODO: all this could be replaced by pre-computed SDL sprites
 void asic_draw_sprites() {
    // TODO: this should be affected by other CRTC.registers (reg2 for borderWidth ?, reg1 for screenWidth ? reg6 for screenHeight ?)
-   const int borderWidth = 64 + (asic_extend_border ? 16 : 0);
+   const int borderWidth = 64 + (asic.extend_border ? 16 : 0);
    const int borderHeight = 40 + 8*(30 - CRTC.registers[7]);
    const int screenWidth = 640 + borderWidth;
    const int screenHeight = 200 + borderHeight;
    // For each sprite
    for(int i = 15; i >= 0; i--) {
-      int sx = asic_sprites_x[i];
-      int mx = asic_sprites_mag_x[i];
+      int sx = asic.sprites_x[i];
+      int mx = asic.sprites_mag_x[i];
       // If some part of the sprite is visible (horizontal check)
       if(mx > 0 && (sx + 64*mx) >= borderWidth && sx <= screenWidth) {
-         int sy = asic_sprites_y[i];
-         int my = asic_sprites_mag_y[i];
+         int sy = asic.sprites_y[i];
+         int my = asic.sprites_mag_y[i];
          // If some part of the sprite is visible (vertical check)
          if(my > 0 && (sy + 64*my) >= borderHeight && sy <= screenHeight) {
             sx += borderWidth;
@@ -313,7 +309,7 @@ void asic_draw_sprites() {
                      break;
                   }
                   // Draw pixel
-                  byte p = asic_sprites[i][x][y];
+                  byte p = asic.sprites[i][x][y];
                   if(p) {
                      Uint32 pixel = GateArray.palette[p];
                      for(int dx = 0; dx < mx; dx++) {

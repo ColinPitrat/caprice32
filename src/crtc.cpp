@@ -496,7 +496,7 @@ void update_skew(void)
       CRTC.hstart = skew; // position at which horizontal display starts
       CRTC.hend = CRTC.hstart + CRTC.registers[1]; // position at which it ends
    }
-   if(asic_extend_border) {
+   if(asic.extend_border) {
       CRTC.hstart++;
    }
 }
@@ -852,15 +852,15 @@ void prerender_normal(void)
 
 void prerender_normal_plus(void)
 {
-   int byteOffset = asic_hscroll / 8;
-   int byteShift = asic_hscroll % 8;
+   int byteOffset = asic.hscroll / 8;
+   int byteShift = asic.hscroll % 8;
    unsigned int next_address = CRTC.next_address;
-   if(asic_vscroll) {
-      if (CRTC.raster_count + asic_vscroll <= CRTC.registers[9]) {
-         next_address += asic_vscroll * 0x0800;
+   if(asic.vscroll) {
+      if (CRTC.raster_count + asic.vscroll <= CRTC.registers[9]) {
+         next_address += asic.vscroll * 0x0800;
       } else {
          next_address += 80;
-         next_address -= ((CRTC.registers[9] + 1 - asic_vscroll) * 0x0800);
+         next_address -= ((CRTC.registers[9] + 1 - asic.vscroll) * 0x0800);
       }
    }
    byte bVidMem1 = getRAMByte(next_address - byteOffset - 1);
@@ -897,15 +897,15 @@ void prerender_normal_half(void)
 
 void prerender_normal_half_plus(void)
 {
-   int byteOffset = (asic_hscroll / 2) / 4;
-   int byteShift = ((asic_hscroll / 2) % 4);
+   int byteOffset = (asic.hscroll / 2) / 4;
+   int byteShift = ((asic.hscroll / 2) % 4);
    unsigned int next_address = CRTC.next_address;
-   if(asic_vscroll) {
-      if (CRTC.raster_count + asic_vscroll <= CRTC.registers[9]) {
-         next_address += asic_vscroll * 0x0800;
+   if(asic.vscroll) {
+      if (CRTC.raster_count + asic.vscroll <= CRTC.registers[9]) {
+         next_address += asic.vscroll * 0x0800;
       } else {
          next_address += 80;
-         next_address -= ((CRTC.registers[9] + 1 - asic_vscroll) * 0x0800);
+         next_address -= ((CRTC.registers[9] + 1 - asic.vscroll) * 0x0800);
       }
    }
    byte bVidMem1 = getRAMByte(next_address - byteOffset - 1);

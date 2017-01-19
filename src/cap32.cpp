@@ -471,7 +471,7 @@ void z80_OUT_handler (reg_pair port, byte val)
             }
             break;
          case 2: // set mode
-            if (!asic_locked && (val & 0x20)) {
+            if (!asic.locked && (val & 0x20)) {
                // 6128+ RMR2 register
                int membank = (val >> 3) & 3;
                if (membank == 3) { // Map register page at 0x4000
@@ -507,7 +507,7 @@ void z80_OUT_handler (reg_pair port, byte val)
             }
             break;
          case 3: // set memory configuration
-            if (asic_locked) {
+            if (asic.locked) {
                #ifdef DEBUG_GA
                if (dwDebugFlag) {
                   fprintf(pfoDebug, "mem 0x%02x\r\n", val);
@@ -2104,12 +2104,12 @@ void emulator_reset (bool bolMF2Reset)
 
 // ASIC
 // TODO: asic_reset
-   asic_locked = true;
+   asic.locked = true;
    for(int i = 0; i < 16; i++) {
-      asic_sprites_x[i] = asic_sprites_y[i] = asic_sprites_mag_x[i] = asic_sprites_mag_y[i] = 0;
+      asic.sprites_x[i] = asic.sprites_y[i] = asic.sprites_mag_x[i] = asic.sprites_mag_y[i] = 0;
       for(int j = 0; j < 16; j++) {
          for(int k = 0; k < 16; k++) {
-            asic_sprites[i][j][k] = 0;
+            asic.sprites[i][j][k] = 0;
          }
       }
    }
