@@ -16,15 +16,15 @@
    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#define CF  0x01
-#define NF	0x02
-#define PF	0x04
-#define VF	PF
-#define XF	0x08
-#define HF	0x10
-#define YF	0x20
-#define ZF	0x40
-#define SF	0x80
+#define CF 0x01
+#define NF 0x02
+#define PF 0x04
+#define VF PF
+#define XF 0x08
+#define HF 0x10
+#define YF 0x20
+#define ZF 0x40
+#define SF 0x80
 
 static word DAATable[0x800] = {
   (0x00<<8)   +ZF         +VF      ,
