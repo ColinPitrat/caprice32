@@ -108,22 +108,22 @@ int z80_execute(void);
 // Handle main z80 instructions.
 void z80_execute_instruction(void);
 
-// Handle special bits instructions.
+// Handle prefixed bits instructions.
 void z80_execute_pfx_cb_instruction(void);
 
-// Handle special IX instructions.
+// Handle prefixed IX instructions.
 void z80_execute_pfx_dd_instruction(void);
 
-// Handle special IX bit instructions.
+// Handle prefixed IX bit instructions.
 void z80_execute_pfx_ddcb_instruction(void);
 
-// Handle extended instructions.
+// Handle prefixed extended instructions.
 void z80_execute_pfx_ed_instruction(void);
 
-// Handle special IY instructions.
+// Handle prefixed IY instructions.
 void z80_execute_pfx_fd_instruction(void);
 
-// Handle special IY bit instructions.
+// Handle prefixed IY bit instructions.
 void z80_execute_pfx_fdcb_instruction(void);
 
 #endif
