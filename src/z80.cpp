@@ -977,8 +977,6 @@ void z80_mf2stop(void)
 
 int z80_execute(void)
 {
-   byte bOpCode;
-
    while (_PCdword != z80.break_point) { // loop until break point
 
       #ifdef DEBUG_Z80
@@ -998,7 +996,48 @@ int z80_execute(void)
          }
       }
 
-      bOpCode = read_mem(_PC++);
+      z80_execute_instruction();
+
+      z80_wait_states
+
+      if (z80.EI_issued) { // EI 'delay' in effect?
+         if (--z80.EI_issued == 0) {
+            _IFF1 = _IFF2 = Pflag; // set interrupt flip-flops
+            if (z80.int_pending) {
+               z80_int_handler
+            }
+         }
+      }
+      else if (z80.int_pending) { // any interrupts pending?
+         z80_int_handler
+      }
+      iWSAdjust = 0;
+
+      if (z80.trace) { // tracing instructions?
+         z80.trace = 0; // reset trace condition
+         return EC_TRACE; // exit emulation loop
+      }
+      else if (VDU.frame_completed) { // video emulation finished building frame?
+         VDU.frame_completed = 0;
+         return EC_FRAME_COMPLETE; // exit emulation loop
+      }
+      else if (PSG.buffer_full) { // sound emulation finished filling a buffer?
+         PSG.buffer_full = 0;
+         return EC_SOUND_BUFFER; // exit emulation loop
+      }
+      else if (CPC.cycle_count <= 0) { // emulation loop ran for one frame?
+         CPC.cycle_count += CYCLE_COUNT_INIT;
+         return EC_CYCLE_COUNT; // exit emulation loop
+      }
+   }
+   return EC_BREAKPOINT;
+}
+
+
+
+void z80_execute_instruction(void)
+{
+      byte bOpCode = read_mem(_PC++);
       iCycleCount = cc_op[bOpCode];
       _R++;
       switch(bOpCode)
@@ -1198,10 +1237,10 @@ int z80_execute(void)
          case or_l:        OR(_L); break;
          case or_mhl:      OR(read_mem(_HL)); break;
          case outa:        { z80_wait_states iCycleCount = Oa_;} { reg_pair p; p.b.l = read_mem(_PC++); p.b.h = _A; z80_OUT_handler(p, _A); } break;
-         case pfx_cb:      z80_pfx_cb(); break;
-         case pfx_dd:      z80_pfx_dd(); break;
-         case pfx_ed:      z80_pfx_ed(); break;
-         case pfx_fd:      z80_pfx_fd(); break;
+         case pfx_cb:      z80_execute_pfx_cb_instruction(); break;
+         case pfx_dd:      z80_execute_pfx_dd_instruction(); break;
+         case pfx_ed:      z80_execute_pfx_ed_instruction(); break;
+         case pfx_fd:      z80_execute_pfx_fd_instruction(); break;
          case pop_af:      POP(AF); break;
          case pop_bc:      POP(BC); break;
          case pop_de:      POP(DE); break;
@@ -1260,45 +1299,11 @@ int z80_execute(void)
          case xor_l:       XOR(_L); break;
          case xor_mhl:     XOR(read_mem(_HL)); break;
       }
-
-      z80_wait_states
-
-      if (z80.EI_issued) { // EI 'delay' in effect?
-         if (--z80.EI_issued == 0) {
-            _IFF1 = _IFF2 = Pflag; // set interrupt flip-flops
-            if (z80.int_pending) {
-               z80_int_handler
-            }
-         }
-      }
-      else if (z80.int_pending) { // any interrupts pending?
-         z80_int_handler
-      }
-      iWSAdjust = 0;
-
-      if (z80.trace) { // tracing instructions?
-         z80.trace = 0; // reset trace condition
-         return EC_TRACE; // exit emulation loop
-      }
-      else if (VDU.frame_completed) { // video emulation finished building frame?
-         VDU.frame_completed = 0;
-         return EC_FRAME_COMPLETE; // exit emulation loop
-      }
-      else if (PSG.buffer_full) { // sound emulation finished filling a buffer?
-         PSG.buffer_full = 0;
-         return EC_SOUND_BUFFER; // exit emulation loop
-      }
-      else if (CPC.cycle_count <= 0) { // emulation loop ran for one frame?
-         CPC.cycle_count += CYCLE_COUNT_INIT;
-         return EC_CYCLE_COUNT; // exit emulation loop
-      }
-   }
-   return EC_BREAKPOINT;
 }
 
 
 
-void z80_pfx_cb(void)
+void z80_execute_pfx_cb_instruction(void)
 {
    byte bOpCode;
 
@@ -1568,7 +1573,7 @@ void z80_pfx_cb(void)
 
 
 
-void z80_pfx_dd(void)
+void z80_execute_pfx_dd_instruction(void)
 {
    byte bOpCode;
 
@@ -1772,10 +1777,10 @@ void z80_pfx_dd(void)
       case or_l:        OR(_IXl); break;
       case or_mhl:      { signed char o = read_mem(_PC++); OR(read_mem(_IX+o)); } break;
       case outa:        { z80_wait_states iCycleCount = Oa_;} { reg_pair p; p.b.l = read_mem(_PC++); p.b.h = _A; z80_OUT_handler(p, _A); } break;
-      case pfx_cb:      z80_pfx_ddcb(); break;
-      case pfx_dd:      z80_pfx_dd(); break;
-      case pfx_ed:      z80_pfx_ed(); break;
-      case pfx_fd:      z80_pfx_fd(); break;
+      case pfx_cb:      z80_execute_pfx_ddcb_instruction(); break;
+      case pfx_dd:      z80_execute_pfx_dd_instruction(); break;
+      case pfx_ed:      z80_execute_pfx_ed_instruction(); break;
+      case pfx_fd:      z80_execute_pfx_fd_instruction(); break;
       case pop_af:      POP(AF); break;
       case pop_bc:      POP(BC); break;
       case pop_de:      POP(DE); break;
@@ -1838,7 +1843,7 @@ void z80_pfx_dd(void)
 
 
 
-void z80_pfx_ddcb(void)
+void z80_execute_pfx_ddcb_instruction(void)
 {
    signed char o;
    byte bOpCode;
@@ -2109,7 +2114,7 @@ void z80_pfx_ddcb(void)
 
 
 
-void z80_pfx_ed(void)
+void z80_execute_pfx_ed_instruction(void)
 {
    byte bOpCode;
 
@@ -2379,7 +2384,7 @@ void z80_pfx_ed(void)
 
 
 
-void z80_pfx_fd(void)
+void z80_execute_pfx_fd_instruction(void)
 {
    byte bOpCode;
 
@@ -2583,10 +2588,10 @@ void z80_pfx_fd(void)
       case or_l:        OR(_IYl); break;
       case or_mhl:      { signed char o = read_mem(_PC++); OR(read_mem(_IY+o)); } break;
       case outa:        { z80_wait_states iCycleCount = Oa_;} { reg_pair p; p.b.l = read_mem(_PC++); p.b.h = _A; z80_OUT_handler(p, _A); } break;
-      case pfx_cb:      z80_pfx_fdcb(); break;
-      case pfx_dd:      z80_pfx_dd(); break;
-      case pfx_ed:      z80_pfx_ed(); break;
-      case pfx_fd:      z80_pfx_fd(); break;
+      case pfx_cb:      z80_execute_pfx_fdcb_instruction(); break;
+      case pfx_dd:      z80_execute_pfx_dd_instruction(); break;
+      case pfx_ed:      z80_execute_pfx_ed_instruction(); break;
+      case pfx_fd:      z80_execute_pfx_fd_instruction(); break;
       case pop_af:      POP(AF); break;
       case pop_bc:      POP(BC); break;
       case pop_de:      POP(DE); break;
@@ -2649,7 +2654,7 @@ void z80_pfx_fd(void)
 
 
 
-void z80_pfx_fdcb(void)
+void z80_execute_pfx_fdcb_instruction(void)
 {
    signed char o;
    byte bOpCode;

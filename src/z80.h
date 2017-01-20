@@ -102,12 +102,28 @@ void z80_OUT_handler(reg_pair port, byte val); // not provided by Z80.c
 
 void z80_init_tables(void);
 void z80_mf2stop(void);
+
 int z80_execute(void);
-void z80_pfx_cb(void);
-void z80_pfx_dd(void);
-void z80_pfx_ddcb(void);
-void z80_pfx_ed(void);
-void z80_pfx_fd(void);
-void z80_pfx_fdcb(void);
+
+// Handle main z80 instructions.
+void z80_execute_instruction(void);
+
+// Handle special bits instructions.
+void z80_execute_pfx_cb_instruction(void);
+
+// Handle special IX instructions.
+void z80_execute_pfx_dd_instruction(void);
+
+// Handle special IX bit instructions.
+void z80_execute_pfx_ddcb_instruction(void);
+
+// Handle extended instructions.
+void z80_execute_pfx_ed_instruction(void);
+
+// Handle special IY instructions.
+void z80_execute_pfx_fd_instruction(void);
+
+// Handle special IY bit instructions.
+void z80_execute_pfx_fdcb_instruction(void);
 
 #endif
