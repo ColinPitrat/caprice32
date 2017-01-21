@@ -121,40 +121,24 @@ TEST_F(AsicTest, SetDMAControlAndStatusRegister)
   EXPECT_TRUE(asic.dma.ch0.enabled);
   EXPECT_FALSE(asic.dma.ch1.enabled);
   EXPECT_FALSE(asic.dma.ch2.enabled);
-  EXPECT_FALSE(asic.dma.ch2.interrupt);
-  EXPECT_FALSE(asic.dma.ch1.interrupt);
-  EXPECT_FALSE(asic.dma.ch0.interrupt);
-  EXPECT_FALSE(asic.raster_interrupt);
 
-  asic_register_page_write(0x6C0F, 0x41);
-
-  EXPECT_TRUE(asic.dma.ch0.enabled);
-  EXPECT_FALSE(asic.dma.ch1.enabled);
-  EXPECT_FALSE(asic.dma.ch2.enabled);
-  EXPECT_FALSE(asic.dma.ch2.interrupt);
-  EXPECT_FALSE(asic.dma.ch1.interrupt);
-  EXPECT_TRUE(asic.dma.ch0.interrupt);
-  EXPECT_FALSE(asic.raster_interrupt);
-
-  asic_register_page_write(0x6C0F, 0x24);
-
-  EXPECT_FALSE(asic.dma.ch0.enabled);
-  EXPECT_FALSE(asic.dma.ch1.enabled);
-  EXPECT_TRUE(asic.dma.ch2.enabled);
-  EXPECT_FALSE(asic.dma.ch2.interrupt);
-  EXPECT_TRUE(asic.dma.ch1.interrupt);
-  EXPECT_FALSE(asic.dma.ch0.interrupt);
-  EXPECT_FALSE(asic.raster_interrupt);
-
-  asic_register_page_write(0x6C0F, 0x92);
+  asic_register_page_write(0x6C0F, 2);
 
   EXPECT_FALSE(asic.dma.ch0.enabled);
   EXPECT_TRUE(asic.dma.ch1.enabled);
   EXPECT_FALSE(asic.dma.ch2.enabled);
-  EXPECT_TRUE(asic.dma.ch2.interrupt);
-  EXPECT_FALSE(asic.dma.ch1.interrupt);
-  EXPECT_FALSE(asic.dma.ch0.interrupt);
-  EXPECT_TRUE(asic.raster_interrupt);
+
+  asic_register_page_write(0x6C0F, 3);
+
+  EXPECT_TRUE(asic.dma.ch0.enabled);
+  EXPECT_TRUE(asic.dma.ch1.enabled);
+  EXPECT_FALSE(asic.dma.ch2.enabled);
+
+  asic_register_page_write(0x6C0F, 0x4);
+
+  EXPECT_FALSE(asic.dma.ch0.enabled);
+  EXPECT_FALSE(asic.dma.ch1.enabled);
+  EXPECT_TRUE(asic.dma.ch2.enabled);
 }
 
 }

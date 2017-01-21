@@ -188,6 +188,7 @@ bool asic_register_page_write(word addr, byte val) {
          update_skew();
       } else if (addr == 0x6805) {
          LOG_DEBUG("Received interrupt vector: " << static_cast<int>(val));
+         // TODO: Write this part !!! (Interrupt service part from http://www.cpcwiki.eu/index.php/Arnold_V_Specs_Revised)
       }
    } else if (addr >= 0x6808 && addr < 0x6810) {
       LOG_DEBUG("Received analog input stuff");
@@ -230,10 +231,6 @@ bool asic_register_page_write(word addr, byte val) {
       asic.dma.ch0.enabled = val & 0x1;
       asic.dma.ch1.enabled = val & 0x2;
       asic.dma.ch2.enabled = val & 0x4;
-      asic.dma.ch2.interrupt = val & 0x10;
-      asic.dma.ch1.interrupt = val & 0x20;
-      asic.dma.ch0.interrupt = val & 0x40;
-      asic.raster_interrupt = val & 0x80;
    } else {
       //LOG_DEBUG("Received unused write at " << std::hex << addr << " - val: " << static_cast<int>(val) << std::dec);
    }
