@@ -118,27 +118,27 @@ TEST_F(AsicTest, SetDMAControlAndStatusRegister)
 {
   asic_register_page_write(0x6C0F, 1);
 
-  EXPECT_TRUE(asic.dma.ch0.enabled);
-  EXPECT_FALSE(asic.dma.ch1.enabled);
-  EXPECT_FALSE(asic.dma.ch2.enabled);
+  EXPECT_TRUE(asic.dma.ch[0].enabled);
+  EXPECT_FALSE(asic.dma.ch[1].enabled);
+  EXPECT_FALSE(asic.dma.ch[2].enabled);
 
   asic_register_page_write(0x6C0F, 2);
 
-  EXPECT_FALSE(asic.dma.ch0.enabled);
-  EXPECT_TRUE(asic.dma.ch1.enabled);
-  EXPECT_FALSE(asic.dma.ch2.enabled);
+  EXPECT_FALSE(asic.dma.ch[0].enabled);
+  EXPECT_TRUE(asic.dma.ch[1].enabled);
+  EXPECT_FALSE(asic.dma.ch[2].enabled);
 
   asic_register_page_write(0x6C0F, 3);
 
-  EXPECT_TRUE(asic.dma.ch0.enabled);
-  EXPECT_TRUE(asic.dma.ch1.enabled);
-  EXPECT_FALSE(asic.dma.ch2.enabled);
+  EXPECT_TRUE(asic.dma.ch[0].enabled);
+  EXPECT_TRUE(asic.dma.ch[1].enabled);
+  EXPECT_FALSE(asic.dma.ch[2].enabled);
 
   asic_register_page_write(0x6C0F, 0x4);
 
-  EXPECT_FALSE(asic.dma.ch0.enabled);
-  EXPECT_FALSE(asic.dma.ch1.enabled);
-  EXPECT_TRUE(asic.dma.ch2.enabled);
+  EXPECT_FALSE(asic.dma.ch[0].enabled);
+  EXPECT_FALSE(asic.dma.ch[1].enabled);
+  EXPECT_TRUE(asic.dma.ch[2].enabled);
 }
 
 }

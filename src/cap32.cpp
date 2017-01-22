@@ -101,7 +101,7 @@ byte keyboard_matrix[16];
 std::list<SDL_Event> virtualKeyboardEvents;
 dword lastVirtualEventTicks;
 
-static byte *membank_config[8][4];
+byte *membank_config[8][4];
 
 FILE *pfileObject;
 FILE *pfoPrinter;

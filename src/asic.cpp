@@ -9,8 +9,10 @@ extern SDL_Color colours[32];
 extern t_GateArray GateArray;
 extern t_CRTC CRTC;
 extern t_CPC CPC;
+extern t_PSG PSG;
 extern SDL_Surface *back_surface;
 extern dword dwXScale;
+extern byte *membank_config[8][4];
 
 asic_t asic;
 double asic_colours[32][3];
@@ -64,6 +66,78 @@ static inline unsigned short decode_magnification(byte val) {
    byte mag = (val & 0x3);
    if (mag == 3) mag = 4;
    return mag;
+}
+
+void asic_dma_cycle() {
+  // TODO: Use the DMA info to feed PSG from RAM
+  // Basically: read one 16bits instruction for each channel X (if chX.enabled only?) at each scan line and execute it.
+  // More precisely: after leading edge of HSYNC, one dead cycle followed by a fetch cycle for each active channel (enabled and not executing a pause) followed by an execution cycle for each active channel.
+  // All instructions last 1 cycle except LOAD that lasts 8 (up to 10 if CPU is also accessing the PSG).
+  //  - LOAD R,DD will write DD to PSG.RegisterAY.Index[R] - The ASIC should actually be blocking the CPU if it tries to access the PSG, to determine if it's important to emulate.
+  //  - PAUSE N set a counter to wait N*(chX.prescaler+1) cycles
+  //  - REPEAT NNN keep address of loop start (next instruction) and a counter of loops
+  //  - NOP does nothing
+  //  - LOOP jump to address of loop stat if counter of loops is >0 and decrement it (yes, code is actually executed NNN+1 times)
+  //  - INT generates an interruption for chX by setting chX.interrupt to true (code for CPU to detect it must also be done !)
+  //  - STOP set chX.enabled to false ? (still increment address for when processing will restart)
+  //  The last 4 can be OR-ed to be combined
+
+  // The two first bits of the address give the page to read from
+  for(int c = 0; c < NB_DMA_CHANNELS; c++) {
+    dma_channel &channel = asic.dma.ch[c];
+    if(!channel.enabled) continue;
+    if(channel.pause_ticks > 0) { // PAUSE on-going
+      if(channel.tick_cycles < channel.prescaler) {
+        channel.tick_cycles++;
+        continue;
+      }
+      channel.tick_cycles = 0;
+      channel.pause_ticks--;
+      continue;
+    }
+    int bank = ((channel.source_address & 0xC000) >> 14);
+    int addr = (channel.source_address & 0x3FFF);
+    word instruction = 0;
+    instruction |= membank_config[GateArray.RAM_config & 7][bank][addr];
+    instruction |= membank_config[GateArray.RAM_config & 7][bank][addr+1] << 8;
+    LOG_DEBUG("DMA [" << c << "] instruction " << std::hex << instruction << " from " << channel.source_address << std::dec);
+    int opcode = ((instruction & 0x7000) >> 12);
+    if (opcode == 0) { // LOAD
+      int R = ((instruction & 0x0F00) >> 8);
+      byte val = (instruction & 0x00FF);
+      PSG.RegisterAY.Index[R] = val;
+      LOG_DEBUG("DMA [" << c << "] load " << std::hex << static_cast<int>(val) << " in register " << R << std::dec);
+    }
+    else {
+      if (opcode & 0x01) { // PAUSE
+        channel.pause_ticks = (instruction) & 0x0FFF;
+        channel.tick_cycles = 0;
+        LOG_DEBUG("DMA [" << c << "] pause " << channel.pause_ticks << "*" << static_cast<int>(channel.tick_cycles) << " cycles");
+      }
+      if (opcode & 0x02) { // REPEAT
+        channel.loops = (instruction) & 0x0FFF;
+        channel.loop_address = channel.source_address;
+        LOG_DEBUG("DMA [" << c << "] repeat " << channel.loops);
+      }
+      if (opcode & 0x04) { // NOP, LOOP, INT, STOP
+        if(instruction & 0x0001) { // LOOP
+          if(channel.loops > 0) {
+            channel.source_address = channel.loop_address;
+            LOG_DEBUG("DMA [" << c << "] loop");
+          }
+        }
+        if(instruction & 0x0010) { // INT
+          channel.interrupt = true;
+          LOG_DEBUG("DMA [" << c << "] interrupt");
+        }
+        if(instruction & 0x0020) { // STOP
+          channel.enabled = false;
+          LOG_DEBUG("DMA [" << c << "] stop");
+        }
+      }
+    }
+    channel.source_address += 2;
+  }
 }
 
 // Return true if byte should be written in memory
@@ -191,46 +265,34 @@ bool asic_register_page_write(word addr, byte val) {
          // TODO: Write this part !!! (Interrupt service part from http://www.cpcwiki.eu/index.php/Arnold_V_Specs_Revised)
       }
    } else if (addr >= 0x6808 && addr < 0x6810) {
-      LOG_DEBUG("Received analog input stuff");
+     LOG_DEBUG("Received analog input stuff");
    } else if (addr >= 0x6C00 && addr < 0x6C0B) {
-      LOG_DEBUG("Received DMA source address: " << std::hex << addr << " " << static_cast<int>(val) << std::dec);
-      dma_channel *channel = nullptr;
-      switch ((addr & 0xc) >> 2) {
-        case 0:
-          channel = &asic.dma.ch0;
-          break;
-        case 1:
-          channel = &asic.dma.ch1;
-          break;
-        case 2:
-          channel = &asic.dma.ch2;
-          break;
-        default:
-          // This should never happen considering addr possible values
-          return true;
-      }
-      switch(addr & 0x3) {
-        case 0:
-          channel->source_address &= 0xFF00;
-          // least significant bit is ignored (address are word-aligned)
-          channel->source_address |= (val & 0xE);
-          break;
-        case 1:
-          channel->source_address &= 0x00FF;
-          channel->source_address |= (val << 8);
-          break;
-        case 2:
-          channel->prescaler = val;
-          break;
-        default:
-          // unused
-          break;
-      }
+     int c = ((addr & 0xc) >> 2);
+     LOG_DEBUG("Received DMA source address: " << std::hex << addr << " (channel " << c << ") " << static_cast<int>(val) << std::dec);
+     dma_channel *channel = nullptr;
+     channel = &asic.dma.ch[c];
+     switch(addr & 0x3) {
+       case 0:
+         channel->source_address &= 0xFF00;
+         // least significant bit is ignored (address are word-aligned)
+         channel->source_address |= (val & 0xFE);
+         break;
+       case 1:
+         channel->source_address &= 0x00FF;
+         channel->source_address |= (val << 8);
+         break;
+       case 2:
+         channel->prescaler = val;
+         break;
+       default:
+         // unused
+         break;
+     }
    } else if (addr == 0x6C0F) {
       LOG_DEBUG("Received DMA control register: " << std::hex << static_cast<int>(val) << std::dec);
-      asic.dma.ch0.enabled = val & 0x1;
-      asic.dma.ch1.enabled = val & 0x2;
-      asic.dma.ch2.enabled = val & 0x4;
+      for (int c = 0; c < NB_DMA_CHANNELS; c++) {
+        asic.dma.ch[c].enabled = (val & (0x1 << c));
+      }
    } else {
       //LOG_DEBUG("Received unused write at " << std::hex << addr << " - val: " << static_cast<int>(val) << std::dec);
    }

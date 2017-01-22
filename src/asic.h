@@ -13,32 +13,25 @@
 #include "types.h"
 #include <stdint.h>
 
+#define NB_DMA_CHANNELS 3
+
 struct dma_channel {
   unsigned int source_address;
+  unsigned int loop_address;
   byte prescaler;
+  // TODO: This must be set to false at CPC reset
   bool enabled;
   bool interrupt;
+  int pause_ticks;
+  byte tick_cycles;
+  int loops;
 };
 
 struct dma_t {
-  dma_channel ch0;
-  dma_channel ch1;
-  dma_channel ch2;
+  dma_channel ch[NB_DMA_CHANNELS];
 };
 
 struct asic_t {
-  // TODO: Use the DMA info to feed PSG from RAM
-  // Basically: read one 16bits instruction for each channel X (if chX.enabled only?) at each scan line and execute it.
-  // More precisely: after leading edge of HSYNC, one dead cycle followed by a fetch cycle for each active channel (enabled and not executing a pause) followed by an execution cycle for each active channel.
-  // All instructions last 1 cycle except LOAD that lasts 8 (up to 10 if CPU is also accessing the PSG).
-  //  - LOAD R,DD will write DD to PSG.Index[R] - The ASIC should actually be blocking the CPU if it tries to access the PSG, to determine if it's important to emulate.
-  //  - PAUSE N set a counter to wait N*(chX.prescaler+1) cycles
-  //  - REPEAT NNN keep address of loop start (next instruction) and a counter of loops
-  //  - NOP does nothing
-  //  - LOOP jump to address of loop stat if counter of loops is >0 and decrement it (yes, code is actually executed NNN+1 times)
-  //  - INT generates an interruption for chX by setting chX.interrupt to true (code for CPU to detect it must also be done !)
-  //  - STOP set chX.enabled to false ? (still increment address for when processing will restart)
-  //  The last 4 can be OR-ed to be combined
   bool locked = true;
 
   bool extend_border = false;
@@ -59,6 +52,7 @@ extern asic_t asic;
 extern byte *pbRegisterPage;
 
 void asic_poke_lock_sequence(byte val);
+void asic_dma_cycle();
 bool asic_register_page_write(word addr, byte val);
 void asic_draw_sprites();
 

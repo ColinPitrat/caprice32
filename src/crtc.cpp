@@ -697,6 +697,7 @@ inline void match_hsw(void)
          CRTC.flag_inmonhsync = 1; // enter monitor HSYNC
          iMonHSStartPos = 0;
          iMonHSPeakToStart = iMonHSPeakPos;
+         asic_dma_cycle();
       } else if (CRTC.hsw_count == 7) { // reached GA HSYNC output cutoff?
          change_mode();
          end_vdu_hsync();
