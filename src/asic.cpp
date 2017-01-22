@@ -69,8 +69,8 @@ static inline unsigned short decode_magnification(byte val) {
 }
 
 void asic_dma_cycle() {
-  // TODO: Use the DMA info to feed PSG from RAM
-  // Basically: read one 16bits instruction for each channel X (if chX.enabled only?) at each scan line and execute it.
+  // Use the DMA info to feed PSG from RAM:
+  // Read one 16bits instruction for each enabled channel X at each scan line and execute it.
   // More precisely: after leading edge of HSYNC, one dead cycle followed by a fetch cycle for each active channel (enabled and not executing a pause) followed by an execution cycle for each active channel.
   // All instructions last 1 cycle except LOAD that lasts 8 (up to 10 if CPU is also accessing the PSG).
   //  - LOAD R,DD will write DD to PSG.RegisterAY.Index[R] - The ASIC should actually be blocking the CPU if it tries to access the PSG, to determine if it's important to emulate.
@@ -136,6 +136,7 @@ void asic_dma_cycle() {
         }
       }
     }
+    // TODO: modify the value of the mapped registers
     channel.source_address += 2;
   }
 }
@@ -217,18 +218,18 @@ bool asic_register_page_write(word addr, byte val) {
          pbRegisterPage[(addr & 0x3FFF)] = val;
       }
       // TODO: deduplicate with code in video_set_palette + make it work in monochrome
-               dword red = static_cast<dword>(asic_colours[colour][0] * (CPC.scr_intensity / 10.0) * 255);
-               if (red > 255) { // limit to the maximum
-                  red = 255;
-               }
-               dword green = static_cast<dword>(asic_colours[colour][1] * (CPC.scr_intensity / 10.0) * 255);
-               if (green > 255) {
-                  green = 255;
-               }
-               dword blue = static_cast<dword>(asic_colours[colour][2] * (CPC.scr_intensity / 10.0) * 255);
-               if (blue > 255) {
-                  blue = 255;
-               }
+      dword red = static_cast<dword>(asic_colours[colour][0] * (CPC.scr_intensity / 10.0) * 255);
+      if (red > 255) { // limit to the maximum
+        red = 255;
+      }
+      dword green = static_cast<dword>(asic_colours[colour][1] * (CPC.scr_intensity / 10.0) * 255);
+      if (green > 255) {
+        green = 255;
+      }
+      dword blue = static_cast<dword>(asic_colours[colour][2] * (CPC.scr_intensity / 10.0) * 255);
+      if (blue > 255) {
+        blue = 255;
+      }
       GateArray.palette[colour] = SDL_MapRGB(back_surface->format, red, green, blue);
 /*
       if (colour < 2) {
