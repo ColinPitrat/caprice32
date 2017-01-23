@@ -13,6 +13,7 @@ extern t_PSG PSG;
 extern SDL_Surface *back_surface;
 extern dword dwXScale;
 extern byte *membank_config[8][4];
+extern byte *membank_write[4];
 
 asic_t asic;
 double asic_colours[32][3];
@@ -83,6 +84,7 @@ void asic_dma_cycle() {
   //  The last 4 can be OR-ed to be combined
 
   // The two first bits of the address give the page to read from
+  byte dcsr = 0;
   for(int c = 0; c < NB_DMA_CHANNELS; c++) {
     dma_channel &channel = asic.dma.ch[c];
     if(!channel.enabled) continue;
@@ -105,14 +107,14 @@ void asic_dma_cycle() {
     if (opcode == 0) { // LOAD
       int R = ((instruction & 0x0F00) >> 8);
       byte val = (instruction & 0x00FF);
-      PSG.RegisterAY.Index[R] = val;
+      SetAYRegister(R, val);
       LOG_DEBUG("DMA [" << c << "] load " << std::hex << static_cast<int>(val) << " in register " << R << std::dec);
     }
     else {
       if (opcode & 0x01) { // PAUSE
         channel.pause_ticks = (instruction) & 0x0FFF;
         channel.tick_cycles = 0;
-        LOG_DEBUG("DMA [" << c << "] pause " << channel.pause_ticks << "*" << static_cast<int>(channel.tick_cycles) << " cycles");
+        LOG_DEBUG("DMA [" << c << "] pause " << channel.pause_ticks << "*" << static_cast<int>(channel.prescaler) << " cycles");
       }
       if (opcode & 0x02) { // REPEAT
         channel.loops = (instruction) & 0x0FFF;
@@ -136,8 +138,27 @@ void asic_dma_cycle() {
         }
       }
     }
-    // TODO: modify the value of the mapped registers
     channel.source_address += 2;
+    // TODO: cleaner way to modify back the register value here ...
+    {
+      word addr = 0x6C00 + (c << 2);
+      *(membank_write[addr >> 14] + (addr & 0x3fff)) = static_cast<byte>(channel.source_address & 0xFF);
+      addr++;
+      *(membank_write[addr >> 14] + (addr & 0x3fff)) = static_cast<byte>((channel.source_address & 0xFF00) >> 8);
+      addr++;
+      *(membank_write[addr >> 14] + (addr & 0x3fff)) = channel.prescaler;
+      if (channel.enabled) {
+        dcsr |= (0x1 << c);
+      }
+      if (channel.interrupt) {
+        dcsr |= (0x40 >> c);
+      }
+    }
+  }
+  // TODO: ... and here
+  {
+    word addr = 0x6C0F;
+    *(membank_write[addr >> 14] + (addr & 0x3fff)) = dcsr;
   }
 }
 
@@ -293,6 +314,7 @@ bool asic_register_page_write(word addr, byte val) {
       LOG_DEBUG("Received DMA control register: " << std::hex << static_cast<int>(val) << std::dec);
       for (int c = 0; c < NB_DMA_CHANNELS; c++) {
         asic.dma.ch[c].enabled = (val & (0x1 << c));
+        LOG_DEBUG("DMA channel " << c << (asic.dma.ch[c].enabled ? " enabled" : " disabled"))
       }
    } else {
       //LOG_DEBUG("Received unused write at " << std::hex << addr << " - val: " << static_cast<int>(val) << std::dec);
