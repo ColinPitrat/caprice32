@@ -331,8 +331,10 @@ inline byte read_mem(word addr) {
 
 inline void write_mem(word addr, byte val) {
    if (GateArray.registerPageOn) {
+     //LOG_DEBUG("Pass write to ASIC: " << static_cast<int>(val) << " at " << addr);
       if(!asic_register_page_write(addr, val)) return;
    }
+   //LOG_DEBUG("Write " << static_cast<int>(val) << " at " << addr);
    *(membank_write[addr >> 14] + (addr & 0x3fff)) = val; // writes a byte to a 16KB memory bank
 }
 
@@ -890,7 +892,7 @@ inline byte SRL(byte val) {
 
 #define z80_int_handler \
 { \
-   LOG_DEBUG("Interrupt handler " << static_cast<int>(_IFF1)); \
+   /*LOG_DEBUG("Interrupt handler " << static_cast<int>(_IFF1));*/ \
    if (_IFF1) { /* process interrupts? */ \
       _R++; \
       _IFF1 = _IFF2 = 0; /* clear interrupt flip-flops */ \

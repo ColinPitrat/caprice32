@@ -19,7 +19,6 @@ struct dma_channel {
   unsigned int source_address;
   unsigned int loop_address;
   byte prescaler;
-  // TODO: This must be set to false at CPC reset
   bool enabled;
   bool interrupt;
   int pause_ticks;
@@ -32,25 +31,27 @@ struct dma_t {
 };
 
 struct asic_t {
-  bool locked = true;
+  bool locked;
 
-  bool extend_border = false;
-  int hscroll = 0;
-  int vscroll = 0;
+  bool extend_border;
+  int hscroll;
+  int vscroll;
   byte sprites[16][16][16];
   int16_t sprites_x[16];
   int16_t sprites_y[16];
   short int sprites_mag_x[16];
   short int sprites_mag_y[16];
 
-  dma_t dma;
-
   bool raster_interrupt;
+  byte interrupt_vector;
+
+  dma_t dma;
 };
 
 extern asic_t asic;
 extern byte *pbRegisterPage;
 
+void asic_reset();
 void asic_poke_lock_sequence(byte val);
 void asic_dma_cycle();
 bool asic_register_page_write(word addr, byte val);

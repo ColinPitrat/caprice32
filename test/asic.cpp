@@ -1,7 +1,12 @@
 #include <gtest/gtest.h>
 
 #include "asic.h"
+#include "cap32.h"
 #include <vector>
+
+extern byte *membank_config[8][4];
+extern byte *membank_write[4];
+extern t_GateArray GateArray;
 
 namespace 
 {
@@ -139,6 +144,58 @@ TEST_F(AsicTest, SetDMAControlAndStatusRegister)
   EXPECT_FALSE(asic.dma.ch[0].enabled);
   EXPECT_FALSE(asic.dma.ch[1].enabled);
   EXPECT_TRUE(asic.dma.ch[2].enabled);
+}
+
+TEST_F(AsicTest, AsicReset)
+{
+  asic.locked = false;
+  asic.hscroll = 1;
+  asic.vscroll = 2;
+  asic.dma.ch[0].source_address = 0x1234;
+  asic.dma.ch[0].loop_address = 0x1234;
+  asic.dma.ch[0].prescaler = 42;
+  asic.dma.ch[0].enabled = true;
+  asic.dma.ch[0].interrupt = true;
+  asic.dma.ch[0].pause_ticks = 42;
+  asic.dma.ch[0].tick_cycles = 42;
+  asic.dma.ch[0].loops = 42;
+
+  asic_reset();
+
+  ASSERT_TRUE(asic.locked);
+  ASSERT_EQ(0, asic.hscroll);
+  ASSERT_EQ(0, asic.vscroll);
+  ASSERT_EQ(0, asic.dma.ch[0].source_address);
+  ASSERT_EQ(0, asic.dma.ch[0].loop_address);
+  ASSERT_EQ(0, asic.dma.ch[0].prescaler);
+  ASSERT_FALSE(asic.dma.ch[0].enabled);
+  ASSERT_FALSE(asic.dma.ch[0].interrupt);
+  ASSERT_EQ(0, asic.dma.ch[0].pause_ticks);
+  ASSERT_EQ(0, asic.dma.ch[0].tick_cycles);
+  ASSERT_EQ(0, asic.dma.ch[0].loops);
+  // D0 of IVR is set to 1 at reset says Arnold 5 specs
+  ASSERT_TRUE((asic.interrupt_vector & 1) == 1);
+}
+
+TEST_F(AsicTest, AsicDMACycleWriteBackDCSR)
+{
+  std::vector<byte> membank0 = { 0x00, 0x00};
+  std::vector<byte> membank1(0x3000, 0);
+  membank_config[0][0] = &membank0[0];
+  membank_write[1] = &membank1[0];
+
+  GateArray.RAM_config = 0;
+  asic_reset();
+  asic.dma.ch[0].enabled = true;
+  asic.dma.ch[0].source_address = 0x0;
+
+  EXPECT_EQ(0, *(membank_write[1] + 0x2c00));
+  EXPECT_EQ(0, *(membank_write[1] + 0x2c0f));
+
+  asic_dma_cycle();
+
+  EXPECT_EQ(2, *(membank_write[1] + 0x2c00));
+  EXPECT_EQ(1, *(membank_write[1] + 0x2c0f));
 }
 
 }

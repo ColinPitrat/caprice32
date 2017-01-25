@@ -18,6 +18,37 @@ extern byte *membank_write[4];
 asic_t asic;
 double asic_colours[32][3];
 
+void asic_reset() {
+  asic.locked = true;
+
+  asic.extend_border = false;
+  asic.hscroll = 0;
+  asic.vscroll = 0;
+
+  for(int i = 0; i < 16; i++) {
+    asic.sprites_x[i] = asic.sprites_y[i] = asic.sprites_mag_x[i] = asic.sprites_mag_y[i] = 0;
+    for(int j = 0; j < 16; j++) {
+      for(int k = 0; k < 16; k++) {
+        asic.sprites[i][j][k] = 0;
+      }
+    }
+  }
+
+  asic.raster_interrupt = false;
+  asic.interrupt_vector = 1;
+
+  for(int c = 0; c < NB_DMA_CHANNELS; ++c) {
+    asic.dma.ch[c].source_address = 0;
+    asic.dma.ch[c].loop_address = 0;
+    asic.dma.ch[c].prescaler = 0;
+    asic.dma.ch[c].enabled = false;
+    asic.dma.ch[c].interrupt = false;
+    asic.dma.ch[c].pause_ticks = 0;
+    asic.dma.ch[c].tick_cycles = 0;
+    asic.dma.ch[c].loops = 0;
+  }
+}
+
 void asic_poke_lock_sequence(byte val) {
    static const byte lockSeq[] = { 0x00, 0x00, 0xff, 0x77, 0xb3, 0x51, 0xa8, 0xd4, 0x62, 0x39, 0x9c, 0x46, 0x2b, 0x15, 0x8a, 0xcd };
    static const int lockSeqLength = sizeof(lockSeq)/sizeof(lockSeq[0]);
@@ -85,6 +116,7 @@ void asic_dma_cycle() {
 
   // The two first bits of the address give the page to read from
   byte dcsr = 0;
+  bool dcsr_changed = false;
   for(int c = 0; c < NB_DMA_CHANNELS; c++) {
     dma_channel &channel = asic.dma.ch[c];
     if(!channel.enabled) continue;
@@ -145,17 +177,23 @@ void asic_dma_cycle() {
       *(membank_write[addr >> 14] + (addr & 0x3fff)) = static_cast<byte>(channel.source_address & 0xFF);
       addr++;
       *(membank_write[addr >> 14] + (addr & 0x3fff)) = static_cast<byte>((channel.source_address & 0xFF00) >> 8);
+      /* Useless ?
       addr++;
       *(membank_write[addr >> 14] + (addr & 0x3fff)) = channel.prescaler;
+      */
       if (channel.enabled) {
         dcsr |= (0x1 << c);
+        dcsr_changed = true;
       }
       if (channel.interrupt) {
         dcsr |= (0x40 >> c);
+        dcsr_changed = true;
       }
     }
   }
   // TODO: ... and here
+  // Run RAM test of testplus.cpr when touching this (this is not a guarantee that this is correct but at least it's a guarantee that it's less wrong ! cf issue #40)
+  if (dcsr_changed)
   {
     word addr = 0x6C0F;
     *(membank_write[addr >> 14] + (addr & 0x3fff)) = dcsr;
@@ -263,7 +301,7 @@ bool asic_register_page_write(word addr, byte val) {
       return false;
    } else if (addr >= 0x6800 && addr < 0x6806) {
       if (addr == 0x6800) {
-         //LOG_DEBUG("Received programmable raster interrupt scan line: " << static_cast<int>(val));
+         LOG_DEBUG("Received programmable raster interrupt scan line: " << static_cast<int>(val));
          CRTC.interrupt_sl = val;
       } else if (addr == 0x6801) {
          LOG_DEBUG("Received scan line for split: " << static_cast<int>(val));
@@ -283,11 +321,12 @@ bool asic_register_page_write(word addr, byte val) {
          LOG_DEBUG("Received soft scroll control: " << static_cast<int>(val) << ": dx=" << asic.hscroll << ", dy=" << asic.vscroll << ", border=" << asic.extend_border);
          update_skew();
       } else if (addr == 0x6805) {
-         LOG_DEBUG("Received interrupt vector: " << static_cast<int>(val));
+         LOG_DEBUG("[UNSUPPORTED] Received interrupt vector: " << static_cast<int>(val));
+         asic.interrupt_vector = val & 0xF8;
          // TODO: Write this part !!! (Interrupt service part from http://www.cpcwiki.eu/index.php/Arnold_V_Specs_Revised)
       }
    } else if (addr >= 0x6808 && addr < 0x6810) {
-     LOG_DEBUG("Received analog input stuff");
+     LOG_DEBUG("[UNSUPPORTED] Received analog input stuff");
    } else if (addr >= 0x6C00 && addr < 0x6C0B) {
      int c = ((addr & 0xc) >> 2);
      LOG_DEBUG("Received DMA source address: " << std::hex << addr << " (channel " << c << ") " << static_cast<int>(val) << std::dec);
@@ -317,7 +356,7 @@ bool asic_register_page_write(word addr, byte val) {
         LOG_DEBUG("DMA channel " << c << (asic.dma.ch[c].enabled ? " enabled" : " disabled"))
       }
    } else {
-      //LOG_DEBUG("Received unused write at " << std::hex << addr << " - val: " << static_cast<int>(val) << std::dec);
+      LOG_DEBUG("Received unused write at " << std::hex << addr << " - val: " << static_cast<int>(val) << std::dec);
    }
    return true;
 }

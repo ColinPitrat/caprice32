@@ -605,6 +605,7 @@ int kbd_layout[4][KBD_MAX_ENTRIES][2] = {
     //{ CAP32_SAVESNAP, SDLK_F4 },
     //{ CAP32_SCRNSHOT, SDLK_PRINT },
     { CAP32_SPEED,    SDLK_F9 },
+    { CAP32_DEBUG,    SDLK_F12 },
     { CAP32_TAPEPLAY, SDLK_F4 }
   },
   { // French PC to CPC keyboard layout translation
@@ -760,6 +761,7 @@ int kbd_layout[4][KBD_MAX_ENTRIES][2] = {
     //{ CAP32_SAVESNAP, SDLK_F4 },
     //{ CAP32_SCRNSHOT, SDLK_PRINT },
     { CAP32_SPEED,    SDLK_F9 },
+    { CAP32_DEBUG,    SDLK_F12 },
     { CAP32_TAPEPLAY, SDLK_F4 }
   },
   { // Spanish PC to CPC keyboard layout translation
@@ -910,6 +912,7 @@ int kbd_layout[4][KBD_MAX_ENTRIES][2] = {
     //{ CAP32_SAVESNAP, SDLK_F4 },
     //{ CAP32_SCRNSHOT, SDLK_PRINT },
     { CAP32_SPEED,    SDLK_F9 },
+    { CAP32_DEBUG,    SDLK_F12 },
     { CAP32_TAPEPLAY, SDLK_F4 }
   }
 };

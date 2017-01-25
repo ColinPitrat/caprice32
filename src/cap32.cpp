@@ -107,7 +107,6 @@ FILE *pfileObject;
 FILE *pfoPrinter;
 
 #ifdef DEBUG
-#define DEBUG_KEY SDLK_F12
 dword dwDebugFlag = 0;
 FILE *pfoDebug = nullptr;
 #endif
@@ -2103,16 +2102,7 @@ void emulator_reset (bool bolMF2Reset)
    }
 
 // ASIC
-// TODO: asic_reset
-   asic.locked = true;
-   for(int i = 0; i < 16; i++) {
-      asic.sprites_x[i] = asic.sprites_y[i] = asic.sprites_mag_x[i] = asic.sprites_mag_y[i] = 0;
-      for(int j = 0; j < 16; j++) {
-         for(int k = 0; k < 16; k++) {
-            asic.sprites[i][j][k] = 0;
-         }
-      }
-   }
+   asic_reset();
    video_set_palette();
 
 // Z80
@@ -3616,9 +3606,11 @@ int cap32_main (int argc, char **argv)
                            set_osd_message(std::string("Limit speed: ") + (CPC.limit_speed ? "on" : "off"));
                            break;
 
-                        #ifdef DEBUG
-                        case DEBUG_KEY:
+                        case CAP32_DEBUG:
+                           log_verbose = !log_verbose;
+                           #ifdef DEBUG
                            dwDebugFlag = dwDebugFlag ? 0 : 1;
+                           #endif
                            #ifdef DEBUG_CRTC
                            if (dwDebugFlag) {
                               for (int n = 0; n < 14; n++) {
@@ -3626,9 +3618,8 @@ int cap32_main (int argc, char **argv)
                               }
                            }
                            #endif
-                           set_osd_message(std::string("Debug mode: ") + (dwDebugFlag ? "on" : "off"));
+                           set_osd_message(std::string("Debug mode: ") + (log_verbose ? "on" : "off"));
                            break;
-                        #endif
                      }
                   }
                }
