@@ -17,7 +17,7 @@ Caprice32 is a software emulator of the Amstrad CPC 8bit home computer series ru
 
 Caprice32 provides:
   * Complete emulation of CPC464, CPC664 and CPC6128
-  * Experimental partial support of CPC6128+ (missing DMA, analog joysticks and 8 bit printer)
+  * Mostly working support of CPC6128+ (missing vectored & DMA interrupts, analog joysticks and 8 bit printer)
   * Joystick support - it can be fully used with joystick only, thanks to an integrated virtual keyboard.
   * Joystick emulation - joystick-only games can be played using the keyboard
   * English, French or Spanish keyboards
@@ -49,6 +49,7 @@ F7 - Toggle joystick emulation (when active, keyboard arrows, Z and X are remapp
 F8 - Toggle display of FPS
 F9 - Toggle limitation of speed (you may want it when loading from a tape ! or for benchmarking)
 F10 - Quit
+F12 - Toggle debug mode (more verbose with debug build)
 
 Shift + F1 - Show Virtual Keyboard (useful if you have no keyboard or don't find the key you want to press on it)
 
