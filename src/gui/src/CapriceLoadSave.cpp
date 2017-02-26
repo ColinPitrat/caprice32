@@ -105,27 +105,27 @@ bool CapriceLoadSave::HandleMessage(CMessage* pMessage)
                     switch (m_pTypeValue->GetSelectedIndex()) {
                       case 0: // Snapshot
                         std::cout << "Load snapshot: " << filename << std::endl;
-                        snapshot_load(filename.c_str());
+                        snapshot_load(filename);
                         actionDone = true;
                         break;
                       case 1: // Drive A
                         std::cout << "Load dsk A: " << filename << std::endl;
-                        dsk_load(filename.c_str(), &driveA);
+                        dsk_load(filename, &driveA);
                         actionDone = true;
                         break;
                       case 2: // Drive B
                         std::cout << "Load dsk B: " << filename << std::endl;
-                        dsk_load(filename.c_str(), &driveB);
+                        dsk_load(filename, &driveB);
                         actionDone = true;
                         break;
                       case 3: // Tape
                         std::cout << "Load tape: " << filename << std::endl;
-                        tape_insert(filename.c_str());
+                        tape_insert(filename);
                         actionDone = true;
                         break;
                       case 4: // Cartridge
                         std::cout << "Load cartridge: " << filename << std::endl;
-                        cpr_load(filename.c_str());
+                        cpr_load(filename);
                         emulator_reset(false);
                         actionDone = true;
                         break;
@@ -135,17 +135,17 @@ bool CapriceLoadSave::HandleMessage(CMessage* pMessage)
                     switch (m_pTypeValue->GetSelectedIndex()) {
                       case 0: // Snapshot
                         std::cout << "Save snapshot: " << filename << std::endl;
-                        snapshot_save(filename.c_str());
+                        snapshot_save(filename);
                         actionDone = true;
                         break;
                       case 1: // Drive A
                         std::cout << "Save dsk A: " << filename << std::endl;
-                        dsk_save(filename.c_str(), &driveA);
+                        dsk_save(filename, &driveA);
                         actionDone = true;
                         break;
                       case 2: // Drive B
                         std::cout << "Save dsk B: " << filename << std::endl;
-                        dsk_save(filename.c_str(), &driveB);
+                        dsk_save(filename, &driveB);
                         actionDone = true;
                         break;
                       case 3: // Tape
@@ -154,7 +154,7 @@ bool CapriceLoadSave::HandleMessage(CMessage* pMessage)
                           // Unsupported
                           wGui::CMessageBox *pMessageBox = new wGui::CMessageBox(CRect(CPoint(m_ClientRect.Width() /2 - 125, m_ClientRect.Height() /2 - 30), 250, 60), this, nullptr, "Not implemented", "Saving tape not yet implemented", CMessageBox::BUTTON_OK);
                           pMessageBox->SetModal(true);
-                          //tape_save(filename.c_str());
+                          //tape_save(filename);
                           break;
                         }
                       case 4: // Cartridge
@@ -163,7 +163,7 @@ bool CapriceLoadSave::HandleMessage(CMessage* pMessage)
                           // Unsupported
                           wGui::CMessageBox *pMessageBox = new wGui::CMessageBox(CRect(CPoint(m_ClientRect.Width() /2 - 125, m_ClientRect.Height() /2 - 30), 250, 60), this, nullptr, "Not implemented", "Saving cartridge not yet implemented", CMessageBox::BUTTON_OK);
                           pMessageBox->SetModal(true);
-                          //cpr_save(filename.c_str());
+                          //cpr_save(filename);
                           break;
                         }
                     }

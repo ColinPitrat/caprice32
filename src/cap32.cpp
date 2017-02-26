@@ -1144,9 +1144,9 @@ int snapshot_load (FILE *pfile)
 
 
 
-int snapshot_load (const char *pchFileName)
+int snapshot_load (const std::string &filename)
 {
-   if ((pfileObject = fopen(pchFileName, "rb")) != nullptr) {
+   if ((pfileObject = fopen(filename.c_str(), "rb")) != nullptr) {
      return snapshot_load(pfileObject);
    }
    return ERR_FILE_NOT_FOUND;
@@ -1154,7 +1154,7 @@ int snapshot_load (const char *pchFileName)
 
 
 
-int snapshot_save (const char *pchFileName)
+int snapshot_save (const std::string &filename)
 {
    t_SNA_header sh;
    dword dwFlags;
@@ -1305,7 +1305,7 @@ int snapshot_save (const char *pchFileName)
    sh.ga_sl_count = GateArray.sl_count;
    sh.z80_int_pending = z80.int_pending;
 
-   if ((pfileObject = fopen(pchFileName, "wb")) != nullptr) {
+   if ((pfileObject = fopen(filename.c_str(), "wb")) != nullptr) {
       if (fwrite(&sh, sizeof(sh), 1, pfileObject) != 1) { // write snapshot header
          fclose(pfileObject);
          return ERR_SNA_WRITE;
@@ -1497,18 +1497,18 @@ int dsk_load (FILE *pfile, t_drive *drive)
 
 
 
-int dsk_load (const char *pchFileName, t_drive *drive)
+int dsk_load (const std::string &filename, t_drive *drive)
 {
    int iRetCode;
 
-   LOG_DEBUG("Loading disk: " << pchFileName);
+   LOG_DEBUG("Loading disk: " << filename);
    iRetCode = 0;
    dsk_eject(drive);
-   if ((pfileObject = fopen(pchFileName, "rb")) != nullptr) {
+   if ((pfileObject = fopen(filename.c_str(), "rb")) != nullptr) {
      iRetCode = dsk_load(pfileObject, drive);
      fclose(pfileObject);
    } else {
-      LOG_ERROR("File not found: " << pchFileName);
+      LOG_ERROR("File not found: " << filename);
       iRetCode = ERR_FILE_NOT_FOUND;
    }
 
@@ -1520,13 +1520,13 @@ int dsk_load (const char *pchFileName, t_drive *drive)
 
 
 
-int dsk_save (const char *pchFileName, t_drive *drive)
+int dsk_save (const std::string &filename, t_drive *drive)
 {
    t_DSK_header dh;
    t_track_header th;
    dword track, side, pos, sector;
 
-   if ((pfileObject = fopen(pchFileName, "wb")) != nullptr) {
+   if ((pfileObject = fopen(filename.c_str(), "wb")) != nullptr) {
       memset(&dh, 0, sizeof(dh));
       memcpy(dh.id, "EXTENDED CPC DSK File\r\nDisk-Info\r\n", sizeof(dh.id));
       strcpy(dh.unused1, "Caprice32\r\n");
@@ -1671,11 +1671,11 @@ int tape_insert (FILE *pfile)
 
 
 
-int tape_insert (const char *pchFileName)
+int tape_insert (const std::string &filename)
 {
-   LOG_DEBUG("tape_insert " << pchFileName);
+   LOG_DEBUG("tape_insert " << filename);
    FILE *pfile;
-   if ((pfile = fopen(pchFileName, "rb")) == nullptr) {
+   if ((pfile = fopen(filename.c_str(), "rb")) == nullptr) {
       return ERR_FILE_NOT_FOUND;
    }
 
@@ -2172,43 +2172,47 @@ void emulator_reset (bool bolMF2Reset)
 
 
 
+// TODO(cpitrat): make char* in zip_info strings - then make zip_info a local variable
+// Extract 'filename' from 'zipfile'. Filename must end with one of the extensions listed in 'ext'.
+// FILE handle returned must be closed once finished with.
+// nullptr is returned if file couldn't be extracted for any reason.
+FILE *extractFile(const std::string& zipfile, const std::string& filename, const std::string& ext) {
+  zip_info.filename = zipfile;
+  zip_info.extensions = ext;
+  if (!zip::dir(&zip_info)) { // parse the zip for relevant files
+    dword n;
+    char *pchPtr = zip_info.pchFileNames;
+    for (n = zip_info.iFiles; n; n--) { // loop through all entries
+      if (!strcasecmp(filename.c_str(), pchPtr)) { // do we have a match?
+        break;
+      }
+      pchPtr += strlen(pchPtr) + 5; // skip offset
+    }
+    if (n) {
+      FILE *file = nullptr;
+      zip_info.dwOffset = *reinterpret_cast<dword *>(pchPtr + (strlen(pchPtr)+1)); // get the offset into the zip archive
+      if (!zip::extract(zip_info, &file)) {
+        return file;
+      }
+    }
+  }
+  return nullptr;
+}
+
+
+
 void cartridge_load (void)
 {
   if (CPC.model >= 3) {
     if (!CPC.cart_file.empty()) { // load a cartridge ?
-      char chFileName[_MAX_PATH + 1];
-      char *pchPtr;
-
       if (CPC.cart_zip) { // compressed image?
-        zip_info.filename = CPC.cart_path; // pchPath already has path and zip file combined
-        zip_info.extensions = ".cpr";
-        if (!zip::dir(&zip_info)) { // parse the zip for relevant files
-          dword n;
-          pchPtr = zip_info.pchFileNames;
-          for (n = zip_info.iFiles; n; n--) { // loop through all entries
-            if (!strcasecmp(CPC.cart_file.c_str(), pchPtr)) { // do we have a match?
-              break;
-            }
-            pchPtr += strlen(pchPtr) + 5; // skip offset
-          }
-          if (n) {
-            FILE *file = nullptr;
-            zip_info.dwOffset = *reinterpret_cast<dword *>(pchPtr + (strlen(pchPtr)+1)); // get the offset into the zip archive
-            if (!zip::extract(zip_info, &file)) {
-              if (cpr_load(file) != 0) {
-                fprintf(stderr, "Load of zipped cartridge failed. Aborting.\n");
-                exit(-1);
-              }
-              fclose(file);
-            }
-          }
-        } else {
-          CPC.cart_zip = 0;
+        FILE *file = extractFile(CPC.cart_path, CPC.cart_file, ".cpr");
+        if (file) {
+          cpr_load(file);
+          fclose(file);
         }
       } else {
-        strncpy(chFileName, CPC.cart_path.c_str(), sizeof(chFileName)-1);
-        strncat(chFileName, CPC.cart_file.c_str(), sizeof(chFileName)-1 - strlen(chFileName));
-        if(cpr_load(chFileName) != 0) {
+        if(cpr_load(CPC.cart_path + CPC.cart_file) != 0) {
           fprintf(stderr, "Load of cartridge failed. Aborting.\n");
           exit(-1);
         }
@@ -2865,9 +2869,9 @@ std::string serializeDiskFormat(const t_disk_format& format)
     oss << format.gap3_length << ",";
     oss << static_cast<unsigned int>(format.filler_byte);
     for (int iSide = 0; iSide < static_cast<int>(format.sides); iSide++) {
-	    for (int iSector = 0; iSector < static_cast<int>(format.sectors); iSector++) {
-		    oss << "," << static_cast<unsigned int>(format.sector_ids[iSide][iSector]);
-	    }
+      for (int iSector = 0; iSector < static_cast<int>(format.sectors); iSector++) {
+        oss << "," << static_cast<unsigned int>(format.sector_ids[iSide][iSector]);
+      }
     }
   }
   return oss.str();
@@ -3243,33 +3247,6 @@ void set_osd_message(const std::string& message) {
 
 
 
-// TODO(cpitrat): make char* in zip_info strings - then make zip_info a local variable
-// Extract 'filename' from 'zipfile'. Filename must end with one of the extensions listed in 'ext'.
-// FILE handle returned must be closed once finished with.
-// nullptr is returned if file couldn't be extracted for any reason.
-FILE *extractFile(const std::string& zipfile, const std::string& filename, const std::string& ext) {
-	zip_info.filename = zipfile;
-	zip_info.extensions = ext;
-	if (!zip::dir(&zip_info)) { // parse the zip for relevant files
-		dword n;
-		char *pchPtr = zip_info.pchFileNames;
-		for (n = zip_info.iFiles; n; n--) { // loop through all entries
-			if (!strcasecmp(filename.c_str(), pchPtr)) { // do we have a match?
-				break;
-			}
-			pchPtr += strlen(pchPtr) + 5; // skip offset
-		}
-		if (n) {
-			FILE *file = nullptr;
-			zip_info.dwOffset = *reinterpret_cast<dword *>(pchPtr + (strlen(pchPtr)+1)); // get the offset into the zip archive
-			if (!zip::extract(zip_info, &file)) {
-				return file;
-			}
-		}
-	}
-	return nullptr;
-}
-
 int cap32_main (int argc, char **argv)
 {
    dword dwOffset;
@@ -3333,68 +3310,52 @@ int cap32_main (int argc, char **argv)
    // TODO(cpitrat): refactor this: duplication + should be tested + cleanup
    memset(&driveA, 0, sizeof(t_drive)); // clear disk drive A data structure
    if (!CPC.drvA_file.empty()) { // insert disk in drive A?
-      char chFileName[_MAX_PATH + 1];
-      if (CPC.drvA_zip) { // compressed image?
-				FILE *file = extractFile(CPC.drvA_path, CPC.drvA_file, ".dsk");
-         if (file) {
-					 dsk_load(file, &driveA);
-					 fclose(file);
-				 }
-      } else {
-				// TODO(cpitrat): Replace char* by string in dsk_load, tape_insert and snapshot_load
-         strncpy(chFileName, CPC.drvA_path.c_str(), sizeof(chFileName)-1);
-         strncat(chFileName, CPC.drvA_file.c_str(), sizeof(chFileName)-1 - strlen(chFileName));
-         dsk_load(chFileName, &driveA);
-      }
+     if (CPC.drvA_zip) { // compressed image?
+       FILE *file = extractFile(CPC.drvA_path, CPC.drvA_file, ".dsk");
+       if (file) {
+         dsk_load(file, &driveA);
+         fclose(file);
+       }
+     } else {
+       dsk_load(CPC.drvA_path + CPC.drvA_file, &driveA);
+     }
    }
    memset(&driveB, 0, sizeof(t_drive)); // clear disk drive B data structure
    if (!CPC.drvB_file.empty()) { // insert disk in drive B?
-      char chFileName[_MAX_PATH + 1];
-
-      if (CPC.drvB_zip) { // compressed image?
-				FILE *file = extractFile(CPC.drvB_path, CPC.drvB_file, ".dsk");
-         if (file) {
-					 dsk_load(file, &driveB);
-					 fclose(file);
-				 }
-      }
-      else {
-         strncpy(chFileName, CPC.drvB_path.c_str(), sizeof(chFileName)-1);
-         strncat(chFileName, CPC.drvB_file.c_str(), sizeof(chFileName)-1 - strlen(chFileName));
-         dsk_load(chFileName, &driveB);
-      }
+     if (CPC.drvB_zip) { // compressed image?
+       FILE *file = extractFile(CPC.drvB_path, CPC.drvB_file, ".dsk");
+       if (file) {
+         dsk_load(file, &driveB);
+         fclose(file);
+       }
+     }
+     else {
+       dsk_load(CPC.drvB_path + CPC.drvB_file, &driveB);
+     }
    }
    if (!CPC.tape_file.empty()) { // insert a tape?
-      char chFileName[_MAX_PATH + 1];
-
-      if (CPC.tape_zip) { // compressed image?
-				FILE *file = extractFile(CPC.tape_path, CPC.tape_file, ".cdt.voc");
-         if (file) {
-					 tape_insert(file);
-					 fclose(file);
-				 }
-      }
-      else {
-         strncpy(chFileName, CPC.tape_path.c_str(), sizeof(chFileName)-1);
-         strncat(chFileName, CPC.tape_file.c_str(), sizeof(chFileName)-1 - strlen(chFileName));
-         tape_insert(chFileName);
-      }
+     if (CPC.tape_zip) { // compressed image?
+       FILE *file = extractFile(CPC.tape_path, CPC.tape_file, ".cdt.voc");
+       if (file) {
+         tape_insert(file);
+         fclose(file);
+       }
+     }
+     else {
+       tape_insert(CPC.tape_path + CPC.tape_file);
+     }
    }
    if (!CPC.snap_file.empty()) { // load a snapshot ?
-      char chFileName[_MAX_PATH + 1];
-
-      if (CPC.snap_zip) { // compressed image?
-				FILE *file = extractFile(CPC.snap_path, CPC.snap_file, ".sna");
-         if (file) {
-					 snapshot_load(file);
-					 fclose(file);
-				 }
-      }
-      else {
-         strncpy(chFileName, CPC.snap_path.c_str(), sizeof(chFileName)-1);
-         strncat(chFileName, CPC.snap_file.c_str(), sizeof(chFileName)-1 - strlen(chFileName));
-         snapshot_load(chFileName);
-      }
+     if (CPC.snap_zip) { // compressed image?
+       FILE *file = extractFile(CPC.snap_path, CPC.snap_file, ".sna");
+       if (file) {
+         snapshot_load(file);
+         fclose(file);
+       }
+     }
+     else {
+       snapshot_load(CPC.snap_path + CPC.snap_file);
+     }
    }
 
 // ----------------------------------------------------------------------------
