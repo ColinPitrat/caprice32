@@ -193,8 +193,6 @@ t_VDU VDU;
 t_drive driveA;
 t_drive driveB;
 
-zip::t_zip_info zip_info;
-
 #define MAX_DISK_FORMAT 8
 #define DEFAULT_DISK_FORMAT 0
 #define FIRST_CUSTOM_DISK_FORMAT 2
@@ -2172,27 +2170,21 @@ void emulator_reset (bool bolMF2Reset)
 
 
 
-// TODO(cpitrat): make char* in zip_info strings - then make zip_info a local variable
 // Extract 'filename' from 'zipfile'. Filename must end with one of the extensions listed in 'ext'.
 // FILE handle returned must be closed once finished with.
 // nullptr is returned if file couldn't be extracted for any reason.
 FILE *extractFile(const std::string& zipfile, const std::string& filename, const std::string& ext) {
+  zip::t_zip_info zip_info;
   zip_info.filename = zipfile;
   zip_info.extensions = ext;
   if (!zip::dir(&zip_info)) { // parse the zip for relevant files
-    dword n;
-    char *pchPtr = zip_info.pchFileNames;
-    for (n = zip_info.iFiles; n; n--) { // loop through all entries
-      if (!strcasecmp(filename.c_str(), pchPtr)) { // do we have a match?
-        break;
-      }
-      pchPtr += strlen(pchPtr) + 5; // skip offset
-    }
-    if (n) {
-      FILE *file = nullptr;
-      zip_info.dwOffset = *reinterpret_cast<dword *>(pchPtr + (strlen(pchPtr)+1)); // get the offset into the zip archive
-      if (!zip::extract(zip_info, &file)) {
-        return file;
+    for (const auto& fn : zip_info.filesOffsets) {
+      if (!strcasecmp(filename.c_str(), fn.first.c_str())) { // do we have a match?
+        FILE *file = nullptr;
+        zip_info.dwOffset = fn.second; // get the offset into the zip archive
+        if (!zip::extract(zip_info, &file)) {
+          return file;
+        }
       }
     }
   }
@@ -3090,9 +3082,6 @@ void doCleanUp (void)
    dsk_eject(&driveA);
    dsk_eject(&driveB);
    tape_eject();
-   if (zip_info.pchFileNames) {
-      free(zip_info.pchFileNames);
-   }
 
    joysticks_shutdown();
    audio_shutdown();
@@ -3129,17 +3118,18 @@ void parseArgs (int argc, const char **argv, t_CPC& CPC)
          std::string extension = stringutils::lower(fullpath.substr(pos));
          stringutils::splitPath(fullpath, dirname, filename);
          if (extension == ".zip") { // are we dealing with a zip archive?
-            zip_info.filename = fullpath;
-            zip_info.extensions = ".dsk.sna.cdt.voc.cpr";
-            if (zip::dir(&zip_info)) {
-               continue; // error or nothing relevant found
-            } else {
-               dirname = fullpath;
-               filename = zip_info.pchFileNames;
-               pos = filename.length() - 4;
-               extension = filename.substr(pos); // grab the extension
-               zip = true;
-            }
+           zip::t_zip_info zip_info;
+           zip_info.filename = fullpath;
+           zip_info.extensions = ".dsk.sna.cdt.voc.cpr";
+           if (zip::dir(&zip_info)) {
+             continue; // error or nothing relevant found
+           } else {
+             dirname = fullpath;
+             filename = zip_info.filesOffsets[0].first;
+             pos = filename.length() - 4;
+             extension = filename.substr(pos); // grab the extension
+             zip = true;
+           }
          }
          if (extension == ".dsk") { // a disk image?
             if(!have_DSKA) {

@@ -18,10 +18,8 @@ namespace zip
     dword dwCentralDirPosition, dwNextEntry;
     word wCentralDirEntries, wCentralDirSize, wFilenameLength;
     byte *pbPtr;
-    char *pchStrPtr;
     dword dwOffset;
 
-    zi->iFiles = 0;
     if ((pfileObject = fopen(zi->filename.c_str(), "rb")) == nullptr) {
       LOG_DEBUG("File not found or not readable: " << zi->filename);
       return ERR_FILE_NOT_FOUND;
@@ -70,11 +68,6 @@ namespace zip
     }
 
     pbPtr = pbGPBuffer;
-    if (zi->pchFileNames) {
-      free(zi->pchFileNames); // dealloc old string table
-    }
-    zi->pchFileNames = static_cast<char *>(malloc(wCentralDirSize)); // approximate space needed by using the central directory size
-    pchStrPtr = zi->pchFileNames;
 
     for (n = wCentralDirEntries; n; n--) {
       wFilenameLength = *reinterpret_cast<word *>(pbPtr + 28);
@@ -84,13 +77,9 @@ namespace zip
       const char *pchThisExtension = zi->extensions.c_str();
       while (*pchThisExtension != '\0') { // loop for all extensions to be checked
         if (strncasecmp(reinterpret_cast<char*>(pbPtr) + (wFilenameLength - 4), pchThisExtension, 4) == 0) {
-          strncpy(pchStrPtr, reinterpret_cast<char*>(pbPtr), wFilenameLength); // copy filename from zip directory
-          pchStrPtr[wFilenameLength] = 0; // zero terminate string
-          pchStrPtr += wFilenameLength+1;
+          std::string filename(reinterpret_cast<char*>(pbPtr), wFilenameLength);
+          zi->filesOffsets.push_back({filename, dwOffset});
           zi->dwOffset = dwOffset;
-          *reinterpret_cast<dword *>(pchStrPtr) = dwOffset; // associate offset with string
-          pchStrPtr += 4;
-          zi->iFiles++;
           break;
         }
         pchThisExtension += 4; // advance to next extension
@@ -99,7 +88,7 @@ namespace zip
     }
     fclose(pfileObject);
 
-    if (zi->iFiles == 0) { // no files found?
+    if (zi->filesOffsets.empty()) { // no files found?
       LOG_DEBUG("Empty zip file: " << zi->filename);
       return ERR_FILE_EMPTY_ZIP;
     }

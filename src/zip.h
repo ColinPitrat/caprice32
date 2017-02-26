@@ -2,6 +2,7 @@
 #define ZIP_H
 
 #include <string>
+#include <vector>
 
 typedef unsigned char byte;
 typedef unsigned short word;
@@ -12,9 +13,7 @@ namespace zip
   typedef struct {
     std::string filename;
     std::string extensions;
-    char *pchFileNames;
-    char *pchSelection;
-    int iFiles;
+    std::vector<std::pair<std::string, dword>> filesOffsets;
     unsigned int dwOffset;
   } t_zip_info;
 

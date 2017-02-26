@@ -17,15 +17,13 @@ TEST(Zip, DirOnFileWithNoMatchingEntry)
   zip::t_zip_info file_infos;
   file_infos.filename = "test/zip/test1.zip";
   file_infos.extensions = ".zzz";
-  file_infos.pchFileNames = nullptr;
-  file_infos.pchSelection = nullptr;
 
   int rc = zip::dir(&file_infos);
 
   // Returns ERR_FILE_EMPTY_ZIP although zip file is not really empty,
   // it just has no matching file
   ASSERT_EQ(ERR_FILE_EMPTY_ZIP, rc);
-  ASSERT_EQ(0, file_infos.iFiles);
+  ASSERT_EQ(0, file_infos.filesOffsets.size());
 }
 
 TEST(Zip, DirOnFileWithOneExtensionAndMultipleEntries)
@@ -33,17 +31,15 @@ TEST(Zip, DirOnFileWithOneExtensionAndMultipleEntries)
   zip::t_zip_info file_infos;
   file_infos.filename = "test/zip/test1.zip";
   file_infos.extensions = ".dsk";
-  file_infos.pchFileNames = nullptr;
-  file_infos.pchSelection = nullptr;
 
   int rc = zip::dir(&file_infos);
 
   ASSERT_EQ(0, rc);
-  ASSERT_EQ(2, file_infos.iFiles);
-  ASSERT_STREQ("disk/empty.dsk", file_infos.pchFileNames);
-  // TODO(cpitrat): Cleaner way to handle multiple files, offsets and filesizes
-  // 19 because "disk/empty.dsk" requires 15 bytes and another 4 are used by offset concatenated after
-  ASSERT_STREQ("disk/hello.dsk", file_infos.pchFileNames + 19);
+  ASSERT_EQ(2, file_infos.filesOffsets.size());
+  ASSERT_EQ("disk/empty.dsk", file_infos.filesOffsets[0].first);
+  ASSERT_EQ(119, file_infos.filesOffsets[0].second);
+  ASSERT_EQ("disk/hello.dsk", file_infos.filesOffsets[1].first);
+  ASSERT_EQ(1918, file_infos.filesOffsets[1].second);
 }
 
 TEST(Zip, DirOnFileWithMultipleExtensions)
@@ -51,16 +47,14 @@ TEST(Zip, DirOnFileWithMultipleExtensions)
   zip::t_zip_info file_infos;
   file_infos.filename = "test/zip/test1.zip";
   file_infos.extensions = ".dsk.txt";
-  file_infos.pchFileNames = nullptr;
-  file_infos.pchSelection = nullptr;
 
   int rc = zip::dir(&file_infos);
 
   ASSERT_EQ(0, rc);
-  ASSERT_EQ(3, file_infos.iFiles);
-  ASSERT_STREQ("README.txt", file_infos.pchFileNames);
-  ASSERT_STREQ("disk/empty.dsk", file_infos.pchFileNames + 15);
-  ASSERT_STREQ("disk/hello.dsk", file_infos.pchFileNames + 34);
+  ASSERT_EQ(3, file_infos.filesOffsets.size());
+  ASSERT_EQ("README.txt", file_infos.filesOffsets[0].first);
+  ASSERT_EQ("disk/empty.dsk", file_infos.filesOffsets[1].first);
+  ASSERT_EQ("disk/hello.dsk", file_infos.filesOffsets[2].first);
 }
 
 TEST(Zip, ExtractOnFileWithMultipleEntries)
@@ -70,8 +64,6 @@ TEST(Zip, ExtractOnFileWithMultipleEntries)
   zip::t_zip_info file_infos;
   file_infos.filename = "test/zip/test1.zip";
   file_infos.extensions = ".txt";
-  file_infos.pchFileNames = nullptr;
-  file_infos.pchSelection = nullptr;
   int rc = zip::dir(&file_infos);
   ASSERT_EQ(0, rc);
 
