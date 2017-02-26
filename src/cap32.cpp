@@ -3243,6 +3243,33 @@ void set_osd_message(const std::string& message) {
 
 
 
+// TODO(cpitrat): make char* in zip_info strings - then make zip_info a local variable
+// Extract 'filename' from 'zipfile'. Filename must end with one of the extensions listed in 'ext'.
+// FILE handle returned must be closed once finished with.
+// nullptr is returned if file couldn't be extracted for any reason.
+FILE *extractFile(const std::string& zipfile, const std::string& filename, const std::string& ext) {
+	zip_info.filename = zipfile;
+	zip_info.extensions = ext;
+	if (!zip::dir(&zip_info)) { // parse the zip for relevant files
+		dword n;
+		char *pchPtr = zip_info.pchFileNames;
+		for (n = zip_info.iFiles; n; n--) { // loop through all entries
+			if (!strcasecmp(filename.c_str(), pchPtr)) { // do we have a match?
+				break;
+			}
+			pchPtr += strlen(pchPtr) + 5; // skip offset
+		}
+		if (n) {
+			FILE *file = nullptr;
+			zip_info.dwOffset = *reinterpret_cast<dword *>(pchPtr + (strlen(pchPtr)+1)); // get the offset into the zip archive
+			if (!zip::extract(zip_info, &file)) {
+				return file;
+			}
+		}
+	}
+	return nullptr;
+}
+
 int cap32_main (int argc, char **argv)
 {
    dword dwOffset;
@@ -3307,32 +3334,14 @@ int cap32_main (int argc, char **argv)
    memset(&driveA, 0, sizeof(t_drive)); // clear disk drive A data structure
    if (!CPC.drvA_file.empty()) { // insert disk in drive A?
       char chFileName[_MAX_PATH + 1];
-      char *pchPtr;
-
       if (CPC.drvA_zip) { // compressed image?
-         zip_info.filename = CPC.drvA_path; // pchPath already has path and zip file combined
-         zip_info.extensions = ".dsk";
-         if (!zip::dir(&zip_info)) { // parse the zip for relevant files
-            dword n;
-            pchPtr = zip_info.pchFileNames;
-            for (n = zip_info.iFiles; n; n--) { // loop through all entries
-               if (!strcasecmp(CPC.drvA_file.c_str(), pchPtr)) { // do we have a match?
-                  break;
-               }
-               pchPtr += strlen(pchPtr) + 5; // skip offset
-            }
-            if (n) {
-               FILE *file = nullptr;
-               zip_info.dwOffset = *reinterpret_cast<dword *>(pchPtr + (strlen(pchPtr)+1)); // get the offset into the zip archive
-               if (!zip::extract(zip_info, &file)) {
-                  dsk_load(file, &driveA);
-                  fclose(file);
-               }
-            }
-         } else {
-            CPC.drvA_zip = 0;
-         }
+				FILE *file = extractFile(CPC.drvA_path, CPC.drvA_file, ".dsk");
+         if (file) {
+					 dsk_load(file, &driveA);
+					 fclose(file);
+				 }
       } else {
+				// TODO(cpitrat): Replace char* by string in dsk_load, tape_insert and snapshot_load
          strncpy(chFileName, CPC.drvA_path.c_str(), sizeof(chFileName)-1);
          strncat(chFileName, CPC.drvA_file.c_str(), sizeof(chFileName)-1 - strlen(chFileName));
          dsk_load(chFileName, &driveA);
@@ -3341,32 +3350,13 @@ int cap32_main (int argc, char **argv)
    memset(&driveB, 0, sizeof(t_drive)); // clear disk drive B data structure
    if (!CPC.drvB_file.empty()) { // insert disk in drive B?
       char chFileName[_MAX_PATH + 1];
-      char *pchPtr;
 
       if (CPC.drvB_zip) { // compressed image?
-         zip_info.filename = CPC.drvB_path; // pchPath already has path and zip file combined
-         zip_info.extensions = ".dsk";
-         if (!zip::dir(&zip_info)) { // parse the zip for relevant files
-            dword n;
-            pchPtr = zip_info.pchFileNames;
-            for (n = zip_info.iFiles; n; n--) { // loop through all entries
-               if (!strcasecmp(CPC.drvB_file.c_str(), pchPtr)) { // do we have a match?
-                  break;
-               }
-               pchPtr += strlen(pchPtr) + 5; // skip offset
-            }
-            if (n) {
-               FILE *file = nullptr;
-               zip_info.dwOffset = *reinterpret_cast<dword *>(pchPtr + (strlen(pchPtr)+1)); // get the offset into the zip archive
-               if (!zip::extract(zip_info, &file)) {
-                  dsk_load(file, &driveB);
-                  fclose(file);
-               }
-            }
-         }
-         else {
-            CPC.drvB_zip = 0;
-         }
+				FILE *file = extractFile(CPC.drvB_path, CPC.drvB_file, ".dsk");
+         if (file) {
+					 dsk_load(file, &driveB);
+					 fclose(file);
+				 }
       }
       else {
          strncpy(chFileName, CPC.drvB_path.c_str(), sizeof(chFileName)-1);
@@ -3376,35 +3366,13 @@ int cap32_main (int argc, char **argv)
    }
    if (!CPC.tape_file.empty()) { // insert a tape?
       char chFileName[_MAX_PATH + 1];
-      char *pchPtr;
 
       if (CPC.tape_zip) { // compressed image?
-         zip_info.filename = CPC.tape_path; // pchPath already has path and zip file combined
-         zip_info.extensions = ".cdt.voc";
-         if (!zip::dir(&zip_info)) { // parse the zip for relevant files
-            dword n;
-            pchPtr = zip_info.pchFileNames;
-            for (n = zip_info.iFiles; n; n--) { // loop through all entries
-               if (!strcasecmp(CPC.tape_file.c_str(), pchPtr)) { // do we have a match?
-                  break;
-               }
-               pchPtr += strlen(pchPtr) + 5; // skip offset
-            }
-            if (n) {
-               FILE *file = nullptr;
-               zip_info.dwOffset = *reinterpret_cast<dword *>(pchPtr + (strlen(pchPtr)+1)); // get the offset into the zip archive
-               if(!zip::extract(zip_info, &file)) {
-                 tape_insert(file);
-                 fclose(file);
-               }
-            }
-            else {
-               CPC.tape_zip = 0;
-            }
-         }
-         else {
-            CPC.tape_zip = 0;
-         }
+				FILE *file = extractFile(CPC.tape_path, CPC.tape_file, ".cdt.voc");
+         if (file) {
+					 tape_insert(file);
+					 fclose(file);
+				 }
       }
       else {
          strncpy(chFileName, CPC.tape_path.c_str(), sizeof(chFileName)-1);
@@ -3414,35 +3382,13 @@ int cap32_main (int argc, char **argv)
    }
    if (!CPC.snap_file.empty()) { // load a snapshot ?
       char chFileName[_MAX_PATH + 1];
-      char *pchPtr;
 
       if (CPC.snap_zip) { // compressed image?
-         zip_info.filename = CPC.snap_path; // pchPath already has path and zip file combined
-         zip_info.extensions = ".sna";
-         if(!zip::dir(&zip_info)) { // parse the zip for relevant files
-            dword n;
-            pchPtr = zip_info.pchFileNames;
-            for (n = zip_info.iFiles; n; n--) { // loop through all entries
-               if (!strcasecmp(CPC.snap_file.c_str(), pchPtr)) { // do we have a match?
-                  break;
-               }
-               pchPtr += strlen(pchPtr) + 5; // skip offset
-            }
-            if (n) {
-              FILE *file = nullptr;
-               zip_info.dwOffset = *reinterpret_cast<dword *>(pchPtr + (strlen(pchPtr)+1)); // get the offset into the zip archive
-               if (!zip::extract(zip_info, &file)) {
-                  snapshot_load(file);
-                  fclose(file);
-               }
-            }
-            else {
-               CPC.snap_zip = 0;
-            }
-         }
-         else {
-            CPC.snap_zip = 0;
-         }
+				FILE *file = extractFile(CPC.snap_path, CPC.snap_file, ".sna");
+         if (file) {
+					 snapshot_load(file);
+					 fclose(file);
+				 }
       }
       else {
          strncpy(chFileName, CPC.snap_path.c_str(), sizeof(chFileName)-1);
