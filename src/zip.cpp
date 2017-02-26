@@ -32,7 +32,11 @@ namespace zip
     dwCentralDirPosition = 0;
     do {
       lFilePosition -= 256; // move backwards through ZIP file
-      fseek(pfileObject, lFilePosition, SEEK_END);
+      if (fseek(pfileObject, lFilePosition, SEEK_END) != 0) {
+        fclose(pfileObject);
+        LOG_DEBUG("Couldn't read zip file: " << zi->filename);
+        return ERR_FILE_BAD_ZIP; // exit if loading of data chunck failed
+      };
       if (fread(pbGPBuffer, 256, 1, pfileObject) == 0) {
         fclose(pfileObject);
         LOG_DEBUG("Couldn't read zip file: " << zi->filename);
@@ -54,11 +58,15 @@ namespace zip
       LOG_DEBUG("Couldn't read zip file (no central directory): " << zi->filename);
       return ERR_FILE_BAD_ZIP; // exit if no central directory was found
     }
-    fseek(pfileObject, dwCentralDirPosition, SEEK_SET);
+    if (fseek(pfileObject, dwCentralDirPosition, SEEK_SET) != 0) {
+      fclose(pfileObject);
+      LOG_DEBUG("Couldn't read zip file: " << zi->filename);
+      return ERR_FILE_BAD_ZIP; // exit if seeking to the central directory failed
+    };
     if (fread(pbGPBuffer, wCentralDirSize, 1, pfileObject) == 0) {
       fclose(pfileObject);
       LOG_DEBUG("Couldn't read zip file: " << zi->filename);
-      return ERR_FILE_BAD_ZIP; // exit if loading of data chunck failed
+      return ERR_FILE_BAD_ZIP; // exit if reading the central directory failed
     }
 
     pbPtr = pbGPBuffer;
@@ -112,19 +120,35 @@ namespace zip
 
     *pfileOut = tmpfile();
     if (*pfileOut == nullptr) {
+      LOG_DEBUG("Couldn't unzip file: Couldn't create temporary file.");
       return ERR_FILE_UNZIP_FAILED; // couldn't create output file
     }
     pfileIn = fopen(zi.filename.c_str(), "rb"); // open ZIP file for reading
-    fseek(pfileIn, dwOffset, SEEK_SET); // move file pointer to beginning of data block
+    if (pfileIn == nullptr) {
+      LOG_DEBUG("Couldn't open zip file for reading: " << zi.filename);
+      return ERR_FILE_UNZIP_FAILED; // couldn't open input file
+    }
+    if (fseek(pfileIn, dwOffset, SEEK_SET) != 0) {  // move file pointer to beginning of data block
+      LOG_DEBUG("Couldn't read zip file: " << zi.filename);
+      fclose(pfileIn);
+      fclose(*pfileOut);
+      return ERR_FILE_UNZIP_FAILED;
+    };
     size_t rc;
     if((rc = fread(pbGPBuffer, 30, 1, pfileIn)) != 1) { // read local header
+      LOG_DEBUG("Couldn't read zip file: " << zi.filename);
       fclose(pfileIn);
       fclose(*pfileOut);
       return ERR_FILE_UNZIP_FAILED;
     }
     dwSize = *reinterpret_cast<dword *>(pbGPBuffer + 18); // length of compressed data
     dwOffset += 30 + *reinterpret_cast<word *>(pbGPBuffer + 26) + *reinterpret_cast<word *>(pbGPBuffer + 28);
-    fseek(pfileIn, dwOffset, SEEK_SET); // move file pointer to start of compressed data
+    if (fseek(pfileIn, dwOffset, SEEK_SET) != 0) {  // move file pointer to start of compressed data
+      LOG_DEBUG("Couldn't read zip file: " << zi.filename);
+      fclose(pfileIn);
+      fclose(*pfileOut);
+      return ERR_FILE_UNZIP_FAILED;
+    }
 
     pbInputBuffer = pbGPBuffer; // space for compressed data chunck
     pbOutputBuffer = pbInputBuffer + 16384; // space for uncompressed data chunck
@@ -145,13 +169,19 @@ namespace zip
         z.avail_out = 16384;
         iStatus = inflate(&z, Z_NO_FLUSH); // decompress data
         iCount = 16384 - z.avail_out;
-        if (iCount) { // save data to file if output buffer is full
-          fwrite(pbOutputBuffer, iCount, 1, *pfileOut);
+        if (iCount) { // save data to file if some is available
+          if (fwrite(pbOutputBuffer, iCount, 1, *pfileOut) != 1) {
+            LOG_DEBUG("Couldn't unzip file: Couldn't write to output file:");
+            fclose(pfileIn);
+            fclose(*pfileOut);
+            return ERR_FILE_UNZIP_FAILED;
+          }
         }
       }
       dwSize -= 16384; // advance to next chunck
     } while ((dwSize > 0) && (iStatus == Z_OK)) ; // loop until done
     if (iStatus != Z_STREAM_END) {
+      LOG_DEBUG("Couldn't unzip file: " << zi.filename << " (" << iStatus << ")");
       return ERR_FILE_UNZIP_FAILED; // abort on error
     }
     iStatus = inflateEnd(&z); // clean up

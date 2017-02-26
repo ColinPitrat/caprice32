@@ -2221,6 +2221,7 @@ void cartridge_load (void)
 
 int emulator_init (void)
 {
+   // Cartridge must be loaded before init as ROM needs to be present.
    cartridge_load();
    int iErr, iRomNum;
    byte *pchRomData;
@@ -3296,8 +3297,7 @@ int cap32_main (int argc, char **argv)
    parseArgs(argc, const_cast<const char**>(argv), CPC);
 
    // emulator_init must be called before loading files as they require
-   // pbGPBuffer to be initialized but after cartridge is installed as
-   // it requires the ROM to be present
+   // pbGPBuffer to be initialized.
    if (emulator_init()) {
       fprintf(stderr, "emulator_init() failed. Aborting.\n");
       exit(-1);
