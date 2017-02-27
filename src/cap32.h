@@ -101,6 +101,12 @@
 #define JOYSTICK_AXIS_THRESHOLD 16384
 
 
+typedef enum {
+  DSK_A,
+  DSK_B,
+  OTHER,
+} DRIVE;
+
 typedef struct {
    char id[8];
    char unused1[8];
@@ -475,6 +481,10 @@ int tape_insert (const std::string &filename);
 int tape_insert_cdt (FILE *pfile);
 int tape_insert_voc (FILE *pfile);
 void tape_eject (void);
+
+// Smart load: support loading DSK, SNA, CDT, VOC, CPR or a zip containing one of these.
+// drive must be DSK_A or DSK_B for DSK, OTHER otherwise.
+int file_load(const std::string& filepath, const DRIVE drive);
 
 // Return the path to the best (i.e: most specific) configuration file.
 // Priority order is:

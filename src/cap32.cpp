@@ -2215,6 +2215,96 @@ void cartridge_load (void)
 
 
 
+int cartridge_load (const std::string& filepath) {
+  if (CPC.model >= 3) {
+    return cpr_load(filepath);
+  }
+  return ERR_FILE_UNSUPPORTED;
+}
+
+
+
+int cartridge_load (FILE *file) {
+  if (CPC.model >= 3) {
+    return cpr_load(file);
+  }
+  return ERR_FILE_UNSUPPORTED;
+}
+
+
+
+struct file_loader
+{
+  DRIVE drive;
+  std::string extension;
+  int (*load_from_filename)(const std::string& filename);
+  int (*load_from_file)(FILE *file);
+};
+
+file_loader files_loader_list[] =
+{
+  { DSK_A, ".dsk",
+    [](const std::string& filename) -> int { return dsk_load(filename, &driveA); },
+    [](FILE* file) -> int { return dsk_load(file, &driveA); } },
+
+  { DSK_B, ".dsk",
+    [](const std::string& filename) -> int { return dsk_load(filename, &driveB); },
+    [](FILE* file) -> int { return dsk_load(file, &driveB); } },
+
+  { OTHER, ".sna",
+    &snapshot_load,
+    &snapshot_load },
+
+  { OTHER, ".cdt",
+    &tape_insert,
+    &tape_insert },
+
+  { OTHER, ".voc",
+    &tape_insert,
+    &tape_insert },
+
+  { OTHER, ".cpr",
+    &cartridge_load,
+    &cartridge_load },
+};
+
+// TODO(cpitrat): Use this instead of parseArgs + code in main - remove CPC.xxxx_(path|file|zip)
+int file_load(const std::string& filepath, const DRIVE drive) {
+  if (filepath.length() < 4) return ERR_FILE_UNSUPPORTED;
+  int pos = filepath.length() - 4;
+  std::string extension = stringutils::lower(filepath.substr(pos));
+
+  FILE *file = nullptr;
+  if (extension == ".zip") {
+    zip::t_zip_info zip_info;
+    zip_info.filename = filepath;
+    zip_info.extensions = ".dsk.sna.cdt.voc.cpr";
+    if (zip::dir(&zip_info)) {
+      // error or nothing relevant found
+      return ERR_FILE_UNZIP_FAILED;
+    } else {
+      std::string filename = zip_info.filesOffsets[0].first;
+      pos = filename.length() - 4;
+      extension = filename.substr(pos); // grab the extension
+      file = extractFile(filepath, filename, extension);
+    }
+  }
+
+  for(const auto& loader : files_loader_list) {
+    if (drive == loader.drive && extension == loader.extension) {
+      if (file) {
+        return loader.load_from_file(file);
+      } else {
+        return loader.load_from_filename(filepath);
+      }
+    }
+  }
+
+  return ERR_FILE_UNSUPPORTED;
+}
+
+
+
 int emulator_init (void)
 {
    // Cartridge must be loaded before init as ROM needs to be present.
@@ -3131,16 +3221,16 @@ void parseArgs (int argc, const char **argv, t_CPC& CPC)
              zip = true;
            }
          }
-         if (extension == ".dsk") { // a disk image?
+         if (extension == ".dsk") {
             if(!have_DSKA) {
                LOG_DEBUG("Loading " << dirname << filename << " in drive A");
-               CPC.drvA_path = dirname; // if the image loads, copy the infos to the config structure
+               CPC.drvA_path = dirname;
                CPC.drvA_file = filename;
                CPC.drvA_zip = (zip ? 1 : 0);
                have_DSKA = true;
             } else if(!have_DSKB) {
                LOG_DEBUG("Loading " << dirname << filename << " in drive B");
-               CPC.drvB_path = dirname; // if the image loads, copy the infos to the config structure
+               CPC.drvB_path = dirname;
                CPC.drvB_file = filename;
                CPC.drvB_zip = (zip ? 1 : 0);
                have_DSKB = true;
