@@ -19,7 +19,7 @@ namespace wGui
         CapriceLoadSave(const CRect& WindowRect, CWindow* pParent, CFontEngine* pFontEngine);
         ~CapriceLoadSave();
         bool HandleMessage(CMessage* pMessage) override;
-        std::string simplifyPath(std::string path);
+        std::string simplifyDirPath(std::string path);
         void UpdateFilesList();
         bool MatchCurrentFileSpec(const char* filename);
 

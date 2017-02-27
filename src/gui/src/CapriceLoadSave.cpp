@@ -54,7 +54,7 @@ CapriceLoadSave::CapriceLoadSave(const CRect& WindowRect, CWindow* pParent, CFon
   // Directory
   m_pDirectoryLabel = new CLabel(          CPoint(15, 85),             this, "Directory: ");
   m_pDirectoryValue = new CEditBox( CRect( CPoint(80, 80), 150, 20),    this);
-  m_pDirectoryValue->SetWindowText(simplifyPath(CPC.snap_path));
+  m_pDirectoryValue->SetWindowText(simplifyDirPath(CPC.snap_path));
   m_pDirectoryValue->SetReadOnly(true);
 
   // File list
@@ -194,27 +194,27 @@ bool CapriceLoadSave::HandleMessage(CMessage* pMessage)
         if (pMessage->Destination() == m_pTypeValue) {
           switch (m_pTypeValue->GetSelectedIndex()) {
             case 0: // Snapshot
-              m_pDirectoryValue->SetWindowText(simplifyPath(CPC.snap_path));
+              m_pDirectoryValue->SetWindowText(simplifyDirPath(CPC.snap_path));
               m_fileSpec = { ".sna", ".zip" };
               UpdateFilesList();
               break;
             case 1: // Drive A
-              m_pDirectoryValue->SetWindowText(simplifyPath(CPC.drvA_path));
+              m_pDirectoryValue->SetWindowText(simplifyDirPath(CPC.drvA_path));
               m_fileSpec = { ".dsk", ".zip" };
               UpdateFilesList();
               break;
             case 2: // Drive B
-              m_pDirectoryValue->SetWindowText(simplifyPath(CPC.drvB_path));
+              m_pDirectoryValue->SetWindowText(simplifyDirPath(CPC.drvB_path));
               m_fileSpec = { ".dsk", ".zip" };
               UpdateFilesList();
               break;
             case 3: // Tape
-              m_pDirectoryValue->SetWindowText(simplifyPath(CPC.tape_path));
+              m_pDirectoryValue->SetWindowText(simplifyDirPath(CPC.tape_path));
               m_fileSpec = { ".cdt", ".voc", ".zip" };
               UpdateFilesList();
               break;
             case 4: // Cartridge
-              m_pDirectoryValue->SetWindowText(simplifyPath(CPC.cart_path));
+              m_pDirectoryValue->SetWindowText(simplifyDirPath(CPC.cart_path));
               m_fileSpec = { ".cpr", ".zip" };
               UpdateFilesList();
               break;
@@ -223,7 +223,7 @@ bool CapriceLoadSave::HandleMessage(CMessage* pMessage)
 				if (pMessage->Source() == m_pFilesList) {
 					std::string fn = m_pFilesList->GetItem(m_pFilesList->getFirstSelectedIndex()).sItemText;
           if(fn[fn.size()-1] == '/') {
-            m_pDirectoryValue->SetWindowText(simplifyPath(m_pDirectoryValue->GetWindowText() + '/' + fn));
+            m_pDirectoryValue->SetWindowText(simplifyDirPath(m_pDirectoryValue->GetWindowText() + '/' + fn));
             m_pFileNameValue->SetWindowText("");
             UpdateFilesList();
           } else {
@@ -242,7 +242,7 @@ bool CapriceLoadSave::HandleMessage(CMessage* pMessage)
 	return bHandled;
 }
 
-std::string CapriceLoadSave::simplifyPath(std::string path)
+std::string CapriceLoadSave::simplifyDirPath(std::string path)
 {
 #ifdef WINDOWS
   return path;
@@ -252,6 +252,15 @@ std::string CapriceLoadSave::simplifyPath(std::string path)
     std::cerr << "Couldn't simplify path '" << path << "': " << strerror(errno) << std::endl;
     return ".";
   } 
+  struct stat entry_infos;
+  if(stat(simplepath, &entry_infos) != 0) {
+    std::cerr << "Could not retrieve info on " << simplepath << ": " << strerror(errno) << std::endl;
+    return ".";
+  }
+  if(!S_ISDIR(entry_infos.st_mode)) {
+    std::cerr << simplepath << " is not a directory." << std::endl;
+    return ".";
+  }
   return std::string(simplepath);
 #endif
 }
