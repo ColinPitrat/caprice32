@@ -554,7 +554,7 @@ void CapriceOptions::ProcessOptionChanges(t_CPC& CPC, bool saveChanges) {
 
     if (saveChanges)
     {
-        saveConfiguration(CPC, getConfigurationFilename());
+        saveConfiguration(CPC, getConfigurationFilename(true /* forWrite */));
     }
 }
 
