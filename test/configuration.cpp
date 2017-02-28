@@ -94,7 +94,12 @@ TEST_F(ConfigurationTest, parseFileAndSaveBack)
   ASSERT_EQ("./toto", otherConfig.getStringValue("video", "resources_path", "none"));
   ASSERT_EQ("./directory with spaces", otherConfig.getStringValue("input", "resources_path", "none"));
   ASSERT_EQ("./default", otherConfig.getStringValue("sound", "resources_path", "./default"));
-};
+}
+
+TEST_F(ConfigurationTest, parseFileDoesntExist)
+{
+  configuration_.parseFile("/a/non/existing/file");
+}
 
 TEST_F(ConfigurationTest, saveToFileAndMore)
 {
@@ -111,7 +116,7 @@ TEST_F(ConfigurationTest, saveToFileAndMore)
   std::stringstream buffer;
   buffer << ifs.rdbuf();
   ASSERT_EQ(expectedConfig, buffer.str());
-};
+}
 
 // TODO(cpitrat): test about every value in conf ?
 TEST_F(ConfigurationTest, loadConfigurationWithValidContent)

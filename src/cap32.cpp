@@ -3019,7 +3019,7 @@ void loadConfiguration (t_CPC &CPC, const std::string& configFilename)
    if ((CPC.scr_intensity < 5) || (CPC.scr_intensity > 15)) {
       CPC.scr_intensity = 10;
    }
-   CPC.scr_window = conf.getIntValue("video", "scr_window", 0) & 1;
+   CPC.scr_window = conf.getIntValue("video", "scr_window", 1) & 1;
 
    CPC.snd_enabled = conf.getIntValue("sound", "enabled", 1) & 1;
    CPC.snd_playback_rate = conf.getIntValue("sound", "playback_rate", 2);

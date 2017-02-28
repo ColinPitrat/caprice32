@@ -10,7 +10,7 @@ namespace config
     std::streamsize maxSize = 256;
     char chLine[maxSize];
     std::string section;
-    while(!configStream.eof())
+    while(configStream.good())
     {
       configStream.getline(chLine, maxSize);
       if(chLine[0] == '[') // check if there's a section key
