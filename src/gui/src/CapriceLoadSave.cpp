@@ -220,15 +220,19 @@ bool CapriceLoadSave::HandleMessage(CMessage* pMessage)
               break;
           }
         }
-				if (pMessage->Source() == m_pFilesList) {
-					std::string fn = m_pFilesList->GetItem(m_pFilesList->getFirstSelectedIndex()).sItemText;
-          if(fn[fn.size()-1] == '/') {
+        if (pMessage->Source() == m_pFilesList) {
+          int idx = m_pFilesList->getFirstSelectedIndex();
+          std::string fn;
+          if (idx != -1) {
+            fn = m_pFilesList->GetItem(idx).sItemText;
+          }
+          if(!fn.empty() && fn[fn.size()-1] == '/') {
             m_pDirectoryValue->SetWindowText(simplifyDirPath(m_pDirectoryValue->GetWindowText() + '/' + fn));
             m_pFileNameValue->SetWindowText("");
             UpdateFilesList();
           } else {
-						m_pFileNameValue->SetWindowText(fn);
-					}
+            m_pFileNameValue->SetWindowText(fn);
+          }
 				}
         break;
 
