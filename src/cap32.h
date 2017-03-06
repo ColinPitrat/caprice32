@@ -27,6 +27,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <string>
+#include <vector>
 
 //#define DEBUG
 //#define DEBUG_CRTC
@@ -35,6 +36,8 @@
 //#define DEBUG_NO_VIDEO
 //#define DEBUG_TAPE
 //#define DEBUG_Z80
+
+#define VERSION_STRING "v4.3.0"
 
 #ifndef _MAX_PATH
  #ifdef _POSIX_PATH_MAX
@@ -498,7 +501,7 @@ void loadConfiguration (t_CPC &CPC, const std::string& configFilename);
 void saveConfiguration (t_CPC &CPC, const std::string& configFilename);
 
 // Retrieve files that are passed as argument and update CPC fields so that they will be loaded properly
-void parseArgs (int argc, const char **argv, t_CPC& CPC);
+void fillSlots (std::vector<std::string> slot_list, t_CPC& CPC);
 
 int cap32_main(int argc, char **argv);
 
