@@ -2,12 +2,12 @@
 
 #include "cap32.h"
 
-TEST(Cap32Test, parseArgsNoArg)
+TEST(Cap32Test, fillSlotsNoArg)
 {
-  const char *argv[] = { "./cap32" };
+  std::vector<std::string> slot_list;
   t_CPC CPC;
 
-  parseArgs(sizeof(argv)/sizeof(char*), argv, CPC);
+  fillSlots(slot_list, CPC);
 
   ASSERT_EQ("", CPC.cart_path);
   ASSERT_EQ("", CPC.cart_file);
@@ -21,12 +21,12 @@ TEST(Cap32Test, parseArgsNoArg)
   ASSERT_EQ("", CPC.snap_file);
 }
 
-TEST(Cap32Test, parseArgsOneLocalDskFile)
+TEST(Cap32Test, fillSlotsOneLocalDskFile)
 {
-  const char *argv[] = { "./cap32", "./test.dsk" };
+  std::vector<std::string> slot_list = { "./test.dsk"};
   t_CPC CPC;
 
-  parseArgs(sizeof(argv)/sizeof(char*), argv, CPC);
+  fillSlots(slot_list, CPC);
 
   ASSERT_EQ("", CPC.cart_path);
   ASSERT_EQ("", CPC.cart_file);
@@ -41,12 +41,12 @@ TEST(Cap32Test, parseArgsOneLocalDskFile)
   ASSERT_EQ("", CPC.snap_file);
 }
 
-TEST(Cap32Test, parseArgsTwoDskFiles)
+TEST(Cap32Test, fillSlotsTwoDskFiles)
 {
-  const char *argv[] = { "./cap32", "/tmp/foo.dsk", "/var/bar.dsk" };
+  std::vector<std::string> slot_list = { "/tmp/foo.dsk", "/var/bar.dsk"};
   t_CPC CPC;
 
-  parseArgs(sizeof(argv)/sizeof(char*), argv, CPC);
+  fillSlots(slot_list, CPC);
 
   ASSERT_EQ("", CPC.cart_path);
   ASSERT_EQ("", CPC.cart_file);
@@ -62,12 +62,12 @@ TEST(Cap32Test, parseArgsTwoDskFiles)
   ASSERT_EQ("", CPC.snap_file);
 }
 
-TEST(Cap32Test, parseArgsOneLocalCdtFile)
+TEST(Cap32Test, fillSlotsOneLocalCdtFile)
 {
-  const char *argv[] = { "./cap32", "./test.cdt" };
+  std::vector<std::string> slot_list = { "./test.cdt"};
   t_CPC CPC;
 
-  parseArgs(sizeof(argv)/sizeof(char*), argv, CPC);
+  fillSlots(slot_list, CPC);
 
   ASSERT_EQ("", CPC.cart_path);
   ASSERT_EQ("", CPC.cart_file);
@@ -82,12 +82,12 @@ TEST(Cap32Test, parseArgsOneLocalCdtFile)
   ASSERT_EQ("", CPC.snap_file);
 }
 
-TEST(Cap32Test, parseArgsOneLocalVocFile)
+TEST(Cap32Test, fillSlotsOneLocalVocFile)
 {
-  const char *argv[] = { "./cap32", "./test.voc" };
+  std::vector<std::string> slot_list = { "./test.voc"};
   t_CPC CPC;
 
-  parseArgs(sizeof(argv)/sizeof(char*), argv, CPC);
+  fillSlots(slot_list, CPC);
 
   ASSERT_EQ("", CPC.cart_path);
   ASSERT_EQ("", CPC.cart_file);
@@ -102,12 +102,12 @@ TEST(Cap32Test, parseArgsOneLocalVocFile)
   ASSERT_EQ("", CPC.snap_file);
 }
 
-TEST(Cap32Test, parseArgsOneLocalSnaFile)
+TEST(Cap32Test, fillSlotsOneLocalSnaFile)
 {
-  const char *argv[] = { "./cap32", "./test.sna" };
+  std::vector<std::string> slot_list = { "./test.sna"};
   t_CPC CPC;
 
-  parseArgs(sizeof(argv)/sizeof(char*), argv, CPC);
+  fillSlots(slot_list, CPC);
 
   ASSERT_EQ("", CPC.cart_path);
   ASSERT_EQ("", CPC.cart_file);
@@ -122,12 +122,12 @@ TEST(Cap32Test, parseArgsOneLocalSnaFile)
   ASSERT_EQ(0, CPC.snap_zip);
 }
 
-TEST(Cap32Test, parseArgsOneCprFile)
+TEST(Cap32Test, fillSlotsOneCprFile)
 {
-  const char *argv[] = { "./cap32", "./test.cpr" };
+  std::vector<std::string> slot_list = { "./test.cpr"};
   t_CPC CPC;
 
-  parseArgs(sizeof(argv)/sizeof(char*), argv, CPC);
+  fillSlots(slot_list, CPC);
 
   ASSERT_EQ("./", CPC.cart_path);
   ASSERT_EQ("test.cpr", CPC.cart_file);
@@ -142,12 +142,12 @@ TEST(Cap32Test, parseArgsOneCprFile)
   ASSERT_EQ("", CPC.snap_file);
 }
 
-TEST(Cap32Test, parseArgsOneZippedCprFile)
+TEST(Cap32Test, fillSlotsOneZippedCprFile)
 {
-  const char *argv[] = { "./cap32", "test/cartridge/testplus.zip" };
+  std::vector<std::string> slot_list = { "test/cartridge/testplus.zip"};
   t_CPC CPC;
 
-  parseArgs(sizeof(argv)/sizeof(char*), argv, CPC);
+  fillSlots(slot_list, CPC);
 
   ASSERT_EQ("test/cartridge/testplus.zip", CPC.cart_path);
   ASSERT_EQ("testplus.cpr", CPC.cart_file);
@@ -162,12 +162,12 @@ TEST(Cap32Test, parseArgsOneZippedCprFile)
   ASSERT_EQ("", CPC.snap_file);
 }
 
-TEST(Cap32Test, parseArgsOneFileOfEachKind)
+TEST(Cap32Test, fillSlotsOneFileOfEachKind)
 {
-  const char *argv[] = { "./cap32", "/tmp/foo.dsk", "/var/bar.cdt", "/usr/test.sna", "/home/cart.cpr" };
+  std::vector<std::string> slot_list = { "/tmp/foo.dsk", "/var/bar.cdt", "/usr/test.sna", "/home/cart.cpr" };
   t_CPC CPC;
 
-  parseArgs(sizeof(argv)/sizeof(char*), argv, CPC);
+  fillSlots(slot_list, CPC);
 
   ASSERT_EQ("/home/", CPC.cart_path);
   ASSERT_EQ("cart.cpr", CPC.cart_file);
@@ -184,12 +184,12 @@ TEST(Cap32Test, parseArgsOneFileOfEachKind)
   ASSERT_EQ(0, CPC.snap_zip);
 }
 
-TEST(Cap32Test, parseArgsManyFilesOfEachKind)
+TEST(Cap32Test, fillSlotsManyFilesOfEachKind)
 {
-  const char *argv[] = { "./cap32", "rom/system.cpr", "/tmp/foo.dsk", "/var/test.dsk", "/tmp/other.dsk", "/var/bar.cdt", "/tmp/test.voc", "/usr/test.sna", "/tmp/other.sna", "test/test.cpr" };
+  std::vector<std::string> slot_list = { "rom/system.cpr", "/tmp/foo.dsk", "/var/test.dsk", "/tmp/other.dsk", "/var/bar.cdt", "/tmp/test.voc", "/usr/test.sna", "/tmp/other.sna", "test/test.cpr" };
   t_CPC CPC;
 
-  parseArgs(sizeof(argv)/sizeof(char*), argv, CPC);
+  fillSlots(slot_list, CPC);
 
   ASSERT_EQ("rom/", CPC.cart_path);
   ASSERT_EQ("system.cpr", CPC.cart_file);
