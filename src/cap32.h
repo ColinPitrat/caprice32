@@ -457,11 +457,6 @@ typedef struct {
    unsigned char sector_ids[2][16]; // sector IDs - indices: side, sector
 } t_disk_format;
 
-struct slotList {
-   char **names;
-   int num;
-};
-
 // cap32.cpp
 void emulator_reset(bool bolMF2Reset);
 int  emulator_init(void);
