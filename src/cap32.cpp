@@ -32,11 +32,10 @@
 #include "keyboard.h"
 #include "cartridge.h"
 #include "asic.h"
+#include "argparse.h"
 
 #include <errno.h>
 #include <string.h>
-
-#define VERSION_STRING "v4.3.0"
 
 #include "CapriceGui.h"
 #include "CapriceGuiView.h"
@@ -2268,7 +2267,7 @@ file_loader files_loader_list[] =
     &cartridge_load },
 };
 
-// TODO(cpitrat): Use this instead of parseArgs + code in main - remove CPC.xxxx_(path|file|zip)
+// TODO(cpitrat): Use this instead of fillSlots + code in main - remove CPC.xxxx_(path|file|zip)
 int file_load(const std::string& filepath, const DRIVE drive) {
   if (filepath.length() < 4) return ERR_FILE_UNSUPPORTED;
   int pos = filepath.length() - 4;
@@ -3189,7 +3188,7 @@ void doCleanUp (void)
 
 
 // TODO(cpitrat): refactor
-void parseArgs (int argc, const char **argv, t_CPC& CPC)
+void fillSlots (std::vector<std::string> slot_list, t_CPC& CPC)
 {
    bool have_DSKA = false;
    bool have_DSKB = false;
@@ -3197,9 +3196,9 @@ void parseArgs (int argc, const char **argv, t_CPC& CPC)
    bool have_TAP = false;
    bool have_CPR = false;
 
-   for (int i = 1; i < argc; i++) { // loop for all command line arguments
-      LOG_DEBUG("Handling arg " << argv[i]);
-      std::string fullpath = stringutils::trim(argv[i], '"'); // remove quotes if arguments quoted
+   for (unsigned int i = 0; i < slot_list.size(); i++) { // loop for all command line arguments
+      LOG_DEBUG("Handling arg " << slot_list.at(i));
+      std::string fullpath = stringutils::trim(slot_list.at(i), '"'); // remove quotes if arguments quoted
       if (fullpath.length() > 5) { // minumum for a valid filename
          int pos = fullpath.length() - 4;
          std::string dirname;
@@ -3333,6 +3332,9 @@ int cap32_main (int argc, char **argv)
    int iExitCondition;
    bool bolDone;
    SDL_Event event;
+   std::vector<std::string> slot_list;
+
+   parseArguments(argc, argv, slot_list);
 
    if (SDL_Init(SDL_INIT_AUDIO | SDL_INIT_TIMER | SDL_INIT_NOPARACHUTE) < 0) { // initialize SDL
       fprintf(stderr, "SDL_Init() failed: %s\n", SDL_GetError());
@@ -3378,7 +3380,7 @@ int cap32_main (int argc, char **argv)
    pfoDebug = fopen("./debug.txt", "wt");
    #endif
 
-   parseArgs(argc, const_cast<const char**>(argv), CPC);
+   fillSlots(slot_list, CPC);
 
    // emulator_init must be called before loading files as they require
    // pbGPBuffer to be initialized.

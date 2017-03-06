@@ -24,7 +24,7 @@ LIBS = `sdl-config --libs` -lz `freetype-config --libs`
 
 MINGW_PATH=/usr/i686-w64-mingw32
 WINCXX	= i686-w64-mingw32-g++
-WININCS = -Isrc/ -Isrc/gui/includes -I$(MINGW_PATH)/include -I$(MINGW_PATH)/include/SDL -I$(MINGW_PATH)/include/freetype2 
+WININCS = -Isrc/ -Isrc/gui/includes -I$(MINGW_PATH)/include -I$(MINGW_PATH)/include/SDL -I$(MINGW_PATH)/include/freetype2
 WINLIBS=$(MINGW_PATH)/lib/libSDL.dll.a $(MINGW_PATH)/lib/libfreetype.dll.a $(MINGW_PATH)/lib/libz.dll.a
 
 .PHONY: all clean debug debug_flag check_deps
