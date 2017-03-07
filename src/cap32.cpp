@@ -3333,8 +3333,9 @@ int cap32_main (int argc, char **argv)
    bool bolDone;
    SDL_Event event;
    std::vector<std::string> slot_list;
+   struct capriceArgs args;
 
-   parseArguments(argc, argv, slot_list);
+   parseArguments(argc, argv, slot_list, args);
 
    if (SDL_Init(SDL_INIT_AUDIO | SDL_INIT_TIMER | SDL_INIT_NOPARACHUTE) < 0) { // initialize SDL
       fprintf(stderr, "SDL_Init() failed: %s\n", SDL_GetError());
@@ -3347,7 +3348,7 @@ int cap32_main (int argc, char **argv)
       exit(-1);
    }
 
-   loadConfiguration(CPC, getConfigurationFilename()); // retrieve the emulator configuration
+   loadConfiguration(CPC, args.cfgFilePath != "" ? args.cfgFilePath : getConfigurationFilename()); // retrieve the emulator configuration
    if (CPC.printer) {
       if (!printer_start()) { // start capturing printer output, if enabled
          CPC.printer = 0;
