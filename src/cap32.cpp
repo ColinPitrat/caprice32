@@ -215,6 +215,7 @@ t_disk_format disk_format[MAX_DISK_FORMAT] = {
 }
 
 
+CapriceArgs args;
 
 void ga_init_banking (void)
 {
@@ -2869,15 +2870,19 @@ int input_init (void)
 
 std::string getConfigurationFilename(bool forWrite)
 {
-  // First look for cap32.cfg in the same directory as executable
-  std::string configFilename = std::string(chAppPath) + "/cap32.cfg";
+  // First look in any user supplied configuration file path
+  std::string configFilename = args.cfgFilePath;
   if(access(configFilename.c_str(), F_OK) != 0) {
-    // If not found, look for .cap32.cfg in the home of current user
-    configFilename = std::string(getenv("HOME")) + "/.cap32.cfg";
-    // If still not found, look for cap32.cfg in /etc
-    if(!forWrite && access(configFilename.c_str(), F_OK) != 0) {
-      configFilename = "/etc/cap32.cfg";
-    }
+     // If not found, cap32.cfg in the same directory as the executable
+     configFilename = std::string(chAppPath) + "/cap32.cfg";
+     // If not found, look for .cap32.cfg in the home of current user
+     if (access(configFilename.c_str(), F_OK) != 0) {
+        configFilename = std::string(getenv("HOME")) + "/.cap32.cfg";
+        // If still not found, look for cap32.cfg in /etc
+        if (!forWrite && access(configFilename.c_str(), F_OK) != 0) {
+           configFilename = "/etc/cap32.cfg";
+        }
+     }
   }
   std::cout << "Using configuration file" << (forWrite ? " to save" : "") << ": " << configFilename << std::endl;
   return configFilename;
@@ -3333,7 +3338,6 @@ int cap32_main (int argc, char **argv)
    bool bolDone;
    SDL_Event event;
    std::vector<std::string> slot_list;
-   struct capriceArgs args;
 
    parseArguments(argc, argv, slot_list, args);
 
@@ -3348,7 +3352,7 @@ int cap32_main (int argc, char **argv)
       exit(-1);
    }
 
-   loadConfiguration(CPC, args.cfgFilePath != "" ? args.cfgFilePath : getConfigurationFilename()); // retrieve the emulator configuration
+   loadConfiguration(CPC, getConfigurationFilename()); // retrieve the emulator configuration
    if (CPC.printer) {
       if (!printer_start()) { // start capturing printer output, if enabled
          CPC.printer = 0;

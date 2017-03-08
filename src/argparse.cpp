@@ -13,9 +13,9 @@ const struct option long_options[] =
    {nullptr, 0, nullptr, 0},
 };
 
-void initArgs(struct capriceArgs& args)
+CapriceArgs::CapriceArgs(void) :
+   cfgFilePath("") // Unneeded as string are initialized empty. But kept here for clarity.
 {
-   args.cfgFilePath     = "";
 }
 
 void usage(std::ostream &os, char *progPath, int errcode)
@@ -37,12 +37,11 @@ void usage(std::ostream &os, char *progPath, int errcode)
    exit(errcode);
 }
 
-void parseArguments(int argc, char **argv, std::vector<std::string>& slot_list, struct capriceArgs& args)
+void parseArguments(int argc, char **argv, std::vector<std::string>& slot_list, CapriceArgs& args)
 {
    int option_index = 0;
    int c;
 
-   initArgs(args);
    optind = 0; // To please test framework, when this function is called multiple times !
    while(1) {
       c = getopt_long (argc, argv, "c:hV",

@@ -6,7 +6,7 @@
 TEST(ArgParseTest, parseArgsNoArg)
 {
    const char *argv[] = {"./cap32"};
-   struct capriceArgs args;
+   CapriceArgs args;
    std::vector<std::string> slot_list;
 
    parseArguments(1, const_cast<char **>(argv), slot_list, args);
@@ -17,7 +17,7 @@ TEST(ArgParseTest, parseArgsNoArg)
 TEST(ArgParseTest, parseArgsOneArg)
 {
    const char *argv[] = {"./cap32", "./foo.dsk"};
-   struct capriceArgs args;
+   CapriceArgs args;
    std::vector<std::string> slot_list;
 
    parseArguments(2, const_cast<char **>(argv), slot_list, args);
@@ -29,7 +29,7 @@ TEST(ArgParseTest, parseArgsOneArg)
 TEST(ArgParseTest, parseArgsSeveralArgs)
 {
    const char *argv[] = {"./cap32", "./foo.dsk", "bar.zip", "0", "__"};
-   struct capriceArgs args;
+   CapriceArgs args;
    std::vector<std::string> slot_list;
 
    parseArguments(5, const_cast<char **>(argv), slot_list, args);
@@ -42,7 +42,7 @@ TEST(ArgParseTest, parseArgsSeveralArgs)
 TEST (argParseTest, cfgFileArgsSwitch)
 {
    const char *argv[] = {"./caprice32", "--cfg_file=/home/caprice32/cap32.cfg"};
-   struct capriceArgs args;
+   CapriceArgs args;
    std::vector<std::string> slot_list;
 
    parseArguments(2, const_cast<char **>(argv), slot_list, args);
