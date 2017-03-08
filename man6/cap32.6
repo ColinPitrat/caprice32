@@ -1,0 +1,95 @@
+.TH cap32 6 "March 2017"
+.SH NAME
+cap32 - Caprice32 Amstrad CPC emulator
+
+.SH SYNOPSIS
+.B cap32
+[\fI\,OPTION\/\fR]... [\fI\,FILE\/\fR]...
+
+.SH DESCRIPTION
+\fBCaprice32\fR is an Amstrad CPC emulator. It emulates the Amstrad CPC464, 664, 6128 and 6128+ home computers.
+
+.PP
+\fBMedia loading\fR
+.RS
+Upon invocation, the FILEs specified as arguments will be used to populate the various available CPC machine slots. The type of slot is determined by the file format, detected by its extension. Caprice32 supports the following file formats:
+\fR\fB.dsk\fR (disk image), \fR\fB.voc\fR or \fB.cdt\fR (tape image), \fR\fB.cpr\fR (cartridge image), \fR\fB.sna\fR (snapshot image), \fR\fB.zip\fR (ZIP archive containing any number of previously described files). Specifying slot content on the command line is optional.
+.RE
+
+.PP
+\fBConfiguration\fR
+.RS
+When launched, Caprice32 will look for a configuration file in several locations. If a configuration file was specified using the \fB\-\-cfg_file\fR command line switch, Caprice32 will try and use it. If no configuration file was specified, or the configuration file specified does not exist, Caprice32 will try and open, in this order: \fB$CWD/cap32.cfg\fR ($CWD being the directory where the cap32 executable resides), then a \fB.cap32.cfg\fR file in the user home directory, then \fB/etc/cap32.cfg\fR. Caprice32 will use the first valid file it finds. If no configuration file is found, a default configuration will be used.
+.PP
+The configuration file contains various configuration parameters, some of which can be modified from the GUI.
+When saving the configuration from the GUI, it will be written in the configuration file specified by the \fB\-\-cfg_file\fR switch, if it exists, else in $CWD/cap32.cfg if it exists, otherwise in $HOME/.cap32.cfg.
+.RE
+
+.PP
+\fBControl\fR
+.RS
+Emulator functionalities are available through function keys (F1-F12). As CPC also had function keys, those are emulated by keys from the numpad. This makes sense since their disposition on the CPC keyboard was similar to the numpad. If your computer doesn't have a numpad (e.g laptop that doesn't support it with Fn key) the only way to access the CPC F1-F10 keys is through the virtual keyboard.
+.PP
+The emulator function key mapping is:
+.RS
+.br
+\fR\fBF1\fR - Show GUI (and pause the emulator)
+.br
+\fR\fBF2\fR - Toggle fullscreen / windowed mode
+.br
+\fR\fBF4\fR - Press tape reader play key
+.br
+\fR\fBF5\fR - Reset the emulator
+.br
+\fR\fBF6\fR - Multiface II stop (advanced users only)
+.br
+\fR\fBF7\fR - Toggle joystick emulation
+.br
+\fR\fBF8\fR - Toggle FPS display
+.br
+\fR\fBF9\fR - Toggle speed limitation
+.br
+\fR\fBF10\fR - Exit the emulator
+.br
+\fR\fBF12\fR - Toggle debug mode
+.br
+\fR\fBShift+F1\fR - Show virtual keyboard
+.RE
+.RE
+
+." Missing sections to add:
+." Multiface 2 invocation
+." Memory tool usage
+." Slot loading order
+." Etc.
+
+.SH OPTIONS
+.PP
+.TP
+\fB\-c\fR, \fB\-\-cfg_file\fR=\fI\,FILE\/\fR
+use FILE as the emulator configuration file.
+.TP
+\fB\-h\fR, \fB\-\-help\fR
+display short help and exits
+.TP
+\fB\-V\fR, \fB\-\-version\fR
+display Caprice32 version and exits
+
+.SH BUGS
+CPC6128+ emulation is incomplete: vectored & DMA interrupts, analog joysticks and 8 bit printer are not emulated.
+.PP
+See https://github.com/ColinPitrat/caprice32/issues for the list of reported bugs.
+
+.SH AUTHOR
+.PP
+Caprice32 was originally written by Ulrich Doewich.
+.PP
+This man page covers Colin Pitrat's fork of Caprice32.
+
+.SH FILES
+$HOME/.cap32.cfg
+.br
+/etc/cap32.cfg
+
+.SH SEE ALSO
+https://github.com/ColinPitrat/caprice32
