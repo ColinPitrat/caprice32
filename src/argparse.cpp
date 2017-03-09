@@ -64,6 +64,17 @@ void parseArguments(int argc, char **argv, std::vector<std::string>& slot_list, 
 
          case 'V':
             std::cout << "Caprice32 " << VERSION_STRING << "\n";
+            std::cout << "Compiled with:"
+#ifdef HAVE_GL
+                      << " HAVE_GL"
+#endif
+#ifdef HAVE_PNG
+                      << " HAVE_PNG"
+#endif
+#ifdef DEBUG
+                      << " DEBUG"
+#endif
+                      << "\n";
             exit(0);
             break;
 
