@@ -99,7 +99,7 @@ To build with default options, use:
 # Using the source
 
 The source for Caprice32 is distributed under the terms of the GNU General Public License version 2 (GPLv2), which is included in this archive as COPYING.txt. Please make sure that you understand the terms and conditions of the license before using the source.
-The screen dump part of Caprice32 uses driedfruit SDL_SavePNG code, released under zlib/libpng license, which is compatible with GPLv2.
+The screen dump part of Caprice32 uses [driedfruit SDL_SavePNG] (https://github.com/driedfruit/SDL_SavePNG) code, released under zlib/libpng license, which is compatible with GPLv2.
 I encourage you to get involved in the project.
 
 # Comments or ready to contribute?
