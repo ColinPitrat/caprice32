@@ -18,7 +18,6 @@ CapriceAbout::CapriceAbout(const CRect& WindowRect, CWindow* pParent, CFontEngin
 	m_pMessageLabel = new CLabel(CPoint(5, 90), this, "F1 - Menu / Pause");
 	m_pMessageLabel = new CLabel(CPoint(5, 100), this, "F2 - Fullscreen");
 	m_pMessageLabel = new CLabel(CPoint(5, 110), this, "F3 - Save screenshot");
-	//m_pMessageLabel = new CLabel(CPoint(5, 120), this, "F3 - Load/Save disk/tape/snapshot/screenshot");
 	m_pMessageLabel = new CLabel(CPoint(5, 120), this, "F4 - Tape play");
 	m_pMessageLabel = new CLabel(CPoint(5, 130), this, "F5 - Reset");
 	m_pMessageLabel = new CLabel(CPoint(5, 140), this, "F6 - Multiface II Stop");
