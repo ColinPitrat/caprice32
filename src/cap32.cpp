@@ -2063,6 +2063,7 @@ int emulator_patch_ROM (void)
       }
    }
 
+   // Patch ROM for non-english keyboards
    if (CPC.keyboard) {
       pbPtr = pbROMlo;
       switch(CPC.model) {
