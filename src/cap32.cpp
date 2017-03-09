@@ -18,6 +18,7 @@
 
 #include <iostream>
 #include <sstream>
+#include <sys/stat.h>
 
 #include "SDL.h"
 
@@ -43,6 +44,10 @@
 
 #include "errors.h"
 #include "log.h"
+
+#ifdef HAVE_PNG
+#include "savepng.h"
+#endif
 
 #define MAX_LINE_LEN 256
 
@@ -3074,7 +3079,7 @@ void loadConfiguration (t_CPC &CPC, const std::string& configFilename)
       }
    }
    CPC.printer_file = conf.getStringValue("file", "printer_file", appPath + "/printer.dat");
-   CPC.sdump_file = conf.getStringValue("file", "sdump_file", appPath + "/screen.png");
+   CPC.sdump_dir = conf.getStringValue("file", "sdump_dir", appPath + "/screenshots");
 
    CPC.rom_path = conf.getStringValue("rom", "rom_path", appPath + "/rom/");
    for (int iRomNum = 0; iRomNum < 16; iRomNum++) { // loop for ROMs 0-15
@@ -3154,7 +3159,7 @@ void saveConfiguration (t_CPC &CPC, const std::string& configFilename)
       conf.setStringValue("file", chFmtId, serializeDiskFormat(disk_format[iFmt]));
    }
    conf.setStringValue("file", "printer_file", CPC.printer_file);
-   conf.setStringValue("file", "sdump_file", CPC.sdump_file);
+   conf.setStringValue("file", "sdump_dir", CPC.sdump_dir);
 
    conf.setStringValue("rom", "rom_path", CPC.rom_path);
    for (int iRomNum = 0; iRomNum < 16; iRomNum++) { // loop for ROMs 0-15
@@ -3330,7 +3335,25 @@ void set_osd_message(const std::string& message) {
    osd_message = " " + message;
 }
 
+#ifdef HAVE_PNG
+void dumpScreen(void) {
+   static int dump_num=0;
+   struct stat _stat;
 
+   if (stat(CPC.sdump_dir.c_str(), &_stat) == 0) {
+      if (S_ISDIR(_stat.st_mode)) {
+         SDL_Surface* shot;
+         shot = SDL_PNGFormatAlpha(back_surface);
+         std::string dumpPath = CPC.sdump_dir + "/" + std::string("dump") + std::to_string(dump_num) + ".png";
+         LOG_DEBUG("Dumping screen to " + dumpPath);
+         SDL_SavePNG(shot, dumpPath.c_str());
+         dump_num++;
+         return;
+      }
+   }
+   LOG_ERROR("Unable to find or open directory " + CPC.sdump_dir + " when trying to take a screenshot.");
+}
+#endif
 
 int cap32_main (int argc, char **argv)
 {
@@ -3538,6 +3561,14 @@ int cap32_main (int argc, char **argv)
                               exit(-1);
                            }
                            audio_resume();
+                           break;
+
+                        case CAP32_SCRNDUMP:
+#ifdef HAVE_PNG
+                           CPC.paused |= 1;
+                           dumpScreen();
+                           CPC.paused &= ~1;
+#endif
                            break;
 
                         case CAP32_TAPEPLAY:
@@ -3855,3 +3886,4 @@ int cap32_main (int argc, char **argv)
 
    exit(0);
 }
+
