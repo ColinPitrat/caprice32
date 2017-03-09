@@ -3351,7 +3351,7 @@ void dumpScreen(void) {
          return;
       }
    }
-   LOG_DEBUG("Unable to find or open directory " + CPC.sdump_dir + " when trying to take a screenshot.");
+   LOG_ERROR("Unable to find or open directory " + CPC.sdump_dir + " when trying to take a screenshot.");
 }
 #endif
 
