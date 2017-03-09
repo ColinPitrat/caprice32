@@ -34,47 +34,7 @@ You see something missing ? Do not hesitate to open an issue to suggest it.
 
 # Basic usage
 
-## Controls
-
-Emulator functionalities are available through function keys (F1-F12).
-As CPC also had function keys, they are emulated by keys from the numpad (which makes sense because their disposition on the CPC was similar to the numpad).
-If your computer doesn't have a numpad (e.g laptop that doesn't support it with Fn key) the only way to access the CPC F1-F10 keys is through the virtual keyboard.
-
-F1 - Show GUI (and pause the emulator)
-F2 - Toggle fullscreen / windowed mode
-F4 - Press play for tape
-F5 - Reset
-F6 - Multiface II Stop (advanced users only)
-F7 - Toggle joystick emulation (when active, keyboard arrows, Z and X are remapped to emulate joystick 1 of the CPC - real joysticks are disabled)
-F8 - Toggle display of FPS
-F9 - Toggle limitation of speed (you may want it when loading from a tape ! or for benchmarking)
-F10 - Quit
-F12 - Toggle debug mode (more verbose with debug build)
-
-Shift + F1 - Show Virtual Keyboard (useful if you have no keyboard or don't find the key you want to press on it)
-
-## Loading a media (disk/tape/cartridge...)
-
-Simplest solution is to launch the emulator specifying the image you want to use:
-
-`cap32 /path/to/mydisk.dsk`
-
-In a desktop environment, you can usually achieve the same result by drag & dropping the icon of the file on the icon of the emulator.
-
-
-You can also load a media in the emulator while it is running through the menu. Press F1 to show the GUI and select 'Load/Save'.
-Choose the file type you want to load and select it from the box below.
-You can configure the default directory for each type of media from the configuration file.
-
-## Configuration file
-
-When starting, cap32 is looking for a configuration file in the following directories (taking the first one that matches):
-  * $CWD/cap32.cfg ($CWD being the directory where cap32 is situated)
-  * $HOME/.cap32.cfg ($HOME being the user's home directory)
-  * /etc/cap32.cfg
-
-The file contain various configuration parameters, some of which can be modified from the GUI.
-When saving the configuration from the GUI, it will be written in $CWD/cap32.cfg if it exists, otherwise in $HOME/.cap32.cfg.
+See the manual page for invocation arguments, key mapping, and other details. If you are really lost, you can simply invoke the emulator without any argument, then press F1 to get the in-emulator menu.
 
 # Help needed
 
@@ -117,7 +77,7 @@ For example, for a debug build, use:
 
 To build a debian package on Debian/Ubuntu distributions install the dependencies as mentioned above and the dpkg-dev package:
 
-`sudo install dpkg-dev`
+`sudo apt-get install dpkg-dev`
 
 Then build the package with the following command:
 
