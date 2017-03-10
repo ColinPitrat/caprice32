@@ -3,6 +3,8 @@
  *
  * This code is free software, available under zlib/libpng license.
  * http://www.libpng.org/pub/png/src/libpng-LICENSE.txt
+ * Code was copied and slightly adapted from driedfruit savepng.
+ * See https://github.com/driedfruit/SDL_SavePNG
  */
 #include <SDL.h>
 #include <png.h>
