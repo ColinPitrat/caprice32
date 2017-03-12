@@ -55,9 +55,9 @@ extern t_CPC CPC;
 #endif
 
 // checks for an OpenGL extension
+#ifdef HAVE_GL
 static bool have_gl_extension (const char *nom_ext)
 {
-#ifdef HAVE_GL
    const char *ext;
    ext = reinterpret_cast<const char *> (eglGetString (GL_EXTENSIONS));
    const char *f;
@@ -71,9 +71,9 @@ static bool have_gl_extension (const char *nom_ext)
          return true;
       ext += (n + 1);
    }
-#endif
    return false;
 }
+#endif
 
 // computes the clipping of two rectangles and changes src and dst accordingly
 // dst is the screen
