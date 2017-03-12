@@ -10,7 +10,10 @@ TSTDIR:=test
 MAIN:=$(OBJDIR)/main.o
 WINMAIN:=$(OBJDIR)/main.os
 
-SOURCES:=$(shell find $(SRCDIR) -name \*.cpp)
+SOURCES:=$(shell find $(SRCDIR) -name \*.cpp ! \( -name savepng.cpp \))
+ifndef WITHOUT_PNG
+SOURCES += $(SRCDIR)/savepng.cpp
+endif
 DEPENDS:=$(foreach file,$(SOURCES:.cpp=.d),$(shell echo "$(OBJDIR)/$(file)"))
 OBJECTS:=$(DEPENDS:.d=.o)
 WINOBJECTS:=$(DEPENDS:.d=.os)
@@ -54,6 +57,10 @@ ifndef WITHOUT_GL
 CFLAGS += -DHAVE_GL
 endif
 
+ifndef WITHOUT_PNG
+CFLAGS += -DHAVE_PNG
+LIBS += -lpng
+endif
 
 ifdef DEBUG
 BUILD_FLAGS=$(DEBUG_FLAGS)

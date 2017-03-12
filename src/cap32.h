@@ -284,7 +284,7 @@ typedef struct {
    std::string tape_file;
    bool tape_zip;
    std::string printer_file;
-   std::string sdump_file;
+   std::string sdump_dir;
 
    std::string rom_path;
    std::string rom_file[16];

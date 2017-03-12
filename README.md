@@ -55,6 +55,7 @@ You will need the following to successfully compile an executable:
   * SDL - http://www.libsdl.org/index.php
   * FreeType - https://www.freetype.org/
   * zLib - http://www.gzip.org/zlib/
+  * libPNG (optional) - http://libpng.org/pub/png/libpng.html
 
 # Compiling
 
@@ -68,6 +69,7 @@ The following options are available:
 
  * `DEBUG=TRUE`
  * `WITHOUT_GL=TRUE`
+ * `WITHOUT_PNG=TRUE`
 
 For example, for a debug build, use:
 
@@ -96,8 +98,8 @@ To build with default options, use:
 
 # Using the source
 
-The source for Caprice32 is distributed under the terms of the GNU General Public License (GNU GPL), which is included in this archive as COPYING.txt. Please make sure that you understand the terms and conditions of the license before using the source.
-
+The source for Caprice32 is distributed under the terms of the GNU General Public License version 2 (GPLv2), which is included in this archive as COPYING.txt. Please make sure that you understand the terms and conditions of the license before using the source.
+The screen dump part of Caprice32 uses [driedfruit SDL_SavePNG] (https://github.com/driedfruit/SDL_SavePNG) code, released under zlib/libpng license, which is compatible with GPLv2.
 I encourage you to get involved in the project.
 
 # Comments or ready to contribute?
@@ -106,7 +108,7 @@ If you have suggestions, a bug report or even want to participate to the develop
 
 # Why another GitHub repository ?
 
-There are many repository for caprice32 on GitHub:
+There are many repositories for caprice32 on GitHub:
 
   * https://github.com/burzumishi/caprice32
   * https://github.com/rofl0r/caprice32
@@ -115,4 +117,4 @@ There are many repository for caprice32 on GitHub:
   * https://github.com/egrath/caprice32-mod
   * https://github.com/burzumishi/caprice32wx
 
-So why create another one ? All these repositories are highly inactive but more than that, in my opinion, they took a wrong direction. Some added dependencies (wxWidget, GTK) without really adding feature. Two imported the code but did not do any update.
+So why create another one ? All these repositories are highly inactive but more than that, in my opinion, they took a wrong direction. Some added dependencies (wxWidget, GTK) without really adding features. Two imported the code but did not do any update.
