@@ -4,7 +4,7 @@ cap32 - Caprice32 Amstrad CPC emulator
 
 .SH SYNOPSIS
 .B cap32
-[\fI\,OPTION\/\fR]... [\fI\,FILE\/\fR]...
+[\fIOPTION\fR]... [\fIFILE\fR]...
 
 .SH DESCRIPTION
 \fBCaprice32\fR is an Amstrad CPC emulator. It emulates the Amstrad CPC464, 664, 6128 and 6128+ home computers.
@@ -14,6 +14,8 @@ cap32 - Caprice32 Amstrad CPC emulator
 .RS
 Upon invocation, the FILEs specified as arguments will be used to populate the various available CPC machine slots. The type of slot is determined by the file format, detected by its extension. Caprice32 supports the following file formats:
 \fR\fB.dsk\fR (disk image), \fR\fB.voc\fR or \fB.cdt\fR (tape image), \fR\fB.cpr\fR (cartridge image), \fR\fB.sna\fR (snapshot image), \fR\fB.zip\fR (ZIP archive containing any number of previously described files). Specifying slot content on the command line is optional.
+.PP
+Caprice32 supports two disk drives (drive A and drive B). If two disk image files (.dsk) are provided, the first one will be loaded in drive A and the second one in drive B.
 .RE
 
 .PP
@@ -23,13 +25,17 @@ When launched, Caprice32 will look for a configuration file in several locations
 .PP
 The configuration file contains various configuration parameters, some of which can be modified from the GUI.
 When saving the configuration from the GUI, it will be written in the configuration file specified by the \fB\-\-cfg_file\fR switch, if it exists, else in $CWD/cap32.cfg if it exists, otherwise in $HOME/.cap32.cfg.
+.PP
+Most of the configuration file entries are commented in the configuration file provided by default with Caprice32. However, when overwriting the configuration file from the emulator menu, all comments will be lost.
 .RE
 
 .PP
 \fBControl\fR
 .RS
 Emulator functionalities are available through function keys (F1-F12). As CPC also had function keys, those are emulated by keys from the numpad. This makes sense since their disposition on the CPC keyboard was similar to the numpad. If your computer doesn't have a numpad (e.g laptop that doesn't support it with Fn key) the only way to access the CPC F1-F10 keys is through the virtual keyboard.
+.RE
 .PP
+.RS
 The emulator function key mapping is:
 .RS
 .br
@@ -63,7 +69,16 @@ The emulator function key mapping is:
 \fBJoystick support\fR
 .RS
 Joystick emulation can be turned on with the F7 key. When joystick emulation is on, real joysticks are disabled, and the keyboard arrows (directions) as well as X and Z (fire buttons) keys are remapped to emulate the joystick 1 of the CPC machine.
+.PP
+Caprice32 can also be controlled completely from the joystick. The configuration file \fBjoystick_menu_button\fR and \fBjoystick_vkeyboard_button\fR entries allow binding menu and virtual keyboard invocations to some of the (host) joystick button.
 .RE
+
+.PP
+\fBKeyboard mapping\fR
+.RS
+Caprice32 supports CPC English, French and Spanish keyboard layouts. The CPC keyboard layout is defined in the configuration file by the \fBkeyboard\fR entry (0: English, 1: French, 2: Spanish). Additionally one can define the layout of the host keyboard in the configuration file, using \fBkbd_layout\fR entry. \fBkbd_layout\fR supports the same three values as \fBkeyboard\fR and should remap properly the most current keys found on English (US and UK), French and Spanish keyboards.
+.RE
+
 
 ." Missing sections to add:
 ." Multiface 2 invocation
@@ -74,7 +89,7 @@ Joystick emulation can be turned on with the F7 key. When joystick emulation is 
 .SH OPTIONS
 .PP
 .TP
-\fB\-c\fR, \fB\-\-cfg_file\fR=\fI\,FILE\/\fR
+\fB\-c\fR, \fB\-\-cfg_file\fR=\fIFILE\fR
 use FILE as the emulator configuration file.
 .TP
 \fB\-h\fR, \fB\-\-help\fR
@@ -83,6 +98,11 @@ display short help and exits
 \fB\-V\fR, \fB\-\-version\fR
 display Caprice32 version and exits
 
+.SH EXAMPLES
+.PP
+cap32 ./disk/sorcery.dsk ./trail.dsk
+.RS
+Launches cap32, loads the content of ./disk/sorcery.dsk in the drive A slot, and ./trail.dsk in the drive B slot.
 .SH BUGS
 CPC6128+ emulation is incomplete: vectored & DMA interrupts, analog joysticks and 8 bit printer are not emulated.
 .PP
@@ -103,4 +123,5 @@ $HOME/.cap32.cfg
 
 .SH SEE ALSO
 https://github.com/ColinPitrat/caprice32
+.br
 https://github.com/driedfruit/SDL_SavePNG
