@@ -34,7 +34,7 @@ You see something missing ? Do not hesitate to open an issue to suggest it.
 
 # Basic usage
 
-See the manual page for invocation arguments, key mapping, and other details. If you are really lost, you can simply invoke the emulator without any argument, then press F1 to get the in-emulator menu.
+See the [manual page](http://htmlpreview.github.io/?https://github.com/ColinPitrat/caprice32/blob/master/doc/man.html) for more details. If you are really lost, you can simply invoke the emulator without any argument, then press F1 to get the in-emulator menu.
 
 # Help needed
 
