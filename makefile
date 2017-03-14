@@ -7,6 +7,9 @@ OBJDIR:=obj
 SRCDIR:=src
 TSTDIR:=test
 
+HTML_DOC:=doc/man.html
+GROFF_DOC:=doc/man6/cap32.6
+
 MAIN:=$(OBJDIR)/main.o
 WINMAIN:=$(OBJDIR)/main.os
 
@@ -87,7 +90,7 @@ $(OBJECTS): $(OBJDIR)/%.o: %.cpp
 $(WINOBJECTS): $(OBJDIR)/%.os: %.cpp
 	$(WINCXX) -c $(BUILD_FLAGS) $(WINCFLAGS) -o $@ $<
 
-debug: debug_flag tags cap32 unit_test debug_flag
+debug: debug_flag tags cap32 unit_test
 
 debug_flag:
 ifdef FORCED_DEBUG
@@ -102,6 +105,11 @@ check_deps:
 
 tags:
 	@ctags -R . || echo -e "!!!!!!!!!!!\n!! Warning: ctags not found - if you are a developer, you might want to install it.\n!!!!!!!!!!!"
+
+doc: $(HTML_DOC)
+
+$(HTML_DOC): $(GROFF_DOC)
+	man2html $< > $@
 
 cap32: $(OBJECTS) $(MAIN)
 	$(CXX) $(LDFLAGS) -o cap32 $(OBJECTS) $(MAIN) $(LIBS)
