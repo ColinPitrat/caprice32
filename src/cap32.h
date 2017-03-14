@@ -272,11 +272,10 @@ typedef struct {
    std::string cart_path;
    std::string cart_file;
    bool cart_zip;
-   std::string drvA_path;
+   std::string dsk_path;
    std::string drvA_file;
    bool drvA_zip;
    unsigned int drvA_format;
-   std::string drvB_path;
    std::string drvB_file;
    bool drvB_zip;
    unsigned int drvB_format;

@@ -138,13 +138,13 @@ void fillSlots (std::vector<std::string> slot_list, t_CPC& CPC)
          if (extension == ".dsk") {
             if(!have_DSKA) {
                LOG_DEBUG("Loading " << dirname << filename << " in drive A");
-               CPC.drvA_path = dirname;
+               CPC.dsk_path = dirname;
                CPC.drvA_file = filename;
                CPC.drvA_zip = (zip ? 1 : 0);
                have_DSKA = true;
             } else if(!have_DSKB) {
                LOG_DEBUG("Loading " << dirname << filename << " in drive B");
-               CPC.drvB_path = dirname;
+               CPC.dsk_path = dirname;
                CPC.drvB_file = filename;
                CPC.drvB_zip = (zip ? 1 : 0);
                have_DSKB = true;

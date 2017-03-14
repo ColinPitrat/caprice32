@@ -12,9 +12,8 @@ TEST(Cap32Test, fillSlotsNoArg)
 
   ASSERT_EQ("", CPC.cart_path);
   ASSERT_EQ("", CPC.cart_file);
-  ASSERT_EQ("", CPC.drvA_path);
+  ASSERT_EQ("", CPC.dsk_path);
   ASSERT_EQ("", CPC.drvA_file);
-  ASSERT_EQ("", CPC.drvB_path);
   ASSERT_EQ("", CPC.drvB_file);
   ASSERT_EQ("", CPC.tape_path);
   ASSERT_EQ("", CPC.tape_file);
@@ -31,10 +30,9 @@ TEST(Cap32Test, fillSlotsOneLocalDskFile)
 
   ASSERT_EQ("", CPC.cart_path);
   ASSERT_EQ("", CPC.cart_file);
-  ASSERT_EQ("./", CPC.drvA_path);
+  ASSERT_EQ("./", CPC.dsk_path);
   ASSERT_EQ("test.dsk", CPC.drvA_file);
   ASSERT_EQ(0, CPC.drvA_zip);
-  ASSERT_EQ("", CPC.drvB_path);
   ASSERT_EQ("", CPC.drvB_file);
   ASSERT_EQ("", CPC.tape_path);
   ASSERT_EQ("", CPC.tape_file);
@@ -51,10 +49,9 @@ TEST(Cap32Test, fillSlotsTwoDskFiles)
 
   ASSERT_EQ("", CPC.cart_path);
   ASSERT_EQ("", CPC.cart_file);
-  ASSERT_EQ("/tmp/", CPC.drvA_path);
+  ASSERT_EQ("/var/", CPC.dsk_path);
   ASSERT_EQ("foo.dsk", CPC.drvA_file);
   ASSERT_EQ(0, CPC.drvA_zip);
-  ASSERT_EQ("/var/", CPC.drvB_path);
   ASSERT_EQ("bar.dsk", CPC.drvB_file);
   ASSERT_EQ(0, CPC.drvB_zip);
   ASSERT_EQ("", CPC.tape_path);
@@ -72,9 +69,8 @@ TEST(Cap32Test, fillSlotsOneLocalCdtFile)
 
   ASSERT_EQ("", CPC.cart_path);
   ASSERT_EQ("", CPC.cart_file);
-  ASSERT_EQ("", CPC.drvA_path);
+  ASSERT_EQ("", CPC.dsk_path);
   ASSERT_EQ("", CPC.drvA_file);
-  ASSERT_EQ("", CPC.drvB_path);
   ASSERT_EQ("", CPC.drvB_file);
   ASSERT_EQ("./", CPC.tape_path);
   ASSERT_EQ("test.cdt", CPC.tape_file);
@@ -92,9 +88,8 @@ TEST(Cap32Test, fillSlotsOneLocalVocFile)
 
   ASSERT_EQ("", CPC.cart_path);
   ASSERT_EQ("", CPC.cart_file);
-  ASSERT_EQ("", CPC.drvA_path);
+  ASSERT_EQ("", CPC.dsk_path);
   ASSERT_EQ("", CPC.drvA_file);
-  ASSERT_EQ("", CPC.drvB_path);
   ASSERT_EQ("", CPC.drvB_file);
   ASSERT_EQ("./", CPC.tape_path);
   ASSERT_EQ("test.voc", CPC.tape_file);
@@ -112,9 +107,8 @@ TEST(Cap32Test, fillSlotsOneLocalSnaFile)
 
   ASSERT_EQ("", CPC.cart_path);
   ASSERT_EQ("", CPC.cart_file);
-  ASSERT_EQ("", CPC.drvA_path);
+  ASSERT_EQ("", CPC.dsk_path);
   ASSERT_EQ("", CPC.drvA_file);
-  ASSERT_EQ("", CPC.drvB_path);
   ASSERT_EQ("", CPC.drvB_file);
   ASSERT_EQ("", CPC.tape_path);
   ASSERT_EQ("", CPC.tape_file);
@@ -133,9 +127,8 @@ TEST(Cap32Test, fillSlotsOneCprFile)
   ASSERT_EQ("./", CPC.cart_path);
   ASSERT_EQ("test.cpr", CPC.cart_file);
   ASSERT_EQ(0, CPC.cart_zip);
-  ASSERT_EQ("", CPC.drvA_path);
+  ASSERT_EQ("", CPC.dsk_path);
   ASSERT_EQ("", CPC.drvA_file);
-  ASSERT_EQ("", CPC.drvB_path);
   ASSERT_EQ("", CPC.drvB_file);
   ASSERT_EQ("", CPC.tape_path);
   ASSERT_EQ("", CPC.tape_file);
@@ -153,9 +146,8 @@ TEST(Cap32Test, fillSlotsOneZippedCprFile)
   ASSERT_EQ("test/cartridge/testplus.zip", CPC.cart_path);
   ASSERT_EQ("testplus.cpr", CPC.cart_file);
   ASSERT_EQ(1, CPC.cart_zip);
-  ASSERT_EQ("", CPC.drvA_path);
+  ASSERT_EQ("", CPC.dsk_path);
   ASSERT_EQ("", CPC.drvA_file);
-  ASSERT_EQ("", CPC.drvB_path);
   ASSERT_EQ("", CPC.drvB_file);
   ASSERT_EQ("", CPC.tape_path);
   ASSERT_EQ("", CPC.tape_file);
@@ -172,10 +164,9 @@ TEST(Cap32Test, fillSlotsOneFileOfEachKind)
 
   ASSERT_EQ("/home/", CPC.cart_path);
   ASSERT_EQ("cart.cpr", CPC.cart_file);
-  ASSERT_EQ("/tmp/", CPC.drvA_path);
+  ASSERT_EQ("/tmp/", CPC.dsk_path);
   ASSERT_EQ("foo.dsk", CPC.drvA_file);
   ASSERT_EQ(0, CPC.drvA_zip);
-  ASSERT_EQ("", CPC.drvB_path);
   ASSERT_EQ("", CPC.drvB_file);
   ASSERT_EQ("/var/", CPC.tape_path);
   ASSERT_EQ("bar.cdt", CPC.tape_file);
@@ -194,10 +185,9 @@ TEST(Cap32Test, fillSlotsManyFilesOfEachKind)
 
   ASSERT_EQ("rom/", CPC.cart_path);
   ASSERT_EQ("system.cpr", CPC.cart_file);
-  ASSERT_EQ("/tmp/", CPC.drvA_path);
+  ASSERT_EQ("/var/", CPC.dsk_path);
   ASSERT_EQ("foo.dsk", CPC.drvA_file);
   ASSERT_EQ(0, CPC.drvA_zip);
-  ASSERT_EQ("/var/", CPC.drvB_path);
   ASSERT_EQ("test.dsk", CPC.drvB_file);
   ASSERT_EQ(0, CPC.drvB_zip);
   ASSERT_EQ("/var/", CPC.tape_path);
