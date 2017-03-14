@@ -16,6 +16,8 @@ Upon invocation, the FILEs specified as arguments will be used to populate the v
 \fR\fB.dsk\fR (disk image), \fR\fB.voc\fR or \fB.cdt\fR (tape image), \fR\fB.cpr\fR (cartridge image), \fR\fB.sna\fR (snapshot image), \fR\fB.zip\fR (ZIP archive containing any number of previously described files). Specifying slot content on the command line is optional.
 .PP
 Caprice32 supports two disk drives (drive A and drive B). If two disk image files (.dsk) are provided, the first one will be loaded in drive A and the second one in drive B.
+.PP
+The \fBcart_path\fR, \fBsnap_path\fR, \fBdsk_path\fR and \fBtape_path\fR entries in the configuration file are \fBonly\fR used to specify the directory to open when loading/saving files in the GUI. The full path to the various slot contents must be provided on the command line.
 .RE
 
 .PP
