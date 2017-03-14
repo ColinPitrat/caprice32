@@ -60,6 +60,7 @@ endif
 ifndef WITHOUT_PNG
 CFLAGS += -DHAVE_PNG
 LIBS += -lpng
+WINLIBS += $(MINGW_PATH)/lib/libpng.dll.a
 endif
 
 ifdef DEBUG
@@ -73,7 +74,7 @@ $(MAIN): main.cpp src/cap32.h
 	@$(CXX) -c $(BUILD_FLAGS) $(CFLAGS) -o $(MAIN) main.cpp
 
 $(WINMAIN): main.cpp src/cap32.h
-	@$(WINCXX) -c $(WINCFLAGS) -o $(WINMAIN) main.cpp
+	@$(WINCXX) -c $(BUILD_FLAGS) $(WINCFLAGS) -o $(WINMAIN) main.cpp
 
 $(DEPENDS): $(OBJDIR)/%.d: %.cpp
 	@echo Computing dependencies for $<
@@ -84,7 +85,7 @@ $(OBJECTS): $(OBJDIR)/%.o: %.cpp
 	$(CXX) -c $(BUILD_FLAGS) $(CFLAGS) -o $@ $<
 
 $(WINOBJECTS): $(OBJDIR)/%.os: %.cpp
-	$(WINCXX) -c $(WINCFLAGS) -o $@ $<
+	$(WINCXX) -c $(BUILD_FLAGS) $(WINCFLAGS) -o $@ $<
 
 debug: debug_flag tags cap32 unit_test debug_flag
 
