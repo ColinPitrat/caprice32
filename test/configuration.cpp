@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 #include "cap32.h"
+#include "slotshandler.h"
 #include "configuration.h"
 #include <stdlib.h>
 #include <unistd.h>

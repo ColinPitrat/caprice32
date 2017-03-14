@@ -3,6 +3,7 @@
 
 #include "CapriceLoadSave.h"
 #include "cap32.h"
+#include "slotshandler.h"
 #include "cartridge.h"
 
 #include <iostream>

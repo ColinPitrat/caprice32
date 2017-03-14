@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 
 #include "cap32.h"
+#include "slotshandler.h"
 
 TEST(Cap32Test, fillSlotsNoArg)
 {
