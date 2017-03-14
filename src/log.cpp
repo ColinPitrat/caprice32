@@ -1,3 +1,3 @@
 #include "log.h"
 
-bool log_verbose = false;
+bool log_verbose = true;

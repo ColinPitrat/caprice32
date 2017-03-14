@@ -1714,11 +1714,8 @@ void loadConfiguration (t_CPC &CPC, const std::string& configFilename)
 
    CPC.max_tracksize = conf.getIntValue("file", "max_track_size", 6144-154);
    CPC.snap_path = conf.getStringValue("file", "snap_path", appPath + "/snap/");
-   CPC.snap_file = conf.getStringValue("file", "snap_file", "");
-   CPC.snap_zip = conf.getIntValue("file", "snap_zip", 0) & 1;
    CPC.cart_path = conf.getStringValue("file", "cart_path", appPath + "/rom/");
-   CPC.cart_file = conf.getStringValue("file", "cart_file", "system.cpr");
-   CPC.cart_zip = conf.getIntValue("file", "cart_zip", 0) & 1;
+   CPC.cart_file = "system.cpr"; // Default one
    CPC.dsk_path = conf.getStringValue("file", "dsk_path", appPath + "/disk/");
    CPC.tape_path = conf.getStringValue("file", "tape_path", appPath + "/tape/");
 
@@ -1793,18 +1790,10 @@ void saveConfiguration (t_CPC &CPC, const std::string& configFilename)
 
    conf.setIntValue("file", "max_track_size", CPC.max_tracksize);
    conf.setStringValue("file", "snap_path", CPC.snap_path);
-   conf.setStringValue("file", "snap_file", CPC.snap_file);
-   conf.setIntValue("file", "snap_zip", CPC.snap_zip);
    conf.setStringValue("file", "dsk_path", CPC.dsk_path);
-   conf.setStringValue("file", "drvA_file", CPC.drvA_file);
-   conf.setIntValue("file", "drvA_zip", CPC.drvA_zip);
    conf.setIntValue("file", "drvA_format", CPC.drvA_format);
-   conf.setStringValue("file", "drvB_file", CPC.drvB_file);
-   conf.setIntValue("file", "drvB_zip", CPC.drvB_zip);
    conf.setIntValue("file", "drvB_format", CPC.drvB_format);
    conf.setStringValue("file", "tape_path", CPC.tape_path);
-   conf.setStringValue("file", "tape_file", CPC.tape_file);
-   conf.setIntValue("file", "tape_zip", CPC.tape_zip);
 
    for (int iFmt = FIRST_CUSTOM_DISK_FORMAT; iFmt < MAX_DISK_FORMAT; iFmt++) { // loop through all user definable disk formats
       char chFmtId[14];
@@ -1986,10 +1975,11 @@ int cap32_main (int argc, char **argv)
       CPC.joysticks = 0;
    }
 
-   #ifdef DEBUG
+#ifdef DEBUG
    pfoDebug = fopen("./debug.txt", "wt");
-   #endif
+#endif
 
+   // Extract files to be loaded from the command line args 
    fillSlots(slot_list, CPC);
 
    // emulator_init must be called before loading files as they require
@@ -1999,56 +1989,8 @@ int cap32_main (int argc, char **argv)
       exit(-1);
    }
 
-   // TODO(cpitrat): refactor this: duplication + should be tested + cleanup
-   memset(&driveA, 0, sizeof(t_drive)); // clear disk drive A data structure
-   if (!CPC.drvA_file.empty()) { // insert disk in drive A?
-     if (CPC.drvA_zip) { // compressed image?
-       FILE *file = extractFile(CPC.dsk_path, CPC.drvA_file, ".dsk");
-       if (file) {
-         dsk_load(file, &driveA);
-         fclose(file);
-       }
-     } else {
-       dsk_load(CPC.dsk_path + CPC.drvA_file, &driveA);
-     }
-   }
-   memset(&driveB, 0, sizeof(t_drive)); // clear disk drive B data structure
-   if (!CPC.drvB_file.empty()) { // insert disk in drive B?
-     if (CPC.drvB_zip) { // compressed image?
-       FILE *file = extractFile(CPC.dsk_path, CPC.drvB_file, ".dsk");
-       if (file) {
-         dsk_load(file, &driveB);
-         fclose(file);
-       }
-     }
-     else {
-       dsk_load(CPC.dsk_path + CPC.drvB_file, &driveB);
-     }
-   }
-   if (!CPC.tape_file.empty()) { // insert a tape?
-     if (CPC.tape_zip) { // compressed image?
-       FILE *file = extractFile(CPC.tape_path, CPC.tape_file, ".cdt.voc");
-       if (file) {
-         tape_insert(file);
-         fclose(file);
-       }
-     }
-     else {
-       tape_insert(CPC.tape_path + CPC.tape_file);
-     }
-   }
-   if (!CPC.snap_file.empty()) { // load a snapshot ?
-     if (CPC.snap_zip) { // compressed image?
-       FILE *file = extractFile(CPC.snap_path, CPC.snap_file, ".sna");
-       if (file) {
-         snapshot_load(file);
-         fclose(file);
-       }
-     }
-     else {
-       snapshot_load(CPC.snap_path + CPC.snap_file);
-     }
-   }
+   // Really load the various drives, if needed
+   loadSlots();
 
 // ----------------------------------------------------------------------------
 

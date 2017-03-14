@@ -103,13 +103,6 @@
 // TODO: Tune threshold based on different joysticks or make it configurable ?
 #define JOYSTICK_AXIS_THRESHOLD 16384
 
-
-typedef enum {
-  DSK_A,
-  DSK_B,
-  OTHER,
-} DRIVE;
-
 typedef struct {
    char id[8];
    char unused1[8];
@@ -266,22 +259,22 @@ typedef struct {
    unsigned int kbd_layout;
 
    unsigned int max_tracksize;
-   std::string snap_path;
-   std::string snap_file;
-   bool snap_zip;
+
+   std::string snap_path; // Path where images will be loaded/saved by default. Only one exposed in CFG file
+   std::string snap_file; // Path to the actual file (zip or not)
+
    std::string cart_path;
    std::string cart_file;
-   bool cart_zip;
+
    std::string dsk_path;
    std::string drvA_file;
-   bool drvA_zip;
    unsigned int drvA_format;
    std::string drvB_file;
-   bool drvB_zip;
    unsigned int drvB_format;
+
    std::string tape_path;
    std::string tape_file;
-   bool tape_zip;
+
    std::string printer_file;
    std::string sdump_dir;
 

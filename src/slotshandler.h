@@ -16,6 +16,12 @@
    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+typedef enum {
+  DSK_A,
+  DSK_B,
+  OTHER,
+} DRIVE;
+
 FILE *extractFile(const std::string&, const std::string&, const std::string&);
 int snapshot_load (FILE *);
 int snapshot_load (const std::string&);
@@ -38,6 +44,8 @@ int cartridge_load (FILE *file);
 int file_load(const std::string&, const DRIVE);
 // Retrieve files that are passed as argument and update CPC fields so that they will be loaded properly
 void fillSlots (std::vector<std::string>, t_CPC&);
+// Loads slot content in memory
+void loadSlots(void);
 
 #define MAX_DISK_FORMAT          8
 #define DEFAULT_DISK_FORMAT      0
@@ -45,3 +53,4 @@ void fillSlots (std::vector<std::string>, t_CPC&);
 
 t_disk_format parseDiskFormat(const std::string&);
 std::string serializeDiskFormat(const t_disk_format&);
+

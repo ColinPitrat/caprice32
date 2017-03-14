@@ -103,6 +103,12 @@ int file_size (int file_num)
    }
 }
 
+#define FILL_SLOT_INFO(filevar, processedvar, file) \
+    (filevar) = (file); \
+    (processedvar) = true;
+// Parses a list of files and fill in the relevant CPC fields
+// according to what is found.
+// All we do here is fill the proper xxx_file entry.
 void fillSlots (std::vector<std::string> slot_list, t_CPC& CPC)
 {
    bool have_DSKA = false;
@@ -116,11 +122,8 @@ void fillSlots (std::vector<std::string> slot_list, t_CPC& CPC)
       std::string fullpath = stringutils::trim(slot, '"'); // remove quotes if arguments quoted
       if (fullpath.length() > 5) { // minumum for a valid filename
          int pos = fullpath.length() - 4;
-         std::string dirname;
-         std::string filename;
-         bool zip = false;
          std::string extension = stringutils::lower(fullpath.substr(pos));
-         stringutils::splitPath(fullpath, dirname, filename);
+
          if (extension == ".zip") { // are we dealing with a zip archive?
            zip::t_zip_info zip_info;
            zip_info.filename = fullpath;
@@ -128,51 +131,53 @@ void fillSlots (std::vector<std::string> slot_list, t_CPC& CPC)
            if (zip::dir(&zip_info)) {
              continue; // error or nothing relevant found
            } else {
-             dirname = fullpath;
-             filename = zip_info.filesOffsets[0].first;
+             std::string filename = zip_info.filesOffsets[0].first;
              pos = filename.length() - 4;
              extension = filename.substr(pos); // grab the extension
-             zip = true;
            }
          }
-         if (extension == ".dsk") {
-            if(!have_DSKA) {
-               LOG_DEBUG("Loading " << dirname << filename << " in drive A");
-               CPC.dsk_path = dirname;
-               CPC.drvA_file = filename;
-               CPC.drvA_zip = (zip ? 1 : 0);
-               have_DSKA = true;
-            } else if(!have_DSKB) {
-               LOG_DEBUG("Loading " << dirname << filename << " in drive B");
-               CPC.dsk_path = dirname;
-               CPC.drvB_file = filename;
-               CPC.drvB_zip = (zip ? 1 : 0);
-               have_DSKB = true;
-            }
+
+         if ((!have_DSKA) && (extension == ".dsk")) {
+            LOG_DEBUG("Loading " << fullpath << " in drive A");
+            FILL_SLOT_INFO(CPC.drvA_file, have_DSKA, fullpath);
+            continue;
          }
+
+         if ((!have_DSKB) && (extension == ".dsk")) {
+            LOG_DEBUG("Loading " << fullpath << " in drive B");
+            FILL_SLOT_INFO(CPC.drvB_file, have_DSKB, fullpath);
+            continue;
+         }
+
          if ((!have_SNA) && (extension == ".sna")) {
-            LOG_DEBUG("Loading snapshot " << dirname << filename);
-            CPC.snap_path = dirname;
-            CPC.snap_file = filename;
-            CPC.snap_zip = (zip ? 1 : 0);
-            have_SNA = true;
+            LOG_DEBUG("Loading snapshot " << fullpath);
+            FILL_SLOT_INFO(CPC.snap_file, have_SNA, fullpath);
+            continue;
          }
+
          if ((!have_TAP) && (extension == ".cdt" || extension == ".voc")) {
-            LOG_DEBUG("Loading tape " << dirname << filename);
-            CPC.tape_path = dirname;
-            CPC.tape_file = filename;
-            CPC.tape_zip = (zip ? 1 : 0);
-            have_TAP = true;
+            LOG_DEBUG("Loading tape " << fullpath);
+            FILL_SLOT_INFO(CPC.tape_file, have_TAP, fullpath);
+            continue;
          }
+
          if ((!have_CPR) && (extension == ".cpr")) {
-            LOG_DEBUG("Loading cartridge " << dirname << filename);
-            CPC.cart_path = dirname;
-            CPC.cart_file = filename;
-            CPC.cart_zip = (zip ? 1 : 0);
-            have_CPR = true;
+            LOG_DEBUG("Loading cartridge " << fullpath);
+            FILL_SLOT_INFO(CPC.cart_file, have_CPR, fullpath);
+            continue;
          }
       }
    }
+}
+
+void loadSlots(void) {
+   memset(&driveA, 0, sizeof(t_drive)); // clear disk drive A data structure
+   file_load(CPC.drvA_file, DSK_A);
+   memset(&driveB, 0, sizeof(t_drive)); // clear disk drive B data structure
+   file_load(CPC.drvB_file, DSK_B);
+   file_load(CPC.tape_file, OTHER);
+   file_load(CPC.snap_file, OTHER);
+   // Cartridge was loaded elsewhere before this was even called... presumably...
 }
 
 // Extract 'filename' from 'zipfile'. Filename must end with one of the extensions listed in 'ext'.
@@ -1347,20 +1352,10 @@ int tape_insert_voc (FILE *pfile)
 void cartridge_load (void)
 {
   if (CPC.model >= 3) {
-    if (!CPC.cart_file.empty()) { // load a cartridge ?
-      if (CPC.cart_zip) { // compressed image?
-        FILE *file = extractFile(CPC.cart_path, CPC.cart_file, ".cpr");
-        if (file) {
-          cpr_load(file);
-          fclose(file);
-        }
-      } else {
-        if(cpr_load(CPC.cart_path + CPC.cart_file) != 0) {
-          fprintf(stderr, "Load of cartridge failed. Aborting.\n");
-          exit(-1);
-        }
-      }
-    }
+     if (file_load(CPC.cart_path + CPC.cart_file, OTHER)) {
+        fprintf(stderr, "Load of cartridge failed. Aborting.\n");
+        exit(-1);
+     }
   }
 }
 
@@ -1379,7 +1374,9 @@ int cartridge_load (FILE *file) {
   return ERR_FILE_UNSUPPORTED;
 }
 
-int file_load(const std::string& filepath, const DRIVE drive) {
+// Still some duplication there... but it cannot really be helped
+int file_load(const std::string& filepath, const DRIVE drive)
+{
   if (filepath.length() < 4) return ERR_FILE_UNSUPPORTED;
   int pos = filepath.length() - 4;
   std::string extension = stringutils::lower(filepath.substr(pos));
