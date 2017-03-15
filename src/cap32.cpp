@@ -1683,7 +1683,6 @@ void loadConfiguration (t_CPC &CPC, const std::string& configFilename)
    if (CPC.scr_oglscanlines > 100) {
       CPC.scr_oglscanlines = 30;
    }
-   CPC.scr_vsync = conf.getIntValue("video", "scr_vsync", 1) & 1;
    CPC.scr_led = conf.getIntValue("video", "scr_led", 1) & 1;
    CPC.scr_fps = conf.getIntValue("video", "scr_fps", 0) & 1;
    CPC.scr_tube = conf.getIntValue("video", "scr_tube", 0) & 1;
@@ -1763,6 +1762,8 @@ void saveConfiguration (t_CPC &CPC, const std::string& configFilename)
    conf.setIntValue("system", "keyboard", CPC.keyboard);
    conf.setIntValue("system", "joystick_emulation", CPC.joystick_emulation);
    conf.setIntValue("system", "joysticks", CPC.joysticks);
+   conf.setIntValue("system", "joystick_menu_button", CPC.joystick_menu_button + 1);
+   conf.setIntValue("system", "joystick_vkeyboard_button", CPC.joystick_vkeyboard_button + 1);
    conf.setStringValue("system", "resources_path", CPC.resources_path);
 
    conf.setIntValue("video", "scr_width", CPC.scr_fs_width);
@@ -1771,7 +1772,6 @@ void saveConfiguration (t_CPC &CPC, const std::string& configFilename)
    conf.setIntValue("video", "scr_style", CPC.scr_style);
    conf.setIntValue("video", "scr_oglfilter", CPC.scr_oglfilter);
    conf.setIntValue("video", "scr_oglscanlines", CPC.scr_oglscanlines);
-   conf.setIntValue("video", "scr_vsync", CPC.scr_vsync);
    conf.setIntValue("video", "scr_led", CPC.scr_led);
    conf.setIntValue("video", "scr_fps", CPC.scr_fps);
    conf.setIntValue("video", "scr_tube", CPC.scr_tube);
@@ -1792,8 +1792,6 @@ void saveConfiguration (t_CPC &CPC, const std::string& configFilename)
    conf.setStringValue("file", "snap_path", CPC.snap_path);
    conf.setStringValue("file", "cart_path", CPC.cart_path);
    conf.setStringValue("file", "dsk_path", CPC.dsk_path);
-   conf.setIntValue("file", "drvA_format", CPC.drvA_format);
-   conf.setIntValue("file", "drvB_format", CPC.drvB_format);
    conf.setStringValue("file", "tape_path", CPC.tape_path);
 
    for (int iFmt = FIRST_CUSTOM_DISK_FORMAT; iFmt < MAX_DISK_FORMAT; iFmt++) { // loop through all user definable disk formats
@@ -1968,19 +1966,21 @@ int cap32_main (int argc, char **argv)
 
    if (audio_init()) {
       fprintf(stderr, "audio_init() failed. Disabling sound.\n");
+      // TODO(cpitrat): Do not set this to 0 when audio_init fail as this affect
+      // configuration when saving from GUI. Rather use some other indicator to
+      // know whether snd_bufferptr is usable or not.
       CPC.snd_enabled = 0; // disable sound emulation
    }
 
    if (joysticks_init()) {
-      fprintf(stderr, "joysticks_init() failed. Disabling joysticks.\n");
-      CPC.joysticks = 0;
+      fprintf(stderr, "joysticks_init() failed. Joysticks won't work.\n");
    }
 
 #ifdef DEBUG
    pfoDebug = fopen("./debug.txt", "wt");
 #endif
 
-   // Extract files to be loaded from the command line args 
+   // Extract files to be loaded from the command line args
    fillSlots(slot_list, CPC);
 
    // emulator_init must be called before loading files as they require

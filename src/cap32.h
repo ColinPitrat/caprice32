@@ -222,7 +222,6 @@ typedef struct {
    unsigned int scr_style;
    unsigned int scr_oglfilter;
    unsigned int scr_oglscanlines;
-   unsigned int scr_vsync;
    unsigned int scr_led;
    unsigned int scr_fps;
    unsigned int scr_tube;
