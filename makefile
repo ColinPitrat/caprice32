@@ -2,6 +2,7 @@
 # use "make DEBUG=TRUE" to build a debug executable
 
 LAST_BUILD_IN_DEBUG=$(shell [ -e .debug ] && echo 1 || echo 0)
+GIT_HASH=$(shell git rev-parse --verify HEAD)
 
 OBJDIR:=obj
 SRCDIR:=src
@@ -33,7 +34,7 @@ WINCXX	= i686-w64-mingw32-g++
 WININCS = -Isrc/ -Isrc/gui/includes -I$(MINGW_PATH)/include -I$(MINGW_PATH)/include/SDL -I$(MINGW_PATH)/include/freetype2
 WINLIBS=$(MINGW_PATH)/lib/libSDL.dll.a $(MINGW_PATH)/lib/libfreetype.dll.a $(MINGW_PATH)/lib/libz.dll.a
 
-.PHONY: all clean debug debug_flag check_deps
+.PHONY: all clean debug debug_flag check_deps insert_hash
 
 ifndef CXX
 CXX	= g++
@@ -68,10 +69,12 @@ endif
 
 ifdef DEBUG
 BUILD_FLAGS=$(DEBUG_FLAGS)
-all: check_deps debug
+all: insert_hash check_deps debug
 else
-all: check_deps cap32
+all: insert_hash check_deps cap32
 endif
+
+src/argparse.c: insert_hash
 
 $(MAIN): main.cpp src/cap32.h
 	@$(CXX) -c $(BUILD_FLAGS) $(CFLAGS) -o $(MAIN) main.cpp
@@ -102,6 +105,10 @@ check_deps:
 	@sdl-config --cflags >/dev/null 2>&1 || (echo "Error: missing dependency libsdl-1.2. Try installing libsdl 1.2 development package (e.g: libsdl1.2-dev)" && false)
 	@freetype-config --cflags >/dev/null 2>&1 || (echo "Error: missing dependency libfreetype. Try installing libfreetype development package (e.g: libfreetype6-dev)" && false)
 	@pkg-config --cflags zlib >/dev/null 2>&1 || (echo "Error: missing dependency zlib. Try installing zlib development package (e.g: zlib-devel)" && false)
+
+# This might fail on non GNU systems as sed -i in GNU sed only
+insert_hash:
+	@sed -i 's/commit_hash = ".*"/commit_hash = "$(GIT_HASH)"/' src/argparse.cpp
 
 tags:
 	@ctags -R . || echo -e "!!!!!!!!!!!\n!! Warning: ctags not found - if you are a developer, you might want to install it.\n!!!!!!!!!!!"
