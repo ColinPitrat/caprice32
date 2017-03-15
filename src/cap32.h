@@ -260,7 +260,7 @@ typedef struct {
 
    unsigned int max_tracksize;
 
-   std::string snap_path; // Path where images will be loaded/saved by default. Only one exposed in CFG file
+   std::string snap_path; // Path where machine state snapshots will be loaded/saved by default.
    std::string snap_file; // Path to the actual file (zip or not)
 
    std::string cart_path;
