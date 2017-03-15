@@ -7,12 +7,29 @@ GIT_HASH = $(shell git rev-parse --verify HEAD)
 OBJDIR:=obj
 SRCDIR:=src
 TSTDIR:=test
+WINOBJDIR32:=obj/win32
+WINOBJDIR64:=obj/win64
+
+ifndef WINARCH
+WINARCH = 32
+endif
+
+ifeq ($(WINARCH),64)
+TRIPLE = x86_64-w64-mingw32
+WINOBJDIR = $(WINOBJDIR64)
+else ifeq ($(WINARCH),32)
+TRIPLE = i686-w64-mingw32
+WINOBJDIR = $(WINOBJDIR32)
+else
+$(error Unknown WINARCH. Supported ones are 64 and 32.)
+endif
+WINDIR = win$(WINARCH)
 
 HTML_DOC:=doc/man.html
 GROFF_DOC:=doc/man6/cap32.6
 
 MAIN:=$(OBJDIR)/main.o
-WINMAIN:=$(OBJDIR)/main.os
+WINMAIN:=$(WINOBJDIR)/main.os
 
 SOURCES:=$(shell find $(SRCDIR) -name \*.cpp ! \( -name savepng.cpp \))
 ifndef WITHOUT_PNG
@@ -20,7 +37,7 @@ SOURCES += $(SRCDIR)/savepng.cpp
 endif
 DEPENDS:=$(foreach file,$(SOURCES:.cpp=.d),$(shell echo "$(OBJDIR)/$(file)"))
 OBJECTS:=$(DEPENDS:.d=.o)
-WINOBJECTS:=$(DEPENDS:.d=.os)
+WINOBJECTS:=$(foreach file,$(SOURCES:.cpp=.os),$(shell echo "$(WINOBJDIR)/$(file)"))
 
 TEST_SOURCES:=$(shell find $(TSTDIR) -name \*.cpp)
 TEST_DEPENDS:=$(foreach file,$(TEST_SOURCES:.cpp=.d),$(shell echo "$(OBJDIR)/$(file)"))
@@ -29,21 +46,8 @@ TEST_OBJECTS:=$(TEST_DEPENDS:.d=.o)
 IPATHS = -Isrc/ -Isrc/gui/includes `freetype-config --cflags` `sdl-config --cflags`
 LIBS = `sdl-config --libs` -lz `freetype-config --libs`
 
-ifndef WINARCH
-WINARCH = i686
-endif
-
-ifeq ($(WINARCH),x86_64)
-TRIPLE = x86_64-w64-mingw32
-else ifeq ($(WINARCH),i686)
-TRIPLE = i686-w64-mingw32
-else
-$(error Unknown WINARCH. Supported ones are x86_64 and i686.)
-endif
-
 MINGW_PATH = /usr/$(TRIPLE)
 WINCXX = $(TRIPLE)-g++
-WINDIR = win-$(WINARCH)
 WININCS = -Isrc/ -Isrc/gui/includes -I$(MINGW_PATH)/include -I$(MINGW_PATH)/include/SDL -I$(MINGW_PATH)/include/freetype2
 WINLIBS = $(MINGW_PATH)/lib/libSDL.dll.a $(MINGW_PATH)/lib/libfreetype.dll.a $(MINGW_PATH)/lib/libz.dll.a $(MINGW_PATH)/lib/libpng16.dll.a
 
@@ -104,7 +108,8 @@ $(DEPENDS): $(OBJDIR)/%.d: %.cpp
 $(OBJECTS): $(OBJDIR)/%.o: %.cpp
 	$(CXX) -c $(BUILD_FLAGS) $(CFLAGS) -o $@ $<
 
-$(WINOBJECTS): $(OBJDIR)/%.os: %.cpp
+$(WINOBJECTS): $(WINOBJDIR)/%.os: %.cpp
+	@mkdir -p `dirname $@`
 	$(WINCXX) -c $(BUILD_FLAGS) $(WINCFLAGS) -o $@ $<
 
 debug: debug_flag tags cap32 unit_test
@@ -187,7 +192,7 @@ unit_test: $(TEST_TARGET)
 	./$(TEST_TARGET) --gtest_shuffle
 
 clean:
-	rm -rf $(OBJDIR)
+	rm -rf $(OBJDIR) $(WINOBJDIR32) $(WINOBJDIR64)
 	rm -f $(TEST_TARGET) $(GTEST_DIR)/src/gtest-all.o cap32 cap32.exe .debug tags
 
 -include $(DEPENDS) $(TEST_DEPENDS)
