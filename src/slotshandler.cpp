@@ -103,9 +103,16 @@ int file_size (int file_num)
    }
 }
 
-#define FILL_SLOT_INFO(filevar, processedvar, file) \
-    (filevar) = (file); \
-    (processedvar) = true;
+inline bool fillSlot(std::string &filevar, bool &processedvar, const std::string fullpath, std::string extension, const std::string type_ext, const std::string type_desc) {
+   if ((!processedvar) && (extension == type_ext)) {
+      LOG_DEBUG("Loading " << type_desc << " file: " << fullpath);
+      filevar = fullpath;
+      processedvar = true;
+      return true;
+   }
+   return false;
+}
+
 // Parses a list of files and fill in the relevant CPC fields
 // according to what is found.
 // All we do here is fill the proper xxx_file entry.
@@ -137,35 +144,18 @@ void fillSlots (std::vector<std::string> slot_list, t_CPC& CPC)
            }
          }
 
-         if ((!have_DSKA) && (extension == ".dsk")) {
-            LOG_DEBUG("Loading " << fullpath << " in drive A");
-            FILL_SLOT_INFO(CPC.drvA_file, have_DSKA, fullpath);
+         if (fillSlot(CPC.drvA_file, have_DSKA, fullpath, extension, ".dsk", "drive A disk"))
             continue;
-         }
-
-         if ((!have_DSKB) && (extension == ".dsk")) {
-            LOG_DEBUG("Loading " << fullpath << " in drive B");
-            FILL_SLOT_INFO(CPC.drvB_file, have_DSKB, fullpath);
+         if (fillSlot(CPC.drvB_file, have_DSKB, fullpath, extension, ".dsk", "drive B disk"))
             continue;
-         }
-
-         if ((!have_SNA) && (extension == ".sna")) {
-            LOG_DEBUG("Loading snapshot " << fullpath);
-            FILL_SLOT_INFO(CPC.snap_file, have_SNA, fullpath);
+         if (fillSlot(CPC.snap_file, have_SNA, fullpath, extension, ".sna", "CPC state snapshot"))
             continue;
-         }
-
-         if ((!have_TAP) && (extension == ".cdt" || extension == ".voc")) {
-            LOG_DEBUG("Loading tape " << fullpath);
-            FILL_SLOT_INFO(CPC.tape_file, have_TAP, fullpath);
+         if (fillSlot(CPC.tape_file, have_TAP, fullpath, extension, ".cdt", "tape"))
             continue;
-         }
-
-         if ((!have_CPR) && (extension == ".cpr")) {
-            LOG_DEBUG("Loading cartridge " << fullpath);
-            FILL_SLOT_INFO(CPC.cart_file, have_CPR, fullpath);
+         if (fillSlot(CPC.tape_file, have_TAP, fullpath, extension, ".voc", "tape"))
             continue;
-         }
+         if (fillSlot(CPC.cart_file, have_CPR, fullpath, extension, ".cpr", "cartridge"))
+            continue;
       }
    }
 }
