@@ -3,6 +3,7 @@
 
 #include "CapriceLoadSave.h"
 #include "cap32.h"
+#include "slotshandler.h"
 #include "cartridge.h"
 
 #include <iostream>
@@ -199,12 +200,12 @@ bool CapriceLoadSave::HandleMessage(CMessage* pMessage)
               UpdateFilesList();
               break;
             case 1: // Drive A
-              m_pDirectoryValue->SetWindowText(simplifyDirPath(CPC.drvA_path));
+              m_pDirectoryValue->SetWindowText(simplifyDirPath(CPC.dsk_path));
               m_fileSpec = { ".dsk", ".zip" };
               UpdateFilesList();
               break;
             case 2: // Drive B
-              m_pDirectoryValue->SetWindowText(simplifyDirPath(CPC.drvB_path));
+              m_pDirectoryValue->SetWindowText(simplifyDirPath(CPC.dsk_path));
               m_fileSpec = { ".dsk", ".zip" };
               UpdateFilesList();
               break;

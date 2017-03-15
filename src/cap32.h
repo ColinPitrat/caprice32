@@ -103,13 +103,6 @@
 // TODO: Tune threshold based on different joysticks or make it configurable ?
 #define JOYSTICK_AXIS_THRESHOLD 16384
 
-
-typedef enum {
-  DSK_A,
-  DSK_B,
-  OTHER,
-} DRIVE;
-
 typedef struct {
    char id[8];
    char unused1[8];
@@ -266,23 +259,22 @@ typedef struct {
    unsigned int kbd_layout;
 
    unsigned int max_tracksize;
-   std::string snap_path;
-   std::string snap_file;
-   bool snap_zip;
+
+   std::string snap_path; // Path where machine state snapshots will be loaded/saved by default.
+   std::string snap_file; // Path to the actual file (zip or not)
+
    std::string cart_path;
    std::string cart_file;
-   bool cart_zip;
-   std::string drvA_path;
+
+   std::string dsk_path;
    std::string drvA_file;
-   bool drvA_zip;
    unsigned int drvA_format;
-   std::string drvB_path;
    std::string drvB_file;
-   bool drvB_zip;
    unsigned int drvB_format;
+
    std::string tape_path;
    std::string tape_file;
-   bool tape_zip;
+
    std::string printer_file;
    std::string sdump_dir;
 
@@ -471,23 +463,6 @@ void audio_pause (void);
 void audio_resume (void);
 int video_init (void);
 void video_shutdown (void);
-int snapshot_load (FILE *pfile);
-int snapshot_load (const std::string &filename);
-int snapshot_save (const std::string &filename);
-int dsk_load (FILE *pfile, t_drive *drive);
-int dsk_load (const std::string &filename, t_drive *drive);
-int dsk_save (const std::string &filename, t_drive *drive);
-void dsk_eject (t_drive *drive);
-int dsk_format (t_drive *drive, int iFormat);
-int tape_insert (FILE *pfile);
-int tape_insert (const std::string &filename);
-int tape_insert_cdt (FILE *pfile);
-int tape_insert_voc (FILE *pfile);
-void tape_eject (void);
-
-// Smart load: support loading DSK, SNA, CDT, VOC, CPR or a zip containing one of these.
-// drive must be DSK_A or DSK_B for DSK, OTHER otherwise.
-int file_load(const std::string& filepath, const DRIVE drive);
 
 // Return the path to the best (i.e: most specific) configuration file.
 // Priority order is:
@@ -495,13 +470,8 @@ int file_load(const std::string& filepath, const DRIVE drive);
 //  - $HOME/.cap32.cfg
 //  - /etc/cap32.cfg
 std::string getConfigurationFilename(bool forWrite = false);
-t_disk_format parseDiskFormat(const std::string& format);
-std::string serializeDiskFormat(const t_disk_format& format);
 void loadConfiguration (t_CPC &CPC, const std::string& configFilename);
 void saveConfiguration (t_CPC &CPC, const std::string& configFilename);
-
-// Retrieve files that are passed as argument and update CPC fields so that they will be loaded properly
-void fillSlots (std::vector<std::string> slot_list, t_CPC& CPC);
 
 int cap32_main(int argc, char **argv);
 
