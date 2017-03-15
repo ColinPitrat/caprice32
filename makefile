@@ -74,6 +74,8 @@ else
 all: insert_hash check_deps cap32
 endif
 
+src/argparse.c: insert_hash
+
 $(MAIN): main.cpp src/cap32.h
 	@$(CXX) -c $(BUILD_FLAGS) $(CFLAGS) -o $(MAIN) main.cpp
 

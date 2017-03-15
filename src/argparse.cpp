@@ -6,7 +6,7 @@
 #include "stringutils.h"
 
 extern bool log_verbose;
-const std::string commit_hash = "1054dbd09e86016cd931769071c3f0738f381cb7";
+std::string commit_hash = "992241d590b725108cb439766a8820c4a32f775f";
 
 const struct option long_options[] =
 {
@@ -71,7 +71,7 @@ void parseArguments(int argc, char **argv, std::vector<std::string>& slot_list, 
             break;
 
          case 'V':
-            std::cout << "Caprice32 " << VERSION_STRING << "\n";
+            std::cout << "Caprice32 " << VERSION_STRING << (commit_hash.empty()?"\n":"-"+commit_hash+"\n");
             std::cout << "Compiled with:"
 #ifdef HAVE_GL
                       << " HAVE_GL"
@@ -83,8 +83,6 @@ void parseArguments(int argc, char **argv, std::vector<std::string>& slot_list, 
                       << " DEBUG"
 #endif
                       << "\n";
-            if (!commit_hash.empty())
-               std::cout << "From source hash: " << commit_hash << "\n";
             exit(0);
             break;
 
