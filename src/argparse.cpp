@@ -6,6 +6,8 @@
 #include "stringutils.h"
 
 extern bool log_verbose;
+const std::string commit_hash = "1054dbd09e86016cd931769071c3f0738f381cb7";
+
 const struct option long_options[] =
 {
    {"cfg_file", required_argument, nullptr, 'c'},
@@ -56,7 +58,6 @@ void parseArguments(int argc, char **argv, std::vector<std::string>& slot_list, 
 
       switch (c)
       {
-
          case 'c':
             args.cfgFilePath = optarg;
             break;
@@ -82,6 +83,8 @@ void parseArguments(int argc, char **argv, std::vector<std::string>& slot_list, 
                       << " DEBUG"
 #endif
                       << "\n";
+            if (!commit_hash.empty())
+               std::cout << "From source hash: " << commit_hash << "\n";
             exit(0);
             break;
 
