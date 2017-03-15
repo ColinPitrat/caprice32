@@ -146,7 +146,7 @@ windows: cap32.exe $(WINDIR)
 	cp $(MINGW_PATH)/bin/SDL.dll $(WINDIR)/
 	cp $(MINGW_PATH)/bin/libbz2-1.dll $(WINDIR)/
 	cp $(MINGW_PATH)/bin/libfreetype-6.dll $(WINDIR)/
-	cp $(MINGW_PATH)/bin/libgcc_s_sjlj-1.dll $(WINDIR)/
+	cp $(MINGW_PATH)/bin/libgcc_s_*-1.dll $(WINDIR)/
 	cp $(MINGW_PATH)/bin/libpng16-16.dll $(WINDIR)/
 	cp $(MINGW_PATH)/bin/libstdc++-6.dll $(WINDIR)/
 	cp $(MINGW_PATH)/bin/libwinpthread-1.dll $(WINDIR)/
