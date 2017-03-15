@@ -1378,6 +1378,7 @@ int file_load(const std::string& filepath, const DRIVE drive)
     zip_info.extensions = ".dsk.sna.cdt.voc.cpr";
     if (zip::dir(&zip_info)) {
       // error or nothing relevant found
+      LOG_ERROR("Error opening or parsing zip file " << filepath);
       return ERR_FILE_UNZIP_FAILED;
     } else {
       std::string filename = zip_info.filesOffsets[0].first;
@@ -1396,7 +1397,7 @@ int file_load(const std::string& filepath, const DRIVE drive)
       }
     }
   }
-
+  LOG_ERROR("File format unsupported for " << filepath);
   return ERR_FILE_UNSUPPORTED;
 }
 
