@@ -1342,7 +1342,7 @@ int tape_insert_voc (FILE *pfile)
 void cartridge_load (void)
 {
   if (CPC.model >= 3) {
-     if (file_load(CPC.cart_path + CPC.cart_file, OTHER)) {
+     if (file_load(CPC.cart_file, OTHER)) {
         fprintf(stderr, "Load of cartridge failed. Aborting.\n");
         exit(-1);
      }

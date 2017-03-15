@@ -955,7 +955,7 @@ int emulator_patch_ROM (void)
             pbPtr += 0x1eef; // location of the keyboard translation table
             break;
          case 3: // 6128+
-            if(CPC.cart_file == chROMFile[3]) { // Only patch system cartridge - we don't want to break another one by messing with it
+            if(CPC.cart_file == CPC.rom_path + "/" + chROMFile[3]) { // Only patch system cartridge - we don't want to break another one by messing with it
                pbPtr += 0x1eef; // location of the keyboard translation table
             }
             break;
@@ -1715,9 +1715,9 @@ void loadConfiguration (t_CPC &CPC, const std::string& configFilename)
    CPC.max_tracksize = conf.getIntValue("file", "max_track_size", 6144-154);
    CPC.snap_path = conf.getStringValue("file", "snap_path", appPath + "/snap/");
    CPC.cart_path = conf.getStringValue("file", "cart_path", appPath + "/rom/");
-   CPC.cart_file = "system.cpr"; // Default one
    CPC.dsk_path = conf.getStringValue("file", "dsk_path", appPath + "/disk/");
    CPC.tape_path = conf.getStringValue("file", "tape_path", appPath + "/tape/");
+   CPC.cart_file = appPath + "/rom/system.cpr"; // Only default path defined. Needed for CPC6128+
 
    int iFmt = FIRST_CUSTOM_DISK_FORMAT;
    for (int i = iFmt; i < MAX_DISK_FORMAT; i++) { // loop through all user definable disk formats
