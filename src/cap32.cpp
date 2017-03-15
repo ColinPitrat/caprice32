@@ -1714,7 +1714,7 @@ void loadConfiguration (t_CPC &CPC, const std::string& configFilename)
 
    CPC.max_tracksize = conf.getIntValue("file", "max_track_size", 6144-154);
    CPC.snap_path = conf.getStringValue("file", "snap_path", appPath + "/snap/");
-   CPC.cart_path = conf.getStringValue("file", "cart_path", appPath + "/rom/");
+   CPC.cart_path = conf.getStringValue("file", "cart_path", appPath + "/cart/");
    CPC.dsk_path = conf.getStringValue("file", "dsk_path", appPath + "/disk/");
    CPC.tape_path = conf.getStringValue("file", "tape_path", appPath + "/tape/");
    CPC.cart_file = appPath + "/rom/system.cpr"; // Only default path defined. Needed for CPC6128+
@@ -1790,6 +1790,7 @@ void saveConfiguration (t_CPC &CPC, const std::string& configFilename)
 
    conf.setIntValue("file", "max_track_size", CPC.max_tracksize);
    conf.setStringValue("file", "snap_path", CPC.snap_path);
+   conf.setStringValue("file", "cart_path", CPC.cart_path);
    conf.setStringValue("file", "dsk_path", CPC.dsk_path);
    conf.setIntValue("file", "drvA_format", CPC.drvA_format);
    conf.setIntValue("file", "drvB_format", CPC.drvB_format);
