@@ -103,7 +103,7 @@ int file_size (int file_num)
    }
 }
 
-inline bool fillSlot(std::string &filevar, bool &processedvar, const std::string fullpath, std::string extension, const std::string type_ext, const std::string type_desc) {
+inline bool fillSlot(std::string &filevar, bool &processedvar, const std::string& fullpath, const std::string& extension, const std::string& type_ext, const std::string& type_desc) {
    if ((!processedvar) && (extension == type_ext)) {
       LOG_DEBUG("Loading " << type_desc << " file: " << fullpath);
       filevar = fullpath;
