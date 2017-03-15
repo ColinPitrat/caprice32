@@ -167,7 +167,7 @@ void loadSlots(void) {
    file_load(CPC.drvB_file, DSK_B);
    file_load(CPC.tape_file, OTHER);
    file_load(CPC.snap_file, OTHER);
-   // Cartridge was loaded elsewhere before this was even called... presumably...
+   // Cartridge was loaded by emulator_init if needed
 }
 
 // Extract 'filename' from 'zipfile'. Filename must end with one of the extensions listed in 'ext'.

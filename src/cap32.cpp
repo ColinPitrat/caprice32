@@ -1969,6 +1969,7 @@ int cap32_main (int argc, char **argv)
       // TODO(cpitrat): Do not set this to 0 when audio_init fail as this affect
       // configuration when saving from GUI. Rather use some other indicator to
       // know whether snd_bufferptr is usable or not.
+      // To test it, set SDL_AUDIODRIVER=dsp or some other unsupported value.
       CPC.snd_enabled = 0; // disable sound emulation
    }
 
