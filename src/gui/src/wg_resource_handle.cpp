@@ -102,7 +102,7 @@ CBitmapFileResourceHandle::CBitmapFileResourceHandle(std::string sFilename) :
 		SDL_Surface* pSurface = SDL_LoadBMP(m_sFilename.c_str());
 		if (!pSurface)
 		{
-			throw(Wg_Ex_App("Unable to load bitmap", "CBitmapFileResourceHandle::CBitmapFileResourceHandle"));
+			throw(Wg_Ex_App("Unable to load bitmap: " + m_sFilename, "CBitmapFileResourceHandle::CBitmapFileResourceHandle"));
 		}
 		m_BitmapMap[m_ResourceId] = pSurface;
 	}

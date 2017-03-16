@@ -306,21 +306,7 @@ void CApplication::Exec(void)
 				}
 				SDL_Delay(5);
 			}
-			try
-			{
-				CMessageServer::Instance().DeliverMessage();
-			}
-			catch (Wg_Ex_Base& e)
-			{
-				m_AppLog.AddLogEntry("Exception (wGui) : " + e.std_what(), APP_LOG_CRITICAL);
-				if (!m_bHandleExceptionsInternally)
-				{
-					throw;
-				}
-				// Since we're handling exceptions internally, and it's one of our own exceptions, we're just going to
-				// send something to the debug output and then continue processing the message queue
-				wUtil::Trace("wGui exception while delivering message : " + e.std_what());
-			}
+			CMessageServer::Instance().DeliverMessage();
 		}
 	}
 	catch (Wg_Ex_Base& e)
