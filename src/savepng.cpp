@@ -141,7 +141,7 @@ int SDL_SavePNG_RW(SDL_Surface *surface, SDL_RWops *dst, int freedst)
 #ifdef USE_ROW_POINTERS
 	row_pointers = static_cast<png_bytep*>(malloc(sizeof(png_bytep)*surface->h));
 	for (i = 0; i < surface->h; i++)
-		row_pointers[i] = static_cast<png_bytep>(reinterpret_cast<Uint8*>(reinterpret_cast<unsigned long>(surface->pixels) + i * surface->pitch));
+		row_pointers[i] = static_cast<png_bytep>(static_cast<void*>(static_cast<char*>(surface->pixels) + i * surface->pitch));
 	png_write_image(png_ptr, row_pointers);
 	free(row_pointers);
 #else

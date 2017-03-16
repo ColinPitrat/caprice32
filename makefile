@@ -1,18 +1,35 @@
 # makefile for compiling native unix builds
 # use "make DEBUG=TRUE" to build a debug executable
 
-LAST_BUILD_IN_DEBUG=$(shell [ -e .debug ] && echo 1 || echo 0)
-GIT_HASH=$(shell git rev-parse --verify HEAD)
+LAST_BUILD_IN_DEBUG = $(shell [ -e .debug ] && echo 1 || echo 0)
+GIT_HASH = $(shell git rev-parse --verify HEAD)
 
 OBJDIR:=obj
 SRCDIR:=src
 TSTDIR:=test
+WINOBJDIR32:=obj/win32
+WINOBJDIR64:=obj/win64
+
+ifndef WINARCH
+WINARCH = 32
+endif
+
+ifeq ($(WINARCH),64)
+TRIPLE = x86_64-w64-mingw32
+WINOBJDIR = $(WINOBJDIR64)
+else ifeq ($(WINARCH),32)
+TRIPLE = i686-w64-mingw32
+WINOBJDIR = $(WINOBJDIR32)
+else
+$(error Unknown WINARCH. Supported ones are 64 and 32.)
+endif
+WINDIR = win$(WINARCH)
 
 HTML_DOC:=doc/man.html
 GROFF_DOC:=doc/man6/cap32.6
 
 MAIN:=$(OBJDIR)/main.o
-WINMAIN:=$(OBJDIR)/main.os
+WINMAIN:=$(WINOBJDIR)/main.os
 
 SOURCES:=$(shell find $(SRCDIR) -name \*.cpp ! \( -name savepng.cpp \))
 ifndef WITHOUT_PNG
@@ -20,40 +37,41 @@ SOURCES += $(SRCDIR)/savepng.cpp
 endif
 DEPENDS:=$(foreach file,$(SOURCES:.cpp=.d),$(shell echo "$(OBJDIR)/$(file)"))
 OBJECTS:=$(DEPENDS:.d=.o)
-WINOBJECTS:=$(DEPENDS:.d=.os)
+WINOBJECTS:=$(foreach file,$(SOURCES:.cpp=.os),$(shell echo "$(WINOBJDIR)/$(file)"))
 
 TEST_SOURCES:=$(shell find $(TSTDIR) -name \*.cpp)
 TEST_DEPENDS:=$(foreach file,$(TEST_SOURCES:.cpp=.d),$(shell echo "$(OBJDIR)/$(file)"))
 TEST_OBJECTS:=$(TEST_DEPENDS:.d=.o)
 
-IPATHS	= -Isrc/ -Isrc/gui/includes `freetype-config --cflags` `sdl-config --cflags`
+IPATHS = -Isrc/ -Isrc/gui/includes `freetype-config --cflags` `sdl-config --cflags`
 LIBS = `sdl-config --libs` -lz `freetype-config --libs`
 
-MINGW_PATH=/usr/i686-w64-mingw32
-WINCXX	= i686-w64-mingw32-g++
+MINGW_PATH = /usr/$(TRIPLE)
+WINCXX = $(TRIPLE)-g++
 WININCS = -Isrc/ -Isrc/gui/includes -I$(MINGW_PATH)/include -I$(MINGW_PATH)/include/SDL -I$(MINGW_PATH)/include/freetype2
-WINLIBS=$(MINGW_PATH)/lib/libSDL.dll.a $(MINGW_PATH)/lib/libfreetype.dll.a $(MINGW_PATH)/lib/libz.dll.a
+WINLIBS = $(MINGW_PATH)/lib/libSDL.dll.a $(MINGW_PATH)/lib/libfreetype.dll.a $(MINGW_PATH)/lib/libz.dll.a $(MINGW_PATH)/lib/libpng16.dll.a
 
 .PHONY: all clean debug debug_flag check_deps insert_hash
 
 ifndef CXX
-CXX	= g++
+CXX = g++
 endif
 
 COMMON_CFLAGS = $(CUSTOM_CFLAGS) -std=c++11
 WARNINGS = -Wall -Wextra -Wzero-as-null-pointer-constant -Wformat=2 -Wold-style-cast -Wmissing-include-dirs -Wlogical-op -Woverloaded-virtual -Wpointer-arith -Wredundant-decls
 CFLAGS = $(COMMON_CFLAGS) $(IPATHS) $(WARNINGS)
 WINCFLAGS = -DWINDOWS $(COMMON_CFLAGS) $(WININCS) $(WARNINGS)
-DEBUG_FLAGS=-Werror -g -O0 -DDEBUG
-RELEASE_FLAGS=-O2 -funroll-loops -ffast-math -fomit-frame-pointer -fno-strength-reduce -finline-functions -s
-BUILD_FLAGS=$(RELEASE_FLAGS)
+WINLDFLAGS = 
+DEBUG_FLAGS = -Werror -g -O0 -DDEBUG
+RELEASE_FLAGS = -O2 -funroll-loops -ffast-math -fomit-frame-pointer -fno-strength-reduce -finline-functions -s
+BUILD_FLAGS = $(RELEASE_FLAGS)
 
 debug: BUILD_FLAGS:=$(DEBUG_FLAGS)
 
 ifndef DEBUG
 ifeq ($(LAST_BUILD_IN_DEBUG), 1)
-FORCED_DEBUG=1
-DEBUG=1
+FORCED_DEBUG = 1
+DEBUG = 1
 endif
 endif
 
@@ -68,7 +86,7 @@ WINLIBS += $(MINGW_PATH)/lib/libpng.dll.a
 endif
 
 ifdef DEBUG
-BUILD_FLAGS=$(DEBUG_FLAGS)
+BUILD_FLAGS = $(DEBUG_FLAGS)
 all: insert_hash check_deps debug
 else
 all: insert_hash check_deps cap32
@@ -90,7 +108,8 @@ $(DEPENDS): $(OBJDIR)/%.d: %.cpp
 $(OBJECTS): $(OBJDIR)/%.o: %.cpp
 	$(CXX) -c $(BUILD_FLAGS) $(CFLAGS) -o $@ $<
 
-$(WINOBJECTS): $(OBJDIR)/%.os: %.cpp
+$(WINOBJECTS): $(WINOBJDIR)/%.os: %.cpp
+	@mkdir -p `dirname $@`
 	$(WINCXX) -c $(BUILD_FLAGS) $(WINCFLAGS) -o $@ $<
 
 debug: debug_flag tags cap32 unit_test
@@ -121,27 +140,28 @@ $(HTML_DOC): $(GROFF_DOC)
 cap32: $(OBJECTS) $(MAIN)
 	$(CXX) $(LDFLAGS) -o cap32 $(OBJECTS) $(MAIN) $(LIBS)
 
-windows: cap32.exe win
+windows: cap32.exe $(WINDIR)
 	rm -f cap32.zip
-	cp cap32.exe win/
-	cp $(MINGW_PATH)/bin/SDL.dll win/
-	cp $(MINGW_PATH)/bin/libbz2-1.dll win/
-	cp $(MINGW_PATH)/bin/libfreetype-6.dll win/
-	cp $(MINGW_PATH)/bin/libgcc_s_sjlj-1.dll win/
-	cp $(MINGW_PATH)/bin/libstdc++-6.dll win/
-	cp $(MINGW_PATH)/bin/libwinpthread-1.dll win/
-	cp $(MINGW_PATH)/bin/zlib1.dll win/
-	cp cap32.cfg win/
-	mkdir -p win/resources win/rom
-	cp resources/{audio.bmp,cap32logo.bmp,general.bmp,input.bmp,rom.bmp,vera_mono.ttf,vera_sans.ttf,video.bmp} win/resources
-	cp rom/{amsdos.rom,cpc464.rom,cpc6128.rom,cpc664.rom,MF2.rom,system.cpr} win/rom/
-	zip -r cap32.zip win
+	cp cap32.exe $(WINDIR)/
+	cp $(MINGW_PATH)/bin/SDL.dll $(WINDIR)/
+	cp $(MINGW_PATH)/bin/libbz2-1.dll $(WINDIR)/
+	cp $(MINGW_PATH)/bin/libfreetype-6.dll $(WINDIR)/
+	cp $(MINGW_PATH)/bin/libgcc_s_*-1.dll $(WINDIR)/
+	cp $(MINGW_PATH)/bin/libpng16-16.dll $(WINDIR)/
+	cp $(MINGW_PATH)/bin/libstdc++-6.dll $(WINDIR)/
+	cp $(MINGW_PATH)/bin/libwinpthread-1.dll $(WINDIR)/
+	cp $(MINGW_PATH)/bin/zlib1.dll $(WINDIR)/
+	cp cap32.cfg $(WINDIR)/
+	mkdir -p $(WINDIR)/resources $(WINDIR)/rom
+	cp resources/{audio.bmp,cap32logo.bmp,general.bmp,input.bmp,rom.bmp,vera_mono.ttf,vera_sans.ttf,video.bmp} $(WINDIR)/resources
+	cp rom/{amsdos.rom,cpc464.rom,cpc6128.rom,cpc664.rom,MF2.rom,system.cpr} $(WINDIR)/rom/
+	zip -r cap32.zip $(WINDIR)
 
-win:
-	mkdir -p win
+$(WINDIR):
+	mkdir -p $(WINDIR)
 
 cap32.exe: $(WINOBJECTS) $(WINMAIN)
-	$(WINCXX) $(LDFLAGS) -o cap32.exe $(WINOBJECTS) $(WINMAIN) $(WINLIBS)
+	$(WINCXX) $(LDFLAGS) -o cap32.exe $(WINOBJECTS) $(WINMAIN) $(WINLIBS) $(WINLDFLAGS)
 
 ####################################
 ### Tests
@@ -150,9 +170,9 @@ cap32.exe: $(WINOBJECTS) $(WINMAIN)
 googletest:
 	@[ -d googletest ] || git clone https://github.com/google/googletest.git
 
-TEST_CFLAGS=$(COMMON_CFLAGS) -I$(GTEST_DIR)/include -I$(GTEST_DIR)
-TEST_TARGET=$(TSTDIR)/test_runner
-GTEST_DIR=googletest/googletest/
+TEST_CFLAGS = $(COMMON_CFLAGS) -I$(GTEST_DIR)/include -I$(GTEST_DIR)
+TEST_TARGET = $(TSTDIR)/test_runner
+GTEST_DIR = googletest/googletest/
 
 $(TEST_DEPENDS): $(OBJDIR)/%.d: %.cpp
 	@echo Computing dependencies for $<
@@ -172,7 +192,7 @@ unit_test: $(TEST_TARGET)
 	./$(TEST_TARGET) --gtest_shuffle
 
 clean:
-	rm -rf $(OBJDIR)
+	rm -rf $(OBJDIR) $(WINOBJDIR32) $(WINOBJDIR64)
 	rm -f $(TEST_TARGET) $(GTEST_DIR)/src/gtest-all.o cap32 cap32.exe .debug tags
 
 -include $(DEPENDS) $(TEST_DEPENDS)
