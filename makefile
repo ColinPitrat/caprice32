@@ -152,9 +152,7 @@ windows: cap32.exe $(WINDIR)
 	cp $(MINGW_PATH)/bin/libwinpthread-1.dll $(WINDIR)/
 	cp $(MINGW_PATH)/bin/zlib1.dll $(WINDIR)/
 	cp cap32.cfg $(WINDIR)/
-	mkdir -p $(WINDIR)/resources $(WINDIR)/rom
-	cp resources/{audio.bmp,cap32logo.bmp,disk.bmp,general.bmp,input.bmp,rom.bmp,snapshot.bmp,tape.bmp,vera_mono.ttf,vera_sans.ttf,video.bmp} $(WINDIR)/resources
-	cp rom/{amsdos.rom,cpc464.rom,cpc6128.rom,cpc664.rom,MF2.rom,system.cpr} $(WINDIR)/rom/
+	cp -r resources/ rom/ $(WINDIR)/
 	zip -r cap32.zip $(WINDIR)
 
 $(WINDIR):
