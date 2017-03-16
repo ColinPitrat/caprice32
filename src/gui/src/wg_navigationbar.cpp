@@ -76,9 +76,15 @@ unsigned int CNavigationBar::AddItem(SNavBarItem NavBarItem) {
 	m_Items.push_back(NavBarItem);
 	m_RenderedStrings.push_back(CRenderedString(m_pFontEngine, NavBarItem.sItemText, CRenderedString::VALIGN_BOTTOM, CRenderedString::HALIGN_CENTER));
     if (NavBarItem.sPictureFilename != "") {
-        m_Bitmaps.push_back(new CBitmapFileResourceHandle(NavBarItem.sPictureFilename));
-        // Set transparency color to COLOR_WHITE:
-        SDL_SetColorKey(m_Bitmaps.at(m_Bitmaps.size() - 1)->Bitmap(), SDL_SRCCOLORKEY, COLOR_WHITE.SDLColor(m_pSDLSurface->format));
+       try {
+          m_Bitmaps.push_back(new CBitmapFileResourceHandle(NavBarItem.sPictureFilename));
+          // Set transparency color to COLOR_WHITE:
+          SDL_SetColorKey(m_Bitmaps.at(m_Bitmaps.size() - 1)->Bitmap(), SDL_SRCCOLORKEY, COLOR_WHITE.SDLColor(m_pSDLSurface->format));
+       } catch (Wg_Ex_App e) {
+          // we don't want to stop the program if we can't load the picture, so just print the error and keep going
+          wUtil::Trace(e.std_what());
+          m_Bitmaps.push_back(nullptr);
+       }
     } else {
         m_Bitmaps.push_back(nullptr);
     }
@@ -139,7 +145,7 @@ void CNavigationBar::Draw(void) const {
 	CWindow::Draw();
 	if (m_pSDLSurface)
 	{
-		CPainter Painter(m_pSDLSurface, CPainter::PAINT_REPLACE);        
+		CPainter Painter(m_pSDLSurface, CPainter::PAINT_REPLACE);
 		Painter.Draw3DLoweredRect(m_WindowRect.SizeRect(), DEFAULT_BACKGROUND_COLOR);
         SDL_Rect PictureSourceRect = CRect(CPoint(0, 0), 30, 30).SDLRect();
 		for (unsigned int i = 0; i < m_Items.size(); ++i)
