@@ -61,7 +61,7 @@ COMMON_CFLAGS = $(CUSTOM_CFLAGS) -std=c++11
 WARNINGS = -Wall -Wextra -Wzero-as-null-pointer-constant -Wformat=2 -Wold-style-cast -Wmissing-include-dirs -Wlogical-op -Woverloaded-virtual -Wpointer-arith -Wredundant-decls
 CFLAGS = $(COMMON_CFLAGS) $(IPATHS) $(WARNINGS)
 WINCFLAGS = -DWINDOWS $(COMMON_CFLAGS) $(WININCS) $(WARNINGS)
-WINLDFLAGS = 
+WINLDFLAGS =
 DEBUG_FLAGS = -Werror -g -O0 -DDEBUG
 RELEASE_FLAGS = -O2 -funroll-loops -ffast-math -fomit-frame-pointer -fno-strength-reduce -finline-functions -s
 BUILD_FLAGS = $(RELEASE_FLAGS)
@@ -153,7 +153,7 @@ windows: cap32.exe $(WINDIR)
 	cp $(MINGW_PATH)/bin/zlib1.dll $(WINDIR)/
 	cp cap32.cfg $(WINDIR)/
 	mkdir -p $(WINDIR)/resources $(WINDIR)/rom
-	cp resources/{audio.bmp,cap32logo.bmp,general.bmp,input.bmp,rom.bmp,vera_mono.ttf,vera_sans.ttf,video.bmp} $(WINDIR)/resources
+	cp resources/{audio.bmp,cap32logo.bmp,disk.bmp,general.bmp,input.bmp,rom.bmp,snapshot.bmp,tape.bmp,vera_mono.ttf,vera_sans.ttf,video.bmp} $(WINDIR)/resources
 	cp rom/{amsdos.rom,cpc464.rom,cpc6128.rom,cpc664.rom,MF2.rom,system.cpr} $(WINDIR)/rom/
 	zip -r cap32.zip $(WINDIR)
 
