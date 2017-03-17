@@ -22,7 +22,6 @@
 //
 
 
-#include "wgui_include_config.h"
 #include "wg_menu.h"
 #include "std_ex.h"
 #include "wg_application.h"

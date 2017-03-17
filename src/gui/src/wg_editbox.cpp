@@ -22,7 +22,6 @@
 //
 
 
-#include "wgui_include_config.h"
 #include "wg_editbox.h"
 #include "wg_message_server.h"
 #include "wg_application.h"

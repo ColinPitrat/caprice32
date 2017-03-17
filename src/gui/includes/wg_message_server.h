@@ -26,7 +26,6 @@
 #define _WG_MESSAGE_SERVER_H_
 
 
-#include "wgui_include_config.h"
 #include "wg_message.h"
 #include <deque>
 #include <map>

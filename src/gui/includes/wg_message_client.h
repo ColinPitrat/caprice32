@@ -25,7 +25,6 @@
 #ifndef _WG_MESSAGE_CLIENT_H_
 #define _WG_MESSAGE_CLIENT_H_
 
-#include "wgui_include_config.h"
 #include "wg_message.h"
 
 

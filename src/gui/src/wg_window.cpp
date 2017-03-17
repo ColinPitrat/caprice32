@@ -21,7 +21,6 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 //
 
-#include "wgui_include_config.h"
 #include "wg_window.h"
 #include "std_ex.h"
 #include "wg_painter.h"

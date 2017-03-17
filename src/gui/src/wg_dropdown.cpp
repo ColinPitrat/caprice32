@@ -23,7 +23,6 @@
 
 
 #include "std_ex.h"
-#include "wgui_include_config.h"
 #include "wg_dropdown.h"
 #include "wg_message_server.h"
 #include "wg_resources.h"

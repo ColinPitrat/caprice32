@@ -22,7 +22,6 @@
 //
 
 
-#include "wgui_include_config.h"
 #include "wg_resources.h"
 #include "wg_error.h"
 #include "wg_painter.h"
@@ -215,12 +214,6 @@ CwgStringResourceHandle::CwgStringResourceHandle(EwgResourceId resId) :
 		{
 			case NULL_RESOURCE_ID:
 				m_StringMap[m_ResourceId] = "";
-				break;
-			case WGRES_WGUI_STRING:
-				m_StringMap[m_ResourceId] = "wGui";
-				break;
-			case WGRES_VERSION_STRING:
-				m_StringMap[m_ResourceId] = VERSION;
 				break;
 			case INVALID_RESOURCE_ID:
 			case AUTO_CREATE_RESOURCE_ID:

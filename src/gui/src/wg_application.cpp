@@ -21,7 +21,6 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 //
 
-#include "wgui_include_config.h"
 #include "wg_application.h"
 #include "wg_error.h"
 #include "wutil_debug.h"
@@ -220,7 +219,7 @@ CApplication::~CApplication(void)
 	}
 
 	m_AppLog.AddLogEntry("wGui Application closing", APP_LOG_INFO);
-	m_AppLog.WriteToFile("wGui.log", false, "wGui Application Log (version " + std::string(VERSION) + ")\nSeverity Levels : [1] Critical, [3] Error, [5] Warning, [8] Info");
+	m_AppLog.WriteToFile("wGui.log", false, "wGui Application Log (version " + std::string(VERSION_STRING) + ")\nSeverity Levels : [1] Critical, [3] Error, [5] Warning, [8] Info");
 
   CMessageServer::Instance().PurgeQueuedMessages();
 }

@@ -22,7 +22,6 @@
 //
 
 
-#include "wgui_include_config.h"
 #include "wutil_debug.h"
 #include "wg_button.h"
 #include "wg_application.h"

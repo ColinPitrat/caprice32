@@ -20,7 +20,6 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 //
-#include "wgui_include_config.h"
 #include "wg_painter.h"
 #include "wg_error.h"
 #include "std_ex.h"

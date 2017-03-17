@@ -22,7 +22,6 @@
 //
 
 
-#include "wgui_include_config.h"
 #include "wg_fontengine.h"
 #include "wg_error.h"
 #include "wg_application.h"

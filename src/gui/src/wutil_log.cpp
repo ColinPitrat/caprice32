@@ -22,7 +22,6 @@
 //
 
 
-#include "wgui_include_config.h"
 #include "wutil_log.h"
 #include <fstream>
 

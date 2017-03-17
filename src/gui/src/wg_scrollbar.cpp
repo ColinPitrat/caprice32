@@ -22,7 +22,6 @@
 //
 
 
-#include "wgui_include_config.h"
 #include "wg_application.h"
 #include "wg_scrollbar.h"
 #include "wg_message_server.h"

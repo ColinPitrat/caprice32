@@ -21,7 +21,6 @@
 #include "wg_error.h"
 #include "wg_message_server.h"
 #include "wg_navigationbar.h"
-#include "wgui_include_config.h"
 #include "wutil_debug.h"
 #include "std_ex.h"
 
