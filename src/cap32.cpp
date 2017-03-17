@@ -2344,6 +2344,17 @@ int cap32_main (int argc, char **argv)
             }
             break;
 
+            case SDL_ACTIVEEVENT:
+               if (CPC.auto_pause) {
+                  if (event.active.state == SDL_APPINPUTFOCUS) {
+                     if (event.active.gain == 1)
+                        CPC.paused = false;
+                     else
+                        CPC.paused = true;
+                  }
+               }
+               break;
+
             case SDL_QUIT:
                exit(0);
          }
