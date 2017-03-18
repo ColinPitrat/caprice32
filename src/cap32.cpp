@@ -46,9 +46,7 @@
 #include "errors.h"
 #include "log.h"
 
-#ifdef HAVE_PNG
 #include "savepng.h"
-#endif
 
 #define MAX_LINE_LEN 256
 
@@ -1902,7 +1900,6 @@ void set_osd_message(const std::string& message) {
 }
 
 void dumpScreen(void) {
-#ifdef HAVE_PNG
    static int dump_num=0;
    struct stat _stat;
 
@@ -1921,7 +1918,6 @@ void dumpScreen(void) {
       }
    }
    LOG_ERROR("Unable to find or open directory " + CPC.sdump_dir + " when trying to take a screenshot.");
-#endif
 }
 
 int cap32_main (int argc, char **argv)

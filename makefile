@@ -1,67 +1,73 @@
-# makefile for compiling native unix builds
-# use "make DEBUG=TRUE" to build a debug executable
+# use "make" to build for linux
+# use "make debug" or "make DEBUG=TRUE" to build a debug executable for linux
+# use "make ARCH=win32" or "make ARCH=win64" to build for windows
+# Supported variables:
+#  - ARCH = (linux|win32|win64)
+#  - CXX (default = g++)
+#  - CFLAGS
+#  - LDFLAGS
 
 LAST_BUILD_IN_DEBUG = $(shell [ -e .debug ] && echo 1 || echo 0)
 GIT_HASH = $(shell git rev-parse --verify HEAD)
 
-OBJDIR:=obj
+ifndef ARCH
+ARCH = linux
+endif
+
+ifeq ($(ARCH),win64)
+TRIPLE = x86_64-w64-mingw32
+TARGET=cap32.exe
+TEST_TARGET = test_runner.exe
+PLATFORM=windows
+else ifeq ($(ARCH),win32)
+TRIPLE = i686-w64-mingw32
+TARGET=cap32.exe
+TEST_TARGET = test_runner.exe
+PLATFORM=windows
+else ifeq ($(ARCH),linux)
+TARGET=cap32
+TEST_TARGET = test_runner
+PLATFORM=linux
+else
+$(error Unknown ARCH. Supported ones are linux, win32 and win64.)
+endif
+
+ifeq ($(PLATFORM),windows)
+MINGW_PATH = /usr/$(TRIPLE)
+IPATHS = -Isrc/ -Isrc/gui/includes -I$(MINGW_PATH)/include -I$(MINGW_PATH)/include/SDL -I$(MINGW_PATH)/include/freetype2
+LIBS = $(MINGW_PATH)/lib/libSDL.dll.a $(MINGW_PATH)/lib/libfreetype.dll.a $(MINGW_PATH)/lib/libz.dll.a $(MINGW_PATH)/lib/libpng16.dll.a $(MINGW_PATH)/lib/libpng.dll.a
+COMMON_CFLAGS = -DWINDOWS
+CXX = $(TRIPLE)-g++
+else
+IPATHS = -Isrc/ -Isrc/gui/includes `freetype-config --cflags` `sdl-config --cflags` `pkg-config --cflags libpng`
+LIBS = `sdl-config --libs` -lz `freetype-config --libs` `pkg-config --libs libpng`
+ifndef CXX
+CXX = g++
+endif
+endif
+
 SRCDIR:=src
 TSTDIR:=test
-WINOBJDIR32:=obj/win32
-WINOBJDIR64:=obj/win64
-
-ifndef WINARCH
-WINARCH = 32
-endif
-
-ifeq ($(WINARCH),64)
-TRIPLE = x86_64-w64-mingw32
-WINOBJDIR = $(WINOBJDIR64)
-else ifeq ($(WINARCH),32)
-TRIPLE = i686-w64-mingw32
-WINOBJDIR = $(WINOBJDIR32)
-else
-$(error Unknown WINARCH. Supported ones are 64 and 32.)
-endif
-WINDIR = win$(WINARCH)
+OBJDIR:=obj/$(ARCH)
+ARCHIVE = release/cap32-$(ARCH)
 
 HTML_DOC:=doc/man.html
 GROFF_DOC:=doc/man6/cap32.6
 
 MAIN:=$(OBJDIR)/main.o
-WINMAIN:=$(WINOBJDIR)/main.os
 
-SOURCES:=$(shell find $(SRCDIR) -name \*.cpp ! \( -name savepng.cpp \))
-ifndef WITHOUT_PNG
-SOURCES += $(SRCDIR)/savepng.cpp
-endif
+SOURCES:=$(shell find $(SRCDIR) -name \*.cpp)
 DEPENDS:=$(foreach file,$(SOURCES:.cpp=.d),$(shell echo "$(OBJDIR)/$(file)"))
 OBJECTS:=$(DEPENDS:.d=.o)
-WINOBJECTS:=$(foreach file,$(SOURCES:.cpp=.os),$(shell echo "$(WINOBJDIR)/$(file)"))
 
 TEST_SOURCES:=$(shell find $(TSTDIR) -name \*.cpp)
 TEST_DEPENDS:=$(foreach file,$(TEST_SOURCES:.cpp=.d),$(shell echo "$(OBJDIR)/$(file)"))
 TEST_OBJECTS:=$(TEST_DEPENDS:.d=.o)
 
-IPATHS = -Isrc/ -Isrc/gui/includes `freetype-config --cflags` `sdl-config --cflags`
-LIBS = `sdl-config --libs` -lz `freetype-config --libs`
+.PHONY: all check_deps clean debug debug_flag distrib doc insert_hash unit_test
 
-MINGW_PATH = /usr/$(TRIPLE)
-WINCXX = $(TRIPLE)-g++
-WININCS = -Isrc/ -Isrc/gui/includes -I$(MINGW_PATH)/include -I$(MINGW_PATH)/include/SDL -I$(MINGW_PATH)/include/freetype2
-WINLIBS = $(MINGW_PATH)/lib/libSDL.dll.a $(MINGW_PATH)/lib/libfreetype.dll.a $(MINGW_PATH)/lib/libz.dll.a $(MINGW_PATH)/lib/libpng16.dll.a
-
-.PHONY: all clean debug debug_flag check_deps insert_hash
-
-ifndef CXX
-CXX = g++
-endif
-
-COMMON_CFLAGS = $(CUSTOM_CFLAGS) -std=c++11
 WARNINGS = -Wall -Wextra -Wzero-as-null-pointer-constant -Wformat=2 -Wold-style-cast -Wmissing-include-dirs -Wlogical-op -Woverloaded-virtual -Wpointer-arith -Wredundant-decls
-CFLAGS = $(COMMON_CFLAGS) $(IPATHS) $(WARNINGS)
-WINCFLAGS = -DWINDOWS $(COMMON_CFLAGS) $(WININCS) $(WARNINGS)
-WINLDFLAGS =
+COMMON_CFLAGS += $(CFLAGS) -std=c++11 $(IPATHS)
 DEBUG_FLAGS = -Werror -g -O0 -DDEBUG
 RELEASE_FLAGS = -O2 -funroll-loops -ffast-math -fomit-frame-pointer -fno-strength-reduce -finline-functions -s
 BUILD_FLAGS = $(RELEASE_FLAGS)
@@ -76,43 +82,34 @@ endif
 endif
 
 ifndef WITHOUT_GL
-CFLAGS += -DHAVE_GL
-endif
-
-ifndef WITHOUT_PNG
-CFLAGS += -DHAVE_PNG
-LIBS += -lpng
-WINLIBS += $(MINGW_PATH)/lib/libpng.dll.a
+COMMON_CFLAGS += -DHAVE_GL
 endif
 
 ifdef DEBUG
 BUILD_FLAGS = $(DEBUG_FLAGS)
 all: insert_hash check_deps debug
 else
-all: insert_hash check_deps cap32
+all: insert_hash check_deps distrib
 endif
+
+# gtest doesn't build with warnings flags, hence the COMMON_CFLAGS
+ALL_CFLAGS=$(COMMON_CFLAGS) $(WARNINGS)
 
 src/argparse.c: insert_hash
 
 $(MAIN): main.cpp src/cap32.h
-	@$(CXX) -c $(BUILD_FLAGS) $(CFLAGS) -o $(MAIN) main.cpp
-
-$(WINMAIN): main.cpp src/cap32.h
-	@$(WINCXX) -c $(BUILD_FLAGS) $(WINCFLAGS) -o $(WINMAIN) main.cpp
+	@$(CXX) -c $(BUILD_FLAGS) $(ALL_CFLAGS) -o $(MAIN) main.cpp
 
 $(DEPENDS): $(OBJDIR)/%.d: %.cpp
 	@echo Computing dependencies for $<
 	@mkdir -p `dirname $@`
-	@$(CXX) -MM $(BUILD_FLAGS) $(CFLAGS) $< | { sed 's#^[^:]*\.o[ :]*#$(OBJDIR)/$*.o $(OBJDIR)/$*.os $(OBJDIR)/$*.d : #g' ; echo "%.h:;" ; echo "" ; } > $@
+	@$(CXX) -MM $(BUILD_FLAGS) $(ALL_CFLAGS) $< | { sed 's#^[^:]*\.o[ :]*#$(OBJDIR)/$*.o $(OBJDIR)/$*.os $(OBJDIR)/$*.d : #g' ; echo "%.h:;" ; echo "" ; } > $@
 
 $(OBJECTS): $(OBJDIR)/%.o: %.cpp
-	$(CXX) -c $(BUILD_FLAGS) $(CFLAGS) -o $@ $<
-
-$(WINOBJECTS): $(WINOBJDIR)/%.os: %.cpp
 	@mkdir -p `dirname $@`
-	$(WINCXX) -c $(BUILD_FLAGS) $(WINCFLAGS) -o $@ $<
+	$(CXX) -c $(BUILD_FLAGS) $(ALL_CFLAGS) -o $@ $<
 
-debug: debug_flag tags cap32 unit_test
+debug: debug_flag tags distrib unit_test
 
 debug_flag:
 ifdef FORCED_DEBUG
@@ -120,10 +117,15 @@ ifdef FORCED_DEBUG
 endif
 	@touch .debug
 
+ifeq ($(PLATFORM),linux)
 check_deps:
 	@sdl-config --cflags >/dev/null 2>&1 || (echo "Error: missing dependency libsdl-1.2. Try installing libsdl 1.2 development package (e.g: libsdl1.2-dev)" && false)
 	@freetype-config --cflags >/dev/null 2>&1 || (echo "Error: missing dependency libfreetype. Try installing libfreetype development package (e.g: libfreetype6-dev)" && false)
 	@pkg-config --cflags zlib >/dev/null 2>&1 || (echo "Error: missing dependency zlib. Try installing zlib development package (e.g: zlib-devel)" && false)
+else
+# TODO(cpitrat): Implement check_deps for windows build
+check_deps:
+endif
 
 # This might fail on non GNU systems as sed -i in GNU sed only
 insert_hash:
@@ -137,29 +139,29 @@ doc: $(HTML_DOC)
 $(HTML_DOC): $(GROFF_DOC)
 	man2html $< > $@
 
-cap32: $(OBJECTS) $(MAIN)
-	$(CXX) $(LDFLAGS) -o cap32 $(OBJECTS) $(MAIN) $(LIBS)
+$(TARGET): $(OBJECTS) $(MAIN)
+	$(CXX) $(LDFLAGS) -o $(TARGET) $(OBJECTS) $(MAIN) $(LIBS)
 
-windows: cap32.exe $(WINDIR)
-	rm -f cap32.zip
-	cp cap32.exe $(WINDIR)/
-	cp $(MINGW_PATH)/bin/SDL.dll $(WINDIR)/
-	cp $(MINGW_PATH)/bin/libbz2-1.dll $(WINDIR)/
-	cp $(MINGW_PATH)/bin/libfreetype-6.dll $(WINDIR)/
-	cp $(MINGW_PATH)/bin/libgcc_s_*-1.dll $(WINDIR)/
-	cp $(MINGW_PATH)/bin/libpng16-16.dll $(WINDIR)/
-	cp $(MINGW_PATH)/bin/libstdc++-6.dll $(WINDIR)/
-	cp $(MINGW_PATH)/bin/libwinpthread-1.dll $(WINDIR)/
-	cp $(MINGW_PATH)/bin/zlib1.dll $(WINDIR)/
-	cp cap32.cfg $(WINDIR)/
-	cp -r resources/ rom/ $(WINDIR)/
-	zip -r cap32.zip $(WINDIR)
-
-$(WINDIR):
-	mkdir -p $(WINDIR)
-
-cap32.exe: $(WINOBJECTS) $(WINMAIN)
-	$(WINCXX) $(LDFLAGS) -o cap32.exe $(WINOBJECTS) $(WINMAIN) $(WINLIBS) $(WINLDFLAGS)
+# TODO(cpitrat): Make it work for linux too
+ifeq ($(PLATFORM),windows)
+distrib: $(TARGET)
+	mkdir -p $(ARCHIVE)
+	rm -f $(ARCHIVE).zip
+	cp $(TARGET) $(ARCHIVE)/
+	cp $(MINGW_PATH)/bin/SDL.dll $(ARCHIVE)/
+	cp $(MINGW_PATH)/bin/libbz2-1.dll $(ARCHIVE)/
+	cp $(MINGW_PATH)/bin/libfreetype-6.dll $(ARCHIVE)/
+	cp $(MINGW_PATH)/bin/libgcc_s_*-1.dll $(ARCHIVE)/
+	cp $(MINGW_PATH)/bin/libpng16-16.dll $(ARCHIVE)/
+	cp $(MINGW_PATH)/bin/libstdc++-6.dll $(ARCHIVE)/
+	cp $(MINGW_PATH)/bin/libwinpthread-1.dll $(ARCHIVE)/
+	cp $(MINGW_PATH)/bin/zlib1.dll $(ARCHIVE)/
+	cp cap32.cfg $(ARCHIVE)/
+	cp -r resources/ rom/ $(ARCHIVE)/
+	zip -r $(ARCHIVE).zip $(ARCHIVE)
+else
+distrib: $(TARGET)
+endif
 
 ####################################
 ### Tests
@@ -169,28 +171,34 @@ googletest:
 	@[ -d googletest ] || git clone https://github.com/google/googletest.git
 
 TEST_CFLAGS = $(COMMON_CFLAGS) -I$(GTEST_DIR)/include -I$(GTEST_DIR)
-TEST_TARGET = $(TSTDIR)/test_runner
 GTEST_DIR = googletest/googletest/
 
 $(TEST_DEPENDS): $(OBJDIR)/%.d: %.cpp
 	@echo Computing dependencies for $<
 	@mkdir -p `dirname $@`
-	@$(CXX) -MM $(BUILD_FLAGS) $(TEST_CFLAGS) $(IPATHS) $< | { sed 's#^[^:]*\.o[ :]*#$(OBJDIR)/$*.o $(OBJDIR)/$*.d : #g' ; echo "%.h:;" ; echo "" ; } > $@
+	@$(CXX) -MM $(BUILD_FLAGS) $(TEST_CFLAGS) $< | { sed 's#^[^:]*\.o[ :]*#$(OBJDIR)/$*.o $(OBJDIR)/$*.d : #g' ; echo "%.h:;" ; echo "" ; } > $@
 
 $(TEST_OBJECTS): $(OBJDIR)/%.o: %.cpp googletest
-	$(CXX) -c $(BUILD_FLAGS) $(TEST_CFLAGS) $(IPATHS) -o $@ $<
+	@mkdir -p `dirname $@`
+	$(CXX) -c $(BUILD_FLAGS) $(TEST_CFLAGS) -o $@ $<
 
-$(GTEST_DIR)/src/gtest-all.o: $(GTEST_DIR)/src/gtest-all.cc googletest
-	$(CXX) $(BUILD_FLAGS) $(TEST_CFLAGS) -c $(INCPATH) -o $@ $<
+$(OBJDIR)/$(GTEST_DIR)/src/gtest-all.o: $(GTEST_DIR)/src/gtest-all.cc googletest
+	$(CXX) -c $(BUILD_FLAGS) $(TEST_CFLAGS) -o $@ $<
 
-$(TEST_TARGET): $(OBJECTS) $(TEST_OBJECTS) $(GTEST_DIR)/src/gtest-all.o
-	$(CXX) $(LDFLAGS) -o $(TEST_TARGET) $(GTEST_DIR)/src/gtest-all.o $(TEST_OBJECTS) $(OBJECTS) $(LIBS) -lpthread
+$(TEST_TARGET): $(OBJECTS) $(TEST_OBJECTS) $(OBJDIR)/$(GTEST_DIR)/src/gtest-all.o
+	$(CXX) $(LDFLAGS) -o $(TEST_TARGET) $(OBJDIR)/$(GTEST_DIR)/src/gtest-all.o $(TEST_OBJECTS) $(OBJECTS) $(LIBS) -lpthread
 
+ifeq ($(PLATFORM),windows)
+unit_test: $(TEST_TARGET)
+	cp $(TEST_TARGET) $(ARCHIVE)/
+	cd $(ARCHIVE) && wine ./$(TEST_TARGET) --gtest_shuffle
+else
 unit_test: $(TEST_TARGET)
 	./$(TEST_TARGET) --gtest_shuffle
+endif
 
 clean:
-	rm -rf $(OBJDIR) $(WINOBJDIR32) $(WINOBJDIR64)
-	rm -f $(TEST_TARGET) $(GTEST_DIR)/src/gtest-all.o cap32 cap32.exe .debug tags
+	rm -rf obj/
+	rm -f test_runner test_runner.exe cap32 cap32.exe release .debug tags
 
 -include $(DEPENDS) $(TEST_DEPENDS)

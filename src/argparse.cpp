@@ -6,7 +6,7 @@
 #include "stringutils.h"
 
 extern bool log_verbose;
-std::string commit_hash = "f3a9f5078cd861a7e57442d4b6147878456a9c8b";
+std::string commit_hash = "ffe78a9763b89b2d986e829f93d820b6bf9e2645";
 
 const struct option long_options[] =
 {
@@ -75,9 +75,6 @@ void parseArguments(int argc, char **argv, std::vector<std::string>& slot_list, 
             std::cout << "Compiled with:"
 #ifdef HAVE_GL
                       << " HAVE_GL"
-#endif
-#ifdef HAVE_PNG
-                      << " HAVE_PNG"
 #endif
 #ifdef DEBUG
                       << " DEBUG"

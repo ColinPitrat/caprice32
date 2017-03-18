@@ -55,7 +55,7 @@ You will need the following to successfully compile an executable:
   * SDL - http://www.libsdl.org/index.php
   * FreeType - https://www.freetype.org/
   * zLib - http://www.gzip.org/zlib/
-  * libPNG (optional) - http://libpng.org/pub/png/libpng.html
+  * libPNG - http://libpng.org/pub/png/libpng.html
 
 # Compiling
 
@@ -69,11 +69,14 @@ The following options are available:
 
  * `DEBUG=TRUE`
  * `WITHOUT_GL=TRUE`
- * `WITHOUT_PNG=TRUE`
 
 For example, for a debug build, use:
 
 `make DEBUG=TRUE`
+
+Alternatively, the debug target also work:
+
+`make debug`
 
 #### Debian/Ubuntu package:
 
@@ -91,10 +94,15 @@ After installation of the package the users should copy the /etc/cap32.cfg file 
 
 #### Windows target:
 
-Edit the makefile to update the `MINGW_PATH`, `WINCXX`, `WININCS` and `WINLIBS` directive with the correct location of the SDL include and library files.
-To build with default options, use:
+To build with default options for 32 bits architecture (i686), use:
 
-`make windows`
+`make ARCH=win32`
+
+and for 64 bits (x86_64) use:
+
+`make ARCH=win64`
+
+You may need to edit the makefile to update `MINGW_PATH`, `CXX`, `IPATHS` and `LIBS` for windows platform with the correct values for your installation of mingw.
 
 # Using the source
 
