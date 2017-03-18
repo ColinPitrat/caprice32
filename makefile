@@ -179,10 +179,10 @@ $(TEST_DEPENDS): $(OBJDIR)/%.d: %.cpp
 	@$(CXX) -MM $(BUILD_FLAGS) $(TEST_CFLAGS) $< | { sed 's#^[^:]*\.o[ :]*#$(OBJDIR)/$*.o $(OBJDIR)/$*.d : #g' ; echo "%.h:;" ; echo "" ; } > $@
 
 $(TEST_OBJECTS): $(OBJDIR)/%.o: %.cpp googletest
-	@mkdir -p `dirname $@`
 	$(CXX) -c $(BUILD_FLAGS) $(TEST_CFLAGS) -o $@ $<
 
 $(OBJDIR)/$(GTEST_DIR)/src/gtest-all.o: $(GTEST_DIR)/src/gtest-all.cc googletest
+	@mkdir -p `dirname $@`
 	$(CXX) -c $(BUILD_FLAGS) $(TEST_CFLAGS) -o $@ $<
 
 $(TEST_TARGET): $(OBJECTS) $(TEST_OBJECTS) $(OBJDIR)/$(GTEST_DIR)/src/gtest-all.o
