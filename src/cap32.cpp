@@ -1676,7 +1676,8 @@ void loadConfiguration (t_CPC &CPC, const std::string& configFilename)
    CPC.scr_fs_bpp = conf.getIntValue("video", "scr_bpp", 8);
    CPC.scr_style = conf.getIntValue("video", "scr_style", 0);
    if (CPC.scr_style >= nb_video_plugins) {
-    CPC.scr_style = 0;
+      CPC.scr_style = DEFAULT_VIDEO_PLUGIN;
+      LOG_ERROR("Unsupported video plugin specified - defaulting to plugin " << video_plugin_list[DEFAULT_VIDEO_PLUGIN].name);
    }
    CPC.scr_oglfilter = conf.getIntValue("video", "scr_oglfilter", 1) & 1;
    CPC.scr_oglscanlines = conf.getIntValue("video", "scr_oglscanlines", 30);
