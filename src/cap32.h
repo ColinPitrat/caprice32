@@ -103,6 +103,8 @@
 // TODO: Tune threshold based on different joysticks or make it configurable ?
 #define JOYSTICK_AXIS_THRESHOLD 16384
 
+#define DEFAULT_VIDEO_PLUGIN 0
+
 typedef struct {
    char id[8];
    char unused1[8];
