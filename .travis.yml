@@ -9,6 +9,7 @@ addons:
     - libsdl1.2-dev
     - libfreetype6-dev
     - zlib1g-dev
+    - libpng-dev
     - gcc-4.8
     - g++-4.8
 #To uncomment in case a core occurs:
@@ -23,7 +24,7 @@ script:
  - make
  - make unit_test
  - make clean
- - make debug CFLAGS=-Wno-literal-suffix
+ - make debug
 #To uncomment in case a core occurs:
 # - find ./ -name 'core*'
 # - for i in $(find ./ -name 'core*' -print); do gdb ./test/test_runner $i -ex "thread apply all bt" -ex "set pagination 0" -batch; done;
