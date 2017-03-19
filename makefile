@@ -198,6 +198,7 @@ $(TEST_TARGET): $(OBJECTS) $(TEST_OBJECTS) $(OBJDIR)/$(GTEST_DIR)/src/gtest-all.
 ifeq ($(PLATFORM),windows)
 unit_test: $(TEST_TARGET)
 	cp $(TEST_TARGET) $(ARCHIVE)/
+	ln -s -f ../../test $(ARCHIVE)/test
 	cd $(ARCHIVE) && wine ./$(TEST_TARGET) --gtest_shuffle
 else
 unit_test: $(TEST_TARGET)

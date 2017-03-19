@@ -3,6 +3,7 @@
 #include <string.h>
 #include <strings.h>
 #include <zlib.h>
+#include <errno.h>
 #include "errors.h"
 #include "log.h"
 
@@ -21,7 +22,7 @@ namespace zip
     dword dwOffset;
 
     if ((pfileObject = fopen(zi->filename.c_str(), "rb")) == nullptr) {
-      LOG_DEBUG("File not found or not readable: " << zi->filename);
+      LOG_ERROR("File not found or not readable: " << zi->filename);
       return ERR_FILE_NOT_FOUND;
     }
 
@@ -32,12 +33,12 @@ namespace zip
       lFilePosition -= 256; // move backwards through ZIP file
       if (fseek(pfileObject, lFilePosition, SEEK_END) != 0) {
         fclose(pfileObject);
-        LOG_DEBUG("Couldn't read zip file: " << zi->filename);
+        LOG_ERROR("Couldn't read zip file: " << zi->filename);
         return ERR_FILE_BAD_ZIP; // exit if loading of data chunck failed
       };
       if (fread(pbGPBuffer, 256, 1, pfileObject) == 0) {
         fclose(pfileObject);
-        LOG_DEBUG("Couldn't read zip file: " << zi->filename);
+        LOG_ERROR("Couldn't read zip file: " << zi->filename);
         return ERR_FILE_BAD_ZIP; // exit if loading of data chunck failed
       }
       pbPtr = pbGPBuffer + (256 - 22); // pointer to end of central directory (under ideal conditions)
@@ -53,17 +54,17 @@ namespace zip
     } while (wCentralDirEntries == 0);
     if (wCentralDirSize == 0) {
       fclose(pfileObject);
-      LOG_DEBUG("Couldn't read zip file (no central directory): " << zi->filename);
+      LOG_ERROR("Couldn't read zip file (no central directory): " << zi->filename);
       return ERR_FILE_BAD_ZIP; // exit if no central directory was found
     }
     if (fseek(pfileObject, dwCentralDirPosition, SEEK_SET) != 0) {
       fclose(pfileObject);
-      LOG_DEBUG("Couldn't read zip file: " << zi->filename);
+      LOG_ERROR("Couldn't read zip file: " << zi->filename);
       return ERR_FILE_BAD_ZIP; // exit if seeking to the central directory failed
     };
     if (fread(pbGPBuffer, wCentralDirSize, 1, pfileObject) == 0) {
       fclose(pfileObject);
-      LOG_DEBUG("Couldn't read zip file: " << zi->filename);
+      LOG_ERROR("Couldn't read zip file: " << zi->filename);
       return ERR_FILE_BAD_ZIP; // exit if reading the central directory failed
     }
 
@@ -89,7 +90,7 @@ namespace zip
     fclose(pfileObject);
 
     if (zi->filesOffsets.empty()) { // no files found?
-      LOG_DEBUG("Empty zip file: " << zi->filename);
+      LOG_ERROR("Empty zip file: " << zi->filename);
       return ERR_FILE_EMPTY_ZIP;
     }
 
@@ -107,25 +108,38 @@ namespace zip
     z_stream z;
     dword dwOffset = zi.dwOffset;
 
+#ifdef WINDOWS
+    // Windows version of tmpfile is broken by design as it tries to create the temporary file in the root directory.
+    // The "official" recommendation is to use the yet borken tempnam/fopen combination.
+    // https://msdn.microsoft.com/en-us/library/x8x7sakw.aspx
+    char *tmpFilePath = tempnam(".", "cap32_tmp_");
+    if (tmpFilePath == nullptr) {
+      LOG_ERROR("Couldn't unzip file: Couldn't generate temporary file name: " << strerror(errno));
+      return ERR_FILE_UNZIP_FAILED; // couldn't create output file
+    }
+    LOG_DEBUG("Using temporary file: " << tmpFilePath);
+    *pfileOut = fopen(tmpFilePath, "w+");
+#else
     *pfileOut = tmpfile();
+#endif
     if (*pfileOut == nullptr) {
-      LOG_DEBUG("Couldn't unzip file: Couldn't create temporary file.");
+      LOG_ERROR("Couldn't unzip file: Couldn't create temporary file: " << strerror(errno));
       return ERR_FILE_UNZIP_FAILED; // couldn't create output file
     }
     pfileIn = fopen(zi.filename.c_str(), "rb"); // open ZIP file for reading
     if (pfileIn == nullptr) {
-      LOG_DEBUG("Couldn't open zip file for reading: " << zi.filename);
+      LOG_ERROR("Couldn't open zip file for reading: " << zi.filename);
       return ERR_FILE_UNZIP_FAILED; // couldn't open input file
     }
     if (fseek(pfileIn, dwOffset, SEEK_SET) != 0) {  // move file pointer to beginning of data block
-      LOG_DEBUG("Couldn't read zip file: " << zi.filename);
+      LOG_ERROR("Couldn't read zip file: " << zi.filename);
       fclose(pfileIn);
       fclose(*pfileOut);
       return ERR_FILE_UNZIP_FAILED;
     };
     size_t rc;
     if((rc = fread(pbGPBuffer, 30, 1, pfileIn)) != 1) { // read local header
-      LOG_DEBUG("Couldn't read zip file: " << zi.filename);
+      LOG_ERROR("Couldn't read zip file: " << zi.filename);
       fclose(pfileIn);
       fclose(*pfileOut);
       return ERR_FILE_UNZIP_FAILED;
@@ -133,7 +147,7 @@ namespace zip
     dwSize = *reinterpret_cast<dword *>(pbGPBuffer + 18); // length of compressed data
     dwOffset += 30 + *reinterpret_cast<word *>(pbGPBuffer + 26) + *reinterpret_cast<word *>(pbGPBuffer + 28);
     if (fseek(pfileIn, dwOffset, SEEK_SET) != 0) {  // move file pointer to start of compressed data
-      LOG_DEBUG("Couldn't read zip file: " << zi.filename);
+      LOG_ERROR("Couldn't read zip file: " << zi.filename);
       fclose(pfileIn);
       fclose(*pfileOut);
       return ERR_FILE_UNZIP_FAILED;
@@ -160,7 +174,7 @@ namespace zip
         iCount = 16384 - z.avail_out;
         if (iCount) { // save data to file if some is available
           if (fwrite(pbOutputBuffer, iCount, 1, *pfileOut) != 1) {
-            LOG_DEBUG("Couldn't unzip file: Couldn't write to output file:");
+            LOG_ERROR("Couldn't unzip file: Couldn't write to output file:");
             fclose(pfileIn);
             fclose(*pfileOut);
             return ERR_FILE_UNZIP_FAILED;
@@ -170,7 +184,7 @@ namespace zip
       dwSize -= 16384; // advance to next chunck
     } while ((dwSize > 0) && (iStatus == Z_OK)) ; // loop until done
     if (iStatus != Z_STREAM_END) {
-      LOG_DEBUG("Couldn't unzip file: " << zi.filename << " (" << iStatus << ")");
+      LOG_ERROR("Couldn't unzip file: " << zi.filename << " (" << iStatus << ")");
       return ERR_FILE_UNZIP_FAILED; // abort on error
     }
     iStatus = inflateEnd(&z); // clean up
