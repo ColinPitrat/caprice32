@@ -462,7 +462,7 @@ void z80_OUT_handler (reg_pair port, byte val)
             }
             break;
          case 2: // set mode
-            if (!asic.locked && (val & 0x20)) {
+            if (!asic.locked && (val & 0x20) && CPC.model > 2) {
                // 6128+ RMR2 register
                int membank = (val >> 3) & 3;
                if (membank == 3) { // Map register page at 0x4000
