@@ -1,11 +1,17 @@
 # use "make" to build for linux
 # use "make debug" or "make DEBUG=TRUE" to build a debug executable for linux
 # use "make ARCH=win32" or "make ARCH=win64" to build for windows
+# Interesting targets (in addition to the default 'all'):
+#  - debug
+#  - clean
+#  - distrib
+#  - doc
 # Supported variables:
 #  - ARCH = (linux|win32|win64)
 #  - CXX (default = g++)
 #  - CFLAGS
 #  - LDFLAGS
+#  - WITHOUT_GL
 
 LAST_BUILD_IN_DEBUG = $(shell [ -e .debug ] && echo 1 || echo 0)
 GIT_HASH = $(shell git rev-parse --verify HEAD)
@@ -122,6 +128,7 @@ check_deps:
 	@sdl-config --cflags >/dev/null 2>&1 || (echo "Error: missing dependency libsdl-1.2. Try installing libsdl 1.2 development package (e.g: libsdl1.2-dev)" && false)
 	@freetype-config --cflags >/dev/null 2>&1 || (echo "Error: missing dependency libfreetype. Try installing libfreetype development package (e.g: libfreetype6-dev)" && false)
 	@pkg-config --cflags zlib >/dev/null 2>&1 || (echo "Error: missing dependency zlib. Try installing zlib development package (e.g: zlib-devel)" && false)
+	@pkg-config --cflags libpng >/dev/null 2>&1 || (echo "Error: missing dependency libpng. Try installing libpng development package (e.g: libpng-devel)" && false)
 else
 # TODO(cpitrat): Implement check_deps for windows build
 check_deps:

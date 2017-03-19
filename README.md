@@ -69,6 +69,7 @@ The following options are available:
 
  * `DEBUG=TRUE`
  * `WITHOUT_GL=TRUE`
+ * `ARCH=(win32|win64|linux)`
 
 For example, for a debug build, use:
 
