@@ -13,7 +13,7 @@ class CapriceVKeyboardTest : public testing::Test {
     void SetUp() {
       CPC.resources_path = "resources";
       app.Init();
-      cvk = new CapriceVKeyboard(CRect(), nullptr, nullptr, nullptr);
+      cvk = new CapriceVKeyboard(CRect(), nullptr, nullptr);
     }
 
     void TearDown() {

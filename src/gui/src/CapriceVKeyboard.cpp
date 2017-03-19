@@ -7,13 +7,12 @@ extern t_CPC CPC;
 
 namespace wGui {
 
-  CapriceVKeyboard::CapriceVKeyboard(const CRect& WindowRect, CWindow* pParent, SDL_Surface* screen, CFontEngine* pFontEngine) :
-    CFrame(WindowRect, pParent, pFontEngine, "Caprice32 - Virtual Keyboard", false), m_pScreenSurface(screen)
+  CapriceVKeyboard::CapriceVKeyboard(const CRect& WindowRect, CWindow* pParent, CFontEngine* pFontEngine) :
+    CFrame(WindowRect, pParent, pFontEngine, "Caprice32 - Virtual Keyboard", false)
   {
     // TODO: This became ugly with time ... Make this more generic by creating a
     // class key that has a displayable string and SDL events associated
     SetModal(true);
-    m_keyFromChar = keysFromChars[CPC.kbd_layout];
     std::vector<std::string> keys{ "ABCDEFGHIJ", "KLMNOPQRST", "UVWXYZabcd", "efghijklmn", "opqrstuvwx", "yz01234567", "89&#\"'(-_)", "=,.:!|?./*", "+%<>[]{}\\`"};
     // TODO: make this configurable
     std::vector<std::string> keywords{ "cat\n", "run\n", "run\"", "cls\n", "mode ", "|cpm\n", "|tape\n", "|a\n", "|b\n" };
@@ -98,6 +97,7 @@ namespace wGui {
   }
 
   std::list<SDL_Event> CapriceVKeyboard::StringToEvents(std::string toTranslate) {
+    auto keyFromChar = keysFromChars[CPC.kbd_layout];
     std::list<SDL_Event> result;
     bool escaped = false;
     for(auto c : toTranslate) {
@@ -113,8 +113,8 @@ namespace wGui {
         escaped = false;
       } else {
         // key.key.keysym.scancode = ;
-        key.key.keysym.sym = m_keyFromChar[c].first;
-        key.key.keysym.mod = m_keyFromChar[c].second;
+        key.key.keysym.sym = keyFromChar[c].first;
+        key.key.keysym.mod = keyFromChar[c].second;
         // key.key.keysym.unicode = c;
       }
       key.key.type = SDL_KEYDOWN;

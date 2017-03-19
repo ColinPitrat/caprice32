@@ -204,6 +204,7 @@ typedef struct {
    unsigned int limit_speed;
    unsigned int paused;
    unsigned int auto_pause;
+   unsigned int boot_time;
    unsigned int keyboard_line;
    unsigned int tape_motor;
    unsigned int tape_play_button;

@@ -1657,6 +1657,7 @@ void loadConfiguration (t_CPC &CPC, const std::string& configFilename)
    }
    CPC.limit_speed = 1;
    CPC.auto_pause = conf.getIntValue("system", "auto_pause", 1) & 1;
+   CPC.boot_time = conf.getIntValue("system", "boot_time", 5);
    CPC.printer = conf.getIntValue("system", "printer", 0) & 1;
    CPC.mf2 = conf.getIntValue("system", "mf2", 0) & 1;
    CPC.keyboard = conf.getIntValue("system", "keyboard", 0);
@@ -1759,6 +1760,7 @@ void saveConfiguration (t_CPC &CPC, const std::string& configFilename)
    conf.setIntValue("system", "printer", CPC.printer);
    conf.setIntValue("system", "mf2", CPC.mf2);
    conf.setIntValue("system", "keyboard", CPC.keyboard);
+   conf.setIntValue("system", "boot_time", CPC.boot_time);
    conf.setIntValue("system", "joystick_emulation", CPC.joystick_emulation);
    conf.setIntValue("system", "joysticks", CPC.joysticks);
    conf.setIntValue("system", "joystick_menu_button", CPC.joystick_menu_button + 1);
@@ -1990,6 +1992,11 @@ int cap32_main (int argc, char **argv)
 
    // Really load the various drives, if needed
    loadSlots();
+
+   // Fill the buffer with autocmd if provided
+   virtualKeyboardEvents = CapriceVKeyboard::StringToEvents(args.autocmd);
+   // Give some time to the CPC to start before sending any command
+   lastVirtualEventTicks = SDL_GetTicks() + CPC.boot_time * 1000;
 
 // ----------------------------------------------------------------------------
 

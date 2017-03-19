@@ -6,10 +6,11 @@
 #include "stringutils.h"
 
 extern bool log_verbose;
-std::string commit_hash = "8cfdd63e9c4bfd7c1bad3b11cb586ea89149e4a0";
+std::string commit_hash = "458abf2c0ae8ccac2c9b9ad615d11010f3bce27c";
 
 const struct option long_options[] =
 {
+   {"autocmd",  required_argument, nullptr, 'a'},
    {"cfg_file", required_argument, nullptr, 'c'},
    {"version",  no_argument, nullptr, 'V'},
    {"help",     no_argument, nullptr, 'h'},
@@ -17,8 +18,7 @@ const struct option long_options[] =
    {nullptr, 0, nullptr, 0},
 };
 
-CapriceArgs::CapriceArgs(void) :
-   cfgFilePath("") // Unneeded as string are initialized empty. But kept here for clarity.
+CapriceArgs::CapriceArgs(void)
 {
 }
 
@@ -30,6 +30,7 @@ void usage(std::ostream &os, char *progPath, int errcode)
 
    os << "Usage: " << progname << " [options] <slotfile(s)>\n";
    os << "\nSupported options are:\n";
+   os << "   -a/--autocmd=<command>: execute command as soon as the emulator starts.\n";
    os << "   -c/--cfg_file=<file>:   use <file> as the emulator configuration file instead of the default.\n";
    os << "   -h/--help:              shows this help\n";
    os << "   -V/--version:           outputs version and exit\n";
@@ -49,7 +50,7 @@ void parseArguments(int argc, char **argv, std::vector<std::string>& slot_list, 
 
    optind = 0; // To please test framework, when this function is called multiple times !
    while(1) {
-      c = getopt_long (argc, argv, "c:hvV",
+      c = getopt_long (argc, argv, "a:c:hvV",
                        long_options, &option_index);
 
       /* Detect the end of the options. */
@@ -58,6 +59,11 @@ void parseArguments(int argc, char **argv, std::vector<std::string>& slot_list, 
 
       switch (c)
       {
+         case 'a':
+            args.autocmd += optarg;
+            args.autocmd += "\n";
+            break;
+
          case 'c':
             args.cfgFilePath = optarg;
             break;
