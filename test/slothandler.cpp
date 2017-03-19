@@ -3,7 +3,7 @@
 #include "cap32.h"
 #include "slotshandler.h"
 
-TEST(Cap32Test, fillSlotsNoArg)
+TEST(SlotHandlerTest, fillSlotsNoArg)
 {
   std::vector<std::string> slot_list;
   t_CPC CPC;
@@ -21,7 +21,7 @@ TEST(Cap32Test, fillSlotsNoArg)
   ASSERT_EQ("", CPC.snap_file);
 }
 
-TEST(Cap32Test, fillSlotsOneLocalDskFile)
+TEST(SlotHandlerTest, fillSlotsOneLocalDskFile)
 {
   std::vector<std::string> slot_list = { "./test.dsk"};
   t_CPC CPC;
@@ -40,7 +40,7 @@ TEST(Cap32Test, fillSlotsOneLocalDskFile)
 
 }
 
-TEST(Cap32Test, fillSlotsTwoDskFiles)
+TEST(SlotHandlerTest, fillSlotsTwoDskFiles)
 {
   std::vector<std::string> slot_list = { "/tmp/foo.dsk", "/var/bar.dsk"};
   t_CPC CPC;
@@ -58,7 +58,7 @@ TEST(Cap32Test, fillSlotsTwoDskFiles)
   ASSERT_EQ("", CPC.snap_file);
 }
 
-TEST(Cap32Test, fillSlotsOneLocalCdtFile)
+TEST(SlotHandlerTest, fillSlotsOneLocalCdtFile)
 {
   std::vector<std::string> slot_list = { "./test.cdt"};
   t_CPC CPC;
@@ -76,7 +76,7 @@ TEST(Cap32Test, fillSlotsOneLocalCdtFile)
   ASSERT_EQ("", CPC.snap_file);
 }
 
-TEST(Cap32Test, fillSlotsOneLocalVocFile)
+TEST(SlotHandlerTest, fillSlotsOneLocalVocFile)
 {
   std::vector<std::string> slot_list = { "./test.voc"};
   t_CPC CPC;
@@ -94,7 +94,7 @@ TEST(Cap32Test, fillSlotsOneLocalVocFile)
   ASSERT_EQ("", CPC.snap_file);
 }
 
-TEST(Cap32Test, fillSlotsOneLocalSnaFile)
+TEST(SlotHandlerTest, fillSlotsOneLocalSnaFile)
 {
   std::vector<std::string> slot_list = { "./test.sna"};
   t_CPC CPC;
@@ -112,7 +112,7 @@ TEST(Cap32Test, fillSlotsOneLocalSnaFile)
   ASSERT_EQ("./test.sna", CPC.snap_file);
 }
 
-TEST(Cap32Test, fillSlotsOneCprFile)
+TEST(SlotHandlerTest, fillSlotsOneCprFile)
 {
   std::vector<std::string> slot_list = { "./test.cpr"};
   t_CPC CPC;
@@ -130,7 +130,7 @@ TEST(Cap32Test, fillSlotsOneCprFile)
   ASSERT_EQ("", CPC.snap_file);
 }
 
-TEST(Cap32Test, fillSlotsOneZippedCprFile)
+TEST(SlotHandlerTest, fillSlotsOneZippedCprFile)
 {
   std::vector<std::string> slot_list = { "test/cartridge/testplus.zip"};
   t_CPC CPC;
@@ -148,7 +148,7 @@ TEST(Cap32Test, fillSlotsOneZippedCprFile)
   ASSERT_EQ("", CPC.snap_file);
 }
 
-TEST(Cap32Test, fillSlotsOneFileOfEachKind)
+TEST(SlotHandlerTest, fillSlotsOneFileOfEachKind)
 {
   std::vector<std::string> slot_list = { "/tmp/foo.dsk", "/var/bar.cdt", "/usr/test.sna", "/home/cart.cpr" };
   t_CPC CPC;
@@ -166,7 +166,7 @@ TEST(Cap32Test, fillSlotsOneFileOfEachKind)
   ASSERT_EQ("/usr/test.sna", CPC.snap_file);
 }
 
-TEST(Cap32Test, fillSlotsManyFilesOfEachKind)
+TEST(SlotHandlerTest, fillSlotsManyFilesOfEachKind)
 {
   std::vector<std::string> slot_list = { "rom/system.cpr", "/tmp/foo.dsk", "/var/test.dsk", "/tmp/other.dsk", "/var/bar.cdt", "/tmp/test.voc", "/usr/test.sna", "/tmp/other.sna", "test/test.cpr" };
   t_CPC CPC;
@@ -185,7 +185,7 @@ TEST(Cap32Test, fillSlotsManyFilesOfEachKind)
 
 }
 
-TEST(Cap32Test, serializeDiskFormat)
+TEST(SlotHandlerTest, serializeDiskFormat)
 {
   t_disk_format fmt;
   fmt.label = "test";
@@ -209,7 +209,7 @@ TEST(Cap32Test, serializeDiskFormat)
   ASSERT_EQ("test,42,2,4,1,82,229,193,198,194,199,195,200,196,201", result);
 }
 
-TEST(Cap32Test, serializeUnnamedDiskFormatReturnsEmptyString)
+TEST(SlotHandlerTest, serializeUnnamedDiskFormatReturnsEmptyString)
 {
   t_disk_format fmt;
   fmt.tracks = 42;
