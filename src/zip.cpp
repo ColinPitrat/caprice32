@@ -118,7 +118,7 @@ namespace zip
       return ERR_FILE_UNZIP_FAILED; // couldn't create output file
     }
     LOG_DEBUG("Using temporary file: " << tmpFilePath);
-    *pfileOut = fopen(tmpFilePath, "w+");
+    *pfileOut = fopen(tmpFilePath, "w+b");
 #else
     *pfileOut = tmpfile();
 #endif
