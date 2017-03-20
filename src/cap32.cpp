@@ -208,6 +208,13 @@ t_drive driveB;
    } \
 }
 
+enum ApplicationWindowState
+{
+   Minimized,              // application window has been iconified
+   Restored,               // application window has been restored
+   GainedFocus,            // application window got input focus
+   LostFocus               // application window lost input focus
+} _appWindowState;
 
 CapriceArgs args;
 
@@ -2348,13 +2355,36 @@ int cap32_main (int argc, char **argv)
             }
             break;
 
+            // Code shamelessly copied from http://sdl.beuc.net/sdl.wiki/Event_Examples
+            // TODO: What if we were paused because of other reason than losing focus and then only lost focus
+            //       the right thing to do here is to restore focus but keep paused... implementing this require
+            //       keeping track of pause source, which will be a pain.
             case SDL_ACTIVEEVENT:
-               if (CPC.auto_pause) {
-                  if (event.active.state == SDL_APPINPUTFOCUS) {
-                     if (event.active.gain == 1)
-                        CPC.paused = false;
-                     else
-                        CPC.paused = true;
+               if (event.active.state == (SDL_APPINPUTFOCUS | SDL_APPACTIVE) ) {
+                  if (event.active.gain == 0) {
+                     _appWindowState = Minimized;
+                     CPC.paused = true; // Always paused when iconified
+                  } else {
+                     if (_appWindowState == LostFocus ) {
+                         _appWindowState = GainedFocus;
+                         if (CPC.auto_pause)
+                            CPC.paused = false;
+                     } else {
+                         _appWindowState = Restored;
+                         CPC.paused = false; // Always unpause when restoring from iconified
+                     }
+                  }
+               }
+               else if (event.active.state & SDL_APPINPUTFOCUS) {
+                  if (event.active.gain == 0) {
+                      _appWindowState = LostFocus;
+                      if (CPC.auto_pause)
+                         CPC.paused = true;
+                  }
+                  else {
+                      _appWindowState = GainedFocus;
+                      if (CPC.auto_pause)
+                         CPC.paused = false;
                   }
                }
                break;
