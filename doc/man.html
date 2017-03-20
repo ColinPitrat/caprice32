@@ -1,220 +1,279 @@
-Content-type: text/html; charset=UTF-8
+<!-- Creator     : groff version 1.22.3 -->
+<!-- CreationDate: Mon Mar 20 14:46:16 2017 -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta name="generator" content="groff -Thtml, see www.gnu.org">
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<meta name="Content-Style" content="text/css">
+<style type="text/css">
+       p       { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       pre     { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       table   { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       h1      { text-align: center }
+</style>
+<title>cap32</title>
 
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
-<HTML><HEAD><TITLE>Man page of cap32</TITLE>
-</HEAD><BODY>
-<H1>cap32</H1>
-Section: Games and Demos (6)<BR>Updated: March 2017<BR><A HREF="#index">Index</A>
-<A HREF="/cgi-bin/man/man2html">Return to Main Contents</A><HR>
+</head>
+<body>
 
-<A NAME="lbAB">&nbsp;</A>
-<H2>NAME</H2>
+<h1 align="center">cap32</h1>
 
-cap32 - Caprice32 Amstrad CPC emulator
-<P>
-<A NAME="lbAC">&nbsp;</A>
-<H2>SYNOPSIS</H2>
+<a href="#NAME">NAME</a><br>
+<a href="#SYNOPSIS">SYNOPSIS</a><br>
+<a href="#DESCRIPTION">DESCRIPTION</a><br>
+<a href="#OPTIONS">OPTIONS</a><br>
+<a href="#EXAMPLES">EXAMPLES</a><br>
+<a href="#BUGS">BUGS</a><br>
+<a href="#AUTHOR">AUTHOR</a><br>
+<a href="#FILES">FILES</a><br>
+<a href="#SEE ALSO">SEE ALSO</a><br>
 
-<B>cap32</B>
+<hr>
 
-[<I>OPTION</I>]... [<I>FILE</I>]...
-<P>
-<A NAME="lbAD">&nbsp;</A>
-<H2>DESCRIPTION</H2>
 
-<B>Caprice32</B> is an Amstrad CPC emulator. It emulates the Amstrad CPC464, 664, 6128 and 6128+ home computers.
-<P>
-<P>
+<h2>NAME
+<a name="NAME"></a>
+</h2>
 
-<B>Media loading</B>
-<DL COMPACT><DT><DD>
-Upon invocation, the FILEs specified as arguments will be used to populate the various available CPC machine slots. The type of slot is determined by the file format, detected by its extension. Caprice32 supports the following file formats:
-<B>.dsk</B> (disk image), <B>.voc</B> or <B>.cdt</B> (tape image), <B>.cpr</B> (cartridge image), <B>.sna</B> (snapshot image), <B>.zip</B> (ZIP archive containing any number of previously described files). Specifying slot content on the command line is optional.
-<P>
 
-Caprice32 supports two disk drives (drive A and drive B). If two disk image files (.dsk) are provided, the first one will be loaded in drive A and the second one in drive B.
-<P>
+<p style="margin-left:11%; margin-top: 1em">cap32 -
+Caprice32 Amstrad CPC emulator</p>
 
-The <B>cart_path</B>, <B>snap_path</B>, <B>dsk_path</B> and <B>tape_path</B> entries in the configuration file are <B>only</B> used to specify the directory to open when loading/saving files in the GUI. The full path to the various slot contents must be provided on the command line.
-</DL>
+<h2>SYNOPSIS
+<a name="SYNOPSIS"></a>
+</h2>
 
-<P>
-<P>
 
-<B>Configuration</B>
-<DL COMPACT><DT><DD>
-When launched, Caprice32 will look for a configuration file in several locations. If a configuration file was specified using the <B>--cfg_file</B> command line switch, Caprice32 will try and use it. If no configuration file was specified, or the configuration file specified does not exist, Caprice32 will try and open, in this order: <B>$CWD/cap32.cfg</B> ($CWD being the directory where the cap32 executable resides), then a <B>.cap32.cfg</B> file in the user home directory, then <B>/etc/cap32.cfg</B>. Caprice32 will use the first valid file it finds. If no configuration file is found, a default configuration will be used.
-<P>
+<p style="margin-left:11%; margin-top: 1em"><b>cap32</b>
+[<i>OPTION</i>]... [<i>FILE</i>]...</p>
 
-The configuration file contains various configuration parameters, some of which can be modified from the GUI.
-When saving the configuration from the GUI, it will be written in the configuration file specified by the <B>--cfg_file</B> switch, if it exists, else in $CWD/cap32.cfg if it exists, otherwise in $HOME/.cap32.cfg.
-<P>
-
-Most of the configuration file entries are commented in the configuration file provided by default with Caprice32. However, when overwriting the configuration file from the emulator menu, all comments will be lost.
-</DL>
-
-<P>
-<P>
-
-<B>Control</B>
-<DL COMPACT><DT><DD>
-Emulator functionalities are available through function keys (F1-F12). As CPC also had function keys, those are emulated by keys from the numpad. This makes sense since their disposition on the CPC keyboard was similar to the numpad. If your computer doesn't have a numpad (e.g laptop that doesn't support it with Fn key) the only way to access the CPC F1-F10 keys is through the virtual keyboard.
-</DL>
-
-<P>
-
-<DL COMPACT><DT><DD>
-The emulator function key mapping is:
-<DL COMPACT><DT><DD>
-<BR>
-
-<B>F1</B> - Show GUI (and pause the emulator)
-<BR>
-
-<B>F2</B> - Toggle fullscreen / windowed mode
-<BR>
-
-<B>F3</B> - Take screenshot
-<BR>
-
-<B>F4</B> - Press tape reader play key
-<BR>
-
-<B>F5</B> - Reset the emulator
-<BR>
-
-<B>F6</B> - Multiface II stop (advanced users only)
-<BR>
-
-<B>F7</B> - Toggle joystick emulation
-<BR>
-
-<B>F8</B> - Toggle FPS display
-<BR>
-
-<B>F9</B> - Toggle speed limitation
-<BR>
-
-<B>F10</B> - Exit the emulator
-<BR>
-
-<B>F12</B> - Toggle debug mode
-<BR>
-
-<B>Shift+F1</B> - Show virtual keyboard
-</DL>
-
-</DL>
-
-<P>
-<P>
-
-<B>Joystick support</B>
-<DL COMPACT><DT><DD>
-Joystick emulation can be turned on with the F7 key. When joystick emulation is on, real joysticks are disabled, and the keyboard arrows (directions) as well as X and Z (fire buttons) keys are remapped to emulate the joystick 1 of the CPC machine.
-<P>
-
-Caprice32 can also be controlled completely from the joystick. The configuration file <B>joystick_menu_button</B> and <B>joystick_vkeyboard_button</B> entries allow binding menu and virtual keyboard invocations to some of the (host) joystick button.
-</DL>
-
-<P>
-<P>
-
-<B>Keyboard mapping</B>
-<DL COMPACT><DT><DD>
-Caprice32 supports CPC English, French and Spanish keyboard layouts. The CPC keyboard layout is defined in the configuration file by the <B>keyboard</B> entry (0: English, 1: French, 2: Spanish). Additionally one can define the layout of the host keyboard in the configuration file, using <B>kbd_layout</B> entry. <B>kbd_layout</B> supports the same three values as <B>keyboard</B> and should remap properly most keys found on English (US and UK), French and Spanish keyboards.
-</DL>
-
-<P>
-<P>
+<h2>DESCRIPTION
+<a name="DESCRIPTION"></a>
+</h2>
 
 
 
+<p style="margin-left:11%; margin-top: 1em"><b>Caprice32</b>
+is an Amstrad CPC emulator. It emulates the Amstrad CPC464,
+664, 6128 and 6128+ home computers.</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>Media
+loading</b></p>
+
+<p style="margin-left:22%;">Upon invocation, the FILEs
+specified as arguments will be used to populate the various
+available CPC machine slots. The type of slot is determined
+by the file format, detected by its extension. Caprice32
+supports the following file formats: <b>.dsk</b> (disk
+image), <b>.voc</b> or <b>.cdt</b> (tape image), <b>.cpr</b>
+(cartridge image), <b>.sna</b> (snapshot image), <b>.zip</b>
+(ZIP archive containing any number of previously described
+files). Specifying slot content on the command line is
+optional.</p>
+
+<p style="margin-left:22%; margin-top: 1em">Caprice32
+supports two disk drives (drive A and drive B). If two disk
+image files (.dsk) are provided, the first one will be
+loaded in drive A and the second one in drive B.</p>
+
+<p style="margin-left:22%; margin-top: 1em">The
+<b>cart_path</b>, <b>snap_path</b>, <b>dsk_path</b> and
+<b>tape_path</b> entries in the configuration file are
+<b>only</b> used to specify the directory to open when
+loading/saving files in the GUI. The full path to the
+various slot contents must be provided on the command
+line.</p>
 
 
-<P>
-<A NAME="lbAE">&nbsp;</A>
-<H2>OPTIONS</H2>
+<p style="margin-left:11%; margin-top: 1em"><b>Configuration</b></p>
 
-<P>
+<p style="margin-left:22%;">When launched, Caprice32 will
+look for a configuration file in several locations. If a
+configuration file was specified using the
+<b>&minus;&minus;cfg_file</b> command line switch, Caprice32
+will try and use it. If no configuration file was specified,
+or the configuration file specified does not exist,
+Caprice32 will try and open, in this order:
+<b>$CWD/cap32.cfg</b> ($CWD being the directory where the
+cap32 executable resides), then a <b>.cap32.cfg</b> file in
+the user home directory, then <b>/etc/cap32.cfg</b>.
+Caprice32 will use the first valid file it finds. If no
+configuration file is found, a default configuration will be
+used.</p>
 
-<DL COMPACT>
-<DT><B>-a</B>, <B>--autocmd</B>=<I>COMMAND</I><DD>
-pass command to execute to the emulator. The option can be repeated to pass multiple commands. For example: cap32 -a 'print &quot;Hello&quot;' -a 'print &quot;World&quot;'
-<DT><B>-c</B>, <B>--cfg_file</B>=<I>FILE</I><DD>
-use FILE as the emulator configuration file.
-<DT><B>-h</B>, <B>--help</B><DD>
-display short help and exits
-<DT><B>-V</B>, <B>--version</B><DD>
-display Caprice32 version and exits
-<DT><B>-v</B>, <B>--verbose</B><DD>
-be talkative about what the emulator is doing (mostly for debug builds)
-<P>
-</DL>
-<A NAME="lbAF">&nbsp;</A>
-<H2>EXAMPLES</H2>
+<p style="margin-left:22%; margin-top: 1em">The
+configuration file contains various configuration
+parameters, some of which can be modified from the GUI. When
+saving the configuration from the GUI, it will be written in
+the configuration file specified by the
+<b>&minus;&minus;cfg_file</b> switch, if it exists, else in
+$CWD/cap32.cfg if it exists, otherwise in
+$HOME/.cap32.cfg.</p>
 
-<P>
+<p style="margin-left:22%; margin-top: 1em">Most of the
+configuration file entries are commented in the
+configuration file provided by default with Caprice32.
+However, when overwriting the configuration file from the
+emulator menu, all comments will be lost.</p>
 
-cap32 ./disk/sorcery.dsk ./trail.dsk
-<DL COMPACT><DT><DD>
-Launches cap32, loads the content of ./disk/sorcery.dsk in the drive A slot, and ./trail.dsk in the drive B slot.
-</DL>
-<A NAME="lbAG">&nbsp;</A>
-<H2>BUGS</H2>
 
-CPC6128+ emulation is incomplete: vectored &amp; DMA interrupts, analog joysticks and 8 bit printer are not emulated.
-<P>
+<p style="margin-left:11%; margin-top: 1em"><b>Control</b></p>
 
-See <A HREF="https://github.com/ColinPitrat/caprice32/issues">https://github.com/ColinPitrat/caprice32/issues</A> for the list of reported bugs.
-<P>
-<A NAME="lbAH">&nbsp;</A>
-<H2>AUTHOR</H2>
+<p style="margin-left:22%;">Emulator functionalities are
+available through function keys (F1-F12). As CPC also had
+function keys, those are emulated by keys from the numpad.
+This makes sense since their disposition on the CPC keyboard
+was similar to the numpad. If your computer doesn&rsquo;t
+have a numpad (e.g laptop that doesn&rsquo;t support it with
+Fn key) the only way to access the CPC F1-F10 keys is
+through the virtual keyboard.</p>
 
-<P>
+<p style="margin-left:22%; margin-top: 1em">The emulator
+function key mapping is:</p>
 
-Caprice32 was originally written by Ulrich Doewich.
-<P>
+<p style="margin-left:32%;"><b>F1</b> - Show GUI (and pause
+the emulator) <b><br>
+F2</b> - Toggle fullscreen / windowed mode <b><br>
+F3</b> - Take screenshot <b><br>
+F4</b> - Press tape reader play key <b><br>
+F5</b> - Reset the emulator <b><br>
+F6</b> - Multiface II stop (advanced users only) <b><br>
+F7</b> - Toggle joystick emulation <b><br>
+F8</b> - Toggle FPS display <b><br>
+F9</b> - Toggle speed limitation <b><br>
+F10</b> - Exit the emulator <b><br>
+F12</b> - Toggle debug mode <b><br>
+Shift+F1</b> - Show virtual keyboard</p>
 
-This man page covers Colin Pitrat's fork of Caprice32.
-<P>
+<p style="margin-left:11%; margin-top: 1em"><b>Joystick
+support</b></p>
 
-The screen capture code uses driedfruit SDL_SavePNG code (<A HREF="https://github.com/driedfruit/SDL_SavePNG).">https://github.com/driedfruit/SDL_SavePNG).</A>
-<P>
-<A NAME="lbAI">&nbsp;</A>
-<H2>FILES</H2>
+<p style="margin-left:22%;">Joystick emulation can be
+turned on with the F7 key. When joystick emulation is on,
+real joysticks are disabled, and the keyboard arrows
+(directions) as well as X and Z (fire buttons) keys are
+remapped to emulate the joystick 1 of the CPC machine.</p>
 
-$HOME/.cap32.cfg
-<BR>
+<p style="margin-left:22%; margin-top: 1em">Caprice32 can
+also be controlled completely from the joystick. The
+configuration file <b>joystick_menu_button</b> and
+<b>joystick_vkeyboard_button</b> entries allow binding menu
+and virtual keyboard invocations to some of the (host)
+joystick button.</p>
 
-/etc/cap32.cfg
-<P>
-<A NAME="lbAJ">&nbsp;</A>
-<H2>SEE ALSO</H2>
+<p style="margin-left:11%; margin-top: 1em"><b>Keyboard
+mapping</b></p>
 
-<A HREF="https://github.com/ColinPitrat/caprice32">https://github.com/ColinPitrat/caprice32</A>
-<BR>
+<p style="margin-left:22%;">Caprice32 supports CPC English,
+French and Spanish keyboard layouts. The CPC keyboard layout
+is defined in the configuration file by the <b>keyboard</b>
+entry (0: English, 1: French, 2: Spanish). Additionally one
+can define the layout of the host keyboard in the
+configuration file, using <b>kbd_layout</b> entry.
+<b>kbd_layout</b> supports the same three values as
+<b>keyboard</b> and should remap properly most keys found on
+English (US and UK), French and Spanish keyboards.</p>
 
-<A HREF="https://github.com/driedfruit/SDL_SavePNG">https://github.com/driedfruit/SDL_SavePNG</A>
-<P>
+<h2>OPTIONS
+<a name="OPTIONS"></a>
+</h2>
 
-<HR>
-<A NAME="index">&nbsp;</A><H2>Index</H2>
-<DL>
-<DT><A HREF="#lbAB">NAME</A><DD>
-<DT><A HREF="#lbAC">SYNOPSIS</A><DD>
-<DT><A HREF="#lbAD">DESCRIPTION</A><DD>
-<DT><A HREF="#lbAE">OPTIONS</A><DD>
-<DT><A HREF="#lbAF">EXAMPLES</A><DD>
-<DT><A HREF="#lbAG">BUGS</A><DD>
-<DT><A HREF="#lbAH">AUTHOR</A><DD>
-<DT><A HREF="#lbAI">FILES</A><DD>
-<DT><A HREF="#lbAJ">SEE ALSO</A><DD>
-</DL>
-<HR>
-This document was created by
-<A HREF="/cgi-bin/man/man2html">man2html</A>,
-using the manual pages.<BR>
-Time: 13:00:27 GMT, March 20, 2017
-</BODY>
-</HTML>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>&minus;a</b>,
+<b>&minus;&minus;autocmd</b>=<i>COMMAND</i></p>
+
+<p style="margin-left:22%;">pass command to execute to the
+emulator. The option can be repeated to pass multiple
+commands. For example: cap32 -a &rsquo;print
+&quot;Hello&quot;&rsquo; -a &rsquo;print
+&quot;World&quot;&rsquo;</p>
+
+<p style="margin-left:11%;"><b>&minus;c</b>,
+<b>&minus;&minus;cfg_file</b>=<i>FILE</i></p>
+
+<p style="margin-left:22%;">use FILE as the emulator
+configuration file.</p>
+
+<p style="margin-left:11%;"><b>&minus;h</b>,
+<b>&minus;&minus;help</b></p>
+
+<p style="margin-left:22%;">display short help and
+exits</p>
+
+<p style="margin-left:11%;"><b>&minus;V</b>,
+<b>&minus;&minus;version</b></p>
+
+<p style="margin-left:22%;">display Caprice32 version and
+exits</p>
+
+<p style="margin-left:11%;"><b>&minus;v</b>,
+<b>&minus;&minus;verbose</b></p>
+
+<p style="margin-left:22%;">be talkative about what the
+emulator is doing (mostly for debug builds)</p>
+
+<h2>EXAMPLES
+<a name="EXAMPLES"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">cap32
+./disk/sorcery.dsk ./trail.dsk</p>
+
+<p style="margin-left:22%;">Launches cap32, loads the
+content of ./disk/sorcery.dsk in the drive A slot, and
+./trail.dsk in the drive B slot.</p>
+
+<h2>BUGS
+<a name="BUGS"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">CPC6128+
+emulation is incomplete: vectored &amp; DMA interrupts,
+analog joysticks and 8 bit printer are not emulated.</p>
+
+<p style="margin-left:11%; margin-top: 1em">See
+https://github.com/ColinPitrat/caprice32/issues for the list
+of reported bugs.</p>
+
+<h2>AUTHOR
+<a name="AUTHOR"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">Caprice32 was
+originally written by Ulrich Doewich.</p>
+
+<p style="margin-left:11%; margin-top: 1em">This man page
+covers Colin Pitrat&rsquo;s fork of Caprice32.</p>
+
+<p style="margin-left:11%; margin-top: 1em">The screen
+capture code uses driedfruit SDL_SavePNG code
+(https://github.com/driedfruit/SDL_SavePNG).</p>
+
+<h2>FILES
+<a name="FILES"></a>
+</h2>
+
+
+
+<p style="margin-left:11%; margin-top: 1em">$HOME/.cap32.cfg
+<br>
+/etc/cap32.cfg</p>
+
+<h2>SEE ALSO
+<a name="SEE ALSO"></a>
+</h2>
+
+
+
+<p style="margin-left:11%; margin-top: 1em">https://github.com/ColinPitrat/caprice32
+<br>
+ https://github.com/driedfruit/SDL_SavePNG</p>
+<hr>
+</body>
+</html>
