@@ -206,7 +206,7 @@ unit_test: $(TEST_TARGET)
 endif
 
 clean:
-	rm -rf obj/
-	rm -f test_runner test_runner.exe cap32 cap32.exe release .debug tags
+	rm -rf obj/ release/
+	rm -f test_runner test_runner.exe cap32 cap32.exe .debug tags
 
 -include $(DEPENDS) $(TEST_DEPENDS)
