@@ -1150,7 +1150,7 @@ int emulator_init (void)
    }
 
    emulator_reset(false);
-   CPC.paused &= ~1;
+   CPC.paused = false;
 
    return 0;
 }

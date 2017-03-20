@@ -202,7 +202,7 @@ typedef struct {
    unsigned int ram_size;
    unsigned int speed;
    unsigned int limit_speed;
-   unsigned int paused;
+   bool paused;
    unsigned int auto_pause;
    unsigned int boot_time;
    unsigned int keyboard_line;
