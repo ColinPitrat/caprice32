@@ -144,7 +144,7 @@ tags:
 doc: $(HTML_DOC)
 
 $(HTML_DOC): $(GROFF_DOC)
-	man2html $< > $@
+	groff -mandoc -Thtml $< > $@
 
 $(TARGET): $(OBJECTS) $(MAIN)
 	$(CXX) $(LDFLAGS) -o $(TARGET) $(OBJECTS) $(MAIN) $(LIBS)
