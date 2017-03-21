@@ -2018,7 +2018,7 @@ int cap32_main (int argc, char **argv)
 // ----------------------------------------------------------------------------
 
    // TODO: deduplicate this and update_cpc_speed
-   dwTicksOffset = static_cast<int>(20.0 / (CPC.speed * 25) / 100.0);
+   dwTicksOffset = static_cast<int>(20.0 / (CPC.speed/CPC_BASE_FREQUENCY_MHZ));
    dwTicksTarget = SDL_GetTicks();
    dwTicksTargetFPS = dwTicksTarget;
    dwTicksTarget += dwTicksOffset;

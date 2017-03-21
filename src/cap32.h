@@ -48,6 +48,7 @@
 #endif
 
 #define CYCLE_COUNT_INIT 80000 // 4MHz divided by 50Hz = number of CPU cycles per frame
+#define CPC_BASE_FREQUENCY_MHZ 4.0
 
 #define CPC_SCR_WIDTH 1024 // max width
 #define CPC_SCR_HEIGHT 312 // max height
