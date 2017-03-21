@@ -15,6 +15,8 @@
 
 LAST_BUILD_IN_DEBUG = $(shell [ -e .debug ] && echo 1 || echo 0)
 GIT_HASH = $(shell git rev-parse --verify HEAD)
+# If compiling under native windows, set WINE to ""
+WINE = wine
 
 ifndef ARCH
 ARCH = linux
@@ -198,8 +200,9 @@ $(TEST_TARGET): $(OBJECTS) $(TEST_OBJECTS) $(OBJDIR)/$(GTEST_DIR)/src/gtest-all.
 ifeq ($(PLATFORM),windows)
 unit_test: $(TEST_TARGET)
 	cp $(TEST_TARGET) $(ARCHIVE)/
+	rm -fr $(ARCHIVE)/test
 	ln -s -f ../../test $(ARCHIVE)/test
-	cd $(ARCHIVE) && wine ./$(TEST_TARGET) --gtest_shuffle
+	cd $(ARCHIVE) && $(WINE) ./$(TEST_TARGET) --gtest_shuffle
 else
 unit_test: $(TEST_TARGET)
 	./$(TEST_TARGET) --gtest_shuffle
