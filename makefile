@@ -53,7 +53,7 @@ endif
 else
 IPATHS = -Isrc/ -Isrc/gui/includes `freetype-config --cflags` `sdl-config --cflags` `pkg-config --cflags libpng`
 LIBS = `sdl-config --libs` -lz `freetype-config --libs` `pkg-config --libs libpng`
-ifndef WITH_IPF
+ifdef WITH_IPF
 COMMON_CFLAGS += -DWITH_IPF
 LIBS += -lcapsimage
 endif
