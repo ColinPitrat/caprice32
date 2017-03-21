@@ -56,25 +56,40 @@ and for 64 bits (x86_64) use:
 
 You may need to edit the makefile to update `MINGW_PATH`, `CXX`, `IPATHS` and `LIBS` for windows platform with the correct values for your installation of mingw.
 
-# Using the source
+# IPF support
 
-The source for Caprice32 is distributed under the terms of the GNU General Public License version 2 (GPLv2), which is included in this archive as COPYING.txt. Please make sure that you understand the terms and conditions of the license before using the source.
-The screen dump part of Caprice32 uses [driedfruit SDL_SavePNG] (https://github.com/driedfruit/SDL_SavePNG) code, released under zlib/libpng license, which is compatible with GPLv2.
-I encourage you to get involved in the project.
+Caprice32 supports IPF file format (http://www.softpres.org/).
+To enable it, you need to first download the proper package from http://softpres.org/download (under "User Distribution").
+You need version 4.2 at least.
 
-# Comments or ready to contribute?
+#### On Linux
 
-If you have suggestions, a bug report or even want to participate to the development, please feel free to open an issue or submit a pull request.
+Unpack the package and copy the library and headers in a place where they will be found by the compilation.
+Typically:
 
-# Why another GitHub repository ?
+```
+cd tmp
+tar -xvzf ipflib42_linux-x86_64.tar.gz
+cd x86_64-linux-gnu-capsimage/
+sudo cp libcapsimage.so.4.2 /usr/lib
+sudo ln -s /usr/lib/libcapsimage.so.4.2 /usr/lib/libcapsimage.so.4
+sudo ln -s /usr/lib/libcapsimage.so.4.2 /usr/lib/libcapsimage.so
+sudo cp -r include/caps /usr/include
+sudo chmod a-x /usr/include/caps/* /usr/lib/libcapsimage.so*
+sudo chmod a+r /usr/include/caps /usr/include/caps/* /usr/lib/libcapsimage.so*
+```
 
-There are many repositories for caprice32 on GitHub:
+Then build Caprice with WITH_IPF:
 
-  * https://github.com/burzumishi/caprice32
-  * https://github.com/rofl0r/caprice32
-  * https://github.com/Neophile76/Caprice32
-  * https://github.com/MrZammler/caprice32
-  * https://github.com/egrath/caprice32-mod
-  * https://github.com/burzumishi/caprice32wx
+`make WITH_IPF=true`
 
-So why create another one ? All these repositories are highly inactive but more than that, in my opinion, they took a wrong direction. Some added dependencies (wxWidget, GTK) without really adding features. Two imported the code but did not do any update.
+You can then run an IPF file as you would do for a DSK file:
+
+`./cap32.exe disk.ipf`
+
+Note that zip file are not yet supported.
+
+#### On Windows
+
+IPF is not yet supported by Caprice32 on Windows. But this should come soon so stay tuned.
+

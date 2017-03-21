@@ -19,6 +19,9 @@
 #include <sstream>
 #include "cap32.h"
 #include "slotshandler.h"
+#ifdef WITH_IPF
+#include "ipf.h"
+#endif
 
 #include "errors.h"
 #include "cartridge.h"
@@ -69,6 +72,16 @@ file_loader files_loader_list[] =
   { DSK_B, ".dsk",
     [](const std::string& filename) -> int { return dsk_load(filename, &driveB); },
     [](FILE* file) -> int { return dsk_load(file, &driveB); } },
+
+#ifdef WITH_IPF
+  { DSK_A, ".ipf",
+    [](const std::string& filename) -> int { return ipf_load(filename, &driveA); },
+    [](FILE* file) -> int { return ipf_load(file, &driveA); } },
+
+  { DSK_B, ".ipf",
+    [](const std::string& filename) -> int { return ipf_load(filename, &driveB); },
+    [](FILE* file) -> int { return ipf_load(file, &driveB); } },
+#endif
 
   { OTHER, ".sna",
     &snapshot_load,
@@ -146,7 +159,11 @@ void fillSlots (std::vector<std::string> slot_list, t_CPC& CPC)
 
          if (fillSlot(CPC.drvA_file, have_DSKA, fullpath, extension, ".dsk", "drive A disk"))
             continue;
+         if (fillSlot(CPC.drvA_file, have_DSKA, fullpath, extension, ".ipf", "drive A disk (IPF)"))
+            continue;
          if (fillSlot(CPC.drvB_file, have_DSKB, fullpath, extension, ".dsk", "drive B disk"))
+            continue;
+         if (fillSlot(CPC.drvB_file, have_DSKB, fullpath, extension, ".ipf", "drive B disk (IPF)"))
             continue;
          if (fillSlot(CPC.snap_file, have_SNA, fullpath, extension, ".sna", "CPC state snapshot"))
             continue;
@@ -433,6 +450,9 @@ int snapshot_save (const std::string &filename)
 void dsk_eject (t_drive *drive)
 {
    dword track, side;
+
+   if (drive->eject_hook)
+		drive->eject_hook(drive);	// additional cleanup
 
    for (track = 0; track < DSK_TRACKMAX; track++) { // loop for all tracks
       for (side = 0; side < DSK_SIDEMAX; side++) { // loop for all sides

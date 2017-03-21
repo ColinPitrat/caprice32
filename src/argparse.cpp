@@ -6,7 +6,7 @@
 #include "stringutils.h"
 
 extern bool log_verbose;
-std::string commit_hash = "33b0c27fbaf3cd996b6eb4aa0dfa202f69c7891b";
+std::string commit_hash = "a3f9ce6e1d32c349cd90237c35975a906f2aa006";
 
 const struct option long_options[] =
 {

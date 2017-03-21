@@ -429,7 +429,7 @@ typedef struct {
    t_sector sector[DSK_SECTORMAX]; // array of sector information structures
 } t_track;
 
-typedef struct {
+struct t_drive {
    unsigned int tracks; // total number of tracks
    unsigned int current_track; // location of drive head
    unsigned int sides; // total number of sides
@@ -439,8 +439,11 @@ typedef struct {
    unsigned int write_protected; // is the image write protected?
    unsigned int random_DEs; // sectors with Data Errors return random data?
    unsigned int flipped; // reverse the side to access?
+   long ipf_id; // IPF ID if the track is loaded with a IPF image
+   void (*track_hook)(struct t_drive *);	// hook called each disk rotation
+   void (*eject_hook)(struct t_drive *);	// hook called on disk eject
    t_track track[DSK_TRACKMAX][DSK_SIDEMAX]; // array of track information structures
-} t_drive;
+};
 
 typedef struct {
    std::string label; // label to display in options dialog

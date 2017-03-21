@@ -12,6 +12,7 @@
 #  - CFLAGS
 #  - LDFLAGS
 #  - WITHOUT_GL
+#  - WITH_IPF
 
 LAST_BUILD_IN_DEBUG = $(shell [ -e .debug ] && echo 1 || echo 0)
 GIT_HASH = $(shell git rev-parse --verify HEAD)
@@ -46,9 +47,16 @@ IPATHS = -Isrc/ -Isrc/gui/includes -I$(MINGW_PATH)/include -I$(MINGW_PATH)/inclu
 LIBS = $(MINGW_PATH)/lib/libSDL.dll.a $(MINGW_PATH)/lib/libfreetype.dll.a $(MINGW_PATH)/lib/libz.dll.a $(MINGW_PATH)/lib/libpng16.dll.a $(MINGW_PATH)/lib/libpng.dll.a
 COMMON_CFLAGS = -DWINDOWS
 CXX = $(TRIPLE)-g++
+ifdef WITH_IPF
+$(error IPF not yet supported for windows.)
+endif
 else
 IPATHS = -Isrc/ -Isrc/gui/includes `freetype-config --cflags` `sdl-config --cflags` `pkg-config --cflags libpng`
 LIBS = `sdl-config --libs` -lz `freetype-config --libs` `pkg-config --libs libpng`
+ifndef WITH_IPF
+COMMON_CFLAGS += -DWITH_IPF
+LIBS += -lcapsimage
+endif
 ifndef CXX
 CXX = g++
 endif
