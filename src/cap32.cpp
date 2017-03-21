@@ -1566,13 +1566,18 @@ void input_swap_joy (void)
    }
 }
 
-// Recalculate emulation speed (to verify, seems to work reasonably well)
-void update_cpc_speed(void)
+void update_timings(void)
 {
-   dwTicksOffset = static_cast<int>(20.0 / ((CPC.speed * 25) / 100.0));
+   dwTicksOffset = static_cast<int>(FRAME_PERIOD_MS / (CPC.speed/CPC_BASE_FREQUENCY_MHZ));
    dwTicksTarget = SDL_GetTicks();
    dwTicksTargetFPS = dwTicksTarget;
    dwTicksTarget += dwTicksOffset;
+}
+
+// Recalculate emulation speed (to verify, seems to work reasonably well)
+void update_cpc_speed(void)
+{
+   update_timings();
    InitAY();
 }
 
@@ -2017,12 +2022,7 @@ int cap32_main (int argc, char **argv)
 
 // ----------------------------------------------------------------------------
 
-   // TODO: deduplicate this and update_cpc_speed
-   dwTicksOffset = static_cast<int>(FRAME_PERIOD_MS / (CPC.speed/CPC_BASE_FREQUENCY_MHZ));
-   dwTicksTarget = SDL_GetTicks();
-   dwTicksTargetFPS = dwTicksTarget;
-   dwTicksTarget += dwTicksOffset;
-
+   update_timings();
    audio_resume();
 
    iExitCondition = EC_FRAME_COMPLETE;
