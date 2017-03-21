@@ -1292,7 +1292,17 @@ void audio_resume (void)
    }
 }
 
+void cpc_pause(void)
+{
+   audio_pause();
+   CPC.paused = true;
+}
 
+void cpc_resume(void)
+{
+   CPC.paused = false;
+   audio_resume();
+}
 
 int video_set_palette (void)
 {
@@ -2363,15 +2373,15 @@ int cap32_main (int argc, char **argv)
                if (event.active.state == (SDL_APPINPUTFOCUS | SDL_APPACTIVE) ) {
                   if (event.active.gain == 0) {
                      _appWindowState = Minimized;
-                     CPC.paused = true; // Always paused when iconified
+                     cpc_pause(); // Always paused when iconified
                   } else {
                      if (_appWindowState == LostFocus ) {
                          _appWindowState = GainedFocus;
                          if (CPC.auto_pause)
-                            CPC.paused = false;
+                            cpc_resume();
                      } else {
                          _appWindowState = Restored;
-                         CPC.paused = false; // Always unpause when restoring from iconified
+                         cpc_resume(); // Always unpause when restoring from iconified
                      }
                   }
                }
@@ -2379,12 +2389,12 @@ int cap32_main (int argc, char **argv)
                   if (event.active.gain == 0) {
                       _appWindowState = LostFocus;
                       if (CPC.auto_pause)
-                         CPC.paused = true;
+                         cpc_pause();
                   }
                   else {
                       _appWindowState = GainedFocus;
                       if (CPC.auto_pause)
-                         CPC.paused = false;
+                         cpc_resume();
                   }
                }
                break;
