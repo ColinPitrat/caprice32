@@ -19,9 +19,7 @@
 #include <sstream>
 #include "cap32.h"
 #include "slotshandler.h"
-#ifdef WITH_IPF
 #include "ipf.h"
-#endif
 
 #include "errors.h"
 #include "cartridge.h"
