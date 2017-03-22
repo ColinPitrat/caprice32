@@ -29,7 +29,7 @@ install:
 - 7z x "%MSYS2_SUBARCHIVE%" > NUL
   # msys2 advise to restart the shell after a first start
 - msys64\usr\bin\bash -lc ""
-- msys64\usr\bin\bash -lc "pacman -Suy"
+- msys64\usr\bin\bash -lc "pacman --noconfirm -Suy"
 - msys64\usr\bin\bash -lc "pacman --noconfirm -S %PACKAGES%"
 
 before_build:
