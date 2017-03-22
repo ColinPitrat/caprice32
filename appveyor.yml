@@ -34,7 +34,7 @@ before_build:
 - ps: (Get-Item "${Env:WINDBG_DIR}\dbghelp.dll").VersionInfo
 
 build_script:
-- msys64\usr\bin\bash -lc "PATH=$PATH:%MINGW_DIR%/bin make ARCH=%WINARCH% MINGW_PATH=\"%MINGW_DIR%\" debug"
-- msys64\usr\bin\bash -lc "PATH=$PATH:%MINGW_DIR%/bin make clean"
-- msys64\usr\bin\bash -lc "PATH=$PATH:%MINGW_DIR%/bin make ARCH=%WINARCH% MINGW_PATH=\"%MINGW_DIR%\""
-- msys64\usr\bin\bash -lc "PATH=$PATH:%MINGW_DIR%/bin make ARCH=%WINARCH% MINGW_PATH=\"%MINGW_DIR%\" unit_test"
+- msys64\usr\bin\bash -lc "cd %APPVEYOR_BUILD_FOLDER% && PATH=$PATH:%MINGW_DIR%/bin make ARCH=%WINARCH% MINGW_PATH=\"%MINGW_DIR%\" debug"
+- msys64\usr\bin\bash -lc "cd %APPVEYOR_BUILD_FOLDER% && PATH=$PATH:%MINGW_DIR%/bin make clean"
+- msys64\usr\bin\bash -lc "cd %APPVEYOR_BUILD_FOLDER% && PATH=$PATH:%MINGW_DIR%/bin make ARCH=%WINARCH% MINGW_PATH=\"%MINGW_DIR%\""
+- msys64\usr\bin\bash -lc "cd %APPVEYOR_BUILD_FOLDER% && PATH=$PATH:%MINGW_DIR%/bin make ARCH=%WINARCH% MINGW_PATH=\"%MINGW_DIR%\" unit_test"
