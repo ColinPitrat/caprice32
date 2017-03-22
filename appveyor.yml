@@ -27,17 +27,14 @@ install:
 - msys64\usr\bin\bash -lc "for i in {1..3}; do pacman --noconfirm -S %PACKAGES% && break || sleep 15 ; done"
 
 before_build:
-- msys64\usr\bin\bash -lc "export PATH=$PATH:%MINGW_DIR%/bin"
 - msys64\usr\bin\bash -lc "pacman -Ql make"
 - msys64\usr\bin\bash -lc "%MINGW_DIR%/bin/g++ --version"
 - msys64\usr\bin\bash -lc "make --version"
-- "%MINGW_DIR%/bin/g++ --version"
-- "make --version"
 - echo "NUMBER_OF_PROCESSORS=%NUMBER_OF_PROCESSORS%"
 - ps: (Get-Item "${Env:WINDBG_DIR}\dbghelp.dll").VersionInfo
 
 build_script:
-- msys64\usr\bin\bash -lc "make ARCH=%WINARCH% MINGW_PATH=\"%MINGW_DIR%\" debug"
-- msys64\usr\bin\bash -lc "make clean"
-- msys64\usr\bin\bash -lc "make ARCH=%WINARCH% MINGW_PATH=\"%MINGW_DIR%\""
-- msys64\usr\bin\bash -lc "make ARCH=%WINARCH% MINGW_PATH=\"%MINGW_DIR%\" unit_test"
+- msys64\usr\bin\bash -lc "PATH=$PATH:%MINGW_DIR%/bin make ARCH=%WINARCH% MINGW_PATH=\"%MINGW_DIR%\" debug"
+- msys64\usr\bin\bash -lc "PATH=$PATH:%MINGW_DIR%/bin make clean"
+- msys64\usr\bin\bash -lc "PATH=$PATH:%MINGW_DIR%/bin make ARCH=%WINARCH% MINGW_PATH=\"%MINGW_DIR%\""
+- msys64\usr\bin\bash -lc "PATH=$PATH:%MINGW_DIR%/bin make ARCH=%WINARCH% MINGW_PATH=\"%MINGW_DIR%\" unit_test"
