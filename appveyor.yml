@@ -33,8 +33,6 @@ before_build:
 - msys64\usr\bin\bash -lc "make --version"
 - "%MINGW_DIR%/bin/g++ --version"
 - "make --version"
-- "%MINGW_DIR%/bin/make --version"
-- "g++ --version"
 - echo "NUMBER_OF_PROCESSORS=%NUMBER_OF_PROCESSORS%"
 - ps: (Get-Item "${Env:WINDBG_DIR}\dbghelp.dll").VersionInfo
 
