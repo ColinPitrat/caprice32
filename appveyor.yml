@@ -1,6 +1,9 @@
 version: '{build}'
 
 environment:
+  MSYS2_URL: "http://kent.dl.sourceforge.net/project/msys2/Base/%MSYS2_ARCH%/msys2-base-%MSYS2_ARCH%-%MSYS2_BASEVER%.tar.xz"
+  MSYS2_ARCHIVE: msys2.tar.xz
+  MSYS2_SUBARCHIVE: msys2.tar
   matrix:
     - MINGW_DIR: mingw64
       MINGW_URL: https://sourceforge.net/projects/mingw-w64/files/Toolchains%20targetting%20Win64/Personal%20Builds/mingw-builds/4.9.2/threads-win32/seh/x86_64-4.9.2-release-win32-seh-rt_v4-rev4.7z/download
@@ -16,6 +19,9 @@ environment:
 install:
 - if not exist "%MINGW_ARCHIVE%" appveyor DownloadFile "%MINGW_URL%" -FileName "%MINGW_ARCHIVE%"
 - 7z x -y "%MINGW_ARCHIVE%" > nul
+- if not exist "%MSYS2_ARCHIVE%" appveyor DownloadFile "%MSYS2_URL%"  -FileName "%MSYS2_ARCHIVE%"
+- 7z x "%MSYS2_ARCHIVE%"
+- 7z x "%MSYS2_SUBARCHIVE%" > NUL
 
 before_build:
 - set Path=%CD%\%MINGW_DIR%\bin;%Path%
@@ -23,11 +29,6 @@ before_build:
 - mingw32-make --version
 - echo "NUMBER_OF_PROCESSORS=%NUMBER_OF_PROCESSORS%"
 - ps: (Get-Item "${Env:WINDBG_DIR}\dbghelp.dll").VersionInfo
-- if "%APPVEYOR_REPO_TAG%"=="true" (set CMAKE_BUILD_TYPE=Release) else (set CMAKE_BUILD_TYPE=Debug)
-- set ENABLE_COVERAGE=yes
-- if "%APPVEYOR_REPO_TAG%"=="true" set ENABLE_COVERAGE=no
-- if NOT "%MINGW_DIR%"=="mingw64" set ENABLE_COVERAGE=no
-- cmake -H. -Bbuild\mingw -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=%CMAKE_BUILD_TYPE% -DENABLE_COVERAGE=%ENABLE_COVERAGE% -DWINDBG_DIR="%WINDBG_DIR%"
 
 build_script:
 - make ARCH=%WINARCH% debug
