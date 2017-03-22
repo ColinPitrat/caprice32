@@ -31,6 +31,8 @@ before_build:
 - msys64\usr\bin\bash -lc "ls /"
 - msys64\usr\bin\bash -lc "ls /msys*"
 - msys64\usr\bin\bash -lc "ls /msys*/*"
+- msys64\usr\bin\bash -lc "ls /mingw*"
+- msys64\usr\bin\bash -lc "ls /mingw*/*"
 - g++ --version
 - make --version
 - echo "NUMBER_OF_PROCESSORS=%NUMBER_OF_PROCESSORS%"
