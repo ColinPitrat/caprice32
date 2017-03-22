@@ -6,7 +6,7 @@ environment:
   MSYS2_URL: "http://kent.dl.sourceforge.net/project/msys2/Base/%MSYS2_ARCH%/msys2-base-%MSYS2_ARCH%-%MSYS2_BASEVER%.tar.xz"
   MSYS2_ARCHIVE: msys2.tar.xz
   MSYS2_SUBARCHIVE: msys2.tar
-  PACKAGES: "make ctags %ARCH_PACKAGES%" 
+  PACKAGES: "make ctags zip %ARCH_PACKAGES%" 
   matrix:
     - MINGW_DIR: "/mingw64"
       WINARCH: win64
