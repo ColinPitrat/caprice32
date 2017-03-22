@@ -9,7 +9,8 @@ https://github.com/ColinPitrat/caprice32
 
 Linux build: [![Linux build Status](https://travis-ci.org/ColinPitrat/caprice32.svg?branch=master)](https://travis-ci.org/ColinPitrat/caprice32)
 
-Windows build: [![Windows build status](https://ci.appveyor.com/api/projects/status/h795wt2xlttaj6sk?svg=true)](https://ci.appveyor.com/project/ColinPitrat/caprice32)
+Windows build: [![Windows build status](https://ci.appveyor.com/api/projects/status/h795wt2xlttaj6sk/branch/master?svg=true)](https://ci.appveyor.com/project/ColinPitrat/caprice32/branch/master)
+
 
 # What is it ?
 
