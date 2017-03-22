@@ -30,8 +30,8 @@ before_build:
 - msys64\usr\bin\bash -lc "export PATH=$PATH:%MINGW_DIR%/bin"
 - msys64\usr\bin\bash -lc "%MINGWDIR%/bin/g++ --version"
 - msys64\usr\bin\bash -lc "%MINGWDIR%/bin/make --version"
-- %MINGWDIR%/bin/g++ --version
-- %MINGWDIR%/bin/make --version
+- "%MINGWDIR%/bin/g++ --version"
+- "%MINGWDIR%/bin/make --version"
 - echo "NUMBER_OF_PROCESSORS=%NUMBER_OF_PROCESSORS%"
 - ps: (Get-Item "${Env:WINDBG_DIR}\dbghelp.dll").VersionInfo
 
