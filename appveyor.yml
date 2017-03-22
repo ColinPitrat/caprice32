@@ -32,13 +32,14 @@ before_build:
 - msys64\usr\bin\bash -lc "ls /msys*"
 - msys64\usr\bin\bash -lc "ls /mingw*"
 - msys64\usr\bin\bash -lc "ls /mingw*/*"
-- g++ --version
-- make --version
+- msys64\usr\bin\bash -lc "echo $PATH"
+- msys64\usr\bin\bash -lc "g++ --version"
+- msys64\usr\bin\bash -lc "make --version"
 - echo "NUMBER_OF_PROCESSORS=%NUMBER_OF_PROCESSORS%"
 - ps: (Get-Item "${Env:WINDBG_DIR}\dbghelp.dll").VersionInfo
 
 build_script:
-- make ARCH=%WINARCH% MINGW_PATH="%MINGW_DIR%" debug
-- make clean
-- make ARCH=%WINARCH% MINGW_PATH="%MINGW_DIR%" 
-- make ARCH=%WINARCH% MINGW_PATH="%MINGW_DIR%" unit_test
+- msys64\usr\bin\bash -lc "make ARCH=%WINARCH% MINGW_PATH=\"%MINGW_DIR%\" debug"
+- msys64\usr\bin\bash -lc "make clean"
+- msys64\usr\bin\bash -lc "make ARCH=%WINARCH% MINGW_PATH=\"%MINGW_DIR%\""
+- msys64\usr\bin\bash -lc "make ARCH=%WINARCH% MINGW_PATH=\"%MINGW_DIR%\" unit_test"
