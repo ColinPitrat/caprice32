@@ -6,7 +6,7 @@ environment:
   MSYS2_URL: "http://kent.dl.sourceforge.net/project/msys2/Base/%MSYS2_ARCH%/msys2-base-%MSYS2_ARCH%-%MSYS2_BASEVER%.tar.xz"
   MSYS2_ARCHIVE: msys2.tar.xz
   MSYS2_SUBARCHIVE: msys2.tar
-  PACKAGES: "ctags %ARCH_PACKAGES%" 
+  PACKAGES: "make ctags %ARCH_PACKAGES%" 
   matrix:
     - MINGW_DIR: "/mingw64"
       WINDBG_DIR: '%ProgramFiles(x86)%\Windows Kits\8.1\Debuggers\x64'
@@ -28,10 +28,13 @@ install:
 
 before_build:
 - msys64\usr\bin\bash -lc "export PATH=$PATH:%MINGW_DIR%/bin"
-- msys64\usr\bin\bash -lc "%MINGW_DIR%/bin/g++ --version"
-- msys64\usr\bin\bash -lc "%MINGW_DIR%/bin/make --version"
+- msys64\usr\bin\bash -lc "pacman -Ql make"
+- msys64\usr\bin\bash -lc "g++ --version"
+- msys64\usr\bin\bash -lc "make --version"
 - "%MINGW_DIR%/bin/g++ --version"
+- "make --version"
 - "%MINGW_DIR%/bin/make --version"
+- "g++ --version"
 - echo "NUMBER_OF_PROCESSORS=%NUMBER_OF_PROCESSORS%"
 - ps: (Get-Item "${Env:WINDBG_DIR}\dbghelp.dll").VersionInfo
 
