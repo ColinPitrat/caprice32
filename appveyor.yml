@@ -13,13 +13,13 @@ environment:
       MINGW_ARCHIVE: x86_64-4.9.2-release-win32-seh-rt_v4-rev4.7z
       WINDBG_DIR: '%ProgramFiles(x86)%\Windows Kits\8.1\Debuggers\x64'
       WINARCH: win64
-      ARCH_PACKAGES: mingw-w64-i686-g++ mingw-w64-i686-libpng mingw-w64-i686-freetype mingw-w64-i686-zlib mingw-w64-i686-SDL"
+      ARCH_PACKAGES: "mingw-w64-i686-g++ mingw-w64-i686-libpng mingw-w64-i686-freetype mingw-w64-i686-zlib mingw-w64-i686-SDL"
     - MINGW_DIR: mingw32
       MINGW_URL: https://sourceforge.net/projects/mingw-w64/files/Toolchains%20targetting%20Win32/Personal%20Builds/mingw-builds/4.9.2/threads-win32/dwarf/i686-4.9.2-release-win32-dwarf-rt_v4-rev4.7z/download
       MINGW_ARCHIVE: i686-4.9.2-release-win32-dwarf-rt_v4-rev4.7z
       WINDBG_DIR: '%ProgramFiles(x86)%\Windows Kits\8.1\Debuggers\x86'
       WINARCH: win32
-      ARCH_PACKAGES: mingw-w64-x86_64-g++ mingw-w64-x86_64-libpng mingw-w64-x86_64-freetype mingw-w64-x86_64-zlib mingw-w64-x86_64-SDL"
+      ARCH_PACKAGES: "mingw-w64-x86_64-g++ mingw-w64-x86_64-libpng mingw-w64-x86_64-freetype mingw-w64-x86_64-zlib mingw-w64-x86_64-SDL"
 
 install:
 - if not exist "%MINGW_ARCHIVE%" appveyor DownloadFile "%MINGW_URL%" -FileName "%MINGW_ARCHIVE%"
@@ -29,8 +29,8 @@ install:
 - 7z x "%MSYS2_SUBARCHIVE%" > NUL
   # msys2 advise to restart the shell after a first start
 - msys64\usr\bin\bash -lc ""
-- msys64\usr\bin\bash -lc "pacman --noconfirm -Suy"
-- msys64\usr\bin\bash -lc "pacman --noconfirm -S %PACKAGES%"
+- msys64\usr\bin\bash -lc "for i in {1..3}; do pacman --noconfirm -Suy && break || sleep 15 ; done"
+- msys64\usr\bin\bash -lc "for i in {1..3}; do pacman --noconfirm -S %PACKAGES% && break || sleep 15 ; done"
 
 before_build:
 - set Path=%CD%\%MINGW_DIR%\bin;%Path%
