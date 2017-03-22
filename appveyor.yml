@@ -1,6 +1,8 @@
 version: '{build}'
 
 environment:
+  MSYS2_BASEVER: 20150512
+  MSYS2_ARCH: x86_64
   MSYS2_URL: "http://kent.dl.sourceforge.net/project/msys2/Base/%MSYS2_ARCH%/msys2-base-%MSYS2_ARCH%-%MSYS2_BASEVER%.tar.xz"
   MSYS2_ARCHIVE: msys2.tar.xz
   MSYS2_SUBARCHIVE: msys2.tar
@@ -19,7 +21,7 @@ environment:
 install:
 - if not exist "%MINGW_ARCHIVE%" appveyor DownloadFile "%MINGW_URL%" -FileName "%MINGW_ARCHIVE%"
 - 7z x -y "%MINGW_ARCHIVE%" > nul
-- if not exist "%MSYS2_ARCHIVE%" appveyor DownloadFile "%MSYS2_URL%"  -FileName "%MSYS2_ARCHIVE%"
+- if not exist "%MSYS2_ARCHIVE%" appveyor DownloadFile "%MSYS2_URL%" -FileName "%MSYS2_ARCHIVE%"
 - 7z x "%MSYS2_ARCHIVE%"
 - 7z x "%MSYS2_SUBARCHIVE%" > NUL
 
