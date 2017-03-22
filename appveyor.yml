@@ -34,7 +34,8 @@ before_build:
 - ps: (Get-Item "${Env:WINDBG_DIR}\dbghelp.dll").VersionInfo
 
 build_script:
-- msys64\usr\bin\bash -lc "cd %APPVEYOR_BUILD_FOLDER% && PATH=$PATH:%MINGW_DIR%/bin make ARCH=%WINARCH% MINGW_PATH=\"%MINGW_DIR%\" debug"
-- msys64\usr\bin\bash -lc "cd %APPVEYOR_BUILD_FOLDER% && PATH=$PATH:%MINGW_DIR%/bin make clean"
-- msys64\usr\bin\bash -lc "cd %APPVEYOR_BUILD_FOLDER% && PATH=$PATH:%MINGW_DIR%/bin make ARCH=%WINARCH% MINGW_PATH=\"%MINGW_DIR%\""
-- msys64\usr\bin\bash -lc "cd %APPVEYOR_BUILD_FOLDER% && PATH=$PATH:%MINGW_DIR%/bin make ARCH=%WINARCH% MINGW_PATH=\"%MINGW_DIR%\" unit_test"
+# TODO(cpitrat): Find a way to use %APPVEYOR_BUILD_FOLDER%, replacing \ by /
+- msys64\usr\bin\bash -lc "cd c:/projects/caprice32 && PATH=$PATH:%MINGW_DIR%/bin make ARCH=%WINARCH% MINGW_PATH=\"%MINGW_DIR%\" debug"
+- msys64\usr\bin\bash -lc "cd c:/projects/caprice32 && PATH=$PATH:%MINGW_DIR%/bin make clean"
+- msys64\usr\bin\bash -lc "cd c:/projects/caprice32 && PATH=$PATH:%MINGW_DIR%/bin make ARCH=%WINARCH% MINGW_PATH=\"%MINGW_DIR%\""
+- msys64\usr\bin\bash -lc "cd c:/projects/caprice32 && PATH=$PATH:%MINGW_DIR%/bin make ARCH=%WINARCH% MINGW_PATH=\"%MINGW_DIR%\" unit_test"
