@@ -1,7 +1,7 @@
 version: '{build}'
 
 environment:
-  MSYS2_BASEVER: 20150512
+  MSYS2_BASEVER: 20161025
   MSYS2_ARCH: x86_64
   MSYS2_URL: "http://kent.dl.sourceforge.net/project/msys2/Base/%MSYS2_ARCH%/msys2-base-%MSYS2_ARCH%-%MSYS2_BASEVER%.tar.xz"
   MSYS2_ARCHIVE: msys2.tar.xz
@@ -33,7 +33,7 @@ before_build:
 - ps: (Get-Item "${Env:WINDBG_DIR}\dbghelp.dll").VersionInfo
 
 build_script:
-- make ARCH=%WINARCH% debug
-- make clean
-- make ARCH=%WINARCH% 
-- make ARCH=%WINARCH% unit_test
+- mingw32-make ARCH=%WINARCH% MINGW_PATH="%MINGW_DIR%" debug
+- mingw32-make clean
+- mingw32-make ARCH=%WINARCH% MINGW_PATH="%MINGW_DIR%" 
+- mingw32-make ARCH=%WINARCH% MINGW_PATH="%MINGW_DIR%" unit_test
