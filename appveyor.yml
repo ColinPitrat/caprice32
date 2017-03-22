@@ -28,6 +28,9 @@ install:
 
 before_build:
 - msys64\usr\bin\bash -lc "export PATH=$PATH:%MINGW_DIR%/bin"
+- msys64\usr\bin\bash -lc "ls /"
+- msys64\usr\bin\bash -lc "ls /msys*"
+- msys64\usr\bin\bash -lc "ls /msys*/*"
 - g++ --version
 - make --version
 - echo "NUMBER_OF_PROCESSORS=%NUMBER_OF_PROCESSORS%"
