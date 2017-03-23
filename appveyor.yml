@@ -32,12 +32,12 @@ before_build:
 build_script:
 # TODO(cpitrat): Find a way to use %APPVEYOR_BUILD_FOLDER%, replacing \ by /
 - msys64\usr\bin\bash -lc "cd c:/projects/caprice32 && PATH=$PATH:%MINGW_DIR%/bin make ARCH=%WINARCH% MINGW_PATH=\"%MINGW_DIR%\" WINE=\"\" debug"
-- msys64\usr\bin\bash -lc "cd c:/projects/caprice32 && PATH=$PATH:%MINGW_DIR%/bin make clean"
+- msys64\usr\bin\bash -lc "cd c:/projects/caprice32 && PATH=$PATH:%MINGW_DIR%/bin make ARCH=%WINARCh% clean"
 - msys64\usr\bin\bash -lc "cd c:/projects/caprice32 && PATH=$PATH:%MINGW_DIR%/bin make ARCH=%WINARCH% MINGW_PATH=\"%MINGW_DIR%\""
 - msys64\usr\bin\bash -lc "cd c:/projects/caprice32 && PATH=$PATH:%MINGW_DIR%/bin make ARCH=%WINARCH% MINGW_PATH=\"%MINGW_DIR%\" WINE=\"\" unit_test"
 
 artifacts:
-- path: "c:/projects/caprice32/release/cap32-%WINARCH%.zip"
+- path: "release\\cap32-%WINARCH%.zip"
   name: cap32-%WINARCH%.zip
 
 deploy:
