@@ -45,5 +45,6 @@ deploy:
   artifact: "c:/projects/caprice32/release/cap32-%WINARCH%.zip"
   draft: false
   prerelease: false
+  force_update: true
   on:
     branch: master
