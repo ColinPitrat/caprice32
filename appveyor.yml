@@ -41,7 +41,7 @@ artifacts:
   name: cap32-%WINARCH%.zip
 
 deploy:
-  release: caprice32-latest
+  release: "Caprice32 latest"
   description: "Latest build of Caprice 32"
   provider: GitHub
   auth_token: 
