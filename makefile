@@ -28,11 +28,13 @@ TRIPLE = x86_64-w64-mingw32
 TARGET=cap32.exe
 TEST_TARGET = test_runner.exe
 PLATFORM=windows
+CAPSIPFDLL=CAPSImg_x64.dll
 else ifeq ($(ARCH),win32)
 TRIPLE = i686-w64-mingw32
 TARGET=cap32.exe
 TEST_TARGET = test_runner.exe
 PLATFORM=windows
+CAPSIPFDLL=CAPSImg.dll
 else ifeq ($(ARCH),linux)
 TARGET=cap32
 TEST_TARGET = test_runner
@@ -48,7 +50,8 @@ LIBS = $(MINGW_PATH)/lib/libSDL.dll.a $(MINGW_PATH)/lib/libfreetype.dll.a $(MING
 COMMON_CFLAGS = -DWINDOWS
 CXX = $(TRIPLE)-g++
 ifdef WITH_IPF
-$(error IPF not yet supported for windows.)
+COMMON_CFLAGS += -DWITH_IPF
+LIBS += $(MINGW_PATH)/bin/$(CAPSIPFDLL)
 endif
 else
 IPATHS = -Isrc/ -Isrc/gui/includes `freetype-config --cflags` `sdl-config --cflags` `pkg-config --cflags libpng`
@@ -173,6 +176,9 @@ distrib: $(TARGET)
 	cp $(MINGW_PATH)/bin/libstdc++-6.dll $(ARCHIVE)/
 	cp $(MINGW_PATH)/bin/libwinpthread-1.dll $(ARCHIVE)/
 	cp $(MINGW_PATH)/bin/zlib1.dll $(ARCHIVE)/
+ifdef WITH_IPF
+	cp $(MINGW_PATH)/bin/$(CAPSIPFDLL) $(ARCHIVE)/CAPSImg.dll
+endif
 	cp cap32.cfg $(ARCHIVE)/
 	cp -r resources/ rom/ $(ARCHIVE)/
 	zip -r $(ARCHIVE).zip $(ARCHIVE)

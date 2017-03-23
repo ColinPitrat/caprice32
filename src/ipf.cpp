@@ -2,7 +2,9 @@
 
 #ifdef WITH_IPF
 #include "ipf.h"
-
+#ifdef WINDOWS
+#include <windows.h>
+#endif
 #include "cap32.h"
 #include "errors.h"
 #include "log.h"
