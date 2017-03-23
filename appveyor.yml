@@ -36,13 +36,17 @@ build_script:
 - msys64\usr\bin\bash -lc "cd c:/projects/caprice32 && PATH=$PATH:%MINGW_DIR%/bin make ARCH=%WINARCH% MINGW_PATH=\"%MINGW_DIR%\""
 - msys64\usr\bin\bash -lc "cd c:/projects/caprice32 && PATH=$PATH:%MINGW_DIR%/bin make ARCH=%WINARCH% MINGW_PATH=\"%MINGW_DIR%\" WINE=\"\" unit_test"
 
+artifacts:
+- path: "c:/projects/caprice32/release/cap32-%WINARCH%.zip"
+  name: cap32-%WINARCH%.zip
+
 deploy:
   release: cap32-%WINARCH%-latest
   description: "Latest build of cap32 for %WINARCH%"
   provider: GitHub
   auth_token: 
     secure: xEnxvlt8zNDwbgUO0uVJMmQGJS7k3sl28jxyJkLCRxGwnVgd49hkVqukPq2X4TpB
-  artifact: "c:/projects/caprice32/release/cap32-%WINARCH%.zip"
+  artifact: cap32-%WINARCH%.zip
   draft: false
   prerelease: false
   force_update: true
