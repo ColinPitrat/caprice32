@@ -176,7 +176,9 @@ distrib: $(TARGET)
 	cp $(MINGW_PATH)/bin/libstdc++-6.dll $(ARCHIVE)/
 	cp $(MINGW_PATH)/bin/libwinpthread-1.dll $(ARCHIVE)/
 	cp $(MINGW_PATH)/bin/zlib1.dll $(ARCHIVE)/
+ifdef WITH_IPF
 	cp $(MINGW_PATH)/bin/$(CAPSIPFDLL) $(ARCHIVE)/CAPSImg.dll
+endif
 	cp cap32.cfg $(ARCHIVE)/
 	cp -r resources/ rom/ $(ARCHIVE)/
 	zip -r $(ARCHIVE).zip $(ARCHIVE)
