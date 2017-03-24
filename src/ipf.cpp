@@ -1,4 +1,5 @@
 // IPF disk image support (http://www.softpres.org/)
+// Contributed by softpres.org
 
 #ifdef WITH_IPF
 #include "ipf.h"
