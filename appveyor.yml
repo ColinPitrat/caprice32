@@ -32,6 +32,23 @@ before_build:
 build_script:
 # TODO(cpitrat): Find a way to use %APPVEYOR_BUILD_FOLDER%, replacing \ by /
 - msys64\usr\bin\bash -lc "cd c:/projects/caprice32 && PATH=$PATH:%MINGW_DIR%/bin make ARCH=%WINARCH% MINGW_PATH=\"%MINGW_DIR%\" WINE=\"\" debug"
-- msys64\usr\bin\bash -lc "cd c:/projects/caprice32 && PATH=$PATH:%MINGW_DIR%/bin make clean"
+- msys64\usr\bin\bash -lc "cd c:/projects/caprice32 && PATH=$PATH:%MINGW_DIR%/bin make ARCH=%WINARCh% clean"
 - msys64\usr\bin\bash -lc "cd c:/projects/caprice32 && PATH=$PATH:%MINGW_DIR%/bin make ARCH=%WINARCH% MINGW_PATH=\"%MINGW_DIR%\""
 - msys64\usr\bin\bash -lc "cd c:/projects/caprice32 && PATH=$PATH:%MINGW_DIR%/bin make ARCH=%WINARCH% MINGW_PATH=\"%MINGW_DIR%\" WINE=\"\" unit_test"
+
+artifacts:
+- path: "release\\cap32-%WINARCH%.zip"
+  name: cap32-%WINARCH%.zip
+
+deploy:
+  release: "Caprice32 latest"
+  description: "Latest build of Caprice 32, with the newest cool features and the most recent bugs."
+  provider: GitHub
+  auth_token: 
+    secure: xEnxvlt8zNDwbgUO0uVJMmQGJS7k3sl28jxyJkLCRxGwnVgd49hkVqukPq2X4TpB
+  artifact: cap32-%WINARCH%.zip
+  draft: false
+  prerelease: false
+  force_update: true
+  on:
+    branch: master
