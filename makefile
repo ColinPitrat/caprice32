@@ -176,6 +176,14 @@ distrib: $(TARGET)
 	cp $(MINGW_PATH)/bin/libstdc++-6.dll $(ARCHIVE)/
 	cp $(MINGW_PATH)/bin/libwinpthread-1.dll $(ARCHIVE)/
 	cp $(MINGW_PATH)/bin/zlib1.dll $(ARCHIVE)/
+	# The following libs are dependencies of libfreetype under MSYS2
+	# TODO(sebhz) make this a nice loop
+	[ -f $(MINGW_PATH)/bin/libglib-2.0-0.dll ] && cp $(MINGW_PATH)/bin/libglib-2.0-0.dll $(ARCHIVE)/
+	[ -f $(MINGW_PATH)/bin/libgraphite2.dll ] && cp $(MINGW_PATH)/bin/libgraphite2.dll $(ARCHIVE)/
+	[ -f $(MINGW_PATH)/bin/libharfbuzz-0.dll ] && cp $(MINGW_PATH)/bin/libharfbuzz-0.dll $(ARCHIVE)/
+	[ -f $(MINGW_PATH)/bin/libiconv-2.dll ] && cp $(MINGW_PATH)/bin/libiconv-2.dll $(ARCHIVE)/
+	[ -f $(MINGW_PATH)/bin/libintl-8.dll ] && cp $(MINGW_PATH)/bin/libintl-8.dll $(ARCHIVE)/
+	[ -f $(MINGW_PATH)/bin/libpcre-1.dll ] && cp $(MINGW_PATH)/bin/libpcre-1.dll $(ARCHIVE)/
 ifdef WITH_IPF
 	cp $(MINGW_PATH)/bin/$(CAPSIPFDLL) $(ARCHIVE)/CAPSImg.dll
 endif
