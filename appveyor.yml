@@ -75,7 +75,7 @@ deploy:
   force_update: true
   on:
     branch: master
-- release: "Caprice32 %APPVERYOR_REPO_TAG_NAME%"
+- release: "Caprice32 %APPVEYOR_REPO_TAG_NAME%"
   description: "Caprice 32 %APPVEYOR_REPO_TAG_NAME%."
   provider: GitHub
   auth_token: 
