@@ -165,9 +165,9 @@ void fillSlots (std::vector<std::string> slot_list, t_CPC& CPC)
             continue;
          if (fillSlot(CPC.snap_file, have_SNA, fullpath, extension, ".sna", "CPC state snapshot"))
             continue;
-         if (fillSlot(CPC.tape_file, have_TAP, fullpath, extension, ".cdt", "tape"))
+         if (fillSlot(CPC.tape_file, have_TAP, fullpath, extension, ".cdt", "tape (CDT)"))
             continue;
-         if (fillSlot(CPC.tape_file, have_TAP, fullpath, extension, ".voc", "tape"))
+         if (fillSlot(CPC.tape_file, have_TAP, fullpath, extension, ".voc", "tape (VOC)"))
             continue;
          if (fillSlot(CPC.cart_file, have_CPR, fullpath, extension, ".cpr", "cartridge"))
             continue;
