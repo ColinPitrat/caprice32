@@ -85,7 +85,7 @@ Then build Caprice with WITH_IPF:
 
 You can then run an IPF file as you would do for a DSK file:
 
-`./cap32.exe disk.ipf`
+`./cap32 disk.ipf`
 
 Note that zip file are not yet supported.
 
