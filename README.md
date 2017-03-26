@@ -24,10 +24,10 @@ Caprice32 provides:
   * Joystick support - it can be fully used with joystick only, thanks to an integrated virtual keyboard.
   * Joystick emulation - joystick-only games can be played using the keyboard
   * English, French or Spanish keyboards
-  * DSK files for disks - VOC and CDT files for tapes - CPR files for cartridge
+  * DSK and IPF files for disks - VOC and CDT files for tapes - CPR files for cartridge
   * Direct load of ZIP files
   * Custom disk formats
-  * Snapshots
+  * Snapshots (SNA files)
   * Printer support
   * Memory tool to inspect and modify memory (peek and poke)
   * Experimental support of Multiface 2 (you should prefer using memory tool)
