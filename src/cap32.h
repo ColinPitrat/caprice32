@@ -460,7 +460,7 @@ typedef struct {
 void emulator_reset(bool bolMF2Reset);
 int  emulator_init(void);
 int  video_set_palette(void);
-void input_swap_joy(void);
+void init_joystick_emulation(void);
 void update_cpc_speed(void);
 int  printer_start(void);
 void printer_stop(void);

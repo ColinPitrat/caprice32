@@ -549,7 +549,7 @@ void CapriceOptions::ProcessOptionChanges(t_CPC& CPC, bool saveChanges) {
     // Activate/deactivate joystick emulation
     if (CPC.joystick_emulation != m_oldCPCsettings.joystick_emulation)
     {
-       input_swap_joy();
+       init_joystick_emulation();
     }
 
     if (saveChanges)

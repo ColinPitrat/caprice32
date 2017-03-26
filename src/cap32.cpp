@@ -158,21 +158,6 @@ static dword keyboard_shift[SDLK_LAST];
 static dword keyboard_ctrl[SDLK_LAST];
 static dword keyboard_mode[SDLK_LAST];
 
-static int joy_layout[12][2] = {
-   { CPC_J0_UP,      SDLK_UP },
-   { CPC_J0_DOWN,    SDLK_DOWN },
-   { CPC_J0_LEFT,    SDLK_LEFT },
-   { CPC_J0_RIGHT,   SDLK_RIGHT },
-   { CPC_J0_FIRE1,   SDLK_z },
-   { CPC_J0_FIRE2,   SDLK_x },
-   { CPC_J1_UP,      0 },
-   { CPC_J1_DOWN,    0 },
-   { CPC_J1_LEFT,    0 },
-   { CPC_J1_RIGHT,   0 },
-   { CPC_J1_FIRE1,   0 },
-   { CPC_J1_FIRE2,   0 }
-};
-
 #define MAX_ROM_MODS 2
 #include "rom_mods.h"
 
@@ -935,11 +920,13 @@ int emulator_patch_ROM (void)
       if ((pfileObject = fopen(romFilename.c_str(), "rb")) != nullptr) { // load CPC OS + Basic
          if(fread(pbROM, 2*16384, 1, pfileObject) != 1) {
             fclose(pfileObject);
+            LOG_ERROR("Couldn't read ROM file '" << romFilename << "'");
             return ERR_NOT_A_CPC_ROM;
          }
          pbROMlo = pbROM;
          fclose(pfileObject);
       } else {
+         LOG_ERROR("Couldn't open ROM file '" << romFilename << "'");
          return ERR_CPC_ROM_MISSING;
       }
    } else { // Plus range
@@ -1054,8 +1041,59 @@ void emulator_reset (bool bolMF2Reset)
    }
 }
 
+int input_init (void)
+{
+   memset(keyboard_normal, 0xff, sizeof(keyboard_normal));
+   memset(keyboard_shift, 0xff, sizeof(keyboard_shift));
+   memset(keyboard_ctrl, 0xff, sizeof(keyboard_ctrl));
+   memset(keyboard_mode, 0xff, sizeof(keyboard_mode));
+
+   for (dword n = 0; n < KBD_MAX_ENTRIES; n++) {
+      dword pc_key = kbd_layout[CPC.kbd_layout][n][1]; // PC key assigned to CPC key
+      if (pc_key) {
+         dword pc_idx = pc_key & 0xffff; // strip off modifier
+         dword cpc_idx = kbd_layout[CPC.kbd_layout][n][0];
+         dword cpc_key;
+         if (cpc_idx & MOD_EMU_KEY) {
+            cpc_key = cpc_idx;
+         } else {
+            cpc_key = cpc_kbd[CPC.keyboard][cpc_idx];
+         }
+         if (pc_key & MOD_PC_SHIFT) { // key + SHIFT?
+            keyboard_shift[pc_idx] = cpc_key; // copy CPC key matrix value to SHIFT table
+         } else if (pc_key & MOD_PC_CTRL) { // key + CTRL?
+            keyboard_ctrl[pc_idx] = cpc_key; // copy CPC key matrix value to CTRL table
+         } else if (pc_key & MOD_PC_MODE) { // key + AltGr?
+            keyboard_mode[pc_idx] = cpc_key; // copy CPC key matrix value to AltGr table
+         } else {
+            keyboard_normal[pc_idx] = cpc_key; // copy CPC key matrix value to normal table
+            if (!(cpc_key & MOD_EMU_KEY)) { // not an emulator function key?
+               if (keyboard_shift[pc_idx] == 0xffffffff) { // SHIFT table entry has no value yet?
+                  keyboard_shift[pc_idx] = cpc_key; // duplicate entry in SHIFT table
+               }
+               if (keyboard_ctrl[pc_idx] == 0xffffffff) { // CTRL table entry has no value yet?
+                  keyboard_ctrl[pc_idx] = cpc_key | MOD_CPC_CTRL; // duplicate entry in CTRL table
+               }
+               if (keyboard_mode[pc_idx] == 0xffffffff) { // AltGr table entry has no value yet?
+                  keyboard_mode[pc_idx] = cpc_key; // duplicate entry in AltGr table
+               }
+            }
+         }
+      }
+   }
+
+   init_joystick_emulation();
+
+   return 0;
+}
+
 int emulator_init (void)
 {
+   if (input_init()) {
+      fprintf(stderr, "input_init() failed. Aborting.\n");
+      exit(-1);
+   }
+
    // Cartridge must be loaded before init as ROM needs to be present.
    cartridge_load();
    int iErr, iRomNum;
@@ -1068,6 +1106,7 @@ int emulator_init (void)
    pbROM = new byte [32*1024]; // allocate memory for 32K of ROM
    pbRegisterPage = new byte [16*1024];
    if ((!pbGPBuffer) || (!pbRAMbuffer) || (!pbROM) || (!pbRegisterPage)) {
+      LOG_ERROR("Failed allocating memory in emulator_init. Out of memory ?");
       return ERR_OUT_OF_MEMORY;
    }
    pbROMlo = pbROM;
@@ -1076,6 +1115,7 @@ int emulator_init (void)
    memset(memmap_ROM, 0, sizeof(memmap_ROM[0]) * 256); // clear the expansion ROM map
    ga_init_banking(); // init the CPC memory banking map
    if ((iErr = emulator_patch_ROM())) {
+      LOG_ERROR("Failed patching the ROM");
       return iErr;
    }
 
@@ -1554,16 +1594,31 @@ void joysticks_shutdown (void)
 
 
 
-void input_swap_joy (void)
+void init_joystick_emulation (void)
 {
-   for (dword n = 0; n < 6; n++) {
-      dword pc_idx = joy_layout[n][1]; // get the PC key to change the assignment for
-      if (pc_idx) {
-         dword val = keyboard_normal[pc_idx]; // keep old value
-         keyboard_normal[pc_idx] = cpc_kbd[CPC.keyboard][joy_layout[n][0]]; // assign new function
-         cpc_kbd[CPC.keyboard][joy_layout[n][0]] = val; // store old value
-      }
-   }
+  // CPC joy key, PC emulation key, CPC original key
+  static int joy_layout[12][3] = {
+    { CPC_J0_UP,      SDLK_UP,    CPC_CUR_UP },
+    { CPC_J0_DOWN,    SDLK_DOWN,  CPC_CUR_DOWN },
+    { CPC_J0_LEFT,    SDLK_LEFT,  CPC_CUR_LEFT },
+    { CPC_J0_RIGHT,   SDLK_RIGHT, CPC_CUR_RIGHT },
+    { CPC_J0_FIRE1,   SDLK_z,     CPC_z },
+    { CPC_J0_FIRE2,   SDLK_x,     CPC_x },
+    { CPC_J1_UP,      0,          0 },
+    { CPC_J1_DOWN,    0,          0 },
+    { CPC_J1_LEFT,    0,          0 },
+    { CPC_J1_RIGHT,   0,          0 },
+    { CPC_J1_FIRE1,   0,          0 },
+    { CPC_J1_FIRE2,   0,          0 }
+  };
+
+  for (dword n = 0; n < 6; n++) {
+    dword pc_idx = joy_layout[n][1]; // get the PC key to change the assignment for
+    if (pc_idx) {
+      int i = CPC.joystick_emulation ? 0 : 2;
+      keyboard_normal[pc_idx] = cpc_kbd[CPC.keyboard][joy_layout[n][i]]; // assign new function
+    }
+  }
 }
 
 void update_timings(void)
@@ -1580,56 +1635,6 @@ void update_cpc_speed(void)
    update_timings();
    InitAY();
 }
-
-
-int input_init (void)
-{
-   memset(keyboard_normal, 0xff, sizeof(keyboard_normal));
-   memset(keyboard_shift, 0xff, sizeof(keyboard_shift));
-   memset(keyboard_ctrl, 0xff, sizeof(keyboard_ctrl));
-   memset(keyboard_mode, 0xff, sizeof(keyboard_mode));
-
-   for (dword n = 0; n < KBD_MAX_ENTRIES; n++) {
-      dword pc_key = kbd_layout[CPC.kbd_layout][n][1]; // PC key assigned to CPC key
-      if (pc_key) {
-         dword pc_idx = pc_key & 0xffff; // strip off modifier
-         dword cpc_idx = kbd_layout[CPC.kbd_layout][n][0];
-         dword cpc_key;
-         if (cpc_idx & MOD_EMU_KEY) {
-            cpc_key = cpc_idx;
-         } else {
-            cpc_key = cpc_kbd[CPC.keyboard][cpc_idx];
-         }
-         if (pc_key & MOD_PC_SHIFT) { // key + SHIFT?
-            keyboard_shift[pc_idx] = cpc_key; // copy CPC key matrix value to SHIFT table
-         } else if (pc_key & MOD_PC_CTRL) { // key + CTRL?
-            keyboard_ctrl[pc_idx] = cpc_key; // copy CPC key matrix value to CTRL table
-         } else if (pc_key & MOD_PC_MODE) { // key + AltGr?
-            keyboard_mode[pc_idx] = cpc_key; // copy CPC key matrix value to AltGr table
-         } else {
-            keyboard_normal[pc_idx] = cpc_key; // copy CPC key matrix value to normal table
-            if (!(cpc_key & MOD_EMU_KEY)) { // not an emulator function key?
-               if (keyboard_shift[pc_idx] == 0xffffffff) { // SHIFT table entry has no value yet?
-                  keyboard_shift[pc_idx] = cpc_key; // duplicate entry in SHIFT table
-               }
-               if (keyboard_ctrl[pc_idx] == 0xffffffff) { // CTRL table entry has no value yet?
-                  keyboard_ctrl[pc_idx] = cpc_key | MOD_CPC_CTRL; // duplicate entry in CTRL table
-               }
-               if (keyboard_mode[pc_idx] == 0xffffffff) { // AltGr table entry has no value yet?
-                  keyboard_mode[pc_idx] = cpc_key; // duplicate entry in AltGr table
-               }
-            }
-         }
-      }
-   }
-
-   if (CPC.joystick_emulation) { // enable keyboard joystick emulation?
-      input_swap_joy();
-   }
-
-   return 0;
-}
-
 
 
 std::string getConfigurationFilename(bool forWrite)
@@ -1975,11 +1980,6 @@ int cap32_main (int argc, char **argv)
 
    z80_init_tables(); // init Z80 emulation
 
-   if (input_init()) {
-      fprintf(stderr, "input_init() failed. Aborting.\n");
-      exit(-1);
-   }
-
    if (video_init()) {
       fprintf(stderr, "video_init() failed. Aborting.\n");
       exit(-1);
@@ -2156,7 +2156,7 @@ int cap32_main (int argc, char **argv)
 
                         case CAP32_JOY:
                            CPC.joystick_emulation = CPC.joystick_emulation ? 0 : 1;
-                           input_swap_joy();
+                           init_joystick_emulation();
                            set_osd_message(std::string("Joystick emulation: ") + (CPC.joystick_emulation ? "on" : "off"));
                            break;
 
