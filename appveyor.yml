@@ -75,5 +75,11 @@ deploy:
     branch: master
 - release: "Caprice32 %APPVERYOR_REPO_TAG_NAME%"
   description: "Caprice 32 %APPVEYOR_REPO_TAG_NAME%."
+  provider: GitHub
+  auth_token: 
+    secure: xEnxvlt8zNDwbgUO0uVJMmQGJS7k3sl28jxyJkLCRxGwnVgd49hkVqukPq2X4TpB
+  artifact: cap32-%WINARCH%.zip
+  draft: false
+  prerelease: false
   on:
     appveyor_repo_tag: true
