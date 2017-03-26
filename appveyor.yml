@@ -81,5 +81,6 @@ deploy:
   artifact: cap32-%WINARCH%.zip
   draft: false
   prerelease: false
+  force_update: true
   on:
     appveyor_repo_tag: true
