@@ -76,6 +76,7 @@ deploy:
   on:
     branch: master
 - release: "Caprice32 %APPVEYOR_REPO_TAG_NAME%"
+  tag: "%APPVEYOR_REPO_TAG_NAME%"
   provider: GitHub
   auth_token: 
     secure: xEnxvlt8zNDwbgUO0uVJMmQGJS7k3sl28jxyJkLCRxGwnVgd49hkVqukPq2X4TpB
