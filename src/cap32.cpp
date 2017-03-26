@@ -1743,7 +1743,6 @@ void loadConfiguration (t_CPC &CPC, const std::string& configFilename)
    CPC.cart_path = conf.getStringValue("file", "cart_path", appPath + "/cart/");
    CPC.dsk_path = conf.getStringValue("file", "dsk_path", appPath + "/disk/");
    CPC.tape_path = conf.getStringValue("file", "tape_path", appPath + "/tape/");
-   CPC.cart_file = appPath + "/rom/system.cpr"; // Only default path defined. Needed for CPC6128+
 
    int iFmt = FIRST_CUSTOM_DISK_FORMAT;
    for (int i = iFmt; i < MAX_DISK_FORMAT; i++) { // loop through all user definable disk formats
@@ -1770,6 +1769,8 @@ void loadConfiguration (t_CPC &CPC, const std::string& configFilename)
       fclose(pfileObject);
    }
    CPC.rom_mf2 = conf.getStringValue("rom", "rom_mf2", "");
+
+   CPC.cart_file = CPC.rom_path + "/system.cpr"; // Only default path defined. Needed for CPC6128+
 }
 
 
