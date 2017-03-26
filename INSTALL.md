@@ -91,5 +91,5 @@ Note that zip file are not yet supported.
 
 #### On Windows
 
-IPF is not yet supported by Caprice32 on Windows. But this should come soon so stay tuned.
+The windows builds available in releases include IPF support.
 
