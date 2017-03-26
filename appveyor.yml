@@ -52,7 +52,7 @@ build_script:
 # Install IPF lib for linux (for build)
 - msys64\usr\bin\bash -lc "wget \"%IPF_LINUX_URL%\" -O ipflib42_linux-i686.tar.gz && 7z x ipflib42_linux-i686.tar.gz && 7z x ipflib42_linux-i686.tar && cd i686-linux-gnu-capsimage/ && ln -s libcapsimage.so.4.2 libcapsimage.so.4 && ln -s libcapsimage.so.4.2 libcapsimage.so"
 # Install IPF lib for windows
-- msys64\usr\bin\bash -lc "wget \"%IPF_WIN_URL%\" && unzip *ipflib*zip && cp %IPF_DLL_SRC% %MINGW_DIR%/bin/"
+- msys64\usr\bin\bash -lc "wget \"%IPF_WIN_URL%\" && 7z x *ipflib*zip && cp %IPF_DLL_SRC% %MINGW_DIR%/bin/"
 - msys64\usr\bin\bash -lc "cd c:/projects/caprice32 && PATH=$PATH:%MINGW_DIR%/bin make ARCH=%WINARCh% clean"
 - msys64\usr\bin\bash -lc "cd c:/projects/caprice32 && PATH=$PATH:%MINGW_DIR%/bin make ARCH=%WINARCH% MINGW_PATH=\"%MINGW_DIR%\" WITH_IPF=true CFLAGS=-Ix86_64-linux-gnu-capsimage/include LDFLAGS=\"-L./x86_64-linux-gnu-capsimage/ -lcapsimage\""
 - msys64\usr\bin\bash -lc "cd c:/projects/caprice32 && PATH=$PATH:%MINGW_DIR%/bin make ARCH=%WINARCH% MINGW_PATH=\"%MINGW_DIR%\" WINE=\"\" WITH_IPF=true CFLAGS=-Ix86_64-linux-gnu-capsimage/include LDFLAGS=\"-L./x86_64-linux-gnu-capsimage/ -lcapsimage\" unit_test"
