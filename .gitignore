@@ -5,7 +5,7 @@
 /tags
 /.debug
 /googletest
-test/test_runner
+/test_runner
 .pc
 debian/caprice32.debhelper.log
 debian/caprice32.postinst.debhelper
