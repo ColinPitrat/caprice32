@@ -37,7 +37,7 @@
 //#define DEBUG_TAPE
 //#define DEBUG_Z80
 
-#define VERSION_STRING "v4.3.0"
+#define VERSION_STRING "v4.4.0"
 
 #ifndef _MAX_PATH
  #ifdef _POSIX_PATH_MAX
