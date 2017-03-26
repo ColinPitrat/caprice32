@@ -50,7 +50,7 @@ build_script:
 # = 3- Build with IPF support =
 # =============================
 # Install IPF lib for linux (for build)
-- msys64\usr\bin\bash -lc "wget \"%IPF_LINUX_URL%\" && 7z x ipflib42_linux-x86_64.tar.gz && 7z x ipflib42_linux-x86_64.tar && cd x86_64-linux-gnu-capsimage/ && ln -s libcapsimage.so.4.2 libcapsimage.so.4 && ln -s libcapsimage.so.4.2 libcapsimage.so"
+- msys64\usr\bin\bash -lc "wget \"%IPF_LINUX_URL%\" && 7z x files:ipflib42_linux-x86_64.tar.gz && 7z x files:ipflib42_linux-x86_64.tar && cd x86_64-linux-gnu-capsimage/ && ln -s libcapsimage.so.4.2 libcapsimage.so.4 && ln -s libcapsimage.so.4.2 libcapsimage.so"
 # Install IPF lib for windows
 - msys64\usr\bin\bash -lc "wget \"%IPF_WIN_URL%\" && unzip *ipflib*zip && cp %IPF_DLL_SRC% %MINGW_DIR%/bin/"
 - msys64\usr\bin\bash -lc "cd c:/projects/caprice32 && PATH=$PATH:%MINGW_DIR%/bin make ARCH=%WINARCh% clean"
