@@ -65,6 +65,7 @@ artifacts:
 
 deploy:
 - release: "Caprice32 latest"
+  tag: latest
   description: "Latest build of Caprice 32, with the newest cool features and the most recent bugs."
   provider: GitHub
   auth_token: 
