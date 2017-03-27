@@ -2110,7 +2110,7 @@ int cap32_main (int argc, char **argv)
                            audio_resume();
                            break;
 
-                        case CAP32_SCRNDUMP:
+                        case CAP32_SCRNSHOT:
                            dumpScreen();
                            break;
 
