@@ -62,7 +62,6 @@ std::string replaceCap32Keys(std::string command)
     { "CAP32_TAPEPLAY", CAP32_TAPEPLAY },
     { "CAP32_DEBUG", CAP32_DEBUG }
   };
-  LOG_INFO("Input command: " << command);
   for (const auto& elt : keyNames)
   {
     size_t pos;
@@ -71,7 +70,6 @@ std::string replaceCap32Keys(std::string command)
       command.replace(pos, elt.first.size(), std::string("\f") + elt.second);
     }
   }
-  LOG_INFO("Output command: " << command);
   return command;
 }
 
