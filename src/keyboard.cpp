@@ -456,6 +456,7 @@ dword cpc_kbd[3][149] = {
   }
 };
 
+// TODO(cpitrat): Replace this by a map CPC/CAP32 to SDLK
 int kbd_layout[4][KBD_MAX_ENTRIES][2] = {
   { // US PC to CPC keyboard layout translation
     { CPC_0,          SDLK_0 },
