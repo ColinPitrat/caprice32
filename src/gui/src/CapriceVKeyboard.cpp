@@ -100,17 +100,36 @@ namespace wGui {
     auto keyFromChar = keysFromChars[CPC.kbd_layout];
     std::list<SDL_Event> result;
     bool escaped = false;
+    bool cap32_cmd = false;
     for(auto c : toTranslate) {
       if(c == '\a') {
         // Escape prefix: next char is a special one
         escaped = true;
         continue;
       }
+      if (c == '\f') {
+        // Emulator special command
+        cap32_cmd = true;
+        continue;
+      }
       SDL_Event key;
-      if(escaped) {
-        key.key.keysym.sym = static_cast<SDLKey>(kbd_layout[CPC.kbd_layout][static_cast<int>(c)][1] & 0xffff);
-        key.key.keysym.mod = static_cast<SDLMod>(kbd_layout[CPC.kbd_layout][static_cast<int>(c)][1] >> 16);
+      if(escaped || cap32_cmd) {
+        int keycode = c;
+        if (cap32_cmd) {
+          keycode += MOD_EMU_KEY;
+          // Lookup the SDL key corresponding to this emulator command
+          for (dword n = 0; n < KBD_MAX_ENTRIES; n++) {
+            if(keycode == kbd_layout[CPC.kbd_layout][n][0]) {
+              key.key.keysym.sym = static_cast<SDLKey>(kbd_layout[CPC.kbd_layout][n][1] & 0xffff);
+              key.key.keysym.mod = static_cast<SDLMod>(kbd_layout[CPC.kbd_layout][n][1] >> 16);
+            }
+          }
+        } else {
+          key.key.keysym.sym = static_cast<SDLKey>(kbd_layout[CPC.kbd_layout][keycode][1] & 0xffff);
+          key.key.keysym.mod = static_cast<SDLMod>(kbd_layout[CPC.kbd_layout][keycode][1] >> 16);
+        }
         escaped = false;
+        cap32_cmd = false;
       } else {
         // key.key.keysym.scancode = ;
         key.key.keysym.sym = keyFromChar[c].first;
@@ -193,14 +212,11 @@ namespace wGui {
               }
               // Otherwise put backspace in the output
               pressed = "\b";
-            } else if(pressed == "F1") {
-               std::cout << "Pressed F1" << std::endl;
+            } else if(pressed.size() == 2 && pressed[0] == 'F' && pressed[1] >= '0' && pressed[1] <= '9') {
+               std::cout << "Pressed F" << pressed[1] << std::endl;
+               int fkey = CPC_F0 + pressed[1] - '0';
                pressed = "\a";
-               pressed += CPC_F1;
-            } else if(pressed == "F2") {
-               std::cout << "Pressed F2" << std::endl;
-               pressed = "\a";
-               pressed += CPC_F2;
+               pressed += fkey;
             }
             std::string result = m_result->GetWindowText() + pressed;
             m_result->SetWindowText(result);

@@ -149,7 +149,7 @@ endif
 
 # This might fail on non GNU systems as sed -i in GNU sed only
 insert_hash:
-	@sed -i 's/commit_hash = ".*"/commit_hash = "$(GIT_HASH)"/' src/argparse.cpp
+	@sed -i 's/commit_hash = ".*"/commit_hash = "$(GIT_HASH)"/' src/commit_hash.h
 
 tags:
 	@ctags -R . || echo -e "!!!!!!!!!!!\n!! Warning: ctags not found - if you are a developer, you might want to install it.\n!!!!!!!!!!!"

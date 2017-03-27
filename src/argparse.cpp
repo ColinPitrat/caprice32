@@ -1,12 +1,15 @@
+#include "argparse.h"
+
+#include "commit_hash.h"
 #include <getopt.h>
 #include <iostream>
 #include <fstream>
 #include "cap32.h"
-#include "argparse.h"
+#include "keyboard.h"
 #include "stringutils.h"
+#include "log.h"
 
 extern bool log_verbose;
-std::string commit_hash = "6dcd3e8c3e9da1fb793e1e8fc0b17fa378273512";
 
 const struct option long_options[] =
 {
@@ -43,6 +46,35 @@ void usage(std::ostream &os, char *progPath, int errcode)
    exit(errcode);
 }
 
+std::string replaceCap32Keys(std::string command)
+{
+  static std::map<std::string, char> keyNames = {
+    { "CAP32_EXIT", CAP32_EXIT },
+    { "CAP32_FPS", CAP32_FPS },
+    { "CAP32_FULLSCRN", CAP32_FULLSCRN },
+    { "CAP32_GUI", CAP32_GUI },
+    { "CAP32_VKBD", CAP32_VKBD },
+    { "CAP32_JOY", CAP32_JOY },
+    { "CAP32_MF2STOP", CAP32_MF2STOP },
+    { "CAP32_RESET", CAP32_RESET },
+    { "CAP32_SCRNSHOT", CAP32_SCRNSHOT },
+    { "CAP32_SPEED", CAP32_SPEED },
+    { "CAP32_TAPEPLAY", CAP32_TAPEPLAY },
+    { "CAP32_DEBUG", CAP32_DEBUG }
+  };
+  LOG_INFO("Input command: " << command);
+  for (const auto& elt : keyNames)
+  {
+    size_t pos;
+    while ((pos = command.find(elt.first)) != std::string::npos)
+    {
+      command.replace(pos, elt.first.size(), std::string("\f") + elt.second);
+    }
+  }
+  LOG_INFO("Output command: " << command);
+  return command;
+}
+
 void parseArguments(int argc, char **argv, std::vector<std::string>& slot_list, CapriceArgs& args)
 {
    int option_index = 0;
@@ -60,7 +92,7 @@ void parseArguments(int argc, char **argv, std::vector<std::string>& slot_list, 
       switch (c)
       {
          case 'a':
-            args.autocmd += optarg;
+            args.autocmd += replaceCap32Keys(optarg);
             args.autocmd += "\n";
             break;
 

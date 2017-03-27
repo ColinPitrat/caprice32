@@ -2,6 +2,7 @@
 
 #include "cap32.h"
 #include "argparse.h"
+#include "keyboard.h"
 
 TEST(ArgParseTest, parseArgsNoArg)
 {
@@ -39,7 +40,7 @@ TEST(ArgParseTest, parseArgsSeveralArgs)
 	   ASSERT_EQ(argv[i], slot_list.at(i-1));
 }
 
-TEST (argParseTest, cfgFileArgsSwitch)
+TEST(argParseTest, cfgFileArgsSwitch)
 {
    const char *argv[] = {"./caprice32", "--cfg_file=/home/caprice32/cap32.cfg"};
    CapriceArgs args;
@@ -49,3 +50,26 @@ TEST (argParseTest, cfgFileArgsSwitch)
    ASSERT_EQ("/home/caprice32/cap32.cfg", args.cfgFilePath);
 }
 
+TEST(argParseTest, replaceCap32KeysNoKeyword)
+{
+  std::string command = "print \"Hello, world !\"";
+
+  ASSERT_EQ(command, replaceCap32Keys(command));
+}
+
+TEST(argParseTest, replaceCap32KeysKeywords)
+{
+  std::string command = "print \"Hello, world !\"CAP32_SCRNSHOTCAP32_EXIT";
+  std::string expected = "print \"Hello, world !\"\f\x8\f";
+  expected += '\0';
+
+  ASSERT_EQ(expected, replaceCap32Keys(command));
+}
+
+TEST(argParseTest, replaceCap32KeysRepeatedKeywords)
+{
+  std::string command = "print \"Hello\"CAP32_SCRNSHOT ; print \",\" ; CAP32_SCRNSHOT ; print \"world !\" ; CAP32_SCRNSHOT";
+  std::string expected = "print \"Hello\"\f\x8 ; print \",\" ; \f\x8 ; print \"world !\" ; \f\x8";
+
+  ASSERT_EQ(expected, replaceCap32Keys(command));
+}
