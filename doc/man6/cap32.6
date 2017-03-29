@@ -13,11 +13,13 @@ cap32 - Caprice32 Amstrad CPC emulator
 \fBMedia loading\fR
 .RS
 Upon invocation, the FILEs specified as arguments will be used to populate the various available CPC machine slots. The type of slot is determined by the file format, detected by its extension. Caprice32 supports the following file formats:
-\fR\fB.dsk\fR (disk image), \fR\fB.voc\fR or \fB.cdt\fR (tape image), \fR\fB.cpr\fR (cartridge image), \fR\fB.sna\fR (snapshot image), \fR\fB.zip\fR (ZIP archive containing any number of previously described files). Specifying slot content on the command line is optional.
+\fB.dsk\fR (disk image), \fB.ipf\fR (Interchangeable Preservation Format disk image), \fB.voc\fR or \fB.cdt\fR (tape image), \fB.cpr\fR (cartridge image), \fB.sna\fR (snapshot image), \fB.zip\fR (zip of any previously described file \fIexcept\fR .ipf). Specifying slot content on the command line is optional.
 .PP
-Caprice32 supports two disk drives (drive A and drive B). If two disk image files (.dsk) are provided, the first one will be loaded in drive A and the second one in drive B.
+Caprice32 supports two disk drives: drive A and drive B. If two disk image files (.dsk or .ipf) are provided, the first one will be loaded in drive A and the second one in drive B.
 .PP
-The \fBcart_path\fR, \fBsnap_path\fR, \fBdsk_path\fR and \fBtape_path\fR entries in the configuration file are \fBonly\fR used to specify the directory to open when loading/saving files in the GUI. The full path to the various slot contents must be provided on the command line.
+The \fBcart_path\fR, \fBsnap_path\fR, \fBdsk_path\fR and \fBtape_path\fR entries in the configuration file are \fIonly\fR used to specify the directory to open when loading/saving files in the GUI. The full path to the various slot contents must be provided on the command line.
+.PP
+The \fBrom_path\fR entry in the configuration file is used by the emulator to find its \fIsystem\fR ROM and cartridges.
 .RE
 
 .PP
@@ -120,7 +122,7 @@ See https://github.com/ColinPitrat/caprice32/issues for the list of reported bug
 .PP
 Caprice32 was originally written by Ulrich Doewich.
 .PP
-This man page covers Colin Pitrat's fork of Caprice32.
+This manual page covers Colin Pitrat's fork of Caprice32.
 .PP
 The screen capture code uses driedfruit SDL_SavePNG code (https://github.com/driedfruit/SDL_SavePNG).
 
