@@ -23,6 +23,7 @@ script:
 # - sudo sysctl kernel.core_pattern=core
  - make
  - make unit_test
+ - make e2e_test
  - make clean
  - make debug CFLAGS=-Wno-literal-suffix
 #To uncomment in case a core occurs:

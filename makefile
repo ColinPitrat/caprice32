@@ -228,6 +228,9 @@ unit_test: $(TEST_TARGET)
 else
 unit_test: $(TEST_TARGET)
 	./$(TEST_TARGET) --gtest_shuffle
+
+e2e_test: $(TARGET)
+	cd test/integrated && ./run_tests.sh
 endif
 
 clean:
