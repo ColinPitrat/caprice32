@@ -1353,19 +1353,8 @@ void crtc_init(void)
       int j = l << 1; // actual address
       MAXlate[l] = (j & 0x7FE) | ((j & 0x6000) << 1);
    }
-}
 
-
-
-void crtc_reset(void)
-{
    int Wid;
-
-   memset(&CRTC, 0, sizeof(CRTC)); // clear CRTC data structure
-   CRTC.registers[0] = 0x3f;
-   CRTC.registers[2] = 0x2e;
-   CRTC.registers[3] = 0x8e;
-
    if (dwXScale == 1) {
       Wid = 8;
       PosShift = 5;
@@ -1378,6 +1367,17 @@ void crtc_reset(void)
    }
    HorzPix[48] = 0;
    RendStart = reinterpret_cast<dword *>(&RendBuff[Wid]);
+}
+
+
+
+void crtc_reset(void)
+{
+   memset(&CRTC, 0, sizeof(CRTC)); // clear CRTC data structure
+   CRTC.registers[0] = 0x3f;
+   CRTC.registers[2] = 0x2e;
+   CRTC.registers[3] = 0x8e;
+
    RendPos = reinterpret_cast<dword *>(&RendBuff[0]);
    RendOut = reinterpret_cast<byte *>(RendStart);
    RendWid = &HorzPix[0];
