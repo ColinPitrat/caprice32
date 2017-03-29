@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 TSTDIR=`dirname "$0"`
 LOGFILE="test.log"

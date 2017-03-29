@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 OK=0
 TOTAL=0
