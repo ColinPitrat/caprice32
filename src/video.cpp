@@ -40,9 +40,9 @@
 #include <iostream>
 
 // the real video surface
-SDL_Surface* vid;
+SDL_Surface* vid = nullptr;
 // the video surface shown by the plugin to the application
-static SDL_Surface* pub;
+static SDL_Surface* pub = nullptr;
 
 extern t_CPC CPC;
 
@@ -182,9 +182,8 @@ void half_flip()
 
 void half_close()
 {
-	if (!vid)
-		return;
-	SDL_FreeSurface(pub);
+  SDL_FreeSurface(pub);
+  pub = nullptr;
 }
 
 /* ------------------------------------------------------------------------------------ */
@@ -290,9 +289,8 @@ void double_flip()
 
 void double_close()
 {
-	if (!vid)
-		return;
-	SDL_FreeSurface(pub);
+  SDL_FreeSurface(pub);
+  pub = nullptr;
 }
 
 /* ------------------------------------------------------------------------------------ */
@@ -636,9 +634,8 @@ void glscale_flip()
 
 void glscale_close()
 {
-	if (!vid)
-		return;
-	SDL_FreeSurface(pub);
+  SDL_FreeSurface(pub);
+  pub = nullptr;
 }
 #endif // HAVE_GL
 
@@ -965,9 +962,8 @@ void seagle_flip()
 
 void seagle_close()
 {
-	if (!vid)
-		return;
-	SDL_FreeSurface(pub);
+  SDL_FreeSurface(pub);
+  pub = nullptr;
 }
 
 /* ------------------------------------------------------------------------------------ */
@@ -1072,9 +1068,8 @@ void scale2x_flip()
 
 void scale2x_close()
 {
-	if (!vid)
-		return;
-	SDL_FreeSurface(pub);
+  SDL_FreeSurface(pub);
+  pub = nullptr;
 }
 
 /* ------------------------------------------------------------------------------------ */
@@ -1342,9 +1337,8 @@ void ascale2x_flip()
 
 void ascale2x_close()
 {
-	if (!vid)
-		return;
-	SDL_FreeSurface(pub);
+  SDL_FreeSurface(pub);
+  pub = nullptr;
 }
 
 
@@ -1450,9 +1444,8 @@ void tv2x_flip()
 
 void tv2x_close()
 {
-	if (!vid)
-		return;
-	SDL_FreeSurface(pub);
+  SDL_FreeSurface(pub);
+  pub = nullptr;
 }
 
 /* ------------------------------------------------------------------------------------ */
@@ -1554,9 +1547,8 @@ void swbilin_flip()
 
 void swbilin_close()
 {
-	if (!vid)
-		return;
-	SDL_FreeSurface(pub);
+  SDL_FreeSurface(pub);
+  pub = nullptr;
 }
 
 /* ------------------------------------------------------------------------------------ */
@@ -1705,9 +1697,8 @@ void swbicub_flip()
 
 void swbicub_close()
 {
-	if (!vid)
-		return;
-	SDL_FreeSurface(pub);
+  SDL_FreeSurface(pub);
+  pub = nullptr;
 }
 
 
@@ -1818,9 +1809,8 @@ void dotmat_flip()
 
 void dotmat_close()
 {
-	if (!vid)
-		return;
-	SDL_FreeSurface(pub);
+  SDL_FreeSurface(pub);
+  pub = nullptr;
 }
 
 
@@ -1831,7 +1821,7 @@ void dotmat_close()
 video_plugin video_plugin_list[]=
 {
 /* Name                            Init func      Palette func     Lock func      Unlock func      Flip func      Close func      Pixel formats  Half size  X, Y offsets   X, Y scale  */
-{"Half size with hardware flip",   halfhw_init,   halfhw_setpal,   halfhw_lock,   halfhw_unlock,   halfhw_flip,   half_close,     ALL,           1,         0, 0,          0, 0   },
+{"Half size with hardware flip",   halfhw_init,   halfhw_setpal,   halfhw_lock,   halfhw_unlock,   halfhw_flip,   halfhw_close,   ALL,           1,         0, 0,          0, 0   },
 {"Double size with hardware flip", doublehw_init, doublehw_setpal, doublehw_lock, doublehw_unlock, doublehw_flip, doublehw_close, ALL,           0,         0, 0,          0, 0   },
 {"Half size",                      half_init,     half_setpal,     half_lock,     half_unlock,     half_flip,     half_close,     ALL,           1,         0, 0,          0, 0   },
 {"Double size",                    double_init,   double_setpal,   double_lock,   double_unlock,   double_flip,   double_close,   ALL,           0,         0, 0,          0, 0   },
