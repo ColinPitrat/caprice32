@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Mon Mar 20 14:46:16 2017 -->
+<!-- CreationDate: Wed Mar 29 10:05:50 2017 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -67,24 +67,30 @@ specified as arguments will be used to populate the various
 available CPC machine slots. The type of slot is determined
 by the file format, detected by its extension. Caprice32
 supports the following file formats: <b>.dsk</b> (disk
-image), <b>.voc</b> or <b>.cdt</b> (tape image), <b>.cpr</b>
-(cartridge image), <b>.sna</b> (snapshot image), <b>.zip</b>
-(ZIP archive containing any number of previously described
-files). Specifying slot content on the command line is
-optional.</p>
+image), <b>.ipf</b> (Interchangeable Preservation Format
+disk image), <b>.voc</b> or <b>.cdt</b> (tape image),
+<b>.cpr</b> (cartridge image), <b>.sna</b> (snapshot image),
+<b>.zip</b> (zip of any previously described file
+<i>except</i> .ipf). Specifying slot content on the command
+line is optional.</p>
 
 <p style="margin-left:22%; margin-top: 1em">Caprice32
-supports two disk drives (drive A and drive B). If two disk
-image files (.dsk) are provided, the first one will be
-loaded in drive A and the second one in drive B.</p>
+supports two disk drives: drive A and drive B. If two disk
+image files (.dsk or .ipf) are provided, the first one will
+be loaded in drive A and the second one in drive B.</p>
 
 <p style="margin-left:22%; margin-top: 1em">The
 <b>cart_path</b>, <b>snap_path</b>, <b>dsk_path</b> and
 <b>tape_path</b> entries in the configuration file are
-<b>only</b> used to specify the directory to open when
+<i>only</i> used to specify the directory to open when
 loading/saving files in the GUI. The full path to the
 various slot contents must be provided on the command
 line.</p>
+
+<p style="margin-left:22%; margin-top: 1em">The
+<b>rom_path</b> entry in the configuration file is used by
+the emulator to find its <i>system</i> ROM and
+cartridges.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>Configuration</b></p>
@@ -248,8 +254,8 @@ of reported bugs.</p>
 <p style="margin-left:11%; margin-top: 1em">Caprice32 was
 originally written by Ulrich Doewich.</p>
 
-<p style="margin-left:11%; margin-top: 1em">This man page
-covers Colin Pitrat&rsquo;s fork of Caprice32.</p>
+<p style="margin-left:11%; margin-top: 1em">This manual
+page covers Colin Pitrat&rsquo;s fork of Caprice32.</p>
 
 <p style="margin-left:11%; margin-top: 1em">The screen
 capture code uses driedfruit SDL_SavePNG code
