@@ -24,7 +24,7 @@ Caprice32 provides:
   * Joystick support - it can be fully used with joystick only, thanks to an integrated virtual keyboard.
   * Joystick emulation - joystick-only games can be played using the keyboard
   * English, French or Spanish keyboards
-  * DSK and IPF files for disks - VOC and CDT files for tapes - CPR files for cartridge
+  * DSK and [IPF](http://softpres.org/glossary:ipf) files for disks - VOC and CDT files for tapes - CPR files for cartridge
   * Snapshots (SNA files)
   * Direct load of ZIP files (all formats except IPF)
   * Custom disk formats
@@ -57,7 +57,9 @@ See the [INSTALL.md](INSTALL.md) files for Caprice32 build instructions.
 # Using the source
 
 The source for Caprice32 is distributed under the terms of the GNU General Public License version 2 (GPLv2), which is included in this archive as COPYING.txt. Please make sure that you understand the terms and conditions of the license before using the source.
+
 The screen dump part of Caprice32 uses [driedfruit SDL_SavePNG] (https://github.com/driedfruit/SDL_SavePNG) code, released under zlib/libpng license, which is compatible with GPLv2.
+
 I encourage you to get involved in the project.
 
 # Comments or ready to contribute?
