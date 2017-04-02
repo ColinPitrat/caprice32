@@ -10,6 +10,7 @@
 #include "errors.h"
 #include "log.h"
 #include "slotshandler.h"
+#include "fileutils.h"
 
 extern t_CPC CPC;
 
@@ -294,10 +295,37 @@ void ipf_eject_hook (t_drive *drive)
 	drive->eject_hook = nullptr;
 }
 
-int ipf_load (FILE *, t_drive *)
+int ipf_load (FILE *pfileIn, t_drive *drive)
 {
-  LOG_ERROR("Unsupported load of IPF file from FILE handler");
-  return 0;
+  // IPF library needs a filename to be provided so we have to create a new temporary file.
+  // This file is not deleted.
+  // TODO(cpitrat): register the file for cleanup somewhere (e.g: at caprice exit)
+  FILE *pfileOut = nullptr;
+  char *tmpFilePath = nullptr;
+  std::vector<std::string> prefixes = { "/tmp", "." };
+  for (const auto &prefix : prefixes) {
+    tmpFilePath = tempnam(prefix.c_str(), ".cap32_tmp_");
+    if (tmpFilePath == nullptr) {
+      LOG_ERROR("Couldn't load IPF file: Couldn't generate temporary file name: " << strerror(errno));
+      return ERR_DSK_INVALID; // couldn't create output file
+    }
+    LOG_DEBUG("Using temporary file: " << tmpFilePath);
+    pfileOut = fopen(tmpFilePath, "w+b");
+    if (pfileOut != nullptr) {
+      break;
+    }
+  }
+
+  if (!file_copy(pfileIn, pfileOut)) {
+    LOG_ERROR("Error while copying file");
+    return ERR_DSK_INVALID;
+  }
+  if (fclose(pfileOut) != 0) {
+    LOG_ERROR("Error while closing temporary file");
+    return ERR_DSK_INVALID;
+  }
+
+  return ipf_load(tmpFilePath, drive);
 }
 
 // Attempt to load the supplied file as an IPF disk image
@@ -312,12 +340,16 @@ int ipf_load (const std::string &filename, t_drive *drive)
 
 	FILE *f = fopen(filename.c_str(), "rb");
 	if (!f)
+  {
+		LOG_ERROR("Couldn't open file: " << filename);
 		return ERR_DSK_INVALID;
+  }
 
 	// Check for IPF file signature
 	if (!fread(sz, 4, 1, f) || fclose(f) || memcmp(sz, "CAPS", sizeof(sz)))
 	{
 		fclose(f);
+		LOG_ERROR("Wrong IPF header in: " << filename);
 		return ERR_DSK_INVALID;
 	}
 
@@ -355,6 +387,7 @@ int ipf_load (const std::string &filename, t_drive *drive)
 	{
 		CAPSRemImage(id);
 		CAPSExit();
+		LOG_ERROR("Couldn't lock image: " << filename);
 		return ERR_DSK_INVALID;
 	}
 
@@ -363,6 +396,7 @@ int ipf_load (const std::string &filename, t_drive *drive)
 	{
 		CAPSRemImage(id);
 		CAPSExit();
+		LOG_ERROR("Couldn't get image info: " << filename);
 		return ERR_DSK_INVALID;
 	}
 

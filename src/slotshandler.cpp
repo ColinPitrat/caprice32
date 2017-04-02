@@ -24,6 +24,7 @@
 #include "errors.h"
 #include "cartridge.h"
 #include "log.h"
+#include "fileutils.h"
 #include "stringutils.h"
 #include "tape.h"
 #include "z80.h"
@@ -103,17 +104,6 @@ t_disk_format disk_format[MAX_DISK_FORMAT] = {
    { "169K Vendor Format", 40, 1, 9, 2, 0x52, 0xe5, {{ 0x41, 0x46, 0x42, 0x47, 0x43, 0x48, 0x44, 0x49, 0x45 }} }
 };
 
-int file_size (int file_num)
-{
-   struct stat s;
-
-   if (!fstat(file_num, &s)) {
-      return s.st_size;
-   } else {
-      return 0;
-   }
-}
-
 inline bool fillSlot(std::string &filevar, bool &processedvar, const std::string& fullpath, const std::string& extension, const std::string& type_ext, const std::string& type_desc) {
    if ((!processedvar) && (extension == type_ext)) {
       LOG_VERBOSE("Loading " << type_desc << " file: " << fullpath);
@@ -145,7 +135,7 @@ void fillSlots (std::vector<std::string> slot_list, t_CPC& CPC)
          if (extension == ".zip") { // are we dealing with a zip archive?
            zip::t_zip_info zip_info;
            zip_info.filename = fullpath;
-           zip_info.extensions = ".dsk.sna.cdt.voc.cpr";
+           zip_info.extensions = ".dsk.sna.cdt.voc.cpr.ipf";
            if (zip::dir(&zip_info)) {
              continue; // error or nothing relevant found
            } else {
@@ -1393,7 +1383,7 @@ int file_load(const std::string& filepath, const DRIVE drive)
   if (extension == ".zip") {
     zip::t_zip_info zip_info;
     zip_info.filename = filepath;
-    zip_info.extensions = ".dsk.sna.cdt.voc.cpr";
+    zip_info.extensions = ".dsk.sna.cdt.voc.cpr.ipf";
     if (zip::dir(&zip_info)) {
       // error or nothing relevant found
       LOG_ERROR("Error opening or parsing zip file " << filepath);
@@ -1402,6 +1392,7 @@ int file_load(const std::string& filepath, const DRIVE drive)
       std::string filename = zip_info.filesOffsets[0].first;
       pos = filename.length() - 4;
       extension = filename.substr(pos); // grab the extension
+      LOG_DEBUG("Extracting " << filepath << ", " << filename << ", " << extension);
       file = extractFile(filepath, filename, extension);
     }
   }

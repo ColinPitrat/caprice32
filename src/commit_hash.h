@@ -1,6 +1,6 @@
 #ifndef COMMIT_HASH_H
 #define COMMIT_HASH_H
 
-std::string commit_hash = "e220b2ee23149adc0fde8a0c57367beafbb79ec2";
+std::string commit_hash = "d76cd1551408d1f8cbea797b9f2395dd84af041a";
 
 #endif
