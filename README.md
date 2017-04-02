@@ -26,7 +26,7 @@ Caprice32 provides:
   * English, French or Spanish keyboards
   * DSK and [IPF](http://softpres.org/glossary:ipf) files for disks - VOC and CDT files for tapes - CPR files for cartridge
   * Snapshots (SNA files)
-  * Direct load of ZIP files (all formats except IPF)
+  * Direct load of ZIP files
   * Custom disk formats
   * Printer support
   * Memory tool to inspect and modify memory (peek and poke)
