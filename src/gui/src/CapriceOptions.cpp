@@ -247,6 +247,7 @@ CapriceOptions::CapriceOptions(const CRect& WindowRect, CWindow* pParent, CFontE
     m_pDropDownCPCLanguage->SelectItem(CPC.keyboard);
     m_pDropDownCPCLanguage->SetIsFocusable(true);
     // option 'kbd_layout' which is the platform keyboard layout (i.e. the PC keyboard layout)
+    /*
     m_pLabelPCLanguage    = new CLabel(CPoint(10,33), m_pGroupBoxTabInput, "PC Keyboard language");;
     m_pDropDownPCLanguage = new CDropDown(CRect(CPoint(130,31),140,16), m_pGroupBoxTabInput, false, 14);
     m_pDropDownPCLanguage->AddItem(SListItem("English"));
@@ -255,7 +256,7 @@ CapriceOptions::CapriceOptions(const CRect& WindowRect, CWindow* pParent, CFontE
     m_pDropDownPCLanguage->SetListboxHeight(3);
     m_pDropDownPCLanguage->SelectItem(CPC.kbd_layout);
     m_pDropDownPCLanguage->SetIsFocusable(true);
-
+    */
     m_pCheckBoxJoystickEmulation   = new CCheckBox(CRect(CPoint(10, 62), 10, 10), m_pGroupBoxTabInput);
     if (CPC.joystick_emulation == 1) {
         m_pCheckBoxJoystickEmulation->SetCheckBoxState(CCheckBox::CHECKED);
@@ -341,7 +342,7 @@ bool CapriceOptions::HandleMessage(CMessage* pMessage)
 
               // 'Input' settings
               CPC.keyboard = m_pDropDownCPCLanguage->GetSelectedIndex();
-              CPC.kbd_layout = m_pDropDownPCLanguage->GetSelectedIndex();
+              //CPC.kbd_layout = m_pDropDownPCLanguage->GetSelectedIndex();
               CPC.joysticks = (m_pCheckBoxJoysticks->GetCheckBoxState() == CCheckBox::CHECKED)?1:0;
               CPC.joystick_emulation = (m_pCheckBoxJoystickEmulation->GetCheckBoxState() == CCheckBox::CHECKED)?1:0;
 

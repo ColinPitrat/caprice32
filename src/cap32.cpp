@@ -1048,11 +1048,12 @@ int input_init (void)
    memset(keyboard_ctrl, 0xff, sizeof(keyboard_ctrl));
    memset(keyboard_mode, 0xff, sizeof(keyboard_mode));
 
+   init_kbd_layout(CPC.resources_path + "/" + CPC.kbd_layout);
    for (dword n = 0; n < KBD_MAX_ENTRIES; n++) {
-      dword pc_key = kbd_layout[CPC.kbd_layout][n][1]; // PC key assigned to CPC key
+      dword pc_key = kbd_layout[n][1]; // PC key assigned to CPC key
       if (pc_key) {
          dword pc_idx = pc_key & 0xffff; // strip off modifier
-         dword cpc_idx = kbd_layout[CPC.kbd_layout][n][0];
+         dword cpc_idx = kbd_layout[n][0];
          dword cpc_key;
          if (cpc_idx & MOD_EMU_KEY) {
             cpc_key = cpc_idx;
@@ -1733,10 +1734,7 @@ void loadConfiguration (t_CPC &CPC, const std::string& configFilename)
    }
    CPC.snd_pp_device = conf.getIntValue("sound", "pp_device", 0) & 1;
 
-   CPC.kbd_layout = conf.getIntValue("control", "kbd_layout", 0);
-   if (CPC.kbd_layout > 3) {
-      CPC.kbd_layout = 0;
-   }
+   CPC.kbd_layout = conf.getStringValue("control", "kbd_layout", "keymap_us.map");
 
    CPC.max_tracksize = conf.getIntValue("file", "max_track_size", 6144-154);
    CPC.snap_path = conf.getStringValue("file", "snap_path", appPath + "/snap/");
@@ -1815,7 +1813,7 @@ void saveConfiguration (t_CPC &CPC, const std::string& configFilename)
    conf.setIntValue("sound", "volume", CPC.snd_volume);
    conf.setIntValue("sound", "pp_device", CPC.snd_pp_device);
 
-   conf.setIntValue("control", "kbd_layout", CPC.kbd_layout);
+   conf.setStringValue("control", "kbd_layout", CPC.kbd_layout);
 
    conf.setIntValue("file", "max_track_size", CPC.max_tracksize);
    conf.setStringValue("file", "snap_path", CPC.snap_path);
