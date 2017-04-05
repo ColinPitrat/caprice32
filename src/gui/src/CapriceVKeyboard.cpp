@@ -97,7 +97,7 @@ namespace wGui {
   }
 
   std::list<SDL_Event> CapriceVKeyboard::StringToEvents(std::string toTranslate) {
-    auto keyFromChar = CPCkeysFromChars;
+    auto keyFromChar = SDLkeysFromChars;
     std::list<SDL_Event> result;
     bool escaped = false;
     bool cap32_cmd = false;
@@ -131,10 +131,9 @@ namespace wGui {
         escaped = false;
         cap32_cmd = false;
       } else {
-// TODO Fix this !
         // key.key.keysym.scancode = ;
-//        key.key.keysym.sym = keyFromChar[c].first;
-//        key.key.keysym.mod = keyFromChar[c].second;
+        key.key.keysym.sym = keyFromChar[c].first;
+        key.key.keysym.mod = keyFromChar[c].second;
         // key.key.keysym.unicode = c;
       }
       key.key.type = SDL_KEYDOWN;

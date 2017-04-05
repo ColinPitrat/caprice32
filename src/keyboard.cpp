@@ -17,9 +17,9 @@
 						   right event to the CPC machine. A default kbd_us_layout is hardcoded as a fallback in case no custom
 						   keymap file is found.
 						   
-	  * CPCkeysFromChars   is a map associating a real character with a CPC_KEYS value. It is used by the virtual keyboard.
-
 	  * SDLkeysFromChars   is a map associating a real character with an SDLKey (and possibly a modifier) value. It is used by the virtual keyboard.
+
+	  * CPCkeysFromChars   is a map associating a real character with a CPC_KEYS value. It is used internally to generate SDLkeysFromChars.
 */
 
 dword cpc_kbd[CPC_KEYBOARD_NUM][CPC_KEY_NUM] = {
@@ -480,7 +480,7 @@ dword cpc_kbd[CPC_KEYBOARD_NUM][CPC_KEY_NUM] = {
 
 std::map<char, CPC_KEYS> CPCkeysFromChars = {
     // Char to CPC keyboard translation
-	// TODO: How on Earth do we map non ASCII chars ?
+	// TODO(sebhz): How on Earth do we map non ASCII chars ?
     { '&', CPC_AMPERSAND },
     { '#', CPC_HASH },
     { '"', CPC_DBLQUOTE },
@@ -573,6 +573,7 @@ std::map<char, CPC_KEYS> CPCkeysFromChars = {
     { '{', CPC_LCBRACE },
     { '}', CPC_RCBRACE },
     { '\\', CPC_BACKSLASH },
+    { '\b', CPC_DEL },
     { '`', CPC_BACKQUOTE },
     // Not (yet?) on virtual keyboard
     { '@', CPC_AT },
@@ -1148,6 +1149,27 @@ std::map<std::string, unsigned int> SDLkeysFromStrings = {
 };
 
 int kbd_layout[KBD_MAX_ENTRIES][2];
+std::map<char, std::pair<SDLKey, SDLMod>> SDLkeysFromChars;
+
+void create_SDL_keymap(void)
+{
+	CPC_KEYS cpc_key;
+	unsigned int sdl_moddedkey;
+
+	for (auto const &item : CPCkeysFromChars) {
+		sdl_moddedkey = 0xffff;
+		cpc_key = item.second;
+		// TODO (sebhz) we should really replace all this by a map !
+		for (int i=0; i < KBD_MAX_ENTRIES; i++) {
+			if (kbd_layout[i][0] == cpc_key) {
+				sdl_moddedkey = kbd_layout[i][1];
+				break;
+			}
+		}
+		if (sdl_moddedkey != 0xffff)
+			SDLkeysFromChars[item.first] = std::make_pair(static_cast<SDLKey>(sdl_moddedkey & 0xffff), static_cast<SDLMod>(sdl_moddedkey >> 16));
+	}
+}
 
 // Format of a line: CPC_xxx\tSDLK_xxx\tMODIFIER
 // Last field is optional
@@ -1178,33 +1200,33 @@ void parse_line(char *s, unsigned int line)
 		kbd_layout[line][1] = keyv;	
 }
 
+// TODO (sebhz) there must be a way to to this more efficiently !
+inline void fill_default_kbd_layout(void)
+{
+	for (unsigned int key=0; key < KBD_MAX_ENTRIES; key++)
+		for (int i=0; i < 2; i++)
+			kbd_layout[key][i] = us_kbd_layout[key][i];
+}
+
 #define MAX_LINE_LENGTH 80
 void init_kbd_layout(std::string layout_file)
 {
 	std::filebuf fb;
-	unsigned int key = 0;
-	char line[MAX_LINE_LENGTH]; // sufficient for now ! TODO: proper malloc'ing etc...
+	char line[MAX_LINE_LENGTH]; // sufficient for now ! TODO (sebhz): proper malloc'ing etc...
 
-	if (layout_file.empty()) {
-		for (key=0; key < KBD_MAX_ENTRIES; key++)
-			for (int i=0; i < 2; i++)
-				kbd_layout[key][i] = us_kbd_layout[key][i];
-		return;
+	if (layout_file.empty() || (fb.open(layout_file, std::ios::in) == nullptr)) {
+		fill_default_kbd_layout();
 	}
-	
-	if (fb.open(layout_file, std::ios::in) == nullptr) {
-		for (key=0; key < KBD_MAX_ENTRIES; key++)
-			for (int i=0; i < 2; i++)
-				kbd_layout[key][i] = us_kbd_layout[key][i];
-		return;
+	else {
+		std::istream is(&fb);
+		unsigned int key = 0;
+		while (is.good()) {
+			is.getline(line, MAX_LINE_LENGTH);
+			parse_line(line, key);
+			key++;
+		}
+		fb.close();
 	}
-
-    std::istream is(&fb);
-	while (is.good()) {
-		is.getline(line, MAX_LINE_LENGTH);
-		parse_line(line, key);
-		key++;
-	}		
-    fb.close();
+	create_SDL_keymap();
 	return;	
 }

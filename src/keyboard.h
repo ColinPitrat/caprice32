@@ -189,8 +189,7 @@ extern dword cpc_kbd[CPC_KEYBOARD_NUM][CPC_KEY_NUM];
 #define KBD_MAX_ENTRIES 160
 extern int kbd_layout[KBD_MAX_ENTRIES][2];
 
-extern std::map<char, CPC_KEYS> CPCkeysFromChars;
-
-extern void init_kbd_layout(std::string);
+extern std::map<char, std::pair<SDLKey, SDLMod>> SDLkeysFromChars;
+void init_kbd_layout(std::string);
 
 #endif
