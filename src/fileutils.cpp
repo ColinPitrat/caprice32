@@ -57,3 +57,19 @@ std::vector<std::string> listDirectory(std::string sDirectory) {
    sort(s.begin(), s.end()); // sort elements
    return s;
 }
+
+// Returns a vector containing the names of the files having extension "ext" in
+// the specified directory
+std::vector<std::string> listDirectoryExt(std::string sDirectory, std::string ext) {
+	std::vector<std::string> allFiles = listDirectory(sDirectory);
+	std::vector<std::string> matchingFiles;
+	std::string extension;
+	
+	for (const auto& fileName : allFiles) {
+		extension = fileName.substr(fileName.find_last_of(".") + 1);
+		if (ext == extension) {
+			matchingFiles.push_back(fileName);
+		}
+	}	
+	return matchingFiles;
+}

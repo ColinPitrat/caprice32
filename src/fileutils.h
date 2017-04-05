@@ -13,3 +13,7 @@ bool file_copy(FILE *in, FILE *out);
 
 // Returns a vector containing the names of the files in the specified directory
 std::vector<std::string> listDirectory(std::string sDirectory);
+
+// Returns a vector containing the names of the files having extension "ext" in
+// the specified directory
+std::vector<std::string> listDirectoryExt(std::string sDirectory, std::string ext);
