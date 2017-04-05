@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Wed Mar 29 10:05:50 2017 -->
+<!-- CreationDate: Wed Apr  5 14:40:46 2017 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -70,9 +70,8 @@ supports the following file formats: <b>.dsk</b> (disk
 image), <b>.ipf</b> (Interchangeable Preservation Format
 disk image), <b>.voc</b> or <b>.cdt</b> (tape image),
 <b>.cpr</b> (cartridge image), <b>.sna</b> (snapshot image),
-<b>.zip</b> (zip of any previously described file
-<i>except</i> .ipf). Specifying slot content on the command
-line is optional.</p>
+<b>.zip</b> (zip of any previously described file).
+Specifying slot content on the command line is optional.</p>
 
 <p style="margin-left:22%; margin-top: 1em">Caprice32
 supports two disk drives: drive A and drive B. If two disk
@@ -134,7 +133,9 @@ This makes sense since their disposition on the CPC keyboard
 was similar to the numpad. If your computer doesn&rsquo;t
 have a numpad (e.g laptop that doesn&rsquo;t support it with
 Fn key) the only way to access the CPC F1-F10 keys is
-through the virtual keyboard.</p>
+through the virtual keyboard. The emulator function key
+mapping can also be redefined through the host keyboard
+mapping file.</p>
 
 <p style="margin-left:22%; margin-top: 1em">The emulator
 function key mapping is:</p>
@@ -175,12 +176,14 @@ mapping</b></p>
 <p style="margin-left:22%;">Caprice32 supports CPC English,
 French and Spanish keyboard layouts. The CPC keyboard layout
 is defined in the configuration file by the <b>keyboard</b>
-entry (0: English, 1: French, 2: Spanish). Additionally one
-can define the layout of the host keyboard in the
-configuration file, using <b>kbd_layout</b> entry.
-<b>kbd_layout</b> supports the same three values as
-<b>keyboard</b> and should remap properly most keys found on
-English (US and UK), French and Spanish keyboards.</p>
+entry (0: English, 1: French, 2: Spanish). The host keyboard
+mapping is defined in a specific file, allowing to remap any
+host key to any specific key. The mapping file to use is set
+by the <b>kbd_layout</b> configuration entry. The mapping
+file must be put in the resources directory, defined by the
+configuration file <b>resources_path</b> entry. If the
+mapping file is not defined or not found, Caprice32 will
+default to a standard US keyboard map.</p>
 
 <h2>OPTIONS
 <a name="OPTIONS"></a>
