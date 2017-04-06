@@ -581,6 +581,7 @@ std::map<char, CPC_KEYS> CPCkeysFromChars = {
     //{ '~', {0, KMOD_NONE} } // should be pound but it's not part of base ascii (it's in extended ASCII)
 };
 
+// TODO (sebhz) replace this by a map !
 int us_kbd_layout[KBD_MAX_ENTRIES][2] = {
 	{ CPC_0,          SDLK_0 },
     { CPC_1,          SDLK_1 },
@@ -1173,13 +1174,18 @@ void create_SDL_keymap(void)
 
 // Format of a line: CPC_xxx\tSDLK_xxx\tMODIFIER
 // Last field is optional
-void parse_line(char *s, unsigned int line)
+bool parse_line(char *s, unsigned int line)
 {
 		unsigned int keyv = 0;
 		
 		char *pch = strtok(s, "\t");
 		if (pch == nullptr || pch[0] == '#')
-			return;
+			return false;
+
+		if (CPCkeysFromStrings.count(pch) == 0) {
+			LOG_ERROR("Unknown CPC key " << pch << " found in mapping file. Ignoring it.");
+			return false;
+		}
 		
 		for (unsigned int field=0; field < 3; field++) {
 			switch (field) {
@@ -1188,6 +1194,10 @@ void parse_line(char *s, unsigned int line)
 					break;
 				case 1:
 				case 2:
+					if (SDLkeysFromStrings.count(pch) == 0) {
+						LOG_ERROR("Unknown SDL key or modifier " << pch << " found in mapping file. Ignoring it.");
+						return false;
+					}
 					keyv |= SDLkeysFromStrings[pch];
 					break;
 				default:
@@ -1197,7 +1207,8 @@ void parse_line(char *s, unsigned int line)
 			if (pch == nullptr)
 				break;	
 		}
-		kbd_layout[line][1] = keyv;	
+		kbd_layout[line][1] = keyv;
+		return true;
 }
 
 // TODO (sebhz) there must be a way to to this more efficiently !
@@ -1220,10 +1231,10 @@ void init_kbd_layout(std::string layout_file)
 	else {
 		std::istream is(&fb);
 		unsigned int key = 0;
-		while (is.good()) {
+		while (is.good() && key < KBD_MAX_ENTRIES) {
 			is.getline(line, MAX_LINE_LENGTH);
-			parse_line(line, key);
-			key++;
+			if (parse_line(line, key))
+				key++;
 		}
 		fb.close();
 	}
