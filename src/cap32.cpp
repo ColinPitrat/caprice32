@@ -153,11 +153,6 @@ byte bit_values[8] = {
    0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80
 };
 
-static dword keyboard_normal[SDLK_LAST];
-static dword keyboard_shift[SDLK_LAST];
-static dword keyboard_ctrl[SDLK_LAST];
-static dword keyboard_mode[SDLK_LAST];
-
 #define MAX_ROM_MODS 2
 #include "rom_mods.h"
 
@@ -1043,48 +1038,8 @@ void emulator_reset (bool bolMF2Reset)
 
 int input_init (void)
 {
-   memset(keyboard_normal, 0xff, sizeof(keyboard_normal));
-   memset(keyboard_shift, 0xff, sizeof(keyboard_shift));
-   memset(keyboard_ctrl, 0xff, sizeof(keyboard_ctrl));
-   memset(keyboard_mode, 0xff, sizeof(keyboard_mode));
-
-   init_kbd_layout(CPC.resources_path + "/" + CPC.kbd_layout);
-   for (dword n = 0; n < KBD_MAX_ENTRIES; n++) {
-      dword pc_key = kbd_layout[n][1]; // PC key assigned to CPC key
-      if (pc_key) {
-         dword pc_idx = pc_key & 0xffff; // strip off modifier
-         dword cpc_idx = kbd_layout[n][0];
-         dword cpc_key;
-         if (cpc_idx & MOD_EMU_KEY) {
-            cpc_key = cpc_idx;
-         } else {
-            cpc_key = cpc_kbd[CPC.keyboard][cpc_idx];
-         }
-         if (pc_key & MOD_PC_SHIFT) { // key + SHIFT?
-            keyboard_shift[pc_idx] = cpc_key; // copy CPC key matrix value to SHIFT table
-         } else if (pc_key & MOD_PC_CTRL) { // key + CTRL?
-            keyboard_ctrl[pc_idx] = cpc_key; // copy CPC key matrix value to CTRL table
-         } else if (pc_key & MOD_PC_MODE) { // key + AltGr?
-            keyboard_mode[pc_idx] = cpc_key; // copy CPC key matrix value to AltGr table
-         } else {
-            keyboard_normal[pc_idx] = cpc_key; // copy CPC key matrix value to normal table
-            if (!(cpc_key & MOD_EMU_KEY)) { // not an emulator function key?
-               if (keyboard_shift[pc_idx] == 0xffffffff) { // SHIFT table entry has no value yet?
-                  keyboard_shift[pc_idx] = cpc_key; // duplicate entry in SHIFT table
-               }
-               if (keyboard_ctrl[pc_idx] == 0xffffffff) { // CTRL table entry has no value yet?
-                  keyboard_ctrl[pc_idx] = cpc_key | MOD_CPC_CTRL; // duplicate entry in CTRL table
-               }
-               if (keyboard_mode[pc_idx] == 0xffffffff) { // AltGr table entry has no value yet?
-                  keyboard_mode[pc_idx] = cpc_key; // duplicate entry in AltGr table
-               }
-            }
-         }
-      }
-   }
-
-   init_joystick_emulation();
-
+   CPC.InputMapper->init();
+   CPC.InputMapper->set_joystick_emulation();
    return 0;
 }
 
@@ -1595,43 +1550,6 @@ void joysticks_shutdown (void)
 
 
 
-void init_joystick_emulation (void)
-{
-  // CPC joy key, CPC original key
-  static int joy_layout[12][2] = {
-    { CPC_J0_UP,      CPC_CUR_UP },
-    { CPC_J0_DOWN,    CPC_CUR_DOWN },
-    { CPC_J0_LEFT,    CPC_CUR_LEFT },
-    { CPC_J0_RIGHT,   CPC_CUR_RIGHT },
-    { CPC_J0_FIRE1,   CPC_z },
-    { CPC_J0_FIRE2,   CPC_x },
-    { CPC_J1_UP,      0 },
-    { CPC_J1_DOWN,    0 },
-    { CPC_J1_LEFT,    0 },
-    { CPC_J1_RIGHT,   0 },
-    { CPC_J1_FIRE1,   0 },
-    { CPC_J1_FIRE2,   0 }
-  };
-
-  for (dword n = 0; n < 6; n++) {
-    int cpc_idx = joy_layout[n][1]; // get the CPC key to change the assignment for
-    if (cpc_idx) {
-      for (int i=0; i < KBD_MAX_ENTRIES; i++) {
-        if (kbd_layout[i][0] == cpc_idx) {
-	  dword pc_idx = kbd_layout[i][1]; // SDL key corresponding to the CPC key to remap
-	  if (CPC.joystick_emulation) {
-            keyboard_normal[pc_idx] = cpc_kbd[CPC.keyboard][joy_layout[n][0]];
-	  }
-	  else {
-            keyboard_normal[pc_idx] = cpc_kbd[CPC.keyboard][cpc_idx];
-          }
-          break;
-	}
-      }
-    }
-  }
-}
-
 void update_timings(void)
 {
    dwTicksOffset = static_cast<int>(FRAME_PERIOD_MS / (CPC.speed/CPC_BASE_FREQUENCY_MHZ));
@@ -2014,6 +1932,9 @@ int cap32_main (int argc, char **argv)
    // Extract files to be loaded from the command line args
    fillSlots(slot_list, CPC);
 
+   // Must be done before emulator_init()
+   CPC.InputMapper = new InputMapper(&CPC);
+
    // emulator_init must be called before loading files as they require
    // pbGPBuffer to be initialized.
    if (emulator_init()) {
@@ -2025,7 +1946,7 @@ int cap32_main (int argc, char **argv)
    loadSlots();
 
    // Fill the buffer with autocmd if provided
-   virtualKeyboardEvents = CapriceVKeyboard::StringToEvents(args.autocmd);
+   virtualKeyboardEvents = CPC.InputMapper->StringToEvents(args.autocmd);
    // Give some time to the CPC to start before sending any command
    lastVirtualEventTicks = SDL_GetTicks() + CPC.boot_time * 1000;
 
@@ -2047,16 +1968,7 @@ int cap32_main (int argc, char **argv)
          switch (event.type) {
             case SDL_KEYDOWN:
                {
-                  dword cpc_key;
-                  if (event.key.keysym.mod & KMOD_SHIFT) { // PC SHIFT key held down?
-                     cpc_key = keyboard_shift[event.key.keysym.sym]; // consult the SHIFT table
-                  } else if (event.key.keysym.mod & KMOD_CTRL) { // PC CTRL key held down?
-                     cpc_key = keyboard_ctrl[event.key.keysym.sym]; // consult the CTRL table
-                  } else if (event.key.keysym.mod & KMOD_MODE) { // PC AltGr key held down?
-                     cpc_key = keyboard_mode[event.key.keysym.sym]; // consult the AltGr table
-                  } else {
-                     cpc_key = keyboard_normal[event.key.keysym.sym]; // consult the normal table
-                  }
+                  dword cpc_key = CPC.InputMapper->CPCkeyFromKeysym(event.key.keysym);
                   if ((!(cpc_key & MOD_EMU_KEY)) && (!CPC.paused) && (static_cast<byte>(cpc_key) != 0xff)) {
                      keyboard_matrix[static_cast<byte>(cpc_key) >> 4] &= ~bit_values[static_cast<byte>(cpc_key) & 7]; // key is being held down
                      if (cpc_key & MOD_CPC_SHIFT) { // CPC SHIFT key required?
@@ -2075,16 +1987,7 @@ int cap32_main (int argc, char **argv)
 
             case SDL_KEYUP:
                {
-                  dword cpc_key;
-                  if (event.key.keysym.mod & KMOD_SHIFT) { // PC SHIFT key held down?
-                     cpc_key = keyboard_shift[event.key.keysym.sym]; // consult the SHIFT table
-                  } else if (event.key.keysym.mod & KMOD_CTRL) { // PC CTRL key held down?
-                     cpc_key = keyboard_ctrl[event.key.keysym.sym]; // consult the CTRL table
-                  } else if (event.key.keysym.mod & KMOD_MODE) { // PC AltGr key held down?
-                     cpc_key = keyboard_mode[event.key.keysym.sym]; // consult the AltGr table
-                  } else {
-                     cpc_key = keyboard_normal[event.key.keysym.sym]; // consult the normal table
-                  }
+                  dword cpc_key = CPC.InputMapper->CPCkeyFromKeysym(event.key.keysym);
                   if (!(cpc_key & MOD_EMU_KEY)) { // a key of the CPC keyboard?
                      if ((!CPC.paused) && (static_cast<byte>(cpc_key) != 0xff)) {
                         keyboard_matrix[static_cast<byte>(cpc_key) >> 4] |= bit_values[static_cast<byte>(cpc_key) & 7]; // key has been released
@@ -2165,7 +2068,7 @@ int cap32_main (int argc, char **argv)
 
                         case CAP32_JOY:
                            CPC.joystick_emulation = CPC.joystick_emulation ? 0 : 1;
-                           init_joystick_emulation();
+                           CPC.InputMapper->set_joystick_emulation();
                            set_osd_message(std::string("Joystick emulation: ") + (CPC.joystick_emulation ? "on" : "off"));
                            break;
 
@@ -2204,29 +2107,8 @@ int cap32_main (int argc, char **argv)
 
             case SDL_JOYBUTTONDOWN:
             {
-              dword cpc_key(0xff);
-              switch(event.jbutton.button) {
-                case 0:
-                  switch(event.jbutton.which) {
-                    case 0:
-                      cpc_key = cpc_kbd[CPC.keyboard][CPC_J0_FIRE1];
-                      break;
-                    case 1:
-                      cpc_key = cpc_kbd[CPC.keyboard][CPC_J1_FIRE1];
-                      break;
-                  }
-                  break;
-                case 1:
-                  switch(event.jbutton.which) {
-                    case 0:
-                      cpc_key = cpc_kbd[CPC.keyboard][CPC_J0_FIRE2];
-                      break;
-                    case 1:
-                      cpc_key = cpc_kbd[CPC.keyboard][CPC_J1_FIRE2];
-                      break;
-                  }
-                  break;
-                default:
+                dword cpc_key = CPC.InputMapper->CPCkeyFromJoystickButton(event.jbutton);
+				if (cpc_key == 0xff) {
                   if (event.jbutton.button == CPC.joystick_menu_button)
                   {
                     showGui();
@@ -2235,8 +2117,7 @@ int cap32_main (int argc, char **argv)
                   {
                     showVKeyboard();
                   }
-                  break;
-              }
+                }
               // TODO: deduplicate this from SDL_KEYDOWN, SDL_KEYUP, SDL_JOYBUTTONDOWN, SDL_JOYBUTTONUP and SDL_JOYAXISMOTION
               if (!CPC.paused && cpc_key != 0xff) {
                  keyboard_matrix[static_cast<byte>(cpc_key) >> 4] &= ~bit_values[static_cast<byte>(cpc_key) & 7]; // key is being held down
@@ -2256,29 +2137,7 @@ int cap32_main (int argc, char **argv)
 
             case SDL_JOYBUTTONUP:
             {
-              dword cpc_key(0xff);
-              switch(event.jbutton.button) {
-                case 0:
-                  switch(event.jbutton.which) {
-                    case 0:
-                      cpc_key = cpc_kbd[CPC.keyboard][CPC_J0_FIRE1];
-                      break;
-                    case 1:
-                      cpc_key = cpc_kbd[CPC.keyboard][CPC_J1_FIRE1];
-                      break;
-                  }
-                  break;
-                case 1:
-                  switch(event.jbutton.which) {
-                    case 0:
-                      cpc_key = cpc_kbd[CPC.keyboard][CPC_J0_FIRE2];
-                      break;
-                    case 1:
-                      cpc_key = cpc_kbd[CPC.keyboard][CPC_J1_FIRE2];
-                      break;
-                  }
-                  break;
-              }
+              dword cpc_key = CPC.InputMapper->CPCkeyFromJoystickButton(event.jbutton);
               if (!CPC.paused && cpc_key != 0xff) {
                  keyboard_matrix[static_cast<byte>(cpc_key) >> 4] |= bit_values[static_cast<byte>(cpc_key) & 7]; // key has been released
                  keyboard_matrix[0x25 >> 4] |= bit_values[0x25 & 7]; // make sure key is unSHIFTed
@@ -2289,82 +2148,23 @@ int cap32_main (int argc, char **argv)
 
             case SDL_JOYAXISMOTION:
             {
-              dword cpc_key(0xff), cpc_key2(0xff);
+              dword cpc_key[2] = {0xff, 0xff};
               bool release = false;
-              switch(event.jaxis.axis) {
-                case 0:
-                case 2:
-                  switch(event.jaxis.which) {
-                    case 0:
-                      if(event.jaxis.value < -JOYSTICK_AXIS_THRESHOLD) {
-                        cpc_key = cpc_kbd[CPC.keyboard][CPC_J0_LEFT];
-                      } else if(event.jaxis.value > JOYSTICK_AXIS_THRESHOLD) {
-                        cpc_key = cpc_kbd[CPC.keyboard][CPC_J0_RIGHT];
-                      } else {
-                        // release both LEFT and RIGHT
-                        cpc_key = cpc_kbd[CPC.keyboard][CPC_J0_LEFT];
-                        cpc_key2 = cpc_kbd[CPC.keyboard][CPC_J0_RIGHT];
-                        release = true;
-                      }
-                      break;
-                    case 1:
-                      if(event.jaxis.value < -JOYSTICK_AXIS_THRESHOLD) {
-                        cpc_key = cpc_kbd[CPC.keyboard][CPC_J1_LEFT];
-                      } else if(event.jaxis.value > JOYSTICK_AXIS_THRESHOLD) {
-                        cpc_key = cpc_kbd[CPC.keyboard][CPC_J1_RIGHT];
-                      } else {
-                        // release both LEFT and RIGHT
-                        cpc_key = cpc_kbd[CPC.keyboard][CPC_J1_LEFT];
-                        cpc_key2 = cpc_kbd[CPC.keyboard][CPC_J1_RIGHT];
-                        release = true;
-                      }
-                      break;
-                  }
-                  break;
-                case 1:
-                case 3:
-                  switch(event.jaxis.which) {
-                    case 0:
-                      if(event.jaxis.value < -JOYSTICK_AXIS_THRESHOLD) {
-                        cpc_key = cpc_kbd[CPC.keyboard][CPC_J0_UP];
-                      } else if(event.jaxis.value > JOYSTICK_AXIS_THRESHOLD) {
-                        cpc_key = cpc_kbd[CPC.keyboard][CPC_J0_DOWN];
-                      } else {
-                        // release both UP and DOWN
-                        cpc_key = cpc_kbd[CPC.keyboard][CPC_J0_UP];
-                        cpc_key2 = cpc_kbd[CPC.keyboard][CPC_J0_DOWN];
-                        release = true;
-                      }
-                      break;
-                    case 1:
-                      if(event.jaxis.value < -JOYSTICK_AXIS_THRESHOLD) {
-                        cpc_key = cpc_kbd[CPC.keyboard][CPC_J1_UP];
-                      } else if(event.jaxis.value > JOYSTICK_AXIS_THRESHOLD) {
-                        cpc_key = cpc_kbd[CPC.keyboard][CPC_J1_DOWN];
-                      } else {
-                        // release both UP and DOWN
-                        cpc_key = cpc_kbd[CPC.keyboard][CPC_J1_UP];
-                        cpc_key2 = cpc_kbd[CPC.keyboard][CPC_J1_DOWN];
-                        release = true;
-                      }
-                      break;
-                  }
-                  break;
-              }
-              if (!CPC.paused && cpc_key != 0xff) {
+              CPC.InputMapper->CPCkeyFromJoystickAxis(event.jaxis, cpc_key, release);
+			  if (!CPC.paused && cpc_key[0] != 0xff) {
                 if(release) {
-                 keyboard_matrix[static_cast<byte>(cpc_key) >> 4] |= bit_values[static_cast<byte>(cpc_key) & 7]; // key has been released
-                 keyboard_matrix[static_cast<byte>(cpc_key2) >> 4] |= bit_values[static_cast<byte>(cpc_key2) & 7]; // key has been released
+                 keyboard_matrix[static_cast<byte>(cpc_key[0]) >> 4] |= bit_values[static_cast<byte>(cpc_key[0]) & 7]; // key has been released
+                 keyboard_matrix[static_cast<byte>(cpc_key[1]) >> 4] |= bit_values[static_cast<byte>(cpc_key[1]) & 7]; // key has been released
                  keyboard_matrix[0x25 >> 4] |= bit_values[0x25 & 7]; // make sure key is unSHIFTed
                  keyboard_matrix[0x27 >> 4] |= bit_values[0x27 & 7]; // make sure CONTROL key is not held down
                 } else {
-                 keyboard_matrix[static_cast<byte>(cpc_key) >> 4] &= ~bit_values[static_cast<byte>(cpc_key) & 7]; // key is being held down
-                 if (cpc_key & MOD_CPC_SHIFT) { // CPC SHIFT key required?
+                 keyboard_matrix[static_cast<byte>(cpc_key[0]) >> 4] &= ~bit_values[static_cast<byte>(cpc_key[0]) & 7]; // key is being held down
+                 if (cpc_key[0] & MOD_CPC_SHIFT) { // CPC SHIFT key required?
                     keyboard_matrix[0x25 >> 4] &= ~bit_values[0x25 & 7]; // key needs to be SHIFTed
                  } else {
                     keyboard_matrix[0x25 >> 4] |= bit_values[0x25 & 7]; // make sure key is unSHIFTed
                  }
-                 if (cpc_key & MOD_CPC_CTRL) { // CPC CONTROL key required?
+                 if (cpc_key[0] & MOD_CPC_CTRL) { // CPC CONTROL key required?
                     keyboard_matrix[0x27 >> 4] &= ~bit_values[0x27 & 7]; // CONTROL key is held down
                  } else {
                     keyboard_matrix[0x27 >> 4] |= bit_values[0x27 & 7]; // make sure CONTROL key is released

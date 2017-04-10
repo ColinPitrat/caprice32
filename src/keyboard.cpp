@@ -1,7 +1,8 @@
-#include <keyboard.h>
 #include <iostream>
 #include <fstream>
 #include <string.h>
+#include "cap32.h"
+#include "keyboard.h"
 #include "log.h"
 
 /* Keyboard mapping with SDL is not hard, but it is painful.
@@ -22,7 +23,7 @@
 	  * CPCkeysFromChars   is a map associating a real character with a CPC_KEYS value. It is used internally to generate SDLkeysFromChars.
 */
 
-dword cpc_kbd[CPC_KEYBOARD_NUM][CPC_KEY_NUM] = {
+const dword InputMapper::cpc_kbd[CPC_KEYBOARD_NUM][CPC_KEY_NUM] = {
   { // original CPC keyboard
     0x40,                   // CPC_0
     0x80,                   // CPC_1
@@ -478,7 +479,8 @@ dword cpc_kbd[CPC_KEYBOARD_NUM][CPC_KEY_NUM] = {
   }
 };
 
-std::map<char, CPC_KEYS> CPCkeysFromChars = {
+
+const std::map<char, CPC_KEYS> InputMapper::CPCkeysFromChars = {
     // Char to CPC keyboard translation
 	// TODO(sebhz): Need to map non ASCII chars present on the CPC keyboard - maybe by using their ISO-8859-1 code
     { '&', CPC_AMPERSAND },
@@ -582,7 +584,7 @@ std::map<char, CPC_KEYS> CPCkeysFromChars = {
 };
 
 // TODO (sebhz) replace this by a map !
-int us_kbd_layout[KBD_MAX_ENTRIES][2] = {
+const int InputMapper::us_kbd_layout[KBD_MAX_ENTRIES][2] = {
 	{ CPC_0,          SDLK_0 },
     { CPC_1,          SDLK_1 },
     { CPC_2,          SDLK_2 },
@@ -726,7 +728,7 @@ int us_kbd_layout[KBD_MAX_ENTRIES][2] = {
     { CAP32_TAPEPLAY, SDLK_F4 }
 };
 
-std::map<std::string, unsigned int> CPCkeysFromStrings = {
+std::map<std::string, unsigned int> InputMapper::CPCkeysFromStrings = {
    {"CPC_0",           CPC_0},
    {"CPC_1",           CPC_1},
    {"CPC_2",           CPC_2},
@@ -890,7 +892,7 @@ std::map<std::string, unsigned int> CPCkeysFromStrings = {
    {"CAP32_DEBUG",     CAP32_DEBUG},  
 };
 
-std::map<std::string, unsigned int> SDLkeysFromStrings = {
+std::map<std::string, unsigned int> InputMapper::SDLkeysFromStrings = {
 	{ "SDLK_BACKSPACE", SDLK_BACKSPACE},
 	{ "SDLK_TAB", SDLK_TAB},
 	{ "SDLK_CLEAR", SDLK_CLEAR},
@@ -1149,10 +1151,48 @@ std::map<std::string, unsigned int> SDLkeysFromStrings = {
 	{ "MOD_PC_ALT", MOD_PC_ALT}
 };
 
-int kbd_layout[KBD_MAX_ENTRIES][2];
-std::map<char, std::pair<SDLKey, SDLMod>> SDLkeysFromChars;
+void InputMapper::init_maps(void) {
+   memset(keyboard_normal, 0xff, sizeof(keyboard_normal));
+   memset(keyboard_shift, 0xff, sizeof(keyboard_shift));
+   memset(keyboard_ctrl, 0xff, sizeof(keyboard_ctrl));
+   memset(keyboard_mode, 0xff, sizeof(keyboard_mode));
 
-void create_SDL_keymap(void)
+   for (dword n = 0; n < KBD_MAX_ENTRIES; n++) {
+      dword pc_key = kbd_layout[n][1]; // PC key assigned to CPC key
+      if (pc_key) {
+         dword pc_idx = pc_key & 0xffff; // strip off modifier
+         dword cpc_idx = kbd_layout[n][0];
+         dword cpc_key;
+         if (cpc_idx & MOD_EMU_KEY) {
+            cpc_key = cpc_idx;
+         } else {
+            cpc_key = cpc_kbd[CPC->keyboard][cpc_idx];
+         }
+         if (pc_key & MOD_PC_SHIFT) { // key + SHIFT?
+            keyboard_shift[pc_idx] = cpc_key; // copy CPC key matrix value to SHIFT table
+         } else if (pc_key & MOD_PC_CTRL) { // key + CTRL?
+            keyboard_ctrl[pc_idx] = cpc_key; // copy CPC key matrix value to CTRL table
+         } else if (pc_key & MOD_PC_MODE) { // key + AltGr?
+            keyboard_mode[pc_idx] = cpc_key; // copy CPC key matrix value to AltGr table
+         } else {
+            keyboard_normal[pc_idx] = cpc_key; // copy CPC key matrix value to normal table
+            if (!(cpc_key & MOD_EMU_KEY)) { // not an emulator function key?
+               if (keyboard_shift[pc_idx] == 0xffffffff) { // SHIFT table entry has no value yet?
+                  keyboard_shift[pc_idx] = cpc_key; // duplicate entry in SHIFT table
+               }
+               if (keyboard_ctrl[pc_idx] == 0xffffffff) { // CTRL table entry has no value yet?
+                  keyboard_ctrl[pc_idx] = cpc_key | MOD_CPC_CTRL; // duplicate entry in CTRL table
+               }
+               if (keyboard_mode[pc_idx] == 0xffffffff) { // AltGr table entry has no value yet?
+                  keyboard_mode[pc_idx] = cpc_key; // duplicate entry in AltGr table
+               }
+            }
+         }
+      }
+   }
+}
+
+void InputMapper::create_SDL_keymap(void)
 {
 	CPC_KEYS cpc_key;
 	unsigned int sdl_moddedkey;
@@ -1174,7 +1214,7 @@ void create_SDL_keymap(void)
 
 // Format of a line: CPC_xxx\tSDLK_xxx\tMODIFIER
 // Last field is optional
-bool parse_line(char *s, unsigned int line)
+bool InputMapper::parse_line(char *s, unsigned int line)
 {
 		unsigned int keyv = 0;
 		
@@ -1211,7 +1251,7 @@ bool parse_line(char *s, unsigned int line)
 		return true;
 }
 
-inline void fill_default_kbd_layout(void)
+inline void InputMapper::fill_default_kbd_layout(void)
 {
 	for (unsigned int key=0; key < KBD_MAX_ENTRIES; key++)
 		for (int i=0; i < 2; i++)
@@ -1219,10 +1259,11 @@ inline void fill_default_kbd_layout(void)
 }
 
 #define MAX_LINE_LENGTH 80
-void init_kbd_layout(std::string layout_file)
+void InputMapper::init(void)
 {
+	std::string layout_file = CPC->resources_path + "/" + CPC->kbd_layout;
 	std::filebuf fb;
-	char line[MAX_LINE_LENGTH]; // sufficient for now ! TODO (sebhz): proper malloc'ing etc...
+	char line[MAX_LINE_LENGTH]; // sufficient for now ! TODO(sebhz): proper malloc'ing etc...
 
 	if ((fb.open(layout_file, std::ios::in) == nullptr)) {
 		fill_default_kbd_layout();
@@ -1238,5 +1279,204 @@ void init_kbd_layout(std::string layout_file)
 		fb.close();
 	}
 	create_SDL_keymap();
-	return;	
+	init_maps();
 }
+
+dword InputMapper::CPCkeyFromKeysym(SDL_keysym keysym) {
+    dword cpc_key;
+    if (keysym.mod & KMOD_SHIFT) { // PC SHIFT key held down?
+       cpc_key = keyboard_shift[keysym.sym]; // consult the SHIFT table
+    } else if (keysym.mod & KMOD_CTRL) { // PC CTRL key held down?
+       cpc_key = keyboard_ctrl[keysym.sym]; // consult the CTRL table
+    } else if (keysym.mod & KMOD_MODE) { // PC AltGr key held down?
+       cpc_key = keyboard_mode[keysym.sym]; // consult the AltGr table
+    } else {
+       cpc_key = keyboard_normal[keysym.sym]; // consult the normal table
+    }
+	return cpc_key;
+}
+
+std::list<SDL_Event> InputMapper::StringToEvents(std::string toTranslate) {
+    auto keyFromChar = SDLkeysFromChars;
+    std::list<SDL_Event> result;
+    bool escaped = false;
+    bool cap32_cmd = false;
+    for(auto c : toTranslate) {
+      if(c == '\a') {
+        // Escape prefix: next char is a special one
+        escaped = true;
+        continue;
+      }
+      if (c == '\f') {
+        // Emulator special command
+        cap32_cmd = true;
+        continue;
+      }
+      SDL_Event key;
+      if(escaped || cap32_cmd) {
+        int keycode = c;
+        if (cap32_cmd) {
+          keycode += MOD_EMU_KEY;
+          // Lookup the SDL key corresponding to this emulator command
+          for (dword n = 0; n < KBD_MAX_ENTRIES; n++) {
+            if(keycode == kbd_layout[n][0]) {
+              key.key.keysym.sym = static_cast<SDLKey>(kbd_layout[n][1] & 0xffff);
+              key.key.keysym.mod = static_cast<SDLMod>(kbd_layout[n][1] >> 16);
+            }
+          }
+        } else {
+          key.key.keysym.sym = static_cast<SDLKey>(kbd_layout[keycode][1] & 0xffff);
+          key.key.keysym.mod = static_cast<SDLMod>(kbd_layout[keycode][1] >> 16);
+        }
+        escaped = false;
+        cap32_cmd = false;
+      } else {
+        // key.key.keysym.scancode = ;
+        key.key.keysym.sym = keyFromChar[c].first;
+        key.key.keysym.mod = keyFromChar[c].second;
+        // key.key.keysym.unicode = c;
+      }
+      key.key.type = SDL_KEYDOWN;
+      key.key.state = SDL_PRESSED;
+      result.push_back(key);
+
+      key.key.type = SDL_KEYUP;
+      key.key.state = SDL_RELEASED;
+      result.push_back(key);
+    }
+    return result;
+}
+
+
+void InputMapper::set_joystick_emulation (void)
+{
+  // CPC joy key, CPC original key
+  static int joy_layout[12][2] = {
+    { CPC_J0_UP,      CPC_CUR_UP },
+    { CPC_J0_DOWN,    CPC_CUR_DOWN },
+    { CPC_J0_LEFT,    CPC_CUR_LEFT },
+    { CPC_J0_RIGHT,   CPC_CUR_RIGHT },
+    { CPC_J0_FIRE1,   CPC_z },
+    { CPC_J0_FIRE2,   CPC_x },
+    { CPC_J1_UP,      0 },
+    { CPC_J1_DOWN,    0 },
+    { CPC_J1_LEFT,    0 },
+    { CPC_J1_RIGHT,   0 },
+    { CPC_J1_FIRE1,   0 },
+    { CPC_J1_FIRE2,   0 }
+  };
+
+  for (dword n = 0; n < 6; n++) {
+    int cpc_idx = joy_layout[n][1]; // get the CPC key to change the assignment for
+    if (cpc_idx) {
+      for (int i=0; i < KBD_MAX_ENTRIES; i++) {
+        if (kbd_layout[i][0] == cpc_idx) {
+	  dword pc_idx = kbd_layout[i][1]; // SDL key corresponding to the CPC key to remap
+	  if (CPC->joystick_emulation) {
+            keyboard_normal[pc_idx] = cpc_kbd[CPC->keyboard][joy_layout[n][0]];
+	  }
+	  else {
+            keyboard_normal[pc_idx] = cpc_kbd[CPC->keyboard][cpc_idx];
+          }
+          break;
+	}
+      }
+    }
+  }
+}
+
+dword InputMapper::CPCkeyFromJoystickButton(SDL_JoyButtonEvent jbutton)
+{
+    dword cpc_key(0xff);
+    switch(jbutton.button) {
+        case 0:
+            switch(jbutton.which) {
+                case 0:
+                   cpc_key = cpc_kbd[CPC->keyboard][CPC_J0_FIRE1];
+                   break;
+                case 1:
+                   cpc_key = cpc_kbd[CPC->keyboard][CPC_J1_FIRE1];
+                   break;
+            }
+            break;
+        case 1:
+            switch(jbutton.which) {
+                case 0:
+                    cpc_key = cpc_kbd[CPC->keyboard][CPC_J0_FIRE2];
+                    break;
+                case 1:
+                    cpc_key = cpc_kbd[CPC->keyboard][CPC_J1_FIRE2];
+                    break;
+            }
+            break;
+		default:
+			break;
+	}
+	return cpc_key;
+}
+
+void InputMapper::CPCkeyFromJoystickAxis(SDL_JoyAxisEvent jaxis, dword *cpc_key, bool &release)
+{
+   switch(jaxis.axis) {
+     case 0:
+     case 2:
+       switch(jaxis.which) {
+         case 0:
+           if(jaxis.value < -JOYSTICK_AXIS_THRESHOLD) {
+             cpc_key[0] = cpc_kbd[CPC->keyboard][CPC_J0_LEFT];
+           } else if(jaxis.value > JOYSTICK_AXIS_THRESHOLD) {
+             cpc_key[0] = cpc_kbd[CPC->keyboard][CPC_J0_RIGHT];
+           } else {
+             // release both LEFT and RIGHT
+             cpc_key[0] = cpc_kbd[CPC->keyboard][CPC_J0_LEFT];
+             cpc_key[1] = cpc_kbd[CPC->keyboard][CPC_J0_RIGHT];
+             release = true;
+           }
+           break;
+         case 1:
+           if(jaxis.value < -JOYSTICK_AXIS_THRESHOLD) {
+             cpc_key[0] = cpc_kbd[CPC->keyboard][CPC_J1_LEFT];
+           } else if(jaxis.value > JOYSTICK_AXIS_THRESHOLD) {
+             cpc_key[0] = cpc_kbd[CPC->keyboard][CPC_J1_RIGHT];
+           } else {
+             // release both LEFT and RIGHT
+             cpc_key[0] = cpc_kbd[CPC->keyboard][CPC_J1_LEFT];
+             cpc_key[1] = cpc_kbd[CPC->keyboard][CPC_J1_RIGHT];
+             release = true;
+           }
+           break;
+       }
+       break;
+     case 1:
+     case 3:
+       switch(jaxis.which) {
+         case 0:
+           if(jaxis.value < -JOYSTICK_AXIS_THRESHOLD) {
+             cpc_key[0] = cpc_kbd[CPC->keyboard][CPC_J0_UP];
+           } else if(jaxis.value > JOYSTICK_AXIS_THRESHOLD) {
+             cpc_key[0] = cpc_kbd[CPC->keyboard][CPC_J0_DOWN];
+           } else {
+             // release both UP and DOWN
+             cpc_key[0] = cpc_kbd[CPC->keyboard][CPC_J0_UP];
+             cpc_key[1] = cpc_kbd[CPC->keyboard][CPC_J0_DOWN];
+             release = true;
+           }
+           break;
+         case 1:
+           if(jaxis.value < -JOYSTICK_AXIS_THRESHOLD) {
+             cpc_key[0] = cpc_kbd[CPC->keyboard][CPC_J1_UP];
+           } else if(jaxis.value > JOYSTICK_AXIS_THRESHOLD) {
+             cpc_key[0] = cpc_kbd[CPC->keyboard][CPC_J1_DOWN];
+           } else {
+             // release both UP and DOWN
+             cpc_key[0] = cpc_kbd[CPC->keyboard][CPC_J1_UP];
+             cpc_key[1] = cpc_kbd[CPC->keyboard][CPC_J1_DOWN];
+             release = true;
+           }
+           break;
+       }
+       break;
+   }
+}
+
+InputMapper::InputMapper(t_CPC *CPC): CPC(CPC) { }
