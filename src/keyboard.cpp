@@ -480,7 +480,7 @@ dword cpc_kbd[CPC_KEYBOARD_NUM][CPC_KEY_NUM] = {
 
 std::map<char, CPC_KEYS> CPCkeysFromChars = {
     // Char to CPC keyboard translation
-	// TODO(sebhz): How on Earth do we map non ASCII chars ?
+	// TODO(sebhz): Need to map non ASCII chars present on the CPC keyboard - maybe by using their ISO-8859-1 code
     { '&', CPC_AMPERSAND },
     { '#', CPC_HASH },
     { '"', CPC_DBLQUOTE },
@@ -1211,7 +1211,6 @@ bool parse_line(char *s, unsigned int line)
 		return true;
 }
 
-// TODO (sebhz) there must be a way to to this more efficiently !
 inline void fill_default_kbd_layout(void)
 {
 	for (unsigned int key=0; key < KBD_MAX_ENTRIES; key++)
@@ -1225,7 +1224,7 @@ void init_kbd_layout(std::string layout_file)
 	std::filebuf fb;
 	char line[MAX_LINE_LENGTH]; // sufficient for now ! TODO (sebhz): proper malloc'ing etc...
 
-	if (layout_file.empty() || (fb.open(layout_file, std::ios::in) == nullptr)) {
+	if ((fb.open(layout_file, std::ios::in) == nullptr)) {
 		fill_default_kbd_layout();
 	}
 	else {
