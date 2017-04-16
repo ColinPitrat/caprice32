@@ -253,18 +253,18 @@ CapriceOptions::CapriceOptions(const CRect& WindowRect, CWindow* pParent, CFontE
     m_pDropDownPCLanguage = new CDropDown(CRect(CPoint(130,31),140,16), m_pGroupBoxTabInput, false, 14);
 
     mapFileList = listDirectoryExt(CPC.resources_path, "map");
-	unsigned int currentMapIndex = 0;
-	for (unsigned int i=0; i < mapFileList.size(); i++) {
-		std::string mapFileName = mapFileList[i];
-		m_pDropDownPCLanguage->AddItem(SListItem(mapFileName));
-		if (mapFileName == CPC.kbd_layout) {
-			currentMapIndex = i;
-		}
-	}
+    unsigned int currentMapIndex = 0;
+    for (unsigned int i=0; i < mapFileList.size(); i++) {
+        std::string mapFileName = mapFileList[i];
+        m_pDropDownPCLanguage->AddItem(SListItem(mapFileName));
+        if (mapFileName == CPC.kbd_layout) {
+            currentMapIndex = i;
+        }
+    }
     m_pDropDownPCLanguage->SetListboxHeight(mapFileList.size());
     m_pDropDownPCLanguage->SelectItem(currentMapIndex);
     m_pDropDownPCLanguage->SetIsFocusable(true);
-    
+
     m_pCheckBoxJoystickEmulation   = new CCheckBox(CRect(CPoint(10, 62), 10, 10), m_pGroupBoxTabInput);
     if (CPC.joystick_emulation == 1) {
         m_pCheckBoxJoystickEmulation->SetCheckBoxState(CCheckBox::CHECKED);
