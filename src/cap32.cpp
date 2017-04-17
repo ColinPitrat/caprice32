@@ -1597,27 +1597,37 @@ void joysticks_shutdown (void)
 
 void init_joystick_emulation (void)
 {
-  // CPC joy key, PC emulation key, CPC original key
-  static int joy_layout[12][3] = {
-    { CPC_J0_UP,      SDLK_UP,    CPC_CUR_UP },
-    { CPC_J0_DOWN,    SDLK_DOWN,  CPC_CUR_DOWN },
-    { CPC_J0_LEFT,    SDLK_LEFT,  CPC_CUR_LEFT },
-    { CPC_J0_RIGHT,   SDLK_RIGHT, CPC_CUR_RIGHT },
-    { CPC_J0_FIRE1,   SDLK_z,     CPC_z },
-    { CPC_J0_FIRE2,   SDLK_x,     CPC_x },
-    { CPC_J1_UP,      0,          0 },
-    { CPC_J1_DOWN,    0,          0 },
-    { CPC_J1_LEFT,    0,          0 },
-    { CPC_J1_RIGHT,   0,          0 },
-    { CPC_J1_FIRE1,   0,          0 },
-    { CPC_J1_FIRE2,   0,          0 }
+  // CPC joy key, CPC original key
+  static int joy_layout[12][2] = {
+    { CPC_J0_UP,      CPC_CUR_UP },
+    { CPC_J0_DOWN,    CPC_CUR_DOWN },
+    { CPC_J0_LEFT,    CPC_CUR_LEFT },
+    { CPC_J0_RIGHT,   CPC_CUR_RIGHT },
+    { CPC_J0_FIRE1,   CPC_z },
+    { CPC_J0_FIRE2,   CPC_x },
+    { CPC_J1_UP,      0 },
+    { CPC_J1_DOWN,    0 },
+    { CPC_J1_LEFT,    0 },
+    { CPC_J1_RIGHT,   0 },
+    { CPC_J1_FIRE1,   0 },
+    { CPC_J1_FIRE2,   0 }
   };
 
   for (dword n = 0; n < 6; n++) {
-    dword pc_idx = joy_layout[n][1]; // get the PC key to change the assignment for
-    if (pc_idx) {
-      int i = CPC.joystick_emulation ? 0 : 2;
-      keyboard_normal[pc_idx] = cpc_kbd[CPC.keyboard][joy_layout[n][i]]; // assign new function
+    int cpc_idx = joy_layout[n][1]; // get the CPC key to change the assignment for
+    if (cpc_idx) {
+      for (int i=0; i < KBD_MAX_ENTRIES; i++) {
+        if (kbd_layout[i][0] == cpc_idx) {
+	  dword pc_idx = kbd_layout[i][1]; // SDL key corresponding to the CPC key to remap
+	  if (CPC.joystick_emulation) {
+            keyboard_normal[pc_idx] = cpc_kbd[CPC.keyboard][joy_layout[n][0]];
+	  }
+	  else {
+            keyboard_normal[pc_idx] = cpc_kbd[CPC.keyboard][cpc_idx];
+          }
+          break;
+	}
+      }
     }
   }
 }
