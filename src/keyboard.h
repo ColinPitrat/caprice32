@@ -187,27 +187,22 @@ typedef enum {
 
 #define CPC_KEY_NUM 149    // Number of different keys on a CPC keyboard
 #define CPC_KEYBOARD_NUM 3 // Number of different keyboards supported.
-#define KBD_MAX_ENTRIES 160
 
 class InputMapper {
 	private:
 		static const dword cpc_kbd[CPC_KEYBOARD_NUM][CPC_KEY_NUM];
 		static std::map<std::string, unsigned int> CPCkeysFromStrings;
 		static std::map<std::string, unsigned int> SDLkeysFromStrings;
-		static const std::map<char, CPC_KEYS> CPCkeysFromChars;
-		static const int us_kbd_layout[KBD_MAX_ENTRIES][2];
+		static std::map<char, CPC_KEYS> CPCkeysFromChars;
 		std::map<char, std::pair<SDLKey, SDLMod>> SDLkeysFromChars;
-		dword keyboard_normal[SDLK_LAST];
-		dword keyboard_shift[SDLK_LAST];
-		dword keyboard_ctrl[SDLK_LAST];
-		dword keyboard_mode[SDLK_LAST];
-		int kbd_layout[KBD_MAX_ENTRIES][2];
+		static std::map<unsigned int, unsigned int> SDLkeysymFromCPCkeys_us;
+		std::map<unsigned int, unsigned int> CPCkeysFromSDLkeysym;
+		std::map<unsigned int, unsigned int> SDLkeysymFromCPCkeys;
 		t_CPC *CPC;
 
-		inline void fill_default_kbd_layout(void);
-		bool parse_line(char *s, unsigned int line);
-		void create_SDL_keymap(void);
-		void init_maps(void);
+		void parse_line(char *s);
+		void init_keymaps(void);
+		//void init_maps(void);
 
 	public:
 		InputMapper(t_CPC *CPC);
