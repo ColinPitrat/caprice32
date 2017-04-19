@@ -1,14 +1,11 @@
 #include <gtest/gtest.h>
 
-#include "CapriceVKeyboard.h"
 #include "cap32.h"
 #include "keyboard.h"
 
-using namespace wGui;
-
 extern t_CPC CPC;
 
-class CapriceVKeyboardTest : public testing::Test {
+class InputMapperTest : public testing::Test {
   public:
     void SetUp() {
       CPC.resources_path = "resources";
@@ -17,7 +14,7 @@ class CapriceVKeyboardTest : public testing::Test {
     }
 };
 
-TEST_F(CapriceVKeyboardTest, StringToEventsSimpleString)
+TEST_F(InputMapperTest, StringToEventsSimpleString)
 {
   std::string input = "cat";
 
@@ -46,7 +43,7 @@ TEST_F(CapriceVKeyboardTest, StringToEventsSimpleString)
   ASSERT_EQ(SDLK_t, result[5].key.keysym.sym);
 }
 
-TEST_F(CapriceVKeyboardTest, StringToEventsWithEscapedChar)
+TEST_F(InputMapperTest, StringToEventsWithEscapedChar)
 {
   std::string input = "run\"s\btest\n";
 
@@ -64,7 +61,7 @@ TEST_F(CapriceVKeyboardTest, StringToEventsWithEscapedChar)
   ASSERT_EQ(SDLK_RETURN, result[20].key.keysym.sym);
 }
 
-TEST_F(CapriceVKeyboardTest, StringToEventsWithSpecialChar)
+TEST_F(InputMapperTest, StringToEventsWithSpecialChar)
 {
   std::string input = "\a";
   input += CPC_ESC;
@@ -85,3 +82,4 @@ TEST_F(CapriceVKeyboardTest, StringToEventsWithSpecialChar)
   ASSERT_EQ(SDL_KEYUP, result[1].key.type);
   ASSERT_EQ(SDL_RELEASED, result[1].key.state);
 }
+
