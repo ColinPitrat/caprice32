@@ -260,7 +260,7 @@ typedef struct {
       int64_t both;
    } snd_cycle_count_init;
 
-   unsigned int kbd_layout;
+   std::string kbd_layout;
 
    unsigned int max_tracksize;
 

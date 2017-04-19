@@ -34,17 +34,17 @@ bool file_copy(FILE *in, FILE *out) {
 }
 
 // Returns a vector containing the names of the files in the specified directory
-std::vector<std::string> listDirectory(std::string sDirectory) {
+std::vector<std::string> listDirectory(std::string &directory) {
    std::vector<std::string> s;
 
-   if (sDirectory[sDirectory.size() - 1] != '/') {
-      sDirectory += "/";
+   if (directory[directory.size() - 1] != '/') {
+      directory += "/";
    }
    DIR* pDir;
    struct dirent *pent;
-   pDir = opendir(sDirectory.c_str());
+   pDir = opendir(directory.c_str());
    if (!pDir){
-       printf ("opendir(%s) failed; terminating\n", sDirectory.c_str());
+       printf ("opendir(%s) failed; terminating\n", directory.c_str());
        return s;
    }
    while ((pent = readdir(pDir))){
@@ -56,4 +56,20 @@ std::vector<std::string> listDirectory(std::string sDirectory) {
    closedir(pDir);
    sort(s.begin(), s.end()); // sort elements
    return s;
+}
+
+// Returns a vector containing the names of the files having extension "ext" in
+// the specified directory
+std::vector<std::string> listDirectoryExt(std::string &directory, const std::string &ext) {
+	std::vector<std::string> allFiles = listDirectory(directory);
+	std::vector<std::string> matchingFiles;
+	std::string extension;
+
+	for (const auto& fileName : allFiles) {
+		extension = fileName.substr(fileName.find_last_of(".") + 1);
+		if (ext == extension) {
+			matchingFiles.push_back(fileName);
+		}
+	}
+	return matchingFiles;
 }
