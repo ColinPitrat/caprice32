@@ -1208,8 +1208,7 @@ dword InputMapper::CPCkeyFromKeysym(SDL_keysym keysym) {
     if (keysym.mod & KMOD_MODE)   sdl_key |= MOD_PC_MODE;
     if (keysym.mod & KMOD_META)   sdl_key |= MOD_PC_META;
     if (keysym.mod & KMOD_ALT)    sdl_key |= MOD_PC_ALT;
-    if (keysym.mod & KMOD_NUM)    sdl_key |= MOD_PC_NUM;
-    if (keysym.mod & KMOD_CAPS)   sdl_key |= MOD_PC_CAPS;
+    // Ignore sticky modifiers (MOD_PC_NUM and MOD_PC_CAPS)
 
     std::map<unsigned int, unsigned int>::iterator cpc_key = CPCkeysFromSDLkeysym.find(sdl_key);
     // TODO(sebhz) magic numbers are bad. Get rid of the 0xff.
