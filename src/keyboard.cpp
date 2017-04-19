@@ -1,6 +1,5 @@
 #include <iostream>
 #include <fstream>
-#include <string.h>
 #include "cap32.h"
 #include "keyboard.h"
 #include "log.h"
@@ -462,7 +461,7 @@ const dword InputMapper::cpc_kbd[CPC_KEYBOARD_NUM][CPC_KEY_NUM] = {
 };
 
 
-std::map<char, CPC_KEYS> InputMapper::CPCkeysFromChars = {
+const std::map<const char, const CPC_KEYS> InputMapper::CPCkeysFromChars = {
     // Char to CPC keyboard translation
 	// TODO(sebhz): Need to map non ASCII chars present on the CPC keyboard - maybe by using their ISO-8859-1 code
     { '&', CPC_AMPERSAND },
@@ -709,7 +708,7 @@ std::map<unsigned int, unsigned int> InputMapper::SDLkeysymFromCPCkeys_us = {
     { CAP32_TAPEPLAY, SDLK_F4 }
 };
 
-std::map<std::string, unsigned int> InputMapper::CPCkeysFromStrings = {
+const std::map<const std::string, const unsigned int> InputMapper::CPCkeysFromStrings = {
    {"CPC_0",           CPC_0},
    {"CPC_1",           CPC_1},
    {"CPC_2",           CPC_2},
@@ -873,7 +872,7 @@ std::map<std::string, unsigned int> InputMapper::CPCkeysFromStrings = {
    {"CAP32_DEBUG",     CAP32_DEBUG},  
 };
 
-std::map<std::string, unsigned int> InputMapper::SDLkeysFromStrings = {
+const std::map<const std::string, const unsigned int> InputMapper::SDLkeysFromStrings = {
 	{ "SDLK_BACKSPACE", SDLK_BACKSPACE},
 	{ "SDLK_TAB", SDLK_TAB},
 	{ "SDLK_CLEAR", SDLK_CLEAR},
@@ -1132,70 +1131,9 @@ std::map<std::string, unsigned int> InputMapper::SDLkeysFromStrings = {
 	{ "MOD_PC_ALT", MOD_PC_ALT}
 };
 
-/*
-void InputMapper::init_maps(void) {
-   memset(keyboard_normal, 0xff, sizeof(keyboard_normal));
-   memset(keyboard_shift, 0xff, sizeof(keyboard_shift));
-   memset(keyboard_ctrl, 0xff, sizeof(keyboard_ctrl));
-   memset(keyboard_mode, 0xff, sizeof(keyboard_mode));
-
-   for (dword n = 0; n < KBD_MAX_ENTRIES; n++) {
-      dword pc_key = kbd_layout[n][1]; // PC key assigned to CPC key
-      if (pc_key) {
-         dword pc_idx = pc_key & 0xffff; // strip off modifier
-         dword cpc_idx = kbd_layout[n][0];
-         dword cpc_key;
-         if (cpc_idx & MOD_EMU_KEY) {
-            cpc_key = cpc_idx;
-         } else {
-            cpc_key = cpc_kbd[CPC->keyboard][cpc_idx];
-         }
-         if (pc_key & MOD_PC_SHIFT) { // key + SHIFT?
-            keyboard_shift[pc_idx] = cpc_key; // copy CPC key matrix value to SHIFT table
-         } else if (pc_key & MOD_PC_CTRL) { // key + CTRL?
-            keyboard_ctrl[pc_idx] = cpc_key; // copy CPC key matrix value to CTRL table
-         } else if (pc_key & MOD_PC_MODE) { // key + AltGr?
-            keyboard_mode[pc_idx] = cpc_key; // copy CPC key matrix value to AltGr table
-         } else {
-            keyboard_normal[pc_idx] = cpc_key; // copy CPC key matrix value to normal table
-            if (!(cpc_key & MOD_EMU_KEY)) { // not an emulator function key?
-               if (keyboard_shift[pc_idx] == 0xffffffff) { // SHIFT table entry has no value yet?
-                  keyboard_shift[pc_idx] = cpc_key; // duplicate entry in SHIFT table
-               }
-               if (keyboard_ctrl[pc_idx] == 0xffffffff) { // CTRL table entry has no value yet?
-                  keyboard_ctrl[pc_idx] = cpc_key | MOD_CPC_CTRL; // duplicate entry in CTRL table
-               }
-               if (keyboard_mode[pc_idx] == 0xffffffff) { // AltGr table entry has no value yet?
-                  keyboard_mode[pc_idx] = cpc_key; // duplicate entry in AltGr table
-               }
-            }
-         }
-      }
-   }
-}
-*/
-
-void InputMapper::init_keymaps(void)
-{
-	unsigned int sdl_moddedkey;
-
-	// Create the inverse map of CPCkeysFromSDLkeysym
-	for (std::map<unsigned int, unsigned int>::iterator it = SDLkeysymFromCPCkeys.begin(); it != SDLkeysymFromCPCkeys.end(); ++it) {
-		CPCkeysFromSDLkeysym[it->second] = it->first;
-	}
-
-	// Create SDLkeysFromChars, using CPCkeysFromChars and CPCkeysFromSDLkeysym maps
-	for (std::map<char, CPC_KEYS>::iterator it = CPCkeysFromChars.begin(); it != CPCkeysFromChars.end(); ++it) {
-		if (SDLkeysymFromCPCkeys.count(it->second) != 0) {
-			sdl_moddedkey = SDLkeysymFromCPCkeys[it->second];
-			SDLkeysFromChars[it->first] = std::make_pair(static_cast<SDLKey>(sdl_moddedkey & 0xffff), static_cast<SDLMod>(sdl_moddedkey >> 16));
-		}	
-	}
-}
-
 // Format of a line: CPC_xxx\tSDLK_xxx\tMODIFIER
 // Last field is optional
-void InputMapper::parse_line(char *s)
+void InputMapper::process_cfg_line(char *s)
 {
 		unsigned int cpc_key = 0, sdl_key = 0;
 		
@@ -1211,7 +1149,7 @@ void InputMapper::parse_line(char *s)
 		for (unsigned int field=0; field < 3; field++) {
 			switch (field) {
 				case 0:
-					cpc_key = CPCkeysFromStrings[pch];
+					cpc_key = CPCkeysFromStrings.at(pch);
 					break;
 				case 1:
 				case 2:
@@ -1219,7 +1157,7 @@ void InputMapper::parse_line(char *s)
 						LOG_ERROR("Unknown SDL key or modifier " << pch << " found in mapping file. Ignoring it.");
 						return;
 					}
-					sdl_key |= SDLkeysFromStrings[pch];
+					sdl_key |= SDLkeysFromStrings.at(pch);
 					break;
 				default:
 					break;
@@ -1229,6 +1167,7 @@ void InputMapper::parse_line(char *s)
 				break;	
 		}
 		SDLkeysymFromCPCkeys[cpc_key] = sdl_key;
+		CPCkeysFromSDLkeysym[sdl_key] = cpc_key;
 		return;
 }
 
@@ -1237,6 +1176,7 @@ void InputMapper::init(void)
 {
 	std::string layout_file = CPC->resources_path + "/" + CPC->kbd_layout;
 	std::filebuf fb;
+	unsigned int sdl_moddedkey;
 	char line[MAX_LINE_LENGTH]; // sufficient for now ! TODO(sebhz): proper malloc'ing etc...
 
 	if ((fb.open(layout_file, std::ios::in) == nullptr)) {
@@ -1246,17 +1186,22 @@ void InputMapper::init(void)
 		std::istream is(&fb);
 		while (is.good()) {
 			is.getline(line, MAX_LINE_LENGTH);
-			parse_line(line);
+			process_cfg_line(line);
 		}
 		fb.close();
 	}
-	init_keymaps();
-	//init_maps();
+
+	// Create SDLkeysFromChars, using CPCkeysFromChars and CPCkeysFromSDLkeysym maps
+	for (std::map<const char, const CPC_KEYS>::const_iterator it = CPCkeysFromChars.begin(); it != CPCkeysFromChars.end(); ++it) {
+		if (SDLkeysymFromCPCkeys.count(it->second) != 0) {
+			sdl_moddedkey = SDLkeysymFromCPCkeys[it->second];
+			SDLkeysFromChars[it->first] = std::make_pair(static_cast<SDLKey>(sdl_moddedkey & 0xffff), static_cast<SDLMod>(sdl_moddedkey >> 16));
+		}
+	}
 }
 
 dword InputMapper::CPCkeyFromKeysym(SDL_keysym keysym) {
-    dword cpc_key;
-	dword sdl_key = keysym.sym;
+    dword sdl_key = keysym.sym;
 
     if (keysym.mod & KMOD_SHIFT)  sdl_key |= MOD_PC_SHIFT;
     if (keysym.mod & KMOD_CTRL)   sdl_key |= MOD_PC_CTRL;
@@ -1266,23 +1211,24 @@ dword InputMapper::CPCkeyFromKeysym(SDL_keysym keysym) {
     if (keysym.mod & KMOD_NUM)    sdl_key |= MOD_PC_NUM;
     if (keysym.mod & KMOD_CAPS)   sdl_key |= MOD_PC_CAPS;
 
-	// TODO(sebhz) magic numbers are bad. Get rid of the 0xff.
-	if (CPCkeysFromSDLkeysym.count(sdl_key) == 0) return 0xff;
+    std::map<unsigned int, unsigned int>::iterator cpc_key = CPCkeysFromSDLkeysym.find(sdl_key);
+    // TODO(sebhz) magic numbers are bad. Get rid of the 0xff.
+    if (cpc_key == CPCkeysFromSDLkeysym.end()) return 0xff;
 
-	cpc_key = CPCkeysFromSDLkeysym[sdl_key];
-	if (cpc_key & MOD_EMU_KEY)
-		return cpc_key;
-	else
-		return cpc_kbd[CPC->keyboard][cpc_key];
+    if (cpc_key->second & MOD_EMU_KEY)
+        return cpc_key->second;
+    else
+        return cpc_kbd[CPC->keyboard][cpc_key->second];
 }
 
 std::list<SDL_Event> InputMapper::StringToEvents(std::string toTranslate) {
-    auto keyFromChar = SDLkeysFromChars;
     std::list<SDL_Event> result;
     bool escaped = false;
     bool cap32_cmd = false;
-    for(auto c : toTranslate) {
-      if(c == '\a') {
+    std::map<unsigned int, unsigned int>::iterator sdl_keysym;
+
+    for (auto c : toTranslate) {
+      if (c == '\a') {
         // Escape prefix: next char is a special one
         escaped = true;
         continue;
@@ -1293,25 +1239,23 @@ std::list<SDL_Event> InputMapper::StringToEvents(std::string toTranslate) {
         continue;
       }
       SDL_Event key;
-      if(escaped || cap32_cmd) {
+      if (escaped || cap32_cmd) {
         int keycode = c;
         if (cap32_cmd) {
           keycode += MOD_EMU_KEY;
-          // Lookup the SDL key corresponding to this emulator command
-          if (SDLkeysymFromCPCkeys.count(keycode) != 0) {
-              key.key.keysym.sym = static_cast<SDLKey>(SDLkeysymFromCPCkeys[keycode] & 0xffff);
-              key.key.keysym.mod = static_cast<SDLMod>(SDLkeysymFromCPCkeys[keycode] >> 16);
-          }
-        } else {
-            key.key.keysym.sym = static_cast<SDLKey>(SDLkeysymFromCPCkeys[keycode] & 0xffff);
-            key.key.keysym.mod = static_cast<SDLMod>(SDLkeysymFromCPCkeys[keycode] >> 16);
+		}
+        // Lookup the SDL key corresponding to this emulator command
+        sdl_keysym = SDLkeysymFromCPCkeys.find(keycode);
+		if (sdl_keysym != SDLkeysymFromCPCkeys.end()) {
+          key.key.keysym.sym = static_cast<SDLKey>(sdl_keysym->second & 0xffff);
+          key.key.keysym.mod = static_cast<SDLMod>(sdl_keysym->second >> 16);
         }
         escaped = false;
         cap32_cmd = false;
       } else {
         // key.key.keysym.scancode = ;
-        key.key.keysym.sym = keyFromChar[c].first;
-        key.key.keysym.mod = keyFromChar[c].second;
+        key.key.keysym.sym = SDLkeysFromChars[c].first;
+        key.key.keysym.mod = SDLkeysFromChars[c].second;
         // key.key.keysym.unicode = c;
       }
       key.key.type = SDL_KEYDOWN;
@@ -1324,7 +1268,6 @@ std::list<SDL_Event> InputMapper::StringToEvents(std::string toTranslate) {
     }
     return result;
 }
-
 
 void InputMapper::set_joystick_emulation (void)
 {

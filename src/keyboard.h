@@ -191,18 +191,16 @@ typedef enum {
 class InputMapper {
 	private:
 		static const dword cpc_kbd[CPC_KEYBOARD_NUM][CPC_KEY_NUM];
-		static std::map<std::string, unsigned int> CPCkeysFromStrings;
-		static std::map<std::string, unsigned int> SDLkeysFromStrings;
-		static std::map<char, CPC_KEYS> CPCkeysFromChars;
+		static const std::map<const std::string, const unsigned int> CPCkeysFromStrings;
+		static const std::map<const std::string, const unsigned int> SDLkeysFromStrings;
+		static const std::map<const char, const CPC_KEYS> CPCkeysFromChars;
 		std::map<char, std::pair<SDLKey, SDLMod>> SDLkeysFromChars;
 		static std::map<unsigned int, unsigned int> SDLkeysymFromCPCkeys_us;
 		std::map<unsigned int, unsigned int> CPCkeysFromSDLkeysym;
 		std::map<unsigned int, unsigned int> SDLkeysymFromCPCkeys;
 		t_CPC *CPC;
 
-		void parse_line(char *s);
-		void init_keymaps(void);
-		//void init_maps(void);
+		void process_cfg_line(char *);
 
 	public:
 		InputMapper(t_CPC *CPC);
