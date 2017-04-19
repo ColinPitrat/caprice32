@@ -13,7 +13,8 @@ cap32 - Caprice32 Amstrad CPC emulator
 \fBMedia loading\fR
 .RS
 Upon invocation, the FILEs specified as arguments will be used to populate the various available CPC machine slots. The type of slot is determined by the file format, detected by its extension. Caprice32 supports the following file formats:
-\fB.dsk\fR (disk image), \fB.ipf\fR (Interchangeable Preservation Format disk image), \fB.voc\fR or \fB.cdt\fR (tape image), \fB.cpr\fR (cartridge image), \fB.sna\fR (snapshot image), \fB.zip\fR (zip of any previously described file \fIexcept\fR .ipf). Specifying slot content on the command line is optional.
+\fB.dsk\fR (disk image), \fB.ipf\fR (Interchangeable Preservation Format disk image), \fB.voc\fR or \fB.cdt\fR (tape image), \fB.cpr\fR (cartridge image), \fB.sna\fR (snapshot image), \fB.zip\fR (zip of any previously described file).
+Specifying slot content on the command line is optional.
 .PP
 Caprice32 supports two disk drives: drive A and drive B. If two disk image files (.dsk or .ipf) are provided, the first one will be loaded in drive A and the second one in drive B.
 .PP
@@ -36,7 +37,11 @@ Most of the configuration file entries are commented in the configuration file p
 .PP
 \fBControl\fR
 .RS
-Emulator functionalities are available through function keys (F1-F12). As CPC also had function keys, those are emulated by keys from the numpad. This makes sense since their disposition on the CPC keyboard was similar to the numpad. If your computer doesn't have a numpad (e.g laptop that doesn't support it with Fn key) the only way to access the CPC F1-F10 keys is through the virtual keyboard.
+Emulator functionalities are available through function keys (F1-F12). 
+As CPC also had function keys, those are emulated by keys from the numpad. 
+This makes sense since their disposition on the CPC keyboard was similar to the numpad.
+If your computer doesn't have a numpad (e.g laptop that doesn't support it with Fn key) the only way to access the CPC F1-F10 keys is through the virtual keyboard.
+The emulator function key mapping can also be redefined through the host keyboard mapping file.
 .RE
 .PP
 .RS
@@ -80,9 +85,11 @@ Caprice32 can also be controlled completely from the joystick. The configuration
 .PP
 \fBKeyboard mapping\fR
 .RS
-Caprice32 supports CPC English, French and Spanish keyboard layouts. The CPC keyboard layout is defined in the configuration file by the \fBkeyboard\fR entry (0: English, 1: French, 2: Spanish). Additionally one can define the layout of the host keyboard in the configuration file, using \fBkbd_layout\fR entry. \fBkbd_layout\fR supports the same three values as \fBkeyboard\fR and should remap properly most keys found on English (US and UK), French and Spanish keyboards.
+Caprice32 supports CPC English, French and Spanish keyboard layouts. The CPC keyboard layout is defined in the configuration file by the \fBkeyboard\fR entry (0: English, 1: French, 2: Spanish).
+The host keyboard mapping is defined in a specific file, allowing to remap any host key to any specific key. The mapping file to use is set by the \fBkbd_layout\fR configuration entry.
+The mapping file must be put in the resources directory, defined by the configuration file \fBresources_path\fR entry.
+If the mapping file is not defined or not found, Caprice32 will default to a standard US keyboard map.
 .RE
-
 
 ." Missing sections to add:
 ." Multiface 2 invocation

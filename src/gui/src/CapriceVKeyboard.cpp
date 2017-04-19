@@ -1,7 +1,6 @@
 #include "CapriceVKeyboard.h"
-#include "CapriceVKeyboard.h"
-#include "keyboard.h"
 #include "cap32.h"
+#include "keyboard.h"
 
 extern t_CPC CPC;
 
@@ -96,59 +95,8 @@ namespace wGui {
     CMessageServer::Instance().QueueMessage(new CMessage(CMessage::APP_EXIT, nullptr, this));
   }
 
-  std::list<SDL_Event> CapriceVKeyboard::StringToEvents(std::string toTranslate) {
-    auto keyFromChar = keysFromChars[CPC.kbd_layout];
-    std::list<SDL_Event> result;
-    bool escaped = false;
-    bool cap32_cmd = false;
-    for(auto c : toTranslate) {
-      if(c == '\a') {
-        // Escape prefix: next char is a special one
-        escaped = true;
-        continue;
-      }
-      if (c == '\f') {
-        // Emulator special command
-        cap32_cmd = true;
-        continue;
-      }
-      SDL_Event key;
-      if(escaped || cap32_cmd) {
-        int keycode = c;
-        if (cap32_cmd) {
-          keycode += MOD_EMU_KEY;
-          // Lookup the SDL key corresponding to this emulator command
-          for (dword n = 0; n < KBD_MAX_ENTRIES; n++) {
-            if(keycode == kbd_layout[CPC.kbd_layout][n][0]) {
-              key.key.keysym.sym = static_cast<SDLKey>(kbd_layout[CPC.kbd_layout][n][1] & 0xffff);
-              key.key.keysym.mod = static_cast<SDLMod>(kbd_layout[CPC.kbd_layout][n][1] >> 16);
-            }
-          }
-        } else {
-          key.key.keysym.sym = static_cast<SDLKey>(kbd_layout[CPC.kbd_layout][keycode][1] & 0xffff);
-          key.key.keysym.mod = static_cast<SDLMod>(kbd_layout[CPC.kbd_layout][keycode][1] >> 16);
-        }
-        escaped = false;
-        cap32_cmd = false;
-      } else {
-        // key.key.keysym.scancode = ;
-        key.key.keysym.sym = keyFromChar[c].first;
-        key.key.keysym.mod = keyFromChar[c].second;
-        // key.key.keysym.unicode = c;
-      }
-      key.key.type = SDL_KEYDOWN;
-      key.key.state = SDL_PRESSED;
-      result.push_back(key);
-
-      key.key.type = SDL_KEYUP;
-      key.key.state = SDL_RELEASED;
-      result.push_back(key);
-    }
-    return result;
-  }
-
   std::list<SDL_Event> CapriceVKeyboard::GetEvents() {
-    return StringToEvents(m_result->GetWindowText());
+    return CPC.InputMapper->StringToEvents(m_result->GetWindowText());
   }
 
   void CapriceVKeyboard::moveFocus(int dy, int dx) {

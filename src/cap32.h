@@ -29,6 +29,7 @@
 #include <string>
 #include <vector>
 
+class InputMapper;
 //#define DEBUG
 //#define DEBUG_CRTC
 //#define DEBUG_FDC
@@ -260,7 +261,7 @@ typedef struct {
       int64_t both;
    } snd_cycle_count_init;
 
-   unsigned int kbd_layout;
+   std::string kbd_layout;
 
    unsigned int max_tracksize;
 
@@ -285,6 +286,8 @@ typedef struct {
    std::string rom_path;
    std::string rom_file[16];
    std::string rom_mf2;
+
+   InputMapper *InputMapper;
 } t_CPC;
 
 typedef struct {

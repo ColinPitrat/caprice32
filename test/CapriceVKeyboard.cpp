@@ -12,24 +12,16 @@ class CapriceVKeyboardTest : public testing::Test {
   public:
     void SetUp() {
       CPC.resources_path = "resources";
-      app.Init();
-      cvk = new CapriceVKeyboard(CRect(), nullptr, nullptr);
+	  CPC.InputMapper = new InputMapper(&CPC);
+	  CPC.InputMapper->init();
     }
-
-    void TearDown() {
-      delete cvk;
-    }
-
-  protected:
-    CApplication app;
-    CapriceVKeyboard *cvk;
 };
 
 TEST_F(CapriceVKeyboardTest, StringToEventsSimpleString)
 {
   std::string input = "cat";
 
-  auto tmp = cvk->StringToEvents(input);
+  auto tmp = CPC.InputMapper->StringToEvents(input);
   std::vector<SDL_Event> result(tmp.begin(), tmp.end());
 
   ASSERT_EQ(6, result.size());
@@ -58,9 +50,7 @@ TEST_F(CapriceVKeyboardTest, StringToEventsWithEscapedChar)
 {
   std::string input = "run\"s\btest\n";
 
-  // Ensure we use US keyboard
-  CPC.kbd_layout = 0;
-  auto tmp = cvk->StringToEvents(input);
+  auto tmp = CPC.InputMapper->StringToEvents(input);
   std::vector<SDL_Event> result(tmp.begin(), tmp.end());
 
   ASSERT_EQ(22, result.size());
@@ -79,7 +69,7 @@ TEST_F(CapriceVKeyboardTest, StringToEventsWithSpecialChar)
   std::string input = "\a";
   input += CPC_ESC;
 
-  auto tmp = cvk->StringToEvents(input);
+  auto tmp = CPC.InputMapper->StringToEvents(input);
   std::vector<SDL_Event> result(tmp.begin(), tmp.end());
 
   ASSERT_EQ(2, result.size());
