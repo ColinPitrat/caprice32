@@ -1136,7 +1136,7 @@ const std::map<const std::string, const unsigned int> InputMapper::SDLkeysFromSt
 void InputMapper::process_cfg_line(char *s)
 {
 		unsigned int cpc_key = 0, sdl_key = 0;
-		
+
 		char *pch = strtok(s, "\t");
 		if (pch == nullptr || pch[0] == '#')
 			return;
@@ -1145,7 +1145,7 @@ void InputMapper::process_cfg_line(char *s)
 			LOG_ERROR("Unknown CPC key " << pch << " found in mapping file. Ignoring it.");
 			return;
 		}
-		
+
 		for (unsigned int field=0; field < 3; field++) {
 			switch (field) {
 				case 0:
@@ -1164,10 +1164,9 @@ void InputMapper::process_cfg_line(char *s)
 			}
 			pch = strtok(nullptr, "\t");
 			if (pch == nullptr)
-				break;	
+				break;
 		}
 		SDLkeysymFromCPCkeys[cpc_key] = sdl_key;
-		CPCkeysFromSDLkeysym[sdl_key] = cpc_key;
 		return;
 }
 
@@ -1191,7 +1190,10 @@ void InputMapper::init(void)
 		fb.close();
 	}
 
-	// Create SDLkeysFromChars, using CPCkeysFromChars and CPCkeysFromSDLkeysym maps
+	for (std::map<unsigned int, unsigned int>::iterator it = SDLkeysymFromCPCkeys.begin(); it != SDLkeysymFromCPCkeys.end(); ++it) {
+		CPCkeysFromSDLkeysym[it->second] = it->first;
+	}
+
 	for (std::map<const char, const CPC_KEYS>::const_iterator it = CPCkeysFromChars.begin(); it != CPCkeysFromChars.end(); ++it) {
 		if (SDLkeysymFromCPCkeys.count(it->second) != 0) {
 			sdl_moddedkey = SDLkeysymFromCPCkeys[it->second];
