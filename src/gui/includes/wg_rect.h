@@ -86,72 +86,72 @@ public:
 
 	//! Gets the top of the rectangle
 	//! \return The Top position
-	int Top(void) const { return m_Top; }
+	int Top() const { return m_Top; }
 
 	//! Gets the left of the rectangle
 	//! \return The Left position
-	int Left(void) const { return m_Left; }
+	int Left() const { return m_Left; }
 
 	//! Gets the right of the rectangle
 	//! \return The Right position
-	int Right(void) const { return m_Right; }
+	int Right() const { return m_Right; }
 
 	//! Gets the bottom of the rectangle
 	//! \return The Bottom position
-	int Bottom(void) const { return m_Bottom; }
+	int Bottom() const { return m_Bottom; }
 
 	//! Gets the top-left corner of the rectangle
 	//! \return A point representing the Top Left corner of the CRect
-	CPoint TopLeft(void) const { return CPoint(m_Left, m_Top); }
+	CPoint TopLeft() const { return CPoint(m_Left, m_Top); }
 
 	//! Gets the top-right corner of the rectangle
 	//! \return A point representing the Top Right corner of the CRect
-	CPoint TopRight(void) const { return CPoint(m_Right, m_Top); }
+	CPoint TopRight() const { return CPoint(m_Right, m_Top); }
 
 	//! Gets the bottom left corner of the rectangle
 	//! \return A point representing the Bottom Left corner of the CRect
-	CPoint BottomLeft(void) const { return CPoint(m_Left, m_Bottom); }
+	CPoint BottomLeft() const { return CPoint(m_Left, m_Bottom); }
 
 	//! Gets the bottom-right corner of the rectangle
 	//! \return A point representing the Bottom Right corner of the CRect
-	CPoint BottomRight(void) const { return CPoint(m_Right, m_Bottom); }
+	CPoint BottomRight() const { return CPoint(m_Right, m_Bottom); }
 
 	//! Gets the center of the rectangle
 	//! \return A point representing the center of the CRect
-	CPoint Center(void) const { return CPoint((m_Left + m_Right) / 2, (m_Top + m_Bottom) / 2); }
+	CPoint Center() const { return CPoint((m_Left + m_Right) / 2, (m_Top + m_Bottom) / 2); }
 
 	//! Gets the left side's center of the rectangle
 	//! \return A point representing the CenterLeft point of the CRect
-	CPoint CenterLeft(void) const { return CPoint( m_Left, (m_Top + m_Bottom) / 2); }
+	CPoint CenterLeft() const { return CPoint( m_Left, (m_Top + m_Bottom) / 2); }
 
 	//! Get the top's center of the rectangle
 	//! \return A point representing the CenterTop point of the CRect
-	CPoint CenterTop(void) const { return CPoint( (m_Left + m_Right) / 2, m_Top ); }
+	CPoint CenterTop() const { return CPoint( (m_Left + m_Right) / 2, m_Top ); }
 
 	//! Gets the bottom's center of the rectangle
 	//! \return A point representing the Bottom Left corner of the CRect
-	CPoint CenterBottom(void) const { return CPoint( (m_Left + m_Right) / 2, m_Bottom ); }
+	CPoint CenterBottom() const { return CPoint( (m_Left + m_Right) / 2, m_Bottom ); }
 
 	//! Gets the right side's center of the rectangle
 	//! \return A point representing the Bottom Right corner of the CRect
-	CPoint CenterRight(void) const { return CPoint( m_Right, (m_Top + m_Bottom) / 2); }
+	CPoint CenterRight() const { return CPoint( m_Right, (m_Top + m_Bottom) / 2); }
 
 
 	//! Converts the CRect into a SDL style rect
 	//! \return An SDL_Rect of the same size
-	SDL_Rect SDLRect(void) const;
+	SDL_Rect SDLRect() const;
 
 	//! Gets the width of the rectangle
 	//! \return The width (along the X axis) of the CRect
-	int Width(void) const { return abs(m_Right - m_Left + 1); }
+	int Width() const { return abs(m_Right - m_Left + 1); }
 
 	//! Gets the height of the rectangle
 	//! \return The height (along the Y axis) of the CRect
-	int Height(void) const { return abs(m_Bottom - m_Top + 1); }
+	int Height() const { return abs(m_Bottom - m_Top + 1); }
 
 	//! Creates a CRect that has the same width and height of the rect, but has 0, 0 as it's top left coordinate
 	//! \return A CRect
-	CRect SizeRect(void) const { return CRect(0, 0, abs(m_Right - m_Left), abs(m_Bottom - m_Top)); }
+	CRect SizeRect() const { return CRect(0, 0, abs(m_Right - m_Left), abs(m_Bottom - m_Top)); }
 
 	//! Assignment operator will copy the values of the other rect
 	CRect& operator=(const CRect& r);  // assignment operator
@@ -221,7 +221,7 @@ public:
 
 	//! Returns the coordinates of the rectangle as a string
 	//! \return A std::string with the coordinates listed as "<left>,<top>,<right>,<bottom>",  i.e. "1,2,3,4"
-	std::string ToString(void) const
+	std::string ToString() const
 		{ return stdex::itoa(m_Left) + "," + stdex::itoa(m_Top) + "," + stdex::itoa(m_Right) + "," + stdex::itoa(m_Bottom); }
 
 protected:

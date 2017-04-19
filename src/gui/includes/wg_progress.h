@@ -44,11 +44,11 @@ public:
 	CProgress(const CRect& WindowRect, CWindow* pParent, CRGBColor BarColor = COLOR_BLUE);
 
 	//! Standard destructor
-	virtual ~CProgress(void);
+	virtual ~CProgress();
 
 	//! Gets the color of the bar
 	//! \return The bar color
-	CRGBColor GetBarColor(void) { return m_BarColor; }
+	CRGBColor GetBarColor() { return m_BarColor; }
 
 	//! Set the bar color
 	//! \param BarColor The new bar color
@@ -57,7 +57,7 @@ public:
 
 	// CWindow overrides
 	//! Draws the progress bar
-	virtual void Draw(void) const override;
+	virtual void Draw() const override;
 
 
 protected:

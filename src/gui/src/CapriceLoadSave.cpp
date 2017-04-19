@@ -314,11 +314,11 @@ void CapriceLoadSave::UpdateFilesList()
     }
     std::sort(directories.begin(), directories.end());
     std::sort(files.begin(), files.end());
-    for(std::vector<std::string>::iterator it = directories.begin(); it != directories.end(); ++it) {
-      m_pFilesList->AddItem(SListItem(*it));
+    for(const auto &directory : directories) {
+      m_pFilesList->AddItem(SListItem(directory));
     }
-    for(std::vector<std::string>::iterator it = files.begin(); it != files.end(); ++it) {
-      m_pFilesList->AddItem(SListItem(*it));
+    for(const auto &file : files) {
+      m_pFilesList->AddItem(SListItem(file));
     }
   }
 }

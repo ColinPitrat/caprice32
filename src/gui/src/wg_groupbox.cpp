@@ -52,13 +52,13 @@ CGroupBox::CGroupBox(const CRect& WindowRect, CWindow* pParent, std::string sTex
 }
 
 
-CGroupBox::~CGroupBox(void)
+CGroupBox::~CGroupBox()
 {
 
 }
 
 
-void CGroupBox::Draw(void) const
+void CGroupBox::Draw() const
 {
 	CWindow::Draw();
 

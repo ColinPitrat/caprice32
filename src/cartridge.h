@@ -12,7 +12,7 @@
 
 #include <string>
 
-void cpr_eject (void);
+void cpr_eject ();
 int cpr_load (const std::string &filename);
 int cpr_load (FILE *pfile);
 

@@ -69,10 +69,10 @@ class CMessageServer
 {
 protected:
 	//! The CMessageServer class cannot be directly instantiated, it must be access through Instance()
-	CMessageServer(void);
+	CMessageServer();
 
 	//! Standard constructor
-	virtual ~CMessageServer(void);
+	virtual ~CMessageServer();
 
 
 public:
@@ -88,7 +88,7 @@ public:
 
 	//! Gets the single instance of the message server
 	//! \return The single valid instance of the message server, or create one if it doesn't already exist
-	static CMessageServer& Instance(void);
+	static CMessageServer& Instance();
 
 	//! Register a client to recieve messages
 	//! \param pClient A pointer to the client which should recieve the messages
@@ -106,7 +106,7 @@ public:
 	void DeregisterMessageClient(CMessageClient* pClient);
 
 	//! Takes the next message in the queue and dispatches it to any registered clients in priority order
-	void DeliverMessage(void);
+	void DeliverMessage();
 
 	//! Adds a message to the message queue
 	//! \param pMessage A pointer to the message to be queued
@@ -114,7 +114,7 @@ public:
 
 	//! Indicates if there are any messages available
 	//! \return true if there's a message available in the queue
-	bool MessageAvailable(void) { return m_MessageQueue.size() > 0; }
+	bool MessageAvailable() { return m_MessageQueue.size() > 0; }
 
 	//! Sets the server to ignore any new incoming messages (messages already in the queue are unaffected)
 	//! \param bIgnore if true, the message queue will ignore any new messages

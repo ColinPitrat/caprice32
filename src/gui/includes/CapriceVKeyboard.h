@@ -13,7 +13,7 @@ namespace wGui
       CapriceVKeyboard(const CRect& WindowRect, CWindow* pParent, CFontEngine* pFontEngine);
       ~CapriceVKeyboard();
 
-      void CloseFrame(void) override;
+      void CloseFrame() override;
       bool HandleMessage(CMessage* pMessage) override;
       std::list<SDL_Event> GetEvents();
 

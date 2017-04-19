@@ -38,10 +38,10 @@ class CMessageClient
 {
 public:
 	//! Standard constructor
-	CMessageClient(void);
+	CMessageClient();
 
 	//! Standard destructor
-	virtual ~CMessageClient(void);
+	virtual ~CMessageClient();
 
 	//! This is the callback used by the Message Server to distribute messages
 	//! The client must first register with the server and indicate any messages it wishes to recieve

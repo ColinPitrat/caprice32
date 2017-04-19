@@ -64,7 +64,7 @@ dword dwTapeBitsToShift;
 
 
 
-void Tape_GetCycleCount(void)
+void Tape_GetCycleCount()
 {
    dwTapePulseCycles = CYCLE_ADJUST(*pwTapePulseTablePtr++);
    if (pwTapePulseTablePtr >= pwTapePulseTableEnd) {
@@ -74,7 +74,7 @@ void Tape_GetCycleCount(void)
 
 
 
-void Tape_SwitchLevel(void)
+void Tape_SwitchLevel()
 {
    if (bTapeLevel == TAPE_LEVEL_LOW) {
       bTapeLevel = TAPE_LEVEL_HIGH; // reverse the level
@@ -86,7 +86,7 @@ void Tape_SwitchLevel(void)
 
 
 
-int Tape_ReadDataBit(void)
+int Tape_ReadDataBit()
 {
    if (dwTapeDataCount) {
       if (!dwTapeBitsToShift) {
@@ -115,7 +115,7 @@ int Tape_ReadDataBit(void)
 
 
 
-int Tape_ReadSampleDataBit(void)
+int Tape_ReadSampleDataBit()
 {
    if (dwTapeDataCount) {
       if (!dwTapeBitsToShift) {
@@ -144,7 +144,7 @@ int Tape_ReadSampleDataBit(void)
 
 
 
-int Tape_GetNextBlock(void)
+int Tape_GetNextBlock()
 {
    while (pbTapeBlock < pbTapeImageEnd) { // loop until a valid block is found
       #ifdef DEBUG_TAPE
@@ -309,7 +309,7 @@ int Tape_GetNextBlock(void)
 
 
 
-void Tape_BlockDone(void)
+void Tape_BlockDone()
 {
    if (pbTapeBlock < pbTapeImageEnd) {
       switch (*pbTapeBlock) {
@@ -352,7 +352,7 @@ void Tape_BlockDone(void)
 
 
 
-void Tape_UpdateLevel(void)
+void Tape_UpdateLevel()
 {
    switch (dwTapeStage) {
 
@@ -590,7 +590,7 @@ void Tape_UpdateLevel(void)
 
 
 
-void Tape_Rewind(void)
+void Tape_Rewind()
 {
    pbTapeBlock = pbTapeImage;
    bTapeLevel = TAPE_LEVEL_LOW;

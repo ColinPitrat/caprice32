@@ -46,7 +46,7 @@ public:
 	CToolBar(const CRect& WindowRect, CWindow* pParent);
 
 	//! Standard destructor
-	virtual ~CToolBar(void);
+	virtual ~CToolBar();
 
 
 	//! Add a button to the toolbar
@@ -70,11 +70,11 @@ public:
 	void RemoveButton(unsigned int iPosition);
 
 	//! Remove all buttons from the ToolBar
-	void Clear(void);
+	void Clear();
 
 	//! Gets the number of items on the toolbar (including spacers)
 	//! \return The number of buttons in the toolbar
-	unsigned int GetButtonCount(void) { return stdex::safe_static_cast<unsigned int>(m_vpButtons.size()); }
+	unsigned int GetButtonCount() { return stdex::safe_static_cast<unsigned int>(m_vpButtons.size()); }
 
 	//! \param iPosition The position of the button to get the ID for.  An exception will be thrown if this is out of range.
 	//! \return The ButtonID of the button at the given position (spacers always return 0)
@@ -100,7 +100,7 @@ public:
 protected:
 
 	//! Reposition all the buttons in the toolbar
-	void RepositionButtons(void);
+	void RepositionButtons();
 
 	typedef std::pair<CButton*, long int> t_ButtonIDPair;  //!< A typedef of CButton pointer to ID pair
 	typedef std::vector<t_ButtonIDPair> t_ButtonVector;  //!< A typedef of a vector of Button ID pairs

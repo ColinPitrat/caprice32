@@ -63,15 +63,15 @@ public:
                    unsigned int iItemWidth = 50, unsigned int iItemHeight = 50, CFontEngine* pFontEngine = nullptr);
 
 	//! Standard destructor
-	virtual ~CNavigationBar(void);
+	virtual ~CNavigationBar();
 
 	//! Gets the height of the items
 	//! \return The height of the items in the navigation bar
-	unsigned int GetItemHeight(void) { return m_iItemHeight; }
+	unsigned int GetItemHeight() { return m_iItemHeight; }
 
 	//! Gets the width of the items
 	//! \return The width of the items in the navigation bar
-	unsigned int GetItemWidth(void) { return m_iItemWidth; }
+	unsigned int GetItemWidth() { return m_iItemWidth; }
 
 	//! Sets the height of the items in the navigation bar
 	//! \param iItemHeight The height of the items in the navigation bar
@@ -96,11 +96,11 @@ public:
 	void RemoveItem(unsigned int iItemIndex);
 
 	//! Remove all items from the bar
-	void ClearItems(void);
+	void ClearItems();
 
 	//! Gets the number of items in the navigation bar
 	//! \return The number of items in the bar
-	unsigned int Size(void) { return m_Items.size(); }
+	unsigned int Size() { return m_Items.size(); }
 
 	//! \param iItemIndex The index of the item to check (will return false if the index is out of range)
 	//! \return true if the item is selected
@@ -123,7 +123,7 @@ public:
 
 	// CWindow overrides
 	//! Draws the navigation bar
-	virtual void Draw(void) const override;
+	virtual void Draw() const override;
 
 	//! Giving a control a new WindowRect will move and resize the control
 	//! \param WindowRect A CRect that defines the outer limits of the control

@@ -1,5 +1,5 @@
 #include "CapriceGui.h"
 
-void CapriceGui::Init(void) {
+void CapriceGui::Init() {
     CApplication::Init();
 }

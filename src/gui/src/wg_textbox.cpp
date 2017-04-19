@@ -85,10 +85,10 @@ CTextBox::CTextBox(const CRect& WindowRect, CWindow* pParent, CFontEngine* pFont
 }
 
 
-CTextBox::~CTextBox(void)  // virtual
+CTextBox::~CTextBox()  // virtual
 {
-	for(std::vector<CRenderedString*>::iterator iter = m_vpRenderedString.begin(); iter !=  m_vpRenderedString.end(); ++iter)
-		delete *iter;
+	for(const auto *str : m_vpRenderedString)
+		delete str;
 	m_vpRenderedString.clear();
 
 	delete m_pCursorTimer;
@@ -104,7 +104,7 @@ void CTextBox::SetReadOnly(bool bReadOnly)  // virtual
 }
 
 
-std::string CTextBox::GetSelText(void) const  // virtual
+std::string CTextBox::GetSelText() const  // virtual
 {
 	std::string sSelText = "";
 	if (m_SelLength != 0)
@@ -151,7 +151,7 @@ void CTextBox::SetScrollBarVisibility(CScrollBar::EScrollBarType ScrollBarType, 
 }
 
 
-void CTextBox::Draw(void) const  // virtual
+void CTextBox::Draw() const  // virtual
 {
 	CWindow::Draw();
 
@@ -183,15 +183,16 @@ void CTextBox::Draw(void) const  // virtual
 			std::vector<CPoint> vBoundingDimensions;
 			std::vector<std::vector<CRect> > vCharRects;
 			int iIndex = 0;
-			for (std::vector<CRenderedString*>::const_iterator iter = m_vpRenderedString.begin(); iter != m_vpRenderedString.end(); ++iter, ++iIndex)
+      for(const auto *str : m_vpRenderedString)
 			{
 				CPoint BoundingDimensions;
 				CPoint Offset;
 				std::vector<CRect> CharRects;
-				(*iter)->GetMetrics(&BoundingDimensions, &Offset, &CharRects);
+				str->GetMetrics(&BoundingDimensions, &Offset, &CharRects);
 				vBoundingDimensions.push_back(BoundingDimensions);
 				vOffsets.push_back(Offset);
 				vCharRects.push_back(CharRects);
+        ++iIndex;
 			}
 
 			// move the cursor into view by scrolling if necessary
@@ -257,7 +258,7 @@ void CTextBox::Draw(void) const  // virtual
 
 		// finally, draw the text
 		CPoint LineOrigin = m_ClientRect.TopLeft() - CPoint(m_pHorizontalScrollBar->GetValue() * 10, 0);
-		for(std::vector<CRenderedString*>::const_iterator iter = m_vpRenderedString.begin() + m_pVerticalScrollBar->GetValue();
+		for(auto iter = m_vpRenderedString.begin() + m_pVerticalScrollBar->GetValue();
 				iter != m_vpRenderedString.end() && LineOrigin.YPos() < m_ClientRect.Bottom(); ++iter) {
 			(*iter)->Draw(m_pSDLSurface, m_ClientRect, LineOrigin, FontColor);
 			LineOrigin.SetY(LineOrigin.YPos() + m_iRowHeight);
@@ -318,13 +319,14 @@ bool CTextBox::OnMouseButtonDown(CPoint Point, unsigned int Button)  // virtual
 				std::vector<std::vector<CRect> > vCharRects;
 				int iIndex = 0;
 				// get the dimensions of all the characters
-				for (std::vector<CRenderedString*>::iterator iter = m_vpRenderedString.begin(); iter != m_vpRenderedString.end(); ++iter, ++iIndex)
+        for(const auto *str : m_vpRenderedString)
 				{
 					CPoint Offset;
 					std::vector<CRect> CharRects;
-					(*iter)->GetMetrics(nullptr, &Offset, &CharRects);
+					str->GetMetrics(nullptr, &Offset, &CharRects);
 					vOffsets.push_back(Offset);
 					vCharRects.push_back(CharRects);
+          ++iIndex;
 				}
 
 				// figure out which line was clicked on
@@ -426,13 +428,14 @@ bool CTextBox::HandleMessage(CMessage* pMessage)  // virtual
 					std::vector<CPoint> vOffsets;
 					std::vector<std::vector<CRect> > vCharRects;
 					int iIndex = 0;
-					for (std::vector<CRenderedString*>::iterator iter = m_vpRenderedString.begin(); iter != m_vpRenderedString.end(); ++iter, ++iIndex)
+          for(const auto *str : m_vpRenderedString)
 					{
 						CPoint Offset;
 						std::vector<CRect> CharRects;
-						(*iter)->GetMetrics(nullptr, &Offset, &CharRects);
+						str->GetMetrics(nullptr, &Offset, &CharRects);
 						vOffsets.push_back(Offset);
 						vCharRects.push_back(CharRects);
+            ++iIndex;
 					}
 
 					// figure out which line was clicked on
@@ -836,8 +839,8 @@ void CTextBox::SelDelete(std::string* psString)
 
 void CTextBox::PrepareWindowText(const std::string& sText)
 {
-	for(std::vector<CRenderedString*>::iterator iter = m_vpRenderedString.begin(); iter !=  m_vpRenderedString.end(); ++iter)
-		delete *iter;
+	for(const auto *str : m_vpRenderedString)
+		delete str;
 	m_vpRenderedString.clear();
 
 	m_iLineCount = 0;
@@ -864,7 +867,7 @@ void CTextBox::PrepareWindowText(const std::string& sText)
 }
 
 
-void CTextBox::UpdateScrollBars(void)
+void CTextBox::UpdateScrollBars()
 {
 	m_ClientRect = CRect(3, 3, m_WindowRect.Width() - 5, m_WindowRect.Height() - 5);
 	bool bVertVisible = m_ScrollBarVisibilityMap[CScrollBar::VERTICAL] == SCROLLBAR_VIS_ALWAYS ||

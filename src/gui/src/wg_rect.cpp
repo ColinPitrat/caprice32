@@ -32,7 +32,7 @@ namespace wGui
 {
 
 
-SDL_Rect CRect::SDLRect(void) const
+SDL_Rect CRect::SDLRect() const
 {
 	SDL_Rect sdlRect;
 	//Normalize the rect...

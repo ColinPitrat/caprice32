@@ -32,11 +32,11 @@ namespace wUtil
 CLog::t_LogList CLog::GetLogEntries(unsigned int iSeverity) const
 {
 	t_LogList OutLog;
-	for (t_LogList::const_iterator iter = m_LogList.begin(); iter != m_LogList.end(); ++iter)
+  for (const auto &log : m_LogList)
 	{
-		if (iSeverity == 0 || iter->m_iSeverity == iSeverity)
+		if (iSeverity == 0 || log.m_iSeverity == iSeverity)
 		{
-			OutLog.push_back(*iter);
+			OutLog.push_back(log);
 		}
 	}
 	return OutLog;
@@ -46,11 +46,11 @@ CLog::t_LogList CLog::GetLogEntries(unsigned int iSeverity) const
 CLog::t_LogList CLog::GetLogEntries(unsigned int iHighSeverity, unsigned int iLowSeverity) const
 {
 	t_LogList OutLog;
-	for (t_LogList::const_iterator iter = m_LogList.begin(); iter != m_LogList.end(); ++iter)
+  for (const auto &log : m_LogList)
 	{
-		if (iter->m_iSeverity >= iHighSeverity || iter->m_iSeverity <= iLowSeverity)
+		if (log.m_iSeverity >= iHighSeverity || log.m_iSeverity <= iLowSeverity)
 		{
-			OutLog.push_back(*iter);
+			OutLog.push_back(log);
 		}
 	}
 	return OutLog;
@@ -72,10 +72,10 @@ void CLog::WriteToFile(const std::string& sFilename, bool bAppend, const std::st
 	if (File.is_open())
 	{
 		File << sLogHeader << std::endl;
-		for (t_LogList::const_iterator iter = m_LogList.begin(); iter != m_LogList.end(); ++iter)
+    for (const auto &log : m_LogList)
 		{
-			std::string sTimeStamp(asctime(localtime(&iter->m_TimeStamp)));
-			File << sTimeStamp.substr(0, sTimeStamp.size() - 1) << " [ " << iter->m_iSeverity << " ] : " << iter->m_sMessage << std::endl;
+			std::string sTimeStamp(asctime(localtime(&log.m_TimeStamp)));
+			File << sTimeStamp.substr(0, sTimeStamp.size() - 1) << " [ " << log.m_iSeverity << " ] : " << log.m_sMessage << std::endl;
 		}
 		File.close();
 	}

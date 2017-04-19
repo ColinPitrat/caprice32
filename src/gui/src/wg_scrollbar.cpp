@@ -72,7 +72,7 @@ CScrollBar::CScrollBar(const CRect& WindowRect, CWindow* pParent, EScrollBarType
 }
 
 
-CScrollBar::~CScrollBar(void)
+CScrollBar::~CScrollBar()
 {
 
 }
@@ -89,7 +89,7 @@ void CScrollBar::SetValue(int iValue, bool bRedraw)  // virtual
 }
 
 
-void CScrollBar::Draw(void) const
+void CScrollBar::Draw() const
 {
 	CWindow::Draw();
 
@@ -277,7 +277,7 @@ bool CScrollBar::HandleMessage(CMessage* pMessage)
 }
 
 
-void CScrollBar::RepositionThumb(void)  // virtual
+void CScrollBar::RepositionThumb()  // virtual
 {
 	if (m_MinLimit != m_MaxLimit)
 	{

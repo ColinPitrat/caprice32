@@ -45,29 +45,29 @@ typedef union {
    };
 } t_new_dt;
 
-void update_skew(void);
-void CharMR1(void);
-void CharMR2(void);
-void prerender_border(void);
-void prerender_border_half(void);
-void prerender_sync(void);
-void prerender_sync_half(void);
-void prerender_normal(void);
-void prerender_normal_half(void);
-void prerender_normal_plus(void);
-void prerender_normal_half_plus(void);
+void update_skew();
+void CharMR1();
+void CharMR2();
+void prerender_border();
+void prerender_border_half();
+void prerender_sync();
+void prerender_sync_half();
+void prerender_normal();
+void prerender_normal_half();
+void prerender_normal_plus();
+void prerender_normal_half_plus();
 void crtc_cycle(int repeat_count);
-void crtc_init(void);
-void crtc_reset(void);
+void crtc_init();
+void crtc_reset();
 dword shiftLittleEndianDwordTriplet(dword val1, dword val2, dword val3, int offset);
 
-void render8bpp(void);
-void render8bpp_doubleY(void);
-void render16bpp(void);
-void render16bpp_doubleY(void);
-void render24bpp(void);
-void render24bpp_doubleY(void);
-void render32bpp(void);
-void render32bpp_doubleY(void);
+void render8bpp();
+void render8bpp_doubleY();
+void render16bpp();
+void render16bpp_doubleY();
+void render24bpp();
+void render24bpp_doubleY();
+void render32bpp();
+void render32bpp_doubleY();
 
 #endif

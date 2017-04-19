@@ -53,7 +53,7 @@ public:
 		sItemText(sItemText), iItemId(iItemId), pPopup(pPopup), bSpacer(false) { }
 
 	//! Constructs a new Spacer Menu Item
-	SMenuItem(void) : sItemText(""), iItemId(0), pPopup(nullptr), bSpacer(true) { }
+	SMenuItem() : sItemText(""), iItemId(0), pPopup(nullptr), bSpacer(true) { }
 
 	std::string sItemText;  //!< The caption to display for the menu item
 	long int iItemId;  //!< An identifier for the menu item, which gets returned in the CTRL_SINGLELCLICK message
@@ -78,7 +78,7 @@ public:
 	CMenuBase(const CRect& WindowRect, CWindow* pParent, CFontEngine* pFontEngine = nullptr);
 
 	//! Standard destructor
-	virtual ~CMenuBase(void);
+	virtual ~CMenuBase();
 
 	//! Insert a menu item into the menu
 	//! \param MenuItem An SMenuItem struct that defines the menu item to add
@@ -91,10 +91,10 @@ public:
 
 	//! Gets the number of items in a menu
 	//! \return The number of items in the menu
-	unsigned int GetMenuItemCount(void) const { return m_MenuItems.size(); }
+	unsigned int GetMenuItemCount() const { return m_MenuItems.size(); }
 
 	//! Hides the active popup window
-	void HideActivePopup(void);
+	void HideActivePopup();
 
 	//! Set the highlight color for the menu
 	//! \param HighlightColor The new color to use for highlighting
@@ -103,7 +103,7 @@ public:
 
 	//! CWindow overrides
 	//! Draws the menu
-	virtual void Draw(void) const override = 0;
+	virtual void Draw() const override = 0;
 
 	//! This is called whenever the menu is clicked on by the mouse
 	//! Only the topmost window that bounds the point will be called by the system
@@ -121,7 +121,7 @@ public:
 
 protected:
 	//! This updates the cached item rects if they are marked as invalid
-	virtual void UpdateCachedRects(void) const = 0;
+	virtual void UpdateCachedRects() const = 0;
 
 	//! Check to see where it will fit, then show the popup menu
 	//! \param ParentRect A CRect that defines the dimensions of the item that is spawning the popup
@@ -147,7 +147,7 @@ protected:
 	};
 	typedef std::vector<s_MenuItemInfo> t_MenuItemVector;  //!< The type for menu items
 	mutable t_MenuItemVector m_MenuItems;  //!< The vector of menu items
-	SMenuItem* m_pHighlightedItem;  //!< The item that should be highlighted
+	const SMenuItem* m_pHighlightedItem;  //!< The item that should be highlighted
 	mutable bool m_bCachedRectsValid;  //!< True if the cached item rects are valid
 	CPopupMenu* m_pActivePopup;  //!< A pointer to the active popup
 	CwgBitmapResourceHandle m_hRightArrowBitmap;  //!< A handle to the bitmap for the right arrow
@@ -174,7 +174,7 @@ public:
 	CMenu(const CRect& WindowRect, CWindow* pParent, CFontEngine* pFontEngine = nullptr);
 
 	//! Standard destructor
-	virtual ~CMenu(void);
+	virtual ~CMenu();
 
 	//! Insert a menu item into the menu
 	//! \param MenuItem An SMenuItem struct that defines the menu item to add
@@ -184,7 +184,7 @@ public:
 
 	//! CWindow overrides
 	//! Draws the menu
-	virtual void Draw(void) const override;
+	virtual void Draw() const override;
 
 	//! This is called whenever the menu is clicked on by the mouse
 	//! Only the topmost window that bounds the point will be called by the system
@@ -202,7 +202,7 @@ public:
 
 protected:
 	//! This updates the cached item rects if they are marked as invalid
-	virtual void UpdateCachedRects(void) const override;
+	virtual void UpdateCachedRects() const override;
 
 	//! Check to see where it will fit, then show the popup menu
 	//! \param ParentRect A CRect that defines the dimensions of the item that is spawning the popup
@@ -229,25 +229,25 @@ public:
 	CPopupMenu(const CRect& WindowRect, CWindow* pParent, CFontEngine* pFontEngine = nullptr);
 
 	//! Standard destructor
-	virtual ~CPopupMenu(void);
+	virtual ~CPopupMenu();
 
 	//! Show the popup at the given point
 	//! \param Position The point to use for the top left corner of the popup, in view coordinates
 	void Show(CPoint Position);
 
 	//! Hide the popup and any popups hanging off of it
-	void Hide(void);
+	void Hide();
 
 	//! Hide the popup, along with it's popup parents and children
 	//! This method just searches for the root popup, and then calls Hide() on it
-	void HideAll(void);
+	void HideAll();
 
 	//! Tests to see if any children are hit by the point
 	bool IsInsideChild(const CPoint& Point) const;
 
 	//! Indicates if the popup menu has any popup parents
 	//! \return true is the Popup menu doesn't have any popup parents
-	bool IsRootPopup(void) { return !(dynamic_cast<CPopupMenu*>(m_pParentWindow)); }
+	bool IsRootPopup() { return !(dynamic_cast<CPopupMenu*>(m_pParentWindow)); }
 
 	//! This is only for root popup menus that are dropped by a CMenu
 	//! This doesn't set the actual parent of the control since the root window (probably a CView) should be the real parent
@@ -258,7 +258,7 @@ public:
 
 	//! CWindow overrides
 	//! Draws the menu
-	virtual void Draw(void) const override;
+	virtual void Draw() const override;
 
 	//! Blit the window to the given surface, using m_WindowRect as the offset into the surface
 	//! \param ScreenSurface A reference to the surface that the window will be copied to
@@ -282,7 +282,7 @@ public:
 
 protected:
 	//! This updates the cached item rects if they are marked as invalid
-	virtual void UpdateCachedRects(void) const override;
+	virtual void UpdateCachedRects() const override;
 
 	//! Check to see where it will fit, then show the popup menu
 	//! \param ParentRect A CRect that defines the dimensions of the item that is spawning the popup

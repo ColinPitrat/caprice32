@@ -62,11 +62,11 @@ public:
 
 	//! Gets the X coordinate
 	//! \return X coordinate
-	int XPos(void) const { return m_XPos; }
+	int XPos() const { return m_XPos; }
 
 	//! Gets the Y coordinate
 	//! \return Y coordinate
-	int YPos(void) const { return m_YPos; }
+	int YPos() const { return m_YPos; }
 
 	//! Add the X and Y coordinates of the points
 	CPoint operator+(const CPoint& p) const;
@@ -101,7 +101,7 @@ public:
 
 	//! Gives a string representation of the coordinates
 	//! \return The coordinates in a string "<x>,<y>" i.e. "10,20"
-	std::string ToString(void) const { return stdex::itoa(m_XPos) + "," + stdex::itoa(m_YPos); }
+	std::string ToString() const { return stdex::itoa(m_XPos) + "," + stdex::itoa(m_YPos); }
 
 protected:
 	//! The X coordinate

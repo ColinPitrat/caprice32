@@ -4,6 +4,6 @@ class CapriceGui : public wGui::CApplication
 {
 	public:
 		CapriceGui() : wGui::CApplication() {};
-		void Init(void) override;
+		void Init() override;
 };
 

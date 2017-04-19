@@ -1,4 +1,4 @@
-#include <keyboard.h>
+#include "keyboard.h"
 #include <iostream>
 #include <fstream>
 #include <string.h>
@@ -1152,7 +1152,7 @@ std::map<std::string, unsigned int> SDLkeysFromStrings = {
 int kbd_layout[KBD_MAX_ENTRIES][2];
 std::map<char, std::pair<SDLKey, SDLMod>> SDLkeysFromChars;
 
-void create_SDL_keymap(void)
+void create_SDL_keymap()
 {
 	CPC_KEYS cpc_key;
 	unsigned int sdl_moddedkey;
@@ -1211,7 +1211,7 @@ bool parse_line(char *s, unsigned int line)
 		return true;
 }
 
-inline void fill_default_kbd_layout(void)
+inline void fill_default_kbd_layout()
 {
 	for (unsigned int key=0; key < KBD_MAX_ENTRIES; key++)
 		for (int i=0; i < 2; i++)

@@ -30,13 +30,13 @@
 namespace wGui
 {
 
-CMessageClient::CMessageClient(void)
+CMessageClient::CMessageClient()
 {
 
 }
 
 
-CMessageClient::~CMessageClient(void)  // virtual
+CMessageClient::~CMessageClient()  // virtual
 {
 	wGui::CMessageServer::Instance().DeregisterMessageClient(this);
 }

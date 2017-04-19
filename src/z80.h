@@ -100,30 +100,30 @@ void write_mem(word addr, byte val);
 byte z80_IN_handler(reg_pair port); // not provided by Z80.c
 void z80_OUT_handler(reg_pair port, byte val); // not provided by Z80.c
 
-void z80_init_tables(void);
-void z80_mf2stop(void);
+void z80_init_tables();
+void z80_mf2stop();
 
-int z80_execute(void);
+int z80_execute();
 
 // Handle main z80 instructions.
-void z80_execute_instruction(void);
+void z80_execute_instruction();
 
 // Handle prefixed bits instructions.
-void z80_execute_pfx_cb_instruction(void);
+void z80_execute_pfx_cb_instruction();
 
 // Handle prefixed IX instructions.
-void z80_execute_pfx_dd_instruction(void);
+void z80_execute_pfx_dd_instruction();
 
 // Handle prefixed IX bit instructions.
-void z80_execute_pfx_ddcb_instruction(void);
+void z80_execute_pfx_ddcb_instruction();
 
 // Handle prefixed extended instructions.
-void z80_execute_pfx_ed_instruction(void);
+void z80_execute_pfx_ed_instruction();
 
 // Handle prefixed IY instructions.
-void z80_execute_pfx_fd_instruction(void);
+void z80_execute_pfx_fd_instruction();
 
 // Handle prefixed IY bit instructions.
-void z80_execute_pfx_fdcb_instruction(void);
+void z80_execute_pfx_fdcb_instruction();
 
 #endif

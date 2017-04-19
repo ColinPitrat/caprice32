@@ -65,7 +65,7 @@ CListBox::CListBox(const CRect& WindowRect, CWindow* pParent, bool bSingleSelect
 }
 
 
-CListBox::~CListBox(void)
+CListBox::~CListBox()
 {
 
 }
@@ -105,7 +105,7 @@ void CListBox::RemoveItem(unsigned int iItemIndex)
 }
 
 
-void CListBox::ClearItems(void)
+void CListBox::ClearItems()
 {
 	m_Items.clear();
 	m_SelectedItems.clear();
@@ -169,7 +169,7 @@ void CListBox::SetDropDown(CWindow* pDropDown)
   }
 }
 
-void CListBox::Draw(void) const
+void CListBox::Draw() const
 {
 	CWindow::Draw();    
 
@@ -226,9 +226,9 @@ void CListBox::PaintToSurface(SDL_Surface& ScreenSurface, SDL_Surface& FloatingS
 			SDL_Rect DestRect = CRect(m_WindowRect + Offset).SDLRect();
 			SDL_BlitSurface(m_pSDLSurface, &SourceRect, &FloatingSurface, &DestRect);
 			CPoint NewOffset = m_ClientRect.TopLeft() + m_WindowRect.TopLeft() + Offset;
-			for (std::list<CWindow*>::const_iterator iter = m_ChildWindows.begin(); iter != m_ChildWindows.end(); ++iter)
+			for (const auto& child : m_ChildWindows)
 			{
-				(*iter)->PaintToSurface(FloatingSurface, FloatingSurface, NewOffset);
+				child->PaintToSurface(FloatingSurface, FloatingSurface, NewOffset);
 			}
 		}
 	}

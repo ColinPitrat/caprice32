@@ -17,7 +17,7 @@ byte *pbCartridgePages[CARTRIDGE_NB_PAGES] = { nullptr };
 
 extern byte* pbROMlo;
 
-void cpr_eject (void)
+void cpr_eject ()
 {
    delete[] pbCartridgeImage;
    pbCartridgeImage = nullptr;

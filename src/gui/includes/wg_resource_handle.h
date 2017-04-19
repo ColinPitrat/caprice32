@@ -54,15 +54,15 @@ public:
 	CResourceHandle(const CResourceHandle& resHandle);
 
 	//! Standard destructor will decrement the refcount for the resource and will deallocate it if the refcount hits zero
-	virtual ~CResourceHandle(void);
+	virtual ~CResourceHandle();
 
 	//! Gets the resource ID of the handle
 	//! \return The resource ID of the handle
-	TResourceId GetResourceId(void) { return m_ResourceId; }
+	TResourceId GetResourceId() { return m_ResourceId; }
 
 	//! Gets the handle's internal reference count
 	//! \return The reference count of the handle
-	unsigned int GetRefCount(void) { return m_RefCountMap[m_ResourceId]; }
+	unsigned int GetRefCount() { return m_RefCountMap[m_ResourceId]; }
 
 protected:
 	//! The resource ID for the handle
@@ -95,11 +95,11 @@ public:
 		CResourceHandle(resHandle) { }
 
 	//! Standard destructor, which frees the bitmap if the refcount is zero
-	virtual ~CBitmapResourceHandle(void);
+	virtual ~CBitmapResourceHandle();
 
 	//! Gets the handle's bitmap
 	//! \return An SDL_Surface pointer (the bitmap)
-	SDL_Surface* Bitmap(void) const;
+	SDL_Surface* Bitmap() const;
 
 protected:
 	//! The map of bitmaps held by the handles
@@ -143,11 +143,11 @@ public:
 		CResourceHandle(resHandle) { }
 
 	//! Standard destructor, which frees the string if the refcount is zero
-	virtual ~CStringResourceHandle(void);
+	virtual ~CStringResourceHandle();
 
 	//! Returns the string
 	//! \return A string
-	const std::string String(void) const;
+	const std::string String() const;
 
 protected:
 	//! A map of strings that are used by the handles
@@ -173,11 +173,11 @@ public:
 		CResourceHandle(resHandle) { }
 
 	//! Standard destructor, which frees the cursor if the refcount is zero
-	virtual ~CCursorResourceHandle(void);
+	virtual ~CCursorResourceHandle();
 
 	//! Returns the SDL Cursor pointer
 	//! \return A pointer to an SDL cursor object
-	SDL_Cursor* Cursor(void) const;
+	SDL_Cursor* Cursor() const;
 
 protected:
 	//! A map of cursors used by the handles

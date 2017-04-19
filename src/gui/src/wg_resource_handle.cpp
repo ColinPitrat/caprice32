@@ -63,7 +63,7 @@ CResourceHandle::CResourceHandle(const CResourceHandle& resHandle)
 }
 
 
-CResourceHandle::~CResourceHandle(void)
+CResourceHandle::~CResourceHandle()
 {
 	if (GetRefCount() > 0)
 	{
@@ -76,7 +76,7 @@ CResourceHandle::~CResourceHandle(void)
 }
 
 
-CBitmapResourceHandle::~CBitmapResourceHandle(void)
+CBitmapResourceHandle::~CBitmapResourceHandle()
 {
 	if (GetRefCount() == 1 && m_BitmapMap.find(m_ResourceId) != m_BitmapMap.end())
 	{
@@ -86,7 +86,7 @@ CBitmapResourceHandle::~CBitmapResourceHandle(void)
 }
 
 
-SDL_Surface* CBitmapResourceHandle::Bitmap(void) const
+SDL_Surface* CBitmapResourceHandle::Bitmap() const
 {
 	return (m_BitmapMap.find(m_ResourceId) != m_BitmapMap.end()) ? m_BitmapMap[m_ResourceId] : nullptr;
 }
@@ -108,7 +108,7 @@ CBitmapFileResourceHandle::CBitmapFileResourceHandle(std::string sFilename) :
 }
 
 
-CStringResourceHandle::~CStringResourceHandle(void)
+CStringResourceHandle::~CStringResourceHandle()
 {
 	if (GetRefCount() == 1 && m_StringMap.find(m_ResourceId) != m_StringMap.end())
 	{
@@ -117,13 +117,13 @@ CStringResourceHandle::~CStringResourceHandle(void)
 }
 
 
-const std::string CStringResourceHandle::String(void) const
+const std::string CStringResourceHandle::String() const
 {
 	return (m_StringMap.find(m_ResourceId) != m_StringMap.end()) ? m_StringMap[m_ResourceId] : "";
 }
 
 
-CCursorResourceHandle::~CCursorResourceHandle(void)
+CCursorResourceHandle::~CCursorResourceHandle()
 {
 	if (GetRefCount() == 1 && m_SDLCursorMap.find(m_ResourceId) != m_SDLCursorMap.end())
 	{
@@ -133,7 +133,7 @@ CCursorResourceHandle::~CCursorResourceHandle(void)
 }
 
 
-SDL_Cursor* CCursorResourceHandle::Cursor(void) const
+SDL_Cursor* CCursorResourceHandle::Cursor() const
 {
 	return (m_SDLCursorMap.find(m_ResourceId) != m_SDLCursorMap.end()) ? m_SDLCursorMap[m_ResourceId] : nullptr;
 }

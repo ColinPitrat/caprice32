@@ -57,7 +57,7 @@ CFontEngine::CFontEngine(const std::string& sFontFileName, unsigned char FontSiz
 }
 
 
-CFontEngine::~CFontEngine(void)
+CFontEngine::~CFontEngine()
 {
 
 	FT_Done_Face(m_FontFace);
@@ -65,7 +65,7 @@ CFontEngine::~CFontEngine(void)
 
 FT_BitmapGlyphRec* CFontEngine::RenderGlyph(char Char)
 {
-	std::map<char, FT_BitmapGlyphRec>::iterator glyphIter = m_CachedGlyphMap.find(Char);
+	auto glyphIter = m_CachedGlyphMap.find(Char);
 	if (glyphIter == m_CachedGlyphMap.end())
 	{
 		if (FT_Load_Char(m_FontFace, Char, FT_LOAD_DEFAULT))
@@ -88,7 +88,7 @@ FT_BitmapGlyphRec* CFontEngine::RenderGlyph(char Char)
 
 FT_Glyph_Metrics* CFontEngine::GetMetrics(char Char)
 {
-	std::map<char, FT_Glyph_Metrics>::iterator glyphIter = m_CachedMetricsMap.find(Char);
+	auto glyphIter = m_CachedMetricsMap.find(Char);
 	if (glyphIter == m_CachedMetricsMap.end())
 	{
 		if (FT_Load_Char(m_FontFace, Char, FT_LOAD_DEFAULT))

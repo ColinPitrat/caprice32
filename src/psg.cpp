@@ -56,7 +56,7 @@ int64_t LoopCountInit;
 
 bool Ton_EnA, Ton_EnB, Ton_EnC, Noise_EnA, Noise_EnB, Noise_EnC;
 bool Envelope_EnA, Envelope_EnB, Envelope_EnC;
-void (*Case_EnvType)(void);
+void (*Case_EnvType)();
 
 union TCounter {
    struct {
@@ -129,7 +129,7 @@ inline void SetAmplC(byte Value)
 
 
 
-void Case_EnvType_0_3__9(void)
+void Case_EnvType_0_3__9()
 {
    if (PSG.FirstPeriod) {
       PSG.AmplitudeEnv--;
@@ -141,7 +141,7 @@ void Case_EnvType_0_3__9(void)
 
 
 
-void Case_EnvType_4_7__15(void)
+void Case_EnvType_4_7__15()
 {
    if (PSG.FirstPeriod) {
       PSG.AmplitudeEnv++;
@@ -154,14 +154,14 @@ void Case_EnvType_4_7__15(void)
 
 
 
-void Case_EnvType_8(void)
+void Case_EnvType_8()
 {
    PSG.AmplitudeEnv = (PSG.AmplitudeEnv - 1) & 31;
 }
 
 
 
-void Case_EnvType_10(void)
+void Case_EnvType_10()
 {
    if (PSG.FirstPeriod) {
       PSG.AmplitudeEnv--;
@@ -181,7 +181,7 @@ void Case_EnvType_10(void)
 
 
 
-void Case_EnvType_11(void)
+void Case_EnvType_11()
 {
    if (PSG.FirstPeriod) {
       PSG.AmplitudeEnv--;
@@ -194,14 +194,14 @@ void Case_EnvType_11(void)
 
 
 
-void Case_EnvType_12(void)
+void Case_EnvType_12()
 {
    PSG.AmplitudeEnv = (PSG.AmplitudeEnv + 1) & 31;
 }
 
 
 
-void Case_EnvType_13(void)
+void Case_EnvType_13()
 {
    if (PSG.FirstPeriod) {
       PSG.AmplitudeEnv++;
@@ -214,7 +214,7 @@ void Case_EnvType_13(void)
 
 
 
-void Case_EnvType_14(void)
+void Case_EnvType_14()
 {
    if (!PSG.FirstPeriod) {
       PSG.AmplitudeEnv--;
@@ -323,7 +323,7 @@ void SetAYRegister(int Num, byte Value)
 
 
 
-inline void Synthesizer_Logic_Q(void)
+inline void Synthesizer_Logic_Q()
 {
    Ton_Counter_A.Hi++;
    if (Ton_Counter_A.Hi >= PSG.RegisterAY.TonA) {
@@ -356,7 +356,7 @@ inline void Synthesizer_Logic_Q(void)
 
 
 
-inline void Synthesizer_Mixer_Q(void)
+inline void Synthesizer_Mixer_Q()
 {
    int LevL, LevR, k;
 
@@ -447,7 +447,7 @@ inline void Synthesizer_Mixer_Q(void)
 
 
 
-void Synthesizer_Stereo16(void)
+void Synthesizer_Stereo16()
 {
    int Tick_Counter = 0;
    while (LoopCount.Hi) {
@@ -472,7 +472,7 @@ void Synthesizer_Stereo16(void)
 
 
 
-void Synthesizer_Stereo8(void)
+void Synthesizer_Stereo8()
 {
    int Tick_Counter = 0;
    while (LoopCount.Hi) {
@@ -497,7 +497,7 @@ void Synthesizer_Stereo8(void)
 
 
 
-inline void Synthesizer_Mixer_Q_Mono(void)
+inline void Synthesizer_Mixer_Q_Mono()
 {
    int Lev, k;
 
@@ -580,7 +580,7 @@ inline void Synthesizer_Mixer_Q_Mono(void)
 
 
 
-void Synthesizer_Mono16(void)
+void Synthesizer_Mono16()
 {
    int Tick_Counter = 0;
    while (LoopCount.Hi) {
@@ -601,7 +601,7 @@ void Synthesizer_Mono16(void)
 
 
 
-void Synthesizer_Mono8(void)
+void Synthesizer_Mono8()
 {
    int Tick_Counter = 0;
    while (LoopCount.Hi) {
@@ -622,7 +622,7 @@ void Synthesizer_Mono8(void)
 
 
 
-void Calculate_Level_Tables(void)
+void Calculate_Level_Tables()
 {
    int i, b, l, r;
    int Index_A, Index_B, Index_C;
@@ -703,7 +703,7 @@ void Calculate_Level_Tables(void)
 
 
 
-void ResetAYChipEmulation(void)
+void ResetAYChipEmulation()
 {
    Ton_Counter_A.Re = 0;
    Ton_Counter_B.Re = 0;
@@ -720,7 +720,7 @@ void ResetAYChipEmulation(void)
 
 
 
-void InitAYCounterVars(void)
+void InitAYCounterVars()
 {
    CPC.snd_cycle_count_init.both = static_cast<int64_t>(rint((4000000 * ((CPC.speed * 25) / 100.0)) /
       freq_table[CPC.snd_playback_rate] * 4294967296.0)); // number of Z80 cycles per sample
@@ -731,7 +731,7 @@ void InitAYCounterVars(void)
 
 
 
-void InitAY(void)
+void InitAY()
 {
    Index_AL = 255;
    Index_AR = 13;

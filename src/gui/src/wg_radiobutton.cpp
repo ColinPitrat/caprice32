@@ -37,7 +37,7 @@ CRadioButton::CRadioButton(const CPoint& p, int size, CWindow* pParent) :
 }
 
 
-CRadioButton::~CRadioButton(void)
+CRadioButton::~CRadioButton()
 {
    
 }
@@ -60,13 +60,13 @@ void CRadioButton::Select()
     SetState(CHECKED);
     // Uncheck all other 'children' of this parent that are radiobuttons:
     std::list<CWindow*> myChildWindows = m_pParentWindow->GetChildWindows();
-    for (std::list<CWindow*>::iterator iter = myChildWindows.begin(); iter != myChildWindows.end(); ++iter)
+    for (const auto &child : myChildWindows)
     {
       // Compare the types to find out if a child is a CRadioButton.
-      if (typeid(**iter) == typeid(*this) && *iter != this)
+      if (typeid(*child) == typeid(*this) && child != this)
       {
         // 'other' radiobutton found -> UNCHECK
-        dynamic_cast<CRadioButton*>(*iter)->SetState(UNCHECKED);
+        dynamic_cast<CRadioButton*>(child)->SetState(UNCHECKED);
       }
     }
     CMessageServer::Instance().QueueMessage(new TIntMessage(CMessage::CTRL_VALUECHANGE, m_pParentWindow, this, 1));
@@ -74,7 +74,7 @@ void CRadioButton::Select()
 }
 
 
-void CRadioButton::Draw(void) const
+void CRadioButton::Draw() const
 {
 	CWindow::Draw();
 

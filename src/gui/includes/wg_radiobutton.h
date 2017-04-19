@@ -43,7 +43,7 @@ public:
 	CRadioButton(const CPoint& p, int size, CWindow* pParent);
 
 	//! Standard destructor
-	virtual ~CRadioButton(void);
+	virtual ~CRadioButton();
 
 	//! The radiobutton state(s)
 	enum EState {
@@ -54,7 +54,7 @@ public:
 
 	//! Gets the current state of the radiobutton
 	//! \return The current radiobutton state
-	EState GetState(void) const { return m_eRadioButtonState; }
+	EState GetState() const { return m_eRadioButtonState; }
 
 	//! Set the radiobutton state
 	//! \param eState The radiobutton state
@@ -65,7 +65,7 @@ public:
 
 	// CWindow overrides
 	//! Draws the radiobutton
-	virtual void Draw(void) const override;
+	virtual void Draw() const override;
 
 	//! This is called whenever the radiobutton is clicked on by the mouse
 	//! Only the topmost window that bounds the point will be called by the system

@@ -48,7 +48,7 @@ public:
 	CCheckBox(const CRect& WindowRect, CWindow* pParent);
 
 	//! Standard destructor
-	virtual ~CCheckBox(void);
+	virtual ~CCheckBox();
 
 	//! The checkbox state
 	enum EState {
@@ -59,7 +59,7 @@ public:
 
 	//! Gets the current state of the checkbox
 	//! \return The current checkbox state
-	EState GetCheckBoxState(void) const { return m_eCheckBoxState; }
+	EState GetCheckBoxState() const { return m_eCheckBoxState; }
 
 	//! Set the checkbox state
 	//! \param eState The checkbox state
@@ -70,7 +70,7 @@ public:
 
 	// CWindow overrides
 	//! Draws the checkbox
-	virtual void Draw(void) const override;
+	virtual void Draw() const override;
 
 	//! This is called whenever the checkbox is clicked on by the mouse
 	//! Only the topmost window that bounds the point will be called by the system

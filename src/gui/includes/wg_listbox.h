@@ -68,11 +68,11 @@ public:
 	CListBox(const CRect& WindowRect, CWindow* pParent, bool bSingleSelection = false, unsigned int iItemHeight = 12, CFontEngine* pFontEngine = nullptr);
 
 	//! Standard destructor
-	virtual ~CListBox(void);
+	virtual ~CListBox();
 
 	//! Gets the height of the items
 	//! \return The height of the items in the listbox
-	unsigned int GetItemHeight(void) { return m_iItemHeight; }
+	unsigned int GetItemHeight() { return m_iItemHeight; }
 
 	//! Sets the heigh of the items in the listbox
 	//! \param iItemHeight The height of the items in the listbox
@@ -93,11 +93,11 @@ public:
 	void RemoveItem(unsigned int iItemIndex);
 
 	//! Remove all items from the list
-	void ClearItems(void);
+	void ClearItems();
 
 	//! Gets the number of items in the listbox
 	//! \return The number of items in the list
-	unsigned int Size(void) { return m_Items.size(); }
+	unsigned int Size() { return m_Items.size(); }
 
 	//! \param iItemIndex The index of the item to check (will return false if the index is out of range)
 	//! \return true if the item is selected
@@ -125,7 +125,7 @@ public:
 
 	// CWindow overrides
 	//! Draws the button and renders the button label
-	virtual void Draw(void) const override;
+	virtual void Draw() const override;
 
 	//! Giving a control a new WindowRect will move and resize the control
 	//! \param WindowRect A CRect that defines the outer limits of the control

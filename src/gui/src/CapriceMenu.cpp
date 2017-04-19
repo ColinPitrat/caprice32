@@ -39,10 +39,10 @@ CapriceMenu::CapriceMenu(const CRect& WindowRect, CWindow* pParent, SDL_Surface*
   }
 }
 
-CapriceMenu::~CapriceMenu(void) {
+CapriceMenu::~CapriceMenu() {
 }
 
-void CapriceMenu::CloseFrame(void) {
+void CapriceMenu::CloseFrame() {
   // Exit gui
   CMessageServer::Instance().QueueMessage(new CMessage(CMessage::APP_EXIT, nullptr, this));
 }

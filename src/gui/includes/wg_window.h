@@ -60,11 +60,11 @@ public:
 	CWindow(CWindow* pParent);
 
 	//! The CWindow destructor will automatically deregister itself with it's parent (if it had one)
-	virtual ~CWindow(void);
+	virtual ~CWindow();
 
 	//! Return the classname for the object
 	//! \return The classname of the object
-	virtual std::string GetClassName(void) const { return typeid(*this).name(); }
+	virtual std::string GetClassName() const { return typeid(*this).name(); }
 
 	//! Giving a control a new WindowRect will move and resize the control
 	//! \param WindowRect A CRect that defines the outer limits of the control
@@ -73,7 +73,7 @@ public:
 	//! Gets the window's rectangle
 	//! This is represented in the window's parent's client coordinates
 	//! \return A copy of the CRect that the window represents
-	virtual CRect GetWindowRect(void) const { return m_WindowRect; }
+	virtual CRect GetWindowRect() const { return m_WindowRect; }
 
 	//! Move the window and any child windows
 	//! \param MoveDistance The relative distance to move the window
@@ -84,7 +84,7 @@ public:
 	//! The ClientRect is useful for windows that will contain other windows
 	//! Internally it's represented via the window's coordinates
 	//! \return The client area CRect
-	virtual CRect GetClientRect(void) const { return m_ClientRect; }
+	virtual CRect GetClientRect() const { return m_ClientRect; }
 
 	//! Set the window's background color
 	//! \param Color A CRGBColor that represents the background color
@@ -92,7 +92,7 @@ public:
 
 	//! Retrieve a window's background color
 	//! \return A CRGBColor object that represents the background color
-	virtual CRGBColor GetBackgroundColor(void) { return m_BackgroundColor; }
+	virtual CRGBColor GetBackgroundColor() { return m_BackgroundColor; }
 
 	//! Describes the ancestor that is desired
 	enum EAncestor {
@@ -106,7 +106,7 @@ public:
 
 	//! Gets the view the window is a part of
 	//! \return A pointer to the view object for the window (if one exists), this assumes that the view is the root ancestor
-	virtual CView* GetView(void) const;
+	virtual CView* GetView() const;
 
 	//! Find out if the window is a child of another specified window
 	//! \param pWindow A pointer to the window that we're testing to see if this is a child of
@@ -115,7 +115,7 @@ public:
 
 	//! Get the visibility of the control
 	//! \return true if the control is visible
-	virtual bool IsVisible(void) { return m_bVisible; }
+	virtual bool IsVisible() { return m_bVisible; }
 
 	//! Set the visibility of the control, and all of it's children
 	//! \param bVisible Set to false to hide the control
@@ -123,7 +123,7 @@ public:
 
 	//! Get whether the control has the focus
 	//! \return true if the control has the focus
-  virtual bool HasFocus(void) const { return m_bHasFocus; }
+  virtual bool HasFocus() const { return m_bHasFocus; }
 
 	//! Set whether the control has the focus
 	//! \param bHasFocus Set to true to tell the control it has the focus
@@ -131,7 +131,7 @@ public:
 
 	//! Get whether the control is focusable or not
 	//! \return true if the control can have the focus
-  virtual bool IsFocusable(void) { return m_bIsFocusable; }
+  virtual bool IsFocusable() { return m_bIsFocusable; }
 
 	//! Set whether the control has the focus
 	//! \param bHasFocus Set to true to tell the control it has the focus
@@ -139,7 +139,7 @@ public:
 
 	//! Gets the SDL surface the window draws to
 	//! \return A pointer to the window's SDL surface
-	virtual SDL_Surface* GetSDLSurface(void) { return m_pSDLSurface; }
+	virtual SDL_Surface* GetSDLSurface() { return m_pSDLSurface; }
 
 	//! Translate the given CRect into view coordinates
 	//! \param Rect A CRect in client coordinates
@@ -171,7 +171,7 @@ public:
 
 	//! Return the WindowText for the current window
 	//! \return The WindowText
-	virtual std::string GetWindowText(void) const { return m_sWindowText; }
+	virtual std::string GetWindowText() const { return m_sWindowText; }
 
     // judb return list of children
 	std::list<CWindow*> GetChildWindows() { return m_ChildWindows; }
@@ -182,7 +182,7 @@ public:
 	virtual bool HitTest(const CPoint& Point) const;
 
 	//! Render the window itself
-	virtual void Draw(void) const;
+	virtual void Draw() const;
 
 	//! Blit the window to the given surface, using m_WindowRect as the offset into the surface
 	//! \param ScreenSurface A reference to the surface that the window will be copied to

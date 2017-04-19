@@ -48,7 +48,7 @@ public:
 	CTimer(CMessageClient* pOwner = nullptr);
 
 	//! Standard destructor
-	virtual ~CTimer(void);
+	virtual ~CTimer();
 
 	//! Start the timer. When the timer expires, it will post an CTRL_TIMER message
 	//! \param Interval The time interval in milliseconds before the timer will expire
@@ -56,22 +56,22 @@ public:
 	void StartTimer(unsigned long int Interval, bool bAutoRestart = false);
 
 	//! Stops the running timer
-	void StopTimer(void);
+	void StopTimer();
 
 	//! Indicates if the timer is currently running
 	//! \return true is the timer is currently running
-	bool IsRunning(void) { return m_TimerID != nullptr; }
+	bool IsRunning() { return m_TimerID != nullptr; }
 
 	//! Gets the number of times the timer has triggered since it was last reset
 	//! \return The count of times the timer has fired
-	long int GetCount(void) const { return m_iCounter; }
+	long int GetCount() const { return m_iCounter; }
 
 	//! Resets the internal counter to zero
-	void ResetCount(void) { m_iCounter = 0; }
+	void ResetCount() { m_iCounter = 0; }
 
 	//! Gets the owner of the timer
 	//! \return A pointer to the owner of the timer
-	CMessageClient* GetOwner(void) { return m_pOwner; }
+	CMessageClient* GetOwner() { return m_pOwner; }
 
 	//! For internal use only
 	//! \internal This is where the SDL timer calls back to, and should not be used elsewhere

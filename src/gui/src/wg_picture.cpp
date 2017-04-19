@@ -58,13 +58,13 @@ CPicture::CPicture(const CRect& WindowRect, CWindow* pParent, const CBitmapResou
 }
 
 
-CPicture::~CPicture(void)
+CPicture::~CPicture()
 {
 
 }
 
 
-void CPicture::Draw(void) const
+void CPicture::Draw() const
 {
 	CWindow::Draw();
 

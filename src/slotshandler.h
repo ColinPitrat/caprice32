@@ -35,8 +35,8 @@ int tape_insert (FILE *);
 int tape_insert (const std::string&);
 int tape_insert_cdt (FILE *);
 int tape_insert_voc (FILE *);
-void tape_eject (void);
-void cartridge_load (void);
+void tape_eject ();
+void cartridge_load ();
 int cartridge_load (const std::string&);
 int cartridge_load (FILE *file);
 // Smart load: support loading DSK, SNA, CDT, VOC, CPR or a zip containing one of these.
@@ -45,7 +45,7 @@ int file_load(const std::string&, const DRIVE);
 // Retrieve files that are passed as argument and update CPC fields so that they will be loaded properly
 void fillSlots (std::vector<std::string>, t_CPC&);
 // Loads slot content in memory
-void loadSlots(void);
+void loadSlots();
 
 #define MAX_DISK_FORMAT          8
 #define DEFAULT_DISK_FORMAT      0

@@ -70,12 +70,12 @@ CLabel::CLabel(const CPoint& point, CWindow* pParent, std::string sText, CRGBCol
 }
 
 
-CLabel::~CLabel(void)
+CLabel::~CLabel()
 {
 }
 
 
-void CLabel::Draw(void) const
+void CLabel::Draw() const
 {
  	CWindow::Draw();
 

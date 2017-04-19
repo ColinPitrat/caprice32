@@ -60,12 +60,12 @@ public:
 		bool bDrawBorder = false, const CRGBColor& BorderColor = DEFAULT_LINE_COLOR);
 
 	//! Standard destructor
-	virtual ~CPicture(void);
+	virtual ~CPicture();
 
 
 	// CWindow overrides
 	//! Draws the button and renders the button label
-	virtual void Draw(void) const override;
+	virtual void Draw() const override;
 
 	//! Giving a control a new WindowRect will move and resize the control
 	//! \param WindowRect A CRect that defines the outer limits of the control

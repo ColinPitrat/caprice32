@@ -64,7 +64,7 @@ CMenuBase::CMenuBase(const CRect& WindowRect, CWindow* pParent, CFontEngine* pFo
 }
 
 
-CMenuBase::~CMenuBase(void)
+CMenuBase::~CMenuBase()
 {
 	delete m_pPopupTimer;
 	m_pPopupTimer = nullptr;
@@ -88,7 +88,7 @@ void CMenuBase::RemoveMenuItem(int iPosition)
 }
 
 
-void CMenuBase::HideActivePopup(void)
+void CMenuBase::HideActivePopup()
 {
 	if (m_pActivePopup)
 	{
@@ -105,7 +105,7 @@ bool CMenuBase::OnMouseButtonDown(CPoint Point, unsigned int Button)
 
 	if (m_bVisible)
 	{
-		for (std::list<CWindow*>::reverse_iterator iter = m_ChildWindows.rbegin(); iter != m_ChildWindows.rend(); ++iter)
+		for (auto iter = m_ChildWindows.rbegin(); iter != m_ChildWindows.rend(); ++iter)
 		{
 			bResult = (*iter)->OnMouseButtonDown(Point, Button);
 			if (bResult)
@@ -134,14 +134,14 @@ bool CMenuBase::HandleMessage(CMessage* pMessage)
 				m_WindowRect.SizeRect().HitTest(ViewToWindow(pMouseMessage->Point)) == CRect::RELPOS_INSIDE)
 			{
 				UpdateCachedRects();
-				SMenuItem* pOldHighlight = m_pHighlightedItem;
+				const SMenuItem* pOldHighlight = m_pHighlightedItem;
 				m_pHighlightedItem = nullptr;
 				CPoint WindowPoint(ViewToWindow(pMouseMessage->Point));
-				for (t_MenuItemVector::iterator iter = m_MenuItems.begin(); iter != m_MenuItems.end(); ++iter)
+				for (const auto &item : m_MenuItems)
 				{
-					if (iter->Rect.HitTest(WindowPoint) == CRect::RELPOS_INSIDE && !iter->MenuItem.bSpacer)
+					if (item.Rect.HitTest(WindowPoint) == CRect::RELPOS_INSIDE && !item.MenuItem.bSpacer)
 					{
-						m_pHighlightedItem = &(iter->MenuItem);
+						m_pHighlightedItem = &(item.MenuItem);
 						break;
 					}
 				}
@@ -168,9 +168,9 @@ bool CMenuBase::HandleMessage(CMessage* pMessage)
 			TIntMessage* pCtrlMessage = dynamic_cast<TIntMessage*>(pMessage);
 			if (pCtrlMessage && pCtrlMessage->Destination() == this)
 			{
-				for (t_MenuItemVector::iterator iter = m_MenuItems.begin(); iter != m_MenuItems.end(); ++iter)
+				for (const auto &item : m_MenuItems)
 				{
-					if (pCtrlMessage->Source() == iter->MenuItem.pPopup)
+					if (pCtrlMessage->Source() == item.MenuItem.pPopup)
 					{
 						CMessageServer::Instance().QueueMessage(new TIntMessage(CMessage::CTRL_SINGLELCLICK, m_pParentWindow,
 							this, pCtrlMessage->Value()));
@@ -209,7 +209,7 @@ CMenu::CMenu(const CRect& WindowRect, CWindow* pParent, CFontEngine* pFontEngine
 }
 
 
-CMenu::~CMenu(void)
+CMenu::~CMenu()
 {
 
 }
@@ -228,7 +228,7 @@ void CMenu::InsertMenuItem(const SMenuItem& MenuItem, int iPosition)
 }
 
 
-void CMenu::Draw(void) const
+void CMenu::Draw() const
 {
 	CWindow::Draw();
 
@@ -236,21 +236,21 @@ void CMenu::Draw(void) const
 	{
 		CPainter Painter(m_pSDLSurface, CPainter::PAINT_REPLACE);
 		UpdateCachedRects();
-		for (t_MenuItemVector::const_iterator iter = m_MenuItems.begin(); iter != m_MenuItems.end(); ++iter)
+    for (const auto &item : m_MenuItems)
 		{
-			if (m_pHighlightedItem == &(iter->MenuItem))
+			if (m_pHighlightedItem == &(item.MenuItem))
 			{
-				Painter.DrawRect(iter->Rect, true, m_HighlightColor, m_HighlightColor);
+				Painter.DrawRect(item.Rect, true, m_HighlightColor, m_HighlightColor);
 			}
-			CRect TextRect(iter->Rect);
+			CRect TextRect(item.Rect);
 			TextRect.Grow(-2);
-			if (iter->MenuItem.bSpacer)
+			if (item.MenuItem.bSpacer)
 			{
 				Painter.DrawVLine(TextRect.Top(), TextRect.Bottom(), TextRect.Left(), COLOR_LIGHTGRAY);
 				Painter.DrawVLine(TextRect.Top(), TextRect.Bottom(), TextRect.Right(), COLOR_DARKGRAY);
 			}
 			else
-				iter->RenderedString.Draw(m_pSDLSurface, TextRect, CPoint(TextRect.Left(), (TextRect.Top() + TextRect.Bottom()) * 3 / 4));
+				item.RenderedString.Draw(m_pSDLSurface, TextRect, CPoint(TextRect.Left(), (TextRect.Top() + TextRect.Bottom()) * 3 / 4));
 		}
 	}
 }
@@ -264,23 +264,23 @@ bool CMenu::OnMouseButtonDown(CPoint Point, unsigned int Button)
 		(m_WindowRect.SizeRect().HitTest(ViewToWindow(Point)) == CRect::RELPOS_INSIDE))
 	{
 		UpdateCachedRects();
-		for (t_MenuItemVector::iterator iter = m_MenuItems.begin(); iter != m_MenuItems.end(); ++iter)
+      for (const auto &item : m_MenuItems)
 		{
-			if (iter->Rect.HitTest(ViewToWindow(Point)) == CRect::RELPOS_INSIDE && !iter->MenuItem.bSpacer)
+			if (item.Rect.HitTest(ViewToWindow(Point)) == CRect::RELPOS_INSIDE && !item.MenuItem.bSpacer)
 			{
 				HideActivePopup();
-				if (iter->MenuItem.pPopup)
+				if (item.MenuItem.pPopup)
 				{
-					CPopupMenu* pPopup = dynamic_cast<CPopupMenu*>(iter->MenuItem.pPopup);
+					CPopupMenu* pPopup = dynamic_cast<CPopupMenu*>(item.MenuItem.pPopup);
 					if (pPopup)
 					{
 						m_pActivePopup = pPopup;
-						ShowActivePopup(iter->Rect, GetAncestor(ROOT)->GetClientRect());
+						ShowActivePopup(item.Rect, GetAncestor(ROOT)->GetClientRect());
 					}
 				}
 				else
 				{
-					CMessageServer::Instance().QueueMessage(new TIntMessage(CMessage::CTRL_SINGLELCLICK, m_pParentWindow, this, iter->MenuItem.iItemId));
+					CMessageServer::Instance().QueueMessage(new TIntMessage(CMessage::CTRL_SINGLELCLICK, m_pParentWindow, this, item.MenuItem.iItemId));
 				}
 				break;
 			}
@@ -307,14 +307,14 @@ bool CMenu::HandleMessage(CMessage* pMessage)
 				m_WindowRect.SizeRect().HitTest(ViewToWindow(pMouseMessage->Point)) == CRect::RELPOS_INSIDE)
 			{
 				UpdateCachedRects();
-				SMenuItem* pOldHighlight = m_pHighlightedItem;
+				const SMenuItem* pOldHighlight = m_pHighlightedItem;
 				m_pHighlightedItem = nullptr;
 				CPoint WindowPoint(ViewToWindow(pMouseMessage->Point));
-				for (t_MenuItemVector::iterator iter = m_MenuItems.begin(); iter != m_MenuItems.end(); ++iter)
+				for (const auto &item : m_MenuItems)
 				{
-					if (iter->Rect.HitTest(WindowPoint) == CRect::RELPOS_INSIDE && !iter->MenuItem.bSpacer)
+					if (item.Rect.HitTest(WindowPoint) == CRect::RELPOS_INSIDE && !item.MenuItem.bSpacer)
 					{
-						m_pHighlightedItem = &(iter->MenuItem);
+						m_pHighlightedItem = &(item.MenuItem);
 						break;
 					}
 				}
@@ -340,29 +340,29 @@ bool CMenu::HandleMessage(CMessage* pMessage)
 }
 
 
-void CMenu::UpdateCachedRects(void) const
+void CMenu::UpdateCachedRects() const
 {
 	if (!m_bCachedRectsValid)
 	{
 		CRect SubRect(m_WindowRect.SizeRect());
 		SubRect.Grow(-2);
 		int iWidth = 5;
-		for (t_MenuItemVector::iterator iter = m_MenuItems.begin(); iter != m_MenuItems.end(); ++iter)
+    for (auto &item : m_MenuItems)
 		{
-			if (iter->MenuItem.bSpacer)
+			if (item.MenuItem.bSpacer)
 			{
 				CRect TextRect(SubRect.Left() + iWidth, SubRect.Top() + 2, SubRect.Left() + iWidth + 1, SubRect.Bottom() - 2);
 				TextRect.Grow(2);
-				iter->Rect = TextRect;
+				item.Rect = TextRect;
 				iWidth += 9;
 			}
 			else
 			{
 				CPoint Dims;
-				iter->RenderedString.GetMetrics(&Dims, nullptr, nullptr);
+				item.RenderedString.GetMetrics(&Dims, nullptr, nullptr);
 				CRect TextRect(SubRect.Left() + iWidth, SubRect.Top() + 2, SubRect.Left() + iWidth + Dims.XPos(), SubRect.Bottom() - 2);
 				TextRect.Grow(2);
-				iter->Rect = TextRect;
+				item.Rect = TextRect;
 				iWidth += Dims.XPos() + 8;
 			}
 		}
@@ -408,7 +408,7 @@ CPopupMenu::CPopupMenu(const CRect& WindowRect, CWindow* pParent, CFontEngine* p
 }
 
 
-CPopupMenu::~CPopupMenu(void)
+CPopupMenu::~CPopupMenu()
 {
 
 }
@@ -422,14 +422,14 @@ void CPopupMenu::Show(CPoint Position)
 	}
 
 	int iHeight = 4;
-	for (t_MenuItemVector::iterator iter = m_MenuItems.begin(); iter != m_MenuItems.end(); ++iter)
+    for (const auto &item : m_MenuItems)
 	{
-		if (iter->MenuItem.bSpacer)
+		if (item.MenuItem.bSpacer)
 			iHeight += 6;
 		else
 		{
 			CPoint Dims;
-			iter->RenderedString.GetMetrics(&Dims, nullptr, nullptr);
+			item.RenderedString.GetMetrics(&Dims, nullptr, nullptr);
 			iHeight += Dims.YPos() + 5;
 		}
 	}
@@ -468,7 +468,7 @@ void CPopupMenu::Show(CPoint Position)
 }
 
 
-void CPopupMenu::Hide(void)
+void CPopupMenu::Hide()
 {
 	HideActivePopup();
 	m_bVisible = false;
@@ -484,7 +484,7 @@ void CPopupMenu::Hide(void)
 }
 
 
-void CPopupMenu::HideAll(void)
+void CPopupMenu::HideAll()
 {
 	CPopupMenu* pParentPopup = dynamic_cast<CPopupMenu*>(m_pParentWindow);
 	if (pParentPopup)
@@ -520,7 +520,7 @@ bool CPopupMenu::IsInsideChild(const CPoint& Point) const
 }
 
 
-void CPopupMenu::Draw(void) const
+void CPopupMenu::Draw() const
 {
 	CWindow::Draw();
 
@@ -531,24 +531,24 @@ void CPopupMenu::Draw(void) const
 		Painter.DrawHLine(0, m_WindowRect.Width(), m_WindowRect.Height(), COLOR_DARKGRAY);
 		Painter.DrawVLine(0, m_WindowRect.Height(), m_WindowRect.Width(), COLOR_DARKGRAY);
 		UpdateCachedRects();
-		for (t_MenuItemVector::const_iterator iter = m_MenuItems.begin(); iter != m_MenuItems.end(); ++iter)
+      for (const auto &item : m_MenuItems)
 		{
-			if (m_pHighlightedItem == &(iter->MenuItem))
+			if (m_pHighlightedItem == &(item.MenuItem))
 			{
-				Painter.DrawRect(iter->Rect, true, m_HighlightColor, m_HighlightColor);
+				Painter.DrawRect(item.Rect, true, m_HighlightColor, m_HighlightColor);
 			}
-			CRect TextRect(iter->Rect);
+			CRect TextRect(item.Rect);
 			TextRect.Grow(-2);
-			if (iter->MenuItem.bSpacer)
+			if (item.MenuItem.bSpacer)
 			{
 				Painter.DrawHLine(TextRect.Left(), TextRect.Right(), TextRect.Top(), COLOR_LIGHTGRAY);
 				Painter.DrawHLine(TextRect.Left(), TextRect.Right(), TextRect.Bottom(), COLOR_DARKGRAY);
 			}
 			else
-				iter->RenderedString.Draw(m_pSDLSurface, TextRect, TextRect.TopLeft());
-			if (iter->MenuItem.pPopup)
+				item.RenderedString.Draw(m_pSDLSurface, TextRect, TextRect.TopLeft());
+			if (item.MenuItem.pPopup)
 			{
-				CRect ArrowRect(iter->Rect);
+				CRect ArrowRect(item.Rect);
 				ArrowRect.SetLeft(ArrowRect.Right() - m_hRightArrowBitmap.Bitmap()->w);
 				SDL_Rect SourceRect;
 				SourceRect.x = stdex::safe_static_cast<short int>(0);
@@ -577,9 +577,9 @@ void CPopupMenu::PaintToSurface(SDL_Surface& /*ScreenSurface*/, SDL_Surface& Flo
 		SDL_Rect DestRect = CRect(m_WindowRect + Offset).SDLRect();
 		SDL_BlitSurface(m_pSDLSurface, &SourceRect, &FloatingSurface, &DestRect);
 		CPoint NewOffset = m_ClientRect.TopLeft() + m_WindowRect.TopLeft() + Offset;
-		for (std::list<CWindow*>::const_iterator iter = m_ChildWindows.begin(); iter != m_ChildWindows.end(); ++iter)
+    for (const auto& child : m_ChildWindows)
 		{
-			(*iter)->PaintToSurface(FloatingSurface, FloatingSurface, NewOffset);
+			child->PaintToSurface(FloatingSurface, FloatingSurface, NewOffset);
 		}
 	}
 }
@@ -593,25 +593,25 @@ bool CPopupMenu::OnMouseButtonDown(CPoint Point, unsigned int Button)
  	if (!bResult && m_bVisible && (m_WindowRect.SizeRect().HitTest(WindowPoint) == CRect::RELPOS_INSIDE))
 	{
 		UpdateCachedRects();
-		for (t_MenuItemVector::iterator iter = m_MenuItems.begin(); iter != m_MenuItems.end(); ++iter)
+    for (const auto &item : m_MenuItems)
 		{
-			if (iter->Rect.HitTest(WindowPoint) == CRect::RELPOS_INSIDE && !iter->MenuItem.bSpacer)
+			if (item.Rect.HitTest(WindowPoint) == CRect::RELPOS_INSIDE && !item.MenuItem.bSpacer)
 			{
-				if (!iter->MenuItem.pPopup)
+				if (!item.MenuItem.pPopup)
 				{
 					CMessageClient* pDestination = m_pParentWindow;
 					if (m_pParentMenu)
 					{
 						pDestination = m_pParentMenu;
 					}
-					CMessageServer::Instance().QueueMessage(new TIntMessage(CMessage::CTRL_SINGLELCLICK, pDestination, this, iter->MenuItem.iItemId));
+					CMessageServer::Instance().QueueMessage(new TIntMessage(CMessage::CTRL_SINGLELCLICK, pDestination, this, item.MenuItem.iItemId));
 					HideAll();
 				}
 				else
 				{
 					HideActivePopup();
-					m_pActivePopup = iter->MenuItem.pPopup;
-					ShowActivePopup(iter->Rect, GetAncestor(ROOT)->GetClientRect());
+					m_pActivePopup = item.MenuItem.pPopup;
+					ShowActivePopup(item.Rect, GetAncestor(ROOT)->GetClientRect());
 				}
 				break;
 			}
@@ -654,11 +654,11 @@ bool CPopupMenu::HandleMessage(CMessage* pMessage)
 			if (pMessage->Destination() == this)
 			{
 				CRect ItemRect;
-				for (t_MenuItemVector::iterator iter = m_MenuItems.begin(); iter != m_MenuItems.end(); ++iter)
+				for (const auto &item : m_MenuItems)
 				{
-					if (m_pHighlightedItem == &(iter->MenuItem))
+					if (m_pHighlightedItem == &(item.MenuItem))
 					{
-						ItemRect = iter->Rect;
+						ItemRect = item.Rect;
 						break;
 					}
 				}
@@ -682,29 +682,29 @@ bool CPopupMenu::HandleMessage(CMessage* pMessage)
 }
 
 
-void CPopupMenu::UpdateCachedRects(void) const
+void CPopupMenu::UpdateCachedRects() const
 {
 	if (!m_bCachedRectsValid)
 	{
 		CRect SubRect(m_WindowRect.SizeRect());
 		SubRect.Grow(-2);
 		int iHeight = 4;
-		for (t_MenuItemVector::iterator iter = m_MenuItems.begin(); iter != m_MenuItems.end(); ++iter)
+    for (auto &item : m_MenuItems)
 		{
-			if (iter->MenuItem.bSpacer)
+			if (item.MenuItem.bSpacer)
 			{
 				CRect TextRect(SubRect.Left() + 3, SubRect.Top() + iHeight, SubRect.Right() - 3, SubRect.Top() + iHeight + 1);
 				TextRect.Grow(2);
-				iter->Rect = TextRect;
+				item.Rect = TextRect;
 				iHeight += 6;
 			}
 			else
 			{
 				CPoint Dims;
-				iter->RenderedString.GetMetrics(&Dims, nullptr, nullptr);
+				item.RenderedString.GetMetrics(&Dims, nullptr, nullptr);
 				CRect TextRect(SubRect.Left() + 3, SubRect.Top() + iHeight, SubRect.Right() - 3, SubRect.Top() + iHeight + Dims.YPos());
 				TextRect.Grow(2);
-				iter->Rect = TextRect;
+				item.Rect = TextRect;
 				iHeight += Dims.YPos() + 5;
 			}
 		}

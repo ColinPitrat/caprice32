@@ -58,7 +58,7 @@ CButton::CButton(const CRect& WindowRect, CWindow* pParent, std::string sText, C
 }
 
 
-CButton::~CButton(void)
+CButton::~CButton()
 {
   if(m_pParentWindow)
   {
@@ -77,7 +77,7 @@ void CButton::SetButtonState(EState eState)
 }
 
 
-void CButton::Draw(void) const
+void CButton::Draw() const
 {
 	CWindow::Draw();
 
@@ -223,7 +223,7 @@ CPictureButton::CPictureButton(const CRect& WindowRect, CWindow* pParent, const 
 }
 
 
-CPictureButton::~CPictureButton(void)
+CPictureButton::~CPictureButton()
 {
 
 }
@@ -242,7 +242,7 @@ void CPictureButton::SetPicture(const CBitmapResourceHandle& hBitmap)
 }
 
 
-void CPictureButton::Draw(void) const
+void CPictureButton::Draw() const
 {
 	CWindow::Draw();
 

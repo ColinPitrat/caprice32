@@ -63,7 +63,7 @@ public:
 	CPainter(CWindow* pWindow, EPaintMode ePaintMode = PAINT_NORMAL);
 
 	//! Standard destructor
-	virtual ~CPainter(void) { }
+	virtual ~CPainter() { }
 
 
 	//! Draw a horizontal line
@@ -124,10 +124,10 @@ public:
 
 protected:
 	//! Locks the SDL surface
-	void LockSurface(void);
+	void LockSurface();
 
 	//! Unlocks the SDL surface
-	void UnlockSurface(void);
+	void UnlockSurface();
 
 	//! Mixes thje two colors based on the painting mode
 	//! \param ColorBase The color to use as the base

@@ -44,7 +44,7 @@ CCheckBox::CCheckBox(const CRect& WindowRect, CWindow* pParent) :
 }
 
 
-CCheckBox::~CCheckBox(void)
+CCheckBox::~CCheckBox()
 {
 
 }
@@ -78,7 +78,7 @@ void CCheckBox::ToggleCheckBoxState()
 }
 
 
-void CCheckBox::Draw(void) const
+void CCheckBox::Draw() const
 {
 	CWindow::Draw();
 

@@ -61,7 +61,7 @@ CFrame::CFrame(const CRect& WindowRect, CWindow* pParent, CFontEngine* pFontEngi
 }
 
 
-CFrame::~CFrame(void)  // virtual
+CFrame::~CFrame()  // virtual
 {
 	if (m_bModal)
 	{
@@ -70,7 +70,7 @@ CFrame::~CFrame(void)  // virtual
 }
 
 
-void CFrame::CloseFrame(void)
+void CFrame::CloseFrame()
 {
 	CMessageServer::Instance().QueueMessage(new CMessage(CMessage::APP_DESTROY_FRAME, nullptr, this));
 }
@@ -90,7 +90,7 @@ void CFrame::SetModal(bool bModal)
 }
 
 
-void CFrame::Draw(void) const  // virtual
+void CFrame::Draw() const  // virtual
 {
 	CWindow::Draw();
 
@@ -124,11 +124,11 @@ void CFrame::PaintToSurface(SDL_Surface& ScreenSurface, SDL_Surface& FloatingSur
 			SDL_Rect DestRect = CRect(m_WindowRect + Offset).SDLRect();
 			SDL_BlitSurface(m_pSDLSurface, &SourceRect, &ScreenSurface, &DestRect);
 			CPoint NewOffset = m_ClientRect.TopLeft() + m_WindowRect.TopLeft() + Offset;
-			for (std::list<CWindow*>::const_iterator iter = m_ChildWindows.begin(); iter != m_ChildWindows.end(); ++iter)
+			for (const auto& child : m_ChildWindows)
 			{
-				if (*iter)
+				if (child)
 				{
-					(*iter)->PaintToSurface(ScreenSurface, FloatingSurface, NewOffset);
+					child->PaintToSurface(ScreenSurface, FloatingSurface, NewOffset);
 				}
 			}
 		}	
@@ -138,13 +138,13 @@ void CFrame::PaintToSurface(SDL_Surface& ScreenSurface, SDL_Surface& FloatingSur
 //			SDL_BlitSurface(m_pSDLSurface, &SourceRect, &ScreenSurface, &DestGhostRect);
 //			Original line:
 			SDL_BlitSurface(m_pSDLSurface, &SourceRect, &FloatingSurface, &DestGhostRect);
-			for (std::list<CWindow*>::const_iterator iter = m_ChildWindows.begin(); iter != m_ChildWindows.end(); ++iter)
+			for (const auto& child : m_ChildWindows)
 			{
-				if (*iter)
+				if (child)
 				{
                 // (*iter)->PaintToSurface(ScreenSurface, FloatingSurface, m_ClientRect.TopLeft() + m_FrameGhostRect.TopLeft() + Offset);
 				// Original line:
-					(*iter)->PaintToSurface(FloatingSurface, FloatingSurface, m_ClientRect.TopLeft() + m_FrameGhostRect.TopLeft() + Offset);
+					child->PaintToSurface(FloatingSurface, FloatingSurface, m_ClientRect.TopLeft() + m_FrameGhostRect.TopLeft() + Offset);
 				}
 			}
 			// this is a quick trick to convert the surface to being transparent

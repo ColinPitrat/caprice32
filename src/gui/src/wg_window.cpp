@@ -74,7 +74,7 @@ CWindow::CWindow(CWindow* pParent) :
 }
 
 
-CWindow::~CWindow(void)
+CWindow::~CWindow()
 {
 	// Each child window is deleted, and should in their destructors call back to this object to Deregister themselves
 	CMessageServer::Instance().DeregisterMessageClient(this);
@@ -145,7 +145,7 @@ CWindow* CWindow::GetAncestor(EAncestor eAncestor) const
 }
 
 
-CView* CWindow::GetView(void) const  // virtual
+CView* CWindow::GetView() const  // virtual
 {
 	return dynamic_cast<CView*>(GetAncestor(ROOT));
 }
@@ -285,16 +285,20 @@ void CWindow::SetWindowText(const std::string& sText)
 
 bool CWindow::HitTest(const CPoint& Point) const
 {
-	bool bHit = m_WindowRect.SizeRect().HitTest(ViewToWindow(Point)) == CRect::RELPOS_INSIDE;
-	for (std::list<CWindow*>::const_iterator iter = m_ChildWindows.begin(); !bHit && iter != m_ChildWindows.end(); ++iter)
+	if (m_WindowRect.SizeRect().HitTest(ViewToWindow(Point)) == CRect::RELPOS_INSIDE) {
+    return true;
+  };
+	for (const auto &child : m_ChildWindows)
 	{
-		bHit = (*iter)->HitTest(Point);
+    if (child->HitTest(Point)) {
+      return true;
+    }
 	}
-	return bHit;
+	return false;
 }
 
 
-void CWindow::Draw(void) const
+void CWindow::Draw() const
 {
 	if (m_pSDLSurface)	{
 
@@ -313,11 +317,11 @@ void CWindow::PaintToSurface(SDL_Surface& ScreenSurface, SDL_Surface& FloatingSu
 		SDL_Rect DestRect = CRect(m_WindowRect + Offset).SDLRect();
 		SDL_BlitSurface(m_pSDLSurface, &SourceRect, &ScreenSurface, &DestRect);
 		CPoint NewOffset = m_ClientRect.TopLeft() + m_WindowRect.TopLeft() + Offset;
-		for (std::list<CWindow*>::const_iterator iter = m_ChildWindows.begin(); iter != m_ChildWindows.end(); ++iter)
+    for (const auto &child : m_ChildWindows)
 		{
-			if (*iter)
+			if (child)
 			{
-				(*iter)->PaintToSurface(ScreenSurface, FloatingSurface, NewOffset);
+				child->PaintToSurface(ScreenSurface, FloatingSurface, NewOffset);
 			}
 		}
 	}
@@ -344,7 +348,7 @@ bool CWindow::OnMouseButtonDown(CPoint Point, unsigned int Button)
 
 	if (m_bVisible && (m_WindowRect.SizeRect().HitTest(ViewToWindow(Point)) == CRect::RELPOS_INSIDE))
 	{
-		for (std::list<CWindow*>::reverse_iterator iter = m_ChildWindows.rbegin(); iter != m_ChildWindows.rend(); ++iter)
+		for (auto iter = m_ChildWindows.rbegin(); iter != m_ChildWindows.rend(); ++iter)
 		{
 			bResult = (*iter)->OnMouseButtonDown(Point, Button);
 			if (bResult)
@@ -364,7 +368,7 @@ bool CWindow::OnMouseButtonUp(CPoint Point, unsigned int Button)
 
 	if (m_bVisible && (m_WindowRect.SizeRect().HitTest(ViewToWindow(Point)) == CRect::RELPOS_INSIDE))
 	{
-		for (std::list<CWindow*>::reverse_iterator iter = m_ChildWindows.rbegin(); iter != m_ChildWindows.rend(); ++iter)
+		for (auto iter = m_ChildWindows.rbegin(); iter != m_ChildWindows.rend(); ++iter)
 		{
 			bResult = (*iter)->OnMouseButtonUp(Point, Button);
 			if (bResult)
