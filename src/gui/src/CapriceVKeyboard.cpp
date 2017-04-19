@@ -97,7 +97,7 @@ namespace wGui {
   }
 
   std::list<SDL_Event> CapriceVKeyboard::StringToEvents(std::string toTranslate) {
-    auto keyFromChar = keysFromChars[CPC.kbd_layout];
+    auto keyFromChar = SDLkeysFromChars;
     std::list<SDL_Event> result;
     bool escaped = false;
     bool cap32_cmd = false;
@@ -119,14 +119,14 @@ namespace wGui {
           keycode += MOD_EMU_KEY;
           // Lookup the SDL key corresponding to this emulator command
           for (dword n = 0; n < KBD_MAX_ENTRIES; n++) {
-            if(keycode == kbd_layout[CPC.kbd_layout][n][0]) {
-              key.key.keysym.sym = static_cast<SDLKey>(kbd_layout[CPC.kbd_layout][n][1] & 0xffff);
-              key.key.keysym.mod = static_cast<SDLMod>(kbd_layout[CPC.kbd_layout][n][1] >> 16);
+            if(keycode == kbd_layout[n][0]) {
+              key.key.keysym.sym = static_cast<SDLKey>(kbd_layout[n][1] & 0xffff);
+              key.key.keysym.mod = static_cast<SDLMod>(kbd_layout[n][1] >> 16);
             }
           }
         } else {
-          key.key.keysym.sym = static_cast<SDLKey>(kbd_layout[CPC.kbd_layout][keycode][1] & 0xffff);
-          key.key.keysym.mod = static_cast<SDLMod>(kbd_layout[CPC.kbd_layout][keycode][1] >> 16);
+          key.key.keysym.sym = static_cast<SDLKey>(kbd_layout[keycode][1] & 0xffff);
+          key.key.keysym.mod = static_cast<SDLMod>(kbd_layout[keycode][1] >> 16);
         }
         escaped = false;
         cap32_cmd = false;

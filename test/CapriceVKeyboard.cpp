@@ -14,6 +14,8 @@ class CapriceVKeyboardTest : public testing::Test {
       CPC.resources_path = "resources";
       app.Init();
       cvk = new CapriceVKeyboard(CRect(), nullptr, nullptr);
+	  // Necessary to initialize the keyboard layout (use default US map)
+	  init_kbd_layout(std::string());
     }
 
     void TearDown() {
@@ -58,8 +60,6 @@ TEST_F(CapriceVKeyboardTest, StringToEventsWithEscapedChar)
 {
   std::string input = "run\"s\btest\n";
 
-  // Ensure we use US keyboard
-  CPC.kbd_layout = 0;
   auto tmp = cvk->StringToEvents(input);
   std::vector<SDL_Event> result(tmp.begin(), tmp.end());
 

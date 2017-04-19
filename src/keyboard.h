@@ -12,6 +12,10 @@
 #define MOD_PC_SHIFT    (KMOD_SHIFT << 16)
 #define MOD_PC_CTRL     (KMOD_CTRL << 16)
 #define MOD_PC_MODE     (KMOD_MODE << 16)
+#define MOD_PC_META     (KMOD_META << 16)
+#define MOD_PC_ALT      (KMOD_ALT << 16)
+#define MOD_PC_NUM      (KMOD_NUM << 16)
+#define MOD_PC_CAPS     (KMOD_CAPS << 16)
 
 typedef enum {
    CAP32_EXIT = MOD_EMU_KEY,
@@ -180,11 +184,14 @@ typedef enum {
    CPC_FR_uGRAVE
 } CPC_KEYS;
 
-extern dword cpc_kbd[3][149];
+#define CPC_KEY_NUM 149    // Number of different keys on a CPC keyboard
+#define CPC_KEYBOARD_NUM 3 // Number of different keyboards supported.
+extern dword cpc_kbd[CPC_KEYBOARD_NUM][CPC_KEY_NUM];
 
 #define KBD_MAX_ENTRIES 160
-extern int kbd_layout[4][KBD_MAX_ENTRIES][2];
+extern int kbd_layout[KBD_MAX_ENTRIES][2];
 
-extern std::map<char, std::pair<SDLKey, SDLMod>> keysFromChars[3];
+extern std::map<char, std::pair<SDLKey, SDLMod>> SDLkeysFromChars;
+void init_kbd_layout(std::string);
 
 #endif
