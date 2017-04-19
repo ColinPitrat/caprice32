@@ -287,7 +287,7 @@ typedef struct {
    std::string rom_file[16];
    std::string rom_mf2;
 
-   InputMapper *InputMapper;
+   class InputMapper *InputMapper;
 } t_CPC;
 
 typedef struct {
