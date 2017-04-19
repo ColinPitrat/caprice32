@@ -73,7 +73,7 @@ int cpr_load (FILE *pfile)
       return rc;
    }
 
-   std::unique_ptr<byte> tmpBuffer(new byte[CARTRIDGE_MAX_SIZE]);
+   std::unique_ptr<byte[]> tmpBuffer(new byte[CARTRIDGE_MAX_SIZE]);
    byte *pbTmpBuffer = tmpBuffer.get();
 
    // Check RIFF header
