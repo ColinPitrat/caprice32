@@ -4,6 +4,7 @@
 #include <getopt.h>
 #include <iostream>
 #include <fstream>
+#include "SDL.h"
 #include "cap32.h"
 #include "keyboard.h"
 #include "stringutils.h"

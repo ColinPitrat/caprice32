@@ -4,6 +4,8 @@
 #include "types.h"
 #include "SDL.h"
 #include <map>
+#include <list>
+#include "cap32.h"
 
 #define MOD_CPC_SHIFT   (0x01 << 8)
 #define MOD_CPC_CTRL    (0x02 << 8)
@@ -186,12 +188,29 @@ typedef enum {
 
 #define CPC_KEY_NUM 149    // Number of different keys on a CPC keyboard
 #define CPC_KEYBOARD_NUM 3 // Number of different keyboards supported.
-extern dword cpc_kbd[CPC_KEYBOARD_NUM][CPC_KEY_NUM];
 
-#define KBD_MAX_ENTRIES 160
-extern int kbd_layout[KBD_MAX_ENTRIES][2];
+class InputMapper {
+	private:
+		static const dword cpc_kbd[CPC_KEYBOARD_NUM][CPC_KEY_NUM];
+		static const std::map<const std::string, const unsigned int> CPCkeysFromStrings;
+		static const std::map<const std::string, const unsigned int> SDLkeysFromStrings;
+		static const std::map<const char, const CPC_KEYS> CPCkeysFromChars;
+		std::map<char, std::pair<SDLKey, SDLMod>> SDLkeysFromChars;
+		static std::map<unsigned int, unsigned int> SDLkeysymFromCPCkeys_us;
+		std::map<unsigned int, unsigned int> CPCkeysFromSDLkeysym;
+		std::map<unsigned int, unsigned int> SDLkeysymFromCPCkeys;
+		t_CPC *CPC;
 
-extern std::map<char, std::pair<SDLKey, SDLMod>> SDLkeysFromChars;
-void init_kbd_layout(std::string);
+		void process_cfg_line(char *);
+
+	public:
+		InputMapper(t_CPC *CPC);
+		void init(void);
+		dword CPCkeyFromKeysym(SDL_keysym key);
+		dword CPCkeyFromJoystickButton(SDL_JoyButtonEvent jbutton);
+		void CPCkeyFromJoystickAxis(SDL_JoyAxisEvent jaxis, dword *cpc_key, bool &release);
+		std::list<SDL_Event> StringToEvents(std::string);
+		void set_joystick_emulation(void);
+};
 
 #endif

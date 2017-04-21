@@ -29,6 +29,7 @@
 #include <string>
 #include <vector>
 
+class InputMapper;
 //#define DEBUG
 //#define DEBUG_CRTC
 //#define DEBUG_FDC
@@ -285,6 +286,8 @@ typedef struct {
    std::string rom_path;
    std::string rom_file[16];
    std::string rom_mf2;
+
+   class InputMapper *InputMapper;
 } t_CPC;
 
 typedef struct {

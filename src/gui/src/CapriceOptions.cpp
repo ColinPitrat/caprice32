@@ -5,6 +5,7 @@
 #include "std_ex.h"
 #include "CapriceOptions.h"
 #include "cap32.h"
+#include "keyboard.h"
 #include "fileutils.h"
 
 // CPC emulation properties, defined in cap32.h:
@@ -558,7 +559,7 @@ void CapriceOptions::ProcessOptionChanges(t_CPC& CPC, bool saveChanges) {
     // Activate/deactivate joystick emulation
     if (CPC.joystick_emulation != m_oldCPCsettings.joystick_emulation)
     {
-       init_joystick_emulation();
+       CPC.InputMapper->set_joystick_emulation();
     }
 
     if (saveChanges)
