@@ -94,7 +94,7 @@ SDL_Surface* CBitmapResourceHandle::Bitmap() const
 
 CBitmapFileResourceHandle::CBitmapFileResourceHandle(std::string sFilename) :
 	CBitmapResourceHandle(AUTO_CREATE_RESOURCE_ID),
-	m_sFilename(sFilename)
+	m_sFilename(std::move(sFilename))
 {
 	if (m_BitmapMap.find(m_ResourceId) == m_BitmapMap.end())
 	{

@@ -72,10 +72,7 @@ CScrollBar::CScrollBar(const CRect& WindowRect, CWindow* pParent, EScrollBarType
 }
 
 
-CScrollBar::~CScrollBar()
-{
-
-}
+CScrollBar::~CScrollBar() = default;
 
 
 void CScrollBar::SetValue(int iValue, bool bRedraw)  // virtual

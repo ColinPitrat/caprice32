@@ -28,7 +28,7 @@ CapriceAbout::CapriceAbout(const CRect& WindowRect, CWindow* pParent, CFontEngin
 	m_pMessageLabel = new CLabel(CPoint(5, 180), this, "F10 - Quit");
 	try	{
 	    m_pPicture = new CPicture(CRect(CPoint(5, 5), 162, 62), this, CPC.resources_path + "/cap32logo.bmp", true);
-	} catch (Wg_Ex_App e) {
+	} catch (Wg_Ex_App &e) {
 		// we don't want to stop the program if we can't load the picture, so just print the error and keep going
 		wUtil::Trace(e.std_what());
 	}

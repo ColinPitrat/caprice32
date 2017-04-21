@@ -70,9 +70,7 @@ CLabel::CLabel(const CPoint& point, CWindow* pParent, std::string sText, CRGBCol
 }
 
 
-CLabel::~CLabel()
-{
-}
+CLabel::~CLabel() = default;
 
 
 void CLabel::Draw() const

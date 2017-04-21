@@ -65,10 +65,7 @@ CListBox::CListBox(const CRect& WindowRect, CWindow* pParent, bool bSingleSelect
 }
 
 
-CListBox::~CListBox()
-{
-
-}
+CListBox::~CListBox() = default;
 
 
 void CListBox::SetItemHeight(unsigned int iItemHeight)

@@ -223,10 +223,7 @@ CPictureButton::CPictureButton(const CRect& WindowRect, CWindow* pParent, const 
 }
 
 
-CPictureButton::~CPictureButton()
-{
-
-}
+CPictureButton::~CPictureButton() = default;
 
 
 void CPictureButton::SetPicture(std::string sPictureFile)

@@ -52,10 +52,7 @@ CGroupBox::CGroupBox(const CRect& WindowRect, CWindow* pParent, std::string sTex
 }
 
 
-CGroupBox::~CGroupBox()
-{
-
-}
+CGroupBox::~CGroupBox() = default;
 
 
 void CGroupBox::Draw() const

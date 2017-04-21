@@ -44,10 +44,7 @@ CCheckBox::CCheckBox(const CRect& WindowRect, CWindow* pParent) :
 }
 
 
-CCheckBox::~CCheckBox()
-{
-
-}
+CCheckBox::~CCheckBox() = default;
 
 
 void CCheckBox::SetCheckBoxState(EState eState)

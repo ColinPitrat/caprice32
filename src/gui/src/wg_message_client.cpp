@@ -30,10 +30,7 @@
 namespace wGui
 {
 
-CMessageClient::CMessageClient()
-{
-
-}
+CMessageClient::CMessageClient() = default;
 
 
 CMessageClient::~CMessageClient()  // virtual

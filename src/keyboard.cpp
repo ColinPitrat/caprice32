@@ -1173,7 +1173,7 @@ void InputMapper::process_cfg_line(char *s)
 }
 
 #define MAX_LINE_LENGTH 80
-void InputMapper::init(void)
+void InputMapper::init()
 {
 	std::string layout_file = CPC->resources_path + "/" + CPC->kbd_layout;
 	std::filebuf fb;
@@ -1193,14 +1193,14 @@ void InputMapper::init(void)
 		fb.close();
 	}
 
-	for (std::map<unsigned int, unsigned int>::iterator it = SDLkeysymFromCPCkeys.begin(); it != SDLkeysymFromCPCkeys.end(); ++it) {
-		CPCkeysFromSDLkeysym[it->second] = it->first;
+	for (const auto &mapping : SDLkeysymFromCPCkeys) {
+		CPCkeysFromSDLkeysym[mapping.second] = mapping.first;
 	}
 
-	for (std::map<const char, const CPC_KEYS>::const_iterator it = CPCkeysFromChars.begin(); it != CPCkeysFromChars.end(); ++it) {
-		if (SDLkeysymFromCPCkeys.count(it->second) != 0) {
-			sdl_moddedkey = SDLkeysymFromCPCkeys[it->second];
-			SDLkeysFromChars[it->first] = std::make_pair(static_cast<SDLKey>(sdl_moddedkey & 0xffff), static_cast<SDLMod>(sdl_moddedkey >> 16));
+	for (const auto &mapping : CPCkeysFromChars) {
+		if (SDLkeysymFromCPCkeys.count(mapping.second) != 0) {
+			sdl_moddedkey = SDLkeysymFromCPCkeys[mapping.second];
+			SDLkeysFromChars[mapping.first] = std::make_pair(static_cast<SDLKey>(sdl_moddedkey & 0xffff), static_cast<SDLMod>(sdl_moddedkey >> 16));
 		}
 	}
 }
@@ -1215,7 +1215,7 @@ dword InputMapper::CPCkeyFromKeysym(SDL_keysym keysym) {
     if (keysym.mod & KMOD_ALT)    sdl_key |= MOD_PC_ALT;
     // Ignore sticky modifiers (MOD_PC_NUM and MOD_PC_CAPS)
 
-    std::map<unsigned int, unsigned int>::iterator cpc_key = CPCkeysFromSDLkeysym.find(sdl_key);
+    auto cpc_key = CPCkeysFromSDLkeysym.find(sdl_key);
     // TODO(sebhz) magic numbers are bad. Get rid of the 0xff.
     if (cpc_key == CPCkeysFromSDLkeysym.end()) return 0xff;
 
@@ -1273,7 +1273,7 @@ std::list<SDL_Event> InputMapper::StringToEvents(std::string toTranslate) {
     return result;
 }
 
-void InputMapper::set_joystick_emulation (void)
+void InputMapper::set_joystick_emulation()
 {
   // CPC joy key, CPC original key
   static int joy_layout[12][2] = {

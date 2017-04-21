@@ -37,14 +37,7 @@ CRGBColor::CRGBColor(const Uint32* pColorValue, const SDL_PixelFormat* pFormat)
 }
 
 
-CRGBColor& CRGBColor::operator=(const CRGBColor& c)
-{
-	red = c.red;
-	green = c.green;
-	blue = c.blue;
-	alpha = c.alpha;
-	return *this;
-}
+CRGBColor& CRGBColor::operator=(const CRGBColor& c) = default;
 
 CRGBColor::CRGBColor(std::string s)
 {

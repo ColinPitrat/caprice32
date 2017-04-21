@@ -37,10 +37,7 @@ CRadioButton::CRadioButton(const CPoint& p, int size, CWindow* pParent) :
 }
 
 
-CRadioButton::~CRadioButton()
-{
-   
-}
+CRadioButton::~CRadioButton() = default;
 
 
 void CRadioButton::SetState(EState eState)

@@ -58,10 +58,7 @@ CPicture::CPicture(const CRect& WindowRect, CWindow* pParent, const CBitmapResou
 }
 
 
-CPicture::~CPicture()
-{
-
-}
+CPicture::~CPicture() = default;
 
 
 void CPicture::Draw() const

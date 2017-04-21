@@ -401,7 +401,7 @@ inline void write_mem(word addr, byte val) {
 
 #define AND(val) \
 { \
-   _A &= val; \
+   _A &= (val); \
    _F = SZP[_A] | Hflag; \
 }
 
@@ -437,7 +437,7 @@ inline void write_mem(word addr, byte val) {
 
 #define DEC(reg) \
 { \
-   reg--; \
+   (reg)--; \
    _F = (_F & Cflag) | SZHV_dec[reg]; \
 }
 
@@ -465,9 +465,9 @@ inline void write_mem(word addr, byte val) {
 #define EX(op1, op2) \
 { \
    reg_pair temp; \
-   temp = op1; \
-   op1 = op2; \
-   op2 = temp; \
+   temp = (op1); \
+   (op1) = (op2); \
+   (op2) = temp; \
 }
 
 #define EX_SP(reg) \
@@ -482,7 +482,7 @@ inline void write_mem(word addr, byte val) {
 
 #define INC(reg) \
 { \
-   reg++; \
+   (reg)++; \
    _F = (_F & Cflag) | SZHV_inc[reg]; \
 }
 
@@ -514,7 +514,7 @@ inline void write_mem(word addr, byte val) {
 
 #define OR(val) \
 { \
-   _A |= val; \
+   _A |= (val); \
    _F = SZP[_A]; \
 }
 
@@ -592,12 +592,12 @@ inline void write_mem(word addr, byte val) {
 
 #define XOR(val) \
 { \
-   _A ^= val; \
+   _A ^= (val); \
    _F = SZP[_A]; \
 }
 
 #define BIT(bit, reg) \
-   _F = (_F & Cflag) | Hflag | SZ_BIT[reg & (1 << bit)]
+   (_F = (_F & Cflag) | Hflag | SZ_BIT[(reg) & (1 << (bit))])
 
 #define BIT_XY BIT
 

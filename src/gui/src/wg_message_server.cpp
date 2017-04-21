@@ -45,10 +45,7 @@ CMessageServer::CMessageServer() : m_bIgnoreAllNewMessages(true)
 }
 
 
-CMessageServer::~CMessageServer()
-{
-
-}
+CMessageServer::~CMessageServer() = default;
 
 
 CMessageServer& CMessageServer::Instance()

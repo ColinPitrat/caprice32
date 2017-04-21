@@ -38,10 +38,7 @@ CProgress::CProgress(const CRect& WindowRect, CWindow* pParent, CRGBColor BarCol
 }
 
 
-CProgress::~CProgress()
-{
-
-}
+CProgress::~CProgress() = default;
 
 
 void CProgress::Draw() const

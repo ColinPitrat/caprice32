@@ -39,10 +39,7 @@ CToolBar::CToolBar(const CRect& WindowRect, CWindow* pParent) :
 }
 
 
-CToolBar::~CToolBar()
-{
-
-}
+CToolBar::~CToolBar() = default;
 
 
 void CToolBar::InsertButton(CButton* pButton, long int iButtonID, unsigned int iPosition)

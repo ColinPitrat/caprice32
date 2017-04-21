@@ -11,7 +11,7 @@
 #include <cstdint>
 
 #define SUCCESS 0
-#define ERROR -1
+#define ERROR (-1)
 
 #define USE_ROW_POINTERS
 

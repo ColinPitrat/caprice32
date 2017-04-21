@@ -47,11 +47,11 @@ static SDL_Surface* pub = nullptr;
 extern t_CPC CPC;
 
 #ifndef min
-#define min(a,b) (a<b ? a : b)
+#define min(a,b) ((a)<(b) ? (a) : (b))
 #endif
 
 #ifndef max
-#define max(a,b) (a>b ? a : b)
+#define max(a,b) ((a)>(b) ? (a) : (b))
 #endif
 
 // checks for an OpenGL extension

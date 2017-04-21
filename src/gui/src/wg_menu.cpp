@@ -209,10 +209,7 @@ CMenu::CMenu(const CRect& WindowRect, CWindow* pParent, CFontEngine* pFontEngine
 }
 
 
-CMenu::~CMenu()
-{
-
-}
+CMenu::~CMenu() = default;
 
 
 void CMenu::InsertMenuItem(const SMenuItem& MenuItem, int iPosition)
@@ -408,10 +405,7 @@ CPopupMenu::CPopupMenu(const CRect& WindowRect, CWindow* pParent, CFontEngine* p
 }
 
 
-CPopupMenu::~CPopupMenu()
-{
-
-}
+CPopupMenu::~CPopupMenu() = default;
 
 
 void CPopupMenu::Show(CPoint Position)

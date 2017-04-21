@@ -75,8 +75,7 @@ CapriceMemoryTool::CapriceMemoryTool(const CRect& WindowRect, CWindow* pParent, 
     UpdateTextMemory();
 }
 
-CapriceMemoryTool::~CapriceMemoryTool() {
-}
+CapriceMemoryTool::~CapriceMemoryTool() = default;
 
 bool CapriceMemoryTool::HandleMessage(CMessage* pMessage)
 {

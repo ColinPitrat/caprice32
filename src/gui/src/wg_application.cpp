@@ -164,7 +164,7 @@ void CApplication::HandleSDLEvent(SDL_Event Event)
 
 
 CApplication::CApplication(std::string sFontFileName, bool bHandleExceptionsInternally) :
-	m_sFontFileName(sFontFileName),
+	m_sFontFileName(std::move(sFontFileName)),
 	m_iExitCode(EXIT_FAILURE),
 	m_bRunning(false),
 	m_bInited(false),

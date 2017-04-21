@@ -88,7 +88,7 @@ namespace wGui {
     }
   }
 
-  CapriceVKeyboard::~CapriceVKeyboard() { };
+  CapriceVKeyboard::~CapriceVKeyboard() = default;
 
   void CapriceVKeyboard::CloseFrame() {
     // Exit gui

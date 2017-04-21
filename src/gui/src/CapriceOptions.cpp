@@ -290,8 +290,7 @@ CapriceOptions::CapriceOptions(const CRect& WindowRect, CWindow* pParent, CFontE
     m_pButtonApply->SetIsFocusable(true);
 }
 
-CapriceOptions::~CapriceOptions() {
-}
+CapriceOptions::~CapriceOptions() = default;
 
 bool CapriceOptions::HandleMessage(CMessage* pMessage)
 {

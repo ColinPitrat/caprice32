@@ -30,9 +30,9 @@
 namespace wGui
 {
 
-CRenderedString::CRenderedString(CFontEngine* pFontEngine, const std::string& sString, EVAlign eVertAlign, EHAlign eHorzAlign) :
+CRenderedString::CRenderedString(CFontEngine* pFontEngine, std::string sString, EVAlign eVertAlign, EHAlign eHorzAlign) :
 	m_pFontEngine(pFontEngine),
-	m_sString(sString),
+	m_sString(std::move(sString)),
 	m_MaskChar(' '),
 	m_eVertAlign(eVertAlign),
 	m_eHorzAlign(eHorzAlign),

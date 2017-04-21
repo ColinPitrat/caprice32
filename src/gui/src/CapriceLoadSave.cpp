@@ -76,8 +76,7 @@ CapriceLoadSave::CapriceLoadSave(const CRect& WindowRect, CWindow* pParent, CFon
   m_pLoadSaveButton->SetIsFocusable(true);
 }
 
-CapriceLoadSave::~CapriceLoadSave() {
-}
+CapriceLoadSave::~CapriceLoadSave() = default;
 
 bool CapriceLoadSave::HandleMessage(CMessage* pMessage)
 {

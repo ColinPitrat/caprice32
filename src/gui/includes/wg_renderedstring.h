@@ -70,7 +70,7 @@ public:
 	//! \param sString The string to render
 	//! \param eVertAlign The vertical alignment
 	//! \param eHorzAlign The horizontal alignment
-	CRenderedString(CFontEngine* pFontEngine, const std::string& sString, EVAlign eVertAlign = VALIGN_NORMAL, EHAlign eHorzAlign = HALIGN_LEFT);
+	CRenderedString(CFontEngine* pFontEngine, std::string sString, EVAlign eVertAlign = VALIGN_NORMAL, EHAlign eHorzAlign = HALIGN_LEFT);
 
 	//! Render the string onto the given surface
 	//! \param pSurface A pointer to the surface that will be drawn to

@@ -39,8 +39,7 @@ CapriceMenu::CapriceMenu(const CRect& WindowRect, CWindow* pParent, SDL_Surface*
   }
 }
 
-CapriceMenu::~CapriceMenu() {
-}
+CapriceMenu::~CapriceMenu() = default;
 
 void CapriceMenu::CloseFrame() {
   // Exit gui
