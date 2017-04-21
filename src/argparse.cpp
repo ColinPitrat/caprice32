@@ -22,7 +22,7 @@ const struct option long_options[] =
    {nullptr, 0, nullptr, 0},
 };
 
-CapriceArgs::CapriceArgs(void)
+CapriceArgs::CapriceArgs()
 {
 }
 
@@ -80,7 +80,7 @@ void parseArguments(int argc, char **argv, std::vector<std::string>& slot_list, 
    int c;
 
    optind = 0; // To please test framework, when this function is called multiple times !
-   while(1) {
+   while(true) {
       c = getopt_long (argc, argv, "a:c:hvV",
                        long_options, &option_index);
 

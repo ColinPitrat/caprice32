@@ -83,7 +83,7 @@ public:
 	void WriteToFile(const std::string& sFilename, bool bAppend = true, const std::string& sLogHeader = "") const;
 
 	//! Clear all log entries
-	void Clear(void)
+	void Clear()
 		{ m_LogList.clear(); }
 
 protected:

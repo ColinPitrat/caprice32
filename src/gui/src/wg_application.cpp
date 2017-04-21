@@ -205,17 +205,17 @@ CApplication::CApplication(std::string sFontFileName, bool bHandleExceptionsInte
 }
 
 
-CApplication::~CApplication(void)
+CApplication::~CApplication()
 {
 	if (m_pInstance == this)
 	{
 		m_pInstance = nullptr;
 	}
 
-	for(std::map<std::pair<std::string, unsigned char>, CFontEngine*>::iterator iter = m_FontEngines.begin(); iter != m_FontEngines.end(); ++iter)
+	for(auto& fontEngine : m_FontEngines)
 	{
-		delete iter->second;
-		iter->second = nullptr;
+		delete fontEngine.second;
+		fontEngine.second = nullptr;
 	}
 
 	m_AppLog.AddLogEntry("wGui Application closing", APP_LOG_INFO);
@@ -263,7 +263,7 @@ void CApplication::SetMouseFocus(CWindow* pWindow)
 
 
 
-void CApplication::Init(void)
+void CApplication::Init()
 {
 	CMessageServer::Instance().RegisterMessageClient(this, CMessage::APP_EXIT, CMessageServer::PRIORITY_LAST);
 	SDL_EnableUNICODE(1);
@@ -277,7 +277,7 @@ void CApplication::Init(void)
 }
 
 
-void CApplication::Exec(void)
+void CApplication::Exec()
 {
 	try
 	{
@@ -363,7 +363,7 @@ void CApplication::ApplicationExit(int iExitCode)
 CFontEngine* CApplication::GetFontEngine(std::string sFontFileName, unsigned char iFontSize)
 {
 	// First search to see if the requested font engine already exists
-	t_FontEngineMap::iterator iterFontEngine = m_FontEngines.find(std::make_pair(sFontFileName, iFontSize));
+	auto iterFontEngine = m_FontEngines.find(std::make_pair(sFontFileName, iFontSize));
 	CFontEngine* pFontEngine = nullptr;
 
 	if (iterFontEngine == m_FontEngines.end())

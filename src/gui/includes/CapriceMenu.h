@@ -43,7 +43,7 @@ namespace wGui
       CapriceMenu(const CRect& WindowRect, CWindow* pParent, SDL_Surface* screen, CFontEngine* pFontEngine);
       ~CapriceMenu();
 
-      void CloseFrame(void) override;
+      void CloseFrame() override;
       bool HandleMessage(CMessage* pMessage) override;
 
     protected:

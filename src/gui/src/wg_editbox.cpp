@@ -74,7 +74,7 @@ CEditBox::CEditBox(const CRect& WindowRect, CWindow* pParent, CFontEngine* pFont
 }
 
 
-CEditBox::~CEditBox(void)  // virtual
+CEditBox::~CEditBox()  // virtual
 {
 	delete m_pCursorTimer;
 	delete m_pDblClickTimer;
@@ -90,7 +90,7 @@ void CEditBox::SetReadOnly(bool bReadOnly)
 }
 
 
-std::string CEditBox::GetSelText(void) const
+std::string CEditBox::GetSelText() const
 {
 	if (m_bUseMask)
 	{
@@ -169,7 +169,7 @@ std::string::size_type CEditBox::GetIndexFromPoint(const CPoint& Point) const  /
 }
 
 
-void CEditBox::Draw(void) const
+void CEditBox::Draw() const
 {
 	CWindow::Draw();
 

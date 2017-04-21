@@ -728,10 +728,10 @@ __inline__ Uint32 INTERPOLATE (Uint32 A, Uint32 B)
 
 __inline__ Uint32 Q_INTERPOLATE (Uint32 A, Uint32 B, Uint32 C, Uint32 D)
 {
-	register Uint32 x = ((A & qcolorMask) >> 2) +
+	Uint32 x = ((A & qcolorMask) >> 2) +
 		((B & qcolorMask) >> 2) +
 		((C & qcolorMask) >> 2) + ((D & qcolorMask) >> 2);
-	register Uint32 y = (A & qlowpixelMask) +
+	Uint32 y = (A & qlowpixelMask) +
 		(B & qlowpixelMask) + (C & qlowpixelMask) + (D & qlowpixelMask);
 	y = (y >> 2) & qlowpixelMask;
 	return x + y;
@@ -831,7 +831,7 @@ void filter_supereagle(Uint8 *srcPtr, Uint32 srcPitch, /* Uint8 *deltaPtr,  */
 		}
 		else if (color5 == color3 && color2 == color6)
 		{
-		    register int r = 0;
+		    int r = 0;
 
 		    r += GetResult (color6, color5, color1, colorA1);
 		    r += GetResult (color6, color5, color4, colorB1);
@@ -1096,7 +1096,7 @@ void filter_ascale2x (Uint8 *srcPtr, Uint32 srcPitch,
 	    for (finish = width; finish; finish -= inc_bP)
 	    {
 
-		register Uint32 colorA, colorB;
+		Uint32 colorA, colorB;
 		Uint32 colorC, colorD,
 		    colorE, colorF, colorG, colorH,
 		    colorI, colorJ, colorK, colorL,
@@ -1188,7 +1188,7 @@ void filter_ascale2x (Uint8 *srcPtr, Uint32 srcPitch,
 		    }
 		    else
 		    {
-			register int r = 0;
+			int r = 0;
 
 			product1 = INTERPOLATE (colorA, colorC);
 			product = INTERPOLATE (colorA, colorB);

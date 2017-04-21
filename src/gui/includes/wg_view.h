@@ -58,15 +58,15 @@ public:
 	CView(SDL_Surface* surface, SDL_Surface* backSurface, const CRect& WindowRect);
 
 	//! Standard Destructor
-	virtual ~CView(void);
+	virtual ~CView();
 
 	//! Indicates if the view is resizable (set in the constructor)
 	//! \return true if the view is resizable
-	bool IsResizable(void) const { return m_bResizable; }
+	bool IsResizable() const { return m_bResizable; }
 
 	//! Indicates id the view is fullscreen (set in the constructor)
 	//! \return true if the view was created as fullscreen
-	bool IsFullScreen(void) const { return m_bFullScreen; }
+	bool IsFullScreen() const { return m_bFullScreen; }
 
 	//! Attaches a standard menu to the view, if the view already has a menu, the old menu will be deleted
 	//! \param pMenu A pointer to the menu, the CView is then responsible for cleaning it up, passing in 0 will delete the current menu
@@ -74,7 +74,7 @@ public:
 
 	//! Gets the menu for the view
 	//! \return A pointer to the view's menu, 0 if the view doesn't have a menu
-	CMenu* GetMenu(void) const { return m_pMenu; }
+	CMenu* GetMenu() const { return m_pMenu; }
 
 	//! Switch from current mode to other mode ( resizable / fullscreen )
 	//! \param WindowRect The rectangle that specifies the size of the view
@@ -88,7 +88,7 @@ public:
 
 	//! Gets teh current floating window
 	//! \return a pointer to the current floating window
-	CWindow* GetFloatingWindow(void) const { return m_pFloatingWindow; }
+	CWindow* GetFloatingWindow() const { return m_pFloatingWindow; }
 
 	// judb ; sometimes the surface is re-created in caprice32; in this case, we have
 	// to pass it on here

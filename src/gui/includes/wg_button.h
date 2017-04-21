@@ -51,7 +51,7 @@ public:
 	CButton(const CRect& WindowRect, CWindow* pParent, std::string sText, CFontEngine* pFontEngine = nullptr);
 
 	//! Standard destructor
-	virtual ~CButton(void);
+	virtual ~CButton();
 
 	//! The button state
 	enum EState {
@@ -62,7 +62,7 @@ public:
 
 	//! Gets the current state of the button
 	//! \return The current button state
-	EState GetButtonState(void) const { return m_eButtonState; }
+	EState GetButtonState() const { return m_eButtonState; }
 
 	//! Set the button state
 	//! \param eState The button state
@@ -71,7 +71,7 @@ public:
 
 	// CWindow overrides
 	//! Draws the button and renders the button label
-	virtual void Draw(void) const override;
+	virtual void Draw() const override;
 
 	//! Set the WindowText of the button
 	//! \param sWindowText The text to assign to the window
@@ -128,7 +128,7 @@ public:
 	CPictureButton(const CRect& WindowRect, CWindow* pParent, const CBitmapResourceHandle& hBitmap);
 
 	//! Standard destructor
-	virtual ~CPictureButton(void);
+	virtual ~CPictureButton();
 
 
 	//! Change the picture the button displays
@@ -142,7 +142,7 @@ public:
 
 	// CWindow overrides
 	//! Draws the button and renders the button label
-	virtual void Draw(void) const override;
+	virtual void Draw() const override;
 
 
 private:

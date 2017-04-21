@@ -38,13 +38,13 @@ CProgress::CProgress(const CRect& WindowRect, CWindow* pParent, CRGBColor BarCol
 }
 
 
-CProgress::~CProgress(void)
+CProgress::~CProgress()
 {
 
 }
 
 
-void CProgress::Draw(void) const
+void CProgress::Draw() const
 {
 	CWindow::Draw();
 

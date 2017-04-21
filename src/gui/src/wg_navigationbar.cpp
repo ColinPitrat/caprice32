@@ -52,7 +52,7 @@ CNavigationBar::CNavigationBar(CWindow* pParent, const CPoint& UpperLeft, unsign
 }
 
 
-CNavigationBar::~CNavigationBar(void) {
+CNavigationBar::~CNavigationBar() {
     // Delete the bitmaps
     for (unsigned int i = 0; i < m_Bitmaps.size(); i ++) {
         delete m_Bitmaps.at(i);
@@ -97,7 +97,7 @@ void CNavigationBar::RemoveItem(unsigned int iItemIndex) {
 }
 
 
-void CNavigationBar::ClearItems(void)
+void CNavigationBar::ClearItems()
 {
 	m_Items.clear();
 	Draw();
@@ -134,7 +134,7 @@ void CNavigationBar::FocusItem(unsigned int iItemIndex) {
 }
 
 
-void CNavigationBar::Draw(void) const {
+void CNavigationBar::Draw() const {
 	CWindow::Draw();
 	if (m_pSDLSurface)
 	{

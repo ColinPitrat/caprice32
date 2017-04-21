@@ -165,7 +165,7 @@ void fillSlots (std::vector<std::string> slot_list, t_CPC& CPC)
    }
 }
 
-void loadSlots(void) {
+void loadSlots() {
    memset(&driveA, 0, sizeof(t_drive)); // clear disk drive A data structure
    file_load(CPC.drvA_file, DSK_A);
    memset(&driveB, 0, sizeof(t_drive)); // clear disk drive B data structure
@@ -609,10 +609,9 @@ int dsk_load (FILE *pfile, t_drive *drive)
 
 int dsk_load (const std::string &filename, t_drive *drive)
 {
-   int iRetCode;
+   int iRetCode = 0;
 
    LOG_DEBUG("Loading disk: " << filename);
-   iRetCode = 0;
    dsk_eject(drive);
    if ((pfileObject = fopen(filename.c_str(), "rb")) != nullptr) {
      iRetCode = dsk_load(pfileObject, drive);
@@ -637,7 +636,7 @@ int dsk_save (const std::string &filename, t_drive *drive)
    if ((pfileObject = fopen(filename.c_str(), "wb")) != nullptr) {
       memset(&dh, 0, sizeof(dh));
       memcpy(dh.id, "EXTENDED CPC DSK File\r\nDisk-Info\r\n", sizeof(dh.id));
-      strcpy(dh.unused1, "Caprice32\r\n");
+      strncpy(dh.unused1, "Caprice32\r\n", sizeof(dh.unused1));
       dh.tracks = drive->tracks;
       dh.sides = (drive->sides+1) | (drive->random_DEs); // correct side count and indicate random DEs, if necessary
       pos = 0;
@@ -744,7 +743,7 @@ exit:
    return iRetCode;
 }
 
-void tape_eject (void)
+void tape_eject ()
 {
    free(pbTapeImage);
    pbTapeImage = nullptr;
@@ -1347,7 +1346,7 @@ int tape_insert_voc (FILE *pfile)
    return 0;
 }
 
-void cartridge_load (void)
+void cartridge_load ()
 {
   if (CPC.model >= 3) {
      if (file_load(CPC.cart_file, OTHER)) {

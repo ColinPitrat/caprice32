@@ -60,7 +60,7 @@ CDropDown::CDropDown(const CRect& WindowRect, CWindow* pParent, bool bAllowEdit,
 }
 
 
-CDropDown::~CDropDown(void)
+CDropDown::~CDropDown()
 {
   if(m_pCViewAncestor)
   {
@@ -241,7 +241,7 @@ void CDropDown::SelectItem(unsigned int iItemIndex) {
 }
 
 
-void CDropDown::ShowListBox(void)
+void CDropDown::ShowListBox()
 {
 	if (!m_pListBox->IsVisible())
 	{
@@ -254,7 +254,7 @@ void CDropDown::ShowListBox(void)
 }
 
 
-void CDropDown::HideListBox(void)
+void CDropDown::HideListBox()
 {
 	if (m_pListBox->IsVisible())
 	{

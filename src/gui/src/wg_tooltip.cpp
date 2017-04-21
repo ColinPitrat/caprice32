@@ -56,7 +56,7 @@ CToolTip::CToolTip(CWindow* pToolWindow, std::string sText, CRGBColor& FontColor
 }
 
 
-CToolTip::~CToolTip(void)
+CToolTip::~CToolTip()
 {
 	delete m_pTimer;
 }
@@ -70,14 +70,14 @@ void CToolTip::ShowTip(const CPoint& DrawPoint)
 }
 
 
-void CToolTip::HideTip(void)
+void CToolTip::HideTip()
 {
 	SetVisible(false);
 	CMessageServer::Instance().QueueMessage(new CMessage(CMessage::APP_PAINT, nullptr, this));
 }
 
 
-void CToolTip::Draw(void) const
+void CToolTip::Draw() const
 {
 	CWindow::Draw();
 
@@ -110,9 +110,9 @@ void CToolTip::PaintToSurface(SDL_Surface& /*ScreenSurface*/, SDL_Surface& Float
 		SDL_Rect DestRect = CRect(m_WindowRect + Offset).SDLRect();
 		SDL_BlitSurface(m_pSDLSurface, &SourceRect, &FloatingSurface, &DestRect);
 		CPoint NewOffset = m_ClientRect.TopLeft() + m_WindowRect.TopLeft() + Offset;
-		for (std::list<CWindow*>::const_iterator iter = m_ChildWindows.begin(); iter != m_ChildWindows.end(); ++iter)
+    for (const auto &child : m_ChildWindows)
 		{
-			(*iter)->PaintToSurface(FloatingSurface, FloatingSurface, NewOffset);
+			child->PaintToSurface(FloatingSurface, FloatingSurface, NewOffset);
 		}
 	}
 }

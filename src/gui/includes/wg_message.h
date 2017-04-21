@@ -82,19 +82,19 @@ public:
 	CMessage(const EMessageType MessageType, const CMessageClient* pDestination, const CMessageClient* pSource);
 
 	//! Standard destructor
-	virtual ~CMessage(void) { }
+	virtual ~CMessage() { }
 
 	//! Gets the message type
 	//! \return The message type of the message
-	EMessageType MessageType(void) { return m_MessageType; }
+	EMessageType MessageType() { return m_MessageType; }
 
 	//! Gets the intended destination for the message
 	//! \return A pointer to the destination of the message (0 for no specific destination, or to broadcast to all)
-	const CMessageClient* Destination(void) { return m_pDestination; }
+	const CMessageClient* Destination() { return m_pDestination; }
 
 	//! Gets the source of the message
 	//! \return A pointer to the source of the message
-	const CMessageClient* Source(void) { return m_pSource; }
+	const CMessageClient* Source() { return m_pSource; }
 
 protected:
 	//! The message type
@@ -209,7 +209,7 @@ public:
 
 	//! Returns the value of the message
 	//! \return A constant reference to the internal value
-	const T& Value(void) { return m_Value; }
+	const T& Value() { return m_Value; }
 
 	//! Sets the value of the message
 	//! \param Value The value

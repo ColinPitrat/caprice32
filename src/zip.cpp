@@ -4,6 +4,7 @@
 #include <strings.h>
 #include <zlib.h>
 #include <errno.h>
+#include <cstdio>
 #include "errors.h"
 #include "log.h"
 

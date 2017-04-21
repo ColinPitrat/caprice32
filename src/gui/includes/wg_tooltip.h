@@ -54,19 +54,19 @@ public:
 		CRGBColor& FontColor = DEFAULT_LINE_COLOR, CRGBColor& BackgroundColor = COLOR_WHITE, CFontEngine* pFontEngine = nullptr);
 
 	//! Standard destructor
-	virtual ~CToolTip(void);
+	virtual ~CToolTip();
 
 	//! Displays the tooltip
 	//! \param DrawPoint Where to poisition the top left corner of the tooltip, in view coordinates
 	void ShowTip(const CPoint& DrawPoint);
 
 	//! Hides the tooltip
-	void HideTip(void);
+	void HideTip();
 
 
 	// CWindow overrides
 	//! Renders the Window Text, and clips to the Window Rect
-	virtual void Draw(void) const override;
+	virtual void Draw() const override;
 
 	//! Move the window and any child windows
 	//! \param MoveDistance The relative distance to move the window

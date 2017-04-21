@@ -177,10 +177,10 @@ void CRenderedString::GetMetrics(CPoint* pBoundedDimensions, CPoint* pOriginOffs
 		iLength = iLength >> 6;
 
 		// now fix the top and bottom values of the rects
-		for(std::vector<CRect>::iterator iter = m_CachedCharacterRects.begin(); iter != m_CachedCharacterRects.end(); ++iter)
+    for (auto &rect : m_CachedCharacterRects)
 		{
-			iter->SetTop(iMaxY - iter->Top());
-			iter->SetBottom(iter->Top() + iter->Bottom());
+			rect.SetTop(iMaxY - rect.Top());
+			rect.SetBottom(rect.Top() + rect.Bottom());
 		}
 
 		// Tack an empty rect on the end

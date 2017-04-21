@@ -277,7 +277,7 @@ CRGBColor CPainter::ReadPoint(const CPoint& Point)
 }
 
 
-void CPainter::LockSurface(void)
+void CPainter::LockSurface()
 {
 	if (SDL_MUSTLOCK(m_pSurface))
 	{
@@ -293,7 +293,7 @@ void CPainter::LockSurface(void)
 }
 
 
-void CPainter::UnlockSurface(void)
+void CPainter::UnlockSurface()
 {
 	if (SDL_MUSTLOCK(m_pSurface))
 	{

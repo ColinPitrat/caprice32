@@ -43,7 +43,7 @@ public:
 	Wg_Ex_Base(const std::string& sWhat, const std::string& sWhere) : m_sWhat(sWhat), m_sWhere(sWhere) { }
 
 	//! Standard Destructor
-	virtual ~Wg_Ex_Base(void) throw() { }
+	virtual ~Wg_Ex_Base() throw() { }
 
 	//! Gets a text description of the exception
 	//! \return A string describing what caused the exception

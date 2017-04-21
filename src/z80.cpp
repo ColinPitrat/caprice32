@@ -930,7 +930,7 @@ inline byte SRL(byte val) {
 
 
 
-void z80_init_tables(void)
+void z80_init_tables()
 {
    int i, p;
 
@@ -960,7 +960,7 @@ void z80_init_tables(void)
 
 
 
-void z80_mf2stop(void)
+void z80_mf2stop()
 {
    _R++;
    _IFF1 = 0;
@@ -977,7 +977,7 @@ void z80_mf2stop(void)
 
 
 
-int z80_execute(void)
+int z80_execute()
 {
    while (_PCdword != z80.break_point) { // loop until break point
 
@@ -1037,7 +1037,7 @@ int z80_execute(void)
 
 
 
-void z80_execute_instruction(void)
+void z80_execute_instruction()
 {
       byte bOpCode = read_mem(_PC++);
       iCycleCount = cc_op[bOpCode];
@@ -1305,7 +1305,7 @@ void z80_execute_instruction(void)
 
 
 
-void z80_execute_pfx_cb_instruction(void)
+void z80_execute_pfx_cb_instruction()
 {
    byte bOpCode;
 
@@ -1575,7 +1575,7 @@ void z80_execute_pfx_cb_instruction(void)
 
 
 
-void z80_execute_pfx_dd_instruction(void)
+void z80_execute_pfx_dd_instruction()
 {
    byte bOpCode;
 
@@ -1845,7 +1845,7 @@ void z80_execute_pfx_dd_instruction(void)
 
 
 
-void z80_execute_pfx_ddcb_instruction(void)
+void z80_execute_pfx_ddcb_instruction()
 {
    signed char o;
    byte bOpCode;
@@ -2116,7 +2116,7 @@ void z80_execute_pfx_ddcb_instruction(void)
 
 
 
-void z80_execute_pfx_ed_instruction(void)
+void z80_execute_pfx_ed_instruction()
 {
    byte bOpCode;
 
@@ -2386,7 +2386,7 @@ void z80_execute_pfx_ed_instruction(void)
 
 
 
-void z80_execute_pfx_fd_instruction(void)
+void z80_execute_pfx_fd_instruction()
 {
    byte bOpCode;
 
@@ -2656,7 +2656,7 @@ void z80_execute_pfx_fd_instruction(void)
 
 
 
-void z80_execute_pfx_fdcb_instruction(void)
+void z80_execute_pfx_fdcb_instruction()
 {
    signed char o;
    byte bOpCode;

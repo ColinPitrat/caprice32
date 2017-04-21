@@ -239,10 +239,10 @@ typedef struct {
    unsigned int scr_line_offs;
    unsigned int *scr_base;
    unsigned int *scr_pos;
-   void (*scr_render)(void);
-   void (*scr_prerendernorm)(void);
-   void (*scr_prerenderbord)(void);
-   void (*scr_prerendersync)(void);
+   void (*scr_render)();
+   void (*scr_prerendernorm)();
+   void (*scr_prerenderbord)();
+   void (*scr_prerendersync)();
    bool scr_is_ogl;
 
    unsigned int snd_enabled;
@@ -320,8 +320,8 @@ typedef struct {
    unsigned int r9match;
    unsigned int hstart;
    unsigned int hend;
-   void (*CharInstMR)(void);
-   void (*CharInstSL)(void);
+   void (*CharInstMR)();
+   void (*CharInstSL)();
    unsigned char reg_select;
    unsigned char registers[18];
    // 6128+ split screen support
@@ -342,7 +342,7 @@ typedef struct {
    int cmd_length;
    int res_length;
    int cmd_direction;
-   void (*cmd_handler)(void);
+   void (*cmd_handler)();
    unsigned char *buffer_ptr;
    unsigned char *buffer_endptr;
    unsigned char command[12];
@@ -408,7 +408,7 @@ typedef struct {
    } RegisterAY;
    int AmplitudeEnv;
    bool FirstPeriod;
-   void (*Synthesizer)(void);
+   void (*Synthesizer)();
 } t_PSG;
 
 typedef struct {
@@ -461,18 +461,18 @@ typedef struct {
 
 // cap32.cpp
 void emulator_reset(bool bolMF2Reset);
-int  emulator_init(void);
-int  video_set_palette(void);
-void init_joystick_emulation(void);
-void update_cpc_speed(void);
-int  printer_start(void);
-void printer_stop(void);
-int audio_init (void);
-void audio_shutdown (void);
-void audio_pause (void);
-void audio_resume (void);
-int video_init (void);
-void video_shutdown (void);
+int  emulator_init();
+int  video_set_palette();
+void init_joystick_emulation();
+void update_cpc_speed();
+int  printer_start();
+void printer_stop();
+int audio_init ();
+void audio_shutdown ();
+void audio_pause ();
+void audio_resume ();
+int video_init ();
+void video_shutdown ();
 
 // Return the path to the best (i.e: most specific) configuration file.
 // Priority order is:
@@ -487,14 +487,14 @@ int cap32_main(int argc, char **argv);
 
 // fdc.c
 void fdc_write_data(unsigned char val);
-unsigned char fdc_read_status(void);
-unsigned char fdc_read_data(void);
+unsigned char fdc_read_status();
+unsigned char fdc_read_data();
 
 // psg.c
 void SetAYRegister(int Num, unsigned char Value);
-void Calculate_Level_Tables(void);
-void ResetAYChipEmulation(void);
-void InitAYCounterVars(void);
-void InitAY(void);
+void Calculate_Level_Tables();
+void ResetAYChipEmulation();
+void InitAYCounterVars();
+void InitAY();
 
 #endif

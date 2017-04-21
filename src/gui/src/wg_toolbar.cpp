@@ -39,7 +39,7 @@ CToolBar::CToolBar(const CRect& WindowRect, CWindow* pParent) :
 }
 
 
-CToolBar::~CToolBar(void)
+CToolBar::~CToolBar()
 {
 
 }
@@ -78,11 +78,11 @@ void CToolBar::RemoveButton(unsigned int iPosition)
 }
 
 
-void CToolBar::Clear(void)
+void CToolBar::Clear()
 {
-	for(t_ButtonVector::iterator iter = m_vpButtons.begin(); iter != m_vpButtons.end(); ++iter)
+  for(const auto &button : m_vpButtons)
 	{
-		delete iter->first;
+		delete button.first;
 	}
 	m_vpButtons.clear();
 }
@@ -91,7 +91,7 @@ void CToolBar::Clear(void)
 int CToolBar::GetButtonPosition(long int iButtonID)
 {
 	int iPosition = -1;
-	for (t_ButtonVector::iterator iter = m_vpButtons.begin(); iter != m_vpButtons.end(); ++iter)
+	for (auto iter = m_vpButtons.begin(); iter != m_vpButtons.end(); ++iter)
 	{
 		if (iter->second == iButtonID)
 		{
@@ -102,12 +102,12 @@ int CToolBar::GetButtonPosition(long int iButtonID)
 }
 
 
-void CToolBar::RepositionButtons(void)
+void CToolBar::RepositionButtons()
 {
 	int xPosition = 4;
-	for (t_ButtonVector::iterator iter = m_vpButtons.begin(); iter != m_vpButtons.end(); ++iter)
+  for (auto &button : m_vpButtons)
 	{
-		CButton* pButton = iter->first;
+		CButton* pButton = button.first;
 		if (pButton)
 		{
 			int xStartPosition = xPosition;
@@ -147,11 +147,11 @@ bool CToolBar::HandleMessage(CMessage* pMessage)
 			if (pMessage->Destination() == this)
 			{
 				long int iButtonID = 0;
-				for (t_ButtonVector::iterator iter = m_vpButtons.begin(); iter != m_vpButtons.end(); ++iter)
+        for (const auto &button : m_vpButtons)
 				{
-					if (iter->first == pMessage->Source())
+					if (button.first == pMessage->Source())
 					{
-						iButtonID = iter->second;
+						iButtonID = button.second;
 					}
 				}
 				CMessageServer::Instance().QueueMessage(new TIntMessage(CMessage::CTRL_SINGLELCLICK, m_pParentWindow, this, iButtonID));

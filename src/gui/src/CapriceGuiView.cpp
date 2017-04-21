@@ -22,11 +22,11 @@ void CapriceGuiView::PaintToSurface(SDL_Surface& ScreenSurface, SDL_Surface& Flo
     SDL_BlitSurface(m_pBackSurface, nullptr, &ScreenSurface, nullptr);
 
     // Draw all child windows recursively
-    for (std::list<CWindow*>::const_iterator iter = m_ChildWindows.begin(); iter != m_ChildWindows.end(); ++iter)
+    for (const auto child : m_ChildWindows)
     {
-      if (*iter)
+      if (child)
       {
-        (*iter)->PaintToSurface(ScreenSurface, FloatingSurface, Offset);
+        child->PaintToSurface(ScreenSurface, FloatingSurface, Offset);
       }
     }
   }

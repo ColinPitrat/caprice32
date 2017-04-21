@@ -39,19 +39,19 @@ namespace wGui
 CMessageServer* CMessageServer::m_pInstance = nullptr;
 
 
-CMessageServer::CMessageServer(void) : m_bIgnoreAllNewMessages(true)
+CMessageServer::CMessageServer() : m_bIgnoreAllNewMessages(true)
 {
 	m_pSemaphore = SDL_CreateSemaphore(0);
 }
 
 
-CMessageServer::~CMessageServer(void)
+CMessageServer::~CMessageServer()
 {
 
 }
 
 
-CMessageServer& CMessageServer::Instance(void)
+CMessageServer& CMessageServer::Instance()
 {
 	if (!m_pInstance)
 	{
@@ -83,7 +83,7 @@ void CMessageServer::RegisterMessageClient(CMessageClient* pClient, CMessage::EM
 void CMessageServer::DeregisterMessageClient(CMessageClient* pClient, CMessage::EMessageType eMessageType)
 {
 	t_MessageClientPriorityMap& PriorityMap = m_MessageClients[eMessageType];
-	t_MessageClientPriorityMap::iterator iter = PriorityMap.begin();
+	auto iter = PriorityMap.begin();
 	while (iter != PriorityMap.end())
 	{
 		if (iter->second.pClient == pClient)
@@ -101,26 +101,26 @@ void CMessageServer::DeregisterMessageClient(CMessageClient* pClient, CMessage::
 
 void CMessageServer::DeregisterMessageClient(CMessageClient* pClient)
 {
-	for (t_MessageClientMap::iterator iter = m_MessageClients.begin(); iter != m_MessageClients.end(); ++iter)
+  for (auto& client : m_MessageClients)
 	{
-		t_MessageClientPriorityMap::iterator iter2 = iter->second.begin();
-		while (iter2 != iter->second.end())
+		auto iter = client.second.begin();
+		while (iter != client.second.end())
 		{
-			if (iter2->second.pClient == pClient)
+			if (iter->second.pClient == pClient)
 			{
-				iter->second.erase(iter2);
-				iter2 = iter->second.begin();
+				client.second.erase(iter);
+				iter = client.second.begin();
 			}
 			else
 			{
-				++iter2;
+				++iter;
 			}
 		}
 	}
 }
 
 
-void CMessageServer::DeliverMessage(void)
+void CMessageServer::DeliverMessage()
 {
 	if (m_MessageQueue.size() > 0)
 	{
@@ -129,15 +129,15 @@ void CMessageServer::DeliverMessage(void)
 
 		// we have to make sure that each client only gets the message once,
 		// even if the handling of one of these messages changes the message map
-		for (t_MessageClientPriorityMap::iterator iter = PriorityMap.begin(); iter != PriorityMap.end(); ++iter)
+    for (auto& priority : PriorityMap)
 		{
-			iter->second.bWaitingForMessage = true;
+			priority.second.bWaitingForMessage = true;
 		}
 
 		bool bFinished = false;
 		while (! bFinished)
 		{
-			t_MessageClientPriorityMap::iterator iter = PriorityMap.begin();
+			auto iter = PriorityMap.begin();
 			for (; iter != PriorityMap.end(); ++iter)
 			{
 				if (iter->second.bWaitingForMessage)

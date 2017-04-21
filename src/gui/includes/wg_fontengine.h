@@ -51,7 +51,7 @@ public:
 	CFontEngine(const std::string& sFontFileName, unsigned char FontSize);
 
 	//! Standard destructor
-	virtual ~CFontEngine(void);
+	virtual ~CFontEngine();
 
 	//! Renders the specified character
 	//! \param Char The character to render

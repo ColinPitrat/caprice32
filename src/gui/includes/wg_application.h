@@ -73,31 +73,31 @@ public:
 	CApplication(std::string sFontFileName = "resource/vera_sans.ttf", bool bHandleExceptionsInternally = true);
 
 	//! Standard destructor
-	virtual ~CApplication(void);
+	virtual ~CApplication();
 
 	//! Gets the single instance of the CApplication object
 	//! \return A pointer to the one instance of the Application
-	static CApplication* Instance(void) { return m_pInstance; }
+	static CApplication* Instance() { return m_pInstance; }
 
 	//! Gets the default font file name
 	//! \return The default font
-	virtual const std::string& GetDefaultFontFileName(void) const { return m_sFontFileName; }
+	virtual const std::string& GetDefaultFontFileName() const { return m_sFontFileName; }
 
 	//! Gets the current exit code of the application
 	//! \return The exit code of the app
-	virtual int ExitCode(void) const { return m_iExitCode; }
+	virtual int ExitCode() const { return m_iExitCode; }
 
 	//! Indicates if the application is currently "running" or not
 	//! \return true while the application is in it's message loop
-	virtual bool IsRunning(void) const { return m_bRunning; }
+	virtual bool IsRunning() const { return m_bRunning; }
 
 	//! Indicates if the application will be attempting to handle it's own exceptions (set in the CApplication constructor)
 	//! \return true if wGui should handle it's own exceptions
-	virtual bool HandleExceptions(void) const { return m_bHandleExceptionsInternally; }
+	virtual bool HandleExceptions() const { return m_bHandleExceptionsInternally; }
 
 	//! Indicates if the CApplication object has been properly initialized
 	//! \return true if Init() has been called
-	virtual bool IsInitialized(void) const { return m_bInited; }
+	virtual bool IsInitialized() const { return m_bInited; }
 
 	//! This is for setting/getting the window that has the current keyboard focus
 	//! Any KEYBOARD messages will have this window as their destination
@@ -106,7 +106,7 @@ public:
 
 	//! Gets the current keyboard focus for the application
 	//! \return A pointer to the window with keyboard focus
-	virtual CWindow* GetKeyFocus(void) const { return m_pKeyFocusWindow; }
+	virtual CWindow* GetKeyFocus() const { return m_pKeyFocusWindow; }
 
 	//! This is for setting/getting the window that has the current mouse focus
 	//! Any subsequent MOUSE messages will have this window as their destination
@@ -115,14 +115,14 @@ public:
 
 	//! Gets the current mouse focus for the application
 	//! \return A pointer to the window with mouse focus ( grab )
-	virtual CWindow* GetMouseFocus(void) const { return m_pMouseFocusWindow; }
+	virtual CWindow* GetMouseFocus() const { return m_pMouseFocusWindow; }
 
 	//! Init() must be called before Exec()
 	//! Takes care of initializing SDL and other important stuff
-	virtual void Init(void);
+	virtual void Init();
 
 	//! The primary message loop
-	virtual void Exec(void);
+	virtual void Exec();
 
 	//! This is called just before the application exits
 	//! \param iExitCode The exit code to return, defaults to EXIT_SUCCESS
@@ -141,23 +141,23 @@ public:
 
 	//! Gets the default font engine
 	//! \return A pointer to the default font engine
-	virtual CFontEngine* GetDefaultFontEngine(void) const { return m_pDefaultFontEngine; }
+	virtual CFontEngine* GetDefaultFontEngine() const { return m_pDefaultFontEngine; }
 
 	//! Gets the color depth (in bits per pixel) of the app
 	//! \return The color depth of the view
-	virtual int GetBitsPerPixel(void) const { return m_iBitsPerPixel; }
+	virtual int GetBitsPerPixel() const { return m_iBitsPerPixel; }
 
 	//! Gets the default background color
 	//! \return Default background color
-	virtual CRGBColor GetDefaultBackgroundColor(void) const { return m_DefaultBackgroundColor; }
+	virtual CRGBColor GetDefaultBackgroundColor() const { return m_DefaultBackgroundColor; }
 
 	//! Gets the default foreground color
 	//! \return Default foreground color
-	virtual CRGBColor GetDefaultForegroundColor(void) const { return m_DefaultForegroundColor; }
+	virtual CRGBColor GetDefaultForegroundColor() const { return m_DefaultForegroundColor; }
 
 	//! Gets the default selection color
 	//! \return Default selection color
-	virtual CRGBColor GetDefaultSelectionColor(void) const { return m_DefaultSelectionColor; }
+	virtual CRGBColor GetDefaultSelectionColor() const { return m_DefaultSelectionColor; }
 
 	//! The resource pool is used to keep wGui provided resources around even when there are no other handles begin kept by the user
 	//! The internal wGui resources are automatically added to the pool if this is enabled when they are created
@@ -187,7 +187,7 @@ public:
 
 	//!Returns the application log, which is output to wGui.log on application exit
 	//! \return A reference to the application log, which gets any wGui log messages
-	virtual wUtil::CLog& GetApplicationLog(void) { return m_AppLog; }
+	virtual wUtil::CLog& GetApplicationLog() { return m_AppLog; }
 
 
 	// CMessageClient overrides

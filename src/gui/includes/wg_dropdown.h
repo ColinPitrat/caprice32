@@ -52,7 +52,7 @@ public:
 	CDropDown(const CRect& WindowRect, CWindow* pParent, bool bAllowEdit = true, unsigned int iItemHeight = 15, CFontEngine* pFontEngine = nullptr);
 
 	//! Standard destructor
-	virtual ~CDropDown(void);
+	virtual ~CDropDown();
 
 	//! Adds a new item to the list
 	//! \param ListItem A SListItem structure with the data for the item
@@ -69,11 +69,11 @@ public:
 	void RemoveItem(int iItemIndex) { m_pListBox->RemoveItem(iItemIndex); }
 
 	//! Remove all items from the list
-	void ClearItems(void) { m_pListBox->ClearItems(); }
+	void ClearItems() { m_pListBox->ClearItems(); }
 
 	//! Gets the current number of items in the listbox
 	//! \return The number of items in the list
-	int Size(void) { return m_pListBox->Size(); }
+	int Size() { return m_pListBox->Size(); }
 
 	//! \param iItemIndex The index of the item to check (will return false if the index is out of range)
 	//! \return true if the item is selected
@@ -129,10 +129,10 @@ public:
 
 protected:
 	//! Shows the drop down listbox
-	void ShowListBox(void);
+	void ShowListBox();
 
 	//! Hides the drop down listbox
-	void HideListBox(void);
+	void HideListBox();
 
 
 	CEditBox* m_pEditBox;  //!< A pointer to the drop down's edit box

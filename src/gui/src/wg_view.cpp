@@ -106,7 +106,7 @@ CView::CView(SDL_Surface* surface, SDL_Surface* backSurface, const CRect& Window
 }
 
 
-CView::~CView(void)
+CView::~CView()
 {
 	delete m_pMenu;
 	if (m_pInstance == this)

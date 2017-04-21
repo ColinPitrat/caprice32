@@ -52,7 +52,7 @@ public:
 	CTextBox(const CRect& WindowRect, CWindow* pParent, CFontEngine* pFontEngine = nullptr);
 
 	//! Standard destructor
-	virtual ~CTextBox(void);
+	virtual ~CTextBox();
 
 	//! Set the Read-only state of the control
 	//! \param bReadOnly  If set to true, the control will not take any keyboard input
@@ -60,11 +60,11 @@ public:
 
 	//! Indicates if the text box is in read-only mode
 	//! \return true if the control is read-only
-	virtual bool IsReadOnly(void) const { return m_bReadOnly; }
+	virtual bool IsReadOnly() const { return m_bReadOnly; }
 
 	//! Gets the currently selected text
 	//! \return The currently selected text in the edit box, if the edit box is in Password Mask mode, this will always return an empty string
-	virtual std::string GetSelText(void) const;
+	virtual std::string GetSelText() const;
 
 	//! Set the selection
 	//! \param iSelStart The index of the start of the selection
@@ -73,11 +73,11 @@ public:
 
 	//! Gets the start of the selection
 	//! \return The index of the start of the selection
-	virtual std::string::size_type GetSelectionStart(void) const { return m_SelStart; }
+	virtual std::string::size_type GetSelectionStart() const { return m_SelStart; }
 
 	//! Gets the selection length
 	//! \return The length of the selection
-	virtual int GetSelectionLength(void) const { return m_SelLength; }
+	virtual int GetSelectionLength() const { return m_SelLength; }
 
 	//! The various states for the scrollbars
 	enum EScrollBarVisibility
@@ -101,7 +101,7 @@ public:
 
 	// CWindow overrides
 	//! Renders the text contents of a control, and the cursor
-	virtual void Draw(void) const override;
+	virtual void Draw() const override;
 
 	//! Giving a control a new WindowRect will move and resize the control
 	//! \param WindowRect A CRect that defines the outer limits of the control
@@ -137,7 +137,7 @@ protected:
 	void PrepareWindowText(const std::string& sText);
 
 	//! Updates the visibility of the scrollbars
-	void UpdateScrollBars(void);
+	void UpdateScrollBars();
 
 	//! Convert an index to a row, column pair (in a CPoint object)
 	//! \param Index The index into the string

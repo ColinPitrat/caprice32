@@ -52,7 +52,7 @@ public:
 	CScrollBar(const CRect& WindowRect, CWindow* pParent, EScrollBarType ScrollBarType);
 
 	//! Standard destructor
-	virtual ~CScrollBar(void);
+	virtual ~CScrollBar();
 
 	//! Set the amount to jump by when the area below or above the thumb is clicked (this is 5 by default)
 	//! \param iJumpAmount The amount to step by
@@ -60,7 +60,7 @@ public:
 
 	//! Get the amount that the scrollbar will jump by when the arrow buttons are clicked
 	//! \return The amount the scrollbar jumps by when clicked above or below the thumb
-	virtual int GetJumpAmount(void) const { return m_iJumpAmount; }
+	virtual int GetJumpAmount() const { return m_iJumpAmount; }
 
 
 	// CRangeControl overrides
@@ -72,7 +72,7 @@ public:
 
 	// CWindow overrides
 	//! Draws the scroll bar
-	virtual void Draw(void) const override;
+	virtual void Draw() const override;
 
 	//! Giving a control a new WindowRect will move and resize the control
 	//! \param WindowRect A CRect that defines the outer limits of the control
@@ -99,7 +99,7 @@ public:
 
 protected:
 	//! Repositions the thumb according to the value
-	virtual void RepositionThumb(void);
+	virtual void RepositionThumb();
 
 	EScrollBarType m_ScrollBarType;  //!< The type of scroll bar
 	int m_iJumpAmount;  //!< The amount to jump when the area below or above the thumb is clicked

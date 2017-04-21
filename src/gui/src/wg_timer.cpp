@@ -43,7 +43,7 @@ CTimer::CTimer(CMessageClient* pOwner) :
 { }
 
 
-CTimer::~CTimer(void)
+CTimer::~CTimer()
 {
 	StopTimer();
 }
@@ -60,7 +60,7 @@ void CTimer::StartTimer(unsigned long int Interval, bool bAutoRestart)
 }
 
 
-void CTimer::StopTimer(void)
+void CTimer::StopTimer()
 {
 	if (m_TimerID)
 	{

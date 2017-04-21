@@ -78,11 +78,11 @@ bool CMessageBox::HandleMessage(CMessage* pMessage)
 		{
 			if (pMessage->Destination() == this)
 			{
-				for (std::map<EButton, CButton*>::iterator iter = m_ButtonMap.begin(); iter != m_ButtonMap.end(); ++iter)
+        for (const auto& button : m_ButtonMap)
 				{
-					if (pMessage->Source() == iter->second)
+					if (pMessage->Source() == button.second)
 					{
-						CMessageServer::Instance().QueueMessage(new CValueMessage<CMessageBox::EButton>(CMessage::CTRL_MESSAGEBOXRETURN, m_pParentWindow, nullptr, iter->first));
+						CMessageServer::Instance().QueueMessage(new CValueMessage<CMessageBox::EButton>(CMessage::CTRL_MESSAGEBOXRETURN, m_pParentWindow, nullptr, button.first));
 						CloseFrame();
             bHandled = true;
 						break;

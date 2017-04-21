@@ -50,7 +50,7 @@ public:
 	CEditBox(const CRect& WindowRect, CWindow* pParent, CFontEngine* pFontEngine = nullptr);
 
 	//! Standard destructor
-	virtual ~CEditBox(void);
+	virtual ~CEditBox();
 
   //! The content allowed
   enum EContentType {
@@ -67,7 +67,7 @@ public:
 
 	//! Indicates if the edit box is using a password mask
 	//! \return true if the control is a password box
-	bool UsingPasswordMask(void) const { return m_bUseMask; }
+	bool UsingPasswordMask() const { return m_bUseMask; }
 
 	//! Set the Read-only state of the control
 	//! \param bReadOnly  If set to true, the control will not take any keyboard input
@@ -75,11 +75,11 @@ public:
 
 	//! Indicates if the edit box is operating in read-only mode
 	//! \return true if the control is read-only
-	bool IsReadOnly(void) const { return m_bReadOnly; }
+	bool IsReadOnly() const { return m_bReadOnly; }
 
 	//! Gets the currently selected text
 	//! \return The currently selected text in the edit box, if the edit box is in Password Mask mode, this will always return an empty string
-	std::string GetSelText(void) const;
+	std::string GetSelText() const;
 
 	//! Set the selection
 	//! \param iSelStart The index of the start of the selection
@@ -88,11 +88,11 @@ public:
 
 	//! Gets the starting index of the selection
 	//! \return The index of the start of the selection
-	virtual std::string::size_type GetSelectionStart(void) const { return m_SelStart; }
+	virtual std::string::size_type GetSelectionStart() const { return m_SelStart; }
 
 	//! Gets the length of the selection
 	//! \return The length of the selection
-	virtual int GetSelectionLength(void) const { return m_SelLength; }
+	virtual int GetSelectionLength() const { return m_SelLength; }
 
 	//! Gets a character index from a point
 	//! \param Point The point (in window coordinates)
@@ -102,7 +102,7 @@ public:
 
 	// CWindow overrides
 	//! Renders the text contents of a control, and the cursor
-	virtual void Draw(void) const override;
+	virtual void Draw() const override;
 
 	//! Set the WindowText of the control
 	//! \param sText The text to assign to the window

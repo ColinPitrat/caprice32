@@ -90,7 +90,7 @@ namespace wGui {
 
   CapriceVKeyboard::~CapriceVKeyboard() { };
 
-  void CapriceVKeyboard::CloseFrame(void) {
+  void CapriceVKeyboard::CloseFrame() {
     // Exit gui
     CMessageServer::Instance().QueueMessage(new CMessage(CMessage::APP_EXIT, nullptr, this));
   }

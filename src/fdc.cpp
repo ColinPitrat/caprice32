@@ -56,26 +56,26 @@ dword dwBytesTransferred = 0;
 #define OVERRUN_TIMEOUT 128*4
 #define INITIAL_TIMEOUT OVERRUN_TIMEOUT*4
 
-void fdc_specify(void);
-void fdc_drvstat(void);
-void fdc_recalib(void);
-void fdc_intstat(void);
-void fdc_seek(void);
-void fdc_readtrk(void);
-void fdc_write(void);
-void fdc_read(void);
-void fdc_readID(void);
-void fdc_writeID(void);
-void fdc_scan(void);
-void fdc_scanlo(void);
-void fdc_scanhi(void);
+void fdc_specify();
+void fdc_drvstat();
+void fdc_recalib();
+void fdc_intstat();
+void fdc_seek();
+void fdc_readtrk();
+void fdc_write();
+void fdc_read();
+void fdc_readID();
+void fdc_writeID();
+void fdc_scan();
+void fdc_scanlo();
+void fdc_scanhi();
 
 typedef struct fdc_cmd_table_def {
    int cmd;
    int cmd_length;
    int res_length;
    int cmd_direction;
-   void (*cmd_handler)(void);
+   void (*cmd_handler)();
 } fdc_cmd_table_def;
 
 #define MAX_CMD_COUNT 15
@@ -135,7 +135,7 @@ dword read_status_delay = 0;
 
 
 
-void check_unit(void)
+void check_unit()
 {
    switch (FDC.command[CMD_UNIT] & 1) // check unit selection bits of active command
    {
@@ -150,7 +150,7 @@ void check_unit(void)
 
 
 
-int init_status_regs(void)
+int init_status_regs()
 {
    byte val;
 
@@ -211,7 +211,7 @@ t_sector *find_sector(byte *requested_CHRN)
 
 
 
-inline void cmd_write(void)
+inline void cmd_write()
 {
    t_sector *sector;
 
@@ -254,7 +254,7 @@ inline void cmd_write(void)
 
 
 
-inline void cmd_read(void)
+inline void cmd_read()
 {
    t_sector *sector;
 
@@ -313,7 +313,7 @@ loop:
 
 
 
-inline void cmd_readtrk(void)
+inline void cmd_readtrk()
 {
    int sector_size;
    t_sector *sector;
@@ -343,7 +343,7 @@ inline void cmd_readtrk(void)
 
 
 
-inline void cmd_scan(void)
+inline void cmd_scan()
 {
    t_sector *sector;
 
@@ -564,7 +564,7 @@ void fdc_write_data(byte val)
 
 
 
-byte fdc_read_status(void)
+byte fdc_read_status()
 {
    byte val;
 
@@ -594,7 +594,7 @@ byte fdc_read_status(void)
 
 
 
-byte fdc_read_data(void)
+byte fdc_read_data()
 {
    byte val;
 
@@ -696,14 +696,14 @@ byte fdc_read_data(void)
 
 
 
-void fdc_specify(void)
+void fdc_specify()
 {
    FDC.phase = CMD_PHASE; // switch back to command phase (fdc_specify has no result phase!)
 }
 
 
 
-void fdc_drvstat(void)
+void fdc_drvstat()
 {
    byte val;
 
@@ -724,7 +724,7 @@ void fdc_drvstat(void)
 
 
 
-void fdc_recalib(void)
+void fdc_recalib()
 {
    FDC.command[CMD_C] = 0; // seek to track 0
    fdc_seek();
@@ -732,7 +732,7 @@ void fdc_recalib(void)
 
 
 
-void fdc_intstat(void)
+void fdc_intstat()
 {
    byte val;
 
@@ -777,7 +777,7 @@ void fdc_intstat(void)
 
 
 
-void fdc_seek(void)
+void fdc_seek()
 {
    check_unit(); // switch to target drive
    if (init_status_regs() == 0) { // drive Ready?
@@ -792,7 +792,7 @@ void fdc_seek(void)
 
 
 
-void fdc_readtrk(void)
+void fdc_readtrk()
 {
    FDC.led = 1; // turn the drive LED on
    check_unit(); // switch to target drive
@@ -829,7 +829,7 @@ void fdc_readtrk(void)
 
 
 
-void fdc_write(void)
+void fdc_write()
 {
    FDC.led = 1; // turn the drive LED on
    check_unit(); // switch to target drive
@@ -869,7 +869,7 @@ void fdc_write(void)
 
 
 
-void fdc_read(void)
+void fdc_read()
 {
    FDC.led = 1; // turn the drive LED on
    check_unit(); // switch to target drive
@@ -901,7 +901,7 @@ void fdc_read(void)
 
 
 
-void fdc_readID(void)
+void fdc_readID()
 {
    FDC.led = 1; // turn the drive LED on
    check_unit(); // switch to target drive
@@ -936,7 +936,7 @@ void fdc_readID(void)
 
 
 
-void fdc_writeID(void)
+void fdc_writeID()
 {
    FDC.led = 1; // turn the drive LED on
    check_unit(); // switch to target drive
@@ -972,7 +972,7 @@ void fdc_writeID(void)
 
 
 
-void fdc_scan(void)
+void fdc_scan()
 {
    FDC.led = 1; // turn the drive LED on
    check_unit(); // switch to target drive

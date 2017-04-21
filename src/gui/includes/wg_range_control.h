@@ -55,7 +55,7 @@ public:
 
 	//! Gets the lower limit of the control
 	//! \return The minimum limit of the control
-	virtual T GetMinLimit(void) const { return m_MinLimit; }
+	virtual T GetMinLimit() const { return m_MinLimit; }
 
 	//! Set the upper limit for the control
 	//! \param maxLimit The upper limit of the control
@@ -63,7 +63,7 @@ public:
 
 	//! Gets teh upper limit of the control
 	//! \return The maximum limit of the control
-	virtual T GetMaxLimit(void) const { return m_MaxLimit; }
+	virtual T GetMaxLimit() const { return m_MaxLimit; }
 
 	//! Set the current step size.
 	//! \param stepSize The amount to increment the value by for Increment() and Decrement() calls
@@ -71,7 +71,7 @@ public:
 
 	//! Gets the current step size of the control
 	//! \return The current step size
-	virtual T GetStepSize(void) const { return m_StepSize; }
+	virtual T GetStepSize() const { return m_StepSize; }
 
 	//! Set the current value.
 	//! \param value The new value for the control
@@ -89,7 +89,7 @@ public:
 
 	//! Gets the current value of the control
 	//! \return The current value
-	virtual T GetValue(void) const { return m_Value; }
+	virtual T GetValue() const { return m_Value; }
 
 	//! Increase the value by one step size
 	//! \param bRedraw indicates if the control should be redrawn (defaults to true)

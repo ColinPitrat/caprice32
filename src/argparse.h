@@ -7,7 +7,7 @@
 class CapriceArgs
 {
    public:
-      CapriceArgs(void);
+      CapriceArgs();
       std::string autocmd;
       std::string cfgFilePath;
 };

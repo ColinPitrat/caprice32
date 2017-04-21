@@ -198,7 +198,7 @@ enum ApplicationWindowState
 
 CapriceArgs args;
 
-void ga_init_banking (void)
+void ga_init_banking ()
 {
    byte *romb0, *romb1, *romb2, *romb3, *romb4, *romb5, *romb6, *romb7;
    byte *pbRAMbank;
@@ -257,7 +257,7 @@ void ga_init_banking (void)
 
 
 
-void ga_memory_manager (void)
+void ga_memory_manager ()
 {
    dword mem_bank;
    if (CPC.ram_size == 64) { // 64KB of RAM?
@@ -556,7 +556,7 @@ void z80_OUT_handler (reg_pair port, byte val)
                case 7: // vertical sync position
                   CRTC.registers[7] = val & 0x7f;
                   {
-                     register dword temp = 0;
+                     dword temp = 0;
                      if (CRTC.line_count == CRTC.registers[7]) { // matches vertical sync position?
                         temp++;
                         if (CRTC.r7match != temp) {
@@ -584,7 +584,7 @@ void z80_OUT_handler (reg_pair port, byte val)
                case 9: // maximum raster count
                   CRTC.registers[9] = val & 0x1f;
                   {
-                     register dword temp = 0;
+                     dword temp = 0;
                      if (CRTC.raster_count == CRTC.registers[9]) { // matches maximum raster address?
                         temp = 1;
                         CRTC.flag_resscan = 1; // request a raster counter reset
@@ -906,7 +906,7 @@ void print (dword *pdwAddr, const char *pchStr, bool bolColour)
    }
 }
 
-int emulator_patch_ROM (void)
+int emulator_patch_ROM ()
 {
    byte *pbPtr;
 
@@ -1036,14 +1036,14 @@ void emulator_reset (bool bolMF2Reset)
    }
 }
 
-int input_init (void)
+int input_init ()
 {
    CPC.InputMapper->init();
    CPC.InputMapper->set_joystick_emulation();
    return 0;
 }
 
-int emulator_init (void)
+int emulator_init ()
 {
    if (input_init()) {
       fprintf(stderr, "input_init() failed. Aborting.\n");
@@ -1153,7 +1153,7 @@ int emulator_init (void)
 
 
 
-void emulator_shutdown (void)
+void emulator_shutdown ()
 {
    int iRomNum;
 
@@ -1174,7 +1174,7 @@ void emulator_shutdown (void)
 
 
 
-int printer_start (void)
+int printer_start ()
 {
    if (!pfoPrinter) {
       if(!(pfoPrinter = fopen(CPC.printer_file.c_str(), "wb"))) {
@@ -1186,7 +1186,7 @@ int printer_start (void)
 
 
 
-void printer_stop (void)
+void printer_stop ()
 {
    if (pfoPrinter) {
       fclose(pfoPrinter);
@@ -1216,7 +1216,7 @@ int audio_align_samples (int given)
 
 
 
-int audio_init (void)
+int audio_init ()
 {
    SDL_AudioSpec *desired, *obtained;
 
@@ -1259,7 +1259,7 @@ int audio_init (void)
 
 
 
-void audio_shutdown (void)
+void audio_shutdown ()
 {
    SDL_CloseAudio();
    if (pbSndBuffer) {
@@ -1272,7 +1272,7 @@ void audio_shutdown (void)
 
 
 
-void audio_pause (void)
+void audio_pause ()
 {
    if (CPC.snd_enabled) {
       SDL_PauseAudio(1);
@@ -1281,26 +1281,26 @@ void audio_pause (void)
 
 
 
-void audio_resume (void)
+void audio_resume ()
 {
    if (CPC.snd_enabled) {
       SDL_PauseAudio(0);
    }
 }
 
-void cpc_pause(void)
+void cpc_pause()
 {
    audio_pause();
    CPC.paused = true;
 }
 
-void cpc_resume(void)
+void cpc_resume()
 {
    CPC.paused = false;
    audio_resume();
 }
 
-int video_set_palette (void)
+int video_set_palette ()
 {
    if (!CPC.scr_tube) {
       for (int n = 0; n < 32; n++) {
@@ -1344,7 +1344,7 @@ int video_set_palette (void)
 
 
 
-void video_set_style (void)
+void video_set_style ()
 {
    if (vid_plugin->half_pixels)
    {
@@ -1427,7 +1427,7 @@ void video_set_style (void)
 }
 
 
-int video_init (void)
+int video_init ()
 {
    if (SDL_InitSubSystem(SDL_INIT_VIDEO) < 0) { // initialize the video subsystem
       std::cerr << "Init of video subsystem failed: " << SDL_GetError() << std::endl;
@@ -1470,7 +1470,7 @@ int video_init (void)
 
 
 
-void video_shutdown (void)
+void video_shutdown ()
 {
    if (back_surface) {
       vid_plugin->unlock();
@@ -1481,14 +1481,14 @@ void video_shutdown (void)
 
 
 
-void video_display (void)
+void video_display ()
 {
    vid_plugin->flip();
 }
 
 
 
-int joysticks_init (void)
+int joysticks_init ()
 {
    if(CPC.joysticks == 0) {
       return 0;
@@ -1535,7 +1535,7 @@ int joysticks_init (void)
 
 
 
-void joysticks_shutdown (void)
+void joysticks_shutdown ()
 {
 /* This cores for an unknown reason - anyway, SDL_QuitSubSystem will do the job
    for(int i = 0; i < MAX_NB_JOYSTICKS; i++) {
@@ -1550,7 +1550,7 @@ void joysticks_shutdown (void)
 
 
 
-void update_timings(void)
+void update_timings()
 {
    dwTicksOffset = static_cast<int>(FRAME_PERIOD_MS / (CPC.speed/CPC_BASE_FREQUENCY_MHZ));
    dwTicksTarget = SDL_GetTicks();
@@ -1559,7 +1559,7 @@ void update_timings(void)
 }
 
 // Recalculate emulation speed (to verify, seems to work reasonably well)
-void update_cpc_speed(void)
+void update_cpc_speed()
 {
    update_timings();
    InitAY();
@@ -1770,7 +1770,7 @@ void saveConfiguration (t_CPC &CPC, const std::string& configFilename)
 
 
 
-void doCleanUp (void)
+void doCleanUp ()
 {
    printer_stop();
    emulator_shutdown();
@@ -1856,7 +1856,7 @@ void set_osd_message(const std::string& message) {
    osd_message = " " + message;
 }
 
-void dumpScreen(void) {
+void dumpScreen() {
    static int dump_num=0;
    struct stat _stat;
 

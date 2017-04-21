@@ -22,7 +22,7 @@
 #define TAPE_LEVEL_LOW 0
 #define TAPE_LEVEL_HIGH 0x80
 
-void Tape_UpdateLevel(void);
-void Tape_Rewind(void);
+void Tape_UpdateLevel();
+void Tape_Rewind();
 
 #endif

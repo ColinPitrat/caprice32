@@ -52,7 +52,7 @@ public:
 		CRGBColor& FontColor = ALTERNATE_TEXT_COLOR, CFontEngine* pFontEngine = nullptr);
 
 	//! Standard destructor
-	virtual ~CGroupBox(void);
+	virtual ~CGroupBox();
 
 	//! Sets the color of the font used to render the label
 	//! \param FontColor The color of the label text
@@ -60,11 +60,11 @@ public:
 
 	//! Gets the font color for the label od the group box
 	//! \return The color of the text in the label
-	CRGBColor GetFontColor(void) { return m_FontColor; }
+	CRGBColor GetFontColor() { return m_FontColor; }
 
 	// CWindow overrides
 	//! Renders the Window Text, and clips to the Window Rect
-	virtual void Draw(void) const override;
+	virtual void Draw() const override;
 
 	//! Set the WindowText of the label
 	//! \param sWindowText The text to assign to the window

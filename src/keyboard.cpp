@@ -1,8 +1,8 @@
+#include "keyboard.h"
 #include <iostream>
 #include <fstream>
 #include <sys/stat.h>
 #include "cap32.h"
-#include "keyboard.h"
 #include "log.h"
 
 const dword InputMapper::cpc_kbd[CPC_KEYBOARD_NUM][CPC_KEY_NUM] = {
@@ -1131,6 +1131,7 @@ const std::map<const std::string, const unsigned int> InputMapper::SDLkeysFromSt
 	{ "MOD_PC_META", MOD_PC_META},
 	{ "MOD_PC_ALT", MOD_PC_ALT}
 };
+
 
 // Format of a line: CPC_xxx\tSDLK_xxx\tMODIFIER
 // Last field is optional

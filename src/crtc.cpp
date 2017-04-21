@@ -73,7 +73,7 @@ dword *RendStart, *RendPos;
 
 word MAXlate[0x7400];
 
-void (*PreRender)(void);
+void (*PreRender)();
 
 // Version 2 translation tables - static
 dword M0Map[0x200] = {
@@ -486,7 +486,7 @@ dword M3hMap[0x100] = {
 };
 
 
-void update_skew(void)
+void update_skew()
 {
    new_dt.NewHDSPTIMG |= 0x02; // enable horizontal DISPTMG by default
    dword skew = (CRTC.registers[8] >> 4) & 3; // isolate the display skew
@@ -503,7 +503,7 @@ void update_skew(void)
 
 
 
-inline void change_mode(void)
+inline void change_mode()
 {
    if (CRTC.flag_hadhsync) { // have we had an HSYNC on this scan line?
       CRTC.flag_hadhsync = 0;
@@ -514,7 +514,7 @@ inline void change_mode(void)
 
 
 
-inline void end_vdu_hsync(void)
+inline void end_vdu_hsync()
 {
    int temp;
 
@@ -609,7 +609,7 @@ inline void end_vdu_hsync(void)
 
 
 
-inline void match_line_count(void)
+inline void match_line_count()
 {
    if (CRTC.line_count == CRTC.registers[6]) { // matches vertical displayed?
       new_dt.NewDISPTIMG = 0; // disable vertical DISPTMG
@@ -634,7 +634,7 @@ inline void match_line_count(void)
 
 
 
-inline void reload_addr(void)
+inline void reload_addr()
 {
    if (CRTC.line_count == 0) { // has line count been reset?
       new_dt.NewDISPTIMG = 0xff; // enable vertical DISPTMG
@@ -646,7 +646,7 @@ inline void reload_addr(void)
 
 
 
-inline void restart_frame(void)
+inline void restart_frame()
 {
    CRTC.flag_invta = 0;
    CRTC.flag_resframe = 0;
@@ -661,7 +661,7 @@ inline void restart_frame(void)
 
 
 
-inline void match_hsw(void)
+inline void match_hsw()
 {
    if (CRTC.hsw_count == CRTC.hsw) { // matches horizontal sync width?
       GateArray.sl_count++; // update GA scan line counter
@@ -707,14 +707,14 @@ inline void match_hsw(void)
 
 
 
-void NoChar(void)
+void NoChar()
 {
    // nothing to do
 }
 
 
 
-void CharSL2(void)
+void CharSL2()
 {
    CRTC.reg5 = CRTC.registers[5];
    CRTC.CharInstSL = NoChar;
@@ -722,14 +722,14 @@ void CharSL2(void)
 
 
 
-void CharSL1(void)
+void CharSL1()
 {
    CRTC.CharInstSL = CharSL2;
 }
 
 
 
-void CharMR2(void)
+void CharMR2()
 {
    if (CRTC.flag_startvta) { // starting vertical total adjust?
       if (CRTC.line_count == CRTC.registers[4]) { // matches vertical total?
@@ -743,7 +743,7 @@ void CharMR2(void)
 
 
 
-void CharMR1(void)
+void CharMR1()
 {
    if ((CRTC.raster_count == CRTC.registers[9]) && (CRTC.line_count == CRTC.registers[4])) {
       CRTC.flag_invta = 0;
@@ -756,7 +756,7 @@ void CharMR1(void)
 
 
 
-void frame_finished(void)
+void frame_finished()
 {
 /*   if (VDU.scrln < MAX_DRAWN) { // monitor line below maximum visible?
       int cnt = (MAX_DRAWN - VDU.scrln) << 1; // number of lines remaining to be drawn
@@ -777,9 +777,9 @@ void frame_finished(void)
 
 
 
-void prerender_border(void)
+void prerender_border()
 {
-   register dword dwVal = 0x10101010;
+   dword dwVal = 0x10101010;
    *RendPos = dwVal;
    *(RendPos + 1) = dwVal;
    *(RendPos + 2) = dwVal;
@@ -789,9 +789,9 @@ void prerender_border(void)
 
 
 
-void prerender_border_half(void)
+void prerender_border_half()
 {
-   register dword dwVal = 0x10101010;
+   dword dwVal = 0x10101010;
    *RendPos = dwVal;
    *(RendPos + 1) = dwVal;
    RendPos += 2;
@@ -799,9 +799,9 @@ void prerender_border_half(void)
 
 
 
-void prerender_sync(void)
+void prerender_sync()
 {
-   register dword dwVal = 0x11111111;
+   dword dwVal = 0x11111111;
    *RendPos = dwVal;
    *(RendPos + 1) = dwVal;
    *(RendPos + 2) = dwVal;
@@ -811,9 +811,9 @@ void prerender_sync(void)
 
 
 
-void prerender_sync_half(void)
+void prerender_sync_half()
 {
-   register dword dwVal = 0x11111111;
+   dword dwVal = 0x11111111;
    *RendPos = dwVal;
    *(RendPos + 1) = dwVal;
    RendPos += 2;
@@ -840,9 +840,9 @@ dword shiftLittleEndianDwordTriplet(dword val1, dword val2, dword val3, int byte
    return (val2 << bitShift) | (val1 >> (32 - bitShift));
 }
 
-void prerender_normal(void)
+void prerender_normal()
 {
-   register byte bVidMem = getRAMByte(CRTC.next_address);
+   byte bVidMem = getRAMByte(CRTC.next_address);
    *RendPos = *(ModeMap + (bVidMem * 2));
    *(RendPos + 1) = *(ModeMap + (bVidMem * 2) + 1);
    bVidMem = getRAMByte(CRTC.next_address + 1);
@@ -851,7 +851,7 @@ void prerender_normal(void)
    RendPos += 4;
 }
 
-void prerender_normal_plus(void)
+void prerender_normal_plus()
 {
    int byteOffset = asic.hscroll / 8;
    int byteShift = asic.hscroll % 8;
@@ -887,16 +887,16 @@ void prerender_normal_plus(void)
 
 
 
-void prerender_normal_half(void)
+void prerender_normal_half()
 {
-   register byte bVidMem = getRAMByte(CRTC.next_address);
+   byte bVidMem = getRAMByte(CRTC.next_address);
    *RendPos = *(ModeMap + bVidMem);
    bVidMem = getRAMByte(CRTC.next_address + 1);
    *(RendPos + 1) = *(ModeMap + bVidMem);
    RendPos += 2;
 }
 
-void prerender_normal_half_plus(void)
+void prerender_normal_half_plus()
 {
    int byteOffset = (asic.hscroll / 2) / 4;
    int byteShift = ((asic.hscroll / 2) % 4);
@@ -926,7 +926,7 @@ void prerender_normal_half_plus(void)
 
 
 
-void set_prerender(void)
+void set_prerender()
 {
    LastPreRend = flags1.combined;
    if (LastPreRend == 0x03ff0000) {
@@ -949,12 +949,12 @@ unsigned int getPixel()
 
 
 
-void render8bpp(void)
+void render8bpp()
 {
-   register byte *pbPos = reinterpret_cast<byte *>(CPC.scr_pos);
-   register byte bCount = *RendWid++;
+   byte *pbPos = reinterpret_cast<byte *>(CPC.scr_pos);
+   byte bCount = *RendWid++;
    while (bCount--) {
-      register byte val = getPixel();
+      byte val = getPixel();
       *pbPos++ = val;
    }
    CPC.scr_pos = reinterpret_cast<dword *>(pbPos);
@@ -962,13 +962,13 @@ void render8bpp(void)
 
 
 
-void render8bpp_doubleY(void)
+void render8bpp_doubleY()
 {
-   register byte *pbPos = reinterpret_cast<byte *>(CPC.scr_pos);
-   register dword dwLineOffs = CPC.scr_bps << 2;
-   register byte bCount = *RendWid++;
+   byte *pbPos = reinterpret_cast<byte *>(CPC.scr_pos);
+   dword dwLineOffs = CPC.scr_bps << 2;
+   byte bCount = *RendWid++;
    while (bCount--) {
-      register byte val = getPixel();
+      byte val = getPixel();
       *(pbPos + dwLineOffs) = val;
       *pbPos++ = val;
    }
@@ -977,12 +977,12 @@ void render8bpp_doubleY(void)
 
 
 
-void render16bpp(void)
+void render16bpp()
 {
-   register word *pwPos = reinterpret_cast<word *>(CPC.scr_pos);
-   register byte bCount = *RendWid++;
+   word *pwPos = reinterpret_cast<word *>(CPC.scr_pos);
+   byte bCount = *RendWid++;
    while (bCount--) {
-      register word val = getPixel();
+      word val = getPixel();
       *pwPos++ = val;
    }
    CPC.scr_pos = reinterpret_cast<dword *>(pwPos);
@@ -990,13 +990,13 @@ void render16bpp(void)
 
 
 
-void render16bpp_doubleY(void)
+void render16bpp_doubleY()
 {
-   register word *pwPos = reinterpret_cast<word *>(CPC.scr_pos);
-   register dword dwLineOffs = CPC.scr_bps << 1;
-   register byte bCount = *RendWid++;
+   word *pwPos = reinterpret_cast<word *>(CPC.scr_pos);
+   dword dwLineOffs = CPC.scr_bps << 1;
+   byte bCount = *RendWid++;
    while (bCount--) {
-      register word val = getPixel();
+      word val = getPixel();
       *(pwPos + dwLineOffs) = val;
       *pwPos++ = val;
    }
@@ -1005,12 +1005,12 @@ void render16bpp_doubleY(void)
 
 
 
-void render24bpp(void)
+void render24bpp()
 {
-   register byte *pbPos = reinterpret_cast<byte *>(CPC.scr_pos);
-   register byte bCount = *RendWid++;
+   byte *pbPos = reinterpret_cast<byte *>(CPC.scr_pos);
+   byte bCount = *RendWid++;
    while (bCount--) {
-      register dword val = getPixel();
+      dword val = getPixel();
       *reinterpret_cast<word *>(pbPos) = static_cast<word>(val);
       *(pbPos + 2) = static_cast<byte>(val >> 16);
       pbPos += 3;
@@ -1020,13 +1020,13 @@ void render24bpp(void)
 
 
 
-void render24bpp_doubleY(void)
+void render24bpp_doubleY()
 {
-   register byte *pbPos = reinterpret_cast<byte *>(CPC.scr_pos);
-   register dword dwLineOffs = CPC.scr_bps << 2;
-   register byte bCount = *RendWid++;
+   byte *pbPos = reinterpret_cast<byte *>(CPC.scr_pos);
+   dword dwLineOffs = CPC.scr_bps << 2;
+   byte bCount = *RendWid++;
    while (bCount--) {
-      register dword val = getPixel();
+      dword val = getPixel();
       *reinterpret_cast<word *>(pbPos + dwLineOffs) = static_cast<word>(val);
       *reinterpret_cast<word *>(pbPos) = static_cast<word>(val);
       val >>= 16;
@@ -1039,22 +1039,22 @@ void render24bpp_doubleY(void)
 
 
 
-void render32bpp(void)
+void render32bpp()
 {
-   register byte bCount = *RendWid++;
+   byte bCount = *RendWid++;
    while (bCount--) {
-      register dword val = getPixel();
+      dword val = getPixel();
       *CPC.scr_pos++ = val;
    }
 }
 
 
 
-void render32bpp_doubleY(void)
+void render32bpp_doubleY()
 {
-   register byte bCount = *RendWid++;
+   byte bCount = *RendWid++;
    while (bCount--) {
-      register dword val = getPixel();
+      dword val = getPixel();
       *(CPC.scr_pos + CPC.scr_bps) = val;
       *CPC.scr_pos++ = val;
    }
@@ -1276,7 +1276,7 @@ void crtc_cycle(int repeat_count)
 
          CRTC.CharInstSL = CharSL1;
 
-         register dword temp = 0;
+         dword temp = 0;
          if (CRTC.raster_count == CRTC.registers[9]) { // matches maximum raster address?
             temp = 1;
             CRTC.flag_resscan = 1; // request a raster counter reset
@@ -1335,7 +1335,7 @@ void crtc_cycle(int repeat_count)
 
 
 
-void crtc_init(void)
+void crtc_init()
 {
    if (dwXScale == 1) {
       ModeMaps[0] = M0hMap;
@@ -1371,7 +1371,7 @@ void crtc_init(void)
 
 
 
-void crtc_reset(void)
+void crtc_reset()
 {
    memset(&CRTC, 0, sizeof(CRTC)); // clear CRTC data structure
    CRTC.registers[0] = 0x3f;

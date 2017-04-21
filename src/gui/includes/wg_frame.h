@@ -50,7 +50,7 @@ public:
 	CFrame(const CRect& WindowRect, CWindow* pParent, CFontEngine* pFontEngine, const std::string& sTitle, bool bResizable = true);
 
 	//! Standard destructor
-	virtual ~CFrame(void);
+	virtual ~CFrame();
 
 	//! Set the color of the title bar
 	//! \param TitleBarColor The new color for the title bar
@@ -66,7 +66,7 @@ public:
 
 	//! Indicates if the frame is resizable (set in the object constructor)
 	//! \return true if the frame is resizable
-	bool IsResizable(void) const { return m_bResizable; }
+	bool IsResizable() const { return m_bResizable; }
 
 	//! Attaches a standard menu to the frame, if the frame already has a menu, the old menu will be deleted
 	//! \param pMenu A pointer to the menu, the CFrame is then responsible for cleaning it up, passing in 0 will delete the current menu
@@ -74,14 +74,14 @@ public:
 
 	//! Gets the menu for a frame
 	//! \return A pointer to the frame's menu, 0 if the view doesn't have a menu
-	CMenu* GetMenu(void) const { return m_pMenu; }
+	CMenu* GetMenu() const { return m_pMenu; }
 
 	//! Closes the frame and causes it to delete itself
-	virtual void CloseFrame(void);
+	virtual void CloseFrame();
 
 	//! Indicates if the frame is modal (doesn't allow input to any other windows)
 	//! \return true if the frame is modal
-	bool IsModal(void) const { return m_bModal; }
+	bool IsModal() const { return m_bModal; }
 
 	//! Sets the frame's modal state
 	//! param bModal the modal state to set (CFrames are non-modal by default)
@@ -90,7 +90,7 @@ public:
 
 	// CWindow overrides
 	//! Draws the frame and renders the title bar
-	virtual void Draw(void) const override;
+	virtual void Draw() const override;
 
 	//! Blit the window to the given surface, using m_WindowRect as the offset into the surface
 	//! \param ScreenSurface A reference to the surface that the window will be copied to
