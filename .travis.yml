@@ -12,6 +12,8 @@ addons:
     - libpng-dev
     - gcc-4.8
     - g++-4.8
+    - clang-3.8
+    - clang-tidy-3.8
 #To uncomment in case a core occurs:
 #    - gdb
 before_script:
@@ -26,6 +28,7 @@ script:
  - make e2e_test
  - make clean
  - make debug CFLAGS=-Wno-literal-suffix
+ - make clang_tidy
 #To uncomment in case a core occurs:
 # - find ./ -name 'core*'
 # - for i in $(find ./ -name 'core*' -print); do gdb ./test/test_runner $i -ex "thread apply all bt" -ex "set pagination 0" -batch; done;

@@ -60,8 +60,13 @@ ifdef WITH_IPF
 COMMON_CFLAGS += -DWITH_IPF
 LIBS += -lcapsimage
 endif
+ifndef CXX
 CXX = g++
 endif
+endif
+
+CLANG_TIDY=clang-tidy-3.8
+CLANG_CHECKS=modernize-*,performance-*,misc-*
 
 SRCDIR:=src
 TSTDIR:=test
@@ -230,6 +235,9 @@ unit_test: $(TEST_TARGET)
 e2e_test: $(TARGET)
 	cd test/integrated && ./run_tests.sh
 endif
+
+clang-tidy:
+	$(CLANG_TIDY) -checks=-*,$(CLANG_CHECKS) $(SOURCES) -header-filter=src/* -- $(COMMON_CFLAGS)
 
 clean:
 	rm -rf obj/ release/
