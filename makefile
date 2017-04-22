@@ -60,9 +60,7 @@ ifdef WITH_IPF
 COMMON_CFLAGS += -DWITH_IPF
 LIBS += -lcapsimage
 endif
-ifndef CXX
 CXX = g++
-endif
 endif
 
 SRCDIR:=src
