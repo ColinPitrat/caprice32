@@ -66,7 +66,7 @@ endif
 endif
 
 CLANG_TIDY=clang-tidy-3.8
-CLANG_CHECKS=modernize-*,performance-*,misc-*
+CLANG_CHECKS=modernize-*,performance-*,misc-*,-misc-definitions-in-headers
 
 SRCDIR:=src
 TSTDIR:=test
