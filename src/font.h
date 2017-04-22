@@ -20,7 +20,7 @@
 #define FNT_CHAR_HEIGHT 8
 #define FNT_CHARS 96
 #define FNT_MIN_CHAR 32
-#define FNT_MAX_CHAR FNT_MIN_CHAR+FNT_CHARS
+#define FNT_MAX_CHAR (FNT_MIN_CHAR+FNT_CHARS)
 #define FNT_BAD_CHAR 95
 
 static byte bFont[768] = {

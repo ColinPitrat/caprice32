@@ -73,7 +73,7 @@ public:
 	CApplication(std::string sFontFileName = "resource/vera_sans.ttf", bool bHandleExceptionsInternally = true);
 
 	//! Standard destructor
-	virtual ~CApplication();
+	~CApplication() override;
 
 	//! Gets the single instance of the CApplication object
 	//! \return A pointer to the one instance of the Application
@@ -193,7 +193,7 @@ public:
 	// CMessageClient overrides
 	//! CApplication will handle the APP_EXIT message, and will close the application on it's receipt
 	//! \param pMessage A pointer the the message to handle
-	virtual bool HandleMessage(CMessage* pMessage) override;
+	bool HandleMessage(CMessage* pMessage) override;
 
 protected:
 

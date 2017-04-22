@@ -237,7 +237,7 @@ e2e_test: $(TARGET)
 endif
 
 clang-tidy:
-	$(CLANG_TIDY) -checks=-*,$(CLANG_CHECKS) $(SOURCES) -header-filter=src/* -- $(COMMON_CFLAGS)
+	$(CLANG_TIDY) -checks=-*,$(CLANG_CHECKS) $(SOURCES) -header-filter=src/* -- $(COMMON_CFLAGS) | grep "." && false
 
 clean:
 	rm -rf obj/ release/

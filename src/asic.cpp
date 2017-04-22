@@ -37,15 +37,15 @@ void asic_reset() {
   asic.raster_interrupt = false;
   asic.interrupt_vector = 1;
 
-  for(int c = 0; c < NB_DMA_CHANNELS; ++c) {
-    asic.dma.ch[c].source_address = 0;
-    asic.dma.ch[c].loop_address = 0;
-    asic.dma.ch[c].prescaler = 0;
-    asic.dma.ch[c].enabled = false;
-    asic.dma.ch[c].interrupt = false;
-    asic.dma.ch[c].pause_ticks = 0;
-    asic.dma.ch[c].tick_cycles = 0;
-    asic.dma.ch[c].loops = 0;
+  for(auto &channel : asic.dma.ch) {
+    channel.source_address = 0;
+    channel.loop_address = 0;
+    channel.prescaler = 0;
+    channel.enabled = false;
+    channel.interrupt = false;
+    channel.pause_ticks = 0;
+    channel.tick_cycles = 0;
+    channel.loops = 0;
   }
 }
 

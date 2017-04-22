@@ -47,10 +47,10 @@ public:
 	CPoint(const int x, const int y) : m_XPos(x), m_YPos(y) { }
 
 	//! Copy constructor
-	CPoint(const CPoint& p) : m_XPos(p.m_XPos), m_YPos(p.m_YPos) { }
+	CPoint(const CPoint& p) = default;
 
 	//! Standard Destructor
-	virtual ~CPoint() { }
+	virtual ~CPoint() = default;
 
 	//! Set the X coordinate
 	//! \param x X coordinate

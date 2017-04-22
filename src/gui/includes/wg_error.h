@@ -40,14 +40,14 @@ class Wg_Ex_Base : public std::exception
 public:
 	//! Standard constructor
 	//! \param sWhat A string for more information on what caused the exception
-	Wg_Ex_Base(const std::string& sWhat, const std::string& sWhere) : m_sWhat(sWhat), m_sWhere(sWhere) { }
+	Wg_Ex_Base(std::string sWhat, std::string sWhere) : m_sWhat(std::move(sWhat)), m_sWhere(std::move(sWhere)) { }
 
 	//! Standard Destructor
-	virtual ~Wg_Ex_Base() throw() { }
+	~Wg_Ex_Base() throw() override = default;
 
 	//! Gets a text description of the exception
 	//! \return A string describing what caused the exception
-	virtual const char* what() const throw() override { return m_sWhat.c_str(); }
+	const char* what() const throw() override { return m_sWhat.c_str(); }
 
 	//! Gets a text description of where the exception happened
 	//! \return A string describing where the exception was raised

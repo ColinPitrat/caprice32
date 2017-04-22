@@ -54,8 +54,8 @@ CNavigationBar::CNavigationBar(CWindow* pParent, const CPoint& UpperLeft, unsign
 
 CNavigationBar::~CNavigationBar() {
     // Delete the bitmaps
-    for (unsigned int i = 0; i < m_Bitmaps.size(); i ++) {
-        delete m_Bitmaps.at(i);
+    for (const auto& bitmap : m_Bitmaps) {
+        delete bitmap;
     }
 }
 

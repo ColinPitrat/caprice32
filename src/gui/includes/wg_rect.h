@@ -62,11 +62,10 @@ public:
 
 	//! Copy constructor
 	//! \param r A CRect that thie new CRect will be copied from
-	CRect(const CRect& r) :
-		m_Left(r.m_Left), m_Right(r.m_Right), m_Top(r.m_Top), m_Bottom(r.m_Bottom) { }  // constructor
+	CRect(const CRect& r) = default;
 
 	//! Standard Destructor
-	virtual ~CRect() { }
+	virtual ~CRect() = default;
 
 	//! Set the Top poisition
 	//! \param top The new Top coordinate

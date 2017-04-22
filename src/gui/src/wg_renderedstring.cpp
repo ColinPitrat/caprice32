@@ -126,9 +126,9 @@ unsigned int CRenderedString::GetWidth(std::string sText)
 {
     int totalWidth = 0;
 	FT_Glyph_Metrics* pMetrics;
-	for(unsigned i = 0; i < sText.length(); i++)
+	for(const char c : sText)
 	{
-		pMetrics = m_pFontEngine->GetMetrics(sText[i]);
+		pMetrics = m_pFontEngine->GetMetrics(c);
 		totalWidth += (pMetrics->horiAdvance >> 6);
 	}
 	return totalWidth;
@@ -144,12 +144,12 @@ void CRenderedString::GetMetrics(CPoint* pBoundedDimensions, CPoint* pOriginOffs
 		int iMinY = 0;
 		int iMaxY = 0;
 		int iLength = 0;
-		for (unsigned int i = 0; i < m_sString.size(); ++i)
+		for (const char c : m_sString)
 		{
 			FT_Glyph_Metrics* pMetrics;
 			if (m_MaskChar == ' ')
 			{
-				pMetrics = m_pFontEngine->GetMetrics(m_sString[i]);
+				pMetrics = m_pFontEngine->GetMetrics(c);
 			}
 			else
 			{

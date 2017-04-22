@@ -17,7 +17,7 @@ namespace wGui
         //! \param pFontEngine A pointer to the font engine to use when drawing the control
         //! If this is set to 0 it will use the default font engine specified by the CApplication (which must be set before instantiating this object)
         CapriceLoadSave(const CRect& WindowRect, CWindow* pParent, CFontEngine* pFontEngine);
-        ~CapriceLoadSave();
+        ~CapriceLoadSave() override;
         bool HandleMessage(CMessage* pMessage) override;
         std::string simplifyDirPath(std::string path);
         void UpdateFilesList();

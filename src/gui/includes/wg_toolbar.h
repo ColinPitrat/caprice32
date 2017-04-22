@@ -46,7 +46,7 @@ public:
 	CToolBar(const CRect& WindowRect, CWindow* pParent);
 
 	//! Standard destructor
-	virtual ~CToolBar();
+	~CToolBar() override;
 
 
 	//! Add a button to the toolbar
@@ -88,13 +88,13 @@ public:
 	//! CWindow overrides
 	//! Giving a control a new WindowRect will move and resize the control
 	//! \param WindowRect A CRect that defines the outer limits of the control
-	virtual void SetWindowRect(const CRect& WindowRect) override;
+	void SetWindowRect(const CRect& WindowRect) override;
 
 
 	// CMessageClient overrides
 	//! CToolBars handle CTRL_SINGLELCLICK messages
 	//! \param pMessage A pointer to the message
-	virtual bool HandleMessage(CMessage* pMessage) override;
+	bool HandleMessage(CMessage* pMessage) override;
 
 
 protected:

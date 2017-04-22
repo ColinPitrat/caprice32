@@ -25,7 +25,7 @@ namespace wGui
   {
     public:
       CapriceGuiViewButton(MenuItem item, CButton *button) : m_item(item), m_button(button) {};
-      ~CapriceGuiViewButton() {};
+      ~CapriceGuiViewButton() = default;
 
       CButton *GetButton() const { return m_button.get(); };
       MenuItem GetItem() const { return m_item; };
@@ -41,7 +41,7 @@ namespace wGui
       //! \param pFontEngine A pointer to the font engine to use when drawing the control
       //! If this is set to 0 it will use the default font engine specified by the CApplication (which must be set before instantiating this object)
       CapriceMenu(const CRect& WindowRect, CWindow* pParent, SDL_Surface* screen, CFontEngine* pFontEngine);
-      ~CapriceMenu();
+      ~CapriceMenu() override;
 
       void CloseFrame() override;
       bool HandleMessage(CMessage* pMessage) override;

@@ -13,5 +13,5 @@ class CapriceVKeyboardView : public CView
 
     std::list<SDL_Event> GetEvents();
 
-    virtual void PaintToSurface(SDL_Surface& ScreenSurface, SDL_Surface& FloatingSurface, const CPoint& Offset) const override;
+    void PaintToSurface(SDL_Surface& ScreenSurface, SDL_Surface& FloatingSurface, const CPoint& Offset) const override;
 };

@@ -28,8 +28,8 @@
 extern "C" {
 #endif
 
-#define GL_FUNC(ret,func,params) typedef ret (APIENTRY * ptr##func) params;
-#define GL_FUNC_OPTIONAL(ret,func,params) typedef ret (APIENTRY * ptr##func) params;
+#define GL_FUNC(ret,func,params) typedef ret (APIENTRY * ptr##func) params; // NOLINT(misc-macro-parentheses): Caller is expected to provide parenthesis otherwise this will cause a syntax error
+#define GL_FUNC_OPTIONAL(ret,func,params) typedef ret (APIENTRY * ptr##func) params; // NOLINT(misc-macro-parentheses): Caller is expected to provide parenthesis otherwise this will cause a syntax error
 #include "glfunclist.h"
 #undef GL_FUNC
 #undef GL_FUNC_OPTIONAL

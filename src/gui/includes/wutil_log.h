@@ -43,8 +43,8 @@ public:
 	struct SLogEntry
 	{
 		//! The constructor
-		SLogEntry(time_t TimeStamp, unsigned int iSeverity, const std::string& sMessage) :
-			m_TimeStamp(TimeStamp), m_iSeverity(iSeverity), m_sMessage(sMessage) { }
+		SLogEntry(time_t TimeStamp, unsigned int iSeverity, std::string sMessage) :
+			m_TimeStamp(TimeStamp), m_iSeverity(iSeverity), m_sMessage(std::move(sMessage)) { }
 		time_t m_TimeStamp;  //!< The time the log entry was created
 		unsigned int m_iSeverity;  //!< The severity of the log entry
 		std::string m_sMessage;  //!< The actual text of the log entry

@@ -37,7 +37,7 @@ class SNavBarItem  {
 public:
 	//! Standard constructor
 	SNavBarItem(std::string sItemTextIn, std::string PictureFilename ="" , CRGBColor ItemColorIn = DEFAULT_TEXT_COLOR) :
-		sItemText(sItemTextIn), sPictureFilename(PictureFilename), ItemColor(ItemColorIn) {
+		sItemText(std::move(sItemTextIn)), sPictureFilename(std::move(PictureFilename)), ItemColor(ItemColorIn) {
     }
 	std::string sItemText;  //!< The displayed text for the item
 	std::string sPictureFilename;  //!< Name of the bmp file to display in the item.
@@ -63,7 +63,7 @@ public:
                    unsigned int iItemWidth = 50, unsigned int iItemHeight = 50, CFontEngine* pFontEngine = nullptr);
 
 	//! Standard destructor
-	virtual ~CNavigationBar();
+	~CNavigationBar() override;
 
 	//! Gets the height of the items
 	//! \return The height of the items in the navigation bar
@@ -123,29 +123,29 @@ public:
 
 	// CWindow overrides
 	//! Draws the navigation bar
-	virtual void Draw() const override;
+	void Draw() const override;
 
 	//! Giving a control a new WindowRect will move and resize the control
 	//! \param WindowRect A CRect that defines the outer limits of the control
-	virtual void SetWindowRect(const CRect& WindowRect) override;
+	void SetWindowRect(const CRect& WindowRect) override;
 
 	//! Blit the window to the given surface, using m_WindowRect as the offset into the surface
 	//! \param ScreenSurface A reference to the surface that the window will be copied to
 	//! \param FloatingSurface A reference to the floating surface which is overlayed at the very end (used for tooltips, menus and such)
 	//! \param Offset This is the current offset into the Surface that should be used as reference
-	virtual void PaintToSurface(SDL_Surface& ScreenSurface, SDL_Surface& FloatingSurface, const CPoint& Offset) const override;
+	void PaintToSurface(SDL_Surface& ScreenSurface, SDL_Surface& FloatingSurface, const CPoint& Offset) const override;
 
 	//! This is called whenever the navigation bar is clicked on by the mouse
 	//! Only the topmost window that bounds the point will be called by the system
 	//! \param Point The point where the mouse clicked
 	//! \param Button A bitfield indicating which button the window was clicked with
 	//! \return True if it's in the bounds of the navigation bar
-	virtual bool OnMouseButtonDown(CPoint Point, unsigned int Button) override;
+	bool OnMouseButtonDown(CPoint Point, unsigned int Button) override;
 
 	// CMessageClient overrides
 	//! CNavigationBars handle MOUSE_BUTTONDOWN, MOUSE_BUTTONUP and CTRL_VALUECHANGE messages
 	//! \param pMessage A pointer to the message
-	virtual bool HandleMessage(CMessage* pMessage) override;
+	bool HandleMessage(CMessage* pMessage) override;
 
 
 protected:

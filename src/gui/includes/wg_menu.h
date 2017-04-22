@@ -50,7 +50,7 @@ public:
 	//! \param iItemId An identifier for the menu item, which gets returned in the CTRL_SINGLELCLICK message
 	//! \param pPopup A pointer to a popup menu, if the menu item is actually a submenu, this should be 0 if the item isn't a submenu (defaults to 0)
 	SMenuItem(std::string sItemText, long int iItemId = 0, CPopupMenu* pPopup = nullptr) :
-		sItemText(sItemText), iItemId(iItemId), pPopup(pPopup), bSpacer(false) { }
+		sItemText(std::move(sItemText)), iItemId(iItemId), pPopup(pPopup), bSpacer(false) { }
 
 	//! Constructs a new Spacer Menu Item
 	SMenuItem() : sItemText(""), iItemId(0), pPopup(nullptr), bSpacer(true) { }
@@ -78,7 +78,7 @@ public:
 	CMenuBase(const CRect& WindowRect, CWindow* pParent, CFontEngine* pFontEngine = nullptr);
 
 	//! Standard destructor
-	virtual ~CMenuBase();
+	~CMenuBase() override;
 
 	//! Insert a menu item into the menu
 	//! \param MenuItem An SMenuItem struct that defines the menu item to add
@@ -103,20 +103,20 @@ public:
 
 	//! CWindow overrides
 	//! Draws the menu
-	virtual void Draw() const override = 0;
+	void Draw() const override = 0;
 
 	//! This is called whenever the menu is clicked on by the mouse
 	//! Only the topmost window that bounds the point will be called by the system
 	//! \param Point The point where the mouse clicked
 	//! \param Button A bitfield indicating which button the window was clicked with
 	//! \return True if it's in the bounds of the menu
-	virtual bool OnMouseButtonDown(CPoint Point, unsigned int Button) override;
+	bool OnMouseButtonDown(CPoint Point, unsigned int Button) override;
 
 
 	// CMessageClient overrides
 	//! CMenus handle MOUSE_BUTTONDOWN and MOUSE_BUTTONUP messages
 	//! \param pMessage A pointer to the message
-	virtual bool HandleMessage(CMessage* pMessage) override;
+	bool HandleMessage(CMessage* pMessage) override;
 
 
 protected:
@@ -137,8 +137,8 @@ protected:
 		//! \param MI the menu item
 		//! \param RS the rendered string for the menu item
 		//! \param R a CRect describing the boundaries of the menu item
-		s_MenuItemInfo(const SMenuItem& MI, const CRenderedString& RS, const CRect& R)
-			: MenuItem(MI), RenderedString(RS), Rect(R)
+		s_MenuItemInfo(SMenuItem MI, CRenderedString RS, CRect R)
+			: MenuItem(std::move(MI)), RenderedString(std::move(RS)), Rect(std::move(R))
 		{ }
 		
 		SMenuItem MenuItem;  //!< The actual menu item
@@ -174,40 +174,40 @@ public:
 	CMenu(const CRect& WindowRect, CWindow* pParent, CFontEngine* pFontEngine = nullptr);
 
 	//! Standard destructor
-	virtual ~CMenu();
+	~CMenu() override;
 
 	//! Insert a menu item into the menu
 	//! \param MenuItem An SMenuItem struct that defines the menu item to add
 	//! \param iPosition The position to insert it at, -1 will insert it at the end, defaults to -1
-	virtual void InsertMenuItem(const SMenuItem& MenuItem, int iPosition = -1) override;
+	void InsertMenuItem(const SMenuItem& MenuItem, int iPosition = -1) override;
 
 
 	//! CWindow overrides
 	//! Draws the menu
-	virtual void Draw() const override;
+	void Draw() const override;
 
 	//! This is called whenever the menu is clicked on by the mouse
 	//! Only the topmost window that bounds the point will be called by the system
 	//! \param Point The point where the mouse clicked
 	//! \param Button A bitfield indicating which button the window was clicked with
 	//! \return True if it's in the bounds of the menu
-	virtual bool OnMouseButtonDown(CPoint Point, unsigned int Button) override;
+	bool OnMouseButtonDown(CPoint Point, unsigned int Button) override;
 
 
 	// CMessageClient overrides
 	//! CMenus handle MOUSE_BUTTONDOWN and MOUSE_BUTTONUP messages
 	//! \param pMessage A pointer to the message
-	virtual bool HandleMessage(CMessage* pMessage) override;
+	bool HandleMessage(CMessage* pMessage) override;
 
 
 protected:
 	//! This updates the cached item rects if they are marked as invalid
-	virtual void UpdateCachedRects() const override;
+	void UpdateCachedRects() const override;
 
 	//! Check to see where it will fit, then show the popup menu
 	//! \param ParentRect A CRect that defines the dimensions of the item that is spawning the popup
 	//! \param BoundingRect A CRect that defines the boundaries the popup has to fit in
-	virtual void ShowActivePopup(const CRect& ParentRect, const CRect& BoundingRect) override;
+	void ShowActivePopup(const CRect& ParentRect, const CRect& BoundingRect) override;
 
 
 private:
@@ -229,7 +229,7 @@ public:
 	CPopupMenu(const CRect& WindowRect, CWindow* pParent, CFontEngine* pFontEngine = nullptr);
 
 	//! Standard destructor
-	virtual ~CPopupMenu();
+	~CPopupMenu() override;
 
 	//! Show the popup at the given point
 	//! \param Position The point to use for the top left corner of the popup, in view coordinates
@@ -258,36 +258,36 @@ public:
 
 	//! CWindow overrides
 	//! Draws the menu
-	virtual void Draw() const override;
+	void Draw() const override;
 
 	//! Blit the window to the given surface, using m_WindowRect as the offset into the surface
 	//! \param ScreenSurface A reference to the surface that the window will be copied to
 	//! \param FloatingSurface A reference to the floating surface which is overlayed at the very end (used for tooltips, menus and such)
 	//! \param Offset This is the current offset into the Surface that should be used as reference
-	virtual void PaintToSurface(SDL_Surface& ScreenSurface, SDL_Surface& FloatingSurface, const CPoint& Offset) const override;
+	void PaintToSurface(SDL_Surface& ScreenSurface, SDL_Surface& FloatingSurface, const CPoint& Offset) const override;
 
 	//! This is called whenever the popup is clicked on by the mouse
 	//! Only the topmost window that bounds the point will be called by the system
 	//! \param Point The point where the mouse clicked
 	//! \param Button A bitfield indicating which button the window was clicked with
 	//! \return True if it's in the bounds of the popup
-	virtual bool OnMouseButtonDown(CPoint Point, unsigned int Button) override;
+	bool OnMouseButtonDown(CPoint Point, unsigned int Button) override;
 
 
 	// CMessageClient overrides
 	//! CMenus handle MOUSE_BUTTONDOWN and MOUSE_BUTTONUP messages
 	//! \param pMessage A pointer to the message
-	virtual bool HandleMessage(CMessage* pMessage) override;
+	bool HandleMessage(CMessage* pMessage) override;
 
 
 protected:
 	//! This updates the cached item rects if they are marked as invalid
-	virtual void UpdateCachedRects() const override;
+	void UpdateCachedRects() const override;
 
 	//! Check to see where it will fit, then show the popup menu
 	//! \param ParentRect A CRect that defines the dimensions of the item that is spawning the popup
 	//! \param BoundingRect A CRect that defines the boundaries the popup has to fit in, this is in view coordinates
-	virtual void ShowActivePopup(const CRect& ParentRect, const CRect& BoundingRect) override;
+	void ShowActivePopup(const CRect& ParentRect, const CRect& BoundingRect) override;
 
 	//! This is a pointer to the CMenu that acts as parent for the popup,
 	//! though it's not actually the parent, because the parent for root popups should be the CView

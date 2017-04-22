@@ -39,7 +39,7 @@ CMessage::CMessage(const EMessageType MessageType, const CMessageClient* pDestin
 }
 
 
-CSDLMessage::CSDLMessage(const EMessageType MessageType, const CMessageClient* pDestination, const CMessageClient* pSource, SDL_Event SDLEvent) :
+CSDLMessage::CSDLMessage(const EMessageType MessageType, const CMessageClient* pDestination, const CMessageClient* pSource, SDL_Event SDLEvent) : // NOLINT(modernize-pass-by-value): if we pass by value and move SDLEvent, clang produce another warning (misc-move-const-arg) about moving a trivially-copyable type
 	CMessage(MessageType, pDestination, pSource),
 	SDLEvent(SDLEvent)
 {

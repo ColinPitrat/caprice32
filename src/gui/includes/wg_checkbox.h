@@ -48,7 +48,7 @@ public:
 	CCheckBox(const CRect& WindowRect, CWindow* pParent);
 
 	//! Standard destructor
-	virtual ~CCheckBox();
+	~CCheckBox() override;
 
 	//! The checkbox state
 	enum EState {
@@ -70,27 +70,27 @@ public:
 
 	// CWindow overrides
 	//! Draws the checkbox
-	virtual void Draw() const override;
+	void Draw() const override;
 
 	//! This is called whenever the checkbox is clicked on by the mouse
 	//! Only the topmost window that bounds the point will be called by the system
 	//! \param Point The point where the mouse clicked
 	//! \param Button A bitfield indicating which button the window was clicked with
 	//! \return True if it's in the bounds of the checkbox
-	virtual bool OnMouseButtonDown(CPoint Point, unsigned int Button) override;
+	bool OnMouseButtonDown(CPoint Point, unsigned int Button) override;
 
 	//! This is called whenever the a mouse button is released in the checkbox
 	//! Only the topmost window that bounds the point will be called by the system
 	//! \param Point The point where the mouse clicked
 	//! \param Button A bitfield indicating which button the window was clicked with
 	//! \return True if it's in the bounds of the checkbox
-	virtual bool OnMouseButtonUp(CPoint Point, unsigned int Button) override;
+	bool OnMouseButtonUp(CPoint Point, unsigned int Button) override;
 
 
 	// CMessageClient overrides
 	//! CCheckBoxes handle MOUSE_BUTTONDOWN, MOUSE_BUTTONUP, and it's own CTRL_SINGLELCLICK messages
 	//! \param pMessage A pointer to the message
-	virtual bool HandleMessage(CMessage* pMessage) override;
+	bool HandleMessage(CMessage* pMessage) override;
 
 
 protected:

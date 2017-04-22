@@ -82,7 +82,7 @@ public:
 	CMessage(const EMessageType MessageType, const CMessageClient* pDestination, const CMessageClient* pSource);
 
 	//! Standard destructor
-	virtual ~CMessage() { }
+	virtual ~CMessage() = default;
 
 	//! Gets the message type
 	//! \return The message type of the message
@@ -202,9 +202,9 @@ public:
 	//! \param pDestination A pointer to the window that the message is destined for (0 for no specific destination, or to broadcast to all)
 	//! \param pSource A pointer to the control that triggered the message
 	//! \param Value A template type data the user has
-	CValueMessage(const EMessageType MessageType, const CMessageClient* pDestination, const CMessageClient* pSource, const T& Value ) :
+	CValueMessage(const EMessageType MessageType, const CMessageClient* pDestination, const CMessageClient* pSource, T Value ) :
 		CMessage(MessageType, pDestination, pSource),
-		m_Value(Value)
+		m_Value(std::move(Value))
 	{ }
 
 	//! Returns the value of the message

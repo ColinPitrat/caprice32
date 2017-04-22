@@ -48,7 +48,7 @@ public:
 	CTimer(CMessageClient* pOwner = nullptr);
 
 	//! Standard destructor
-	virtual ~CTimer();
+	~CTimer() override;
 
 	//! Start the timer. When the timer expires, it will post an CTRL_TIMER message
 	//! \param Interval The time interval in milliseconds before the timer will expire
@@ -81,7 +81,7 @@ public:
 	// CMessageClient overrides
 	//! Attempt to handle the given message
 	//! \return true if the object handled the message (the message will not be given to any other handlers)
-	virtual bool HandleMessage(CMessage* pMessage) override;
+	bool HandleMessage(CMessage* pMessage) override;
 
 
 protected:

@@ -91,11 +91,10 @@ public:
 
 	//! A copying constructor
 	//! \param resHandle An existing resource handle that will be cloned
-	CBitmapResourceHandle(const CBitmapResourceHandle& resHandle) :
-		CResourceHandle(resHandle) { }
+	CBitmapResourceHandle(const CBitmapResourceHandle& resHandle) = default;
 
 	//! Standard destructor, which frees the bitmap if the refcount is zero
-	virtual ~CBitmapResourceHandle();
+	~CBitmapResourceHandle() override;
 
 	//! Gets the handle's bitmap
 	//! \return An SDL_Surface pointer (the bitmap)
@@ -139,11 +138,10 @@ public:
 
 	//! A copying constructor
 	//! \param resHandle An existing resource handle that will be cloned
-	CStringResourceHandle(const CStringResourceHandle& resHandle) :
-		CResourceHandle(resHandle) { }
+	CStringResourceHandle(const CStringResourceHandle& resHandle) = default;
 
 	//! Standard destructor, which frees the string if the refcount is zero
-	virtual ~CStringResourceHandle();
+	~CStringResourceHandle() override;
 
 	//! Returns the string
 	//! \return A string
@@ -169,11 +167,10 @@ public:
 
 	//! A copying constructor
 	//! \param resHandle An existing resource handle that will be cloned
-	CCursorResourceHandle(const CCursorResourceHandle& resHandle) :
-		CResourceHandle(resHandle) { }
+	CCursorResourceHandle(const CCursorResourceHandle& resHandle) = default;
 
 	//! Standard destructor, which frees the cursor if the refcount is zero
-	virtual ~CCursorResourceHandle();
+	~CCursorResourceHandle() override;
 
 	//! Returns the SDL Cursor pointer
 	//! \return A pointer to an SDL cursor object

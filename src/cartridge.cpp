@@ -21,8 +21,8 @@ void cpr_eject ()
 {
    delete[] pbCartridgeImage;
    pbCartridgeImage = nullptr;
-   for(uint32_t i = 0; i < CARTRIDGE_NB_PAGES; ++i) {
-      pbCartridgePages[i] = nullptr;
+   for(auto &page : pbCartridgePages) {
+      page = nullptr;
    }
 }
 

@@ -57,7 +57,7 @@ public:
 
 
 	//! Standard destructor
-	virtual ~CLabel();
+	~CLabel() override;
 
 	//! Sets the color of the font used to render the label
 	//! \param FontColor The color of the label text
@@ -70,11 +70,11 @@ public:
 
 	// CWindow overrides
 	//! Renders the Window Text, and clips to the Window Rect
-	virtual void Draw() const override;
+	void Draw() const override;
 
 	//! Set the WindowText of the label
 	//! \param sWindowText The text to assign to the window
-	virtual void SetWindowText(const std::string& sWindowText) override;
+	void SetWindowText(const std::string& sWindowText) override;
 
 
 protected:

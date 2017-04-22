@@ -144,7 +144,7 @@ namespace wGui {
             }
             else if(pressed == "ESC") {
               pressed = "\a";
-              pressed += CPC_ESC;
+              pressed += static_cast<char>(CPC_ESC);
             }
             else if(pressed == "DELETE") {
               std::string result = m_result->GetWindowText();
@@ -164,7 +164,7 @@ namespace wGui {
                std::cout << "Pressed F" << pressed[1] << std::endl;
                int fkey = CPC_F0 + pressed[1] - '0';
                pressed = "\a";
-               pressed += fkey;
+               pressed += static_cast<char>(fkey);
             }
             std::string result = m_result->GetWindowText() + pressed;
             m_result->SetWindowText(result);

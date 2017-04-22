@@ -52,7 +52,7 @@ public:
 		CRGBColor& FontColor = ALTERNATE_TEXT_COLOR, CFontEngine* pFontEngine = nullptr);
 
 	//! Standard destructor
-	virtual ~CGroupBox();
+	~CGroupBox() override;
 
 	//! Sets the color of the font used to render the label
 	//! \param FontColor The color of the label text
@@ -64,20 +64,20 @@ public:
 
 	// CWindow overrides
 	//! Renders the Window Text, and clips to the Window Rect
-	virtual void Draw() const override;
+	void Draw() const override;
 
 	//! Set the WindowText of the label
 	//! \param sWindowText The text to assign to the window
-	virtual void SetWindowText(const std::string& sWindowText) override;
+	void SetWindowText(const std::string& sWindowText) override;
 
 	//! Giving a control a new WindowRect will move and resize the control
 	//! \param WindowRect A CRect that defines the outer limits of the control
-	virtual void SetWindowRect(const CRect& WindowRect) override;
+	void SetWindowRect(const CRect& WindowRect) override;
 
 	// CMessageClient overrides
 	//! CGroupBox will forward keyboard events to its parent
 	//! \param pMessage A pointer to the message that needs to be handled
-	virtual bool HandleMessage(CMessage* pMessage) override;
+	bool HandleMessage(CMessage* pMessage) override;
 
 protected:
 	CFontEngine* m_pFontEngine;  //!< A pointer to the font engine to use to render the text

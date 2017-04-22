@@ -11,7 +11,7 @@ namespace wGui
   {
     public:
       CapriceVKeyboard(const CRect& WindowRect, CWindow* pParent, CFontEngine* pFontEngine);
-      ~CapriceVKeyboard();
+      ~CapriceVKeyboard() override;
 
       void CloseFrame() override;
       bool HandleMessage(CMessage* pMessage) override;

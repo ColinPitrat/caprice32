@@ -63,7 +63,7 @@ public:
 	CPainter(CWindow* pWindow, EPaintMode ePaintMode = PAINT_NORMAL);
 
 	//! Standard destructor
-	virtual ~CPainter() { }
+	virtual ~CPainter() = default;
 
 
 	//! Draw a horizontal line

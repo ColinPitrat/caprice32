@@ -445,8 +445,8 @@ SDL_Cursor* CwgCursorResourceHandle::CreateCursor(const char DataIn[], int iData
 	}
 
 	int iDataSize = iWidth * iHeight / 8;
-	Uint8* pData = new Uint8[iDataSize];
-	Uint8* pMask = new Uint8[iDataSize];
+	auto pData = new Uint8[iDataSize];
+	auto pMask = new Uint8[iDataSize];
 	int i = -1;
 
 	for (int iRow = 0; iRow < iHeight; ++iRow)

@@ -51,7 +51,7 @@ public:
 	CButton(const CRect& WindowRect, CWindow* pParent, std::string sText, CFontEngine* pFontEngine = nullptr);
 
 	//! Standard destructor
-	virtual ~CButton();
+	~CButton() override;
 
 	//! The button state
 	enum EState {
@@ -71,31 +71,31 @@ public:
 
 	// CWindow overrides
 	//! Draws the button and renders the button label
-	virtual void Draw() const override;
+	void Draw() const override;
 
 	//! Set the WindowText of the button
 	//! \param sWindowText The text to assign to the window
-	virtual void SetWindowText(const std::string& sWindowText) override;
+	void SetWindowText(const std::string& sWindowText) override;
 
 	//! This is called whenever the button is clicked on by the mouse
 	//! Only the topmost window that bounds the point will be called by the system
 	//! \param Point The point where the mouse clicked
 	//! \param Button A bitfield indicating which button the window was clicked with
 	//! \return True if it's in the bounds of the button
-	virtual bool OnMouseButtonDown(CPoint Point, unsigned int Button) override;
+	bool OnMouseButtonDown(CPoint Point, unsigned int Button) override;
 
 	//! This is called whenever the a mouse button is released in the button
 	//! Only the topmost window that bounds the point will be called by the system
 	//! \param Point The point where the mouse clicked
 	//! \param Button A bitfield indicating which button the window was clicked with
 	//! \return True if it's in the bounds of the button
-	virtual bool OnMouseButtonUp(CPoint Point, unsigned int Button) override;
+	bool OnMouseButtonUp(CPoint Point, unsigned int Button) override;
 
 
 	// CMessageClient overrides
 	//! CButtons handle MOUSE_BUTTONDOWN and MOUSE_BUTTONUP messages
 	//! \param pMessage A pointer to the message
-	virtual bool HandleMessage(CMessage* pMessage) override;
+	bool HandleMessage(CMessage* pMessage) override;
 
 
 protected:
@@ -128,7 +128,7 @@ public:
 	CPictureButton(const CRect& WindowRect, CWindow* pParent, const CBitmapResourceHandle& hBitmap);
 
 	//! Standard destructor
-	virtual ~CPictureButton();
+	~CPictureButton() override;
 
 
 	//! Change the picture the button displays
@@ -142,7 +142,7 @@ public:
 
 	// CWindow overrides
 	//! Draws the button and renders the button label
-	virtual void Draw() const override;
+	void Draw() const override;
 
 
 private:
