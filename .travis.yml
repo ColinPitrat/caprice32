@@ -5,6 +5,7 @@ addons:
  apt:
   sources:
     - ubuntu-toolchain-r-test
+    - llvm-toolchain-precise-3.8
   packages:
     - libsdl1.2-dev
     - libfreetype6-dev
