@@ -969,13 +969,14 @@ int tape_insert (FILE *pfile)
    if (memcmp(pbPtr, "ZXTape!\032", 8) == 0) { // CDT file?
       LOG_DEBUG("tape_insert CDT file");
       return tape_insert_cdt(pfile);
-   } else if (memcmp(pbPtr, "Creative", 8) == 0) { // VOC file ?
+   }
+   if (memcmp(pbPtr, "Creative", 8) == 0) { // VOC file ?
       LOG_DEBUG("tape_insert VOC file");
       return tape_insert_voc(pfile);
-   } else { // Unknown file
-      LOG_DEBUG("tape_insert unknown file");
-      return ERR_TAP_INVALID;
    }
+   // Unknown file
+   LOG_DEBUG("tape_insert unknown file");
+   return ERR_TAP_INVALID;
 }
 
 int tape_insert (const std::string &filename)
@@ -1387,22 +1388,21 @@ int file_load(const std::string& filepath, const DRIVE drive)
       // error or nothing relevant found
       LOG_ERROR("Error opening or parsing zip file " << filepath);
       return ERR_FILE_UNZIP_FAILED;
-    } else {
-      std::string filename = zip_info.filesOffsets[0].first;
-      pos = filename.length() - 4;
-      extension = filename.substr(pos); // grab the extension
-      LOG_DEBUG("Extracting " << filepath << ", " << filename << ", " << extension);
-      file = extractFile(filepath, filename, extension);
     }
+
+    std::string filename = zip_info.filesOffsets[0].first;
+    pos = filename.length() - 4;
+    extension = filename.substr(pos); // grab the extension
+    LOG_DEBUG("Extracting " << filepath << ", " << filename << ", " << extension);
+    file = extractFile(filepath, filename, extension);
   }
 
   for(const auto& loader : files_loader_list) {
     if (drive == loader.drive && extension == loader.extension) {
       if (file) {
         return loader.load_from_file(file);
-      } else {
-        return loader.load_from_filename(filepath);
       }
+      return loader.load_from_filename(filepath);
     }
   }
   LOG_ERROR("File format unsupported for " << filepath);

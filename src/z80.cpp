@@ -1019,15 +1019,15 @@ int z80_execute()
          z80.trace = 0; // reset trace condition
          return EC_TRACE; // exit emulation loop
       }
-      else if (VDU.frame_completed) { // video emulation finished building frame?
+      if (VDU.frame_completed) { // video emulation finished building frame?
          VDU.frame_completed = 0;
          return EC_FRAME_COMPLETE; // exit emulation loop
       }
-      else if (PSG.buffer_full) { // sound emulation finished filling a buffer?
+      if (PSG.buffer_full) { // sound emulation finished filling a buffer?
          PSG.buffer_full = 0;
          return EC_SOUND_BUFFER; // exit emulation loop
       }
-      else if (CPC.cycle_count <= 0) { // emulation loop ran for one frame?
+      if (CPC.cycle_count <= 0) { // emulation loop ran for one frame?
          CPC.cycle_count += CYCLE_COUNT_INIT;
          return EC_CYCLE_COUNT; // exit emulation loop
       }

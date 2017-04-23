@@ -408,7 +408,7 @@ CFontEngine* CApplication::GetFontEngine(std::string sFontFileName, unsigned cha
 void CApplication::EnableResourcePool(bool bEnable)
 {
 	m_bResourcePoolEnabled = bEnable;
-	if (bEnable == false)
+	if (!bEnable)
 	{
 		m_ResourceHandlePool.clear();
 	}

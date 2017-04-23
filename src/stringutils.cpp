@@ -25,7 +25,7 @@ namespace stringutils
     while(*b == c) b++;
     while(*e == c) e--;
     if(e++ >= b) return std::string(b, e);
-    else return "";
+    return "";
   }
 
   std::string lower(const std::string& s)

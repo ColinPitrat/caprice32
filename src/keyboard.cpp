@@ -1135,11 +1135,11 @@ const std::map<const std::string, const unsigned int> InputMapper::SDLkeysFromSt
 
 // Format of a line: CPC_xxx\tSDLK_xxx\tMODIFIER
 // Last field is optional
-void InputMapper::process_cfg_line(char *s)
+void InputMapper::process_cfg_line(char *line)
 {
 		unsigned int cpc_key = 0, sdl_key = 0;
 
-		char *pch = strtok(s, "\t");
+		char *pch = strtok(line, "\t");
 		if (pch == nullptr || pch[0] == '#')
 			return;
 
@@ -1221,8 +1221,7 @@ dword InputMapper::CPCkeyFromKeysym(SDL_keysym keysym) {
 
     if (cpc_key->second & MOD_EMU_KEY)
         return cpc_key->second;
-    else
-        return cpc_kbd[CPC->keyboard][cpc_key->second];
+    return cpc_kbd[CPC->keyboard][cpc_key->second];
 }
 
 std::list<SDL_Event> InputMapper::StringToEvents(std::string toTranslate) {

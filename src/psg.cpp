@@ -95,12 +95,12 @@ int Left_Chan, Right_Chan;
 inline void SetMixerRegister(byte Value)
 {
    PSG.RegisterAY.Mixer = Value;
-   Ton_EnA = Value & 1 ? false : true;
-   Noise_EnA = Value & 8 ? false : true;
-   Ton_EnB = Value & 2 ? false : true;
-   Noise_EnB = Value & 16 ? false : true;
-   Ton_EnC = Value & 4 ? false : true;
-   Noise_EnC = Value & 32 ? false : true;
+   Ton_EnA = !(Value & 1);
+   Noise_EnA = !(Value & 8);
+   Ton_EnB = !(Value & 2);
+   Noise_EnB = !(Value & 16);
+   Ton_EnC = !(Value & 4);
+   Noise_EnC = !(Value & 32);
 }
 
 
@@ -108,7 +108,7 @@ inline void SetMixerRegister(byte Value)
 inline void SetAmplA(byte Value)
 {
    PSG.RegisterAY.AmplitudeA = Value;
-   Envelope_EnA = Value & 16 ? false : true;
+   Envelope_EnA = !(Value & 16);
 }
 
 
@@ -116,7 +116,7 @@ inline void SetAmplA(byte Value)
 inline void SetAmplB(byte Value)
 {
    PSG.RegisterAY.AmplitudeB = Value;
-   Envelope_EnB = Value & 16 ? false : true;
+   Envelope_EnB = !(Value & 16);
 }
 
 
@@ -124,7 +124,7 @@ inline void SetAmplB(byte Value)
 inline void SetAmplC(byte Value)
 {
    PSG.RegisterAY.AmplitudeC = Value;
-   Envelope_EnC = Value & 16 ? false : true;
+   Envelope_EnC = !(Value & 16);
 }
 
 

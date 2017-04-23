@@ -14,9 +14,8 @@ int file_size (int fd) {
 
    if (!fstat(fd, &s)) {
       return s.st_size;
-   } else {
-      return 0;
    }
+   return 0;
 }
 
 bool file_copy(FILE *in, FILE *out) {
@@ -27,10 +26,8 @@ bool file_copy(FILE *in, FILE *out) {
         break;
       }
   }
-  if (ferror(in) || ferror(out)) {
-    return false;
-  }
-  return true;
+
+  return !(ferror(in) || ferror(out));
 }
 
 // Returns a vector containing the names of the files in the specified directory

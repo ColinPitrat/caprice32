@@ -112,10 +112,7 @@ std::string CEditBox::GetSelText() const
 			}
 			return m_sWindowText.substr(SelStartNorm, SelLenNorm);
 	}
-	else
-	{
-		return "";
-	}
+  return "";
 }
 
 

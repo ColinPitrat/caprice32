@@ -201,16 +201,16 @@ class InputMapper {
 		std::map<unsigned int, unsigned int> SDLkeysymFromCPCkeys;
 		t_CPC *CPC;
 
-		void process_cfg_line(char *);
+		void process_cfg_line(char *line);
 
 	public:
 		InputMapper(t_CPC *CPC);
-		void init(void);
+		void init();
 		dword CPCkeyFromKeysym(SDL_keysym keysym);
 		dword CPCkeyFromJoystickButton(SDL_JoyButtonEvent jbutton);
 		void CPCkeyFromJoystickAxis(SDL_JoyAxisEvent jaxis, dword *cpc_key, bool &release);
-		std::list<SDL_Event> StringToEvents(std::string);
-		void set_joystick_emulation(void);
+		std::list<SDL_Event> StringToEvents(std::string toTranslate);
+		void set_joystick_emulation();
 };
 
 #endif

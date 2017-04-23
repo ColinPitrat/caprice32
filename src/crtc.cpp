@@ -828,11 +828,14 @@ static inline byte getRAMByte(int video_address) {
 dword shiftLittleEndianDwordTriplet(dword val1, dword val2, dword val3, int byteShift) {
    if (byteShift == 0) {
       return val3;
-   } else if (byteShift == 4) {
+   }
+   if (byteShift == 4) {
       return val2;
-   } else if (byteShift == 8) {
+   }
+   if (byteShift == 8) {
       return val1;
-   } else if (byteShift < 4) {
+   }
+   if (byteShift < 4) {
       int bitShift = 8 * byteShift;
       return (val3 << bitShift) | (val2 >> (32 - bitShift));
    }

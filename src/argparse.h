@@ -13,6 +13,6 @@ class CapriceArgs
 };
 
 std::string replaceCap32Keys(std::string command);
-void parseArguments(int, char**, std::vector<std::string>&, CapriceArgs&);
+void parseArguments(int argc, char** argv, std::vector<std::string>& slot_list, CapriceArgs& args);
 
 #endif

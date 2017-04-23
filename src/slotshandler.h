@@ -22,28 +22,28 @@ typedef enum {
   OTHER,
 } DRIVE;
 
-FILE *extractFile(const std::string&, const std::string&, const std::string&);
-int snapshot_load (FILE *);
-int snapshot_load (const std::string&);
-int snapshot_save (const std::string&);
-int dsk_load (FILE *, t_drive*);
-int dsk_load (const std::string&, t_drive*);
-int dsk_save (const std::string&, t_drive *drive);
-void dsk_eject (t_drive*);
-int dsk_format (t_drive*, int);
-int tape_insert (FILE *);
-int tape_insert (const std::string&);
-int tape_insert_cdt (FILE *);
-int tape_insert_voc (FILE *);
+FILE *extractFile(const std::string& zipfile, const std::string& filename, const std::string& ext);
+int snapshot_load (FILE *pfile);
+int snapshot_load (const std::string& filename);
+int snapshot_save (const std::string& filename);
+int dsk_load (FILE *pfile, t_drive *drive);
+int dsk_load (const std::string& filename, t_drive *drive);
+int dsk_save (const std::string& filename, t_drive *drive);
+void dsk_eject (t_drive* drive);
+int dsk_format (t_drive* drive, int iFormat);
+int tape_insert (FILE *pfile);
+int tape_insert (const std::string& filename);
+int tape_insert_cdt (FILE *pfile);
+int tape_insert_voc (FILE *pfile);
 void tape_eject ();
 void cartridge_load ();
-int cartridge_load (const std::string&);
+int cartridge_load (const std::string& filepath);
 int cartridge_load (FILE *file);
 // Smart load: support loading DSK, SNA, CDT, VOC, CPR or a zip containing one of these.
 // drive must be DSK_A or DSK_B for DSK, OTHER otherwise.
-int file_load(const std::string&, const DRIVE);
+int file_load(const std::string& filepath, const DRIVE drive);
 // Retrieve files that are passed as argument and update CPC fields so that they will be loaded properly
-void fillSlots (std::vector<std::string>, t_CPC&);
+void fillSlots (std::vector<std::string> slot_list, t_CPC& CPC);
 // Loads slot content in memory
 void loadSlots();
 
@@ -51,6 +51,6 @@ void loadSlots();
 #define DEFAULT_DISK_FORMAT      0
 #define FIRST_CUSTOM_DISK_FORMAT 2
 
-t_disk_format parseDiskFormat(const std::string&);
-std::string serializeDiskFormat(const t_disk_format&);
+t_disk_format parseDiskFormat(const std::string& format);
+std::string serializeDiskFormat(const t_disk_format& format);
 

@@ -722,8 +722,7 @@ __inline__ Uint32 INTERPOLATE (Uint32 A, Uint32 B)
 		return (((A & colorMask) >> 1) + ((B & colorMask) >> 1) +
 				(A & B & lowPixelMask));
 	}
-	else
-		return A;
+  return A;
 }
 
 __inline__ Uint32 Q_INTERPOLATE (Uint32 A, Uint32 B, Uint32 C, Uint32 D)
