@@ -82,9 +82,9 @@ public:
 	void SetItemWidth(unsigned int iItemWidth);
 
 	//! Adds a new item to the bar
-	//! \param ListItem A SNavBarItem structure with the data for the item
+	//! \param NavBarItem A SNavBarItem structure with the data for the item
 	//! \return The index of the added item
-	unsigned int AddItem(SNavBarItem ListItem);
+	unsigned int AddItem(SNavBarItem NavBarItem);
 
 	//! Returns the desired item
 	//! \param iItemIndex The index of the item to check (will throw an exception if the index is out of range)

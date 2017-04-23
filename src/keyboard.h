@@ -206,7 +206,7 @@ class InputMapper {
 	public:
 		InputMapper(t_CPC *CPC);
 		void init(void);
-		dword CPCkeyFromKeysym(SDL_keysym key);
+		dword CPCkeyFromKeysym(SDL_keysym keysym);
 		dword CPCkeyFromJoystickButton(SDL_JoyButtonEvent jbutton);
 		void CPCkeyFromJoystickAxis(SDL_JoyAxisEvent jaxis, dword *cpc_key, bool &release);
 		std::list<SDL_Event> StringToEvents(std::string);

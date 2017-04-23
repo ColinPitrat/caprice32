@@ -119,7 +119,7 @@ void CMessageServer::DeregisterMessageClient(CMessageClient* pClient)
 
 void CMessageServer::DeliverMessage()
 {
-	if (m_MessageQueue.size() > 0)
+	if (!m_MessageQueue.empty())
 	{
 		CMessage* pMessage = m_MessageQueue.front();
 		t_MessageClientPriorityMap& PriorityMap = m_MessageClients[pMessage->MessageType()];

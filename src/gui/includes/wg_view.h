@@ -48,11 +48,11 @@ enum class EFocusDirection {
 class CView : public CWindow
 {
 public:
-	//! \param Rect A CRect that defines the outer limits of the control
+	//! \param WindowRect A CRect that defines the outer limits of the control
 	//! \param sTitle The window title, which will appear in the title bar of the view
 	//! \param bResizable If true, the window will be resizable (defaults to true)
 	//! \param bFullScreen If true, the window will be created full-screen, and the bResizable parameter will be ignored (defaults to false)
-	CView(const CRect& Rect, std::string sTitle, bool bResizable = true, bool bFullScreen = false);
+	CView(const CRect& WindowRect, std::string sTitle, bool bResizable = true, bool bFullScreen = false);
 
 	// judb; surface is an existing SDL surface, WindowRect is the area in which we want to draw the gui:
 	CView(SDL_Surface* surface, SDL_Surface* backSurface, const CRect& WindowRect);

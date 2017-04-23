@@ -119,7 +119,7 @@ public:
 	void SetVisible(bool bVisible) override;
 
   // Override the default behaviour: a focused drop-down list is in fact it's button being focused
-  void SetIsFocusable(bool bFocused) override;
+  void SetIsFocusable(bool bFocusable) override;
 
 	// CMessageClient overrides
 	//! CDropDown will handle MOUSE_BUTTONDOWN messages

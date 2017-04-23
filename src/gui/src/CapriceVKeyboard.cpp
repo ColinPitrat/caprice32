@@ -99,7 +99,7 @@ namespace wGui {
     return CPC.InputMapper->StringToEvents(m_result->GetWindowText());
   }
 
-  void CapriceVKeyboard::moveFocus(int dy, int dx) {
+  void CapriceVKeyboard::moveFocus(int dx, int dy) {
     m_buttons[m_focused.first][m_focused.second]->SetHasFocus(false);
 
     m_focused.first += dy;
@@ -176,19 +176,19 @@ namespace wGui {
             if (pKeyboardMessage) {
               switch (pKeyboardMessage->Key) {
                 case SDLK_UP:
-                  moveFocus(-1, 0);
-                  bHandled = true;
-                  break;
-                case SDLK_DOWN:
-                  moveFocus(1, 0);
-                  bHandled = true;
-                  break;
-                case SDLK_LEFT:
                   moveFocus(0, -1);
                   bHandled = true;
                   break;
-                case SDLK_RIGHT:
+                case SDLK_DOWN:
                   moveFocus(0, 1);
+                  bHandled = true;
+                  break;
+                case SDLK_LEFT:
+                  moveFocus(-1, 0);
+                  bHandled = true;
+                  break;
+                case SDLK_RIGHT:
+                  moveFocus(1, 0);
                   bHandled = true;
                   break;
                 case SDLK_ESCAPE:

@@ -103,8 +103,8 @@ public:
 	void SetWindowRect(const CRect& WindowRect) override;
 
 	//! Set the title bar text of the frame
-	//! \param sText The text to assign to the view
-	void SetWindowText(const std::string& sText) override;
+	//! \param sWindowText The text to assign to the view
+	void SetWindowText(const std::string& sWindowText) override;
 
 	//! This is called whenever the frame is clicked on by the mouse
 	//! Only the topmost window that bounds the point will be called by the system

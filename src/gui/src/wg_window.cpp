@@ -81,7 +81,7 @@ CWindow::~CWindow()
 
 	if (m_pSDLSurface)
 		SDL_FreeSurface(m_pSDLSurface);
-	while (m_ChildWindows.size() > 0)
+	while (!m_ChildWindows.empty())
 	{
 		delete *(m_ChildWindows.begin());
 	}

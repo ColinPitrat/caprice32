@@ -41,64 +41,64 @@ namespace wGui
 CApplication* CApplication::m_pInstance = nullptr;
 
 
-void CApplication::HandleSDLEvent(SDL_Event Event)
+void CApplication::HandleSDLEvent(SDL_Event event)
 {
 	// this will turn an SDL event into a wGui message
-	switch (Event.type)
+	switch (event.type)
 	{
 	case SDL_VIDEORESIZE:
 		CMessageServer::Instance().QueueMessage(new TPointMessage(
-			CMessage::CTRL_RESIZE, nullptr, this, CPoint(Event.resize.w, Event.resize.h)));
+			CMessage::CTRL_RESIZE, nullptr, this, CPoint(event.resize.w, event.resize.h)));
 		break;
 	case SDL_KEYDOWN:
 		CMessageServer::Instance().QueueMessage(new CKeyboardMessage(
 			CMessage::KEYBOARD_KEYDOWN, CApplication::Instance()->GetKeyFocus(), this,
-			Event.key.keysym.scancode, Event.key.keysym.mod,
-			Event.key.keysym.sym, Event.key.keysym.unicode));
+			event.key.keysym.scancode, event.key.keysym.mod,
+			event.key.keysym.sym, event.key.keysym.unicode));
 		break;
 	case SDL_KEYUP:
 		CMessageServer::Instance().QueueMessage(new CKeyboardMessage(
 			CMessage::KEYBOARD_KEYUP, CApplication::Instance()->GetKeyFocus(), this,
-			Event.key.keysym.scancode, Event.key.keysym.mod,
-			Event.key.keysym.sym, Event.key.keysym.unicode));
+			event.key.keysym.scancode, event.key.keysym.mod,
+			event.key.keysym.sym, event.key.keysym.unicode));
 		break;
 	case SDL_MOUSEBUTTONDOWN:
 		CMessageServer::Instance().QueueMessage(new CMouseMessage(
 			CMessage::MOUSE_BUTTONDOWN, CApplication::Instance()->GetMouseFocus(), this,
-			CPoint(static_cast<int>((Event.button.x-vid_plugin->x_offset)*vid_plugin->x_scale), static_cast<int>((Event.button.y-vid_plugin->y_offset)*vid_plugin->y_scale)), CPoint(),
-			CMouseMessage::TranslateSDLButton(Event.button.button)));
+			CPoint(static_cast<int>((event.button.x-vid_plugin->x_offset)*vid_plugin->x_scale), static_cast<int>((event.button.y-vid_plugin->y_offset)*vid_plugin->y_scale)), CPoint(),
+			CMouseMessage::TranslateSDLButton(event.button.button)));
 		break;
 	case SDL_MOUSEBUTTONUP:
 		CMessageServer::Instance().QueueMessage(new CMouseMessage(
 			CMessage::MOUSE_BUTTONUP, CApplication::Instance()->GetMouseFocus(), this,
-			CPoint(static_cast<int>((Event.button.x-vid_plugin->x_offset)*vid_plugin->x_scale), static_cast<int>((Event.button.y-vid_plugin->y_offset)*vid_plugin->y_scale)), CPoint(),
-			CMouseMessage::TranslateSDLButton(Event.button.button)));
+			CPoint(static_cast<int>((event.button.x-vid_plugin->x_offset)*vid_plugin->x_scale), static_cast<int>((event.button.y-vid_plugin->y_offset)*vid_plugin->y_scale)), CPoint(),
+			CMouseMessage::TranslateSDLButton(event.button.button)));
 		break;
 	case SDL_MOUSEMOTION:
 		CMessageServer::Instance().QueueMessage(new CMouseMessage(
 			CMessage::MOUSE_MOVE, CApplication::Instance()->GetMouseFocus(), this,
-			CPoint(static_cast<int>((Event.button.x-vid_plugin->x_offset)*vid_plugin->x_scale), static_cast<int>((Event.button.y-vid_plugin->y_offset)*vid_plugin->y_scale)), CPoint(),
-			CMouseMessage::TranslateSDLButtonState(Event.motion.state)));
+			CPoint(static_cast<int>((event.button.x-vid_plugin->x_offset)*vid_plugin->x_scale), static_cast<int>((event.button.y-vid_plugin->y_offset)*vid_plugin->y_scale)), CPoint(),
+			CMouseMessage::TranslateSDLButtonState(event.motion.state)));
 		break;
   case SDL_JOYAXISMOTION:
     {
       SDLKey key(SDLK_UNKNOWN);
-      switch(Event.jaxis.axis) {
+      switch(event.jaxis.axis) {
         case 0:
         case 2:
           // TODO: validate with a joystick with non-binary axis
           // should we add some timing or consider only state changes ?
-          if(Event.jaxis.value < -JOYSTICK_AXIS_THRESHOLD) {
+          if(event.jaxis.value < -JOYSTICK_AXIS_THRESHOLD) {
             key = SDLK_LEFT;
-          } else if(Event.jaxis.value > JOYSTICK_AXIS_THRESHOLD) {
+          } else if(event.jaxis.value > JOYSTICK_AXIS_THRESHOLD) {
             key = SDLK_RIGHT;
           }
           break;
         case 1:
         case 3:
-          if(Event.jaxis.value < -JOYSTICK_AXIS_THRESHOLD) {
+          if(event.jaxis.value < -JOYSTICK_AXIS_THRESHOLD) {
             key = SDLK_UP;
-          } else if(Event.jaxis.value > JOYSTICK_AXIS_THRESHOLD) {
+          } else if(event.jaxis.value > JOYSTICK_AXIS_THRESHOLD) {
             key = SDLK_DOWN;
           }
           break;
@@ -117,14 +117,14 @@ void CApplication::HandleSDLEvent(SDL_Event Event)
   case SDL_JOYBUTTONDOWN:
     {
       CMessage::EMessageType type = CMessage::KEYBOARD_KEYDOWN;
-      if (Event.type == SDL_JOYBUTTONUP) {
+      if (event.type == SDL_JOYBUTTONUP) {
         type = CMessage::KEYBOARD_KEYUP;
       }
       SDLKey key;
       SDLMod mod = KMOD_NONE;
       bool ignore_event = false;
       // TODO: arbitrary binding: validate with various joystick models
-      switch (Event.jbutton.button) {
+      switch (event.jbutton.button) {
         case 0:
           key = SDLK_RETURN;
           break;
@@ -157,7 +157,7 @@ void CApplication::HandleSDLEvent(SDL_Event Event)
     exit(0);
 		break;
 	default:
-		CMessageServer::Instance().QueueMessage(new CSDLMessage(CMessage::SDL, nullptr, this, Event));
+		CMessageServer::Instance().QueueMessage(new CSDLMessage(CMessage::SDL, nullptr, this, event));
 		break;
 	}
 }

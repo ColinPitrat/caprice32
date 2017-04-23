@@ -80,8 +80,8 @@ unsigned int CListBox::AddItem(SListItem ListItem)
 	m_Items.push_back(ListItem);
 	m_SelectedItems.push_back(false);
 	m_RenderedStrings.push_back(CRenderedString(m_pFontEngine, ListItem.sItemText, CRenderedString::VALIGN_TOP, CRenderedString::HALIGN_LEFT));
-	int iMax = (m_Items.size() < 1 ? 0 : m_Items.size() - 1);
-    // judb correction MaxLimit (number of 'scrolls' = number of items - visible number of items )
+	int iMax = m_Items.empty() ? 0 : m_Items.size() - 1;
+  // judb correction MaxLimit (number of 'scrolls' = number of items - visible number of items )
 	m_pVScrollbar->SetMaxLimit(stdex::MaxInt(iMax - (m_ClientRect.Height() / m_iItemHeight) + 1, 0));
 	Draw();
 	return m_Items.size();
@@ -94,7 +94,7 @@ void CListBox::RemoveItem(unsigned int iItemIndex)
 	{
 		m_Items.erase(m_Items.begin() + iItemIndex);
 		m_SelectedItems.erase(m_SelectedItems.begin() + iItemIndex);
-		int iMax = m_Items.size() < 1 ? 0 : m_Items.size() - 1;
+		int iMax = m_Items.empty() ? 0 : m_Items.size() - 1;
     // judb correction MaxLimit (number of 'scrolls' = number of items - visible number of items )
 		m_pVScrollbar->SetMaxLimit(stdex::MaxInt(iMax - (m_ClientRect.Height() / m_iItemHeight) + 1, 0));
 		Draw();

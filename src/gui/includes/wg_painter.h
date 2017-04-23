@@ -98,9 +98,9 @@ public:
 	//! \param StartPoint The beginning point of the line
 	//! \param EndPoint The end point of the line
 	//! \param LineColor The color to use for drawing the line
-	void DrawLine(const CPoint& StartPoint, const CPoint& EndPoint, const CRGBColor& LineColor = DEFAULT_LINE_COLOR);
-    // judb draw a box (filled)
-    void DrawBox(CPoint UpperLeftPoint, int width, int height, const CRGBColor& LineColor);
+	void DrawLine(const CPoint& Point1, const CPoint& Point2, const CRGBColor& LineColor = DEFAULT_LINE_COLOR);
+  // judb draw a box (filled)
+  void DrawBox(CPoint UpperLeftPoint, int width, int height, const CRGBColor& LineColor);
 
 	//! Draw a pixel
 	//! \param Point The location of the pixel to set

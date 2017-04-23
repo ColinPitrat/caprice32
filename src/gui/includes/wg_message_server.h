@@ -114,7 +114,7 @@ public:
 
 	//! Indicates if there are any messages available
 	//! \return true if there's a message available in the queue
-	bool MessageAvailable() { return m_MessageQueue.size() > 0; }
+	bool MessageAvailable() { return !m_MessageQueue.empty(); }
 
 	//! Sets the server to ignore any new incoming messages (messages already in the queue are unaffected)
 	//! \param bIgnore if true, the message queue will ignore any new messages
