@@ -116,6 +116,9 @@ void parseArguments(int argc, char **argv, std::vector<std::string>& slot_list, 
 #ifdef DEBUG
                       << " DEBUG"
 #endif
+#ifdef	WITH_IPF 
+                      << " WITH_IPF"
+#endif
                       << "\n";
             exit(0);
             break;
