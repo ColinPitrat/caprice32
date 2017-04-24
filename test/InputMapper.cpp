@@ -16,6 +16,10 @@ class InputMapperTest : public testing::Test {
 
 TEST_F(InputMapperTest, StringToEventsSimpleString)
 {
+  CPC.kbd_layout ="keymap_us.map";
+  CPC.keyboard = 0;
+  CPC.InputMapper->init();
+
   std::string input = "cat";
 
   auto tmp = CPC.InputMapper->StringToEvents(input);
@@ -45,6 +49,10 @@ TEST_F(InputMapperTest, StringToEventsSimpleString)
 
 TEST_F(InputMapperTest, StringToEventsWithEscapedChar)
 {
+  CPC.kbd_layout ="keymap_us.map";
+  CPC.keyboard = 0;
+  CPC.InputMapper->init();
+
   std::string input = "run\"s\btest\n";
 
   auto tmp = CPC.InputMapper->StringToEvents(input);
@@ -63,6 +71,10 @@ TEST_F(InputMapperTest, StringToEventsWithEscapedChar)
 
 TEST_F(InputMapperTest, StringToEventsWithSpecialChar)
 {
+  CPC.kbd_layout ="keymap_us.map";
+  CPC.keyboard = 0;
+  CPC.InputMapper->init();
+
   std::string input = "\a";
   input += CPC_ESC;
 
@@ -83,3 +95,41 @@ TEST_F(InputMapperTest, StringToEventsWithSpecialChar)
   ASSERT_EQ(SDL_RELEASED, result[1].key.state);
 }
 
+TEST_F(InputMapperTest, Keymapping)
+{
+  SDL_keysym keysym;
+
+  CPC.kbd_layout ="keymap_us.map";
+  CPC.keyboard = 0;
+  CPC.InputMapper->init();
+  // Exclaim
+  keysym.sym = SDLK_1;
+  keysym.mod = KMOD_LSHIFT;
+  ASSERT_EQ(0x80 | MOD_CPC_SHIFT, CPC.InputMapper->CPCkeyFromKeysym(keysym));
+
+  CPC.kbd_layout ="keymap_uk_linux.map";
+  CPC.keyboard = 0;
+  CPC.InputMapper->init();
+  // Pound
+  keysym.sym = SDLK_3;
+  keysym.mod = KMOD_RSHIFT;
+  ASSERT_EQ(0x30 | MOD_CPC_SHIFT, CPC.InputMapper->CPCkeyFromKeysym(keysym));
+
+  CPC.kbd_layout ="keymap_fr_win.map";
+  CPC.keyboard = 1;
+  CPC.InputMapper->init();
+  // E acute
+  keysym.sym = SDLK_2;
+  keysym.mod = KMOD_NONE;
+  ASSERT_EQ(0x81, CPC.InputMapper->CPCkeyFromKeysym(keysym));
+
+  CPC.kbd_layout ="keymap_es_linux.map";
+  CPC.keyboard = 2;
+  CPC.InputMapper->init();
+  // N Tilde
+  keysym.sym = SDLK_WORLD_81;
+  keysym.mod = KMOD_LSHIFT;
+  ASSERT_EQ(0x35 | MOD_CPC_SHIFT, CPC.InputMapper->CPCkeyFromKeysym(keysym));
+
+
+}
