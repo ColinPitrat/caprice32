@@ -123,4 +123,13 @@ TEST_F(InputMapperTest, Keymapping)
   keysym.mod = KMOD_NONE;
   ASSERT_EQ(0x81, CPC.InputMapper->CPCkeyFromKeysym(keysym));
 
+  CPC.kbd_layout ="keymap_es_linux.map";
+  CPC.keyboard = 2;
+  CPC.InputMapper->init();
+  // N Tilde
+  keysym.sym = SDLK_WORLD_81;
+  keysym.mod = KMOD_LSHIFT;
+  ASSERT_EQ(0x35 | MOD_CPC_SHIFT, CPC.InputMapper->CPCkeyFromKeysym(keysym));
+
+
 }
