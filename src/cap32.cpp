@@ -18,6 +18,8 @@
 
 #include <iostream>
 #include <sstream>
+#include <chrono>
+#include <thread>
 #include <sys/stat.h>
 
 #include "SDL.h"
@@ -56,6 +58,7 @@
 
 #define MAX_NB_JOYSTICKS 2
 
+#define POLL_INTERVAL_MS 1
 
 extern byte bTapeLevel;
 extern t_z80regs z80;
@@ -2224,14 +2227,17 @@ int cap32_main (int argc, char **argv)
          if (CPC.limit_speed) { // limit to original CPC speed?
             if (CPC.snd_enabled) {
                if (iExitCondition == EC_SOUND_BUFFER) {
-                  if (!dwSndBufferCopied) { // limit speed?
+                  if (!dwSndBufferCopied) { // limit speed ?
                      continue; // delay emulation
                   }
                   dwSndBufferCopied = 0;
                }
             } else if (iExitCondition == EC_CYCLE_COUNT) {
                dwTicks = SDL_GetTicks();
-               if (dwTicks < dwTicksTarget) { // limit speed?
+               if (dwTicks < dwTicksTarget) { // limit speed ?
+                  if (dwTicksTarget - dwTicks > POLL_INTERVAL_MS) { // No need to burn cycles if next event is far away
+                     std::this_thread::sleep_for(std::chrono::milliseconds(POLL_INTERVAL_MS));
+                  }
                   continue; // delay emulation
                }
                dwTicksTarget = dwTicks + dwTicksOffset; // prep counter for the next run
@@ -2266,6 +2272,9 @@ int cap32_main (int argc, char **argv)
          } else {
             vid_plugin->unlock();
          }
+      }
+      else { // We are paused. No need to burn CPU cycles
+         std::this_thread::sleep_for(std::chrono::milliseconds(POLL_INTERVAL_MS));
       }
    }
 
