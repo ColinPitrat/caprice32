@@ -2263,7 +2263,7 @@ int cap32_main (int argc, char **argv)
                print(static_cast<dword *>(back_surface->pixels) + CPC.scr_line_offs, osd_message.c_str(), true);
             } else if (CPC.scr_fps) {
                char chStr[15];
-               sprintf(chStr, "%3dFPS %3d%%", static_cast<int>(dwFPS), static_cast<int>(dwFPS) * 100 / 50);
+               sprintf(chStr, "%3dFPS %3d%%", static_cast<int>(dwFPS), static_cast<int>(dwFPS) * 100 / (1000 / static_cast<int>(FRAME_PERIOD_MS)));
                print(static_cast<dword *>(back_surface->pixels) + CPC.scr_line_offs, chStr, true); // display the frames per second counter
             }
             asic_draw_sprites();
