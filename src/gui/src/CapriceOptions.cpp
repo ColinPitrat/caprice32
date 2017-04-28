@@ -282,14 +282,19 @@ CapriceOptions::CapriceOptions(const CRect& WindowRect, CWindow* pParent, CFontE
 
     EnableTab("general");
 
-    m_pButtonSave   = new CButton(CRect(CPoint(70, m_ClientRect.Height() - 20), 50, 15), this, "Save");
+    unsigned int startX = (m_ClientRect.Width()-(4*50)-(3*10))/2;
+    m_pButtonSave   = new CButton(CRect(CPoint(startX, m_ClientRect.Height() - 20), 50, 15), this, "Save");
     m_pButtonSave->SetIsFocusable(true);
-    m_pButtonCancel = new CButton(CRect(CPoint(130, m_ClientRect.Height() - 20), 50, 15), this, "Cancel");
+    startX += 60;
+    m_pButtonCancel = new CButton(CRect(CPoint(startX, m_ClientRect.Height() - 20), 50, 15), this, "Cancel");
     m_pButtonCancel->SetIsFocusable(true);
-    m_pButtonApply   = new CButton(CRect(CPoint(190, m_ClientRect.Height() - 20), 50, 15), this, "Apply");
+    startX += 60;
+    m_pButtonApply   = new CButton(CRect(CPoint(startX, m_ClientRect.Height() - 20), 50, 15), this, "Apply");
     m_pButtonApply->SetIsFocusable(true);
+    startX += 60;
+    m_pButtonOk   = new CButton(CRect(CPoint(startX, m_ClientRect.Height() - 20), 50, 15), this, "Ok");
+    m_pButtonOk->SetIsFocusable(true);
 }
-
 CapriceOptions::~CapriceOptions() = default;
 
 bool CapriceOptions::HandleMessage(CMessage* pMessage)
@@ -309,7 +314,7 @@ bool CapriceOptions::HandleMessage(CMessage* pMessage)
               bHandled = true;
               break;
             }
-            if (pMessage->Source() == m_pButtonSave || pMessage->Source() == m_pButtonApply) {
+            if (pMessage->Source() == m_pButtonSave || pMessage->Source() == m_pButtonApply || pMessage->Source() == m_pButtonOk) {
               // save settings + close
 
               // 'General' settings
@@ -357,7 +362,7 @@ bool CapriceOptions::HandleMessage(CMessage* pMessage)
               // Check if any reset or re-init is required, e.g. emulator reset, sound system reset...
               ProcessOptionChanges(CPC, pMessage->Source() == m_pButtonSave);
 
-              if(pMessage->Source() == m_pButtonSave)
+              if(pMessage->Source() == m_pButtonSave || pMessage->Source() == m_pButtonOk)
               {
                 CloseFrame();
               }
