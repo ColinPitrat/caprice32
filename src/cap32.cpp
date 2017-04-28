@@ -1233,7 +1233,7 @@ int audio_init ()
    desired->freq = freq_table[CPC.snd_playback_rate];
    desired->format = CPC.snd_bits ? AUDIO_S16LSB : AUDIO_S8;
    desired->channels = CPC.snd_stereo+1;
-   desired->samples = audio_align_samples(desired->freq / 50); // desired is 20ms at the given frequency
+   desired->samples = audio_align_samples(desired->freq * FRAME_PERIOD_MS / 1000);
    desired->callback = audio_update;
    desired->userdata = nullptr;
 
@@ -2226,9 +2226,9 @@ int cap32_main (int argc, char **argv)
 
          if (CPC.limit_speed) { // limit to original CPC speed?
             if (CPC.snd_enabled) {
-               if (iExitCondition == EC_SOUND_BUFFER) {
-                  if (!dwSndBufferCopied) { // limit speed ?
-                     continue; // delay emulation
+               if (iExitCondition == EC_SOUND_BUFFER) { // Emulation filled a sound buffer.
+                  if (!dwSndBufferCopied) {
+                     continue; // delay emulation until our audio callback copied and played the buffer
                   }
                   dwSndBufferCopied = 0;
                }
