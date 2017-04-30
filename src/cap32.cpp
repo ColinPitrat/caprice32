@@ -18,6 +18,8 @@
 
 #include <iostream>
 #include <sstream>
+#include <chrono>
+#include <thread>
 #include <sys/stat.h>
 
 #include "SDL.h"
@@ -56,6 +58,7 @@
 
 #define MAX_NB_JOYSTICKS 2
 
+#define POLL_INTERVAL_MS 1
 
 extern byte bTapeLevel;
 extern t_z80regs z80;
@@ -1230,7 +1233,7 @@ int audio_init ()
    desired->freq = freq_table[CPC.snd_playback_rate];
    desired->format = CPC.snd_bits ? AUDIO_S16LSB : AUDIO_S8;
    desired->channels = CPC.snd_stereo+1;
-   desired->samples = audio_align_samples(desired->freq / 50); // desired is 20ms at the given frequency
+   desired->samples = audio_align_samples(desired->freq * FRAME_PERIOD_MS / 1000);
    desired->callback = audio_update;
    desired->userdata = nullptr;
 
@@ -2223,15 +2226,18 @@ int cap32_main (int argc, char **argv)
 
          if (CPC.limit_speed) { // limit to original CPC speed?
             if (CPC.snd_enabled) {
-               if (iExitCondition == EC_SOUND_BUFFER) {
-                  if (!dwSndBufferCopied) { // limit speed?
-                     continue; // delay emulation
+               if (iExitCondition == EC_SOUND_BUFFER) { // Emulation filled a sound buffer.
+                  if (!dwSndBufferCopied) {
+                     continue; // delay emulation until our audio callback copied and played the buffer
                   }
                   dwSndBufferCopied = 0;
                }
             } else if (iExitCondition == EC_CYCLE_COUNT) {
                dwTicks = SDL_GetTicks();
-               if (dwTicks < dwTicksTarget) { // limit speed?
+               if (dwTicks < dwTicksTarget) { // limit speed ?
+                  if (dwTicksTarget - dwTicks > POLL_INTERVAL_MS) { // No need to burn cycles if next event is far away
+                     std::this_thread::sleep_for(std::chrono::milliseconds(POLL_INTERVAL_MS));
+                  }
                   continue; // delay emulation
                }
                dwTicksTarget = dwTicks + dwTicksOffset; // prep counter for the next run
@@ -2257,7 +2263,7 @@ int cap32_main (int argc, char **argv)
                print(static_cast<dword *>(back_surface->pixels) + CPC.scr_line_offs, osd_message.c_str(), true);
             } else if (CPC.scr_fps) {
                char chStr[15];
-               sprintf(chStr, "%3dFPS %3d%%", static_cast<int>(dwFPS), static_cast<int>(dwFPS) * 100 / 50);
+               sprintf(chStr, "%3dFPS %3d%%", static_cast<int>(dwFPS), static_cast<int>(dwFPS) * 100 / (1000 / static_cast<int>(FRAME_PERIOD_MS)));
                print(static_cast<dword *>(back_surface->pixels) + CPC.scr_line_offs, chStr, true); // display the frames per second counter
             }
             asic_draw_sprites();
@@ -2266,6 +2272,9 @@ int cap32_main (int argc, char **argv)
          } else {
             vid_plugin->unlock();
          }
+      }
+      else { // We are paused. No need to burn CPU cycles
+         std::this_thread::sleep_for(std::chrono::milliseconds(POLL_INTERVAL_MS));
       }
    }
 
