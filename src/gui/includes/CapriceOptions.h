@@ -33,6 +33,7 @@ namespace wGui
 
       protected:
         CButton* m_pButtonSave;
+        CButton* m_pButtonOk;
         CButton* m_pButtonCancel;
         CButton* m_pButtonApply;
 
@@ -40,7 +41,7 @@ namespace wGui
         CapriceRomSlots* pRomSlotsDialog;
 
       // New navigation bar control (to select the different pages or tabs on the options dialog)
-      CNavigationBar* m_pNavigationBar; 
+      CNavigationBar* m_pNavigationBar;
 
       // groupbox to group the controls on each 'tab':
       CGroupBox* m_pGroupBoxTabGeneral;
