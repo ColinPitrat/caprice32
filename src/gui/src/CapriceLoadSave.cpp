@@ -5,6 +5,7 @@
 #include "cap32.h"
 #include "slotshandler.h"
 #include "cartridge.h"
+#include "fileutils.h"
 
 #include <iostream>
 #include <sys/types.h>
@@ -34,8 +35,13 @@ CapriceLoadSave::CapriceLoadSave(const CRect& WindowRect, CWindow* pParent, CFon
   m_pTypeLabel = new CLabel(          CPoint(15, 25),             this, "File type: ");
   m_pTypeValue = new CDropDown( CRect(CPoint(80, 20), 150, 20),    this, false);
   m_pTypeValue->AddItem(SListItem("Snapshot (.sna)"));
+#ifndef WITH_IPF
   m_pTypeValue->AddItem(SListItem("Drive A (.dsk)"));
   m_pTypeValue->AddItem(SListItem("Drive B (.dsk)"));
+#else
+  m_pTypeValue->AddItem(SListItem("Drive A (.dsk/.ipf)"));
+  m_pTypeValue->AddItem(SListItem("Drive B (.dsk/.ipf)"));
+#endif
   m_pTypeValue->AddItem(SListItem("Tape (.cdt/.voc)"));
   m_pTypeValue->AddItem(SListItem("Cartridge (.cpr)"));
   m_pTypeValue->SetListboxHeight(5);
