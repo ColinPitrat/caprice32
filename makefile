@@ -167,26 +167,15 @@ $(TARGET): $(OBJECTS) $(MAIN)
 
 # TODO(cpitrat): Make it work for linux too
 ifeq ($(PLATFORM),windows)
+DLLS = SDL.dll libbz2-1.dll libfreetype-6.dll libpng16-16.dll libstdc++-6.dll \
+       libwinpthread-1.dll zlib1.dll libglib-2.0-0.dll libgraphite2.dll \
+       libharfbuzz-0.dll libiconv-2.dll libintl-8.dll libpcre-1.dll
 distrib: $(TARGET)
 	mkdir -p $(ARCHIVE)
 	rm -f $(ARCHIVE).zip
 	cp $(TARGET) $(ARCHIVE)/
-	cp $(MINGW_PATH)/bin/SDL.dll $(ARCHIVE)/
-	cp $(MINGW_PATH)/bin/libbz2-1.dll $(ARCHIVE)/
-	cp $(MINGW_PATH)/bin/libfreetype-6.dll $(ARCHIVE)/
+	$(foreach DLL,$(DLLS),[ -f $(MINGW_PATH)/bin/$(DLL) ] && cp $(MINGW_PATH)/bin/$(DLL) $(ARCHIVE)/;)
 	cp $(MINGW_PATH)/bin/libgcc_s_*-1.dll $(ARCHIVE)/
-	cp $(MINGW_PATH)/bin/libpng16-16.dll $(ARCHIVE)/
-	cp $(MINGW_PATH)/bin/libstdc++-6.dll $(ARCHIVE)/
-	cp $(MINGW_PATH)/bin/libwinpthread-1.dll $(ARCHIVE)/
-	cp $(MINGW_PATH)/bin/zlib1.dll $(ARCHIVE)/
-	# The following libs are dependencies of libfreetype under MSYS2
-	# TODO(sebhz) make this a nice loop
-	[ -f $(MINGW_PATH)/bin/libglib-2.0-0.dll ] && cp $(MINGW_PATH)/bin/libglib-2.0-0.dll $(ARCHIVE)/
-	[ -f $(MINGW_PATH)/bin/libgraphite2.dll ] && cp $(MINGW_PATH)/bin/libgraphite2.dll $(ARCHIVE)/
-	[ -f $(MINGW_PATH)/bin/libharfbuzz-0.dll ] && cp $(MINGW_PATH)/bin/libharfbuzz-0.dll $(ARCHIVE)/
-	[ -f $(MINGW_PATH)/bin/libiconv-2.dll ] && cp $(MINGW_PATH)/bin/libiconv-2.dll $(ARCHIVE)/
-	[ -f $(MINGW_PATH)/bin/libintl-8.dll ] && cp $(MINGW_PATH)/bin/libintl-8.dll $(ARCHIVE)/
-	[ -f $(MINGW_PATH)/bin/libpcre-1.dll ] && cp $(MINGW_PATH)/bin/libpcre-1.dll $(ARCHIVE)/
 ifdef WITH_IPF
 	cp $(MINGW_PATH)/bin/$(CAPSIPFDLL) $(ARCHIVE)/CAPSImg.dll
 endif
