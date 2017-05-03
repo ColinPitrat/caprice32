@@ -1861,7 +1861,6 @@ void set_osd_message(const std::string& message) {
 
 void dumpScreen() {
    static int dump_num=0;
-   struct stat _stat;
 
    if (is_directory(CPC.sdump_dir)) {
       SDL_Surface* shot;
