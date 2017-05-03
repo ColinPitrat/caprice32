@@ -30,6 +30,12 @@ bool file_copy(FILE *in, FILE *out) {
   return !(ferror(in) || ferror(out));
 }
 
+bool is_directory(std::string filepath) {
+	struct stat _stat;
+
+	return ( (stat(filepath.c_str(), &_stat) == 0) && (S_ISDIR(_stat.st_mode)) );
+}
+
 // Returns a vector containing the names of the files in the specified directory
 std::vector<std::string> listDirectory(std::string &directory) {
    std::vector<std::string> s;

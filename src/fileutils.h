@@ -11,6 +11,9 @@ int file_size (int fd);
 // Copy the content of in to out. Returns true if successful, false otherwise.
 bool file_copy(FILE *in, FILE *out);
 
+// True if string passed is a directory. false otherwise.
+bool is_directory(std::string filepath);
+
 // Returns a vector containing the names of the files in the specified directory
 std::vector<std::string> listDirectory(std::string &);
 
