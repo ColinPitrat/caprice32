@@ -5,7 +5,6 @@
 #include "cap32.h"
 #include "slotshandler.h"
 #include "cartridge.h"
-#include "fileutils.h"
 
 #include <iostream>
 #include <sys/types.h>
@@ -15,6 +14,11 @@
 #include <vector>
 #include <string>
 #include <algorithm>
+
+#ifdef WINDOWS
+#define realpath(N,R) _fullpath((R),(N),_MAX_PATH)
+#endif
+
 
 // CPC emulation properties, defined in cap32.h:
 extern t_CPC CPC;
@@ -255,13 +259,14 @@ bool CapriceLoadSave::HandleMessage(CMessage* pMessage)
 std::string CapriceLoadSave::simplifyDirPath(std::string path)
 {
 #ifdef WINDOWS
-  return path;
+  char simplepath[_MAX_PATH+1];
 #else
   char simplepath[PATH_MAX+1];
+#endif
   if(realpath(path.c_str(), simplepath) == nullptr) {
     std::cerr << "Couldn't simplify path '" << path << "': " << strerror(errno) << std::endl;
     return ".";
-  } 
+  }
   struct stat entry_infos;
   if(stat(simplepath, &entry_infos) != 0) {
     std::cerr << "Could not retrieve info on " << simplepath << ": " << strerror(errno) << std::endl;
@@ -272,7 +277,6 @@ std::string CapriceLoadSave::simplifyDirPath(std::string path)
     return ".";
   }
   return std::string(simplepath);
-#endif
 }
 
 bool CapriceLoadSave::MatchCurrentFileSpec(const char* filename)
