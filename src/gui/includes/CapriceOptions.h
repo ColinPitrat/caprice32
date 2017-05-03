@@ -34,7 +34,7 @@ namespace wGui
       protected:
         CButton* m_pButtonSave;
         CButton* m_pButtonCancel;
-        CButton* m_pButtonApply;
+        CButton* m_pButtonOk;
 
         // subdialogs that can be opened from the options dialog, e.g. ROM selection:
         CapriceRomSlots* pRomSlotsDialog;
