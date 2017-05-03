@@ -210,7 +210,11 @@ bool CapriceLoadSave::HandleMessage(CMessage* pMessage)
               break;
             case 1: // Drive A
               m_pDirectoryValue->SetWindowText(simplifyDirPath(CPC.dsk_path));
+#ifndef WITH_IPF
               m_fileSpec = { ".dsk", ".zip" };
+#else
+              m_fileSpec = { ".dsk", ".ipf", ".zip" };
+#endif
               UpdateFilesList();
               break;
             case 2: // Drive B
