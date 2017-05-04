@@ -20,7 +20,6 @@
 #include <sstream>
 #include <chrono>
 #include <thread>
-#include <sys/stat.h>
 
 #include "SDL.h"
 
@@ -37,6 +36,7 @@
 #include "asic.h"
 #include "argparse.h"
 #include "slotshandler.h"
+#include "fileutils.h"
 
 #include <errno.h>
 #include <string.h>
@@ -1861,21 +1861,18 @@ void set_osd_message(const std::string& message) {
 
 void dumpScreen() {
    static int dump_num=0;
-   struct stat _stat;
 
-   if (stat(CPC.sdump_dir.c_str(), &_stat) == 0) {
-      if (S_ISDIR(_stat.st_mode)) {
-         SDL_Surface* shot;
-         shot = SDL_PNGFormatAlpha(back_surface);
-         std::string dumpPath;
-         do {
-            dumpPath = CPC.sdump_dir + "/" + std::string("dump") + std::to_string(dump_num) + ".png";
-            dump_num++;
-         } while (access(dumpPath.c_str(), F_OK) == 0);
-         LOG_DEBUG("Dumping screen to " + dumpPath);
-         SDL_SavePNG(shot, dumpPath.c_str());
-         return;
-      }
+   if (is_directory(CPC.sdump_dir)) {
+      SDL_Surface* shot;
+      shot = SDL_PNGFormatAlpha(back_surface);
+      std::string dumpPath;
+      do {
+         dumpPath = CPC.sdump_dir + "/" + std::string("dump") + std::to_string(dump_num) + ".png";
+         dump_num++;
+      } while (access(dumpPath.c_str(), F_OK) == 0);
+      LOG_DEBUG("Dumping screen to " + dumpPath);
+      SDL_SavePNG(shot, dumpPath.c_str());
+      return;
    }
    LOG_ERROR("Unable to find or open directory " + CPC.sdump_dir + " when trying to take a screenshot.");
 }

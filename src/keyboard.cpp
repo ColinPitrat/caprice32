@@ -1,8 +1,8 @@
 #include "keyboard.h"
 #include <iostream>
 #include <fstream>
-#include <sys/stat.h>
 #include "cap32.h"
+#include "fileutils.h"
 #include "log.h"
 
 const dword InputMapper::cpc_kbd[CPC_KEYBOARD_NUM][CPC_KEY_NUM] = {
@@ -1179,9 +1179,8 @@ void InputMapper::init()
 	std::filebuf fb;
 	unsigned int sdl_moddedkey;
 	char line[MAX_LINE_LENGTH]; // sufficient for now ! TODO(sebhz): proper malloc'ing etc...
-	struct stat _stat;
 
-	if ((stat(layout_file.c_str(), &_stat) != 0) || S_ISDIR(_stat.st_mode) || (fb.open(layout_file, std::ios::in) == nullptr)) {
+	if (is_directory(layout_file) || (fb.open(layout_file, std::ios::in) == nullptr)) {
 		SDLkeysymFromCPCkeys = SDLkeysymFromCPCkeys_us;
 	}
 	else {

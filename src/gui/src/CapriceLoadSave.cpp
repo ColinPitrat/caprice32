@@ -15,6 +15,11 @@
 #include <string>
 #include <algorithm>
 
+#ifdef WINDOWS
+#define realpath(N,R) _fullpath((R),(N),_MAX_PATH)
+#endif
+
+
 // CPC emulation properties, defined in cap32.h:
 extern t_CPC CPC;
 extern t_drive driveA;
@@ -34,8 +39,13 @@ CapriceLoadSave::CapriceLoadSave(const CRect& WindowRect, CWindow* pParent, CFon
   m_pTypeLabel = new CLabel(          CPoint(15, 25),             this, "File type: ");
   m_pTypeValue = new CDropDown( CRect(CPoint(80, 20), 150, 20),    this, false);
   m_pTypeValue->AddItem(SListItem("Snapshot (.sna)"));
+#ifndef WITH_IPF
   m_pTypeValue->AddItem(SListItem("Drive A (.dsk)"));
   m_pTypeValue->AddItem(SListItem("Drive B (.dsk)"));
+#else
+  m_pTypeValue->AddItem(SListItem("Drive A (.dsk/.ipf)"));
+  m_pTypeValue->AddItem(SListItem("Drive B (.dsk/.ipf)"));
+#endif
   m_pTypeValue->AddItem(SListItem("Tape (.cdt/.voc)"));
   m_pTypeValue->AddItem(SListItem("Cartridge (.cpr)"));
   m_pTypeValue->SetListboxHeight(5);
@@ -200,7 +210,11 @@ bool CapriceLoadSave::HandleMessage(CMessage* pMessage)
               break;
             case 1: // Drive A
               m_pDirectoryValue->SetWindowText(simplifyDirPath(CPC.dsk_path));
+#ifndef WITH_IPF
               m_fileSpec = { ".dsk", ".zip" };
+#else
+              m_fileSpec = { ".dsk", ".ipf", ".zip" };
+#endif
               UpdateFilesList();
               break;
             case 2: // Drive B
@@ -249,13 +263,14 @@ bool CapriceLoadSave::HandleMessage(CMessage* pMessage)
 std::string CapriceLoadSave::simplifyDirPath(std::string path)
 {
 #ifdef WINDOWS
-  return path;
+  char simplepath[_MAX_PATH+1];
 #else
   char simplepath[PATH_MAX+1];
+#endif
   if(realpath(path.c_str(), simplepath) == nullptr) {
     std::cerr << "Couldn't simplify path '" << path << "': " << strerror(errno) << std::endl;
     return ".";
-  } 
+  }
   struct stat entry_infos;
   if(stat(simplepath, &entry_infos) != 0) {
     std::cerr << "Could not retrieve info on " << simplepath << ": " << strerror(errno) << std::endl;
@@ -266,7 +281,6 @@ std::string CapriceLoadSave::simplifyDirPath(std::string path)
     return ".";
   }
   return std::string(simplepath);
-#endif
 }
 
 bool CapriceLoadSave::MatchCurrentFileSpec(const char* filename)
