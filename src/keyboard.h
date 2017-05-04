@@ -189,6 +189,8 @@ typedef enum {
 #define CPC_KEY_NUM 149    // Number of different keys on a CPC keyboard
 #define CPC_KEYBOARD_NUM 3 // Number of different keyboards supported.
 
+void applyKeypress(dword cpc_key, byte keyboard_matrix[], bool pressed);
+
 class InputMapper {
 	private:
 		static const dword cpc_kbd[CPC_KEYBOARD_NUM][CPC_KEY_NUM];

@@ -5,6 +5,9 @@
 #include "fileutils.h"
 #include "log.h"
 
+extern byte bit_values[8];
+extern t_CPC CPC;
+
 const dword InputMapper::cpc_kbd[CPC_KEYBOARD_NUM][CPC_KEY_NUM] = {
   { // original CPC keyboard
     0x40,                   // CPC_0
@@ -1398,3 +1401,25 @@ void InputMapper::CPCkeyFromJoystickAxis(SDL_JoyAxisEvent jaxis, dword *cpc_key,
 }
 
 InputMapper::InputMapper(t_CPC *CPC): CPC(CPC) { }
+
+void applyKeypress(dword cpc_key, byte keyboard_matrix[], bool pressed) {
+    if ((!CPC.paused) && (static_cast<byte>(cpc_key) != 0xff)) {
+		if (pressed) {
+            keyboard_matrix[static_cast<byte>(cpc_key) >> 4] &= ~bit_values[static_cast<byte>(cpc_key) & 7]; // key is being held down
+            if (cpc_key & MOD_CPC_SHIFT) { // CPC SHIFT key required?
+                keyboard_matrix[0x25 >> 4] &= ~bit_values[0x25 & 7]; // key needs to be SHIFTed
+            } else {
+                keyboard_matrix[0x25 >> 4] |= bit_values[0x25 & 7]; // make sure key is unSHIFTed
+            }
+            if (cpc_key & MOD_CPC_CTRL) { // CPC CONTROL key required?
+                keyboard_matrix[0x27 >> 4] &= ~bit_values[0x27 & 7]; // CONTROL key is held down
+            } else {
+                keyboard_matrix[0x27 >> 4] |= bit_values[0x27 & 7]; // make sure CONTROL key is released
+            }
+		} else {
+            keyboard_matrix[static_cast<byte>(cpc_key) >> 4] |= bit_values[static_cast<byte>(cpc_key) & 7]; // key has been released
+            keyboard_matrix[0x25 >> 4] |= bit_values[0x25 & 7]; // make sure key is unSHIFTed
+            keyboard_matrix[0x27 >> 4] |= bit_values[0x27 & 7]; // make sure CONTROL key is not held down
+		}
+    }
+}

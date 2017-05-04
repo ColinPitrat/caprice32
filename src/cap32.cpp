@@ -1969,18 +1969,8 @@ int cap32_main (int argc, char **argv)
             case SDL_KEYDOWN:
                {
                   dword cpc_key = CPC.InputMapper->CPCkeyFromKeysym(event.key.keysym);
-                  if ((!(cpc_key & MOD_EMU_KEY)) && (!CPC.paused) && (static_cast<byte>(cpc_key) != 0xff)) {
-                     keyboard_matrix[static_cast<byte>(cpc_key) >> 4] &= ~bit_values[static_cast<byte>(cpc_key) & 7]; // key is being held down
-                     if (cpc_key & MOD_CPC_SHIFT) { // CPC SHIFT key required?
-                        keyboard_matrix[0x25 >> 4] &= ~bit_values[0x25 & 7]; // key needs to be SHIFTed
-                     } else {
-                        keyboard_matrix[0x25 >> 4] |= bit_values[0x25 & 7]; // make sure key is unSHIFTed
-                     }
-                     if (cpc_key & MOD_CPC_CTRL) { // CPC CONTROL key required?
-                        keyboard_matrix[0x27 >> 4] &= ~bit_values[0x27 & 7]; // CONTROL key is held down
-                     } else {
-                        keyboard_matrix[0x27 >> 4] |= bit_values[0x27 & 7]; // make sure CONTROL key is released
-                     }
+                  if (!(cpc_key & MOD_EMU_KEY)) {
+                     applyKeypress(cpc_key, keyboard_matrix, true);
                   }
                }
                break;
@@ -1988,13 +1978,10 @@ int cap32_main (int argc, char **argv)
             case SDL_KEYUP:
                {
                   dword cpc_key = CPC.InputMapper->CPCkeyFromKeysym(event.key.keysym);
-                  if (!(cpc_key & MOD_EMU_KEY)) { // a key of the CPC keyboard?
-                     if ((!CPC.paused) && (static_cast<byte>(cpc_key) != 0xff)) {
-                        keyboard_matrix[static_cast<byte>(cpc_key) >> 4] |= bit_values[static_cast<byte>(cpc_key) & 7]; // key has been released
-                        keyboard_matrix[0x25 >> 4] |= bit_values[0x25 & 7]; // make sure key is unSHIFTed
-                        keyboard_matrix[0x27 >> 4] |= bit_values[0x27 & 7]; // make sure CONTROL key is not held down
-                     }
-                  } else { // process emulator specific keys
+                  if (!(cpc_key & MOD_EMU_KEY)) {
+                     applyKeypress(cpc_key, keyboard_matrix, false);
+                  }
+                  else { // process emulator specific keys
                      switch (cpc_key) {
 
                         case CAP32_GUI:
@@ -2118,31 +2105,14 @@ int cap32_main (int argc, char **argv)
                     showVKeyboard();
                   }
                 }
-              // TODO: deduplicate this from SDL_KEYDOWN, SDL_KEYUP, SDL_JOYBUTTONDOWN, SDL_JOYBUTTONUP and SDL_JOYAXISMOTION
-              if (!CPC.paused && cpc_key != 0xff) {
-                 keyboard_matrix[static_cast<byte>(cpc_key) >> 4] &= ~bit_values[static_cast<byte>(cpc_key) & 7]; // key is being held down
-                 if (cpc_key & MOD_CPC_SHIFT) { // CPC SHIFT key required?
-                    keyboard_matrix[0x25 >> 4] &= ~bit_values[0x25 & 7]; // key needs to be SHIFTed
-                 } else {
-                    keyboard_matrix[0x25 >> 4] |= bit_values[0x25 & 7]; // make sure key is unSHIFTed
-                 }
-                 if (cpc_key & MOD_CPC_CTRL) { // CPC CONTROL key required?
-                    keyboard_matrix[0x27 >> 4] &= ~bit_values[0x27 & 7]; // CONTROL key is held down
-                 } else {
-                    keyboard_matrix[0x27 >> 4] |= bit_values[0x27 & 7]; // make sure CONTROL key is released
-                 }
-              }
+                applyKeypress(cpc_key, keyboard_matrix, true);
             }
             break;
 
             case SDL_JOYBUTTONUP:
             {
               dword cpc_key = CPC.InputMapper->CPCkeyFromJoystickButton(event.jbutton);
-              if (!CPC.paused && cpc_key != 0xff) {
-                 keyboard_matrix[static_cast<byte>(cpc_key) >> 4] |= bit_values[static_cast<byte>(cpc_key) & 7]; // key has been released
-                 keyboard_matrix[0x25 >> 4] |= bit_values[0x25 & 7]; // make sure key is unSHIFTed
-                 keyboard_matrix[0x27 >> 4] |= bit_values[0x27 & 7]; // make sure CONTROL key is not held down
-              }
+              applyKeypress(cpc_key, keyboard_matrix, false);
             }
             break;
 
@@ -2151,25 +2121,9 @@ int cap32_main (int argc, char **argv)
               dword cpc_key[2] = {0xff, 0xff};
               bool release = false;
               CPC.InputMapper->CPCkeyFromJoystickAxis(event.jaxis, cpc_key, release);
-			  if (!CPC.paused && cpc_key[0] != 0xff) {
-                if(release) {
-                 keyboard_matrix[static_cast<byte>(cpc_key[0]) >> 4] |= bit_values[static_cast<byte>(cpc_key[0]) & 7]; // key has been released
+              applyKeypress(cpc_key[0], keyboard_matrix, !release);
+              if (!CPC.paused && cpc_key[0] != 0xff && release) {
                  keyboard_matrix[static_cast<byte>(cpc_key[1]) >> 4] |= bit_values[static_cast<byte>(cpc_key[1]) & 7]; // key has been released
-                 keyboard_matrix[0x25 >> 4] |= bit_values[0x25 & 7]; // make sure key is unSHIFTed
-                 keyboard_matrix[0x27 >> 4] |= bit_values[0x27 & 7]; // make sure CONTROL key is not held down
-                } else {
-                 keyboard_matrix[static_cast<byte>(cpc_key[0]) >> 4] &= ~bit_values[static_cast<byte>(cpc_key[0]) & 7]; // key is being held down
-                 if (cpc_key[0] & MOD_CPC_SHIFT) { // CPC SHIFT key required?
-                    keyboard_matrix[0x25 >> 4] &= ~bit_values[0x25 & 7]; // key needs to be SHIFTed
-                 } else {
-                    keyboard_matrix[0x25 >> 4] |= bit_values[0x25 & 7]; // make sure key is unSHIFTed
-                 }
-                 if (cpc_key[0] & MOD_CPC_CTRL) { // CPC CONTROL key required?
-                    keyboard_matrix[0x27 >> 4] &= ~bit_values[0x27 & 7]; // CONTROL key is held down
-                 } else {
-                    keyboard_matrix[0x27 >> 4] |= bit_values[0x27 & 7]; // make sure CONTROL key is released
-                 }
-                }
               }
             }
             break;
