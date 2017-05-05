@@ -1404,7 +1404,7 @@ InputMapper::InputMapper(t_CPC *CPC): CPC(CPC) { }
 
 void applyKeypress(dword cpc_key, byte keyboard_matrix[], bool pressed) {
     if ((!CPC.paused) && (static_cast<byte>(cpc_key) != 0xff)) {
-		if (pressed) {
+        if (pressed) {
             keyboard_matrix[static_cast<byte>(cpc_key) >> 4] &= ~bit_values[static_cast<byte>(cpc_key) & 7]; // key is being held down
             if (cpc_key & MOD_CPC_SHIFT) { // CPC SHIFT key required?
                 keyboard_matrix[0x25 >> 4] &= ~bit_values[0x25 & 7]; // key needs to be SHIFTed

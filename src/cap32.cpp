@@ -2122,8 +2122,8 @@ int cap32_main (int argc, char **argv)
               bool release = false;
               CPC.InputMapper->CPCkeyFromJoystickAxis(event.jaxis, cpc_key, release);
               applyKeypress(cpc_key[0], keyboard_matrix, !release);
-              if (!CPC.paused && cpc_key[0] != 0xff && release) {
-                 keyboard_matrix[static_cast<byte>(cpc_key[1]) >> 4] |= bit_values[static_cast<byte>(cpc_key[1]) & 7]; // key has been released
+              if (release && cpc_key[0] != 0xff) {
+                 applyKeypress(cpc_key[1], keyboard_matrix, !release);
               }
             }
             break;
