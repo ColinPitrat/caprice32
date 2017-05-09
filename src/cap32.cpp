@@ -1877,6 +1877,24 @@ void dumpScreen() {
    }
 }
 
+// Very similar to screenshot, but difficult to factorize :-)
+void dumpSnapshot() {
+   std::string dir = CPC.snap_path;
+   if (!is_directory(dir)) {
+	  LOG_ERROR("Unable to find or open directory " + CPC.snap_path + " when trying to take a machine snapshot. Defaulting to current directory.")
+	  dir = ".";
+   }
+   std::string dumpFile = "snapshot_" + getDateString() + ".sna";
+   std::string dumpPath = dir + "/" + dumpFile;
+   LOG_DEBUG("Dumping machine snapshot to " + dumpPath);
+   if (snapshot_save(dumpPath)) {
+     LOG_DEBUG("Could not write machine snapshot to " + dumpPath);
+   }
+   else {
+     set_osd_message("Captured machine snapshot to " + dumpFile);
+   }
+}
+
 int cap32_main (int argc, char **argv)
 {
    dword dwOffset;
@@ -2010,6 +2028,10 @@ int cap32_main (int argc, char **argv)
 
                         case CAP32_SCRNSHOT:
                            dumpScreen();
+                           break;
+
+                        case CAP32_SNAPSHOT:
+                           dumpSnapshot();
                            break;
 
                         case CAP32_TAPEPLAY:
