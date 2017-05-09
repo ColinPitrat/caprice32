@@ -85,7 +85,5 @@ std::string getDateString() {
 	if (std::strftime(dateString, sizeof(dateString), "%Y%m%d_%H%M%S", std::localtime(&t))) {
 		return std::string(dateString);
 	}
-	else {
-		return "unknown_date";
-	}
+	return "unknown_date";
 }
