@@ -1860,21 +1860,39 @@ void set_osd_message(const std::string& message) {
 }
 
 void dumpScreen() {
-   static int dump_num=0;
-
-   if (is_directory(CPC.sdump_dir)) {
-      SDL_Surface* shot;
-      shot = SDL_PNGFormatAlpha(back_surface);
-      std::string dumpPath;
-      do {
-         dumpPath = CPC.sdump_dir + "/" + std::string("dump") + std::to_string(dump_num) + ".png";
-         dump_num++;
-      } while (access(dumpPath.c_str(), F_OK) == 0);
-      LOG_DEBUG("Dumping screen to " + dumpPath);
-      SDL_SavePNG(shot, dumpPath.c_str());
-      return;
+   std::string dir = CPC.sdump_dir;
+   if (!is_directory(dir)) {
+	  LOG_ERROR("Unable to find or open directory " + CPC.sdump_dir + " when trying to take a screenshot. Defaulting to current directory.")
+	  dir = ".";
    }
-   LOG_ERROR("Unable to find or open directory " + CPC.sdump_dir + " when trying to take a screenshot.");
+   SDL_Surface* shot = SDL_PNGFormatAlpha(back_surface);
+   std::string dumpFile = "screenshot_" + getDateString() + ".png";
+   std::string dumpPath = dir + "/" + dumpFile;
+   LOG_DEBUG("Dumping screen to " + dumpPath);
+   if (SDL_SavePNG(shot, dumpPath.c_str())) {
+     LOG_DEBUG("Could not write screenshot file to " + dumpPath);
+   }
+   else {
+     set_osd_message("Captured screenshot to " + dumpFile);
+   }
+}
+
+// Very similar to screenshot, but difficult to factorize :-)
+void dumpSnapshot() {
+   std::string dir = CPC.snap_path;
+   if (!is_directory(dir)) {
+	  LOG_ERROR("Unable to find or open directory " + CPC.snap_path + " when trying to take a machine snapshot. Defaulting to current directory.")
+	  dir = ".";
+   }
+   std::string dumpFile = "snapshot_" + getDateString() + ".sna";
+   std::string dumpPath = dir + "/" + dumpFile;
+   LOG_DEBUG("Dumping machine snapshot to " + dumpPath);
+   if (snapshot_save(dumpPath)) {
+     LOG_DEBUG("Could not write machine snapshot to " + dumpPath);
+   }
+   else {
+     set_osd_message("Captured machine snapshot to " + dumpFile);
+   }
 }
 
 int cap32_main (int argc, char **argv)
@@ -2010,6 +2028,10 @@ int cap32_main (int argc, char **argv)
 
                         case CAP32_SCRNSHOT:
                            dumpScreen();
+                           break;
+
+                        case CAP32_SNAPSHOT:
+                           dumpSnapshot();
                            break;
 
                         case CAP32_TAPEPLAY:
