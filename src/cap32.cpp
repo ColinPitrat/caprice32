@@ -1579,9 +1579,9 @@ std::string getConfigurationFilename(bool forWrite)
      // If not found, look for .cap32.cfg in the home of current user
      if (access(configFilename.c_str(), F_OK) != 0) {
         configFilename = std::string(getenv("HOME")) + "/.cap32.cfg";
-        // If still not found, look for cap32.cfg in /etc
+        // If still not found, look for cap32.cfg in /usr/local/share/caprice32
         if (!forWrite && access(configFilename.c_str(), F_OK) != 0) {
-           configFilename = "/etc/cap32.cfg";
+           configFilename = "/usr/local/share/caprice32/cap32.cfg";
         }
      }
   }
