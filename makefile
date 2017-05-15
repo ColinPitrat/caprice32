@@ -54,6 +54,8 @@ COMMON_CFLAGS += -DWITH_IPF
 LIBS += $(MINGW_PATH)/bin/$(CAPSIPFDLL)
 endif
 else
+INSTALLROOT = /usr/local
+RESOURCES_INSTALLDIR = $(INSTALLROOT)/caprice32
 IPATHS = -Isrc/ -Isrc/gui/includes `freetype-config --cflags` `sdl-config --cflags` `pkg-config --cflags libpng`
 LIBS = `sdl-config --libs` -lz `freetype-config --libs` `pkg-config --libs libpng`
 ifdef WITH_IPF
@@ -86,7 +88,7 @@ TEST_SOURCES:=$(shell find $(TSTDIR) -name \*.cpp)
 TEST_DEPENDS:=$(foreach file,$(TEST_SOURCES:.cpp=.d),$(shell echo "$(OBJDIR)/$(file)"))
 TEST_OBJECTS:=$(TEST_DEPENDS:.d=.o)
 
-.PHONY: all check_deps clean debug debug_flag distrib doc insert_hash unit_test
+.PHONY: all check_deps clean debug debug_flag distrib doc insert_hash unit_test install
 
 WARNINGS = -Wall -Wextra -Wzero-as-null-pointer-constant -Wformat=2 -Wold-style-cast -Wmissing-include-dirs -Wlogical-op -Woverloaded-virtual -Wpointer-arith -Wredundant-decls
 COMMON_CFLAGS += $(CFLAGS) -std=c++11 $(IPATHS)
@@ -182,8 +184,16 @@ endif
 	cp cap32.cfg COPYING.txt README.md $(ARCHIVE)/
 	cp -r resources/ rom/ licenses/ $(ARCHIVE)/
 	zip -r $(ARCHIVE).zip $(ARCHIVE)
+
+install: $(TARGET)
+
 else
 distrib: $(TARGET)
+
+install: $(TARGET)
+	install -D $(TARGET) $(INSTALLROOT)/bin/$(TARGET)
+	mkdir -p $(RESOURCES_INSTALLDIR)
+	cp -r cap32.cfg resources rom $(RESOURCES_INSTALLDIR)
 endif
 
 ####################################
