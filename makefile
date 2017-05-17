@@ -55,7 +55,8 @@ LIBS += $(MINGW_PATH)/bin/$(CAPSIPFDLL)
 endif
 else
 INSTALLROOT = /usr/local
-RESOURCES_INSTALLDIR = $(INSTALLROOT)/caprice32
+INSTALLSHARE = $(INSTALLROOT)/share
+RESOURCES_INSTALLDIR = $(INSTALLSHARE)/caprice32
 IPATHS = -Isrc/ -Isrc/gui/includes `freetype-config --cflags` `sdl-config --cflags` `pkg-config --cflags libpng`
 LIBS = `sdl-config --libs` -lz `freetype-config --libs` `pkg-config --libs libpng`
 ifdef WITH_IPF
@@ -192,6 +193,7 @@ distrib: $(TARGET)
 
 install: $(TARGET)
 	install -D $(TARGET) $(INSTALLROOT)/bin/$(TARGET)
+	install -D $(GROFF_DOC) $(INSTALLSHARE)/man/man6/cap32.6
 	mkdir -p $(RESOURCES_INSTALLDIR)
 	cp -r cap32.cfg resources rom $(RESOURCES_INSTALLDIR)
 endif
