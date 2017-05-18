@@ -1,5 +1,0 @@
-cap32     usr/bin
-resources usr/share/caprice32
-rom       usr/share/caprice32
-doc/man6  usr/share/man
-debian/cap32.cfg etc

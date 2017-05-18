@@ -1,5 +1,5 @@
-caprice32 (20160828) unstable; urgency=low
+caprice32 (20170601) unstable; urgency=low
 
-  * Initial release
+  * Modification of installation path in makefile and code
 
  -- Andreas Wirooks <andreas.wirooks@1und1.de>  Sun, 28 Aug 2016 17:22:07 +0200

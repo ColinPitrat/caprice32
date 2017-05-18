@@ -54,8 +54,8 @@ COMMON_CFLAGS += -DWITH_IPF
 LIBS += $(MINGW_PATH)/bin/$(CAPSIPFDLL)
 endif
 else
-INSTALLROOT = /usr/local
-INSTALLSHARE = $(INSTALLROOT)/share
+PREFIX = $(DESTDIR)/usr/local
+INSTALLSHARE = $(PREFIX)/share
 RESOURCES_INSTALLDIR = $(INSTALLSHARE)/caprice32
 IPATHS = -Isrc/ -Isrc/gui/includes `freetype-config --cflags` `sdl-config --cflags` `pkg-config --cflags libpng`
 LIBS = `sdl-config --libs` -lz `freetype-config --libs` `pkg-config --libs libpng`
@@ -192,7 +192,7 @@ else
 distrib: $(TARGET)
 
 install: $(TARGET)
-	install -D $(TARGET) $(INSTALLROOT)/bin/$(TARGET)
+	install -D $(TARGET) $(PREFIX)/bin/$(TARGET)
 	install -D $(GROFF_DOC) $(INSTALLSHARE)/man/man6/cap32.6
 	mkdir -p $(RESOURCES_INSTALLDIR)
 	cp -r cap32.cfg resources rom $(RESOURCES_INSTALLDIR)
@@ -241,7 +241,7 @@ clang-tidy:
 	if $(CLANG_TIDY) -checks=-*,$(CLANG_CHECKS) $(SOURCES) -header-filter=src/* -- $(COMMON_CFLAGS) | grep "."; then false; fi
 
 clean:
-	rm -rf obj/ release/
+	rm -rf obj/ release/ .pc/
 	rm -f test_runner test_runner.exe cap32 cap32.exe .debug tags
 
 -include $(DEPENDS) $(TEST_DEPENDS)
