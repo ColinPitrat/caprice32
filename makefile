@@ -165,14 +165,17 @@ doc: $(HTML_DOC)
 $(HTML_DOC): $(GROFF_DOC)
 	groff -mandoc -Thtml $< > $@
 
-$(TARGET): $(OBJECTS) $(MAIN)
-	$(CXX) $(LDFLAGS) -o $(TARGET) $(OBJECTS) $(MAIN) $(LIBS)
 
 # TODO(cpitrat): Make it work for linux too
 ifeq ($(PLATFORM),windows)
 DLLS = SDL.dll libbz2-1.dll libfreetype-6.dll libpng16-16.dll libstdc++-6.dll \
        libwinpthread-1.dll zlib1.dll libglib-2.0-0.dll libgraphite2.dll \
        libharfbuzz-0.dll libiconv-2.dll libintl-8.dll libpcre-1.dll
+
+$(TARGET): $(OBJECTS) $(MAIN)
+	$(CXX) $(LDFLAGS) -o $(TARGET) $(OBJECTS) $(MAIN) $(LIBS)
+	@sed -i 's/\/usr\/local\/share\/caprice32\///g' cap32.cfg
+
 distrib: $(TARGET)
 	mkdir -p $(ARCHIVE)
 	rm -f $(ARCHIVE).zip
@@ -189,6 +192,10 @@ endif
 install: $(TARGET)
 
 else
+
+$(TARGET): $(OBJECTS) $(MAIN)
+	$(CXX) $(LDFLAGS) -o $(TARGET) $(OBJECTS) $(MAIN) $(LIBS)
+
 distrib: $(TARGET)
 
 install: $(TARGET)
