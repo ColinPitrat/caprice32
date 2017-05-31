@@ -1,0 +1,47 @@
+Honor FHS to please debian
+
+--- a/cap32.cfg
++++ b/cap32.cfg
+@@ -50,7 +50,7 @@
+ joystick_vkeyboard_button=10
+ # resources_path
+ #   path to resources (menu images...)
+-resources_path=/usr/local/share/caprice32/resources
++resources_path=/usr/share/caprice32/resources
+ # boot_time
+ #   Estimated time in seconds the CPC takes to boot.
+ #   Caprice will wait this long before sending a provided autocmd.
+@@ -167,7 +167,7 @@
+ sdump_dir=./screenshots
+ 
+ [rom]
+-rom_path=/usr/local/share/caprice32/rom
++rom_path=/usr/share/caprice32/rom
+ slot00=
+ slot01=
+ slot02=
+--- a/makefile
++++ b/makefile
+@@ -54,7 +54,7 @@
+ LIBS += $(MINGW_PATH)/bin/$(CAPSIPFDLL)
+ endif
+ else
+-PREFIX = $(DESTDIR)/usr/local
++PREFIX = $(DESTDIR)/usr
+ INSTALLSHARE = $(PREFIX)/share
+ RESOURCES_INSTALLDIR = $(INSTALLSHARE)/caprice32
+ IPATHS = -Isrc/ -Isrc/gui/includes `freetype-config --cflags` `sdl-config --cflags` `pkg-config --cflags libpng`
+--- a/src/cap32.cpp
++++ b/src/cap32.cpp
+@@ -1579,9 +1579,9 @@
+      // If not found, look for .cap32.cfg in the home of current user
+      if (access(configFilename.c_str(), F_OK) != 0) {
+         configFilename = std::string(getenv("HOME")) + "/.cap32.cfg";
+-        // If still not found, look for cap32.cfg in /usr/local/share/caprice32
++        // If still not found, look for cap32.cfg in /usr/share/caprice32
+         if (!forWrite && access(configFilename.c_str(), F_OK) != 0) {
+-           configFilename = "/usr/local/share/caprice32/cap32.cfg";
++           configFilename = "/usr/share/caprice32/cap32.cfg";
+         }
+      }
+   }
