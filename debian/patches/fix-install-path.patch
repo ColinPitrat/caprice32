@@ -20,17 +20,6 @@ Honor FHS to please debian
  slot00=
  slot01=
  slot02=
---- a/makefile
-+++ b/makefile
-@@ -57,7 +57,7 @@
- LIBS += $(MINGW_PATH)/bin/$(CAPSIPFDLL)
- endif
- else
--PREFIX = $(DESTDIR)/usr/local
-+PREFIX = $(DESTDIR)/usr
- INSTALLSHARE = $(PREFIX)/share
- RESOURCES_INSTALLDIR = $(INSTALLSHARE)/caprice32
- IPATHS = -Isrc/ -Isrc/gui/includes `freetype-config --cflags` `sdl-config --cflags` `pkg-config --cflags libpng`
 --- a/src/cap32.cpp
 +++ b/src/cap32.cpp
 @@ -1579,9 +1579,9 @@

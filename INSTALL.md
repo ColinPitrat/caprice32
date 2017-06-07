@@ -35,14 +35,14 @@ Alternatively, the debug target also work:
 
 To build a debian package on Debian/Ubuntu distributions install the dependencies as mentioned above and the dpkg-dev package:
 
-`sudo apt-get install dpkg-dev`
+`sudo apt-get install dpkg-dev pbuilder`
 
 Then, to create a debian package:
 
  * fill in the required version in the debian/changelog file
  * compile with 'make VERSION=<my_version_string>
  * go to release/cap32_linux/caprice32-<version>/debian
- * execute 'debuild -us -uc --lintian-opts --profile debian'
+ * execute 'debuild -us -uc --lintian-opts --profile debian' or 'pdebuild' if you want to run in a chrooted env. 
 
 #### Windows target:
 

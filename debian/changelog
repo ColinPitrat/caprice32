@@ -1,5 +1,5 @@
 caprice32 (20170601-1) unstable; urgency=low
 
-  * Modification of installation path in makefile and code
+  * Modification of installation path in code and cfg file
 
  -- Seb Haezebrouck <seb@zyglute.fr>  Thu, 01 Jun 2017 17:22:07 +0200

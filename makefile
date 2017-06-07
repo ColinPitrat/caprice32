@@ -18,7 +18,6 @@
 VERSION=latest
 
 LAST_BUILD_IN_DEBUG = $(shell [ -e .debug ] && echo 1 || echo 0)
-GIT_HASH = $(shell git rev-parse --verify HEAD)
 # If compiling under native windows, set WINE to ""
 WINE = wine
 
@@ -57,9 +56,8 @@ COMMON_CFLAGS += -DWITH_IPF
 LIBS += $(MINGW_PATH)/bin/$(CAPSIPFDLL)
 endif
 else
+prefix = /usr/local
 PREFIX = $(DESTDIR)/usr/local
-INSTALLSHARE = $(PREFIX)/share
-RESOURCES_INSTALLDIR = $(INSTALLSHARE)/caprice32
 IPATHS = -Isrc/ -Isrc/gui/includes `freetype-config --cflags` `sdl-config --cflags` `pkg-config --cflags libpng`
 LIBS = `sdl-config --libs` -lz `freetype-config --libs` `pkg-config --libs libpng`
 ifdef WITH_IPF
@@ -69,6 +67,11 @@ endif
 ifndef CXX
 CXX = g++
 endif
+endif
+
+ifndef RELEASE
+GIT_HASH = $(shell git rev-parse --verify HEAD)
+COMMON_CFLAGS += -DHASH=\"$(GIT_HASH)\"
 endif
 
 CLANG_TIDY=clang-tidy-3.8
@@ -92,7 +95,7 @@ TEST_SOURCES:=$(shell find $(TSTDIR) -name \*.cpp)
 TEST_DEPENDS:=$(foreach file,$(TEST_SOURCES:.cpp=.d),$(shell echo "$(OBJDIR)/$(file)"))
 TEST_OBJECTS:=$(TEST_DEPENDS:.d=.o)
 
-.PHONY: all check_deps clean debug debug_flag distrib doc insert_hash unit_test install
+.PHONY: all check_deps clean debug debug_flag distrib doc  unit_test install
 
 WARNINGS = -Wall -Wextra -Wzero-as-null-pointer-constant -Wformat=2 -Wold-style-cast -Wmissing-include-dirs -Wlogical-op -Woverloaded-virtual -Wpointer-arith -Wredundant-decls
 COMMON_CFLAGS += $(CFLAGS) -std=c++11 $(IPATHS)
@@ -115,15 +118,13 @@ endif
 
 ifdef DEBUG
 BUILD_FLAGS = $(DEBUG_FLAGS)
-all: insert_hash check_deps debug
+all: check_deps debug
 else
-all: insert_hash check_deps distrib
+all: check_deps distrib
 endif
 
 # gtest doesn't build with warnings flags, hence the COMMON_CFLAGS
 ALL_CFLAGS=$(COMMON_CFLAGS) $(WARNINGS)
-
-src/argparse.c: insert_hash
 
 $(MAIN): main.cpp src/cap32.h
 	@$(CXX) -c $(BUILD_FLAGS) $(ALL_CFLAGS) -o $(MAIN) main.cpp
@@ -155,10 +156,6 @@ else
 # TODO(cpitrat): Implement check_deps for windows build
 check_deps:
 endif
-
-# This might fail on non GNU systems as sed -i in GNU sed only
-insert_hash:
-	@sed -i 's/commit_hash = ".*"/commit_hash = "$(GIT_HASH)"/' src/commit_hash.h
 
 tags:
 	@ctags -R . || echo -e "!!!!!!!!!!!\n!! Warning: ctags not found - if you are a developer, you might want to install it.\n!!!!!!!!!!!"
@@ -208,13 +205,13 @@ distrib: $(TARGET)
 	cp -r src rom resources doc licenses debian $(SRC_PACKAGE_DIR)
 	cp main.cpp cap32.cfg makefile README.md INSTALL.md COPYING.txt $(SRC_PACKAGE_DIR)
 	tar jcf $(SRC_PACKAGE_DIR).tar.bz2 -C $(ARCHIVE) caprice32-$(VERSION)
-	cp $(SRC_PACKAGE_DIR).tar.bz2 $(ARCHIVE)/caprice32_$(VERSION).orig.tar.bz2
+	ln -s caprice32-$(VERSION).tar.bz2 $(ARCHIVE)/caprice32_$(VERSION).orig.tar.bz2
 
 install: $(TARGET)
-	install -D $(TARGET) $(PREFIX)/bin/$(TARGET)
-	install -D $(GROFF_DOC) $(INSTALLSHARE)/man/man6/cap32.6
-	mkdir -p $(RESOURCES_INSTALLDIR)
-	cp -r cap32.cfg resources rom $(RESOURCES_INSTALLDIR)
+	install -D $(TARGET) $(DESTDIR)$(prefix)/bin/$(TARGET)
+	install -D $(GROFF_DOC) $(DESTDIR)$(prefix)/share/man/man6/cap32.6
+	mkdir -p $(DESTDIR)$(prefix)/share/caprice32
+	cp -r cap32.cfg resources rom $(DESTDIR)$(prefix)/share/caprice32
 endif
 
 ####################################
