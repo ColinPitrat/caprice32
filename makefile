@@ -202,8 +202,9 @@ distrib: $(TARGET)
 install: $(TARGET)
 	install -D $(TARGET) $(DESTDIR)$(prefix)/bin/$(TARGET)
 	install -D $(GROFF_DOC) $(DESTDIR)$(prefix)/share/man/man6/cap32.6
+	install -D -m664 cap32.cfg $(DESTDIR)/etc/cap32.cfg
 	mkdir -p $(DESTDIR)$(prefix)/share/caprice32
-	cp -r cap32.cfg resources rom $(DESTDIR)$(prefix)/share/caprice32
+	cp -r resources rom $(DESTDIR)$(prefix)/share/caprice32
 endif
 
 ####################################
