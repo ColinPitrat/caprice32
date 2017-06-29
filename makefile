@@ -14,36 +14,32 @@
 #  - WITHOUT_GL
 #  - WITH_IPF
 
+# To be overridden for debian packaging
+VERSION=latest
+
 LAST_BUILD_IN_DEBUG = $(shell [ -e .debug ] && echo 1 || echo 0)
-GIT_HASH = $(shell git rev-parse --verify HEAD)
 # If compiling under native windows, set WINE to ""
 WINE = wine
 
-ifndef ARCH
-ARCH = linux
-endif
+ARCH ?= linux
 
 ifeq ($(ARCH),win64)
 TRIPLE = x86_64-w64-mingw32
-TARGET=cap32.exe
-TEST_TARGET = test_runner.exe
 PLATFORM=windows
 CAPSIPFDLL=CAPSImg_x64.dll
 else ifeq ($(ARCH),win32)
 TRIPLE = i686-w64-mingw32
-TARGET=cap32.exe
-TEST_TARGET = test_runner.exe
 PLATFORM=windows
 CAPSIPFDLL=CAPSImg.dll
 else ifeq ($(ARCH),linux)
-TARGET=cap32
-TEST_TARGET = test_runner
 PLATFORM=linux
 else
 $(error Unknown ARCH. Supported ones are linux, win32 and win64.)
 endif
 
 ifeq ($(PLATFORM),windows)
+TARGET = cap32.exe
+TEST_TARGET = test_runner.exe
 MINGW_PATH = /usr/$(TRIPLE)
 IPATHS = -Isrc/ -Isrc/gui/includes -I$(MINGW_PATH)/include -I$(MINGW_PATH)/include/SDL -I$(MINGW_PATH)/include/freetype2
 LIBS = $(MINGW_PATH)/lib/libSDL.dll.a $(MINGW_PATH)/lib/libfreetype.dll.a $(MINGW_PATH)/lib/libz.dll.a $(MINGW_PATH)/lib/libpng16.dll.a $(MINGW_PATH)/lib/libpng.dll.a
@@ -54,15 +50,21 @@ COMMON_CFLAGS += -DWITH_IPF
 LIBS += $(MINGW_PATH)/bin/$(CAPSIPFDLL)
 endif
 else
+prefix = /usr/local
+TARGET = cap32
+TEST_TARGET = test_runner
 IPATHS = -Isrc/ -Isrc/gui/includes `freetype-config --cflags` `sdl-config --cflags` `pkg-config --cflags libpng`
 LIBS = `sdl-config --libs` -lz `freetype-config --libs` `pkg-config --libs libpng`
+CXX ?= g++
 ifdef WITH_IPF
 COMMON_CFLAGS += -DWITH_IPF
 LIBS += -lcapsimage
 endif
-ifndef CXX
-CXX = g++
 endif
+
+ifndef RELEASE
+GIT_HASH = $(shell git rev-parse --verify HEAD)
+COMMON_CFLAGS += -DHASH=\"$(GIT_HASH)\"
 endif
 
 CLANG_TIDY=clang-tidy-3.8
@@ -86,7 +88,7 @@ TEST_SOURCES:=$(shell find $(TSTDIR) -name \*.cpp)
 TEST_DEPENDS:=$(foreach file,$(TEST_SOURCES:.cpp=.d),$(shell echo "$(OBJDIR)/$(file)"))
 TEST_OBJECTS:=$(TEST_DEPENDS:.d=.o)
 
-.PHONY: all check_deps clean debug debug_flag distrib doc insert_hash unit_test
+.PHONY: all check_deps clean debug debug_flag distrib doc unit_test install
 
 WARNINGS = -Wall -Wextra -Wzero-as-null-pointer-constant -Wformat=2 -Wold-style-cast -Wmissing-include-dirs -Wlogical-op -Woverloaded-virtual -Wpointer-arith -Wredundant-decls
 COMMON_CFLAGS += $(CFLAGS) -std=c++11 $(IPATHS)
@@ -109,15 +111,13 @@ endif
 
 ifdef DEBUG
 BUILD_FLAGS = $(DEBUG_FLAGS)
-all: insert_hash check_deps debug
+all: check_deps debug
 else
-all: insert_hash check_deps distrib
+all: check_deps distrib
 endif
 
 # gtest doesn't build with warnings flags, hence the COMMON_CFLAGS
 ALL_CFLAGS=$(COMMON_CFLAGS) $(WARNINGS)
-
-src/argparse.c: insert_hash
 
 $(MAIN): main.cpp src/cap32.h
 	@$(CXX) -c $(BUILD_FLAGS) $(ALL_CFLAGS) -o $(MAIN) main.cpp
@@ -150,10 +150,6 @@ else
 check_deps:
 endif
 
-# This might fail on non GNU systems as sed -i in GNU sed only
-insert_hash:
-	@sed -i 's/commit_hash = ".*"/commit_hash = "$(GIT_HASH)"/' src/commit_hash.h
-
 tags:
 	@ctags -R . || echo -e "!!!!!!!!!!!\n!! Warning: ctags not found - if you are a developer, you might want to install it.\n!!!!!!!!!!!"
 
@@ -162,14 +158,16 @@ doc: $(HTML_DOC)
 $(HTML_DOC): $(GROFF_DOC)
 	groff -mandoc -Thtml $< > $@
 
-$(TARGET): $(OBJECTS) $(MAIN)
-	$(CXX) $(LDFLAGS) -o $(TARGET) $(OBJECTS) $(MAIN) $(LIBS)
 
-# TODO(cpitrat): Make it work for linux too
 ifeq ($(PLATFORM),windows)
 DLLS = SDL.dll libbz2-1.dll libfreetype-6.dll libpng16-16.dll libstdc++-6.dll \
        libwinpthread-1.dll zlib1.dll libglib-2.0-0.dll libgraphite2.dll \
        libharfbuzz-0.dll libiconv-2.dll libintl-8.dll libpcre-1.dll
+
+$(TARGET): $(OBJECTS) $(MAIN)
+	$(CXX) $(LDFLAGS) -o $(TARGET) $(OBJECTS) $(MAIN) $(LIBS)
+	@sed -i 's/\/usr\/local\/share\/caprice32\///g' cap32.cfg
+
 distrib: $(TARGET)
 	mkdir -p $(ARCHIVE)
 	rm -f $(ARCHIVE).zip
@@ -182,8 +180,31 @@ endif
 	cp cap32.cfg COPYING.txt README.md $(ARCHIVE)/
 	cp -r resources/ rom/ licenses/ $(ARCHIVE)/
 	zip -r $(ARCHIVE).zip $(ARCHIVE)
+
+install: $(TARGET)
+
 else
+
+SRC_PACKAGE_DIR=$(ARCHIVE)/caprice32-$(VERSION)
+
+$(TARGET): $(OBJECTS) $(MAIN)
+	$(CXX) $(LDFLAGS) -o $(TARGET) $(OBJECTS) $(MAIN) $(LIBS)
+
+# Create a debian source package
 distrib: $(TARGET)
+	mkdir -p $(SRC_PACKAGE_DIR)
+	rm -fr $(SRC_PACKAGE_DIR)/*
+	cp -r src rom resources doc licenses debian $(SRC_PACKAGE_DIR)
+	cp main.cpp cap32.cfg makefile README.md INSTALL.md COPYING.txt $(SRC_PACKAGE_DIR)
+	tar jcf $(SRC_PACKAGE_DIR).tar.bz2 -C $(ARCHIVE) caprice32-$(VERSION)
+	ln -s caprice32-$(VERSION).tar.bz2 $(ARCHIVE)/caprice32_$(VERSION).orig.tar.bz2
+
+install: $(TARGET)
+	install -D $(TARGET) $(DESTDIR)$(prefix)/bin/$(TARGET)
+	install -D $(GROFF_DOC) $(DESTDIR)$(prefix)/share/man/man6/cap32.6
+	install -D -m664 cap32.cfg $(DESTDIR)/etc/cap32.cfg
+	mkdir -p $(DESTDIR)$(prefix)/share/caprice32
+	cp -r resources rom $(DESTDIR)$(prefix)/share/caprice32
 endif
 
 ####################################
@@ -229,7 +250,7 @@ clang-tidy:
 	if $(CLANG_TIDY) -checks=-*,$(CLANG_CHECKS) $(SOURCES) -header-filter=src/* -- $(COMMON_CFLAGS) | grep "."; then false; fi
 
 clean:
-	rm -rf obj/ release/
+	rm -rf obj/ release/ .pc/
 	rm -f test_runner test_runner.exe cap32 cap32.exe .debug tags
 
 -include $(DEPENDS) $(TEST_DEPENDS)

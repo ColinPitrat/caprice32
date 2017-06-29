@@ -6,7 +6,6 @@
 
 // CPC emulation properties, defined in cap32.h:
 extern t_CPC CPC;
-extern std::string commit_hash;
 
 namespace wGui {
 
@@ -16,6 +15,11 @@ CapriceAbout::CapriceAbout(const CRect& WindowRect, CWindow* pParent, CFontEngin
     int y=80;
     SetModal(true);
 	// Override here: specify position of label ourselves:
+#ifdef HASH
+	std::string commit_hash = std::string(HASH);
+#else
+	std::string commit_hash;
+#endif
 	m_pMessageLabel = new CLabel(CPoint(5, 70), this, VERSION_STRING + (commit_hash.empty()?"":"-"+commit_hash.substr(0, 16)));
 	m_pMessageLabel = new CLabel(CPoint(5, y+=10), this, "F1 - Menu / Pause");
 	m_pMessageLabel = new CLabel(CPoint(5, y+=10), this, "F2 - Fullscreen");

@@ -1,6 +1,5 @@
 #include "argparse.h"
 
-#include "commit_hash.h"
 #include <getopt.h>
 #include <iostream>
 #include <fstream>
@@ -108,7 +107,11 @@ void parseArguments(int argc, char **argv, std::vector<std::string>& slot_list, 
             break;
 
          case 'V':
-            std::cout << "Caprice32 " << VERSION_STRING << (commit_hash.empty()?"\n":"-"+commit_hash+"\n");
+            std::cout << "Caprice32 " << VERSION_STRING;
+#ifdef HASH
+            std::cout << (std::string(HASH).empty()?"":"-"+std::string(HASH));
+#endif
+            std::cout << "\n";
             std::cout << "Compiled with:"
 #ifdef HAVE_GL
                       << " HAVE_GL"

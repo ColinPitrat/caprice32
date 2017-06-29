@@ -1,5 +1,5 @@
-caprice32 (20160828) unstable; urgency=low
+caprice32 (20170601-1) unstable; urgency=low
 
-  * Initial release
+  * Modification of installation path in code and cfg file
 
- -- Andreas Wirooks <andreas.wirooks@1und1.de>  Sun, 28 Aug 2016 17:22:07 +0200
+ -- Seb Haezebrouck <seb@zyglute.fr>  Thu, 01 Jun 2017 17:22:07 +0200

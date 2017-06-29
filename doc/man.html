@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Tue May  9 15:40:50 2017 -->
+<!-- CreationDate: Fri Jun  9 09:16:47 2017 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -96,26 +96,24 @@ cartridges.</p>
 
 <p style="margin-left:22%;">When launched, Caprice32 will
 look for a configuration file in several locations. If a
-configuration file was specified using the
-<b>&minus;&minus;cfg_file</b> command line switch, Caprice32
-will try and use it. If no configuration file was specified,
-or the configuration file specified does not exist,
-Caprice32 will try and open, in this order:
-<b>$CWD/cap32.cfg</b> ($CWD being the directory where the
-cap32 executable resides), then a <b>.cap32.cfg</b> file in
-the user home directory, then <b>/etc/cap32.cfg</b>.
-Caprice32 will use the first valid file it finds. If no
-configuration file is found, a default configuration will be
-used.</p>
+configuration file was specified using the <b>--cfg_file</b>
+command line switch, Caprice32 will try and use it. If no
+configuration file was specified, or the configuration file
+specified does not exist, Caprice32 will try and open, in
+this order: <b>$CWD/cap32.cfg</b> ($CWD being the directory
+where the cap32 executable resides), then a
+<b>.cap32.cfg</b> file in the user home directory, then
+<b>/etc/cap32.cfg</b>. Caprice32 will use the first valid
+file it finds. If no configuration file is found, a default
+configuration will be used.</p>
 
 <p style="margin-left:22%; margin-top: 1em">The
 configuration file contains various configuration
 parameters, some of which can be modified from the GUI. When
 saving the configuration from the GUI, it will be written in
-the configuration file specified by the
-<b>&minus;&minus;cfg_file</b> switch, if it exists, else in
-$CWD/cap32.cfg if it exists, otherwise in
-$HOME/.cap32.cfg.</p>
+the configuration file specified by the <b>--cfg_file</b>
+switch, if it exists, else in $CWD/cap32.cfg if it exists,
+otherwise in $HOME/.cap32.cfg.</p>
 
 <p style="margin-left:22%; margin-top: 1em">Most of the
 configuration file entries are commented in the
@@ -191,9 +189,8 @@ default to a standard US keyboard map.</p>
 </h2>
 
 
-
-<p style="margin-left:11%; margin-top: 1em"><b>&minus;a</b>,
-<b>&minus;&minus;autocmd</b>=<i>COMMAND</i></p>
+<p style="margin-left:11%; margin-top: 1em"><b>-a</b>,
+<b>--autocmd</b>=<i>COMMAND</i></p>
 
 <p style="margin-left:22%;">pass command to execute to the
 emulator. The option can be repeated to pass multiple
@@ -201,26 +198,23 @@ commands. For example: cap32 -a &rsquo;print
 &quot;Hello&quot;&rsquo; -a &rsquo;print
 &quot;World&quot;&rsquo;</p>
 
-<p style="margin-left:11%;"><b>&minus;c</b>,
-<b>&minus;&minus;cfg_file</b>=<i>FILE</i></p>
+<p style="margin-left:11%;"><b>-c</b>,
+<b>--cfg_file</b>=<i>FILE</i></p>
 
 <p style="margin-left:22%;">use FILE as the emulator
 configuration file.</p>
 
-<p style="margin-left:11%;"><b>&minus;h</b>,
-<b>&minus;&minus;help</b></p>
+<p style="margin-left:11%;"><b>-h</b>, <b>--help</b></p>
 
 <p style="margin-left:22%;">display short help and
 exits</p>
 
-<p style="margin-left:11%;"><b>&minus;V</b>,
-<b>&minus;&minus;version</b></p>
+<p style="margin-left:11%;"><b>-V</b>, <b>--version</b></p>
 
 <p style="margin-left:22%;">display Caprice32 version and
 exits</p>
 
-<p style="margin-left:11%;"><b>&minus;v</b>,
-<b>&minus;&minus;verbose</b></p>
+<p style="margin-left:11%;"><b>-v</b>, <b>--verbose</b></p>
 
 <p style="margin-left:22%;">be talkative about what the
 emulator is doing (mostly for debug builds)</p>

@@ -20,9 +20,10 @@ The following options are available:
 
  * `DEBUG=TRUE`
  * `WITHOUT_GL=TRUE`
+ * `WITH_IPF=TRUE`
  * `ARCH=(win32|win64|linux)`
 
-For example, for a debug build, use:
+For example, for a linux debug build, use:
 
 `make DEBUG=TRUE`
 
@@ -34,15 +35,14 @@ Alternatively, the debug target also work:
 
 To build a debian package on Debian/Ubuntu distributions install the dependencies as mentioned above and the dpkg-dev package:
 
-`sudo apt-get install dpkg-dev`
+`sudo apt-get install dpkg-dev pbuilder`
 
-Then build the package with the following command:
+Then, to create a debian package:
 
-`dpkg-buildpackage -rfakeroot -uc -us`
-
-After installation of the package the users should copy the /etc/cap32.cfg file to their homedirectory with the following command:
-
-`cp /etc/cap32.cfg .cap32.cfg`
+ * fill in the required version in the debian/changelog file
+ * compile with 'make VERSION=<my_version_string>
+ * go to release/cap32_linux/caprice32-<version>/debian
+ * execute 'debuild -us -uc --lintian-opts --profile debian' or 'pdebuild' if you want to run in a chrooted env. 
 
 #### Windows target:
 
@@ -86,8 +86,6 @@ Then build Caprice with WITH_IPF:
 You can then run an IPF file as you would do for a DSK file:
 
 `./cap32 disk.ipf`
-
-Note that zip file are not yet supported.
 
 #### On Windows
 
