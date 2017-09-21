@@ -376,7 +376,7 @@ bool CapriceOptions::HandleMessage(CMessage* pMessage)
           break;
         }
 
-      case CMessage::CTRL_VALUECHANGE: // -fallthrough
+      case CMessage::CTRL_VALUECHANGE:
         if (pMessage->Destination() == this) {
           if (pMessage->Source() == m_pNavigationBar) {
             switch (m_pNavigationBar->getSelectedIndex()) {
@@ -407,6 +407,7 @@ bool CapriceOptions::HandleMessage(CMessage* pMessage)
             }
           }
         }
+	[[gnu::fallthrough]];
       case CMessage::CTRL_VALUECHANGING:
         if (pMessage->Destination() == m_pGroupBoxTabGeneral) {
           // Update the CPC speed %
