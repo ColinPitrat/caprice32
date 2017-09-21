@@ -32,31 +32,31 @@ namespace wGui
 {
 
 CDropDown::CDropDown(const CRect& WindowRect, CWindow* pParent, bool bAllowEdit, unsigned int iItemHeight, CFontEngine* pFontEngine) :
-	CWindow(WindowRect, pParent),
-	m_bAllowEdit(bAllowEdit)
+  CWindow(WindowRect, pParent),
+  m_bAllowEdit(bAllowEdit)
 {
   m_pCViewAncestor = GetView();
-	m_pEditBox = new CEditBox(CRect(0, 0, m_WindowRect.Width() - m_WindowRect.Height(), m_WindowRect.Height()), this, pFontEngine);
-	if (!m_bAllowEdit)
-	{
-		m_pEditBox->SetReadOnly(true);
-		// Override the normal read-only BG color
-		m_pEditBox->SetBackgroundColor(COLOR_WHITE);
-	}
+  m_pEditBox = new CEditBox(CRect(0, 0, m_WindowRect.Width() - m_WindowRect.Height(), m_WindowRect.Height()), this, pFontEngine);
+  if (!m_bAllowEdit)
+  {
+    m_pEditBox->SetReadOnly(true);
+    // Override the normal read-only BG color
+    m_pEditBox->SetBackgroundColor(COLOR_WHITE);
+  }
 
-	m_pListBox = new CListBox(CRect(0, m_WindowRect.Height(), m_WindowRect.Width(), m_WindowRect.Height() + iItemHeight * 5 + 1),
-		this, true, iItemHeight, pFontEngine);
-	m_pListBox->SetVisible(false);
-	m_pListBox->SetDropDown(this);
+  m_pListBox = new CListBox(CRect(0, m_WindowRect.Height(), m_WindowRect.Width(), m_WindowRect.Height() + iItemHeight * 5 + 1),
+                            this, true, iItemHeight, pFontEngine);
+  m_pListBox->SetVisible(false);
+  m_pListBox->SetDropDown(this);
 
-	m_pDropButton = new CPictureButton(
-		CRect(m_WindowRect.Width() - m_WindowRect.Height() + 1, 0, m_WindowRect.Width(), m_WindowRect.Height()),
-		this, CwgBitmapResourceHandle(WGRES_DOWN_ARROW_BITMAP));
-	CMessageServer::Instance().RegisterMessageClient(this, CMessage::KEYBOARD_KEYDOWN);
-	CMessageServer::Instance().RegisterMessageClient(this, CMessage::MOUSE_BUTTONDOWN);
-	CMessageServer::Instance().RegisterMessageClient(this, CMessage::CTRL_SINGLELCLICK);
-	CMessageServer::Instance().RegisterMessageClient(this, CMessage::CTRL_VALUECHANGE);
-	Draw();
+  m_pDropButton = new CPictureButton(
+      CRect(m_WindowRect.Width() - m_WindowRect.Height() + 1, 0, m_WindowRect.Width(), m_WindowRect.Height()),
+      this, CwgBitmapResourceHandle(WGRES_DOWN_ARROW_BITMAP));
+  CMessageServer::Instance().RegisterMessageClient(this, CMessage::KEYBOARD_KEYDOWN);
+  CMessageServer::Instance().RegisterMessageClient(this, CMessage::MOUSE_BUTTONDOWN);
+  CMessageServer::Instance().RegisterMessageClient(this, CMessage::CTRL_SINGLELCLICK);
+  CMessageServer::Instance().RegisterMessageClient(this, CMessage::CTRL_VALUECHANGE);
+  Draw();
 }
 
 
@@ -74,41 +74,41 @@ CDropDown::~CDropDown()
 
 void CDropDown::SetListboxHeight(int iItemCount)
 {
-	m_pListBox->SetWindowRect(
-		CRect(0, m_WindowRect.Height(), m_WindowRect.Width(), m_WindowRect.Height() + m_pListBox->GetItemHeight() * iItemCount + 1));
+  m_pListBox->SetWindowRect(
+      CRect(0, m_WindowRect.Height(), m_WindowRect.Width(), m_WindowRect.Height() + m_pListBox->GetItemHeight() * iItemCount + 1));
 }
 
 
 void CDropDown::SetWindowRect(const CRect& WindowRect)
 {
-	CWindow::SetWindowRect(WindowRect);
-	m_pListBox->SetWindowRect(CRect(0, m_WindowRect.Height(), m_WindowRect.Width(), m_WindowRect.Height() + m_pListBox->GetItemHeight() * 5 + 1));
-	m_pDropButton->SetWindowRect(CRect(m_WindowRect.Width() - m_WindowRect.Height() + 1, 0, m_WindowRect.Width(), m_WindowRect.Height()));
-	m_pEditBox->SetWindowRect(CRect(0, 0, m_WindowRect.Width() - m_WindowRect.Height(), m_WindowRect.Height()));
+  CWindow::SetWindowRect(WindowRect);
+  m_pListBox->SetWindowRect(CRect(0, m_WindowRect.Height(), m_WindowRect.Width(), m_WindowRect.Height() + m_pListBox->GetItemHeight() * 5 + 1));
+  m_pDropButton->SetWindowRect(CRect(m_WindowRect.Width() - m_WindowRect.Height() + 1, 0, m_WindowRect.Width(), m_WindowRect.Height()));
+  m_pEditBox->SetWindowRect(CRect(0, 0, m_WindowRect.Width() - m_WindowRect.Height(), m_WindowRect.Height()));
 }
 
 
 void CDropDown::SetWindowText(const std::string& sWindowText)
 {
-	m_pEditBox->SetWindowText(sWindowText);
+  m_pEditBox->SetWindowText(sWindowText);
 }
 
 
 std::string CDropDown::GetWindowText() const
 {
-	return m_pEditBox->GetWindowText();
+  return m_pEditBox->GetWindowText();
 }
 
 
 void CDropDown::MoveWindow(const CPoint& MoveDistance)
 {
-	CWindow::MoveWindow(MoveDistance);
-	m_pListBox->MoveWindow(MoveDistance);
+  CWindow::MoveWindow(MoveDistance);
+  m_pListBox->MoveWindow(MoveDistance);
 }
 
 void CDropDown::SetVisible(bool bVisible) {
-	CWindow::SetVisible(bVisible);
-	HideListBox();
+  CWindow::SetVisible(bVisible);
+  HideListBox();
 }
 
 void CDropDown::SetIsFocusable(bool bFocusable) {
@@ -117,108 +117,110 @@ void CDropDown::SetIsFocusable(bool bFocusable) {
 
 bool CDropDown::HandleMessage(CMessage* pMessage)
 {
-	bool bHandled = false;
-	CRect SubRect(m_WindowRect);
-	SubRect.Grow(-3);
+  bool bHandled = false;
+  CRect SubRect(m_WindowRect);
+  SubRect.Grow(-3);
 
-	if (pMessage)
-	{
-		switch(pMessage->MessageType())
-		{
-		case CMessage::KEYBOARD_KEYDOWN:
+  if (pMessage)
+  {
+    switch(pMessage->MessageType())
     {
-      CKeyboardMessage* pKeyboardMessage = dynamic_cast<CKeyboardMessage*>(pMessage);
-      if (pKeyboardMessage && pMessage->Destination() == this)
-      {
-        switch (pKeyboardMessage->Key)
+      case CMessage::KEYBOARD_KEYDOWN:
         {
-          case SDLK_UP:
-            SelectItem(GetSelectedIndex() - 1);
-						ShowListBox();
-            break;
-          case SDLK_DOWN:
-            SelectItem(GetSelectedIndex() + 1);
-						ShowListBox();
-            break;
-          case SDLK_RETURN:
-          case SDLK_SPACE:
-						HideListBox();
-            break;
-          case SDLK_TAB:
-						HideListBox();
-            // intentional fall through: the parent frame will change focused widget
-          default:
-            // Forward all key downs to parent
-            CMessageServer::Instance().QueueMessage(new CKeyboardMessage(CMessage::KEYBOARD_KEYDOWN, m_pParentWindow, this,
-                  pKeyboardMessage->ScanCode, pKeyboardMessage->Modifiers, pKeyboardMessage->Key, pKeyboardMessage->Unicode));
-            break;
+          CKeyboardMessage* pKeyboardMessage = dynamic_cast<CKeyboardMessage*>(pMessage);
+          if (pKeyboardMessage && pMessage->Destination() == this)
+          {
+            switch (pKeyboardMessage->Key)
+            {
+              case SDLK_UP:
+                SelectItem(GetSelectedIndex() - 1);
+                ShowListBox();
+                break;
+              case SDLK_DOWN:
+                SelectItem(GetSelectedIndex() + 1);
+                ShowListBox();
+                break;
+              case SDLK_RETURN:
+              case SDLK_SPACE:
+                HideListBox();
+                break;
+              case SDLK_TAB:
+                HideListBox();
+                [[gnu::fallthrough]]; // the parent frame will change focused widget
+              default:
+                // Forward all key downs to parent
+                CMessageServer::Instance().QueueMessage(
+                    new CKeyboardMessage(CMessage::KEYBOARD_KEYDOWN, m_pParentWindow, this,
+                                         pKeyboardMessage->ScanCode, pKeyboardMessage->Modifiers,
+                                         pKeyboardMessage->Key, pKeyboardMessage->Unicode));
+                break;
+            }
+          }
+          break;
         }
-      }
-      break;
+      case CMessage::MOUSE_BUTTONDOWN:
+        {
+          CMouseMessage* pMouseMessage = dynamic_cast<CMouseMessage*>(pMessage);
+          if (pMouseMessage->Button == CMouseMessage::LEFT)
+          {
+            if (m_pListBox->IsVisible() &&
+                m_pDropButton->GetWindowRect().SizeRect().HitTest(m_pDropButton->ViewToWindow(pMouseMessage->Point)) != CRect::RELPOS_INSIDE &&
+                m_pListBox->GetWindowRect().SizeRect().HitTest(m_pListBox->ViewToWindow(pMouseMessage->Point)) != CRect::RELPOS_INSIDE)
+            {
+              HideListBox();
+            }
+          }
+          break;
+        }
+      case CMessage::CTRL_SINGLELCLICK:
+        {
+          if (pMessage->Destination() == this)
+          {
+            if (pMessage->Source() == m_pDropButton)
+            {
+              if (m_pListBox->IsVisible())
+              {
+                HideListBox();
+              }
+              else
+              {
+                ShowListBox();
+              }
+              bHandled = true;
+            }
+          }
+          break;
+        }
+      case CMessage::CTRL_VALUECHANGE:
+        {
+          TIntMessage* pCtrlMessage = dynamic_cast<TIntMessage*>(pMessage);
+          if (pCtrlMessage && pMessage->Destination() == this)
+          {
+            if (pCtrlMessage->Source() == m_pListBox)
+            {
+              const SListItem& ListItem = m_pListBox->GetItem(pCtrlMessage->Value());
+              SetWindowText(ListItem.sItemText);
+              HideListBox();
+              CMessageServer::Instance().QueueMessage(new TIntMessage(CMessage::CTRL_VALUECHANGE, m_pParentWindow, this, 0));
+              bHandled = true;
+            }
+            else if (pCtrlMessage->Source() == m_pEditBox)
+            {
+              m_pListBox->SetAllSelections(false);
+              HideListBox();
+              CMessageServer::Instance().QueueMessage(new TIntMessage(CMessage::CTRL_VALUECHANGE, m_pParentWindow, this, 0));
+              bHandled = true;
+            }
+          }
+          break;
+        }
+      default :
+        bHandled = CWindow::HandleMessage(pMessage);
+        break;
     }
-		case CMessage::MOUSE_BUTTONDOWN:
-		{
-			CMouseMessage* pMouseMessage = dynamic_cast<CMouseMessage*>(pMessage);
-			if (pMouseMessage->Button == CMouseMessage::LEFT)
-			{
-				if (m_pListBox->IsVisible() &&
-					m_pDropButton->GetWindowRect().SizeRect().HitTest(m_pDropButton->ViewToWindow(pMouseMessage->Point)) != CRect::RELPOS_INSIDE &&
-					m_pListBox->GetWindowRect().SizeRect().HitTest(m_pListBox->ViewToWindow(pMouseMessage->Point)) != CRect::RELPOS_INSIDE)
-				{
-					HideListBox();
-				}
-			}
-			break;
-		}
-		case CMessage::CTRL_SINGLELCLICK:
-		{
-			if (pMessage->Destination() == this)
-			{
-				if (pMessage->Source() == m_pDropButton)
-				{
-					if (m_pListBox->IsVisible())
-					{
-						HideListBox();
-					}
-					else
-					{
-						ShowListBox();
-					}
-					bHandled = true;
-				}
-			}
-			break;
-		}
-		case CMessage::CTRL_VALUECHANGE:
-		{
-			TIntMessage* pCtrlMessage = dynamic_cast<TIntMessage*>(pMessage);
-			if (pCtrlMessage && pMessage->Destination() == this)
-			{
-				if (pCtrlMessage->Source() == m_pListBox)
-				{
-					const SListItem& ListItem = m_pListBox->GetItem(pCtrlMessage->Value());
-					SetWindowText(ListItem.sItemText);
-					HideListBox();
-					CMessageServer::Instance().QueueMessage(new TIntMessage(CMessage::CTRL_VALUECHANGE, m_pParentWindow, this, 0));
-					bHandled = true;
-				}
-				else if (pCtrlMessage->Source() == m_pEditBox)
-				{
-					m_pListBox->SetAllSelections(false);
-					HideListBox();
-					CMessageServer::Instance().QueueMessage(new TIntMessage(CMessage::CTRL_VALUECHANGE, m_pParentWindow, this, 0));
-					bHandled = true;
-				}
-			}
-			break;
-		}
-		default :
-			bHandled = CWindow::HandleMessage(pMessage);
-			break;
-		}
-	}
+  }
 
-	return bHandled;
+  return bHandled;
 }
 
 int CDropDown::GetSelectedIndex() {
@@ -243,29 +245,28 @@ void CDropDown::SelectItem(unsigned int iItemIndex) {
 
 void CDropDown::ShowListBox()
 {
-	if (!m_pListBox->IsVisible())
-	{
-		if (m_pCViewAncestor)
-		{
-			m_pCViewAncestor->SetFloatingWindow(m_pListBox);
-		}
-		m_pListBox->SetVisible(true);
-	}
+  if (!m_pListBox->IsVisible())
+  {
+    if (m_pCViewAncestor)
+    {
+      m_pCViewAncestor->SetFloatingWindow(m_pListBox);
+    }
+    m_pListBox->SetVisible(true);
+  }
 }
 
 
 void CDropDown::HideListBox()
 {
-	if (m_pListBox->IsVisible())
-	{
-		m_pListBox->SetVisible(false);
-		if (m_pCViewAncestor && m_pCViewAncestor->GetFloatingWindow() == m_pListBox)
-		{
-			m_pCViewAncestor->SetFloatingWindow(nullptr);
-		}
-	}
+  if (m_pListBox->IsVisible())
+  {
+    m_pListBox->SetVisible(false);
+    if (m_pCViewAncestor && m_pCViewAncestor->GetFloatingWindow() == m_pListBox)
+    {
+      m_pCViewAncestor->SetFloatingWindow(nullptr);
+    }
+  }
 }
 
 }
-
 
