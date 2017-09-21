@@ -792,8 +792,8 @@ bool CTextBox::HandleMessage(CMessage* pMessage)  // virtual
 					m_bScrollToCursor = true;  // a key was pressed, so we need to make sure that the cursor is visible
 					Draw();
 				}
-				break;
 			}
+			break;
 		case CMessage::CTRL_VALUECHANGE:
 		case CMessage::CTRL_VALUECHANGING:
 		{
