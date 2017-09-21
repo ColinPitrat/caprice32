@@ -407,7 +407,7 @@ bool CapriceOptions::HandleMessage(CMessage* pMessage)
             }
           }
         }
-#if __GNUC__ > 7
+#if __GNUC__ >= 7
 	[[gnu::fallthrough]];
 #endif
       case CMessage::CTRL_VALUECHANGING:
