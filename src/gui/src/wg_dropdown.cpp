@@ -146,7 +146,9 @@ bool CDropDown::HandleMessage(CMessage* pMessage)
                 break;
               case SDLK_TAB:
                 HideListBox();
+#if __GNUC__ > 7
                 [[gnu::fallthrough]]; // the parent frame will change focused widget
+#endif
               default:
                 // Forward all key downs to parent
                 CMessageServer::Instance().QueueMessage(
