@@ -288,7 +288,7 @@ bool CapriceLoadSave::MatchCurrentFileSpec(const char* filename)
   for(const auto &ext : m_fileSpec) {
     size_t lenFileName = strlen(filename);
     if (lenFileName < ext.size()) continue;
-    if (strncmp(&(filename[lenFileName-ext.size()]), ext.c_str(), ext.size()) == 0) {
+    if (strncasecmp(&(filename[lenFileName-ext.size()]), ext.c_str(), ext.size()) == 0) {
       return true;
     }
   }
