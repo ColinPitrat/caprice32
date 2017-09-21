@@ -407,7 +407,7 @@ bool CapriceOptions::HandleMessage(CMessage* pMessage)
             }
           }
         }
-        // Note that there is no 'break;' here !
+	// -fallthrough
       case CMessage::CTRL_VALUECHANGING:
         if (pMessage->Destination() == m_pGroupBoxTabGeneral) {
           // Update the CPC speed %
