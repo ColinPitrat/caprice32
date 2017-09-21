@@ -127,41 +127,42 @@ bool CToolTip::HandleMessage(CMessage* pMessage)
 		switch(pMessage->MessageType())
 		{
 			case CMessage::CTRL_TIMER:
-			{
-				wGui::TIntMessage* pTimerMessage = dynamic_cast<wGui::TIntMessage*>(pMessage);
-				if (pTimerMessage && pMessage->Destination() == this)
 				{
-					// Timer has expired, so it's time to show the tooltip
-					ShowTip(m_LastMousePosition + CPoint(-6, 18));
-					bHandled = true;
+					wGui::TIntMessage* pTimerMessage = dynamic_cast<wGui::TIntMessage*>(pMessage);
+					if (pTimerMessage && pMessage->Destination() == this)
+					{
+						// Timer has expired, so it's time to show the tooltip
+						ShowTip(m_LastMousePosition + CPoint(-6, 18));
+						bHandled = true;
+					}
+					break;
 				}
+			case CMessage::MOUSE_MOVE:
+				{
+					// We don't want to mess with the underlying control, so don't trap any MOUSE_MOVE messages
+					CMouseMessage* pMouseMessage = dynamic_cast<CMouseMessage*>(pMessage);
+					if (pMouseMessage)
+					{
+						m_LastMousePosition = pMouseMessage->Point;
+						m_pTimer->StopTimer();
+						if (IsVisible())
+						{
+							HideTip();
+						}
+						CView* pView = GetView();
+						bool bHitFloating = pView && pView->GetFloatingWindow() && pView->GetFloatingWindow()->HitTest(pMouseMessage->Point) &&
+								pView->GetFloatingWindow() != m_pParentWindow;
+						if (m_pParentWindow->GetWindowRect().SizeRect().HitTest(
+								m_pParentWindow->ViewToWindow(m_LastMousePosition)) == CRect::RELPOS_INSIDE && !bHitFloating)
+						{
+							m_pTimer->StartTimer(1000);
+						}
+					}
+					break;
+				}
+			default :
+				bHandled = CWindow::HandleMessage(pMessage);
 				break;
-			}
-		case CMessage::MOUSE_MOVE:
-		{
-			// We don't want to mess with the underlying control, so don't trap any MOUSE_MOVE messages
-			CMouseMessage* pMouseMessage = dynamic_cast<CMouseMessage*>(pMessage);
-			if (pMouseMessage)
-			{
-				m_LastMousePosition = pMouseMessage->Point;
-				m_pTimer->StopTimer();
-				if (IsVisible())
-				{
-					HideTip();
-				}
-				CView* pView = GetView();
-				bool bHitFloating = pView && pView->GetFloatingWindow() && pView->GetFloatingWindow()->HitTest(pMouseMessage->Point) &&
-					pView->GetFloatingWindow() != m_pParentWindow;
-				if (m_pParentWindow->GetWindowRect().SizeRect().HitTest(
-					m_pParentWindow->ViewToWindow(m_LastMousePosition)) == CRect::RELPOS_INSIDE && !bHitFloating)
-				{
-					m_pTimer->StartTimer(1000);
-				}
-			}
-		}
-		default :
-			bHandled = CWindow::HandleMessage(pMessage);
-			break;
 		}
 	}
 
