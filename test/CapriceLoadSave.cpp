@@ -66,3 +66,12 @@ TEST_F(CapriceLoadSaveTest, MatchCurrentFileSpecSupportsVariousExtensionSizes)
   ASSERT_TRUE(cls->MatchCurrentFileSpec("test.nodot"));
   ASSERT_FALSE(cls->MatchCurrentFileSpec("dot"));
 }
+
+TEST_F(CapriceLoadSaveTest, MatchCurrentFileSpecIsCaseInsensitive) {
+  std::list<std::string> fileSpec = { ".dsk" };
+  SetFileSpec(fileSpec);
+
+  ASSERT_TRUE(cls->MatchCurrentFileSpec("test.dsk"));
+  ASSERT_TRUE(cls->MatchCurrentFileSpec("TEST.DSK"));
+  ASSERT_TRUE(cls->MatchCurrentFileSpec("test.DsK"));
+}
