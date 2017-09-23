@@ -5,6 +5,7 @@
 #include "cap32.h"
 #include "slotshandler.h"
 #include "cartridge.h"
+#include "stringutils.h"
 
 #include <iostream>
 #include <sys/types.h>
@@ -28,7 +29,7 @@ extern t_drive driveB;
 namespace wGui {
 
 CapriceLoadSave::CapriceLoadSave(const CRect& WindowRect, CWindow* pParent, CFontEngine* pFontEngine) :
-	CFrame(WindowRect, pParent, pFontEngine, "Load / Save", false)
+  CFrame(WindowRect, pParent, pFontEngine, "Load / Save", false)
 {
   SetModal(true);
   // Make this window listen to incoming CTRL_VALUECHANGE messages (used for updating drop down values)
@@ -90,12 +91,12 @@ CapriceLoadSave::~CapriceLoadSave() = default;
 
 bool CapriceLoadSave::HandleMessage(CMessage* pMessage)
 {
-	bool bHandled = false;
+  bool bHandled = false;
 
-	if (pMessage)
-	{
-		switch(pMessage->MessageType())
-		{
+  if (pMessage)
+  {
+    switch(pMessage->MessageType())
+    {
       case CMessage::CTRL_SINGLELCLICK:
         {
           if (pMessage->Destination() == this)
@@ -247,7 +248,7 @@ bool CapriceLoadSave::HandleMessage(CMessage* pMessage)
           } else {
             m_pFileNameValue->SetWindowText(fn);
           }
-				}
+        }
         break;
 
       default :
@@ -257,7 +258,7 @@ bool CapriceLoadSave::HandleMessage(CMessage* pMessage)
   if (!bHandled) {
     bHandled = CFrame::HandleMessage(pMessage);
   }
-	return bHandled;
+  return bHandled;
 }
 
 std::string CapriceLoadSave::simplifyDirPath(std::string path)
@@ -325,8 +326,8 @@ void CapriceLoadSave::UpdateFilesList()
     if(closedir(dp) != 0) {
       std::cerr << "Could not close directory: " << strerror(errno) << std::endl;
     }
-    std::sort(directories.begin(), directories.end());
-    std::sort(files.begin(), files.end());
+    std::sort(directories.begin(), directories.end(), stringutils::caseInsensitiveCompare);
+    std::sort(files.begin(), files.end(), stringutils::caseInsensitiveCompare);
     for(const auto &directory : directories) {
       m_pFilesList->AddItem(SListItem(directory));
     }
