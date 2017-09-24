@@ -1668,9 +1668,13 @@ void loadConfiguration (t_CPC &CPC, const std::string& configFilename)
    CPC.kbd_layout = conf.getStringValue("control", "kbd_layout", "keymap_us.map");
 
    CPC.max_tracksize = conf.getIntValue("file", "max_track_size", 6144-154);
+   CPC.current_snap_path =
    CPC.snap_path = conf.getStringValue("file", "snap_path", appPath + "/snap/");
+   CPC.current_cart_path =
    CPC.cart_path = conf.getStringValue("file", "cart_path", appPath + "/cart/");
+   CPC.current_dsk_path =
    CPC.dsk_path = conf.getStringValue("file", "dsk_path", appPath + "/disk/");
+   CPC.current_tape_path =
    CPC.tape_path = conf.getStringValue("file", "tape_path", appPath + "/tape/");
 
    int iFmt = FIRST_CUSTOM_DISK_FORMAT;
