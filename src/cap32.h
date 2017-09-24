@@ -244,6 +244,7 @@ typedef struct {
    void (*scr_prerenderbord)();
    void (*scr_prerendersync)();
    bool scr_is_ogl;
+   bool scr_gui_is_currently_on;
 
    unsigned int snd_enabled;
    unsigned int snd_playback_rate;

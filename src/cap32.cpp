@@ -1459,6 +1459,7 @@ int video_init ()
    CPC.scr_line_offs = CPC.scr_bps * dwYScale;
    CPC.scr_pos =
    CPC.scr_base = static_cast<dword *>(back_surface->pixels); // memory address of back buffer
+   CPC.scr_gui_is_currently_on = false;
 
    vid_plugin->unlock();
 
@@ -1802,6 +1803,7 @@ void showVKeyboard()
 {
   // Activate virtual keyboard
   audio_pause();
+  CPC.scr_gui_is_currently_on = true;
   SDL_ShowCursor(SDL_ENABLE);
   // guiBackSurface will allow the GUI to capture the current frame
   SDL_Surface* guiBackSurface(SDL_CreateRGBSurface(SDL_SWSURFACE, back_surface->w, back_surface->h, 32, 0x000000FF, 0x0000FF00, 0x00FF0000, 0x00000000));
@@ -1822,6 +1824,7 @@ void showVKeyboard()
   // Clear SDL surface:
   SDL_FillRect(back_surface, nullptr, SDL_MapRGB(back_surface->format, 0, 0, 0));
   SDL_ShowCursor(SDL_DISABLE);
+  CPC.scr_gui_is_currently_on = false;
   audio_resume();
 }
 
@@ -1831,6 +1834,7 @@ void showGui()
 {
   // Activate gui
   audio_pause();
+  CPC.scr_gui_is_currently_on = true;
   SDL_ShowCursor(SDL_ENABLE);
   // guiBackSurface will allow the GUI to capture the current frame
   SDL_Surface* guiBackSurface(SDL_CreateRGBSurface(SDL_SWSURFACE, back_surface->w, back_surface->h, 32, 0x000000FF, 0x0000FF00, 0x00FF0000, 0x00000000));
@@ -1849,6 +1853,7 @@ void showGui()
   // Clear SDL surface:
   SDL_FillRect(back_surface, nullptr, SDL_MapRGB(back_surface->format, 0, 0, 0));
   SDL_ShowCursor(SDL_DISABLE);
+  CPC.scr_gui_is_currently_on = false;
   audio_resume();
 }
 
