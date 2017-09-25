@@ -67,6 +67,7 @@ GIT_HASH = $(shell git rev-parse --verify HEAD)
 COMMON_CFLAGS += -DHASH=\"$(GIT_HASH)\"
 endif
 
+CLANG_FORMAT=clang-format
 CLANG_TIDY=clang-tidy-3.8
 CLANG_CHECKS=modernize-*,performance-*,misc-*,-misc-definitions-in-headers,readability-*,-readability-implicit-bool-cast,-readability-braces-around-statements,-readability-function-size
 
@@ -81,10 +82,12 @@ GROFF_DOC:=doc/man6/cap32.6
 MAIN:=$(OBJDIR)/main.o
 
 SOURCES:=$(shell find $(SRCDIR) -name \*.cpp)
+HEADERS:=$(shell find $(SRCDIR) -name \*.h)
 DEPENDS:=$(foreach file,$(SOURCES:.cpp=.d),$(shell echo "$(OBJDIR)/$(file)"))
 OBJECTS:=$(DEPENDS:.d=.o)
 
 TEST_SOURCES:=$(shell find $(TSTDIR) -name \*.cpp)
+TEST_HEADERS:=$(shell find $(TSTDIR) -name \*.h)
 TEST_DEPENDS:=$(foreach file,$(TEST_SOURCES:.cpp=.d),$(shell echo "$(OBJDIR)/$(file)"))
 TEST_OBJECTS:=$(TEST_DEPENDS:.d=.o)
 
@@ -248,6 +251,12 @@ endif
 
 clang-tidy:
 	if $(CLANG_TIDY) -checks=-*,$(CLANG_CHECKS) $(SOURCES) -header-filter=src/* -- $(COMMON_CFLAGS) | grep "."; then false; fi
+
+clang-format:
+	./check_clang_format.sh $(CLANG_FORMAT) "-style=Google" $(SOURCES) $(TEST_SOURCES) $(HEADERS) $(TEST_HEADERS)
+
+fix-clang-format:
+	$(CLANG_FORMAT) -style=Google -i $(SOURCES) $(TEST_SOURCES) $(HEADERS) $(TEST_HEADERS)
 
 clean:
 	rm -rf obj/ release/ .pc/
