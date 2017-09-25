@@ -39,7 +39,6 @@ CapriceLoadSave::CapriceLoadSave(const CRect& WindowRect, CWindow* pParent, CFon
   // File type (.SNA, .DSK, .TAP, .VOC)
   m_pTypeLabel = new CLabel(          CPoint(15, 25),             this, "File type: ");
   m_pTypeValue = new CDropDown( CRect(CPoint(80, 20), 150, 20),    this, false);
-  m_pTypeValue->AddItem(SListItem("Snapshot (.sna)"));
 #ifndef WITH_IPF
   m_pTypeValue->AddItem(SListItem("Drive A (.dsk)"));
   m_pTypeValue->AddItem(SListItem("Drive B (.dsk)"));
@@ -47,12 +46,13 @@ CapriceLoadSave::CapriceLoadSave(const CRect& WindowRect, CWindow* pParent, CFon
   m_pTypeValue->AddItem(SListItem("Drive A (.dsk/.ipf)"));
   m_pTypeValue->AddItem(SListItem("Drive B (.dsk/.ipf)"));
 #endif
+  m_pTypeValue->AddItem(SListItem("Snapshot (.sna)"));
   m_pTypeValue->AddItem(SListItem("Tape (.cdt/.voc)"));
   m_pTypeValue->AddItem(SListItem("Cartridge (.cpr)"));
   m_pTypeValue->SetListboxHeight(5);
   m_pTypeValue->SelectItem(0);
   m_pTypeValue->SetIsFocusable(true);
-  m_fileSpec = { ".sna", ".zip" };
+  m_fileSpec = { ".dsk", ".zip" };
 
   // Action: load / save
   m_pActionLabel = new CLabel(          CPoint(15, 55),             this, "Action: ");
@@ -66,7 +66,7 @@ CapriceLoadSave::CapriceLoadSave(const CRect& WindowRect, CWindow* pParent, CFon
   // Directory
   m_pDirectoryLabel = new CLabel(          CPoint(15, 85),             this, "Directory: ");
   m_pDirectoryValue = new CEditBox( CRect( CPoint(80, 80), 150, 20),    this);
-  m_pDirectoryValue->SetWindowText(simplifyDirPath(CPC.snap_path));
+  m_pDirectoryValue->SetWindowText(simplifyDirPath(CPC.current_dsk_path));
   m_pDirectoryValue->SetReadOnly(true);
 
   // File list
@@ -110,25 +110,37 @@ bool CapriceLoadSave::HandleMessage(CMessage* pMessage)
               bool actionDone = false;
               std::string filename = m_pFileNameValue->GetWindowText();
               if(!filename.empty()) {
-                filename = m_pDirectoryValue->GetWindowText() + '/' + filename;
+                std::string directory = m_pDirectoryValue->GetWindowText();
+                filename = directory + '/' + filename;
                 switch (m_pActionValue->GetSelectedIndex()) {
                   case 0: // Load
                     {
                       DRIVE drive;
                       switch (m_pTypeValue->GetSelectedIndex()) {
-                        case 1: // Drive A
+                        case 0: // Drive A
                           drive = DSK_A;
                           actionDone = true;
+                          CPC.current_dsk_path = directory;
                           break;
-                        case 2: // Drive B
+                        case 1: // Drive B
                           drive = DSK_B;
                           actionDone = true;
+                          CPC.current_dsk_path = directory;
                           break;
-                        case 0: // Snapshot
+                        case 2: // Snapshot
+                          drive = OTHER;
+                          actionDone = true;
+                          CPC.current_snap_path = directory;
+                          break;
                         case 3: // Tape
+                          drive = OTHER;
+                          actionDone = true;
+                          CPC.current_tape_path = directory;
+                          break;
                         case 4: // Cartridge
                           drive = OTHER;
                           actionDone = true;
+                          CPC.current_cart_path = directory;
                           break;
                       }
                       if (actionDone) {
@@ -142,19 +154,19 @@ bool CapriceLoadSave::HandleMessage(CMessage* pMessage)
                   case 1: // Save
                     // TODO(cpitrat): Ensure the proper extension is present in the filename, otherwise add it.
                     switch (m_pTypeValue->GetSelectedIndex()) {
-                      case 0: // Snapshot
-                        std::cout << "Save snapshot: " << filename << std::endl;
-                        snapshot_save(filename);
-                        actionDone = true;
-                        break;
-                      case 1: // Drive A
+                      case 0: // Drive A
                         std::cout << "Save dsk A: " << filename << std::endl;
                         dsk_save(filename, &driveA);
                         actionDone = true;
                         break;
-                      case 2: // Drive B
+                      case 1: // Drive B
                         std::cout << "Save dsk B: " << filename << std::endl;
                         dsk_save(filename, &driveB);
+                        actionDone = true;
+                        break;
+                      case 2: // Snapshot
+                        std::cout << "Save snapshot: " << filename << std::endl;
+                        snapshot_save(filename);
                         actionDone = true;
                         break;
                       case 3: // Tape
@@ -204,13 +216,8 @@ bool CapriceLoadSave::HandleMessage(CMessage* pMessage)
         }
         if (pMessage->Destination() == m_pTypeValue) {
           switch (m_pTypeValue->GetSelectedIndex()) {
-            case 0: // Snapshot
-              m_pDirectoryValue->SetWindowText(simplifyDirPath(CPC.snap_path));
-              m_fileSpec = { ".sna", ".zip" };
-              UpdateFilesList();
-              break;
-            case 1: // Drive A
-              m_pDirectoryValue->SetWindowText(simplifyDirPath(CPC.dsk_path));
+            case 0: // Drive A
+              m_pDirectoryValue->SetWindowText(simplifyDirPath(CPC.current_dsk_path));
 #ifndef WITH_IPF
               m_fileSpec = { ".dsk", ".zip" };
 #else
@@ -218,18 +225,23 @@ bool CapriceLoadSave::HandleMessage(CMessage* pMessage)
 #endif
               UpdateFilesList();
               break;
-            case 2: // Drive B
-              m_pDirectoryValue->SetWindowText(simplifyDirPath(CPC.dsk_path));
+            case 1: // Drive B
+              m_pDirectoryValue->SetWindowText(simplifyDirPath(CPC.current_dsk_path));
               m_fileSpec = { ".dsk", ".zip" };
               UpdateFilesList();
               break;
+            case 2: // Snapshot
+              m_pDirectoryValue->SetWindowText(simplifyDirPath(CPC.current_snap_path));
+              m_fileSpec = { ".sna", ".zip" };
+              UpdateFilesList();
+              break;
             case 3: // Tape
-              m_pDirectoryValue->SetWindowText(simplifyDirPath(CPC.tape_path));
+              m_pDirectoryValue->SetWindowText(simplifyDirPath(CPC.current_tape_path));
               m_fileSpec = { ".cdt", ".voc", ".zip" };
               UpdateFilesList();
               break;
             case 4: // Cartridge
-              m_pDirectoryValue->SetWindowText(simplifyDirPath(CPC.cart_path));
+              m_pDirectoryValue->SetWindowText(simplifyDirPath(CPC.current_cart_path));
               m_fileSpec = { ".cpr", ".zip" };
               UpdateFilesList();
               break;

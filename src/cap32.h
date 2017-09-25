@@ -288,6 +288,11 @@ typedef struct {
    std::string rom_file[16];
    std::string rom_mf2;
 
+   std::string current_snap_path; // Last used snapshot path in the file dialog.
+   std::string current_cart_path; // Last used cartridge path in the file dialog.
+   std::string current_dsk_path;  // Last used disk path in the file dialog.
+   std::string current_tape_path; // Last used tape path in the file dialog.
+
    class InputMapper *InputMapper;
 } t_CPC;
 
