@@ -411,7 +411,7 @@ typedef struct {
          unsigned char _noise, _mixer, _ampa, _ampb, _ampc;
          unsigned short Envelope;
          unsigned char _envtype, _porta, portb;
-      } __attribute__((packed));
+      } __attribute__((packed, gcc_struct));
    } RegisterAY;
    int AmplitudeEnv;
    bool FirstPeriod;
