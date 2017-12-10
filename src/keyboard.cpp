@@ -467,7 +467,7 @@ const dword InputMapper::cpc_kbd[CPC_KEYBOARD_NUM][CPC_KEY_NUM] = {
 
 const std::map<const char, const CPC_KEYS> InputMapper::CPCkeysFromChars = {
     // Char to CPC keyboard translation
-	// TODO(sebhz): Need to map non ASCII chars present on the CPC keyboard - maybe by using their ISO-8859-1 code
+    // TODO(sebhz): Need to map non ASCII chars present on the CPC keyboard - maybe by using their ISO-8859-1 code
     { '&', CPC_AMPERSAND },
     { '#', CPC_HASH },
     { '"', CPC_DBLQUOTE },
@@ -569,148 +569,148 @@ const std::map<const char, const CPC_KEYS> InputMapper::CPCkeysFromChars = {
 };
 
 std::map<unsigned int, unsigned int> InputMapper::SDLkeysymFromCPCkeys_us = {
-	{ CPC_0,          SDLK_0 },
-    { CPC_1,          SDLK_1 },
-    { CPC_2,          SDLK_2 },
-    { CPC_3,          SDLK_3 },
-    { CPC_4,          SDLK_4 },
-    { CPC_5,          SDLK_5 },
-    { CPC_6,          SDLK_6 },
-    { CPC_7,          SDLK_7 },
-    { CPC_8,          SDLK_8 },
-    { CPC_9,          SDLK_9 },
-    { CPC_A,          SDLK_a | MOD_PC_SHIFT },
-    { CPC_B,          SDLK_b | MOD_PC_SHIFT },
-    { CPC_C,          SDLK_c | MOD_PC_SHIFT },
-    { CPC_D,          SDLK_d | MOD_PC_SHIFT },
-    { CPC_E,          SDLK_e | MOD_PC_SHIFT },
-    { CPC_F,          SDLK_f | MOD_PC_SHIFT },
-    { CPC_G,          SDLK_g | MOD_PC_SHIFT },
-    { CPC_H,          SDLK_h | MOD_PC_SHIFT },
-    { CPC_I,          SDLK_i | MOD_PC_SHIFT },
-    { CPC_J,          SDLK_j | MOD_PC_SHIFT },
-    { CPC_K,          SDLK_k | MOD_PC_SHIFT },
-    { CPC_L,          SDLK_l | MOD_PC_SHIFT },
-    { CPC_M,          SDLK_m | MOD_PC_SHIFT },
-    { CPC_N,          SDLK_n | MOD_PC_SHIFT },
-    { CPC_O,          SDLK_o | MOD_PC_SHIFT },
-    { CPC_P,          SDLK_p | MOD_PC_SHIFT },
-    { CPC_Q,          SDLK_q | MOD_PC_SHIFT },
-    { CPC_R,          SDLK_r | MOD_PC_SHIFT },
-    { CPC_S,          SDLK_s | MOD_PC_SHIFT },
-    { CPC_T,          SDLK_t | MOD_PC_SHIFT },
-    { CPC_U,          SDLK_u | MOD_PC_SHIFT },
-    { CPC_V,          SDLK_v | MOD_PC_SHIFT },
-    { CPC_W,          SDLK_w | MOD_PC_SHIFT },
-    { CPC_X,          SDLK_x | MOD_PC_SHIFT },
-    { CPC_Y,          SDLK_y | MOD_PC_SHIFT },
-    { CPC_Z,          SDLK_z | MOD_PC_SHIFT },
-    { CPC_a,          SDLK_a },
-    { CPC_b,          SDLK_b },
-    { CPC_c,          SDLK_c },
-    { CPC_d,          SDLK_d },
-    { CPC_e,          SDLK_e },
-    { CPC_f,          SDLK_f },
-    { CPC_g,          SDLK_g },
-    { CPC_h,          SDLK_h },
-    { CPC_i,          SDLK_i },
-    { CPC_j,          SDLK_j },
-    { CPC_k,          SDLK_k },
-    { CPC_l,          SDLK_l },
-    { CPC_m,          SDLK_m },
-    { CPC_n,          SDLK_n },
-    { CPC_o,          SDLK_o },
-    { CPC_p,          SDLK_p },
-    { CPC_q,          SDLK_q },
-    { CPC_r,          SDLK_r },
-    { CPC_s,          SDLK_s },
-    { CPC_t,          SDLK_t },
-    { CPC_u,          SDLK_u },
-    { CPC_v,          SDLK_v },
-    { CPC_w,          SDLK_w },
-    { CPC_x,          SDLK_x },
-    { CPC_y,          SDLK_y },
-    { CPC_z,          SDLK_z },
-    { CPC_AMPERSAND,  SDLK_7 | MOD_PC_SHIFT },
-    { CPC_ASTERISK,   SDLK_8 | MOD_PC_SHIFT },
-    { CPC_AT,         SDLK_2 | MOD_PC_SHIFT },
-    { CPC_BACKQUOTE,  SDLK_BACKQUOTE },
-    { CPC_BACKSLASH,  SDLK_BACKSLASH },
-    { CPC_CAPSLOCK,   SDLK_CAPSLOCK },
-    { CPC_CLR,        SDLK_DELETE },
-    { CPC_COLON,      SDLK_SEMICOLON | MOD_PC_SHIFT },
-    { CPC_COMMA,      SDLK_COMMA },
-    { CPC_CONTROL,    SDLK_LCTRL },
-    { CPC_COPY,       SDLK_LALT },
-    { CPC_CPY_DOWN,   SDLK_DOWN | MOD_PC_SHIFT },
-    { CPC_CPY_LEFT,   SDLK_LEFT | MOD_PC_SHIFT },
-    { CPC_CPY_RIGHT,  SDLK_RIGHT | MOD_PC_SHIFT },
-    { CPC_CPY_UP,     SDLK_UP | MOD_PC_SHIFT },
-    { CPC_CUR_DOWN,   SDLK_DOWN },
-    { CPC_CUR_LEFT,   SDLK_LEFT },
-    { CPC_CUR_RIGHT,  SDLK_RIGHT },
-    { CPC_CUR_UP,     SDLK_UP },
-    { CPC_CUR_HOMELN, SDLK_HOME },
-    { CPC_CUR_ENDLN,  SDLK_END },
-    { CPC_CUR_HOMEBL, SDLK_HOME | MOD_PC_CTRL },
-    { CPC_CUR_ENDBL,  SDLK_END | MOD_PC_CTRL },
-    { CPC_DBLQUOTE,   SDLK_QUOTE | MOD_PC_SHIFT },
-    { CPC_DEL,        SDLK_BACKSPACE },
-    { CPC_DOLLAR,     SDLK_4 | MOD_PC_SHIFT },
-    { CPC_ENTER,      SDLK_KP_ENTER },
-    { CPC_EQUAL,      SDLK_EQUALS },
-    { CPC_ESC,        SDLK_ESCAPE },
-    { CPC_EXCLAMATN,  SDLK_1 | MOD_PC_SHIFT },
-    { CPC_F0,         SDLK_KP0 },
-    { CPC_F1,         SDLK_KP1 },
-    { CPC_F2,         SDLK_KP2 },
-    { CPC_F3,         SDLK_KP3 },
-    { CPC_F4,         SDLK_KP4 },
-    { CPC_F5,         SDLK_KP5 },
-    { CPC_F6,         SDLK_KP6 },
-    { CPC_F7,         SDLK_KP7 },
-    { CPC_F8,         SDLK_KP8 },
-    { CPC_F9,         SDLK_KP9 },
-    { CPC_FPERIOD,    SDLK_KP_PERIOD },
-    { CPC_GREATER,    SDLK_PERIOD | MOD_PC_SHIFT },
-    { CPC_HASH,       SDLK_3 | MOD_PC_SHIFT },
-    { CPC_LBRACKET,   SDLK_LEFTBRACKET },
-    { CPC_LCBRACE,    SDLK_LEFTBRACKET | MOD_PC_SHIFT },
-    { CPC_LEFTPAREN,  SDLK_9 | MOD_PC_SHIFT },
-    { CPC_LESS,       SDLK_COMMA | MOD_PC_SHIFT },
-    { CPC_LSHIFT,     SDLK_LSHIFT },
-    { CPC_MINUS,      SDLK_MINUS },
-    { CPC_PERCENT,    SDLK_5 | MOD_PC_SHIFT },
-    { CPC_PERIOD,     SDLK_PERIOD },
-    { CPC_PIPE,       SDLK_BACKSLASH | MOD_PC_SHIFT },
-    { CPC_PLUS,       SDLK_EQUALS | MOD_PC_SHIFT },
-    { CPC_POUND,      0 },
-    { CPC_POWER,      SDLK_6 | MOD_PC_SHIFT },
-    { CPC_QUESTION,   SDLK_SLASH | MOD_PC_SHIFT },
-    { CPC_QUOTE,      SDLK_QUOTE },
-    { CPC_RBRACKET,   SDLK_RIGHTBRACKET },
-    { CPC_RCBRACE,    SDLK_RIGHTBRACKET | MOD_PC_SHIFT },
-    { CPC_RETURN,     SDLK_RETURN },
-    { CPC_RIGHTPAREN, SDLK_0 | MOD_PC_SHIFT },
-    { CPC_RSHIFT,     SDLK_RSHIFT },
-    { CPC_SEMICOLON,  SDLK_SEMICOLON },
-    { CPC_SLASH,      SDLK_SLASH },
-    { CPC_SPACE,      SDLK_SPACE },
-    { CPC_TAB,        SDLK_TAB },
-    { CPC_UNDERSCORE, SDLK_MINUS | MOD_PC_SHIFT },
-    { CAP32_EXIT,     SDLK_F10 },
-    { CAP32_FPS,      SDLK_F8 },
-    { CAP32_GUI,      SDLK_F1},
-    { CAP32_VKBD,     SDLK_F1 | MOD_PC_SHIFT },
-    { CAP32_FULLSCRN, SDLK_F2 },
-    { CAP32_SCRNSHOT, SDLK_F3 },
-    { CAP32_SNAPSHOT, SDLK_F3 | MOD_PC_SHIFT },
-    { CAP32_JOY,      SDLK_F7 },
-    { CAP32_MF2STOP,  SDLK_F6 },
-    { CAP32_RESET,    SDLK_F5 },
-    { CAP32_SPEED,    SDLK_F9 },
-    { CAP32_DEBUG,    SDLK_F12 },
-    { CAP32_TAPEPLAY, SDLK_F4 }
+  { CPC_0,          SDLK_0 },
+  { CPC_1,          SDLK_1 },
+  { CPC_2,          SDLK_2 },
+  { CPC_3,          SDLK_3 },
+  { CPC_4,          SDLK_4 },
+  { CPC_5,          SDLK_5 },
+  { CPC_6,          SDLK_6 },
+  { CPC_7,          SDLK_7 },
+  { CPC_8,          SDLK_8 },
+  { CPC_9,          SDLK_9 },
+  { CPC_A,          SDLK_a | MOD_PC_SHIFT },
+  { CPC_B,          SDLK_b | MOD_PC_SHIFT },
+  { CPC_C,          SDLK_c | MOD_PC_SHIFT },
+  { CPC_D,          SDLK_d | MOD_PC_SHIFT },
+  { CPC_E,          SDLK_e | MOD_PC_SHIFT },
+  { CPC_F,          SDLK_f | MOD_PC_SHIFT },
+  { CPC_G,          SDLK_g | MOD_PC_SHIFT },
+  { CPC_H,          SDLK_h | MOD_PC_SHIFT },
+  { CPC_I,          SDLK_i | MOD_PC_SHIFT },
+  { CPC_J,          SDLK_j | MOD_PC_SHIFT },
+  { CPC_K,          SDLK_k | MOD_PC_SHIFT },
+  { CPC_L,          SDLK_l | MOD_PC_SHIFT },
+  { CPC_M,          SDLK_m | MOD_PC_SHIFT },
+  { CPC_N,          SDLK_n | MOD_PC_SHIFT },
+  { CPC_O,          SDLK_o | MOD_PC_SHIFT },
+  { CPC_P,          SDLK_p | MOD_PC_SHIFT },
+  { CPC_Q,          SDLK_q | MOD_PC_SHIFT },
+  { CPC_R,          SDLK_r | MOD_PC_SHIFT },
+  { CPC_S,          SDLK_s | MOD_PC_SHIFT },
+  { CPC_T,          SDLK_t | MOD_PC_SHIFT },
+  { CPC_U,          SDLK_u | MOD_PC_SHIFT },
+  { CPC_V,          SDLK_v | MOD_PC_SHIFT },
+  { CPC_W,          SDLK_w | MOD_PC_SHIFT },
+  { CPC_X,          SDLK_x | MOD_PC_SHIFT },
+  { CPC_Y,          SDLK_y | MOD_PC_SHIFT },
+  { CPC_Z,          SDLK_z | MOD_PC_SHIFT },
+  { CPC_a,          SDLK_a },
+  { CPC_b,          SDLK_b },
+  { CPC_c,          SDLK_c },
+  { CPC_d,          SDLK_d },
+  { CPC_e,          SDLK_e },
+  { CPC_f,          SDLK_f },
+  { CPC_g,          SDLK_g },
+  { CPC_h,          SDLK_h },
+  { CPC_i,          SDLK_i },
+  { CPC_j,          SDLK_j },
+  { CPC_k,          SDLK_k },
+  { CPC_l,          SDLK_l },
+  { CPC_m,          SDLK_m },
+  { CPC_n,          SDLK_n },
+  { CPC_o,          SDLK_o },
+  { CPC_p,          SDLK_p },
+  { CPC_q,          SDLK_q },
+  { CPC_r,          SDLK_r },
+  { CPC_s,          SDLK_s },
+  { CPC_t,          SDLK_t },
+  { CPC_u,          SDLK_u },
+  { CPC_v,          SDLK_v },
+  { CPC_w,          SDLK_w },
+  { CPC_x,          SDLK_x },
+  { CPC_y,          SDLK_y },
+  { CPC_z,          SDLK_z },
+  { CPC_AMPERSAND,  SDLK_7 | MOD_PC_SHIFT },
+  { CPC_ASTERISK,   SDLK_8 | MOD_PC_SHIFT },
+  { CPC_AT,         SDLK_2 | MOD_PC_SHIFT },
+  { CPC_BACKQUOTE,  SDLK_BACKQUOTE },
+  { CPC_BACKSLASH,  SDLK_BACKSLASH },
+  { CPC_CAPSLOCK,   SDLK_CAPSLOCK },
+  { CPC_CLR,        SDLK_DELETE },
+  { CPC_COLON,      SDLK_SEMICOLON | MOD_PC_SHIFT },
+  { CPC_COMMA,      SDLK_COMMA },
+  { CPC_CONTROL,    SDLK_LCTRL },
+  { CPC_COPY,       SDLK_LALT },
+  { CPC_CPY_DOWN,   SDLK_DOWN | MOD_PC_SHIFT },
+  { CPC_CPY_LEFT,   SDLK_LEFT | MOD_PC_SHIFT },
+  { CPC_CPY_RIGHT,  SDLK_RIGHT | MOD_PC_SHIFT },
+  { CPC_CPY_UP,     SDLK_UP | MOD_PC_SHIFT },
+  { CPC_CUR_DOWN,   SDLK_DOWN },
+  { CPC_CUR_LEFT,   SDLK_LEFT },
+  { CPC_CUR_RIGHT,  SDLK_RIGHT },
+  { CPC_CUR_UP,     SDLK_UP },
+  { CPC_CUR_HOMELN, SDLK_HOME },
+  { CPC_CUR_ENDLN,  SDLK_END },
+  { CPC_CUR_HOMEBL, SDLK_HOME | MOD_PC_CTRL },
+  { CPC_CUR_ENDBL,  SDLK_END | MOD_PC_CTRL },
+  { CPC_DBLQUOTE,   SDLK_QUOTE | MOD_PC_SHIFT },
+  { CPC_DEL,        SDLK_BACKSPACE },
+  { CPC_DOLLAR,     SDLK_4 | MOD_PC_SHIFT },
+  { CPC_ENTER,      SDLK_KP_ENTER },
+  { CPC_EQUAL,      SDLK_EQUALS },
+  { CPC_ESC,        SDLK_ESCAPE },
+  { CPC_EXCLAMATN,  SDLK_1 | MOD_PC_SHIFT },
+  { CPC_F0,         SDLK_KP0 },
+  { CPC_F1,         SDLK_KP1 },
+  { CPC_F2,         SDLK_KP2 },
+  { CPC_F3,         SDLK_KP3 },
+  { CPC_F4,         SDLK_KP4 },
+  { CPC_F5,         SDLK_KP5 },
+  { CPC_F6,         SDLK_KP6 },
+  { CPC_F7,         SDLK_KP7 },
+  { CPC_F8,         SDLK_KP8 },
+  { CPC_F9,         SDLK_KP9 },
+  { CPC_FPERIOD,    SDLK_KP_PERIOD },
+  { CPC_GREATER,    SDLK_PERIOD | MOD_PC_SHIFT },
+  { CPC_HASH,       SDLK_3 | MOD_PC_SHIFT },
+  { CPC_LBRACKET,   SDLK_LEFTBRACKET },
+  { CPC_LCBRACE,    SDLK_LEFTBRACKET | MOD_PC_SHIFT },
+  { CPC_LEFTPAREN,  SDLK_9 | MOD_PC_SHIFT },
+  { CPC_LESS,       SDLK_COMMA | MOD_PC_SHIFT },
+  { CPC_LSHIFT,     SDLK_LSHIFT },
+  { CPC_MINUS,      SDLK_MINUS },
+  { CPC_PERCENT,    SDLK_5 | MOD_PC_SHIFT },
+  { CPC_PERIOD,     SDLK_PERIOD },
+  { CPC_PIPE,       SDLK_BACKSLASH | MOD_PC_SHIFT },
+  { CPC_PLUS,       SDLK_EQUALS | MOD_PC_SHIFT },
+  { CPC_POUND,      0 },
+  { CPC_POWER,      SDLK_6 | MOD_PC_SHIFT },
+  { CPC_QUESTION,   SDLK_SLASH | MOD_PC_SHIFT },
+  { CPC_QUOTE,      SDLK_QUOTE },
+  { CPC_RBRACKET,   SDLK_RIGHTBRACKET },
+  { CPC_RCBRACE,    SDLK_RIGHTBRACKET | MOD_PC_SHIFT },
+  { CPC_RETURN,     SDLK_RETURN },
+  { CPC_RIGHTPAREN, SDLK_0 | MOD_PC_SHIFT },
+  { CPC_RSHIFT,     SDLK_RSHIFT },
+  { CPC_SEMICOLON,  SDLK_SEMICOLON },
+  { CPC_SLASH,      SDLK_SLASH },
+  { CPC_SPACE,      SDLK_SPACE },
+  { CPC_TAB,        SDLK_TAB },
+  { CPC_UNDERSCORE, SDLK_MINUS | MOD_PC_SHIFT },
+  { CAP32_EXIT,     SDLK_F10 },
+  { CAP32_FPS,      SDLK_F8 },
+  { CAP32_GUI,      SDLK_F1},
+  { CAP32_VKBD,     SDLK_F1 | MOD_PC_SHIFT },
+  { CAP32_FULLSCRN, SDLK_F2 },
+  { CAP32_SCRNSHOT, SDLK_F3 },
+  { CAP32_SNAPSHOT, SDLK_F3 | MOD_PC_SHIFT },
+  { CAP32_JOY,      SDLK_F7 },
+  { CAP32_MF2STOP,  SDLK_F6 },
+  { CAP32_RESET,    SDLK_F5 },
+  { CAP32_SPEED,    SDLK_F9 },
+  { CAP32_DEBUG,    SDLK_F12 },
+  { CAP32_TAPEPLAY, SDLK_F4 }
 };
 
 const std::map<const std::string, const unsigned int> InputMapper::CPCkeysFromStrings = {
@@ -1142,71 +1142,71 @@ const std::map<const std::string, const unsigned int> InputMapper::SDLkeysFromSt
 // Last field is optional
 void InputMapper::process_cfg_line(char *line)
 {
-		unsigned int cpc_key = 0, sdl_key = 0;
+  unsigned int cpc_key = 0, sdl_key = 0;
 
-		char *pch = strtok(line, "\t");
-		if (pch == nullptr || pch[0] == '#')
-			return;
+  char *pch = strtok(line, "\t");
+  if (pch == nullptr || pch[0] == '#')
+    return;
 
-		if (CPCkeysFromStrings.count(pch) == 0) {
-			LOG_ERROR("Unknown CPC key " << pch << " found in mapping file. Ignoring it.");
-			return;
-		}
+  if (CPCkeysFromStrings.count(pch) == 0) {
+    LOG_ERROR("Unknown CPC key " << pch << " found in mapping file. Ignoring it.");
+    return;
+  }
 
-		for (unsigned int field=0; field < 3; field++) {
-			switch (field) {
-				case 0:
-					cpc_key = CPCkeysFromStrings.at(pch);
-					break;
-				case 1:
-				case 2:
-					if (SDLkeysFromStrings.count(pch) == 0) {
-						LOG_ERROR("Unknown SDL key or modifier " << pch << " found in mapping file. Ignoring it.");
-						return;
-					}
-					sdl_key |= SDLkeysFromStrings.at(pch);
-					break;
-				default:
-					break;
-			}
-			pch = strtok(nullptr, "\t");
-			if (pch == nullptr)
-				break;
-		}
-		SDLkeysymFromCPCkeys[cpc_key] = sdl_key;
-		return;
+  for (unsigned int field=0; field < 3; field++) {
+    switch (field) {
+      case 0:
+        cpc_key = CPCkeysFromStrings.at(pch);
+        break;
+      case 1:
+      case 2:
+        if (SDLkeysFromStrings.count(pch) == 0) {
+          LOG_ERROR("Unknown SDL key or modifier " << pch << " found in mapping file. Ignoring it.");
+          return;
+        }
+        sdl_key |= SDLkeysFromStrings.at(pch);
+        break;
+      default:
+        break;
+    }
+    pch = strtok(nullptr, "\t");
+    if (pch == nullptr)
+      break;
+  }
+  SDLkeysymFromCPCkeys[cpc_key] = sdl_key;
+  return;
 }
 
 #define MAX_LINE_LENGTH 80
 void InputMapper::init()
 {
-	std::string layout_file = CPC->resources_path + "/" + CPC->kbd_layout;
-	std::filebuf fb;
-	unsigned int sdl_moddedkey;
-	char line[MAX_LINE_LENGTH]; // sufficient for now ! TODO(sebhz): proper malloc'ing etc...
+  std::string layout_file = CPC->resources_path + "/" + CPC->kbd_layout;
+  std::filebuf fb;
+  unsigned int sdl_moddedkey;
+  char line[MAX_LINE_LENGTH]; // sufficient for now ! TODO(sebhz): proper malloc'ing etc...
 
-	if (is_directory(layout_file) || (fb.open(layout_file, std::ios::in) == nullptr)) {
-		SDLkeysymFromCPCkeys = SDLkeysymFromCPCkeys_us;
-	}
-	else {
-		std::istream is(&fb);
-		while (is.good()) {
-			is.getline(line, MAX_LINE_LENGTH);
-			process_cfg_line(line);
-		}
-		fb.close();
-	}
+  if (is_directory(layout_file) || (fb.open(layout_file, std::ios::in) == nullptr)) {
+    SDLkeysymFromCPCkeys = SDLkeysymFromCPCkeys_us;
+  }
+  else {
+    std::istream is(&fb);
+    while (is.good()) {
+      is.getline(line, MAX_LINE_LENGTH);
+      process_cfg_line(line);
+    }
+    fb.close();
+  }
 
-	for (const auto &mapping : SDLkeysymFromCPCkeys) {
-		CPCkeysFromSDLkeysym[mapping.second] = mapping.first;
-	}
+  for (const auto &mapping : SDLkeysymFromCPCkeys) {
+    CPCkeysFromSDLkeysym[mapping.second] = mapping.first;
+  }
 
-	for (const auto &mapping : CPCkeysFromChars) {
-		if (SDLkeysymFromCPCkeys.count(mapping.second) != 0) {
-			sdl_moddedkey = SDLkeysymFromCPCkeys[mapping.second];
-			SDLkeysFromChars[mapping.first] = std::make_pair(static_cast<SDLKey>(sdl_moddedkey & 0xffff), static_cast<SDLMod>(sdl_moddedkey >> 16));
-		}
-	}
+  for (const auto &mapping : CPCkeysFromChars) {
+    if (SDLkeysymFromCPCkeys.count(mapping.second) != 0) {
+      sdl_moddedkey = SDLkeysymFromCPCkeys[mapping.second];
+      SDLkeysFromChars[mapping.first] = std::make_pair(static_cast<SDLKey>(sdl_moddedkey & 0xffff), static_cast<SDLMod>(sdl_moddedkey >> 16));
+    }
+  }
 }
 
 dword InputMapper::CPCkeyFromKeysym(SDL_keysym keysym) {
@@ -1250,10 +1250,10 @@ std::list<SDL_Event> InputMapper::StringToEvents(std::string toTranslate) {
         int keycode = c;
         if (cap32_cmd) {
           keycode += MOD_EMU_KEY;
-		}
+        }
         // Lookup the SDL key corresponding to this emulator command
         sdl_keysym = SDLkeysymFromCPCkeys.find(keycode);
-		if (sdl_keysym != SDLkeysymFromCPCkeys.end()) {
+        if (sdl_keysym != SDLkeysymFromCPCkeys.end()) {
           key.key.keysym.sym = static_cast<SDLKey>(sdl_keysym->second & 0xffff);
           key.key.keysym.mod = static_cast<SDLMod>(sdl_keysym->second >> 16);
         }
@@ -1332,10 +1332,10 @@ dword InputMapper::CPCkeyFromJoystickButton(SDL_JoyButtonEvent jbutton)
                     break;
             }
             break;
-		default:
-			break;
-	}
-	return cpc_key;
+        default:
+            break;
+    }
+    return cpc_key;
 }
 
 void InputMapper::CPCkeyFromJoystickAxis(SDL_JoyAxisEvent jaxis, dword *cpc_key, bool &release)
@@ -1418,10 +1418,10 @@ void applyKeypress(dword cpc_key, byte keyboard_matrix[], bool pressed) {
             } else {
                 keyboard_matrix[0x27 >> 4] |= bit_values[0x27 & 7]; // make sure CONTROL key is released
             }
-		} else {
+        } else {
             keyboard_matrix[static_cast<byte>(cpc_key) >> 4] |= bit_values[static_cast<byte>(cpc_key) & 7]; // key has been released
             keyboard_matrix[0x25 >> 4] |= bit_values[0x25 & 7]; // make sure key is unSHIFTed
             keyboard_matrix[0x27 >> 4] |= bit_values[0x27 & 7]; // make sure CONTROL key is not held down
-		}
+        }
     }
 }
