@@ -1987,7 +1987,7 @@ int cap32_main (int argc, char **argv)
 
    while (!bolDone) {
       if(!virtualKeyboardEvents.empty() && nextVirtualEventFrameCount < dwFrameCountOverall) {
-        nextVirtualEventFrameCount = dwFrameCountOverall;
+        nextVirtualEventFrameCount = dwFrameCountOverall + 1; // Let CPC firmware debouncer time else it will eat repeated characters.
         SDL_PushEvent(&virtualKeyboardEvents.front());
         virtualKeyboardEvents.pop_front();
       }
