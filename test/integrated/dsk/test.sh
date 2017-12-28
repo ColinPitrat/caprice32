@@ -9,7 +9,7 @@ cd "$TSTDIR"
 touch "${LOGFILE}"
 
 # The CLS is here mostly to let time to the program to run
-$CAP32DIR/cap32 -c cap32.cfg -a CAP32_SCRNSHOT -a "run\"hello" -a "          " -a CAP32_EXIT hello.zip >> "${LOGFILE}" 2>&1
+$CAP32DIR/cap32 -c cap32.cfg -a CAP32_SCRNSHOT -a "         " -a "run\"hello" -a "                    " -a CAP32_EXIT hello.zip >> "${LOGFILE}" 2>&1
 
 if diff printer.dat expected.dat >> "${LOGFILE}"
 then

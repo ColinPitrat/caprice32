@@ -105,7 +105,7 @@ byte *pbTapeImage = nullptr;
 byte keyboard_matrix[16];
 
 std::list<SDL_Event> virtualKeyboardEvents;
-dword lastVirtualEventTicks;
+dword nextVirtualEventFrameCount, dwFrameCountOverall = 0;
 
 byte *membank_config[8][4];
 
@@ -1975,7 +1975,7 @@ int cap32_main (int argc, char **argv)
    // Fill the buffer with autocmd if provided
    virtualKeyboardEvents = CPC.InputMapper->StringToEvents(args.autocmd);
    // Give some time to the CPC to start before sending any command
-   lastVirtualEventTicks = SDL_GetTicks() + CPC.boot_time * 1000;
+   nextVirtualEventFrameCount = dwFrameCountOverall + CPC.boot_time;
 
 // ----------------------------------------------------------------------------
 
@@ -1986,8 +1986,8 @@ int cap32_main (int argc, char **argv)
    bolDone = false;
 
    while (!bolDone) {
-      if(!virtualKeyboardEvents.empty() && lastVirtualEventTicks + 100 < SDL_GetTicks()) {
-        lastVirtualEventTicks = SDL_GetTicks();
+      if(!virtualKeyboardEvents.empty() && nextVirtualEventFrameCount < dwFrameCountOverall) {
+        nextVirtualEventFrameCount = dwFrameCountOverall + 1; // Let CPC firmware debouncer time else it will eat repeated characters.
         SDL_PushEvent(&virtualKeyboardEvents.front());
         virtualKeyboardEvents.pop_front();
       }
@@ -2240,6 +2240,7 @@ int cap32_main (int argc, char **argv)
          iExitCondition = z80_execute(); // run the emulation until an exit condition is met
 
          if (iExitCondition == EC_FRAME_COMPLETE) { // emulation finished rendering a complete frame?
+            dwFrameCountOverall++;
             dwFrameCount++;
             if (SDL_GetTicks() < osd_timing) {
                print(static_cast<dword *>(back_surface->pixels) + CPC.scr_line_offs, osd_message.c_str(), true);
