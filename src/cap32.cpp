@@ -105,7 +105,7 @@ byte *pbTapeImage = nullptr;
 byte keyboard_matrix[16];
 
 std::list<SDL_Event> virtualKeyboardEvents;
-dword lastVirtualEventFrameCount, dwFrameCountOverall = 0;
+dword nextVirtualEventFrameCount, dwFrameCountOverall = 0;
 
 byte *membank_config[8][4];
 
@@ -1975,7 +1975,7 @@ int cap32_main (int argc, char **argv)
    // Fill the buffer with autocmd if provided
    virtualKeyboardEvents = CPC.InputMapper->StringToEvents(args.autocmd);
    // Give some time to the CPC to start before sending any command
-   lastVirtualEventFrameCount = dwFrameCountOverall + CPC.boot_time;
+   nextVirtualEventFrameCount = dwFrameCountOverall + CPC.boot_time;
 
 // ----------------------------------------------------------------------------
 
@@ -1986,8 +1986,8 @@ int cap32_main (int argc, char **argv)
    bolDone = false;
 
    while (!bolDone) {
-      if(!virtualKeyboardEvents.empty() && lastVirtualEventFrameCount < dwFrameCountOverall) {
-        lastVirtualEventFrameCount = dwFrameCountOverall;
+      if(!virtualKeyboardEvents.empty() && nextVirtualEventFrameCount < dwFrameCountOverall) {
+        nextVirtualEventFrameCount = dwFrameCountOverall;
         SDL_PushEvent(&virtualKeyboardEvents.front());
         virtualKeyboardEvents.pop_front();
       }
