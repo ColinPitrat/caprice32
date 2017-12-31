@@ -2040,6 +2040,10 @@ int cap32_main (int argc, char **argv)
                            dumpScreen();
                            break;
 
+                        case CAP32_WAITBREAK:
+                           LOG_WARNING("Received CAP32_WAITBREAK.");
+                           break;
+
                         case CAP32_SNAPSHOT:
                            dumpSnapshot();
                            break;

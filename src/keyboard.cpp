@@ -710,7 +710,8 @@ std::map<unsigned int, unsigned int> InputMapper::SDLkeysymFromCPCkeys_us = {
   { CAP32_RESET,    SDLK_F5 },
   { CAP32_SPEED,    SDLK_F9 },
   { CAP32_DEBUG,    SDLK_F12 },
-  { CAP32_TAPEPLAY, SDLK_F4 }
+  { CAP32_TAPEPLAY, SDLK_F4 },
+  { CAP32_WAITBREAK, SDLK_BREAK }
 };
 
 const std::map<const std::string, const unsigned int> InputMapper::CPCkeysFromStrings = {
@@ -876,6 +877,7 @@ const std::map<const std::string, const unsigned int> InputMapper::CPCkeysFromSt
    {"CAP32_SPEED",     CAP32_SPEED},
    {"CAP32_TAPEPLAY",  CAP32_TAPEPLAY},
    {"CAP32_DEBUG",     CAP32_DEBUG},  
+   {"CAP32_WAITBREAK", CAP32_WAITBREAK},
 };
 
 const std::map<const std::string, const unsigned int> InputMapper::SDLkeysFromStrings = {
