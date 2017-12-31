@@ -106,6 +106,7 @@ byte keyboard_matrix[16];
 
 std::list<SDL_Event> virtualKeyboardEvents;
 dword nextVirtualEventFrameCount, dwFrameCountOverall = 0;
+dword breakPointsToSkipBeforeProceedingWithVirtualEvents = 0;
 
 byte *membank_config[8][4];
 
@@ -1987,11 +1988,32 @@ int cap32_main (int argc, char **argv)
    bolDone = false;
 
    while (!bolDone) {
-      if(!virtualKeyboardEvents.empty() && nextVirtualEventFrameCount < dwFrameCountOverall) {
-        nextVirtualEventFrameCount = dwFrameCountOverall + 1; // Let CPC firmware debouncer time else it will eat repeated characters.
-        SDL_PushEvent(&virtualKeyboardEvents.front());
-        virtualKeyboardEvents.pop_front();
+      while(!virtualKeyboardEvents.empty()
+	 && (nextVirtualEventFrameCount < dwFrameCountOverall)
+	 && (breakPointsToSkipBeforeProceedingWithVirtualEvents == 0)) {
+
+	 auto nextVirtualEvent = &virtualKeyboardEvents.front();
+	 SDL_PushEvent(nextVirtualEvent);
+	 
+	 auto keysym = nextVirtualEvent->key.keysym;
+	 LOG_DEBUG("Inserted virtual event keysym=" << int(keysym.sym));
+	 
+	 dword cpc_key = CPC.InputMapper->CPCkeyFromKeysym(keysym);
+	 if (!(cpc_key & MOD_EMU_KEY)) {
+	    LOG_DEBUG("The virtual event is a keypress (not a command), so introduce a pause.");
+	    // Setting nextVirtualEventFrameCount below guarantees to
+	    // immediately break the loop enclosing this code and wait
+	    // at least one frame.
+	    nextVirtualEventFrameCount = dwFrameCountOverall
+	       + ((event.type == SDL_KEYDOWN)?1:0);
+	    // The extra delay in case of SDL_KEYDOWN is to keep the
+	    // key pressed long enough.  If we don't do this, the CPC
+	    // firmware debouncer eats repeated characters.
+	 }
+
+	 virtualKeyboardEvents.pop_front();
       }
+      
       while (SDL_PollEvent(&event)) {
          switch (event.type) {
             case SDL_KEYDOWN:
@@ -2041,7 +2063,10 @@ int cap32_main (int argc, char **argv)
                            break;
 
                         case CAP32_WAITBREAK:
-                           LOG_WARNING("Received CAP32_WAITBREAK.");
+                           breakPointsToSkipBeforeProceedingWithVirtualEvents++;
+                           LOG_INFO("Will skip " << breakPointsToSkipBeforeProceedingWithVirtualEvents << " before processing more virtual events.");
+                           LOG_INFO("Setting z80.break_point=0 (was " << z80.break_point << ").");
+                           z80.break_point = 0; // set break point to address 0.
                            break;
 
                         case CAP32_SNAPSHOT:
@@ -2243,6 +2268,22 @@ int cap32_main (int argc, char **argv)
          CPC.scr_pos = CPC.scr_base + dwOffset; // update current rendering position
 
          iExitCondition = z80_execute(); // run the emulation until an exit condition is met
+	 
+	 if (iExitCondition == EC_BREAKPOINT) {
+	    // We have to clear breakpoint to let the z80 emulator move on.
+	    z80.break_point = 0xffffffff; // clear break point
+	    z80.trace = 1; // make sure we'll be here to rearm break point at the next z80 instruction.
+
+	    if (breakPointsToSkipBeforeProceedingWithVirtualEvents>0) {
+	       breakPointsToSkipBeforeProceedingWithVirtualEvents--;
+	       LOG_INFO("Decremented breakpoint skip counter to " << breakPointsToSkipBeforeProceedingWithVirtualEvents);
+	    }
+	 } else {
+	    if (z80.break_point != 0) {
+	       LOG_INFO("Rearming EC_BREAKPOINT.");
+	       z80.break_point = 0; // set break point for next time
+	    }
+	 }
 
          if (iExitCondition == EC_FRAME_COMPLETE) { // emulation finished rendering a complete frame?
             dwFrameCountOverall++;
