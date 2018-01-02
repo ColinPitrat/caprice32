@@ -2065,8 +2065,8 @@ int cap32_main (int argc, char **argv)
                         case CAP32_WAITBREAK:
                            breakPointsToSkipBeforeProceedingWithVirtualEvents++;
                            LOG_INFO("Will skip " << breakPointsToSkipBeforeProceedingWithVirtualEvents << " before processing more virtual events.");
-                           LOG_INFO("Setting z80.break_point=0 (was " << z80.break_point << ").");
-                           z80.break_point = 0; // set break point to address 0.
+                           LOG_DEBUG("Setting z80.break_point=0 (was " << z80.break_point << ").");
+                           z80.break_point = 0; // set break point to address 0. FIXME would be interesting to change this via a parameter of CAP32_WAITBREAK on command line.
                            break;
 
                         case CAP32_SNAPSHOT:
