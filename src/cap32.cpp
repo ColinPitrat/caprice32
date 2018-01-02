@@ -1988,7 +1988,7 @@ int cap32_main (int argc, char **argv)
    bolDone = false;
 
    while (!bolDone) {
-      while(!virtualKeyboardEvents.empty()
+      if(!virtualKeyboardEvents.empty()
 	 && (nextVirtualEventFrameCount < dwFrameCountOverall)
 	 && (breakPointsToSkipBeforeProceedingWithVirtualEvents == 0)) {
 
