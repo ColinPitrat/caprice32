@@ -2279,7 +2279,7 @@ int cap32_main (int argc, char **argv)
 	       LOG_INFO("Decremented breakpoint skip counter to " << breakPointsToSkipBeforeProceedingWithVirtualEvents);
 	    }
 	 } else {
-	    if (z80.break_point != 0) {
+	    if (z80.break_point == 0xffffffff) { // TODO(cpcitor) clean up 0xffffffff into a value like Z80_BREAKPOINT_NONE
 	       LOG_INFO("Rearming EC_BREAKPOINT.");
 	       z80.break_point = 0; // set break point for next time
 	    }
