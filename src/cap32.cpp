@@ -293,7 +293,7 @@ void ga_memory_manager ()
          membank_read[GateArray.lower_ROM_bank] = pbROMlo; // 'page in' lower ROM
       }
    }
-   if (CPC.model >= 3 && GateArray.registerPageOn) {
+   if (CPC.model > 2 && GateArray.registerPageOn) {
       membank_read[1] = pbRegisterPage;
       membank_write[1] = pbRegisterPage;
    }
