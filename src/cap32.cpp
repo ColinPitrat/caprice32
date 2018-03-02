@@ -106,6 +106,7 @@ byte keyboard_matrix[16];
 
 std::list<SDL_Event> virtualKeyboardEvents;
 dword nextVirtualEventFrameCount, dwFrameCountOverall = 0;
+dword breakPointsToSkipBeforeProceedingWithVirtualEvents = 0;
 
 byte *membank_config[8][4];
 
@@ -1615,7 +1616,7 @@ void loadConfiguration (t_CPC &CPC, const std::string& configFilename)
    if ((CPC.speed < MIN_SPEED_SETTING) || (CPC.speed > MAX_SPEED_SETTING)) {
       CPC.speed = DEF_SPEED_SETTING;
    }
-   CPC.limit_speed = 1;
+   CPC.limit_speed = conf.getIntValue("system", "limit_speed", 1) & 1;
    CPC.auto_pause = conf.getIntValue("system", "auto_pause", 1) & 1;
    CPC.boot_time = conf.getIntValue("system", "boot_time", 5);
    CPC.printer = conf.getIntValue("system", "printer", 0) & 1;
@@ -1717,6 +1718,7 @@ void saveConfiguration (t_CPC &CPC, const std::string& configFilename)
    conf.setIntValue("system", "jumpers", CPC.jumpers);
 
    conf.setIntValue("system", "ram_size", CPC.ram_size); // 128KB RAM
+   conf.setIntValue("system", "limit_speed", CPC.limit_speed);
    conf.setIntValue("system", "speed", CPC.speed); // original CPC speed
    conf.setIntValue("system", "auto_pause", CPC.auto_pause);
    conf.setIntValue("system", "printer", CPC.printer);
@@ -1871,8 +1873,8 @@ void set_osd_message(const std::string& message) {
 void dumpScreen() {
    std::string dir = CPC.sdump_dir;
    if (!is_directory(dir)) {
-	  LOG_ERROR("Unable to find or open directory " + CPC.sdump_dir + " when trying to take a screenshot. Defaulting to current directory.")
-	  dir = ".";
+          LOG_ERROR("Unable to find or open directory " + CPC.sdump_dir + " when trying to take a screenshot. Defaulting to current directory.")
+          dir = ".";
    }
    SDL_Surface* shot = SDL_PNGFormatAlpha(back_surface);
    std::string dumpFile = "screenshot_" + getDateString() + ".png";
@@ -1890,8 +1892,8 @@ void dumpScreen() {
 void dumpSnapshot() {
    std::string dir = CPC.snap_path;
    if (!is_directory(dir)) {
-	  LOG_ERROR("Unable to find or open directory " + CPC.snap_path + " when trying to take a machine snapshot. Defaulting to current directory.")
-	  dir = ".";
+          LOG_ERROR("Unable to find or open directory " + CPC.snap_path + " when trying to take a machine snapshot. Defaulting to current directory.")
+          dir = ".";
    }
    std::string dumpFile = "snapshot_" + getDateString() + ".sna";
    std::string dumpPath = dir + "/" + dumpFile;
@@ -1986,11 +1988,32 @@ int cap32_main (int argc, char **argv)
    bolDone = false;
 
    while (!bolDone) {
-      if(!virtualKeyboardEvents.empty() && nextVirtualEventFrameCount < dwFrameCountOverall) {
-        nextVirtualEventFrameCount = dwFrameCountOverall + 1; // Let CPC firmware debouncer time else it will eat repeated characters.
-        SDL_PushEvent(&virtualKeyboardEvents.front());
-        virtualKeyboardEvents.pop_front();
+      if(!virtualKeyboardEvents.empty()
+         && (nextVirtualEventFrameCount < dwFrameCountOverall)
+         && (breakPointsToSkipBeforeProceedingWithVirtualEvents == 0)) {
+
+         auto nextVirtualEvent = &virtualKeyboardEvents.front();
+         SDL_PushEvent(nextVirtualEvent);
+         
+         auto keysym = nextVirtualEvent->key.keysym;
+         LOG_DEBUG("Inserted virtual event keysym=" << int(keysym.sym));
+         
+         dword cpc_key = CPC.InputMapper->CPCkeyFromKeysym(keysym);
+         if (!(cpc_key & MOD_EMU_KEY)) {
+            LOG_DEBUG("The virtual event is a keypress (not a command), so introduce a pause.");
+            // Setting nextVirtualEventFrameCount below guarantees to
+            // immediately break the loop enclosing this code and wait
+            // at least one frame.
+            nextVirtualEventFrameCount = dwFrameCountOverall
+               + ((event.type == SDL_KEYDOWN)?1:0);
+            // The extra delay in case of SDL_KEYDOWN is to keep the
+            // key pressed long enough.  If we don't do this, the CPC
+            // firmware debouncer eats repeated characters.
+         }
+
+         virtualKeyboardEvents.pop_front();
       }
+      
       while (SDL_PollEvent(&event)) {
          switch (event.type) {
             case SDL_KEYDOWN:
@@ -2037,6 +2060,13 @@ int cap32_main (int argc, char **argv)
 
                         case CAP32_SCRNSHOT:
                            dumpScreen();
+                           break;
+
+                        case CAP32_WAITBREAK:
+                           breakPointsToSkipBeforeProceedingWithVirtualEvents++;
+                           LOG_INFO("Will skip " << breakPointsToSkipBeforeProceedingWithVirtualEvents << " before processing more virtual events.");
+                           LOG_DEBUG("Setting z80.break_point=0 (was " << z80.break_point << ").");
+                           z80.break_point = 0; // set break point to address 0. FIXME would be interesting to change this via a parameter of CAP32_WAITBREAK on command line.
                            break;
 
                         case CAP32_SNAPSHOT:
@@ -2126,7 +2156,7 @@ int cap32_main (int argc, char **argv)
             case SDL_JOYBUTTONDOWN:
             {
                 dword cpc_key = CPC.InputMapper->CPCkeyFromJoystickButton(event.jbutton);
-				if (cpc_key == 0xff) {
+                                if (cpc_key == 0xff) {
                   if (event.jbutton.button == CPC.joystick_menu_button)
                   {
                     showGui();
@@ -2238,6 +2268,22 @@ int cap32_main (int argc, char **argv)
          CPC.scr_pos = CPC.scr_base + dwOffset; // update current rendering position
 
          iExitCondition = z80_execute(); // run the emulation until an exit condition is met
+         
+         if (iExitCondition == EC_BREAKPOINT) {
+            // We have to clear breakpoint to let the z80 emulator move on.
+            z80.break_point = 0xffffffff; // clear break point
+            z80.trace = 1; // make sure we'll be here to rearm break point at the next z80 instruction.
+
+            if (breakPointsToSkipBeforeProceedingWithVirtualEvents>0) {
+               breakPointsToSkipBeforeProceedingWithVirtualEvents--;
+               LOG_INFO("Decremented breakpoint skip counter to " << breakPointsToSkipBeforeProceedingWithVirtualEvents);
+            }
+         } else {
+            if (z80.break_point == 0xffffffff) { // TODO(cpcitor) clean up 0xffffffff into a value like Z80_BREAKPOINT_NONE
+               LOG_INFO("Rearming EC_BREAKPOINT.");
+               z80.break_point = 0; // set break point for next time
+            }
+         }
 
          if (iExitCondition == EC_FRAME_COMPLETE) { // emulation finished rendering a complete frame?
             dwFrameCountOverall++;

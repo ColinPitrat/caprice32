@@ -69,6 +69,7 @@ std::string replaceCap32Keys(std::string command)
     { "CAP32_SPEED", cap32_keystroke(CAP32_SPEED) },
     { "CAP32_TAPEPLAY", cap32_keystroke(CAP32_TAPEPLAY) },
     { "CAP32_DEBUG", cap32_keystroke(CAP32_DEBUG) },
+    { "CAP32_WAITBREAK", cap32_keystroke(CAP32_WAITBREAK) },
     { "CPC_F1", cpc_keystroke(CPC_F1) },
     { "CPC_F2", cpc_keystroke(CPC_F2) },
   };

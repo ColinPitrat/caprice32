@@ -50,6 +50,12 @@ You can:
   * Package it for your favourite distribution (if not yet available)
   * Port it to iOS so that Mac users can enjoy it too
 
+# Supporting
+
+You can support me on Liberapay:
+
+[<img alt="Donate using Liberapay" src="https://liberapay.com/assets/widgets/donate.svg">](https://liberapay.com/ColinPitrat/donate)
+
 # Building and compiling
 
 See the [INSTALL.md](INSTALL.md) files for Caprice32 build instructions.

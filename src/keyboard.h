@@ -32,7 +32,8 @@ typedef enum {
    CAP32_SPEED,
    CAP32_TAPEPLAY,
    CAP32_DEBUG,
-   CAP32_SNAPSHOT
+   CAP32_SNAPSHOT,
+   CAP32_WAITBREAK
 } CAP32_KEYS;
 
 typedef enum {
