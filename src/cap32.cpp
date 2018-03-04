@@ -1870,11 +1870,10 @@ void dumpScreen() {
           LOG_ERROR("Unable to find or open directory " + CPC.sdump_dir + " when trying to take a screenshot. Defaulting to current directory.")
           dir = ".";
    }
-   SDL_Surface* shot = SDL_PNGFormatAlpha(back_surface);
    std::string dumpFile = "screenshot_" + getDateString() + ".png";
    std::string dumpPath = dir + "/" + dumpFile;
    LOG_DEBUG("Dumping screen to " + dumpPath);
-   if (SDL_SavePNG(shot, dumpPath.c_str())) {
+   if (SDL_SavePNG(back_surface, dumpPath)) {
      LOG_DEBUG("Could not write screenshot file to " + dumpPath);
    }
    else {
