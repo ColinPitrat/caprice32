@@ -237,8 +237,8 @@ typedef struct {
    unsigned int scr_bpp;
    unsigned int scr_bps;
    unsigned int scr_line_offs;
-   unsigned int *scr_base;
-   unsigned int *scr_pos;
+   unsigned char *scr_base;
+   unsigned char *scr_pos;
    void (*scr_render)();
    void (*scr_prerendernorm)();
    void (*scr_prerenderbord)();

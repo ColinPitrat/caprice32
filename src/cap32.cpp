@@ -770,138 +770,135 @@ void z80_OUT_handler (reg_pair port, byte val)
 
 
 
-void print (dword *pdwAddr, const char *pchStr, bool bolColour)
+void print (byte *pbAddr, const char *pchStr, bool bolColour)
 {
    int iLen, iIdx;
    dword dwColour;
    word wColour;
    byte bRow, bColour;
+   byte *pbLine, *pbPixel;
 
+   iLen = strlen(pchStr); // number of characters to process
    switch (CPC.scr_bpp)
    {
       case 32:
          dwColour = bolColour ? 0x00ffffff : 0;
-         iLen = strlen(pchStr); // number of characters to process
          for (int n = 0; n < iLen; n++) {
-            dword *pdwLine, *pdwPixel;
             iIdx = static_cast<int>(pchStr[n]); // get the ASCII value
             if ((iIdx < FNT_MIN_CHAR) || (iIdx > FNT_MAX_CHAR)) { // limit it to the range of chars in the font
                iIdx = FNT_BAD_CHAR;
             }
             iIdx -= FNT_MIN_CHAR; // zero base the index
-            pdwLine = pdwAddr; // keep a reference to the current screen position
+            pbLine = pbAddr; // keep a reference to the current screen position
             for (int iRow = 0; iRow < FNT_CHAR_HEIGHT; iRow++) { // loop for all rows in the font character
-               pdwPixel = pdwLine;
+               pbPixel = pbLine;
                bRow = bFont[iIdx]; // get the bitmap information for one row
                for (int iCol = 0; iCol < FNT_CHAR_WIDTH; iCol++) { // loop for all columns in the font character
                   if (bRow & 0x80) { // is the bit set?
-                     *(pdwPixel+1) = 0; // draw the "shadow"
-                     *(pdwPixel+CPC.scr_line_offs) = 0;
-                     *(pdwPixel+CPC.scr_line_offs+1) = 0;
-                     *pdwPixel = dwColour; // draw the character pixel
+                     *(reinterpret_cast<dword*>(pbPixel)+1) = 0; // draw the "shadow"
+                     *(reinterpret_cast<dword*>(pbPixel+CPC.scr_line_offs+1)) = 0;
+                     *(reinterpret_cast<dword*>(pbPixel+CPC.scr_line_offs)) = 0;
+                     *(reinterpret_cast<dword*>(pbPixel)) = dwColour; // draw the character pixel
+                     *(reinterpret_cast<dword *>(pbPixel+CPC.scr_bps)) = dwColour; // draw the second line in case dwYScale == 2 (will be overwritten by shadow otherwise)
                   }
-                  pdwPixel++; // update the screen position
+                  pbPixel += 4; // update the screen position
                   bRow <<= 1; // advance to the next bit
                }
-               pdwLine += CPC.scr_line_offs; // advance to next screen line
+               pbLine += CPC.scr_line_offs; // advance to next screen line
                iIdx += FNT_CHARS; // advance to next row in font data
             }
-            pdwAddr += FNT_CHAR_WIDTH; // set screen address to next character position
+            pbAddr += FNT_CHAR_WIDTH*4; // set screen address to next character position
          }
          break;
 
       case 24:
          dwColour = bolColour ? 0x00ffffff : 0;
-         iLen = strlen(pchStr); // number of characters to process
          for (int n = 0; n < iLen; n++) {
-            dword *pdwLine;
-            byte *pbPixel;
             iIdx = static_cast<int>(pchStr[n]); // get the ASCII value
             if ((iIdx < FNT_MIN_CHAR) || (iIdx > FNT_MAX_CHAR)) { // limit it to the range of chars in the font
                iIdx = FNT_BAD_CHAR;
             }
             iIdx -= FNT_MIN_CHAR; // zero base the index
-            pdwLine = pdwAddr; // keep a reference to the current screen position
+            pbLine = pbAddr; // keep a reference to the current screen position
             for (int iRow = 0; iRow < FNT_CHAR_HEIGHT; iRow++) { // loop for all rows in the font character
-               pbPixel = reinterpret_cast<byte *>(pdwLine);
+               pbPixel = pbLine;
                bRow = bFont[iIdx]; // get the bitmap information for one row
                for (int iCol = 0; iCol < FNT_CHAR_WIDTH; iCol++) { // loop for all columns in the font character
                   if (bRow & 0x80) { // is the bit set?
-                     *(reinterpret_cast<dword *>(pbPixel+CPC.scr_line_offs)) = 0; // draw the "shadow"
-                     *reinterpret_cast<dword *>(pbPixel) = dwColour; // draw the character pixel
+                     *(reinterpret_cast<dword *>(pbPixel+1)) = 0; // draw the "shadow"
+                     *(reinterpret_cast<dword *>(pbPixel+CPC.scr_line_offs)) = 0;
+                     *(reinterpret_cast<dword *>(pbPixel+CPC.scr_line_offs+1)) = 0;
+                     *(reinterpret_cast<dword *>(pbPixel)) = dwColour; // draw the character pixel
+                     *(reinterpret_cast<dword *>(pbPixel+CPC.scr_bps)) = dwColour; // draw the second line in case dwYScale == 2 (will be overwritten by shadow otherwise)
                   }
                   pbPixel += 3; // update the screen position
                   bRow <<= 1; // advance to the next bit
                }
-               pdwLine += CPC.scr_line_offs; // advance to next screen line
+               pbLine += CPC.scr_line_offs; // advance to next screen line
                iIdx += FNT_CHARS; // advance to next row in font data
             }
-            pdwAddr += FNT_CHAR_WIDTH-2; // set screen address to next character position
+            pbAddr += FNT_CHAR_WIDTH*3; // set screen address to next character position
          }
          break;
 
       case 15:
       case 16:
          wColour = bolColour ? 0xffff : 0;
-         iLen = strlen(pchStr); // number of characters to process
          for (int n = 0; n < iLen; n++) {
-            dword *pdwLine;
-            word *pwPixel;
             iIdx = static_cast<int>(pchStr[n]); // get the ASCII value
             if ((iIdx < FNT_MIN_CHAR) || (iIdx > FNT_MAX_CHAR)) { // limit it to the range of chars in the font
                iIdx = FNT_BAD_CHAR;
             }
             iIdx -= FNT_MIN_CHAR; // zero base the index
-            pdwLine = pdwAddr; // keep a reference to the current screen position
+            pbLine = pbAddr; // keep a reference to the current screen position
             for (int iRow = 0; iRow < FNT_CHAR_HEIGHT; iRow++) { // loop for all rows in the font character
-               pwPixel = reinterpret_cast<word *>(pdwLine);
+               pbPixel = pbLine;
                bRow = bFont[iIdx]; // get the bitmap information for one row
                for (int iCol = 0; iCol < FNT_CHAR_WIDTH; iCol++) { // loop for all columns in the font character
                   if (bRow & 0x80) { // is the bit set?
-                     *(pwPixel+1) = 0; // draw the "shadow"
-                     *reinterpret_cast<word *>(reinterpret_cast<dword *>(pwPixel)+CPC.scr_line_offs) = 0;
-                     *(reinterpret_cast<word *>(reinterpret_cast<dword *>(pwPixel)+CPC.scr_line_offs)+1) = 0;
-                     *pwPixel = wColour; // draw the character pixel
+                     *(reinterpret_cast<word *>(pbPixel)+1) = 0; // draw the "shadow"
+                     *(reinterpret_cast<word *>(pbPixel+CPC.scr_line_offs)) = 0;
+                     *(reinterpret_cast<word *>(pbPixel+CPC.scr_line_offs)+1) = 0;
+                     *(reinterpret_cast<word *>(pbPixel)) = wColour; // draw the character pixel
+                     *(reinterpret_cast<word *>(pbPixel+CPC.scr_bps)) = wColour; // draw the second line in case dwYScale == 2 (will be overwritten by shadow otherwise)
                   }
-                  pwPixel++; // update the screen position
+                  pbPixel += 2; // update the screen position
                   bRow <<= 1; // advance to the next bit
                }
-               pdwLine += CPC.scr_line_offs; // advance to next screen line
+               pbLine += CPC.scr_line_offs; // advance to next screen line
                iIdx += FNT_CHARS; // advance to next row in font data
             }
-            pdwAddr += FNT_CHAR_WIDTH/2; // set screen address to next character position
+            pbAddr += FNT_CHAR_WIDTH*2; // set screen address to next character position
          }
          break;
 
       case 8:
          bColour = bolColour ? SDL_MapRGB(back_surface->format,255,255,255) : SDL_MapRGB(back_surface->format,0,0,0);
-         iLen = strlen(pchStr); // number of characters to process
          for (int n = 0; n < iLen; n++) {
-            dword *pdwLine;
-            byte *pbPixel;
             iIdx = static_cast<int>(pchStr[n]); // get the ASCII value
             if ((iIdx < FNT_MIN_CHAR) || (iIdx > FNT_MAX_CHAR)) { // limit it to the range of chars in the font
                iIdx = FNT_BAD_CHAR;
             }
             iIdx -= FNT_MIN_CHAR; // zero base the index
-            pdwLine = pdwAddr; // keep a reference to the current screen position
+            pbLine = pbAddr; // keep a reference to the current screen position
             for (int iRow = 0; iRow < FNT_CHAR_HEIGHT; iRow++) { // loop for all rows in the font character
-               pbPixel = reinterpret_cast<byte *>(pdwLine);
+               pbPixel = pbLine;
                bRow = bFont[iIdx]; // get the bitmap information for one row
                for (int iCol = 0; iCol < FNT_CHAR_WIDTH; iCol++) { // loop for all columns in the font character
                   if (bRow & 0x80) { // is the bit set?
                      *(pbPixel+1) = 0; // draw the "shadow"
-                     *reinterpret_cast<byte *>(reinterpret_cast<dword *>(pbPixel)+CPC.scr_line_offs) = 0;
-                     *(reinterpret_cast<byte *>(reinterpret_cast<dword *>(pbPixel)+CPC.scr_line_offs)+1) = 0;
+                     *(pbPixel+CPC.scr_line_offs) = 0;
+                     *(pbPixel+CPC.scr_line_offs+1) = 0;
                      *pbPixel = bColour; // draw the character pixel
+                     *(pbPixel+CPC.scr_bps) = bColour; // draw the second line in case dwYScale == 2 (will be overwritten by shadow otherwise)
                   }
                   pbPixel++; // update the screen position
                   bRow <<= 1; // advance to the next bit
                }
-               pdwLine += CPC.scr_line_offs; // advance to next screen line
+               pbLine += CPC.scr_line_offs; // advance to next screen line
                iIdx += FNT_CHARS; // advance to next row in font data
             }
-            pdwAddr += FNT_CHAR_WIDTH/4; // set screen address to next character position
+            pbAddr += FNT_CHAR_WIDTH; // set screen address to next character position
          }
          break;
    }
@@ -1453,10 +1450,10 @@ int video_init ()
    }
 
    vid_plugin->lock();
-   CPC.scr_bps = back_surface->pitch / 4; // rendered screen line length (changing bytes to dwords)
+   CPC.scr_bps = back_surface->pitch; // rendered screen line length in bytes
    CPC.scr_line_offs = CPC.scr_bps * dwYScale;
    CPC.scr_pos =
-   CPC.scr_base = static_cast<dword *>(back_surface->pixels); // memory address of back buffer
+   CPC.scr_base = static_cast<byte *>(back_surface->pixels); // memory address of back buffer
    CPC.scr_gui_is_currently_on = false;
 
    vid_plugin->unlock();
@@ -1905,7 +1902,6 @@ void dumpSnapshot() {
 
 int cap32_main (int argc, char **argv)
 {
-   dword dwOffset;
    int iExitCondition;
    bool bolDone;
    SDL_Event event;
@@ -2256,11 +2252,11 @@ int cap32_main (int argc, char **argv)
          if (!vid_plugin->lock()) { // lock the video buffer
            continue; // skip the emulation if we can't get a lock
          }
-         dwOffset = CPC.scr_pos - CPC.scr_base; // offset in current surface row
+         dword dwOffset = CPC.scr_pos - CPC.scr_base; // offset in current surface row
          if (VDU.scrln > 0) {
-            CPC.scr_base = static_cast<dword *>(back_surface->pixels) + (VDU.scrln * CPC.scr_line_offs); // determine current position
+            CPC.scr_base = static_cast<byte *>(back_surface->pixels) + (VDU.scrln * CPC.scr_line_offs); // determine current position
          } else {
-            CPC.scr_base = static_cast<dword *>(back_surface->pixels); // reset to surface start
+            CPC.scr_base = static_cast<byte *>(back_surface->pixels); // reset to surface start
          }
          CPC.scr_pos = CPC.scr_base + dwOffset; // update current rendering position
 
@@ -2286,11 +2282,11 @@ int cap32_main (int argc, char **argv)
             dwFrameCountOverall++;
             dwFrameCount++;
             if (SDL_GetTicks() < osd_timing) {
-               print(static_cast<dword *>(back_surface->pixels) + CPC.scr_line_offs, osd_message.c_str(), true);
+               print(static_cast<byte *>(back_surface->pixels) + CPC.scr_line_offs, osd_message.c_str(), true);
             } else if (CPC.scr_fps) {
                char chStr[15];
                sprintf(chStr, "%3dFPS %3d%%", static_cast<int>(dwFPS), static_cast<int>(dwFPS) * 100 / (1000 / static_cast<int>(FRAME_PERIOD_MS)));
-               print(static_cast<dword *>(back_surface->pixels) + CPC.scr_line_offs, chStr, true); // display the frames per second counter
+               print(static_cast<byte *>(back_surface->pixels) + CPC.scr_line_offs, chStr, true); // display the frames per second counter
             }
             asic_draw_sprites();
             vid_plugin->unlock();
