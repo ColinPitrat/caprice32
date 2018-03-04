@@ -43,15 +43,7 @@ SDL_Surface *SDL_PNGFormatAlpha(SDL_Surface *src)
 {
 	SDL_Surface *surf;
 	SDL_Rect rect = { 0, 0, 0, 0 };
-
-	/* NO-OP for images < 32bpp and 32bpp images that already have Alpha channel */
-  /*
-	if (src->format->BitsPerPixel != 16 && (src->format->BitsPerPixel <= 24 || src->format->Amask)) {
-		src->refcount++;
-		return src;
-	}
-  */
-
+	
 	/* Convert 32bpp alpha-less image to 24bpp alpha-less image */
 	rect.w = src->w;
 	rect.h = src->h;
@@ -78,7 +70,7 @@ int SDL_SavePNG(SDL_Surface *src, const std::string& file)
 	SDL_RWops *dst = SDL_RWFromFile(file.c_str(), "wb");
 	if (!dst)
 	{
-		SDL_SetError("Failed to open file for writing: %s\n", file);
+		SDL_SetError("Failed to open file for writing: %s\n", file.c_str());
 		return (ERROR);
 	}
 
