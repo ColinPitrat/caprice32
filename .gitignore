@@ -6,6 +6,9 @@
 /.debug
 /googletest
 /test_runner
+/disk
+/screenshots
+/release
 .pc
 debian/caprice32.debhelper.log
 debian/caprice32.postinst.debhelper
