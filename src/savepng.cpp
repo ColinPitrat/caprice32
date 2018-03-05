@@ -71,6 +71,7 @@ int SDL_SavePNG(SDL_Surface *src, const std::string& file)
 	if (!dst)
 	{
 		SDL_SetError("Failed to open file for writing: %s\n", file.c_str());
+    SDL_FreeSurface(surface);
 		return (ERROR);
 	}
 
@@ -79,6 +80,7 @@ int SDL_SavePNG(SDL_Surface *src, const std::string& file)
 	{
 		SDL_SetError("Unable to png_create_write_struct on %s\n", PNG_LIBPNG_VER_STRING);
 		SDL_RWclose(dst);
+    SDL_FreeSurface(surface);
 		return (ERROR);
 	}
 
@@ -88,6 +90,7 @@ int SDL_SavePNG(SDL_Surface *src, const std::string& file)
 		SDL_SetError("Unable to png_create_info_struct\n");
 		png_destroy_write_struct(&png_ptr, nullptr);
 		SDL_RWclose(dst);
+    SDL_FreeSurface(surface);
 		return (ERROR);
 	}
 
@@ -95,6 +98,7 @@ int SDL_SavePNG(SDL_Surface *src, const std::string& file)
 	{
 		png_destroy_write_struct(&png_ptr, &info_ptr);
 		SDL_RWclose(dst);
+    SDL_FreeSurface(surface);
 		return (ERROR);
 	}
 
@@ -150,6 +154,7 @@ int SDL_SavePNG(SDL_Surface *src, const std::string& file)
 	/* Done */
 	png_destroy_write_struct(&png_ptr, &info_ptr);
 	SDL_RWclose(dst);
+  SDL_FreeSurface(surface);
 
 	return (SUCCESS);
 }
