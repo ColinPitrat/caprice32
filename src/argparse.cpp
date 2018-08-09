@@ -46,28 +46,39 @@ void usage(std::ostream &os, char *progPath, int errcode)
    exit(errcode);
 }
 
+std::string cap32_keystroke(CAP32_KEYS key) {
+  return std::string("\f") + char(key);
+}
+
+std::string cpc_keystroke(CPC_KEYS key) {
+  return std::string("\a") + char(key);
+}
+
 std::string replaceCap32Keys(std::string command)
 {
-  static std::map<std::string, char> keyNames = {
-    { "CAP32_EXIT", CAP32_EXIT },
-    { "CAP32_FPS", CAP32_FPS },
-    { "CAP32_FULLSCRN", CAP32_FULLSCRN },
-    { "CAP32_GUI", CAP32_GUI },
-    { "CAP32_VKBD", CAP32_VKBD },
-    { "CAP32_JOY", CAP32_JOY },
-    { "CAP32_MF2STOP", CAP32_MF2STOP },
-    { "CAP32_RESET", CAP32_RESET },
-    { "CAP32_SCRNSHOT", CAP32_SCRNSHOT },
-    { "CAP32_SPEED", CAP32_SPEED },
-    { "CAP32_TAPEPLAY", CAP32_TAPEPLAY },
-    { "CAP32_DEBUG", CAP32_DEBUG }
+  static std::map<std::string, std::string> keyNames = {
+    { "CAP32_EXIT", cap32_keystroke(CAP32_EXIT) },
+    { "CAP32_FPS", cap32_keystroke(CAP32_FPS) },
+    { "CAP32_FULLSCRN", cap32_keystroke(CAP32_FULLSCRN) },
+    { "CAP32_GUI", cap32_keystroke(CAP32_GUI) },
+    { "CAP32_VKBD", cap32_keystroke(CAP32_VKBD) },
+    { "CAP32_JOY", cap32_keystroke(CAP32_JOY) },
+    { "CAP32_MF2STOP", cap32_keystroke(CAP32_MF2STOP) },
+    { "CAP32_RESET", cap32_keystroke(CAP32_RESET) },
+    { "CAP32_SCRNSHOT", cap32_keystroke(CAP32_SCRNSHOT) },
+    { "CAP32_SPEED", cap32_keystroke(CAP32_SPEED) },
+    { "CAP32_TAPEPLAY", cap32_keystroke(CAP32_TAPEPLAY) },
+    { "CAP32_DEBUG", cap32_keystroke(CAP32_DEBUG) },
+    { "CAP32_WAITBREAK", cap32_keystroke(CAP32_WAITBREAK) },
+    { "CPC_F1", cpc_keystroke(CPC_F1) },
+    { "CPC_F2", cpc_keystroke(CPC_F2) },
   };
   for (const auto& elt : keyNames)
   {
     size_t pos;
     while ((pos = command.find(elt.first)) != std::string::npos)
     {
-      command.replace(pos, elt.first.size(), std::string("\f") + elt.second);
+      command.replace(pos, elt.first.size(), elt.second);
     }
   }
   return command;

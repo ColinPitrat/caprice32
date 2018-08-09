@@ -237,8 +237,8 @@ typedef struct {
    unsigned int scr_bpp;
    unsigned int scr_bps;
    unsigned int scr_line_offs;
-   unsigned int *scr_base;
-   unsigned int *scr_pos;
+   unsigned char *scr_base;
+   unsigned char *scr_pos;
    void (*scr_render)();
    void (*scr_prerendernorm)();
    void (*scr_prerenderbord)();
@@ -410,7 +410,8 @@ typedef struct {
          unsigned short TonC;
          unsigned char _noise, _mixer, _ampa, _ampb, _ampc;
          unsigned short Envelope;
-      };
+         unsigned char _envtype, _porta, portb;
+      } __attribute__((packed, gcc_struct));
    } RegisterAY;
    int AmplitudeEnv;
    bool FirstPeriod;

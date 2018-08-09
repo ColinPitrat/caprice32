@@ -52,43 +52,37 @@ void asic_reset() {
 void asic_poke_lock_sequence(byte val) {
    static const byte lockSeq[] = { 0x00, 0x00, 0xff, 0x77, 0xb3, 0x51, 0xa8, 0xd4, 0x62, 0x39, 0x9c, 0x46, 0x2b, 0x15, 0x8a, 0xcd };
    static const int lockSeqLength = sizeof(lockSeq)/sizeof(lockSeq[0]);
-   static int lockPos = 0;
-   LOG_DEBUG("ASIC poked with val=" << std::hex << static_cast<int>(val) << std::dec << " lockPos = " << lockPos);
+   LOG_DEBUG("ASIC poked with val=" << std::hex << static_cast<int>(val) << std::dec << " lockPos = " << asic.lockSeqPos);
    // Lock sequence can only start after a non zero value
-   if (lockPos == 0) {
+   if (asic.lockSeqPos == 0) {
       if (val > 0) {
-         lockPos = 1;
+         asic.lockSeqPos = 1;
       }
    } else {
-      if(lockPos < lockSeqLength) {
-         if (val == lockSeq[lockPos]) {
-            lockPos++;
+      if(asic.lockSeqPos < lockSeqLength) {
+         if (val == lockSeq[asic.lockSeqPos]) {
+            asic.lockSeqPos++;
          } else {
-            lockPos++;
+            asic.lockSeqPos++;
             // If the lock sequence is matched except for the last byte, it means lock
-            if (lockPos == lockSeqLength) {
+            if (asic.lockSeqPos == lockSeqLength) {
                LOG_DEBUG("ASIC locked");
                asic.locked = true;
             }
             if (val == 0) {
-               if (lockPos == 3) {
-                  // We had two 0 in a row, we still need a full sequence
-                  lockPos = 0;
-               } else {
-                  // We had a non 0 then a 0, we're now waiting for 0xFF
-                  lockPos = 2;
-               }
+              // We're now waiting for 0xFF
+              asic.lockSeqPos = 2;
             } else {
                // We had a non 0, we're now waiting for 0
-               lockPos = 1;
+               asic.lockSeqPos = 1;
             }
          }
       } else {
          // Full sequence matched and an additional value was written, it means unlock
-         if (lockPos == lockSeqLength) {
+         if (asic.lockSeqPos == lockSeqLength) {
             LOG_DEBUG("ASIC unlocked");
             asic.locked = false;
-            lockPos = (val == 0) ? 0 : 1;
+            asic.lockSeqPos = (val == 0) ? 0 : 1;
          }
       }
    }

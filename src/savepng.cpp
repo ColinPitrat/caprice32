@@ -9,6 +9,7 @@
 #include <SDL.h>
 #include <png.h>
 #include <cstdint>
+#include <string>
 
 #define SUCCESS 0
 #define ERROR (-1)
@@ -42,78 +43,78 @@ SDL_Surface *SDL_PNGFormatAlpha(SDL_Surface *src)
 {
 	SDL_Surface *surf;
 	SDL_Rect rect = { 0, 0, 0, 0 };
-
-	/* NO-OP for images < 32bpp and 32bpp images that already have Alpha channel */
-	if (src->format->BitsPerPixel <= 24 || src->format->Amask) {
-		src->refcount++;
-		return src;
-	}
-
+	
 	/* Convert 32bpp alpha-less image to 24bpp alpha-less image */
 	rect.w = src->w;
 	rect.h = src->h;
-	surf = SDL_CreateRGBSurface(src->flags, src->w, src->h, 24,
-		src->format->Rmask, src->format->Gmask, src->format->Bmask, 0);
+	surf = SDL_CreateRGBSurface(SDL_SWSURFACE, src->w, src->h, 24, rmask, gmask, bmask, 0);
 	SDL_LowerBlit(src, &rect, surf, &rect);
 
 	return surf;
 }
 
-int SDL_SavePNG_RW(SDL_Surface *surface, SDL_RWops *dst, int freedst)
+int SDL_SavePNG(SDL_Surface *src, const std::string& file)
 {
-	png_structp png_ptr;
-	png_infop info_ptr;
-	png_colorp pal_ptr;
-	SDL_Palette *pal;
-	int i, colortype;
-#ifdef USE_ROW_POINTERS
-	png_bytep *row_pointers;
-#endif
 	/* Initialize and do basic error checking */
-	if (!dst)
-	{
-		SDL_SetError("Argument 2 to SDL_SavePNG_RW can't be NULL, expecting SDL_RWops*\n");
-		return (ERROR);
-	}
-	if (!surface)
+	if (!src)
 	{
 		SDL_SetError("Argument 1 to SDL_SavePNG_RW can't be NULL, expecting SDL_Surface*\n");
-		if (freedst) SDL_RWclose(dst);
 		return (ERROR);
 	}
-	png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, nullptr, png_error_SDL, nullptr); /* err_ptr, err_fn, warn_fn */
+  SDL_Surface *surface = SDL_PNGFormatAlpha(src);
+	if (!src)
+	{
+		return (ERROR);
+	}
+
+	SDL_RWops *dst = SDL_RWFromFile(file.c_str(), "wb");
+	if (!dst)
+	{
+		SDL_SetError("Failed to open file for writing: %s\n", file.c_str());
+    SDL_FreeSurface(surface);
+		return (ERROR);
+	}
+
+	png_structp png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, nullptr, png_error_SDL, nullptr); /* err_ptr, err_fn, warn_fn */
 	if (!png_ptr)
 	{
 		SDL_SetError("Unable to png_create_write_struct on %s\n", PNG_LIBPNG_VER_STRING);
-		if (freedst) SDL_RWclose(dst);
+		SDL_RWclose(dst);
+    SDL_FreeSurface(surface);
 		return (ERROR);
 	}
-	info_ptr = png_create_info_struct(png_ptr);
+
+	png_infop info_ptr = png_create_info_struct(png_ptr);
 	if (!info_ptr)
 	{
 		SDL_SetError("Unable to png_create_info_struct\n");
 		png_destroy_write_struct(&png_ptr, nullptr);
-		if (freedst) SDL_RWclose(dst);
+		SDL_RWclose(dst);
+    SDL_FreeSurface(surface);
 		return (ERROR);
 	}
+
 	if (setjmp(png_jmpbuf(png_ptr)))	/* All other errors, see also "png_error_SDL" */
 	{
 		png_destroy_write_struct(&png_ptr, &info_ptr);
-		if (freedst) SDL_RWclose(dst);
+		SDL_RWclose(dst);
+    SDL_FreeSurface(surface);
 		return (ERROR);
 	}
 
+	int i, colortype;
 	/* Setup our RWops writer */
 	png_set_write_fn(png_ptr, dst, png_write_SDL, nullptr); /* w_ptr, write_fn, flush_fn */
 
+	SDL_Palette *pal;
 	/* Prepare chunks */
 	colortype = PNG_COLOR_MASK_COLOR;
 	if (surface->format->BytesPerPixel > 0
-	&&  surface->format->BytesPerPixel <= 8
-	&& (pal = surface->format->palette))
+      && surface->format->BytesPerPixel <= 8
+      && (pal = surface->format->palette))
 	{
 		colortype |= PNG_COLOR_MASK_PALETTE;
-		pal_ptr = static_cast<png_colorp>(malloc(pal->ncolors * sizeof(png_color)));
+		png_colorp pal_ptr = static_cast<png_colorp>(malloc(pal->ncolors * sizeof(png_color)));
 		for (i = 0; i < pal->ncolors; i++) {
 			pal_ptr[i].red   = pal->colors[i].r;
 			pal_ptr[i].green = pal->colors[i].g;
@@ -132,14 +133,14 @@ int SDL_SavePNG_RW(SDL_Surface *surface, SDL_RWops *dst, int freedst)
 
 	/* Allow BGR surfaces */
 	if (surface->format->Rmask == bmask
-	&& surface->format->Gmask == gmask
-	&& surface->format->Bmask == rmask)
+      && surface->format->Gmask == gmask
+      && surface->format->Bmask == rmask)
 		png_set_bgr(png_ptr);
 
 	/* Write everything */
 	png_write_info(png_ptr, info_ptr);
 #ifdef USE_ROW_POINTERS
-	row_pointers = static_cast<png_bytep*>(malloc(sizeof(png_bytep)*surface->h));
+	png_bytep *row_pointers = static_cast<png_bytep*>(malloc(sizeof(png_bytep)*surface->h));
 	for (i = 0; i < surface->h; i++)
 		row_pointers[i] = static_cast<png_bytep>(static_cast<void*>(static_cast<char*>(surface->pixels) + i * surface->pitch));
 	png_write_image(png_ptr, row_pointers);
@@ -152,6 +153,8 @@ int SDL_SavePNG_RW(SDL_Surface *surface, SDL_RWops *dst, int freedst)
 
 	/* Done */
 	png_destroy_write_struct(&png_ptr, &info_ptr);
-	if (freedst) SDL_RWclose(dst);
+	SDL_RWclose(dst);
+  SDL_FreeSurface(surface);
+
 	return (SUCCESS);
 }

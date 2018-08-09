@@ -954,90 +954,78 @@ unsigned int getPixel()
 
 void render8bpp()
 {
-   byte *pbPos = reinterpret_cast<byte *>(CPC.scr_pos);
    byte bCount = *RendWid++;
    while (bCount--) {
       byte val = getPixel();
-      *pbPos++ = val;
+      *CPC.scr_pos++ = val;
    }
-   CPC.scr_pos = reinterpret_cast<dword *>(pbPos);
 }
 
 
 
 void render8bpp_doubleY()
 {
-   byte *pbPos = reinterpret_cast<byte *>(CPC.scr_pos);
-   dword dwLineOffs = CPC.scr_bps << 2;
    byte bCount = *RendWid++;
    while (bCount--) {
       byte val = getPixel();
-      *(pbPos + dwLineOffs) = val;
-      *pbPos++ = val;
+      *(CPC.scr_pos + CPC.scr_bps) = val;
+      *CPC.scr_pos++ = val;
    }
-   CPC.scr_pos = reinterpret_cast<dword *>(pbPos);
 }
 
 
 
 void render16bpp()
 {
-   word *pwPos = reinterpret_cast<word *>(CPC.scr_pos);
    byte bCount = *RendWid++;
    while (bCount--) {
       word val = getPixel();
-      *pwPos++ = val;
+      *reinterpret_cast<word*>(CPC.scr_pos) = val;
+      CPC.scr_pos += 2;
    }
-   CPC.scr_pos = reinterpret_cast<dword *>(pwPos);
 }
 
 
 
 void render16bpp_doubleY()
 {
-   word *pwPos = reinterpret_cast<word *>(CPC.scr_pos);
-   dword dwLineOffs = CPC.scr_bps << 1;
    byte bCount = *RendWid++;
    while (bCount--) {
       word val = getPixel();
-      *(pwPos + dwLineOffs) = val;
-      *pwPos++ = val;
+      *reinterpret_cast<word*>(CPC.scr_pos) = val;
+      *(reinterpret_cast<word*>(CPC.scr_pos + CPC.scr_bps)) = val;
+      CPC.scr_pos += 2;
    }
-   CPC.scr_pos = reinterpret_cast<dword *>(pwPos);
 }
 
 
 
 void render24bpp()
 {
-   byte *pbPos = reinterpret_cast<byte *>(CPC.scr_pos);
    byte bCount = *RendWid++;
    while (bCount--) {
       dword val = getPixel();
-      *reinterpret_cast<word *>(pbPos) = static_cast<word>(val);
-      *(pbPos + 2) = static_cast<byte>(val >> 16);
-      pbPos += 3;
+      *reinterpret_cast<word *>(CPC.scr_pos) = static_cast<word>(val);
+      *(CPC.scr_pos + 2) = static_cast<byte>(val >> 16);
+      CPC.scr_pos += 3;
    }
-   CPC.scr_pos = reinterpret_cast<dword *>(pbPos);
 }
 
 
 
 void render24bpp_doubleY()
 {
-   byte *pbPos = reinterpret_cast<byte *>(CPC.scr_pos);
-   dword dwLineOffs = CPC.scr_bps << 2;
    byte bCount = *RendWid++;
    while (bCount--) {
       dword val = getPixel();
-      *reinterpret_cast<word *>(pbPos + dwLineOffs) = static_cast<word>(val);
-      *reinterpret_cast<word *>(pbPos) = static_cast<word>(val);
+      *reinterpret_cast<word *>(CPC.scr_pos + CPC.scr_bps) = static_cast<word>(val);
+      *reinterpret_cast<word *>(CPC.scr_pos) = static_cast<word>(val);
       val >>= 16;
-      *(pbPos + dwLineOffs + 2) = static_cast<byte>(val);
-      *(pbPos + 2) = static_cast<byte>(val);
-      pbPos += 3;
+      CPC.scr_pos += 2;
+      *(CPC.scr_pos + CPC.scr_bps) = static_cast<byte>(val);
+      *(CPC.scr_pos) = static_cast<byte>(val);
+      CPC.scr_pos++;
    }
-   CPC.scr_pos = reinterpret_cast<dword *>(pbPos);
 }
 
 
@@ -1047,7 +1035,8 @@ void render32bpp()
    byte bCount = *RendWid++;
    while (bCount--) {
       dword val = getPixel();
-      *CPC.scr_pos++ = val;
+      *reinterpret_cast<dword*>(CPC.scr_pos) = val;
+      CPC.scr_pos += 4;
    }
 }
 
@@ -1058,8 +1047,9 @@ void render32bpp_doubleY()
    byte bCount = *RendWid++;
    while (bCount--) {
       dword val = getPixel();
-      *(CPC.scr_pos + CPC.scr_bps) = val;
-      *CPC.scr_pos++ = val;
+      *reinterpret_cast<dword*>(CPC.scr_pos) = val;
+      *(reinterpret_cast<dword*>(CPC.scr_pos + CPC.scr_bps)) = val;
+      CPC.scr_pos += 4;
    }
 }
 

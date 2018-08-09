@@ -105,7 +105,8 @@ byte *pbTapeImage = nullptr;
 byte keyboard_matrix[16];
 
 std::list<SDL_Event> virtualKeyboardEvents;
-dword lastVirtualEventTicks;
+dword nextVirtualEventFrameCount, dwFrameCountOverall = 0;
+dword breakPointsToSkipBeforeProceedingWithVirtualEvents = 0;
 
 byte *membank_config[8][4];
 
@@ -292,7 +293,7 @@ void ga_memory_manager ()
          membank_read[GateArray.lower_ROM_bank] = pbROMlo; // 'page in' lower ROM
       }
    }
-   if (CPC.model >= 3 && GateArray.registerPageOn) {
+   if (CPC.model > 2 && GateArray.registerPageOn) {
       membank_read[1] = pbRegisterPage;
       membank_write[1] = pbRegisterPage;
    }
@@ -452,7 +453,7 @@ void z80_OUT_handler (reg_pair port, byte val)
             }
             break;
          case 2: // set mode
-            if (!asic.locked && (val & 0x20) && CPC.model > 2) {
+            if (!asic.locked && (val & 0x20)) {
                // 6128+ RMR2 register
                int membank = (val >> 3) & 3;
                if (membank == 3) { // Map register page at 0x4000
@@ -488,22 +489,17 @@ void z80_OUT_handler (reg_pair port, byte val)
             }
             break;
          case 3: // set memory configuration
-            if (asic.locked) {
-               #ifdef DEBUG_GA
-               if (dwDebugFlag) {
-                  fprintf(pfoDebug, "mem 0x%02x\r\n", val);
-               }
-               #endif
-               LOG_DEBUG("RAM config: " << static_cast<int>(val));
-               GateArray.RAM_config = val;
-               ga_memory_manager();
-               if (CPC.mf2) { // MF2 enabled?
-                  *(pbMF2ROM + 0x03fff) = val;
-               }
-            } else {
-               // 6128+ memory mapping register
-               LOG_DEBUG("Memory mapping register (RAM)");
-            }
+             #ifdef DEBUG_GA
+             if (dwDebugFlag) {
+                fprintf(pfoDebug, "mem 0x%02x\r\n", val);
+             }
+             #endif
+             LOG_DEBUG("RAM config: " << static_cast<int>(val));
+             GateArray.RAM_config = val;
+             ga_memory_manager();
+             if (CPC.mf2) { // MF2 enabled?
+                *(pbMF2ROM + 0x03fff) = val;
+             }
             break;
       }
    }
@@ -512,7 +508,9 @@ void z80_OUT_handler (reg_pair port, byte val)
       byte crtc_port = port.b.h & 3;
       if (crtc_port == 0) { // CRTC register select?
          // 6128+: this is where we detect the ASIC (un)locking sequence
-         asic_poke_lock_sequence(val);
+         if (CPC.model > 2) {
+           asic_poke_lock_sequence(val);
+         }
          CRTC.reg_select = val;
          if (CPC.mf2) { // MF2 enabled?
             *(pbMF2ROM + 0x03cff) = val;
@@ -772,138 +770,135 @@ void z80_OUT_handler (reg_pair port, byte val)
 
 
 
-void print (dword *pdwAddr, const char *pchStr, bool bolColour)
+void print (byte *pbAddr, const char *pchStr, bool bolColour)
 {
    int iLen, iIdx;
    dword dwColour;
    word wColour;
    byte bRow, bColour;
+   byte *pbLine, *pbPixel;
 
+   iLen = strlen(pchStr); // number of characters to process
    switch (CPC.scr_bpp)
    {
       case 32:
          dwColour = bolColour ? 0x00ffffff : 0;
-         iLen = strlen(pchStr); // number of characters to process
          for (int n = 0; n < iLen; n++) {
-            dword *pdwLine, *pdwPixel;
             iIdx = static_cast<int>(pchStr[n]); // get the ASCII value
             if ((iIdx < FNT_MIN_CHAR) || (iIdx > FNT_MAX_CHAR)) { // limit it to the range of chars in the font
                iIdx = FNT_BAD_CHAR;
             }
             iIdx -= FNT_MIN_CHAR; // zero base the index
-            pdwLine = pdwAddr; // keep a reference to the current screen position
+            pbLine = pbAddr; // keep a reference to the current screen position
             for (int iRow = 0; iRow < FNT_CHAR_HEIGHT; iRow++) { // loop for all rows in the font character
-               pdwPixel = pdwLine;
+               pbPixel = pbLine;
                bRow = bFont[iIdx]; // get the bitmap information for one row
                for (int iCol = 0; iCol < FNT_CHAR_WIDTH; iCol++) { // loop for all columns in the font character
                   if (bRow & 0x80) { // is the bit set?
-                     *(pdwPixel+1) = 0; // draw the "shadow"
-                     *(pdwPixel+CPC.scr_line_offs) = 0;
-                     *(pdwPixel+CPC.scr_line_offs+1) = 0;
-                     *pdwPixel = dwColour; // draw the character pixel
+                     *(reinterpret_cast<dword*>(pbPixel)+1) = 0; // draw the "shadow"
+                     *(reinterpret_cast<dword*>(pbPixel+CPC.scr_line_offs+1)) = 0;
+                     *(reinterpret_cast<dword*>(pbPixel+CPC.scr_line_offs)) = 0;
+                     *(reinterpret_cast<dword*>(pbPixel)) = dwColour; // draw the character pixel
+                     *(reinterpret_cast<dword *>(pbPixel+CPC.scr_bps)) = dwColour; // draw the second line in case dwYScale == 2 (will be overwritten by shadow otherwise)
                   }
-                  pdwPixel++; // update the screen position
+                  pbPixel += 4; // update the screen position
                   bRow <<= 1; // advance to the next bit
                }
-               pdwLine += CPC.scr_line_offs; // advance to next screen line
+               pbLine += CPC.scr_line_offs; // advance to next screen line
                iIdx += FNT_CHARS; // advance to next row in font data
             }
-            pdwAddr += FNT_CHAR_WIDTH; // set screen address to next character position
+            pbAddr += FNT_CHAR_WIDTH*4; // set screen address to next character position
          }
          break;
 
       case 24:
          dwColour = bolColour ? 0x00ffffff : 0;
-         iLen = strlen(pchStr); // number of characters to process
          for (int n = 0; n < iLen; n++) {
-            dword *pdwLine;
-            byte *pbPixel;
             iIdx = static_cast<int>(pchStr[n]); // get the ASCII value
             if ((iIdx < FNT_MIN_CHAR) || (iIdx > FNT_MAX_CHAR)) { // limit it to the range of chars in the font
                iIdx = FNT_BAD_CHAR;
             }
             iIdx -= FNT_MIN_CHAR; // zero base the index
-            pdwLine = pdwAddr; // keep a reference to the current screen position
+            pbLine = pbAddr; // keep a reference to the current screen position
             for (int iRow = 0; iRow < FNT_CHAR_HEIGHT; iRow++) { // loop for all rows in the font character
-               pbPixel = reinterpret_cast<byte *>(pdwLine);
+               pbPixel = pbLine;
                bRow = bFont[iIdx]; // get the bitmap information for one row
                for (int iCol = 0; iCol < FNT_CHAR_WIDTH; iCol++) { // loop for all columns in the font character
                   if (bRow & 0x80) { // is the bit set?
-                     *(reinterpret_cast<dword *>(pbPixel+CPC.scr_line_offs)) = 0; // draw the "shadow"
-                     *reinterpret_cast<dword *>(pbPixel) = dwColour; // draw the character pixel
+                     *(reinterpret_cast<dword *>(pbPixel+1)) = 0; // draw the "shadow"
+                     *(reinterpret_cast<dword *>(pbPixel+CPC.scr_line_offs)) = 0;
+                     *(reinterpret_cast<dword *>(pbPixel+CPC.scr_line_offs+1)) = 0;
+                     *(reinterpret_cast<dword *>(pbPixel)) = dwColour; // draw the character pixel
+                     *(reinterpret_cast<dword *>(pbPixel+CPC.scr_bps)) = dwColour; // draw the second line in case dwYScale == 2 (will be overwritten by shadow otherwise)
                   }
                   pbPixel += 3; // update the screen position
                   bRow <<= 1; // advance to the next bit
                }
-               pdwLine += CPC.scr_line_offs; // advance to next screen line
+               pbLine += CPC.scr_line_offs; // advance to next screen line
                iIdx += FNT_CHARS; // advance to next row in font data
             }
-            pdwAddr += FNT_CHAR_WIDTH-2; // set screen address to next character position
+            pbAddr += FNT_CHAR_WIDTH*3; // set screen address to next character position
          }
          break;
 
       case 15:
       case 16:
          wColour = bolColour ? 0xffff : 0;
-         iLen = strlen(pchStr); // number of characters to process
          for (int n = 0; n < iLen; n++) {
-            dword *pdwLine;
-            word *pwPixel;
             iIdx = static_cast<int>(pchStr[n]); // get the ASCII value
             if ((iIdx < FNT_MIN_CHAR) || (iIdx > FNT_MAX_CHAR)) { // limit it to the range of chars in the font
                iIdx = FNT_BAD_CHAR;
             }
             iIdx -= FNT_MIN_CHAR; // zero base the index
-            pdwLine = pdwAddr; // keep a reference to the current screen position
+            pbLine = pbAddr; // keep a reference to the current screen position
             for (int iRow = 0; iRow < FNT_CHAR_HEIGHT; iRow++) { // loop for all rows in the font character
-               pwPixel = reinterpret_cast<word *>(pdwLine);
+               pbPixel = pbLine;
                bRow = bFont[iIdx]; // get the bitmap information for one row
                for (int iCol = 0; iCol < FNT_CHAR_WIDTH; iCol++) { // loop for all columns in the font character
                   if (bRow & 0x80) { // is the bit set?
-                     *(pwPixel+1) = 0; // draw the "shadow"
-                     *reinterpret_cast<word *>(reinterpret_cast<dword *>(pwPixel)+CPC.scr_line_offs) = 0;
-                     *(reinterpret_cast<word *>(reinterpret_cast<dword *>(pwPixel)+CPC.scr_line_offs)+1) = 0;
-                     *pwPixel = wColour; // draw the character pixel
+                     *(reinterpret_cast<word *>(pbPixel)+1) = 0; // draw the "shadow"
+                     *(reinterpret_cast<word *>(pbPixel+CPC.scr_line_offs)) = 0;
+                     *(reinterpret_cast<word *>(pbPixel+CPC.scr_line_offs)+1) = 0;
+                     *(reinterpret_cast<word *>(pbPixel)) = wColour; // draw the character pixel
+                     *(reinterpret_cast<word *>(pbPixel+CPC.scr_bps)) = wColour; // draw the second line in case dwYScale == 2 (will be overwritten by shadow otherwise)
                   }
-                  pwPixel++; // update the screen position
+                  pbPixel += 2; // update the screen position
                   bRow <<= 1; // advance to the next bit
                }
-               pdwLine += CPC.scr_line_offs; // advance to next screen line
+               pbLine += CPC.scr_line_offs; // advance to next screen line
                iIdx += FNT_CHARS; // advance to next row in font data
             }
-            pdwAddr += FNT_CHAR_WIDTH/2; // set screen address to next character position
+            pbAddr += FNT_CHAR_WIDTH*2; // set screen address to next character position
          }
          break;
 
       case 8:
          bColour = bolColour ? SDL_MapRGB(back_surface->format,255,255,255) : SDL_MapRGB(back_surface->format,0,0,0);
-         iLen = strlen(pchStr); // number of characters to process
          for (int n = 0; n < iLen; n++) {
-            dword *pdwLine;
-            byte *pbPixel;
             iIdx = static_cast<int>(pchStr[n]); // get the ASCII value
             if ((iIdx < FNT_MIN_CHAR) || (iIdx > FNT_MAX_CHAR)) { // limit it to the range of chars in the font
                iIdx = FNT_BAD_CHAR;
             }
             iIdx -= FNT_MIN_CHAR; // zero base the index
-            pdwLine = pdwAddr; // keep a reference to the current screen position
+            pbLine = pbAddr; // keep a reference to the current screen position
             for (int iRow = 0; iRow < FNT_CHAR_HEIGHT; iRow++) { // loop for all rows in the font character
-               pbPixel = reinterpret_cast<byte *>(pdwLine);
+               pbPixel = pbLine;
                bRow = bFont[iIdx]; // get the bitmap information for one row
                for (int iCol = 0; iCol < FNT_CHAR_WIDTH; iCol++) { // loop for all columns in the font character
                   if (bRow & 0x80) { // is the bit set?
                      *(pbPixel+1) = 0; // draw the "shadow"
-                     *reinterpret_cast<byte *>(reinterpret_cast<dword *>(pbPixel)+CPC.scr_line_offs) = 0;
-                     *(reinterpret_cast<byte *>(reinterpret_cast<dword *>(pbPixel)+CPC.scr_line_offs)+1) = 0;
+                     *(pbPixel+CPC.scr_line_offs) = 0;
+                     *(pbPixel+CPC.scr_line_offs+1) = 0;
                      *pbPixel = bColour; // draw the character pixel
+                     *(pbPixel+CPC.scr_bps) = bColour; // draw the second line in case dwYScale == 2 (will be overwritten by shadow otherwise)
                   }
                   pbPixel++; // update the screen position
                   bRow <<= 1; // advance to the next bit
                }
-               pdwLine += CPC.scr_line_offs; // advance to next screen line
+               pbLine += CPC.scr_line_offs; // advance to next screen line
                iIdx += FNT_CHARS; // advance to next row in font data
             }
-            pdwAddr += FNT_CHAR_WIDTH/4; // set screen address to next character position
+            pbAddr += FNT_CHAR_WIDTH; // set screen address to next character position
          }
          break;
    }
@@ -1455,10 +1450,10 @@ int video_init ()
    }
 
    vid_plugin->lock();
-   CPC.scr_bps = back_surface->pitch / 4; // rendered screen line length (changing bytes to dwords)
+   CPC.scr_bps = back_surface->pitch; // rendered screen line length in bytes
    CPC.scr_line_offs = CPC.scr_bps * dwYScale;
    CPC.scr_pos =
-   CPC.scr_base = static_cast<dword *>(back_surface->pixels); // memory address of back buffer
+   CPC.scr_base = static_cast<byte *>(back_surface->pixels); // memory address of back buffer
    CPC.scr_gui_is_currently_on = false;
 
    vid_plugin->unlock();
@@ -1615,7 +1610,7 @@ void loadConfiguration (t_CPC &CPC, const std::string& configFilename)
    if ((CPC.speed < MIN_SPEED_SETTING) || (CPC.speed > MAX_SPEED_SETTING)) {
       CPC.speed = DEF_SPEED_SETTING;
    }
-   CPC.limit_speed = 1;
+   CPC.limit_speed = conf.getIntValue("system", "limit_speed", 1) & 1;
    CPC.auto_pause = conf.getIntValue("system", "auto_pause", 1) & 1;
    CPC.boot_time = conf.getIntValue("system", "boot_time", 5);
    CPC.printer = conf.getIntValue("system", "printer", 0) & 1;
@@ -1717,6 +1712,7 @@ void saveConfiguration (t_CPC &CPC, const std::string& configFilename)
    conf.setIntValue("system", "jumpers", CPC.jumpers);
 
    conf.setIntValue("system", "ram_size", CPC.ram_size); // 128KB RAM
+   conf.setIntValue("system", "limit_speed", CPC.limit_speed);
    conf.setIntValue("system", "speed", CPC.speed); // original CPC speed
    conf.setIntValue("system", "auto_pause", CPC.auto_pause);
    conf.setIntValue("system", "printer", CPC.printer);
@@ -1871,14 +1867,13 @@ void set_osd_message(const std::string& message) {
 void dumpScreen() {
    std::string dir = CPC.sdump_dir;
    if (!is_directory(dir)) {
-	  LOG_ERROR("Unable to find or open directory " + CPC.sdump_dir + " when trying to take a screenshot. Defaulting to current directory.")
-	  dir = ".";
+          LOG_ERROR("Unable to find or open directory " + CPC.sdump_dir + " when trying to take a screenshot. Defaulting to current directory.")
+          dir = ".";
    }
-   SDL_Surface* shot = SDL_PNGFormatAlpha(back_surface);
    std::string dumpFile = "screenshot_" + getDateString() + ".png";
    std::string dumpPath = dir + "/" + dumpFile;
    LOG_DEBUG("Dumping screen to " + dumpPath);
-   if (SDL_SavePNG(shot, dumpPath.c_str())) {
+   if (SDL_SavePNG(back_surface, dumpPath)) {
      LOG_DEBUG("Could not write screenshot file to " + dumpPath);
    }
    else {
@@ -1890,8 +1885,8 @@ void dumpScreen() {
 void dumpSnapshot() {
    std::string dir = CPC.snap_path;
    if (!is_directory(dir)) {
-	  LOG_ERROR("Unable to find or open directory " + CPC.snap_path + " when trying to take a machine snapshot. Defaulting to current directory.")
-	  dir = ".";
+          LOG_ERROR("Unable to find or open directory " + CPC.snap_path + " when trying to take a machine snapshot. Defaulting to current directory.")
+          dir = ".";
    }
    std::string dumpFile = "snapshot_" + getDateString() + ".sna";
    std::string dumpPath = dir + "/" + dumpFile;
@@ -1906,7 +1901,6 @@ void dumpSnapshot() {
 
 int cap32_main (int argc, char **argv)
 {
-   dword dwOffset;
    int iExitCondition;
    bool bolDone;
    SDL_Event event;
@@ -1975,7 +1969,7 @@ int cap32_main (int argc, char **argv)
    // Fill the buffer with autocmd if provided
    virtualKeyboardEvents = CPC.InputMapper->StringToEvents(args.autocmd);
    // Give some time to the CPC to start before sending any command
-   lastVirtualEventTicks = SDL_GetTicks() + CPC.boot_time * 1000;
+   nextVirtualEventFrameCount = dwFrameCountOverall + CPC.boot_time;
 
 // ----------------------------------------------------------------------------
 
@@ -1986,11 +1980,32 @@ int cap32_main (int argc, char **argv)
    bolDone = false;
 
    while (!bolDone) {
-      if(!virtualKeyboardEvents.empty() && lastVirtualEventTicks + 100 < SDL_GetTicks()) {
-        lastVirtualEventTicks = SDL_GetTicks();
-        SDL_PushEvent(&virtualKeyboardEvents.front());
-        virtualKeyboardEvents.pop_front();
+      if(!virtualKeyboardEvents.empty()
+         && (nextVirtualEventFrameCount < dwFrameCountOverall)
+         && (breakPointsToSkipBeforeProceedingWithVirtualEvents == 0)) {
+
+         auto nextVirtualEvent = &virtualKeyboardEvents.front();
+         SDL_PushEvent(nextVirtualEvent);
+         
+         auto keysym = nextVirtualEvent->key.keysym;
+         LOG_DEBUG("Inserted virtual event keysym=" << int(keysym.sym));
+         
+         dword cpc_key = CPC.InputMapper->CPCkeyFromKeysym(keysym);
+         if (!(cpc_key & MOD_EMU_KEY)) {
+            LOG_DEBUG("The virtual event is a keypress (not a command), so introduce a pause.");
+            // Setting nextVirtualEventFrameCount below guarantees to
+            // immediately break the loop enclosing this code and wait
+            // at least one frame.
+            nextVirtualEventFrameCount = dwFrameCountOverall
+               + ((event.type == SDL_KEYDOWN)?1:0);
+            // The extra delay in case of SDL_KEYDOWN is to keep the
+            // key pressed long enough.  If we don't do this, the CPC
+            // firmware debouncer eats repeated characters.
+         }
+
+         virtualKeyboardEvents.pop_front();
       }
+      
       while (SDL_PollEvent(&event)) {
          switch (event.type) {
             case SDL_KEYDOWN:
@@ -2037,6 +2052,13 @@ int cap32_main (int argc, char **argv)
 
                         case CAP32_SCRNSHOT:
                            dumpScreen();
+                           break;
+
+                        case CAP32_WAITBREAK:
+                           breakPointsToSkipBeforeProceedingWithVirtualEvents++;
+                           LOG_INFO("Will skip " << breakPointsToSkipBeforeProceedingWithVirtualEvents << " before processing more virtual events.");
+                           LOG_DEBUG("Setting z80.break_point=0 (was " << z80.break_point << ").");
+                           z80.break_point = 0; // set break point to address 0. FIXME would be interesting to change this via a parameter of CAP32_WAITBREAK on command line.
                            break;
 
                         case CAP32_SNAPSHOT:
@@ -2126,7 +2148,7 @@ int cap32_main (int argc, char **argv)
             case SDL_JOYBUTTONDOWN:
             {
                 dword cpc_key = CPC.InputMapper->CPCkeyFromJoystickButton(event.jbutton);
-				if (cpc_key == 0xff) {
+                                if (cpc_key == 0xff) {
                   if (event.jbutton.button == CPC.joystick_menu_button)
                   {
                     showGui();
@@ -2229,24 +2251,41 @@ int cap32_main (int argc, char **argv)
          if (!vid_plugin->lock()) { // lock the video buffer
            continue; // skip the emulation if we can't get a lock
          }
-         dwOffset = CPC.scr_pos - CPC.scr_base; // offset in current surface row
+         dword dwOffset = CPC.scr_pos - CPC.scr_base; // offset in current surface row
          if (VDU.scrln > 0) {
-            CPC.scr_base = static_cast<dword *>(back_surface->pixels) + (VDU.scrln * CPC.scr_line_offs); // determine current position
+            CPC.scr_base = static_cast<byte *>(back_surface->pixels) + (VDU.scrln * CPC.scr_line_offs); // determine current position
          } else {
-            CPC.scr_base = static_cast<dword *>(back_surface->pixels); // reset to surface start
+            CPC.scr_base = static_cast<byte *>(back_surface->pixels); // reset to surface start
          }
          CPC.scr_pos = CPC.scr_base + dwOffset; // update current rendering position
 
          iExitCondition = z80_execute(); // run the emulation until an exit condition is met
+         
+         if (iExitCondition == EC_BREAKPOINT) {
+            // We have to clear breakpoint to let the z80 emulator move on.
+            z80.break_point = 0xffffffff; // clear break point
+            z80.trace = 1; // make sure we'll be here to rearm break point at the next z80 instruction.
+
+            if (breakPointsToSkipBeforeProceedingWithVirtualEvents>0) {
+               breakPointsToSkipBeforeProceedingWithVirtualEvents--;
+               LOG_INFO("Decremented breakpoint skip counter to " << breakPointsToSkipBeforeProceedingWithVirtualEvents);
+            }
+         } else {
+            if (z80.break_point == 0xffffffff) { // TODO(cpcitor) clean up 0xffffffff into a value like Z80_BREAKPOINT_NONE
+               LOG_INFO("Rearming EC_BREAKPOINT.");
+               z80.break_point = 0; // set break point for next time
+            }
+         }
 
          if (iExitCondition == EC_FRAME_COMPLETE) { // emulation finished rendering a complete frame?
+            dwFrameCountOverall++;
             dwFrameCount++;
             if (SDL_GetTicks() < osd_timing) {
-               print(static_cast<dword *>(back_surface->pixels) + CPC.scr_line_offs, osd_message.c_str(), true);
+               print(static_cast<byte *>(back_surface->pixels) + CPC.scr_line_offs, osd_message.c_str(), true);
             } else if (CPC.scr_fps) {
                char chStr[15];
                sprintf(chStr, "%3dFPS %3d%%", static_cast<int>(dwFPS), static_cast<int>(dwFPS) * 100 / (1000 / static_cast<int>(FRAME_PERIOD_MS)));
-               print(static_cast<dword *>(back_surface->pixels) + CPC.scr_line_offs, chStr, true); // display the frames per second counter
+               print(static_cast<byte *>(back_surface->pixels) + CPC.scr_line_offs, chStr, true); // display the frames per second counter
             }
             asic_draw_sprites();
             vid_plugin->unlock();

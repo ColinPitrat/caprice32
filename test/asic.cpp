@@ -16,10 +16,7 @@ class AsicTest : public testing::Test {
       AsicTest() : lockSeq({0x00, 0xff, 0x77, 0xb3, 0x51, 0xa8, 0xd4, 0x62, 0x39, 0x9c, 0x46, 0x2b, 0x15, 0x8a, 0xcd})
       {
          asic.locked = true;
-         // DIRTY: to ensure that we reset the sequence
-         asic_poke_lock_sequence(0x01);
-         asic_poke_lock_sequence(0x00);
-         asic_poke_lock_sequence(0x00);
+         asic.lockSeqPos = 0;
       }
 
    protected:

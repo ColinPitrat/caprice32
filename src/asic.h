@@ -32,6 +32,7 @@ struct dma_t {
 
 struct asic_t {
   bool locked;
+  int lockSeqPos;
 
   bool extend_border;
   int hscroll;

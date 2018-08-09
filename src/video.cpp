@@ -895,8 +895,8 @@ SDL_Surface* seagle_init(video_plugin* t,int w,int h, int bpp, bool fs)
 {
 	if (bpp!=16)
   {
-    std::cerr << t->name << " only works in 16 bits color mode" << std::endl;
-		return nullptr;
+    std::cerr << t->name << " only works in 16 bits color mode - forcing 16 bpp" << std::endl;
+    bpp = 16;
   }
 	if (!fs)
 	{
@@ -1001,8 +1001,8 @@ SDL_Surface* scale2x_init(video_plugin* t,int w,int h, int bpp, bool fs)
 {
 	if (bpp!=16)
   {
-    std::cerr << t->name << " only works in 16 bits color mode" << std::endl;
-		return nullptr;
+    std::cerr << t->name << " only works in 16 bits color mode - forcing 16 bpp" << std::endl;
+    bpp = 16;
   }
 	if (!fs)
 	{
@@ -1270,8 +1270,8 @@ SDL_Surface* ascale2x_init(video_plugin* t,int w,int h, int bpp, bool fs)
 {
 	if (bpp!=16)
   {
-    std::cerr << t->name << " only works in 16 bits color mode" << std::endl;
-		return nullptr;
+    std::cerr << t->name << " only works in 16 bits color mode - forcing 16 bpp" << std::endl;
+    bpp = 16;
   }
 	if (!fs)
 	{
@@ -1377,8 +1377,8 @@ SDL_Surface* tv2x_init(video_plugin* t,int w,int h, int bpp, bool fs)
 {
 	if (bpp!=16)
   {
-    std::cerr << t->name << " only works in 16 bits color mode" << std::endl;
-		return nullptr;
+    std::cerr << t->name << " only works in 16 bits color mode - forcing 16 bpp" << std::endl;
+    bpp = 16;
   }
 	if (!fs)
 	{
@@ -1480,8 +1480,8 @@ SDL_Surface* swbilin_init(video_plugin* t,int w,int h, int bpp, bool fs)
 {
 	if (bpp!=16)
   {
-    std::cerr << t->name << " only works in 16 bits color mode" << std::endl;
-		return nullptr;
+    std::cerr << t->name << " only works in 16 bits color mode - forcing 16 bpp" << std::endl;
+    bpp = 16;
   }
 	if (!fs)
 	{
@@ -1630,8 +1630,8 @@ SDL_Surface* swbicub_init(video_plugin* t,int w,int h, int bpp, bool fs)
 {
 	if (bpp!=16)
   {
-    std::cerr << t->name << " only works in 16 bits color mode" << std::endl;
-		return nullptr;
+    std::cerr << t->name << " only works in 16 bits color mode - forcing 16 bpp" << std::endl;
+    bpp = 16;
   }
 	if (!fs)
 	{
@@ -1742,8 +1742,8 @@ SDL_Surface* dotmat_init(video_plugin* t,int w,int h, int bpp, bool fs)
 {
 	if (bpp!=16)
   {
-    std::cerr << t->name << " only works in 16 bits color mode" << std::endl;
-		return nullptr;
+    std::cerr << t->name << " only works in 16 bits color mode - forcing 16 bpp" << std::endl;
+    bpp = 16;
   }
 	if (!fs)
 	{
