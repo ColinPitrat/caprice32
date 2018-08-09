@@ -56,6 +56,7 @@ TEST_TARGET = test_runner
 IPATHS = -Isrc/ -Isrc/gui/includes `freetype-config --cflags` `sdl-config --cflags` `pkg-config --cflags libpng`
 LIBS = `sdl-config --libs` -lz `freetype-config --libs` `pkg-config --libs libpng`
 CXX ?= g++
+COMMON_CFLAGS = -fPIC
 ifdef WITH_IPF
 COMMON_CFLAGS += -DWITH_IPF
 LIBS += -lcapsimage
@@ -217,8 +218,9 @@ endif
 googletest:
 	@[ -d googletest ] || git clone https://github.com/google/googletest.git
 
-TEST_CFLAGS = $(COMMON_CFLAGS) -I$(GTEST_DIR)/include -I$(GTEST_DIR)
+TEST_CFLAGS = $(COMMON_CFLAGS) -I$(GTEST_DIR)/include -I$(GTEST_DIR) -I$(GMOCK_DIR)/include -I$(GMOCK_DIR)
 GTEST_DIR = googletest/googletest/
+GMOCK_DIR = googletest/googlemock/
 
 $(TEST_DEPENDS): $(OBJDIR)/%.d: %.cpp
 	@echo Computing dependencies for $<
@@ -232,8 +234,12 @@ $(OBJDIR)/$(GTEST_DIR)/src/gtest-all.o: $(GTEST_DIR)/src/gtest-all.cc googletest
 	@mkdir -p `dirname $@`
 	$(CXX) -c $(BUILD_FLAGS) $(TEST_CFLAGS) -o $@ $<
 
-$(TEST_TARGET): $(OBJECTS) $(TEST_OBJECTS) $(OBJDIR)/$(GTEST_DIR)/src/gtest-all.o
-	$(CXX) $(LDFLAGS) -o $(TEST_TARGET) $(OBJDIR)/$(GTEST_DIR)/src/gtest-all.o $(TEST_OBJECTS) $(OBJECTS) $(LIBS) -lpthread
+$(OBJDIR)/$(GMOCK_DIR)/src/gmock-all.o: $(GMOCK_DIR)/src/gmock-all.cc googletest
+	@mkdir -p `dirname $@`
+	$(CXX) -c $(BUILD_FLAGS) $(TEST_CFLAGS) -o $@ $<
+
+$(TEST_TARGET): $(OBJECTS) $(TEST_OBJECTS) $(OBJDIR)/$(GTEST_DIR)/src/gtest-all.o $(OBJDIR)/$(GMOCK_DIR)/src/gmock-all.o
+	$(CXX) $(LDFLAGS) -o $(TEST_TARGET) $(OBJDIR)/$(GTEST_DIR)/src/gtest-all.o $(OBJDIR)/$(GMOCK_DIR)/src/gmock-all.o $(TEST_OBJECTS) $(OBJECTS) $(LIBS) -lpthread
 
 ifeq ($(PLATFORM),windows)
 unit_test: $(TEST_TARGET)
