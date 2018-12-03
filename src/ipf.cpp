@@ -252,10 +252,11 @@ static void ReadTrack (t_track *pt_)
 	{
 		// Allocate enough for the full decoded size, allowing for expanded overlapping sectors
 		memcpy(pt_->data = static_cast<byte*>(malloc(uDecoded)), abDecoded, pt_->size = uDecoded);
+		unsigned int offset = (pt_->data-abDecoded);
 
 		// Set the sector data pointers for the new buffer
 		for (unsigned int u = 0 ; u < pt_->sectors ; u++)
-			pt_->sector[u].data_ += (pt_->data-abDecoded);
+			pt_->sector[u].setData(pt_->sector[u].getDataForWrite()+offset);
 	}
 }
 
