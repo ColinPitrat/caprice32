@@ -445,6 +445,7 @@ typedef struct {
    void setSizes(unsigned int size, unsigned int total_size) {
      size_ = size;
      total_size_ = total_size;
+     weak_read_version_ = 0;
      weak_versions_ = total_size_ / size_;
    }
 
@@ -456,8 +457,8 @@ typedef struct {
    unsigned char *data_; // pointer to sector data
    unsigned int size_; // sector size in bytes
    unsigned int total_size_; // total data size in bytes
-   unsigned int weak_versions_ = 1; // number of versions of this sector (should be 1 except for weak/random sectors)
-   unsigned int weak_read_version_ = 0; // version of the sector to return when reading
+   unsigned int weak_versions_; // number of versions of this sector (should be 1 except for weak/random sectors)
+   unsigned int weak_read_version_; // version of the sector to return when reading
 } t_sector;
 
 typedef struct {
