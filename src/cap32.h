@@ -428,8 +428,36 @@ typedef struct {
 typedef struct {
    unsigned char CHRN[4]; // the CHRN for this sector
    unsigned char flags[4]; // ST1 and ST2 - reflects any possible error conditions
-   unsigned int size; // sector size in bytes
-   unsigned char *data; // pointer to sector data
+
+   void setData(unsigned char* data) {
+     data_ = data;
+   }
+
+   unsigned char* getDataForWrite() {
+     return data_;
+   }
+
+   unsigned char* getDataForRead() {
+     weak_read_version_ = (weak_read_version_ + 1) % weak_versions_;
+     return &data_[weak_read_version_*size_];
+   }
+
+   void setSizes(unsigned int size, unsigned int total_size) {
+     size_ = size;
+     total_size_ = total_size;
+     weak_versions_ = total_size_ / size_;
+   }
+
+   unsigned int getTotalSize() {
+     return total_size_;
+   }
+
+ private:
+   unsigned char *data_; // pointer to sector data
+   unsigned int size_; // sector size in bytes
+   unsigned int total_size_; // total data size in bytes
+   unsigned int weak_versions_ = 1; // number of versions of this sector (should be 1 except for weak/random sectors)
+   unsigned int weak_read_version_ = 0; // version of the sector to return when reading
 } t_sector;
 
 typedef struct {

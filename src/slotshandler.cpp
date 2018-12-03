@@ -440,7 +440,7 @@ void dsk_eject (t_drive *drive)
    dword track, side;
 
    if (drive->eject_hook)
-		drive->eject_hook(drive);	// additional cleanup
+     drive->eject_hook(drive); // additional cleanup
 
    for (track = 0; track < DSK_TRACKMAX; track++) { // loop for all tracks
       for (side = 0; side < DSK_SIDEMAX; side++) { // loop for all sides
@@ -452,6 +452,15 @@ void dsk_eject (t_drive *drive)
    dword dwTemp = drive->current_track; // save the drive head position
    memset(drive, 0, sizeof(t_drive)); // clear drive info structure
    drive->current_track = dwTemp;
+}
+
+std::string chrn_to_string(unsigned char* chrn) {
+  std::ostringstream oss;
+  oss << static_cast<int>(chrn[0]) << "-"
+      << static_cast<int>(chrn[1]) << "-"
+      << static_cast<int>(chrn[2]) << "-"
+      << static_cast<int>(chrn[3]);
+  return oss.str();
 }
 
 int dsk_load (FILE *pfile, t_drive *drive)
@@ -512,8 +521,8 @@ int dsk_load (FILE *pfile, t_drive *drive)
         for (sector = 0; sector < dwSectors; sector++) { // loop for all sectors
           memcpy(drive->track[track][side].sector[sector].CHRN, (pbPtr + 0x18), 4); // copy CHRN
           memcpy(drive->track[track][side].sector[sector].flags, (pbPtr + 0x1c), 2); // copy ST1 & ST2
-          drive->track[track][side].sector[sector].size = dwSectorSize;
-          drive->track[track][side].sector[sector].data = pbDataPtr; // store pointer to sector data
+          drive->track[track][side].sector[sector].setSizes(dwSectorSize, dwSectorSize);
+          drive->track[track][side].sector[sector].setData(pbDataPtr); // store pointer to sector data
           pbDataPtr += dwSectorSize;
           pbPtr += 8;
         }
@@ -533,7 +542,6 @@ int dsk_load (FILE *pfile, t_drive *drive)
       if (drive->tracks > DSK_TRACKMAX) {  // limit to maximum possible
         drive->tracks = DSK_TRACKMAX;
       }
-      LOG_DEBUG("with " << drive->tracks << " tracks");
       drive->random_DEs = *(pbPtr + 0x31) & 0x80; // simulate random Data Errors?
       drive->sides = *(pbPtr + 0x31) & 3; // number of sides
       LOG_DEBUG("with " << drive->sides << " sides");
@@ -547,6 +555,7 @@ int dsk_load (FILE *pfile, t_drive *drive)
       for (track = 0; track < drive->tracks; track++) { // loop for all tracks
         for (side = 0; side <= drive->sides; side++) { // loop for all sides
           dwTrackSize = (*pbTrackSizeTable++ << 8); // track size in bytes
+          LOG_DEBUG("Track " << track << ", side " << side << ", size " << dwTrackSize);
           if (dwTrackSize != 0) { // only process if track contains data
             dwTrackSize -= 0x100; // compensate for track header
             if(fread(pbGPBuffer+0x100, 0x100, 1, pfile) != 1) { // read track header
@@ -577,14 +586,17 @@ int dsk_load (FILE *pfile, t_drive *drive)
             }
             pbDataPtr = drive->track[track][side].data; // pointer to start of memory buffer
             pbTempPtr = pbDataPtr; // keep a pointer to the beginning of the buffer for the current track
+            pbPtr += 0x18;
             for (sector = 0; sector < dwSectors; sector++) { // loop for all sectors
-              memcpy(drive->track[track][side].sector[sector].CHRN, (pbPtr + 0x18), 4); // copy CHRN
-              memcpy(drive->track[track][side].sector[sector].flags, (pbPtr + 0x1c), 2); // copy ST1 & ST2
-              dwSectorSize = *(pbPtr + 0x1e) + (*(pbPtr + 0x1f) << 8); // sector size in bytes
-              drive->track[track][side].sector[sector].size = dwSectorSize;
-              drive->track[track][side].sector[sector].data = pbDataPtr; // store pointer to sector data
+              memcpy(drive->track[track][side].sector[sector].CHRN, pbPtr, 4); // copy CHRN
+              memcpy(drive->track[track][side].sector[sector].flags, (pbPtr + 0x04), 2); // copy ST1 & ST2
+	      dword dwRealSize = 0x80 << *(pbPtr+0x03);
+              dwSectorSize = *(pbPtr + 0x6) + (*(pbPtr + 0x7) << 8); // sector size in bytes
+              drive->track[track][side].sector[sector].setSizes(dwRealSize, dwSectorSize);
+              drive->track[track][side].sector[sector].setData(pbDataPtr); // store pointer to sector data
               pbDataPtr += dwSectorSize;
               pbPtr += 8;
+              LOG_DEBUG("Sector " << sector << " size: " << dwSectorSize << " real size: " << dwRealSize << " CHRN: " << chrn_to_string(drive->track[track][side].sector[sector].CHRN));
             }
             if (!fread(pbTempPtr, dwTrackSize, 1, pfile)) { // read entire track data in one go
               LOG_ERROR("Couldn't read track data for track " << track << " side " << side);
@@ -667,8 +679,8 @@ int dsk_save (const std::string &filename, t_drive *drive)
                for (sector = 0; sector < th.sectors; sector++) {
                   memcpy(&th.sector[sector][0], drive->track[track][side].sector[sector].CHRN, 4); // copy CHRN
                   memcpy(&th.sector[sector][4], drive->track[track][side].sector[sector].flags, 2); // copy ST1 & ST2
-                  th.sector[sector][6] = drive->track[track][side].sector[sector].size & 0xff;
-                  th.sector[sector][7] = (drive->track[track][side].sector[sector].size >> 8) & 0xff; // sector size in bytes
+                  th.sector[sector][6] = drive->track[track][side].sector[sector].getTotalSize() & 0xff;
+                  th.sector[sector][7] = (drive->track[track][side].sector[sector].getTotalSize() >> 8) & 0xff; // sector size in bytes
                }
                if (!fwrite(&th, sizeof(th), 1, pfileObject)) { // write track header
                   fclose(pfileObject);
@@ -727,8 +739,8 @@ int dsk_format (t_drive *drive, int iFormat)
          for (dword sector = 0; sector < dwSectors; sector++) { // loop for all sectors
             CHRN[2] = disk_format[iFormat].sector_ids[side][sector];
             memcpy(drive->track[track][side].sector[sector].CHRN, CHRN, 4); // copy CHRN
-            drive->track[track][side].sector[sector].size = dwSectorSize;
-            drive->track[track][side].sector[sector].data = pbDataPtr; // store pointer to sector data
+            drive->track[track][side].sector[sector].setSizes(dwSectorSize, dwSectorSize);
+            drive->track[track][side].sector[sector].setData(pbDataPtr); // store pointer to sector data
             pbDataPtr += dwSectorSize;
          }
          memset(pbTempPtr, disk_format[iFormat].filler_byte, dwTrackSize);
