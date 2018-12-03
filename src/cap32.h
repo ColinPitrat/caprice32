@@ -428,6 +428,8 @@ typedef struct {
 typedef struct {
    unsigned char CHRN[4]; // the CHRN for this sector
    unsigned char flags[4]; // ST1 and ST2 - reflects any possible error conditions
+   // TODO: Make data_ private once the last direct usage in src/ipf.cpp is removed
+   unsigned char *data_; // pointer to sector data
 
    void setData(unsigned char* data) {
      data_ = data;
@@ -454,7 +456,6 @@ typedef struct {
    }
 
  private:
-   unsigned char *data_; // pointer to sector data
    unsigned int size_; // sector size in bytes
    unsigned int total_size_; // total data size in bytes
    unsigned int weak_versions_; // number of versions of this sector (should be 1 except for weak/random sectors)
