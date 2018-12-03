@@ -209,7 +209,7 @@ static void ReadTrack (t_track *pt_)
 
 				// Set the data position in the buffer and sector size
 				ps->setData(abDecoded + uDecoded);
-				unsigned int sector_size = (ps->CHRN[3] <= 7) ? (128 << ps->CHRN[3]) : 0x8000
+				unsigned int sector_size = (ps->CHRN[3] <= 7) ? (128 << ps->CHRN[3]) : 0x8000;
 				ps->setSizes(sector_size, sector_size);
 
 				// Decode and CRC the data field
