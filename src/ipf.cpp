@@ -208,11 +208,12 @@ static void ReadTrack (t_track *pt_)
 					ps->flags[1] |= 0x40;
 
 				// Set the data position in the buffer and sector size
-				ps->data = abDecoded + uDecoded;
-				ps->size = (ps->CHRN[3] <= 7) ? (128 << ps->CHRN[3]) : 0x8000;
+				ps->setData(abDecoded + uDecoded);
+				unsigned int sector_size = (ps->CHRN[3] <= 7) ? (128 << ps->CHRN[3]) : 0x8000
+				ps->setSizes(sector_size, sector_size);
 
 				// Decode and CRC the data field
-				for (unsigned int u = 0 ; u < ps->size ; u++)
+				for (unsigned int u = 0 ; u < ps->getTotalSize() ; u++)
 					Crc(ReadDataByte());
 
 				// Include data CRC bytes
@@ -228,9 +229,9 @@ static void ReadTrack (t_track *pt_)
 				}
 
 				// To allow for read-track protections, overread the first data field to 4K
-				if (pt_->sectors == 1 && ps->size < 4096)
+				if (pt_->sectors == 1 && ps->getTotalSize() < 4096)
 				{
-					for (unsigned int u = 0 ; u < (4096 - ps->size) ; u++)
+					for (unsigned int u = 0 ; u < (4096 - ps->getTotalSize()) ; u++)
 						Crc(ReadDataByte());
 				}
 
@@ -254,7 +255,7 @@ static void ReadTrack (t_track *pt_)
 
 		// Set the sector data pointers for the new buffer
 		for (unsigned int u = 0 ; u < pt_->sectors ; u++)
-			pt_->sector[u].data += (pt_->data-abDecoded);
+			pt_->sector[u].setData(pt_->sector[u].getDataForWrite()+pt_->data-abDecoded);
 	}
 }
 
