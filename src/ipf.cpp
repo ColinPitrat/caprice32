@@ -255,7 +255,7 @@ static void ReadTrack (t_track *pt_)
 
 		// Set the sector data pointers for the new buffer
 		for (unsigned int u = 0 ; u < pt_->sectors ; u++)
-			pt_->sector[u].setData(pt_->sector[u].getDataForWrite()+pt_->data-abDecoded);
+			pt_->sector[u].data_ += (pt_->data-abDecoded);
 	}
 }
 
