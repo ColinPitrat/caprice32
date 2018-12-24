@@ -18,6 +18,7 @@
 #include <iostream>
 #include <sstream>
 #include "cap32.h"
+#include "disk.h"
 #include "slotshandler.h"
 #include "ipf.h"
 
@@ -454,15 +455,6 @@ void dsk_eject (t_drive *drive)
    drive->current_track = dwTemp;
 }
 
-std::string chrn_to_string(unsigned char* chrn) {
-  std::ostringstream oss;
-  oss << static_cast<int>(chrn[0]) << "-"
-      << static_cast<int>(chrn[1]) << "-"
-      << static_cast<int>(chrn[2]) << "-"
-      << static_cast<int>(chrn[3]);
-  return oss.str();
-}
-
 int dsk_load (FILE *pfile, t_drive *drive)
 {
   LOG_DEBUG("Loading disk");
@@ -590,7 +582,7 @@ int dsk_load (FILE *pfile, t_drive *drive)
             for (sector = 0; sector < dwSectors; sector++) { // loop for all sectors
               memcpy(drive->track[track][side].sector[sector].CHRN, pbPtr, 4); // copy CHRN
               memcpy(drive->track[track][side].sector[sector].flags, (pbPtr + 0x04), 2); // copy ST1 & ST2
-	      dword dwRealSize = 0x80 << *(pbPtr+0x03);
+              dword dwRealSize = 0x80 << *(pbPtr+0x03);
               dwSectorSize = *(pbPtr + 0x6) + (*(pbPtr + 0x7) << 8); // sector size in bytes
               drive->track[track][side].sector[sector].setSizes(dwRealSize, dwSectorSize);
               drive->track[track][side].sector[sector].setData(pbDataPtr); // store pointer to sector data

@@ -7,6 +7,7 @@
 #include <windows.h>
 #endif
 #include "cap32.h"
+#include "disk.h"
 #include "errors.h"
 #include "log.h"
 #include "slotshandler.h"

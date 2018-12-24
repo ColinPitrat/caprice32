@@ -21,6 +21,7 @@
 */
 
 #include "cap32.h"
+#include "disk.h"
 #include "z80.h"
 
 extern t_CPC CPC;

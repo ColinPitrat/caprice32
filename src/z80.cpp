@@ -26,6 +26,7 @@
 */
 
 #include "cap32.h"
+#include "disk.h"
 #include "tape.h"
 #include "z80.h"
 #include "asic.h"
