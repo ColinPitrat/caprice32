@@ -518,7 +518,7 @@ int dsk_load (FILE *pfile, t_drive *drive)
           pbDataPtr += dwSectorSize;
           pbPtr += 8;
         }
-        if (!fread(pbTempPtr, dwTrackSize, 1, pfile)) { // read entire track data in one go
+        if (dwTrackSize > 0 && !fread(pbTempPtr, dwTrackSize, 1, pfile)) { // read entire track data in one go
           LOG_ERROR("Couldn't read track data for track " << track << " side " << side);
           dsk_eject(drive);
           return ERR_DSK_INVALID;
@@ -590,7 +590,7 @@ int dsk_load (FILE *pfile, t_drive *drive)
               pbPtr += 8;
               LOG_DEBUG("Sector " << sector << " size: " << dwSectorSize << " real size: " << dwRealSize << " CHRN: " << chrn_to_string(drive->track[track][side].sector[sector].CHRN));
             }
-            if (!fread(pbTempPtr, dwTrackSize, 1, pfile)) { // read entire track data in one go
+            if (dwTrackSize > 0 && !fread(pbTempPtr, dwTrackSize, 1, pfile)) { // read entire track data in one go
               LOG_ERROR("Couldn't read track data for track " << track << " side " << side);
               dsk_eject(drive);
               return ERR_DSK_INVALID;
