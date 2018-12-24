@@ -51,7 +51,8 @@ typedef struct {
    unsigned char sector[DSK_SECTORMAX][8];
 } t_track_header;
 
-typedef struct {
+class t_sector {
+  public:
    unsigned char CHRN[4]; // the CHRN for this sector
    unsigned char flags[4]; // ST1 and ST2 - reflects any possible error conditions
    // TODO: Make data_ private once the last direct usage in src/ipf.cpp is removed
@@ -81,7 +82,7 @@ typedef struct {
    unsigned int total_size_; // total data size in bytes
    unsigned int weak_versions_; // number of versions of this sector (should be 1 except for weak/random sectors)
    unsigned int weak_read_version_; // version of the sector to return when reading
-} t_sector;
+};
 
 typedef struct {
    unsigned int sectors; // sector count for this track
