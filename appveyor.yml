@@ -62,12 +62,17 @@ build_script:
 - msys64\usr\bin\bash -lc "cd c:/projects/caprice32 && PATH=$PATH:%MINGW_DIR%/bin make ARCH=%WINARCH% MINGW_PATH=\"%MINGW_DIR%\" WINE=\"\" WITH_IPF=true CFLAGS=-Ii686-linux-gnu-capsimage/include unit_test"
 # ======
 # = 4- Delete and recreate latest tag to trigger the 2nd build that will update the release date (https://github.com/appveyor/ci/issues/827)
+# =    Only do it for build on master branch to avoid looping !
 # ====
-- git config --global credential.helper store
-- ps: Add-Content "$HOME\.git-credentials" "https://$($env:access_token):x-oauth-basic@github.com`n"
-- git tag -d latest
-- git tag latest HEAD
-- git push -f origin latest
+- ps: |
+    if ($env:APPVEYOR_REPO_TAG -eq "false") {
+      git push -f origin latest
+      git config --global credential.helper store
+      Add-Content "$HOME\.git-credentials" "https://$($env:access_token):x-oauth-basic@github.com`n"
+      git tag -d latest
+      git tag latest HEAD
+      git push -f origin latest
+    }
 
 artifacts:
 - path: "release\\cap32-%WINARCH%.zip"
