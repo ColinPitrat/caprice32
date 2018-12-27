@@ -63,6 +63,7 @@ build_script:
 # ======
 # = 4- Delete and recreate latest tag to trigger the 2nd build that will update the release date (https://github.com/appveyor/ci/issues/827)
 # ====
+- git config --global credential.helper store
 - git tag -d latest
 - git tag latest HEAD
 - git push -f origin latest
