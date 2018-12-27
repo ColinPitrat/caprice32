@@ -1,9 +1,5 @@
 version: '{build}'
 
-branches:
- except:
-  - latest
-
 environment:
   MSYS2_BASEVER: 20161025
   MSYS2_ARCH: x86_64
@@ -11,7 +7,7 @@ environment:
   MSYS2_ARCHIVE: msys2.tar.xz
   MSYS2_SUBARCHIVE: msys2.tar
   IPF_LINUX_URL: "http://www.softpres.org/_media/files:ipflib42_linux-i686.tar.gz"
-  PACKAGES: "make zip %ARCH_PACKAGES%" 
+  PACKAGES: "make zip %ARCH_PACKAGES%"
   matrix:
     - MINGW_DIR: "/mingw64"
       WINARCH: win64
@@ -72,22 +68,39 @@ artifacts:
   name: cap32-%WINARCH%.zip
 
 deploy:
+# Ugly hack for https://github.com/appveyor/ci/issues/827
+# We build 2 times.
+# 1st build: a pre-release on master at each commit, marking the release as prerelease and setting tag 'latest'.
 - release: "Caprice32 latest"
   tag: latest
   description: "Latest build of Caprice 32, with the newest cool features and the most recent bugs."
   provider: GitHub
-  auth_token: 
+  auth_token:
+    secure: xEnxvlt8zNDwbgUO0uVJMmQGJS7k3sl28jxyJkLCRxGwnVgd49hkVqukPq2X4TpB
+  artifact: cap32-%WINARCH%.zip
+  draft: false
+  prerelease: true
+  force_update: true
+  on:
+    branch: master
+# 2nd build: a release from 'latest' tag. The only purpose of this release is to update the release date
+- release: "Caprice32 latest"
+  tag: latest
+  description: "Latest build of Caprice 32, with the newest cool features and the most recent bugs."
+  provider: GitHub
+  auth_token:
     secure: xEnxvlt8zNDwbgUO0uVJMmQGJS7k3sl28jxyJkLCRxGwnVgd49hkVqukPq2X4TpB
   artifact: cap32-%WINARCH%.zip
   draft: false
   prerelease: false
   force_update: true
   on:
-    branch: master
+    branch: latest
+# This deployment is for tagged versions (e.g: v4.4.0)
 - release: "Caprice32 %APPVEYOR_REPO_TAG_NAME%"
   tag: "%APPVEYOR_REPO_TAG_NAME%"
   provider: GitHub
-  auth_token: 
+  auth_token:
     secure: xEnxvlt8zNDwbgUO0uVJMmQGJS7k3sl28jxyJkLCRxGwnVgd49hkVqukPq2X4TpB
   artifact: cap32-%WINARCH%.zip
   draft: false
