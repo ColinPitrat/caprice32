@@ -66,7 +66,6 @@ build_script:
 # ====
 - ps: |
     if ($env:APPVEYOR_REPO_TAG -eq "false") {
-      git push -f origin latest
       git config --global credential.helper store
       Add-Content "$HOME\.git-credentials" "https://$($env:access_token):x-oauth-basic@github.com`n"
       git tag -d latest
