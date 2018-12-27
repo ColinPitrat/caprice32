@@ -67,6 +67,7 @@ build_script:
 - git tag -d latest
 - git tag latest HEAD
 - git push -f origin latest
+- ps: Add-Content "$HOME\.git-credentials" "https://$($env:access_token):x-oauth-basic@github.com`n"
 
 artifacts:
 - path: "release\\cap32-%WINARCH%.zip"
