@@ -42,7 +42,7 @@ void usage(std::ostream &os, char *progPath, int errcode)
    os << "Ports files are identified by their extension. Supported formats are .dsk (disk), .cdt or .voc (tape), .cpr (cartridge), .sna (snapshot), or .zip (archive containing one or more of the supported ports files).\n";
    os << "\nExample: " << progname << " sorcery.dsk\n";
    os << "\nPress F1 when the emulator is running to show the in-application option menu.\n";
-   os << "See https://github.com/ColinPitrat/caprice32 for more extensive information.\n";
+   os << "\nSee https://github.com/ColinPitrat/caprice32 or check the man page (man cap32) for more extensive information.\n";
    exit(errcode);
 }
 
