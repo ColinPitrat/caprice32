@@ -95,6 +95,7 @@ deploy:
     branch: master
 # 2nd build: a release from 'latest' tag. The only purpose of this release is to update the release date
 - release: "Caprice32 latest"
+  tag: latest
   description: "Latest build of Caprice 32, with the newest cool features and the most recent bugs."
   provider: GitHub
   auth_token:
