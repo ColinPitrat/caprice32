@@ -62,8 +62,6 @@ build_script:
 # = 4- Mess with 'latest' tag because appveyor force_update doesn't actually force updating github release (https://github.com/appveyor/ci/issues/827)
 # ====
 - msys64\usr\bin\bash -lc "git tag -d latest || true"
-- msys64\usr\bin\bash -lc "git tag latest HEAD"
-- msys64\usr\bin\bash -lc "git push -f origin latest"
 
 artifacts:
 - path: "release\\cap32-%WINARCH%.zip"
