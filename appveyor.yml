@@ -1,5 +1,9 @@
 version: '{build}'
 
+branches:
+ except:
+  - latest
+
 environment:
   MSYS2_BASEVER: 20161025
   MSYS2_ARCH: x86_64
