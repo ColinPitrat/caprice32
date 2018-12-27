@@ -1904,6 +1904,7 @@ int cap32_main (int argc, char **argv)
 {
    int iExitCondition;
    bool bolDone;
+   bool take_screenshot = false;
    SDL_Event event;
    std::vector<std::string> slot_list;
 
@@ -2052,7 +2053,8 @@ int cap32_main (int argc, char **argv)
                            break;
 
                         case CAP32_SCRNSHOT:
-                           dumpScreen();
+                           // Delay taking the screenshot to ensure the frame is complete.
+                           take_screenshot = true;
                            break;
 
                         case CAP32_WAITBREAK:
@@ -2291,6 +2293,10 @@ int cap32_main (int argc, char **argv)
             asic_draw_sprites();
             vid_plugin->unlock();
             video_display(); // update PC display
+            if (take_screenshot) {
+              dumpScreen();
+              take_screenshot = false;
+            }
          } else {
             vid_plugin->unlock();
          }
