@@ -82,4 +82,4 @@ There are many repositories for caprice32 on GitHub:
   * https://github.com/egrath/caprice32-mod
   * https://github.com/burzumishi/caprice32wx
 
-So why create another one ? All these repositories are highly inactive but more than that, in my opinion, they took a wrong direction. Some added dependencies (wxWidget, GTK) without really adding features. Two imported the code but did not do any update.
+So why create another one ? All these repositories are highly inactive. The ones that touched the code added dependencies (wxWidget, GTK) without really adding features.
