@@ -1,6 +1,8 @@
 version: '{build}'
 
 environment:
+  access_token:
+    secure: xEnxvlt8zNDwbgUO0uVJMmQGJS7k3sl28jxyJkLCRxGwnVgd49hkVqukPq2X4TpB
   MSYS2_BASEVER: 20161025
   MSYS2_ARCH: x86_64
   MSYS2_URL: "http://kent.dl.sourceforge.net/project/msys2/Base/%MSYS2_ARCH%/msys2-base-%MSYS2_ARCH%-%MSYS2_BASEVER%.tar.xz"
@@ -61,8 +63,9 @@ build_script:
 # ======
 # = 4- Delete and recreate latest tag to trigger the 2nd build that will update the release date (https://github.com/appveyor/ci/issues/827)
 # ====
-- msys64\usr\bin\bash -lc "git tag -d latest || true"
-- msys64\usr\bin\bash -lc "git tag latest HEAD"
+- git tag -d latest
+- git tag latest HEAD
+- git push -f origin latest
 
 artifacts:
 - path: "release\\cap32-%WINARCH%.zip"
