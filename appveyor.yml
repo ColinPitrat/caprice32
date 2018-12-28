@@ -1,5 +1,11 @@
 version: '{build}'
 
+# In the end, all the efforts to make the date of the release progress didn't work.
+# Just make the tag progress by deleting/recreating it but do not rebuild it.
+branches:
+ except:
+  - latest
+
 environment:
   access_token:
     secure: xEnxvlt8zNDwbgUO0uVJMmQGJS7k3sl28jxyJkLCRxGwnVgd49hkVqukPq2X4TpB
@@ -89,23 +95,25 @@ deploy:
     secure: xEnxvlt8zNDwbgUO0uVJMmQGJS7k3sl28jxyJkLCRxGwnVgd49hkVqukPq2X4TpB
   artifact: cap32-%WINARCH%.zip
   draft: false
-  prerelease: true
-  force_update: true
-  on:
-    branch: master
-# 2nd build: a release from 'latest' tag. The only purpose of this release is to update the release date
-- release: "Caprice32 latest"
-  tag: latest
-  description: "Latest build of Caprice 32, with the newest cool features and the most recent bugs."
-  provider: GitHub
-  auth_token:
-    secure: xEnxvlt8zNDwbgUO0uVJMmQGJS7k3sl28jxyJkLCRxGwnVgd49hkVqukPq2X4TpB
-  artifact: cap32-%WINARCH%.zip
-  draft: false
   prerelease: false
   force_update: true
   on:
-    branch: latest
+    branch: master
+
+# 2nd build: a release from 'latest' tag. The only purpose of this release is to update the release date
+#- release: "Caprice32 latest"
+#  tag: latest
+#  description: "Latest build of Caprice 32, with the newest cool features and the most recent bugs."
+#  provider: GitHub
+#  auth_token:
+#    secure: xEnxvlt8zNDwbgUO0uVJMmQGJS7k3sl28jxyJkLCRxGwnVgd49hkVqukPq2X4TpB
+#  artifact: cap32-%WINARCH%.zip
+#  draft: false
+#  prerelease: false
+#  force_update: true
+#  on:
+#    branch: latest
+
 # This deployment is for tagged versions (e.g: v4.4.0)
 - release: "Caprice32 %APPVEYOR_REPO_TAG_NAME%"
   tag: "%APPVEYOR_REPO_TAG_NAME%"
