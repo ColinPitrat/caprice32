@@ -1,0 +1,12 @@
+<!DOCTYPE Menu PUBLIC "-//freedesktop//DTD Menu 1.0//EN"
+    "http://www.freedesktop.org/standards/menu-spec/menu-1.0.dtd">
+<Menu>
+    <Name>Applications</Name>
+    <Menu>
+        <Name>Emulators</Name>
+        <Directory>Emulators.directory</Directory>
+        <Include>
+            <Filename>caprice32.desktop</Filename>
+        </Include>
+    </Menu>
+</Menu>
