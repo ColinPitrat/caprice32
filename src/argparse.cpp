@@ -70,6 +70,7 @@ std::string replaceCap32Keys(std::string command)
     { "CAP32_TAPEPLAY", cap32_keystroke(CAP32_TAPEPLAY) },
     { "CAP32_DEBUG", cap32_keystroke(CAP32_DEBUG) },
     { "CAP32_WAITBREAK", cap32_keystroke(CAP32_WAITBREAK) },
+    { "CAP32_DELAY", cap32_keystroke(CAP32_DELAY) },
     { "CPC_F1", cpc_keystroke(CPC_F1) },
     { "CPC_F2", cpc_keystroke(CPC_F2) },
   };
@@ -79,6 +80,7 @@ std::string replaceCap32Keys(std::string command)
     while ((pos = command.find(elt.first)) != std::string::npos)
     {
       command.replace(pos, elt.first.size(), elt.second);
+      LOG_VERBOSE("Recognized keyword: " << elt.first);
     }
   }
   return command;
@@ -101,6 +103,7 @@ void parseArguments(int argc, char **argv, std::vector<std::string>& slot_list, 
       switch (c)
       {
          case 'a':
+            LOG_VERBOSE("Append to autocmd: " << optarg);
             args.autocmd += replaceCap32Keys(optarg);
             args.autocmd += "\n";
             break;

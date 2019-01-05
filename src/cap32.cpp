@@ -2057,6 +2057,13 @@ int cap32_main (int argc, char **argv)
                            take_screenshot = true;
                            break;
 
+                        case CAP32_DELAY:
+                           // Reuse boot_time as it is a reasonable wait time for Plus transition between the F1/F2 nag screen and the command line.
+                           // TODO: Support an argument to CAP32_DELAY in autocmd instead.
+                           LOG_VERBOSE("Take into account CAP32_DELAY");
+                           nextVirtualEventFrameCount = dwFrameCountOverall + CPC.boot_time;
+                           break;
+
                         case CAP32_WAITBREAK:
                            breakPointsToSkipBeforeProceedingWithVirtualEvents++;
                            LOG_INFO("Will skip " << breakPointsToSkipBeforeProceedingWithVirtualEvents << " before processing more virtual events.");
