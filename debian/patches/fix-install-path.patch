@@ -2,16 +2,16 @@ Honor FHS to please debian
 
 --- a/cap32.cfg
 +++ b/cap32.cfg
-@@ -50,7 +50,7 @@
+@@ -50,7 +50,7 @@ joystick_menu_button=9
  joystick_vkeyboard_button=10
  # resources_path
  #   path to resources (menu images...)
 -resources_path=/usr/local/share/caprice32/resources
 +resources_path=/usr/share/caprice32/resources
  # boot_time
- #   Estimated time in seconds the CPC takes to boot.
- #   Caprice will wait this long before sending a provided autocmd.
-@@ -167,7 +167,7 @@
+ #   Estimated time in video frames the CPC takes to boot.
+ #   Caprice will emulate this number of frames before starting to send a provided autocmd.
+@@ -167,7 +167,7 @@ printer_file=./printer.dat
  sdump_dir=./screenshots
  
  [rom]
