@@ -72,11 +72,15 @@ build_script:
 # ====
 - ps: |
     if ($env:APPVEYOR_REPO_TAG -eq "false") {
-      git config --global credential.helper store
-      Add-Content "$HOME\.git-credentials" "https://$($env:access_token):x-oauth-basic@github.com`n"
-      git tag -d latest
-      git tag latest HEAD
-      git push -q -f origin latest -ErrorAction SilentlyContinue
+      try {
+        git config --global credential.helper store
+        Add-Content "$HOME\.git-credentials" "https://$($env:access_token):x-oauth-basic@github.com`n"
+        git tag -d latest
+        git tag latest HEAD
+        git push -q -f origin latest
+      } catch {
+        Write-Output "Deletion of tag latest failed, ignoring."
+      }
     }
 
 artifacts:
