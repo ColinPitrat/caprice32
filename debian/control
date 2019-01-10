@@ -3,7 +3,7 @@ Section: contrib/otherosfs
 Priority: optional
 Maintainer: Seb Haezebrouck <seb@zyglute.fr>
 Build-Depends: debhelper (>= 9), gcc (>= 4.8), g++ (>= 4.8), libsdl1.2-dev, libfreetype6-dev, zlib1g-dev, libpng-dev, quilt
-Standards-Version: 3.9.8
+Standards-Version: 4.0.0
 Homepage: https://github.com/ColinPitrat/caprice32
 Vcs-Git: https://github.com/ColinPitrat/caprice32.git
 Vcs-Browser: https://github.com/ColinPitrat/caprice32
