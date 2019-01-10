@@ -16,6 +16,7 @@
 
 # To be overridden for debian packaging
 VERSION=latest
+REVISION=0
 
 LAST_BUILD_IN_DEBUG = $(shell [ -e .debug ] && echo 1 || echo 0)
 # If compiling under native windows, set WINE to ""
@@ -92,7 +93,7 @@ TEST_HEADERS:=$(shell find $(TSTDIR) -name \*.h)
 TEST_DEPENDS:=$(foreach file,$(TEST_SOURCES:.cpp=.d),$(shell echo "$(OBJDIR)/$(file)"))
 TEST_OBJECTS:=$(TEST_DEPENDS:.d=.o)
 
-.PHONY: all check_deps clean debug debug_flag distrib doc unit_test install
+.PHONY: all check_deps clean deb_pkg debug debug_flag distrib doc unit_test install
 
 WARNINGS = -Wall -Wextra -Wzero-as-null-pointer-constant -Wformat=2 -Wold-style-cast -Wmissing-include-dirs -Wlogical-op -Woverloaded-virtual -Wpointer-arith -Wredundant-decls
 COMMON_CFLAGS += $(CFLAGS) -std=c++11 $(IPATHS)
@@ -254,6 +255,12 @@ unit_test: $(TEST_TARGET)
 e2e_test: $(TARGET)
 	cd test/integrated && ./run_tests.sh
 endif
+
+deb_pkg: all
+	# Both changelog files need to be patched with the proper version !
+	sed -i "1s/(.*)/($(VERSION)-$(REVISION))/" debian/changelog
+	sed -i "1s/(.*)/($(VERSION)-$(REVISION))/" release/cap32-linux/caprice32-$(VERSION)/debian/changelog
+	cd release/cap32-linux/caprice32-$(VERSION)/debian && debuild -us -uc --lintian-opts --profile debian
 
 clang-tidy:
 	if $(CLANG_TIDY) -checks=-*,$(CLANG_CHECKS) $(SOURCES) -header-filter=src/* -- $(COMMON_CFLAGS) | grep "."; then false; fi
