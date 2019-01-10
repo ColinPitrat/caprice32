@@ -35,13 +35,13 @@ script:
 #To uncomment in case a core occurs:
 # - ulimit -c unlimited
 # - sudo sysctl kernel.core_pattern=core
- - make deb_pkg VERSION=99.99.0 REVISION=1
  - make
  - make unit_test
  - make e2e_test
  - make clean
  - make debug CFLAGS=-Wno-literal-suffix
  - make clang-tidy
+ - make deb_pkg VERSION=99.99.0 REVISION=1
 #To uncomment in case a core occurs:
 # - find ./ -name 'core*'
 # - for i in $(find ./ -name 'core*' -print); do gdb ./test/test_runner $i -ex "thread apply all bt" -ex "set pagination 0" -batch; done;
