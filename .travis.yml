@@ -21,6 +21,7 @@ addons:
     - quilt
     - devscripts
     - fakeroot
+    - debhelper
 #To uncomment in case a core occurs:
 #    - gdb
 before_script:
