@@ -15,6 +15,9 @@ addons:
     - g++-4.8
     - clang-3.8
     - clang-tidy-3.8
+    - dpkg-dev
+    - pbuilder
+    - quilt
 #To uncomment in case a core occurs:
 #    - gdb
 before_script:
@@ -30,6 +33,7 @@ script:
  - make clean
  - make debug CFLAGS=-Wno-literal-suffix
  - make clang-tidy
+ - make deb_pkg VERSION=99.99.0 REVISION=1
 #To uncomment in case a core occurs:
 # - find ./ -name 'core*'
 # - for i in $(find ./ -name 'core*' -print); do gdb ./test/test_runner $i -ex "thread apply all bt" -ex "set pagination 0" -batch; done;
