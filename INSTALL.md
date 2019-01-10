@@ -35,7 +35,7 @@ Alternatively, the debug target also work:
 
 To build a debian package on Debian/Ubuntu distributions, install the dependencies as mentioned above and the debian packaging helper packages:
 
-`sudo apt-get install dpkg-dev pbuilder`
+`sudo apt-get install dpkg-dev pbuilder quilt devscripts fakeroot debhelper`
 
 Then, to create a debian package:
 
