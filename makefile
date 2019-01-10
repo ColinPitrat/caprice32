@@ -45,10 +45,7 @@ IPATHS = -Isrc/ -Isrc/gui/includes -I$(MINGW_PATH)/include -I$(MINGW_PATH)/inclu
 LIBS = $(MINGW_PATH)/lib/libSDL.dll.a $(MINGW_PATH)/lib/libfreetype.dll.a $(MINGW_PATH)/lib/libz.dll.a $(MINGW_PATH)/lib/libpng16.dll.a $(MINGW_PATH)/lib/libpng.dll.a
 COMMON_CFLAGS = -DWINDOWS
 CXX = $(TRIPLE)-g++
-ifdef WITH_IPF
-COMMON_CFLAGS += -DWITH_IPF
-LIBS += $(MINGW_PATH)/bin/$(CAPSIPFDLL)
-endif
+
 else
 prefix = /usr/local
 TARGET = cap32
@@ -58,9 +55,12 @@ LIBS = `sdl-config --libs` -lz `pkg-config --libs freetype2` `pkg-config --libs 
 CXX ?= g++
 COMMON_CFLAGS = -fPIC
 ifdef WITH_IPF
-COMMON_CFLAGS += -DWITH_IPF
-LIBS += -lcapsimage
+LIBS += -ldl
 endif
+endif
+
+ifdef WITH_IPF
+COMMON_CFLAGS += -DWITH_IPF
 endif
 
 ifndef RELEASE
