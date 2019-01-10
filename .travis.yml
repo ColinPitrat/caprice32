@@ -1,4 +1,8 @@
 language: cpp
+# Do not build latest as this is just a tag on the latest successful release by appveyor
+branches:
+  except:
+  - latest
 #To uncomment in case a core occurs:
 #sudo: required
 addons:
