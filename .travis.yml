@@ -15,9 +15,11 @@ addons:
     - g++-4.8
     - clang-3.8
     - clang-tidy-3.8
+    # For debian package validation
     - dpkg-dev
     - pbuilder
     - quilt
+    - devscripts
 #To uncomment in case a core occurs:
 #    - gdb
 before_script:
