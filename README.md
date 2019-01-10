@@ -3,7 +3,7 @@
 
 (c) Copyright 1997-2015 Ulrich Doewich
 
-(c) Copyright 2016 Colin Pitrat
+(c) Copyright 2016-2019 Colin Pitrat
 
 https://github.com/ColinPitrat/caprice32
 
