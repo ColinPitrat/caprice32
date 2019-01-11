@@ -55,7 +55,7 @@ static int unload_caps_library(void)
 	if (!FreeLibrary(handle)) return ERR_IPF_DYNLIB_LOAD;
 	return 0;
 #else
-	if (dlclose(handle)) return ERR_IPF_DYNLIB_LOAD;
+	if (dlclose(handle) != 0) return ERR_IPF_DYNLIB_LOAD;
 	return 0;
 #endif
 }
