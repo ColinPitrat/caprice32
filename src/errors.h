@@ -34,6 +34,7 @@
 #define ERR_BAD_MF2_ROM          31
 #define ERR_SDUMP                32
 #define ERR_CPR_INVALID          33
+#define ERR_IPF_DYNLIB_LOAD      34
 
 #define ERR_JOYSTICKS_INIT       45
 

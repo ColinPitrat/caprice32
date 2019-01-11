@@ -1356,7 +1356,7 @@ void cartridge_load ()
   if (CPC.model >= 3) {
      if (file_load(CPC.cart_file, OTHER)) {
         fprintf(stderr, "Load of cartridge failed. Aborting.\n");
-        exit(-1);
+        cleanExit(-1);
      }
   }
 }
