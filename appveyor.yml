@@ -78,6 +78,9 @@ build_script:
         git tag -d latest
         git tag latest HEAD
         git push -q -f origin latest
+        if (-not $?) {
+          throw "git push failed ..."
+        }
       } catch {
         Write-Output "Deletion of tag latest failed, ignoring."
       }
