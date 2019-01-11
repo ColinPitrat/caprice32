@@ -392,7 +392,7 @@ void audio_pause ();
 void audio_resume ();
 int video_init ();
 void video_shutdown ();
-void cleanExit(int);
+void cleanExit(int returnCode);
 
 // Return the path to the best (i.e: most specific) configuration file.
 // Priority order is:
