@@ -1797,7 +1797,11 @@ void doCleanUp ()
    SDL_Quit();
 }
 
-
+void cleanExit(int returnCode)
+{
+    doCleanUp();
+    exit(returnCode);
+}
 
 // TODO: Deduplicate showVKeyboard and showGui
 void showVKeyboard()
@@ -1914,11 +1918,10 @@ int cap32_main (int argc, char **argv)
       fprintf(stderr, "SDL_Init() failed: %s\n", SDL_GetError());
       exit(-1);
    }
-   atexit(doCleanUp); // install the clean up routine
 
    if(getcwd(chAppPath, sizeof(chAppPath)-1) == nullptr) { // get the location of the executable
       fprintf(stderr, "getcwd failed: %s\n", strerror(errno));
-      exit(-1);
+      cleanExit(-1);
    }
 
    loadConfiguration(CPC, getConfigurationFilename()); // retrieve the emulator configuration
@@ -1932,7 +1935,7 @@ int cap32_main (int argc, char **argv)
 
    if (video_init()) {
       fprintf(stderr, "video_init() failed. Aborting.\n");
-      exit(-1);
+      cleanExit(-1);
    }
 
    if (audio_init()) {
@@ -1962,7 +1965,7 @@ int cap32_main (int argc, char **argv)
    // pbGPBuffer to be initialized.
    if (emulator_init()) {
       fprintf(stderr, "emulator_init() failed. Aborting.\n");
-      exit(-1);
+      cleanExit(-1);
    }
 
    // Really load the various drives, if needed
@@ -2047,7 +2050,7 @@ int cap32_main (int argc, char **argv)
                            CPC.scr_window = CPC.scr_window ? 0 : 1;
                            if (video_init()) {
                               fprintf(stderr, "video_init() failed. Aborting.\n");
-                              exit(-1);
+                              cleanExit(-1);
                            }
                            audio_resume();
                            break;
@@ -2123,7 +2126,7 @@ int cap32_main (int argc, char **argv)
                            break;
 
                         case CAP32_EXIT:
-                           exit (0);
+                           cleanExit (0);
                            break;
 
                         case CAP32_FPS:
@@ -2226,7 +2229,7 @@ int cap32_main (int argc, char **argv)
                break;
 
             case SDL_QUIT:
-               exit(0);
+               cleanExit(0);
          }
       }
 
