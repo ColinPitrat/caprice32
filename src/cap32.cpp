@@ -1919,10 +1919,14 @@ int cap32_main (int argc, char **argv)
       exit(-1);
    }
 
-   if(getcwd(chAppPath, sizeof(chAppPath)-1) == nullptr) { // get the location of the executable
+   #ifndef APP_PATH
+   if(getcwd(chAppPath, sizeof(chAppPath)-1) == nullptr) {
       fprintf(stderr, "getcwd failed: %s\n", strerror(errno));
       cleanExit(-1);
    }
+   #else
+      strncpy(chAppPath,APP_PATH,_MAX_PATH);
+   #endif
 
    loadConfiguration(CPC, getConfigurationFilename()); // retrieve the emulator configuration
    if (CPC.printer) {
