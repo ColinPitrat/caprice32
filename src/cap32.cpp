@@ -1568,23 +1568,28 @@ void update_cpc_speed()
 
 std::string getConfigurationFilename(bool forWrite)
 {
-  int mode = R_OK | ( F_OK * forWrite );
-  std::array<std::string, 6> configFilename = {
+   int mode = R_OK | ( F_OK * forWrite );
+
+   // If not found, look for .cap32.cfg in the XDG_CONFIG_HOME of current user 
+   // If not found, look for .cap32.cfg in the default XDG_CONFIG_HOME of current user
+   std::string defaultConfig = ( getenv("XDG_CONFIG_HOME") != NULL ) ? \
+      std::string(getenv("XDG_CONFIG_HOME")) : (std::string(getenv("HOME")) + "/.config") + "/cap32.cfg";
+
+   std::vector<std::string> configFilename = {
       args.cfgFilePath, // First look in any user supplied configuration file path
       std::string(chAppPath) + "/cap32.cfg", // If not found, cap32.cfg in the same directory as the executable
-      std::string(getenv("XDG_CONFIG_HOME")) + "/cap32.cfg", // If not found, look for .cap32.cfg in the XDG_CONFIG_HOME of current user  
-      std::string(getenv("HOME")) + "/.config/cap32.cfg", // If not found, look for .cap32.cfg in the default XDG_CONFIG_HOME of current user
+      defaultConfig,
       std::string(getenv("HOME")) + "/.cap32.cfg", // If not found, look for .cap32.cfg in the default home of current user for compatibility
       "/etc/cap32.cfg"  // If still not found, look for cap32.cfg in /etc
    };
   
-  for(const auto& s: configFilename){
-   if (access(s.c_str(), mode) == 0) {
-      std::cout << "Using configuration file" << (forWrite ? " to save" : "") << ": " << s << std::endl;
-      return s;
+   for(const auto& s: configFilename){
+      if (access(s.c_str(), mode) == 0) {
+         std::cout << "Using configuration file" << (forWrite ? " to save" : "") << ": " << s << std::endl;
+         return s;
+      }
    }
-  }
-  return NULL;
+   return defaultConfig;
 }
 
 
