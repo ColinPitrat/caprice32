@@ -13,7 +13,7 @@ find . -iname "*~" -exec rm -fv {} \;
 rm -rv output
 mkdir -p output
 
-$CAP32DIR/cap32 -c cap32.cfg -a 'border 13:ink 0,13:ink 1,0:mode 1:for a=1 to 24:print"Hello World",a:next:call &bd19:call 0' -a 'CAP32_WAITBREAKCAP32_SCRNSHOTCAP32_EXIT'
+$CAP32DIR/cap32 -c cap32.cfg -a 'border 13:ink 0,13:ink 1,0:mode 1:for a=1 to 24:print"Hello World",a:next:call &bd19:call 0' -a 'CAP32_WAITBREAKCAP32_SCRNSHOT CAP32_EXIT'
 
 # Intended test when ready:
 # $CAP32DIR/cap32 -c cap32.cfg -a 'border 13:ink 0,13:ink 1,0:mode 1:for a=1 to 24:print"Hello World",a:next:call &bd19:call 0' -a CAP32_WAITBREAK -a CAP32_SCRNSHOT -a CAP32_EXIT

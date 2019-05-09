@@ -1877,9 +1877,9 @@ void dumpScreen() {
    }
    std::string dumpFile = "screenshot_" + getDateString() + ".png";
    std::string dumpPath = dir + "/" + dumpFile;
-   LOG_DEBUG("Dumping screen to " + dumpPath);
+   LOG_INFO("Dumping screen to " + dumpPath);
    if (SDL_SavePNG(back_surface, dumpPath)) {
-     LOG_DEBUG("Could not write screenshot file to " + dumpPath);
+     LOG_ERROR("Could not write screenshot file to " + dumpPath);
    }
    else {
      set_osd_message("Captured screenshot to " + dumpFile);
