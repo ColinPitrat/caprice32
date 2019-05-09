@@ -1572,7 +1572,7 @@ std::string getConfigurationFilename(bool forWrite)
 
    // If not found, look for .cap32.cfg in the XDG_CONFIG_HOME of current user 
    // If not found, look for .cap32.cfg in the default XDG_CONFIG_HOME of current user
-   std::string defaultConfig = ( getenv("XDG_CONFIG_HOME") != NULL ) ? \
+   std::string defaultConfig = ( getenv("XDG_CONFIG_HOME") != nullptr ) ? \
       std::string(getenv("XDG_CONFIG_HOME")) : (std::string(getenv("HOME")) + "/.config") + "/cap32.cfg";
 
    std::vector<std::string> configFilename = {
