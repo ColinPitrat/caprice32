@@ -10,6 +10,14 @@ if [ -f "/c/projects/caprice32/msys64/usr/bin/diff.exe" ]
 then
 	DIFF=/c/projects/caprice32/msys64/usr/bin/diff.exe
 fi
+if [ -f "/c/cygwin/bin/diff.exe" ]
+then
+	DIFF=/c/cygwin/bin/diff.exe
+fi
+if [ -f "/c/cygwin64/bin/diff.exe" ]
+then
+	DIFF=/c/cygwin64/bin/diff.exe
+fi
 export DIFF=$DIFF
 echo "Using diff: $DIFF"
 
