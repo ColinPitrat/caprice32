@@ -29,6 +29,7 @@ ls /c/projects/caprice32/msys64/usr
 echo ""
 echo "ls /c/projects/caprice32/msys64/usr/bin"
 ls /c/projects/caprice32/msys64/usr/bin
+find /c | grep diff
 
 if $DIFF printer.dat expected.dat >> "${LOGFILE}"
 then
