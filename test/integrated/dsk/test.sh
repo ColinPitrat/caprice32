@@ -15,16 +15,23 @@ if [ -f "msys64/usr/bin/diff" ]
 then
 	DIFF=msys64/usr/bin/diff
 fi
-echo "msys64:"
-ls msys64
-echo "msys64/usr/bin:"
-ls msys64/usr/bin
-echo "msys64/usr/bin/diff:"
-ls -l msys64/usr/bin/diff
-echo "c:"
-ls c
-echo "c/Program Files:"
-ls "c/Program Files"
+echo "pwd:"
+pwd
+echo ""
+echo "ls:"
+ls
+echo ""
+echo "ls ..:"
+ls ..
+echo ""
+echo "ls ../..:"
+ls ../..
+echo ""
+echo "ls ../../..:"
+ls ../../..
+echo ""
+echo "ls ../../../..:"
+ls ../../../..
 
 if $DIFF printer.dat expected.dat >> "${LOGFILE}"
 then
