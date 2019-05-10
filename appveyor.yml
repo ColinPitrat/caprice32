@@ -49,14 +49,13 @@ build_script:
 # ===================================
 # = 1- Build and test in DEBUG mode =
 # ===================================
-# TODO(cpitrat): Uncomment this and commands for 2 once e2e_test debugging is done
-#- msys64\usr\bin\bash -lc "cd c:/projects/caprice32 && PATH=$PATH:%MINGW_DIR%/bin make ARCH=%WINARCH% MINGW_PATH=\"%MINGW_DIR%\" WINE=\"\" debug"
+- msys64\usr\bin\bash -lc "cd c:/projects/caprice32 && PATH=$PATH:%MINGW_DIR%/bin make ARCH=%WINARCH% MINGW_PATH=\"%MINGW_DIR%\" WINE=\"\" debug"
 # ===================================
 # 2- Build and test in RELEASE mode =
 # ===================================
-#- msys64\usr\bin\bash -lc "cd c:/projects/caprice32 && PATH=$PATH:%MINGW_DIR%/bin make ARCH=%WINARCh% clean"
-#- msys64\usr\bin\bash -lc "cd c:/projects/caprice32 && PATH=$PATH:%MINGW_DIR%/bin make ARCH=%WINARCH% MINGW_PATH=\"%MINGW_DIR%\""
-#- msys64\usr\bin\bash -lc "cd c:/projects/caprice32 && PATH=$PATH:%MINGW_DIR%/bin make ARCH=%WINARCH% MINGW_PATH=\"%MINGW_DIR%\" WINE=\"\" unit_test"
+- msys64\usr\bin\bash -lc "cd c:/projects/caprice32 && PATH=$PATH:%MINGW_DIR%/bin make ARCH=%WINARCh% clean"
+- msys64\usr\bin\bash -lc "cd c:/projects/caprice32 && PATH=$PATH:%MINGW_DIR%/bin make ARCH=%WINARCH% MINGW_PATH=\"%MINGW_DIR%\""
+- msys64\usr\bin\bash -lc "cd c:/projects/caprice32 && PATH=$PATH:%MINGW_DIR%/bin make ARCH=%WINARCH% MINGW_PATH=\"%MINGW_DIR%\" WINE=\"\" unit_test"
 # =============================
 # = 3- Build with IPF support =
 # =============================
