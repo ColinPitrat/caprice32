@@ -13,6 +13,10 @@ $CAP32DIR/cap32 -c cap32.cfg -a "run\"hello" -a "call 0" -a CAP32_WAITBREAK -a C
 echo "Running diff printer.dat expected.dat"
 echo "Directory content:"
 ls
+echo "which diff:"
+which diff
+echo "\\diff:"
+\diff printer.dat expected.dat
 echo "diff output:"
 diff printer.dat expected.dat
 echo "diff --help:"
