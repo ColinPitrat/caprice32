@@ -5,6 +5,14 @@ TOTAL=0
 
 echo "Starting integrated tests"
 
+DIFF=diff
+if [ -f "/c/projects/caprice32/msys64/usr/bin/diff.exe" ]
+then
+	DIFF=/c/projects/caprice32/msys64/usr/bin/diff.exe
+fi
+export DIFF=$DIFF
+echo "Using diff: $DIFF"
+
 for tst in */test.sh
 do
   TSTDIR=`dirname "${tst}"`

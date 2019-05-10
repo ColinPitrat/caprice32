@@ -19,7 +19,7 @@ $CAP32DIR/cap32 -c cap32.cfg -a 'border 13:ink 0,13:ink 1,0:mode 1:for a=1 to 24
 # Screenshot file name is not predictible (a feature, not a bug)
 mv -v output/screenshot_*png output/screenshot.png
 
-if diff -ur model output >> "${LOGFILE}"
+if $DIFF -ur model output >> "${LOGFILE}"
 then
   exit 0
 else
