@@ -11,9 +11,9 @@ touch "${LOGFILE}"
 $CAP32DIR/cap32 -c cap32.cfg -a "run\"hello" -a "call 0" -a CAP32_WAITBREAK -a CAP32_EXIT hello.zip >> "${LOGFILE}" 2>&1
 
 DIFF=diff
-if [ -f "/c/projects/msys64/usr/bin/diff" ]
+if [ -f "/c/projects/caprice32/msys64/usr/bin/diff" ]
 then
-	DIFF=/c/projects/msys64/usr/bin/diff
+	DIFF=/c/projects/caprice32/msys64/usr/bin/diff
 fi
 echo "pwd:"
 pwd
@@ -21,11 +21,14 @@ echo ""
 echo "ls /c:"
 ls /c
 echo ""
-echo "ls /c/projects/msys64/usr/bin"
-ls /c/projects/msys64/usr/bin
+echo "ls /c/projects/caprice32/msys64"
+ls /c/projects/caprice32/msys64
 echo ""
-echo "ls /c/*:"
-ls /c/*
+echo "ls /c/projects/caprice32/msys64/usr"
+ls /c/projects/caprice32/msys64/usr
+echo ""
+echo "ls /c/projects/caprice32/msys64/usr/bin"
+ls /c/projects/caprice32/msys64/usr/bin
 
 if $DIFF printer.dat expected.dat >> "${LOGFILE}"
 then
