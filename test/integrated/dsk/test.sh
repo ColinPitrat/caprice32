@@ -26,12 +26,6 @@ ls /c/projects/msys64/usr/bin
 echo ""
 echo "ls /c/*:"
 ls /c/*
-echo ""
-echo "ls /c/*/*:"
-ls /c/*/*
-echo ""
-echo "ls /c/*/*/*:"
-ls /c/*/*/*
 
 if $DIFF printer.dat expected.dat >> "${LOGFILE}"
 then
