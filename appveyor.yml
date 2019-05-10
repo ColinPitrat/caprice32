@@ -15,7 +15,7 @@ environment:
   MSYS2_ARCHIVE: msys2.tar.xz
   MSYS2_SUBARCHIVE: msys2.tar
   IPF_LINUX_URL: "http://www.softpres.org/_media/files:ipflib42_linux-i686.tar.gz"
-  PACKAGES: "make zip %ARCH_PACKAGES%"
+  PACKAGES: "make zip diffutils %ARCH_PACKAGES%"
   matrix:
     - MINGW_DIR: "/mingw64"
       WINARCH: win64
