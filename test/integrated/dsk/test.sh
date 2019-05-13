@@ -22,6 +22,15 @@ ls $CAP32DIR
 echo "TSTDIR content:"
 ls $TSTDIR
 
+echo "Logfile ($LOGFILE) content:"
+cat $LOGFILE
+
+echo "Files on cap32"
+file $CAP32DIR/cap32.exe
+ls -lh $CAP32DIR/cap32.exe
+file $CAP32DIR/release/cap32-*/cap32.exe
+ls -lh $CAP32DIR/release/cap32-*/cap32.exe
+
 
 if $DIFF printer.dat expected.dat >> "${LOGFILE}"
 then
