@@ -9,28 +9,7 @@ cd "$TSTDIR"
 touch "${LOGFILE}"
 
 $CAP32DIR/cap32 -c cap32.cfg -a "run\"hello" -a "call 0" -a CAP32_WAITBREAK -a CAP32_EXIT hello.zip >> "${LOGFILE}" 2>&1
-
-echo "cap32 in TSTDIR:"
-find $TSTDIR | grep cap32
-echo "cap32 in CAP32DIR:"
-find $CAP32DIR | grep cap32
-
-echo "CAP32DIR: $CAP32DIR"
-echo "TSTDIR: $TSTDIR"
-echo "CAP32DIR content:"
-ls $CAP32DIR
-echo "TSTDIR content:"
-ls $TSTDIR
-
-echo "Logfile ($LOGFILE) content:"
-cat $LOGFILE
-
-echo "Files on cap32"
-file $CAP32DIR/cap32.exe
-ls -lh $CAP32DIR/cap32.exe
-file $CAP32DIR/release/cap32-*/cap32.exe
-ls -lh $CAP32DIR/release/cap32-*/cap32.exe
-
+$CAP32DIR/cap32 -h
 
 if $DIFF printer.dat expected.dat >> "${LOGFILE}"
 then
