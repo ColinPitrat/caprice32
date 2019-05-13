@@ -12,6 +12,8 @@ $CAP32DIR/cap32 -c cap32.cfg -a "run\"hello" -a "call 0" -a CAP32_WAITBREAK -a C
 
 echo "cap32 in TSTDIR:"
 find $TSTDIR | grep cap32
+echo "cap32 in CAP32DIR:"
+find $CAP32DIR | grep cap32
 
 echo "CAP32DIR: $CAP32DIR"
 echo "TSTDIR: $TSTDIR"
