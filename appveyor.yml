@@ -71,7 +71,7 @@ build_script:
 - msys64\usr\bin\bash -lc "cd c:/projects/caprice32 && PATH=$PATH:%MINGW_DIR%/bin make ARCH=%WINARCH% MINGW_PATH=\"%MINGW_DIR%\" WINE=\"\" WITH_IPF=true CFLAGS=-Ii686-linux-gnu-capsimage/include unit_test"
 - ps: |
         if ($env:RUN_E2E -eq "true") {
-                msys64\usr\bin\bash -lc "cd c:/projects/caprice32 && PATH=$PATH:%MINGW_DIR%/bin make ARCH=%WINARCH% MINGW_PATH=\"%MINGW_DIR%\" WINE=\"\" WITH_IPF=true CFLAGS=-Ii686-linux-gnu-capsimage/include e2e_test"
+                msys64\usr\bin\bash -lc "cd c:/projects/caprice32 && PATH=$env:PATH:%MINGW_DIR%/bin make ARCH=%WINARCH% MINGW_PATH=\"%MINGW_DIR%\" WINE=\"\" WITH_IPF=true CFLAGS=-Ii686-linux-gnu-capsimage/include e2e_test"
         }
 # ======
 # = 4- Delete and recreate latest tag to trigger the 2nd build that will update the release date (https://github.com/appveyor/ci/issues/827)
