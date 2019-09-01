@@ -17,6 +17,7 @@ include /usr/share/dpkg/default.mk
 #export DEB_LDFLAGS_MAINT_APPEND = -Wl,--as-needed
 
 export RELEASE = true
+export APP_PATH=/usr/share/caprice32
 # main packaging script based on dh7 syntax
 %:
 	dh $@ 

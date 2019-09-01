@@ -43,6 +43,9 @@ public:
 	unsigned char blue;  //!< Blue component of the color
 	unsigned char alpha;  //!< Alpha component (or opacity) of the color
 
+  //! Default copy constructor.
+  CRGBColor(const CRGBColor& other) = default;
+  
 	//! Construct a new color object
 	//! \param r Red component value
 	//! \param b Blue component value

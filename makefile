@@ -69,6 +69,10 @@ GIT_HASH = $(shell git rev-parse --verify HEAD)
 COMMON_CFLAGS += -DHASH=\"$(GIT_HASH)\"
 endif
 
+ifdef APP_PATH
+COMMON_CFLAGS += -DAPP_PATH=\"$(APP_PATH)\"
+endif
+
 CLANG_FORMAT=clang-format
 CLANG_TIDY=clang-tidy-3.8
 CLANG_CHECKS=modernize-*,performance-*,misc-*,-misc-definitions-in-headers,readability-*,-readability-implicit-bool-cast,-readability-braces-around-statements,-readability-function-size

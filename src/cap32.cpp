@@ -1565,27 +1565,34 @@ void update_cpc_speed()
    InitAY();
 }
 
-
 std::string getConfigurationFilename(bool forWrite)
 {
-  // First look in any user supplied configuration file path
-  std::string configFilename = args.cfgFilePath;
-  if(access(configFilename.c_str(), F_OK) != 0) {
-     // If not found, cap32.cfg in the same directory as the executable
-     configFilename = std::string(chAppPath) + "/cap32.cfg";
-     // If not found, look for .cap32.cfg in the home of current user
-     if (access(configFilename.c_str(), F_OK) != 0) {
-        configFilename = std::string(getenv("HOME")) + "/.cap32.cfg";
-        // If still not found, look for cap32.cfg in /etc
-        if (!forWrite && access(configFilename.c_str(), F_OK) != 0) {
-           configFilename = "/etc/cap32.cfg";
-        }
-     }
-  }
-  std::cout << "Using configuration file" << (forWrite ? " to save" : "") << ": " << configFilename << std::endl;
-  return configFilename;
-}
+  int mode = R_OK | ( F_OK * forWrite );
 
+  const char* PATH_OK = "";
+
+  std::vector<std::pair<const char*, std::string>> configPaths = {
+    { PATH_OK, args.cfgFilePath}, // First look in any user supplied configuration file path
+    { chAppPath, "/cap32.cfg" }, // If not found, cap32.cfg in the same directory as the executable
+    { getenv("XDG_CONFIG_HOME"), "/cap32.cfg" },
+    { getenv("HOME"), "/.config/cap32.cfg" },
+    { getenv("HOME"), "/.cap32.cfg" },
+    { PATH_OK, "/etc/cap32.cfg"}
+  };
+
+  for(const auto& p: configPaths){
+    // Skip paths using getenv if it returned NULL (i.e environment variable not defined)
+    if (!p.first) continue;
+    std::string s = std::string(p.first) + p.second;
+    if (access(s.c_str(), mode) == 0) {
+      std::cout << "Using configuration file" << (forWrite ? " to save" : "") << ": " << s << std::endl;
+      return s;
+    }
+  }
+  
+  std::cout << "No valid configuration file found, using empty config." << std::endl;
+  return "";
+}
 
 
 void loadConfiguration (t_CPC &CPC, const std::string& configFilename)
@@ -1919,10 +1926,14 @@ int cap32_main (int argc, char **argv)
       exit(-1);
    }
 
-   if(getcwd(chAppPath, sizeof(chAppPath)-1) == nullptr) { // get the location of the executable
+   #ifndef APP_PATH
+   if(getcwd(chAppPath, sizeof(chAppPath)-1) == nullptr) {
       fprintf(stderr, "getcwd failed: %s\n", strerror(errno));
       cleanExit(-1);
    }
+   #else
+      strncpy(chAppPath,APP_PATH,_MAX_PATH);
+   #endif
 
    loadConfiguration(CPC, getConfigurationFilename()); // retrieve the emulator configuration
    if (CPC.printer) {
