@@ -9,7 +9,7 @@ https://github.com/ColinPitrat/caprice32
 
 Linux build: [![Linux build Status](https://travis-ci.org/ColinPitrat/caprice32.svg?branch=master)](https://travis-ci.org/ColinPitrat/caprice32)
 
- Windows build: [![Windows build status](https://ci.appveyor.com/api/projects/status/h795wt2xlttaj6sk?svg=true)](https://ci.appveyor.com/project/ColinPitrat/caprice32)
+Windows build: [![Windows build status](https://ci.appveyor.com/api/projects/status/h795wt2xlttaj6sk?svg=true)](https://ci.appveyor.com/project/ColinPitrat/caprice32)
 
 
 # What is it ?
@@ -34,6 +34,37 @@ Caprice32 provides:
   * Text mode graphics (using [aalib](http://aa-project.sourceforge.net/aalib/) or [libcaca](http://caca.zoy.org/wiki/libcaca))
 
 You see something missing ? Do not hesitate to open an issue to suggest it.
+
+# Installation
+
+## Linux
+
+### From Git
+
+```
+git clone https://github.com/ColinPitrat/caprice32.git
+make
+./cap32
+```
+
+### From releases
+
+Download a release from https://github.com/ColinPitrat/caprice32/releases.
+Decompress it and then from a terminal in the resulting directory:
+
+```
+make
+./cap32
+```
+
+### Snap
+
+A SNAP (maintained by a third party) is available at https://snapcraft.io/caprice32.
+
+## Windows
+
+Download a release from https://github.com/ColinPitrat/caprice32/releases.
+Decompress it and double click on cap32.exe
 
 # Basic usage
 
