@@ -252,6 +252,9 @@ unit_test: $(TEST_TARGET)
 	rm -fr $(ARCHIVE)/test
 	ln -s -f ../../test $(ARCHIVE)/test
 	cd $(ARCHIVE) && $(WINE) ./$(TEST_TARGET) --gtest_shuffle
+
+e2e_test: $(TARGET)
+	cd test/integrated && ./run_tests.sh
 else
 unit_test: $(TEST_TARGET)
 	./$(TEST_TARGET) --gtest_shuffle

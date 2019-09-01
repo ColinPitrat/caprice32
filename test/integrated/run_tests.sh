@@ -3,29 +3,40 @@
 OK=0
 TOTAL=0
 
+echo "Starting integrated tests"
+
+DIFF=diff
+if [ -f "/c/cygwin/bin/diff.exe" ]
+then
+	DIFF=/c/cygwin/bin/diff.exe
+fi
+export DIFF=$DIFF
+echo "Using diff: $DIFF"
+
 for tst in */test.sh
 do
   TSTDIR=`dirname "${tst}"`
   TSTNAME=`basename "$TSTDIR"`
   pushd "${TSTDIR}" >/dev/null
 
-  echo -n "${TSTNAME}: "
+  echo ""
+  echo " ** Running ${TSTNAME}: "
   BEGIN=`date +%s`
+  result="FAIL"
   if sh test.sh
   then
     let OK=$OK+1
-    echo -n "PASS"
-  else
-    echo -n "FAIL"
+    result="PASS"
   fi
   END=`date +%s`
   let TIMING=$END-$BEGIN
-  echo " (${TIMING}s)"
+  echo " => ${TSTNAME}: ${result} (${TIMING}s)"
 
   let TOTAL=$TOTAL+1
   popd >/dev/null
 done
 
+echo ""
 echo -n "Integrated tests result: "
 if [ $TOTAL -eq $OK ]
 then
