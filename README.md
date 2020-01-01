@@ -39,11 +39,20 @@ You see something missing ? Do not hesitate to open an issue to suggest it.
 
 ## Linux
 
+### Debug behavior and release behavior when locating configuration file
+
+If you compile Caprice32 yourself with plain make, behavior is
+debug-oriented.  By default at run-time it will look for `cap32.cfg`
+in the *current directory of the process* that launches it, not in the
+executable location as stated in the documentation.  To get the
+documented behavior, use `APP_PATH` like in the examples below.
+
 ### From Git
 
 ```
 git clone https://github.com/ColinPitrat/caprice32.git
-make
+cd caprice32
+make APP_PATH="$PWD"
 ./cap32
 ```
 
@@ -53,7 +62,7 @@ Download a release from https://github.com/ColinPitrat/caprice32/releases.
 Decompress it and then from a terminal in the resulting directory:
 
 ```
-make
+make APP_PATH="$PWD"
 ./cap32
 ```
 
