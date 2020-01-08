@@ -71,6 +71,8 @@ endif
 
 ifdef APP_PATH
 COMMON_CFLAGS += -DAPP_PATH=\"$(APP_PATH)\"
+else
+$(warning Notice: APP_PATH not specified.  Will look for cap32.cfg debug-style.  See `README.md` for details. )
 endif
 
 CLANG_FORMAT=clang-format

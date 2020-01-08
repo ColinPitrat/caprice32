@@ -397,6 +397,8 @@ void cleanExit(int returnCode);
 // Return the path to the best (i.e: most specific) configuration file.
 // Priority order is:
 //  - cap32.cfg in the same directory as cap32 binary
+//  - $XDG_CONFIG_HOME/cap32.cfg
+//  - $HOME/.config/cap32.cfg
 //  - $HOME/.cap32.cfg
 //  - /etc/cap32.cfg
 std::string getConfigurationFilename(bool forWrite = false);
