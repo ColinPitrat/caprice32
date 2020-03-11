@@ -957,7 +957,6 @@ int emulator_patch_ROM ()
 }
 
 
-
 void emulator_reset (bool bolMF2Reset)
 {
    if (CPC.model > 2) {
@@ -971,12 +970,8 @@ void emulator_reset (bool bolMF2Reset)
    video_set_palette();
 
 // Z80
-   memset(&z80, 0, sizeof(z80)); // clear all Z80 registers and support variables
-   _IX =
-  _IY = 0xffff; // IX and IY are FFFF after a reset!
-   _F = Zflag; // set zero flag
-   z80.break_point = 0xffffffff; // clear break point
-
+   z80_reset();
+   
 // CPC
    CPC.cycle_count = CYCLE_COUNT_INIT;
    memset(keyboard_matrix, 0xff, sizeof(keyboard_matrix)); // clear CPC keyboard matrix

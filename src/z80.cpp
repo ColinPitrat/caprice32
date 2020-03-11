@@ -32,6 +32,53 @@
 #include "asic.h"
 #include "log.h"
 
+
+/* 
+ * Note: these one letter macros are problematic on some modern
+ * compilers as these are supposed to be reserved for compiler internal
+ * purposes.
+ * mingw-64/msys2 defines some of those macros in ctypes.h which 
+ * leads to compiler errors when <string.h> and these macros are
+ * used in the same module.
+ */
+
+#define _A        z80.AF.b.h
+#define _F        z80.AF.b.l
+#define _AF       z80.AF.w.l
+#define _AFdword  z80.AF.d
+#define _B        z80.BC.b.h
+#define _C        z80.BC.b.l
+#define _BC       z80.BC.w.l
+#define _BCdword  z80.BC.d
+#define _D        z80.DE.b.h
+#define _E        z80.DE.b.l
+#define _DE       z80.DE.w.l
+#define _DEdword  z80.DE.d
+#define _H        z80.HL.b.h
+#define _L        z80.HL.b.l
+#define _HL       z80.HL.w.l
+#define _HLdword  z80.HL.d
+#define _PC       z80.PC.w.l
+#define _PCdword  z80.PC.d
+#define _SP       z80.SP.w.l
+
+#define _IXh      z80.IX.b.h
+#define _IXl      z80.IX.b.l
+#define _IX       z80.IX.w.l
+#define _IXdword  z80.IX.d
+#define _IYh      z80.IY.b.h
+#define _IYl      z80.IY.b.l
+#define _IY       z80.IY.w.l
+#define _IYdword  z80.IY.d
+
+#define _I        z80.I
+#define _R        z80.R
+#define _Rb7      z80.Rb7
+#define _IFF1     z80.IFF1
+#define _IFF2     z80.IFF2
+#define _IM       z80.IM
+#define _HALT     z80.HALT
+
 extern t_CPC CPC;
 extern t_FDC FDC;
 extern t_GateArray GateArray;
@@ -929,7 +976,14 @@ inline byte SRL(byte val) {
    } \
 }
 
-
+void z80_reset()
+{
+   memset(&z80, 0, sizeof(z80)); // clear all Z80 registers and support variables
+   _IX =
+   _IY = 0xffff; // IX and IY are FFFF after a reset!
+   _F = Zflag; // set zero flag
+   z80.break_point = 0xffffffff; // clear break point
+}
 
 void z80_init_tables()
 {
