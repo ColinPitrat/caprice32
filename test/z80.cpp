@@ -2,6 +2,8 @@
 #include "z80.h"
 #include "cap32.h"
 
+#include "z80_macros.h"
+
 extern byte *membank_read[4];
 extern t_z80regs z80;
 
