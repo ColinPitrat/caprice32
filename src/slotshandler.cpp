@@ -277,29 +277,29 @@ int snapshot_save (const std::string &filename)
    memcpy(sh.id, "MV - SNA", sizeof(sh.id));
    sh.version = 3;
 // Z80
-   sh.AF[1] = _A;
-   sh.AF[0] = _F;
-   sh.BC[1] = _B;
-   sh.BC[0] = _C;
-   sh.DE[1] = _D;
-   sh.DE[0] = _E;
-   sh.HL[1] = _H;
-   sh.HL[0] = _L;
-   sh.R = (_R & 0x7f) | (_Rb7 & 0x80);
-   sh.I = _I;
-   if (_IFF1)
+   sh.AF[1] = z80.AF.b.h;
+   sh.AF[0] = z80.AF.b.l;
+   sh.BC[1] = z80.BC.b.h;
+   sh.BC[0] = z80.BC.b.l;
+   sh.DE[1] = z80.DE.b.h;
+   sh.DE[0] = z80.DE.b.l;
+   sh.HL[1] = z80.HL.b.h;
+   sh.HL[0] = z80.HL.b.l;
+   sh.R = (z80.R & 0x7f) | (z80.Rb7 & 0x80);
+   sh.I = z80.I;
+   if (z80.IFF1)
       sh.IFF0 = 1;
-   if (_IFF2)
+   if (z80.IFF2)
       sh.IFF1 = 1;
-   sh.IX[1] = _IXh;
-   sh.IX[0] = _IXl;
-   sh.IY[1] = _IYh;
-   sh.IY[0] = _IYl;
+   sh.IX[1] = z80.IX.b.h;
+   sh.IX[0] = z80.IX.b.l;
+   sh.IY[1] = z80.IY.b.h;
+   sh.IY[0] = z80.IY.b.l;
    sh.SP[1] = z80.SP.b.h;
    sh.SP[0] = z80.SP.b.l;
    sh.PC[1] = z80.PC.b.h;
    sh.PC[0] = z80.PC.b.l;
-   sh.IM = _IM;
+   sh.IM = z80.IM;
    sh.AFx[1] = z80.AFx.b.h;
    sh.AFx[0] = z80.AFx.b.l;
    sh.BCx[1] = z80.BCx.b.h;
@@ -795,30 +795,30 @@ int snapshot_load (FILE *pfile)
   }
 
   // Z80
-  _A = sh.AF[1];
-  _F = sh.AF[0];
-  _B = sh.BC[1];
-  _C = sh.BC[0];
-  _D = sh.DE[1];
-  _E = sh.DE[0];
-  _H = sh.HL[1];
-  _L = sh.HL[0];
-  _R = sh.R & 0x7f;
-  _Rb7 = sh.R & 0x80; // bit 7 of R
-  _I = sh.I;
+  z80.AF.b.h = sh.AF[1];
+  z80.AF.b.l = sh.AF[0];
+  z80.BC.b.h = sh.BC[1];
+  z80.BC.b.l = sh.BC[0];
+  z80.DE.b.h = sh.DE[1];
+  z80.DE.b.l = sh.DE[0];
+  z80.HL.b.h = sh.HL[1];
+  z80.HL.b.l = sh.HL[0];
+  z80.R = sh.R & 0x7f;
+  z80.Rb7 = sh.R & 0x80; // bit 7 of R
+  z80.I = sh.I;
   if (sh.IFF0)
-    _IFF1 = Pflag;
+    z80.IFF1 = Pflag;
   if (sh.IFF1)
-    _IFF2 = Pflag;
-  _IXh = sh.IX[1];
-  _IXl = sh.IX[0];
-  _IYh = sh.IY[1];
-  _IYl = sh.IY[0];
+    z80.IFF2 = Pflag;
+  z80.IX.b.h = sh.IX[1];
+  z80.IX.b.l = sh.IX[0];
+  z80.IY.b.h = sh.IY[1];
+  z80.IY.b.l = sh.IY[0];
   z80.SP.b.h = sh.SP[1];
   z80.SP.b.l = sh.SP[0];
   z80.PC.b.h = sh.PC[1];
   z80.PC.b.l = sh.PC[0];
-  _IM = sh.IM; // interrupt mode
+  z80.IM = sh.IM; // interrupt mode
   z80.AFx.b.h = sh.AFx[1];
   z80.AFx.b.l = sh.AFx[0];
   z80.BCx.b.h = sh.BCx[1];
