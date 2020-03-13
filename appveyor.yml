@@ -44,9 +44,6 @@ install:
 
 before_build:
 - msys64\usr\bin\bash -lc "%MINGW_DIR%/bin/g++ --version"
-- msys64\usr\bin\bash -lc "find %MINGW_DIR% -name ctags"
-- msys64\usr\bin\bash -lc "find /usr -name ctags"
-- msys64\usr\bin\bash -lc "find /bin -name ctags"
 - msys64\usr\bin\bash -lc "%MINGW_DIR%/bin/mingw32-make --version"
 - echo "NUMBER_OF_PROCESSORS=%NUMBER_OF_PROCESSORS%"
 
@@ -55,7 +52,7 @@ build_script:
 # ===================================
 # = 1- Build and test in DEBUG mode =
 # ===================================
-- msys64\usr\bin\bash -lc "cd c:/projects/caprice32 && PATH=$PATH:%MINGW_DIR%/bin %MINGW_DIR%/bin/mingw32-make ARCH=%WINARCH% MINGW_PATH=\"%MINGW_DIR%\" WINE=\"\" debug"
+- msys64\usr\bin\bash -lc "cd c:/projects/caprice32 && PATH=$PATH:%MINGW_DIR%/bin %MINGW_DIR%/bin/mingw32-make -d ARCH=%WINARCH% MINGW_PATH=\"%MINGW_DIR%\" WINE=\"\" debug"
 # ===================================
 # 2- Build and test in RELEASE mode =
 # ===================================
