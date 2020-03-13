@@ -39,6 +39,7 @@ install:
 - 7z x "%MSYS2_SUBARCHIVE%" > NUL
   # msys2 advise to restart the shell after a first start
 - msys64\usr\bin\bash -lc ""
+- msys64\usr\bin\bash -lc "pacman -R --noconfirm catgets"
 - msys64\usr\bin\bash -lc "for i in {1..3}; do pacman --noconfirm -Suy && break || sleep 15 ; done"
 - msys64\usr\bin\bash -lc "for i in {1..3}; do pacman --noconfirm -S %PACKAGES% && break || sleep 15 ; done"
 
