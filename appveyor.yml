@@ -44,10 +44,14 @@ install:
 
 before_build:
 - msys64\usr\bin\bash -lc "%MINGW_DIR%/bin/g++ --version"
-- msys64\usr\bin\bash -lc "ls /"
+- msys64\usr\bin\bash -lc "ls -l /"
+- msys64\usr\bin\bash -lc "pacman -Ql make"
+- msys64\usr\bin\bash -lc "find /bin -name make"
+- msys64\usr\bin\bash -lc "find /mingw32 -name make"
+- msys64\usr\bin\bash -lc "find /mingw64 -name make"
+- msys64\usr\bin\bash -lc "find /opt -name make"
 - msys64\usr\bin\bash -lc "find %MINGW_DIR% -name make"
 - msys64\usr\bin\bash -lc "find /usr -name make"
-- msys64\usr\bin\bash -lc "find /bin -name make"
 - msys64\usr\bin\bash -lc "%MINGW_DIR%/bin/make --version"
 - echo "NUMBER_OF_PROCESSORS=%NUMBER_OF_PROCESSORS%"
 
