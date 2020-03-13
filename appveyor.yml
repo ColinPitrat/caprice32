@@ -46,7 +46,11 @@ before_build:
 - msys64\usr\bin\bash -lc "%MINGW_DIR%/bin/g++ --version"
 - msys64\usr\bin\bash -lc "find /usr -name \*make\*"
 - msys64\usr\bin\bash -lc "find / -name \*make\* || true"
-- msys64\usr\bin\bash -lc "/usr/bin/make --version"
+- msys64\usr\bin\bash -lc "/usr/bin/make || true"
+- msys64\usr\bin\bash -lc "/bin/make || true"
+- msys64\usr\bin\bash -lc "/usr/bin/make --version || true"
+- msys64\usr\bin\bash -lc "/bin/make --version || true"
+- msys64\usr\bin\bash -lc "%MINGW_DIR%/mingw32-make --version || true"
 - echo "NUMBER_OF_PROCESSORS=%NUMBER_OF_PROCESSORS%"
 
 build_script:
