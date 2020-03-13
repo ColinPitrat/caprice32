@@ -52,7 +52,7 @@ build_script:
 # ===================================
 # = 1- Build and test in DEBUG mode =
 # ===================================
-- msys64\usr\bin\bash -lc "cd c:/projects/caprice32 && PATH=$PATH:%MINGW_DIR%/bin %MINGW_DIR%/bin/mingw32-make -p ARCH=%WINARCH% MINGW_PATH=\"%MINGW_DIR%\" WINE=\"\""
+- msys64\usr\bin\bash -lc "cd c:/projects/caprice32 && PATH=$PATH:%MINGW_DIR%/bin find src -name \*.cpp"
 - msys64\usr\bin\bash -lc "cd c:/projects/caprice32 && PATH=$PATH:%MINGW_DIR%/bin %MINGW_DIR%/bin/mingw32-make -d ARCH=%WINARCH% MINGW_PATH=\"%MINGW_DIR%\" WINE=\"\" debug"
 # ===================================
 # 2- Build and test in RELEASE mode =
