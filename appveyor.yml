@@ -44,6 +44,8 @@ install:
 
 before_build:
 - msys64\usr\bin\bash -lc "%MINGW_DIR%/bin/g++ --version"
+- msys64\usr\bin\bash -lc "find /usr -name \*make\*"
+- msys64\usr\bin\bash -lc "find / -name \*make\* || true"
 - msys64\usr\bin\bash -lc "%MINGW_DIR%/bin/mingw32-make --version"
 - echo "NUMBER_OF_PROCESSORS=%NUMBER_OF_PROCESSORS%"
 
