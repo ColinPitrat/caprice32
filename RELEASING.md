@@ -15,16 +15,17 @@ And commit the change:
 $ git commit -m "Create version vX.Y.0"
 ```
 
-Tag the release:
+Tag the release and delete the latest tag:
 
 ```
 $ git tag vX.Y.0
+$ git tag -d latest
 ```
 
 Push the result:
 
 ```
-$ git push
+$ git push --tags
 ```
 
 Delete the latest release from github, it will be recreated by the next push.
