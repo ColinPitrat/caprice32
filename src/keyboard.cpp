@@ -72,6 +72,32 @@ const dword InputMapper::cpc_kbd[CPC_KEYBOARD_NUM][CPC_KEY_NUM] = {
     0x77,                   // CPC_x
     0x53,                   // CPC_y
     0x87,                   // CPC_z
+    0x85 | MOD_CPC_CTRL,    // CPC_CTRL_a
+    0x66 | MOD_CPC_CTRL,    // CPC_CTRL_b
+    0x76 | MOD_CPC_CTRL,    // CPC_CTRL_c
+    0x75 | MOD_CPC_CTRL,    // CPC_CTRL_d
+    0x72 | MOD_CPC_CTRL,    // CPC_CTRL_e
+    0x65 | MOD_CPC_CTRL,    // CPC_CTRL_f
+    0x64 | MOD_CPC_CTRL,    // CPC_CTRL_g
+    0x54 | MOD_CPC_CTRL,    // CPC_CTRL_h
+    0x43 | MOD_CPC_CTRL,    // CPC_CTRL_i
+    0x55 | MOD_CPC_CTRL,    // CPC_CTRL_j
+    0x45 | MOD_CPC_CTRL,    // CPC_CTRL_k
+    0x44 | MOD_CPC_CTRL,    // CPC_CTRL_l
+    0x46 | MOD_CPC_CTRL,    // CPC_CTRL_m
+    0x56 | MOD_CPC_CTRL,    // CPC_CTRL_n
+    0x42 | MOD_CPC_CTRL,    // CPC_CTRL_o
+    0x33 | MOD_CPC_CTRL,    // CPC_CTRL_p
+    0x83 | MOD_CPC_CTRL,    // CPC_CTRL_q
+    0x62 | MOD_CPC_CTRL,    // CPC_CTRL_r
+    0x74 | MOD_CPC_CTRL,    // CPC_CTRL_s
+    0x63 | MOD_CPC_CTRL,    // CPC_CTRL_t
+    0x52 | MOD_CPC_CTRL,    // CPC_CTRL_u
+    0x67 | MOD_CPC_CTRL,    // CPC_CTRL_v
+    0x73 | MOD_CPC_CTRL,    // CPC_CTRL_w
+    0x77 | MOD_CPC_CTRL,    // CPC_CTRL_x
+    0x53 | MOD_CPC_CTRL,    // CPC_CTRL_y
+    0x87 | MOD_CPC_CTRL,    // CPC_CTRL_z
     0x60 | MOD_CPC_SHIFT,   // CPC_AMPERSAND
     0x35 | MOD_CPC_SHIFT,   // CPC_ASTERISK
     0x32,                   // CPC_AT
@@ -223,6 +249,32 @@ const dword InputMapper::cpc_kbd[CPC_KEYBOARD_NUM][CPC_KEY_NUM] = {
     0x77,                   // CPC_x
     0x53,                   // CPC_y
     0x73,                   // CPC_z
+    0x83 | MOD_CPC_CTRL,    // CPC_CTRL_a
+    0x66 | MOD_CPC_CTRL,    // CPC_CTRL_b
+    0x76 | MOD_CPC_CTRL,    // CPC_CTRL_c
+    0x75 | MOD_CPC_CTRL,    // CPC_CTRL_d
+    0x72 | MOD_CPC_CTRL,    // CPC_CTRL_e
+    0x65 | MOD_CPC_CTRL,    // CPC_CTRL_f
+    0x64 | MOD_CPC_CTRL,    // CPC_CTRL_g
+    0x54 | MOD_CPC_CTRL,    // CPC_CTRL_h
+    0x43 | MOD_CPC_CTRL,    // CPC_CTRL_i
+    0x55 | MOD_CPC_CTRL,    // CPC_CTRL_j
+    0x45 | MOD_CPC_CTRL,    // CPC_CTRL_k
+    0x44 | MOD_CPC_CTRL,    // CPC_CTRL_l
+    0x35 | MOD_CPC_CTRL,    // CPC_CTRL_m
+    0x56 | MOD_CPC_CTRL,    // CPC_CTRL_n
+    0x42 | MOD_CPC_CTRL,    // CPC_CTRL_o
+    0x33 | MOD_CPC_CTRL,    // CPC_CTRL_p
+    0x85 | MOD_CPC_CTRL,    // CPC_CTRL_q
+    0x62 | MOD_CPC_CTRL,    // CPC_CTRL_r
+    0x74 | MOD_CPC_CTRL,    // CPC_CTRL_s
+    0x63 | MOD_CPC_CTRL,    // CPC_CTRL_t
+    0x52 | MOD_CPC_CTRL,    // CPC_CTRL_u
+    0x67 | MOD_CPC_CTRL,    // CPC_CTRL_v
+    0x87 | MOD_CPC_CTRL,    // CPC_CTRL_w
+    0x77 | MOD_CPC_CTRL,    // CPC_CTRL_x
+    0x53 | MOD_CPC_CTRL,    // CPC_CTRL_y
+    0x73 | MOD_CPC_CTRL,    // CPC_CTRL_z
     0x80,                   // CPC_AMPERSAND
     0x21,                   // CPC_ASTERISK
     0x26 | MOD_CPC_SHIFT,   // CPC_AT
@@ -374,6 +426,32 @@ const dword InputMapper::cpc_kbd[CPC_KEYBOARD_NUM][CPC_KEY_NUM] = {
     0x77,                   // CPC_x
     0x53,                   // CPC_y
     0x87,                   // CPC_z
+    0x85 | MOD_CPC_CTRL,    // CPC_CTRL_a
+    0x66 | MOD_CPC_CTRL,    // CPC_CTRL_b
+    0x76 | MOD_CPC_CTRL,    // CPC_CTRL_c
+    0x75 | MOD_CPC_CTRL,    // CPC_CTRL_d
+    0x72 | MOD_CPC_CTRL,    // CPC_CTRL_e
+    0x65 | MOD_CPC_CTRL,    // CPC_CTRL_f
+    0x64 | MOD_CPC_CTRL,    // CPC_CTRL_g
+    0x54 | MOD_CPC_CTRL,    // CPC_CTRL_h
+    0x43 | MOD_CPC_CTRL,    // CPC_CTRL_i
+    0x55 | MOD_CPC_CTRL,    // CPC_CTRL_j
+    0x45 | MOD_CPC_CTRL,    // CPC_CTRL_k
+    0x44 | MOD_CPC_CTRL,    // CPC_CTRL_l
+    0x46 | MOD_CPC_CTRL,    // CPC_CTRL_m
+    0x56 | MOD_CPC_CTRL,    // CPC_CTRL_n
+    0x42 | MOD_CPC_CTRL,    // CPC_CTRL_o
+    0x33 | MOD_CPC_CTRL,    // CPC_CTRL_p
+    0x83 | MOD_CPC_CTRL,    // CPC_CTRL_q
+    0x62 | MOD_CPC_CTRL,    // CPC_CTRL_r
+    0x74 | MOD_CPC_CTRL,    // CPC_CTRL_s
+    0x63 | MOD_CPC_CTRL,    // CPC_CTRL_t
+    0x52 | MOD_CPC_CTRL,    // CPC_CTRL_u
+    0x67 | MOD_CPC_CTRL,    // CPC_CTRL_v
+    0x73 | MOD_CPC_CTRL,    // CPC_CTRL_w
+    0x77 | MOD_CPC_CTRL,    // CPC_CTRL_x
+    0x53 | MOD_CPC_CTRL,    // CPC_CTRL_y
+    0x87 | MOD_CPC_CTRL,    // CPC_CTRL_z
     0x60 | MOD_CPC_SHIFT,   // CPC_AMPERSAND
     0x21 | MOD_CPC_SHIFT,   // CPC_ASTERISK
     0x32,                   // CPC_AT
@@ -565,6 +643,7 @@ const std::map<const char, const CPC_KEYS> InputMapper::CPCkeysFromChars = {
     // Not (yet?) on virtual keyboard
     { '@', CPC_AT },
     { '^', CPC_POWER },
+    // Control keys (CPC_CTRL_a to CPC_CTRL_z) are not ont the virtual keyboard (yet?)
     //{ '~', {0, KMOD_NONE} } // should be pound but it's not part of base ascii (it's in extended ASCII)
 };
 
@@ -631,6 +710,32 @@ std::map<unsigned int, unsigned int> InputMapper::SDLkeysymFromCPCkeys_us = {
   { CPC_x,           SDLK_x },
   { CPC_y,           SDLK_y },
   { CPC_z,           SDLK_z },
+  { CPC_CTRL_a,      SDLK_a | MOD_PC_CTRL },
+  { CPC_CTRL_b,      SDLK_b | MOD_PC_CTRL },
+  { CPC_CTRL_c,      SDLK_c | MOD_PC_CTRL },
+  { CPC_CTRL_d,      SDLK_d | MOD_PC_CTRL },
+  { CPC_CTRL_e,      SDLK_e | MOD_PC_CTRL },
+  { CPC_CTRL_f,      SDLK_f | MOD_PC_CTRL },
+  { CPC_CTRL_g,      SDLK_g | MOD_PC_CTRL },
+  { CPC_CTRL_h,      SDLK_h | MOD_PC_CTRL },
+  { CPC_CTRL_i,      SDLK_i | MOD_PC_CTRL },
+  { CPC_CTRL_j,      SDLK_j | MOD_PC_CTRL },
+  { CPC_CTRL_k,      SDLK_k | MOD_PC_CTRL },
+  { CPC_CTRL_l,      SDLK_l | MOD_PC_CTRL },
+  { CPC_CTRL_m,      SDLK_m | MOD_PC_CTRL },
+  { CPC_CTRL_n,      SDLK_n | MOD_PC_CTRL },
+  { CPC_CTRL_o,      SDLK_o | MOD_PC_CTRL },
+  { CPC_CTRL_p,      SDLK_p | MOD_PC_CTRL },
+  { CPC_CTRL_q,      SDLK_q | MOD_PC_CTRL },
+  { CPC_CTRL_r,      SDLK_r | MOD_PC_CTRL },
+  { CPC_CTRL_s,      SDLK_s | MOD_PC_CTRL },
+  { CPC_CTRL_t,      SDLK_t | MOD_PC_CTRL },
+  { CPC_CTRL_u,      SDLK_u | MOD_PC_CTRL },
+  { CPC_CTRL_v,      SDLK_v | MOD_PC_CTRL },
+  { CPC_CTRL_w,      SDLK_w | MOD_PC_CTRL },
+  { CPC_CTRL_x,      SDLK_x | MOD_PC_CTRL },
+  { CPC_CTRL_y,      SDLK_y | MOD_PC_CTRL },
+  { CPC_CTRL_z,      SDLK_z | MOD_PC_CTRL },
   { CPC_AMPERSAND,   SDLK_7 | MOD_PC_SHIFT },
   { CPC_ASTERISK,    SDLK_8 | MOD_PC_SHIFT },
   { CPC_AT,          SDLK_2 | MOD_PC_SHIFT },
@@ -778,6 +883,32 @@ const std::map<const std::string, const unsigned int> InputMapper::CPCkeysFromSt
    {"CPC_x",           CPC_x},
    {"CPC_y",           CPC_y},
    {"CPC_z",           CPC_z},
+   {"CPC_CTRL_a",      CPC_CTRL_a},
+   {"CPC_CTRL_b",      CPC_CTRL_b},
+   {"CPC_CTRL_c",      CPC_CTRL_c},
+   {"CPC_CTRL_d",      CPC_CTRL_d},
+   {"CPC_CTRL_e",      CPC_CTRL_e},
+   {"CPC_CTRL_f",      CPC_CTRL_f},
+   {"CPC_CTRL_g",      CPC_CTRL_g},
+   {"CPC_CTRL_h",      CPC_CTRL_h},
+   {"CPC_CTRL_i",      CPC_CTRL_i},
+   {"CPC_CTRL_j",      CPC_CTRL_j},
+   {"CPC_CTRL_k",      CPC_CTRL_k},
+   {"CPC_CTRL_l",      CPC_CTRL_l},
+   {"CPC_CTRL_m",      CPC_CTRL_m},
+   {"CPC_CTRL_n",      CPC_CTRL_n},
+   {"CPC_CTRL_o",      CPC_CTRL_o},
+   {"CPC_CTRL_p",      CPC_CTRL_p},
+   {"CPC_CTRL_q",      CPC_CTRL_q},
+   {"CPC_CTRL_r",      CPC_CTRL_r},
+   {"CPC_CTRL_s",      CPC_CTRL_s},
+   {"CPC_CTRL_t",      CPC_CTRL_t},
+   {"CPC_CTRL_u",      CPC_CTRL_u},
+   {"CPC_CTRL_v",      CPC_CTRL_v},
+   {"CPC_CTRL_w",      CPC_CTRL_w},
+   {"CPC_CTRL_x",      CPC_CTRL_x},
+   {"CPC_CTRL_y",      CPC_CTRL_y},
+   {"CPC_CTRL_z",      CPC_CTRL_z},
    {"CPC_AMPERSAND",   CPC_AMPERSAND},
    {"CPC_ASTERISK",    CPC_ASTERISK},
    {"CPC_AT",          CPC_AT},
