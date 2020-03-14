@@ -9,6 +9,12 @@ $ vi src/cap32.h
 (...)
 ```
 
+And commit the change:
+
+```
+$ git commit -m "Create version vX.Y.0"
+```
+
 Tag the release:
 
 ```
