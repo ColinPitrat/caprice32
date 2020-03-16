@@ -16,6 +16,12 @@
    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+/*
+ * TODO: single letter macros are reserved for compiler internal use and
+ * should be renamed/refactored in future.
+ * See: https://github.com/ColinPitrat/caprice32/issues/150
+ */
+
 #ifndef Z80_MACROS_H
 #define Z80_MACROS_H
 
