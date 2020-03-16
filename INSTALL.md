@@ -142,7 +142,7 @@ Finally build the caprice binary.
 
 Test the fresh Caprice32 Build.
 
-`./cap32
+`./cap32`
 
 If you want to build the 32 bit version you need to adjust the MINGW_PATH in the makefile and to install the proper packages for i686 (32 bit) instead of x86_64 e.g.
 
