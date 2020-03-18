@@ -10,7 +10,7 @@ You will need the following to successfully compile an executable:
 
 # Compiling
 
-#### Linux target:
+### Linux target:
 
 To build with default options, use :
 
@@ -31,7 +31,7 @@ Alternatively, the debug target also work:
 
 `make debug`
 
-#### Debian/Ubuntu package:
+### Debian/Ubuntu package:
 
 To build a debian package on Debian/Ubuntu distributions, install the dependencies as mentioned above and the debian packaging helper packages:
 
@@ -44,7 +44,7 @@ Then, to create a debian package:
  * go to `release/cap32_linux/caprice32-<version>/debian`
  * execute `debuild -us -uc --lintian-opts --profile debian` or `pdebuild` if you want to run in a chrooted env.
 
-#### Windows target:
+### Windows target:
 
 To build with default options for 32 bits architecture (i686), use:
 
@@ -55,6 +55,99 @@ and for 64 bits (x86_64) use:
 `make ARCH=win64`
 
 You may need to edit the makefile to update `MINGW_PATH`, `CXX`, `IPATHS` and `LIBS` for windows platform with the correct values for your installation of mingw.
+
+
+### Example Build for mingw64 on Windows10
+
+Download MSys2.0 from https://www.msys2.org.
+We assume that you are using 64bit architecture,
+so you need to download msys2-x86_64-xxxxxxxx.exe (msys2-x86_64-20190524.exe). 
+
+Install it under default folder "c:\msys64". 
+Do not automatically start the msys2 shell after the installation is complete.
+
+Open folder "c:\msys64" and start "mingw64.exe".
+
+If you are working behind a firewall, you might need to define the 
+http proxy for the packet manager. For this enter the proper export commands.
+```
+export HTTP_PROXY="username:password@proxy.server.address:port"
+export HTTPS_PROXY=$HTTP_PROXY
+export http_proxy=$HTTP_PROXY
+export https_proxy=$HTTP_PROXY
+```
+
+Update the package manager database.
+
+`pacman -Syu`
+
+When you find the message "Warnung: terminate MSYS2 without returning to shell
+and check for updates again" then close the window with the close symbol and repeat the previous step.
+
+`pacman -Syu`
+
+Install git.
+
+`pacman -S git`
+
+Clone the caprice32 repository.
+
+`git clone https://github.com/ColinPitrat/caprice32.git`
+
+Install the 64 bit gcc compiler.
+
+`pacman -S mingw-w64-x86_64-gcc`
+
+Install make.
+
+`pacman -S make`
+
+Adjust the win64 part in the makefile.
+
+```
+ifeq ($(ARCH),win64)
+TRIPLE = x86_64-w64-mingw32
+PLATFORM=windows
+CAPSIPFDLL=CAPSImg_x64.dll
+MINGW_PATH = /mingw64
+```
+
+Adjust the windows part in the makefile.
+
+```
+ifeq ($(PLATFORM),windows)
+TARGET = cap32.exe
+TEST_TARGET = test_runner.exe
+IPATHS = -Isrc/ -Isrc/gui/includes -I$(MINGW_PATH)/include -I$(MINGW_PATH)/include/SDL -I$(MINGW_PATH)/include/freetype2
+LIBS = $(MINGW_PATH)/lib/libSDL.dll.a $(MINGW_PATH)/lib/libfreetype.dll.a $(MINGW_PATH)/lib/libz.dll.a $(MINGW_PATH)/lib/libpng16.dll.a $(MINGW_PATH)/lib/libpng.dll.a
+COMMON_CFLAGS = -DWINDOWS
+CXX = $(MINGW_PATH)/bin/g++
+```
+
+Install SDL 1.2.15.
+
+`pacman -S mingw-w64-i686-SDL`
+
+Install freetype.
+
+`pacman -S mingw-w64-x86_64-freetype`
+
+Install zip.
+
+`pacman -S zip`
+
+Finally build the caprice binary.
+
+`make ARCH=win64`
+
+Test the fresh Caprice32 Build.
+
+`./cap32`
+
+If you want to build the 32 bit version you need to adjust the MINGW_PATH in the makefile and to install the proper packages for i686 (32 bit) instead of x86_64 e.g.
+
+`pacman -S mingw-w64-i686-gcc`
+
 
 # IPF support
 
