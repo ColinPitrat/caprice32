@@ -32,6 +32,8 @@
 #include "asic.h"
 #include "log.h"
 
+#include "z80_macros.h"
+
 extern t_CPC CPC;
 extern t_FDC FDC;
 extern t_GateArray GateArray;
@@ -929,7 +931,14 @@ inline byte SRL(byte val) {
    } \
 }
 
-
+void z80_reset()
+{
+   memset(&z80, 0, sizeof(z80)); // clear all Z80 registers and support variables
+   _IX =
+   _IY = 0xffff; // IX and IY are FFFF after a reset!
+   _F = Zflag; // set zero flag
+   z80.break_point = 0xffffffff; // clear break point
+}
 
 void z80_init_tables()
 {
