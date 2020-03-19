@@ -49,7 +49,7 @@ Install git.
 
 `sudo apt-get install git`
 
-Set your proxy variables (if necessarry) and clone the caprice repository.
+Set your proxy variables (if necessary) and clone the caprice repository.
 
 ```
 export HTTP_PROXY="http://proxy.company.com:9999"
@@ -59,21 +59,9 @@ git clone https://github.com/ColinPitrat/caprice32.git
 cd caprice32
 ```
 
-Install g++.
+Install g++, make, sdl1.2 and freetype.
 
-`sudo apt-get install g++`
-
-Install make.
-
-`sudo apt-get install make`
-
-Install sdl.
-
-`sudo apt-get install libsdl1.2-dev`
-
-Install freetype.
-
-`sudo apt-get install libfreetype6-dev`
+`sudo apt-get install g++ make libsdl1.2-dev libfreetype6-dev`
 
 Finally build the linux binary.
 
