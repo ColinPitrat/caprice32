@@ -31,6 +31,62 @@ Alternatively, the debug target also work:
 
 `make debug`
 
+### Example build on a Debian 10 System
+
+Download a debian install image e.g. from https://www.debian.org/CD/netinst/
+and install debian 10 on a virtual or real machine. Create your user account
+during installation.
+
+Add your user to the sudoer group.
+
+```
+su -
+usermod -aG sudo <user>
+# now you need to logout and login again!
+```
+
+Install git.
+
+`sudo apt-get install git`
+
+Set your proxy variables (if necessarry) and clone the caprice repository.
+
+```
+export HTTP_PROXY="http://proxy.company.com:9999"
+export HTTPS_PROXY=$HTTP_PROXY
+
+git clone https://github.com/ColinPitrat/caprice32.git
+cd caprice32
+```
+
+Install g++.
+
+`sudo apt-get install g++`
+
+Install make.
+
+`sudo apt-get install make`
+
+Install sdl.
+
+`sudo apt-get install libsdl1.2-dev`
+
+Install freetype.
+
+`sudo apt-get install libfreetype6-dev`
+
+Finally build the linux binary.
+
+`make ARCH=linux`
+
+To speed up the build you can use more than one processes if you have more cores, e.g.
+
+`make ARCH=linux -j 4` 
+
+Test the binary
+
+`./cap32`
+
 ### Debian/Ubuntu package:
 
 To build a debian package on Debian/Ubuntu distributions, install the dependencies as mentioned above and the debian packaging helper packages:
