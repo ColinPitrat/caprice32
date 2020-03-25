@@ -1,5 +1,5 @@
-<!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Fri Jun  9 09:16:47 2017 -->
+<!-- Creator     : groff version 1.22.4 -->
+<!-- CreationDate: Wed Mar 25 00:31:08 2020 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -100,20 +100,26 @@ configuration file was specified using the <b>--cfg_file</b>
 command line switch, Caprice32 will try and use it. If no
 configuration file was specified, or the configuration file
 specified does not exist, Caprice32 will try and open, in
-this order: <b>$CWD/cap32.cfg</b> ($CWD being the directory
-where the cap32 executable resides), then a
-<b>.cap32.cfg</b> file in the user home directory, then
-<b>/etc/cap32.cfg</b>. Caprice32 will use the first valid
-file it finds. If no configuration file is found, a default
-configuration will be used.</p>
+this order: <br>
+- <b>$CWD/cap32.cfg</b> ($CWD being the directory where the
+cap32 executable resides) <br>
+- <b>cap32.cfg</b> file in the location pointed to by the
+XDG_CONFIG_HOME environment variable. If XDG_CONFIG_HOME is
+undefined, it will look at $HOME/.config/ as default
+XDG_CONFIG_HOME directory. <br>
+- <b>$HOME/.cap32.cfg</b> for compatibility. <br>
+- <b>/etc/cap32.cfg</b>. <br>
+Caprice32 will use the first valid file it finds. If no
+configuration file is found, a default configuration will be
+used.</p>
 
 <p style="margin-left:22%; margin-top: 1em">The
 configuration file contains various configuration
 parameters, some of which can be modified from the GUI. When
 saving the configuration from the GUI, it will be written in
-the configuration file specified by the <b>--cfg_file</b>
-switch, if it exists, else in $CWD/cap32.cfg if it exists,
-otherwise in $HOME/.cap32.cfg.</p>
+the configuration file following the same order than
+previously described, except for the addition of the write
+permission condition.</p>
 
 <p style="margin-left:22%; margin-top: 1em">Most of the
 configuration file entries are commented in the
@@ -203,6 +209,16 @@ commands. For example: cap32 -a &rsquo;print
 
 <p style="margin-left:22%;">use FILE as the emulator
 configuration file.</p>
+
+<p style="margin-left:11%;"><b>-g</b>,
+<b>--greenmode</b>=<i>MODE</i></p>
+
+<p style="margin-left:22%;">adjust the color palette for
+the green screen mode. Possible values for MODE are 0 to 3,
+where 0=classic caprice green colors, 1=as mode 0, but with
+blue value adjustment, 2=lebretro proposal implementation
+(see https://github.com/ColinPitrat/caprice32/issues/135)
+and 3=libretro proposal with blue adjustment.</p>
 
 <p style="margin-left:11%;"><b>-h</b>, <b>--help</b></p>
 

@@ -15,6 +15,7 @@ const struct option long_options[] =
 {
    {"autocmd",  required_argument, nullptr, 'a'},
    {"cfg_file", required_argument, nullptr, 'c'},
+   {"greenmode",required_argument, nullptr, 'g'}, 
    {"version",  no_argument, nullptr, 'V'},
    {"help",     no_argument, nullptr, 'h'},
    {"verbose",  no_argument, nullptr, 'v'},
@@ -33,11 +34,16 @@ void usage(std::ostream &os, char *progPath, int errcode)
 
    os << "Usage: " << progname << " [options] <slotfile(s)>\n";
    os << "\nSupported options are:\n";
-   os << "   -a/--autocmd=<command>: execute command as soon as the emulator starts.\n";
-   os << "   -c/--cfg_file=<file>:   use <file> as the emulator configuration file instead of the default.\n";
-   os << "   -h/--help:              shows this help\n";
-   os << "   -V/--version:           outputs version and exit\n";
-   os << "   -v/--verbose:           be talkative\n";
+   os << "   -a/--autocmd=<command>:  execute command as soon as the emulator starts.\n";
+   os << "   -c/--cfg_file=<file>:    use <file> as the emulator configuration file instead of the default.\n";
+   os << "   -g/--greenmode=<0|1|2|3>:adjust the color profile for green screen simulation.\n";
+   os << "                            0=classic caprice green color scheme\n";
+   os << "                            1=as mode 0, but added some blue to increase realism\n";
+   os << "                            2=improved palette proposed by libretro project\n";
+   os << "                            3=as mode 2, but added some blue to increase realism\n";
+   os << "   -h/--help:               shows this help\n";
+   os << "   -V/--version:            outputs version and exit\n";
+   os << "   -v/--verbose:            be talkative\n";
    os << "\nslotfiles is an optional list of files giving the content of the various CPC ports.\n";
    os << "Ports files are identified by their extension. Supported formats are .dsk (disk), .cdt or .voc (tape), .cpr (cartridge), .sna (snapshot), or .zip (archive containing one or more of the supported ports files).\n";
    os << "\nExample: " << progname << " sorcery.dsk\n";
@@ -93,7 +99,7 @@ void parseArguments(int argc, char **argv, std::vector<std::string>& slot_list, 
 
    optind = 0; // To please test framework, when this function is called multiple times !
    while(true) {
-      c = getopt_long (argc, argv, "a:c:hvV",
+      c = getopt_long (argc, argv, "a:c:g:hvV",
                        long_options, &option_index);
 
       /* Detect the end of the options. */
@@ -110,6 +116,14 @@ void parseArguments(int argc, char **argv, std::vector<std::string>& slot_list, 
 
          case 'c':
             args.cfgFilePath = optarg;
+            break;
+
+         case 'g':
+            args.greenMode = atoi(optarg);
+            if (args.greenMode < 0 || args.greenMode > 3) {
+               printf("illegal greenmode value:%s\n", optarg);
+               usage(std::cout, argv[0], 0);
+            }
             break;
 
          case 'h':

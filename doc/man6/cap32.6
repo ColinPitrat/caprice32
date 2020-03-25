@@ -118,6 +118,9 @@ pass command to execute to the emulator. The option can be repeated to pass mult
 \fB\-c\fR, \fB\-\-cfg_file\fR=\fIFILE\fR
 use FILE as the emulator configuration file.
 .TP
+\fB\-g\fR, \fB\-\-greenmode\fR=\fIMODE\fR
+adjust the color palette for the green screen mode. Possible values for MODE are 0 to 3, where 0=classic caprice green colors, 1=as mode 0, but with blue value adjustment, 2=lebretro proposal implementation (see https://github.com/ColinPitrat/caprice32/issues/135) and 3=libretro proposal with blue adjustment.
+.TP
 \fB\-h\fR, \fB\-\-help\fR
 display short help and exits
 .TP

@@ -141,7 +141,10 @@ double colours_rgb[32][3] = {
    { 0.5, 0.0, 0.0 }, { 0.5, 0.0, 1.0 },{ 0.5, 0.5, 0.0 }, { 0.5, 0.5, 1.0 }
 };
 
-double colours_green[32] = {
+
+// original RGB color to GREEN LUMA converted by Ulrich Doewich
+// unknown formula.
+double colours_green_classic[32] = {
    0.5647, 0.5647, 0.7529, 0.9412,
    0.1882, 0.3765, 0.4706, 0.6588,
    0.3765, 0.9412, 0.9098, 0.9725,
@@ -151,6 +154,47 @@ double colours_green[32] = {
    0.2824, 0.8471, 0.8157, 0.8784,
    0.2510, 0.3137, 0.5333, 0.5961
 };
+
+// added by a proposal from libretro project,
+// see https://github.com/ColinPitrat/caprice32/issues/135
+//
+
+double colours_green_libretro[32] = {
+   0.5755,  0.5755,  0.7534,  0.9718, 
+   0.1792,  0.3976,  0.4663,  0.6847, 
+   0.3976,  0.9718,  0.9136,  1.0300, 
+   0.3394,  0.4558,  0.6265,  0.7429, 
+   0.1792,  0.7534,  0.6952,  0.8116, 
+   0.1210,  0.2374,  0.4081,  0.5245, 
+   0.2884,  0.8626,  0.8044,  0.9208, 
+   0.2302,  0.3466,  0.5173,  0.6337
+};
+
+// the following formula would produce the table above
+/*
+// Convert RGB color to GREEN LUMA
+// check colours_green vs colours_rgb, we could use here a logarithm.
+// https://en.wikipedia.org/wiki/Grayscale#Converting_color_to_grayscale
+#define G_LUMA_R     0.2427
+#define G_LUMA_G     0.6380
+#define G_LUMA_B     0.1293
+#define G_LUMA_BASE  0.071
+#define G_LUMA_COEF  0.100
+#define G_LUMA_PRIM  0.050
+
+PIXEL_TYPE video_palette_green(double r, double g, double b) {
+   double green_luma = ((G_LUMA_R * r) + (G_LUMA_G * g) + (G_LUMA_B * b));
+   green_luma += (G_LUMA_BASE + G_LUMA_PRIM - (G_LUMA_COEF * green_luma));
+
+   uint32_t green = (uint32_t) (green_luma * (CPC.scr_intensity / 10.0) * 255);
+
+   if (green > 255)
+      green = 255;
+
+   return (PIXEL_TYPE) RGB2COLOR(0, green, 0);
+}
+*/
+
 
 SDL_Color colours[32];
 
@@ -1316,13 +1360,37 @@ int video_set_palette ()
       }
    } else {
       for (int n = 0; n < 32; n++) {
+
+         double *colours_green;
+
+         if (args.greenMode == 0 || args.greenMode == 1) {
+            // mode 0 and 1 -> caprice classic
+            colours_green = colours_green_classic;
+         } else {
+            // mode 2 and 3 -> libretro proposal
+            colours_green = colours_green_libretro;
+         }
+
          dword green = static_cast<dword>(colours_green[n] * (CPC.scr_intensity / 10.0) * 255);
          if (green > 255) {
             green = 255;
          }
+
+         dword blue = 0;
+
+         // add a tiny bit of blue for green mode 1 and 3
+         if (args.greenMode == 1 || args.greenMode == 3) {
+            blue = static_cast<dword>(0.31 * colours_green[n] * (CPC.scr_intensity / 10.0) * 255);
+         }
+
+         // unlikely, but we care though
+         if (blue > 255) {
+            blue = 255;
+         }
+
          colours[n].r = 0;
          colours[n].g = green;
-         colours[n].b = 0;
+         colours[n].b = blue;
       }
    }
 
