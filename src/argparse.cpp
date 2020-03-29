@@ -8,6 +8,7 @@
 #include "keyboard.h"
 #include "stringutils.h"
 #include "log.h"
+#include "video.h"
 
 extern bool log_verbose;
 
@@ -137,6 +138,8 @@ void parseArguments(int argc, char **argv, std::vector<std::string>& slot_list, 
                       << " WITH_IPF"
 #endif
                       << "\n";
+            std::cout << "Number of video plugins available: "
+                      << nb_video_plugins << std::endl;
             exit(0);
             break;
 
