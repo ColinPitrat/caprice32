@@ -31,6 +31,21 @@ Alternatively, the debug target also work:
 
 `make debug`
 
+### Troubleshooting
+
+If you encounter an error like:
+```
+/usr/include/SDL/SDL_opengl.h:116: error: "GL_GLEXT_VERSION" redefined [-Werror]
+```
+
+This is caused by a conflict between a `gl_ext.h` file provided by SDL and the
+one provided by your OpenGL implementation. This can be fixed by not using the
+one provided by SDL:
+
+```
+make CFLAGS=-DNO_SDL_GLEXT
+```
+
 ### Example build on a Debian 10 System
 
 Download a debian install image e.g. from https://www.debian.org/CD/netinst/
