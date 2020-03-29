@@ -80,46 +80,46 @@ static bool have_gl_extension (const char *nom_ext)
 // src is the internal window
 static void compute_rects(SDL_Rect* src, SDL_Rect* dst)
 {
-	/* initialise the source rect to full source */
-	src->x=0;
-	src->y=0;
-	src->w=pub->w;
-	src->h=pub->h;
-	
-	dst->x=(vid->w-CPC_VISIBLE_SCR_WIDTH*2)/2,
-	dst->y=(vid->h-CPC_VISIBLE_SCR_HEIGHT*2)/2;
-	dst->w=vid->w;
-	dst->h=vid->h;
-	
-	int dw=src->w*2-dst->w;
-	/* the src width is too big */
-	if (dw>0)
-	{
-		src->w-=dw/2;
-		src->x+=dw/4;
+  /* initialise the source rect to full source */
+  src->x=0;
+  src->y=0;
+  src->w=pub->w;
+  src->h=pub->h;
+  
+  dst->x=(vid->w-CPC_VISIBLE_SCR_WIDTH*2)/2,
+  dst->y=(vid->h-CPC_VISIBLE_SCR_HEIGHT*2)/2;
+  dst->w=vid->w;
+  dst->h=vid->h;
+  
+  int dw=src->w*2-dst->w;
+  /* the src width is too big */
+  if (dw>0)
+  {
+    src->w-=dw/2;
+    src->x+=dw/4;
 
-		dst->x=0;
-		dst->w=vid->w;
-	}
-	else
-	{
-		dst->w=CPC_VISIBLE_SCR_WIDTH*2;
-	}
-	int dh=src->h*2-dst->h;
-	/* the src height is too big */
-	if (dh>0)
-	{
-		src->h-=dh/2;
-		src->y+=dh/4;
-		
-		dst->y=0;
-		dst->h=vid->h;
-	}
-	else
-	{
-		src->h-=2*2;
-		dst->h=CPC_VISIBLE_SCR_HEIGHT*2;
-	}
+    dst->x=0;
+    dst->w=vid->w;
+  }
+  else
+  {
+    dst->w=CPC_VISIBLE_SCR_WIDTH*2;
+  }
+  int dh=src->h*2-dst->h;
+  /* the src height is too big */
+  if (dh>0)
+  {
+    src->h-=dh/2;
+    src->y+=dh/4;
+    
+    dst->y=0;
+    dst->h=vid->h;
+  }
+  else
+  {
+    src->h-=2*2;
+    dst->h=CPC_VISIBLE_SCR_HEIGHT*2;
+  }
 }
 
 /* ------------------------------------------------------------------------------------ */
@@ -127,42 +127,42 @@ static void compute_rects(SDL_Rect* src, SDL_Rect* dst)
 /* ------------------------------------------------------------------------------------ */
 SDL_Surface* half_init(video_plugin* t,int w,int h, int bpp,bool fs)
 {
-	if (!fs)
-	{
-		w=CPC_VISIBLE_SCR_WIDTH;
-		h=CPC_VISIBLE_SCR_HEIGHT;
-	}
-	vid=SDL_SetVideoMode(w,h,bpp,SDL_ANYFORMAT | SDL_HWSURFACE | SDL_HWPALETTE | (fs?SDL_FULLSCREEN:0));
-	if (!vid)
-		return nullptr;
-	if (fs)
-	{
-		t->x_scale=1.0;
-		t->y_scale=1.0;
-		t->x_offset=static_cast<int>((w-CPC_VISIBLE_SCR_WIDTH/t->x_scale)/2);
-		t->y_offset=static_cast<int>((h-CPC_VISIBLE_SCR_HEIGHT/t->y_scale)/2);
-	}
-	else
-	{
-		t->x_scale=1.0;
-		t->y_scale=1.0;
-		t->x_offset=0;
-		t->y_offset=0;
-	}
-	SDL_FillRect(vid,nullptr,SDL_MapRGB(vid->format,0,0,0));
-	pub=SDL_CreateRGBSurface(SDL_SWSURFACE,CPC_VISIBLE_SCR_WIDTH,CPC_VISIBLE_SCR_HEIGHT,bpp,0,0,0,0);
-	return pub;
+  if (!fs)
+  {
+    w=CPC_VISIBLE_SCR_WIDTH;
+    h=CPC_VISIBLE_SCR_HEIGHT;
+  }
+  vid=SDL_SetVideoMode(w,h,bpp,SDL_ANYFORMAT | SDL_HWSURFACE | SDL_HWPALETTE | (fs?SDL_FULLSCREEN:0));
+  if (!vid)
+    return nullptr;
+  if (fs)
+  {
+    t->x_scale=1.0;
+    t->y_scale=1.0;
+    t->x_offset=static_cast<int>((w-CPC_VISIBLE_SCR_WIDTH/t->x_scale)/2);
+    t->y_offset=static_cast<int>((h-CPC_VISIBLE_SCR_HEIGHT/t->y_scale)/2);
+  }
+  else
+  {
+    t->x_scale=1.0;
+    t->y_scale=1.0;
+    t->x_offset=0;
+    t->y_offset=0;
+  }
+  SDL_FillRect(vid,nullptr,SDL_MapRGB(vid->format,0,0,0));
+  pub=SDL_CreateRGBSurface(SDL_SWSURFACE,CPC_VISIBLE_SCR_WIDTH,CPC_VISIBLE_SCR_HEIGHT,bpp,0,0,0,0);
+  return pub;
 }
 
 void half_setpal(SDL_Color* c)
 {
-	SDL_SetPalette(vid, SDL_LOGPAL | SDL_PHYSPAL, c, 0, 32); 
-	SDL_SetPalette(pub, SDL_LOGPAL | SDL_PHYSPAL, c, 0, 32); 
+  SDL_SetPalette(vid, SDL_LOGPAL | SDL_PHYSPAL, c, 0, 32); 
+  SDL_SetPalette(pub, SDL_LOGPAL | SDL_PHYSPAL, c, 0, 32); 
 }
 
 bool half_lock()
 {
-	return true;
+  return true;
 }
 
 void half_unlock()
@@ -171,13 +171,13 @@ void half_unlock()
 
 void half_flip()
 {
-	SDL_Rect dr;
-	dr.x=(vid->w-CPC_VISIBLE_SCR_WIDTH)/2;
-	dr.y=(vid->h-CPC_VISIBLE_SCR_HEIGHT)/2;
-	dr.w=CPC_VISIBLE_SCR_WIDTH;
-	dr.h=CPC_VISIBLE_SCR_HEIGHT;
-	SDL_BlitSurface(pub,nullptr,vid,&dr);
-	SDL_UpdateRects(vid,1,&dr);
+  SDL_Rect dr;
+  dr.x=(vid->w-CPC_VISIBLE_SCR_WIDTH)/2;
+  dr.y=(vid->h-CPC_VISIBLE_SCR_HEIGHT)/2;
+  dr.w=CPC_VISIBLE_SCR_WIDTH;
+  dr.h=CPC_VISIBLE_SCR_HEIGHT;
+  SDL_BlitSurface(pub,nullptr,vid,&dr);
+  SDL_UpdateRects(vid,1,&dr);
 }
 
 void half_close()
@@ -191,38 +191,38 @@ void half_close()
 /* ------------------------------------------------------------------------------------ */
 SDL_Surface* halfhw_init(video_plugin* t, int w __attribute__((unused)), int h __attribute__((unused)), int bpp, bool fs)
 {
-	vid=SDL_SetVideoMode(CPC_VISIBLE_SCR_WIDTH,CPC_VISIBLE_SCR_HEIGHT,bpp,SDL_ANYFORMAT | SDL_DOUBLEBUF | SDL_HWSURFACE | SDL_HWPALETTE | (fs?SDL_FULLSCREEN:0));
-	if (!vid)
-		return nullptr;
+  vid=SDL_SetVideoMode(CPC_VISIBLE_SCR_WIDTH,CPC_VISIBLE_SCR_HEIGHT,bpp,SDL_ANYFORMAT | SDL_DOUBLEBUF | SDL_HWSURFACE | SDL_HWPALETTE | (fs?SDL_FULLSCREEN:0));
+  if (!vid)
+    return nullptr;
   t->x_scale=1.0;
   t->y_scale=1.0;
   t->x_offset=0;
   t->y_offset=0;
-	SDL_FillRect(vid,nullptr,SDL_MapRGB(vid->format,0,0,0));
-	return vid;
+  SDL_FillRect(vid,nullptr,SDL_MapRGB(vid->format,0,0,0));
+  return vid;
 }
 
 void halfhw_setpal(SDL_Color* c)
 {
-	SDL_SetPalette(vid, SDL_LOGPAL | SDL_PHYSPAL, c, 0, 32); 
+  SDL_SetPalette(vid, SDL_LOGPAL | SDL_PHYSPAL, c, 0, 32); 
 }
 
 bool halfhw_lock()
 {
-	if (SDL_MUSTLOCK(vid))
-		return (SDL_LockSurface(vid)==0);
-	return true;
+  if (SDL_MUSTLOCK(vid))
+    return (SDL_LockSurface(vid)==0);
+  return true;
 }
 
 void halfhw_unlock()
 {
-	if (SDL_MUSTLOCK(vid))
-		SDL_UnlockSurface(vid);
+  if (SDL_MUSTLOCK(vid))
+    SDL_UnlockSurface(vid);
 }
 
 void halfhw_flip()
 {
-	SDL_Flip(vid);
+  SDL_Flip(vid);
 }
 
 void halfhw_close()
@@ -234,42 +234,42 @@ void halfhw_close()
 /* ------------------------------------------------------------------------------------ */
 SDL_Surface* double_init(video_plugin* t,int w,int h, int bpp, bool fs)
 {
-	if (!fs)
-	{
-		w=CPC_VISIBLE_SCR_WIDTH*2;
-		h=CPC_VISIBLE_SCR_HEIGHT*2;
-	}
-	vid=SDL_SetVideoMode(w,h,bpp,SDL_ANYFORMAT | SDL_HWSURFACE | SDL_HWPALETTE | (fs?SDL_FULLSCREEN:0));
-	if (!vid)
-		return nullptr;
-	if (fs)
-	{
-		t->x_scale=1.0;
-		t->y_scale=1.0;
-		t->x_offset=static_cast<int>((w-CPC_VISIBLE_SCR_WIDTH*2/t->x_scale)/2);
-		t->y_offset=static_cast<int>((h-CPC_VISIBLE_SCR_HEIGHT*2/t->y_scale)/2);
-	}
-	else
-	{
-		t->x_scale=1.0;
-		t->y_scale=1.0;
-		t->x_offset=0;
-		t->y_offset=0;
-	}
-	SDL_FillRect(vid,nullptr,SDL_MapRGB(vid->format,0,0,0));
-	pub=SDL_CreateRGBSurface(SDL_SWSURFACE,CPC_VISIBLE_SCR_WIDTH*2,CPC_VISIBLE_SCR_HEIGHT*2,bpp,0,0,0,0);
-	return pub;
+  if (!fs)
+  {
+    w=CPC_VISIBLE_SCR_WIDTH*2;
+    h=CPC_VISIBLE_SCR_HEIGHT*2;
+  }
+  vid=SDL_SetVideoMode(w,h,bpp,SDL_ANYFORMAT | SDL_HWSURFACE | SDL_HWPALETTE | (fs?SDL_FULLSCREEN:0));
+  if (!vid)
+    return nullptr;
+  if (fs)
+  {
+    t->x_scale=1.0;
+    t->y_scale=1.0;
+    t->x_offset=static_cast<int>((w-CPC_VISIBLE_SCR_WIDTH*2/t->x_scale)/2);
+    t->y_offset=static_cast<int>((h-CPC_VISIBLE_SCR_HEIGHT*2/t->y_scale)/2);
+  }
+  else
+  {
+    t->x_scale=1.0;
+    t->y_scale=1.0;
+    t->x_offset=0;
+    t->y_offset=0;
+  }
+  SDL_FillRect(vid,nullptr,SDL_MapRGB(vid->format,0,0,0));
+  pub=SDL_CreateRGBSurface(SDL_SWSURFACE,CPC_VISIBLE_SCR_WIDTH*2,CPC_VISIBLE_SCR_HEIGHT*2,bpp,0,0,0,0);
+  return pub;
 }
 
 void double_setpal(SDL_Color* c)
 {
-	SDL_SetPalette(vid, SDL_LOGPAL | SDL_PHYSPAL, c, 0, 32); 
-	SDL_SetPalette(pub, SDL_LOGPAL | SDL_PHYSPAL, c, 0, 32); 
+  SDL_SetPalette(vid, SDL_LOGPAL | SDL_PHYSPAL, c, 0, 32); 
+  SDL_SetPalette(pub, SDL_LOGPAL | SDL_PHYSPAL, c, 0, 32); 
 }
 
 bool double_lock()
 {
-	return true;
+  return true;
 }
 
 void double_unlock()
@@ -278,13 +278,13 @@ void double_unlock()
 
 void double_flip()
 {
-	SDL_Rect dr;
-	dr.x=(vid->w-CPC_VISIBLE_SCR_WIDTH*2)/2;
-	dr.y=(vid->h-CPC_VISIBLE_SCR_HEIGHT*2)/2;
-	dr.w=CPC_VISIBLE_SCR_WIDTH*2;
-	dr.h=CPC_VISIBLE_SCR_HEIGHT*2;
-	SDL_BlitSurface(pub,nullptr,vid,&dr);
-	SDL_UpdateRects(vid,1,&dr);
+  SDL_Rect dr;
+  dr.x=(vid->w-CPC_VISIBLE_SCR_WIDTH*2)/2;
+  dr.y=(vid->h-CPC_VISIBLE_SCR_HEIGHT*2)/2;
+  dr.w=CPC_VISIBLE_SCR_WIDTH*2;
+  dr.h=CPC_VISIBLE_SCR_HEIGHT*2;
+  SDL_BlitSurface(pub,nullptr,vid,&dr);
+  SDL_UpdateRects(vid,1,&dr);
 }
 
 void double_close()
@@ -298,38 +298,38 @@ void double_close()
 /* ------------------------------------------------------------------------------------ */
 SDL_Surface* doublehw_init(video_plugin* t, int w __attribute__((unused)), int h __attribute__((unused)), int bpp, bool fs)
 {
-	vid=SDL_SetVideoMode(CPC_VISIBLE_SCR_WIDTH*2,CPC_VISIBLE_SCR_HEIGHT*2,bpp,SDL_ANYFORMAT | SDL_DOUBLEBUF | SDL_HWSURFACE | SDL_HWPALETTE | (fs?SDL_FULLSCREEN:0));
-	if (!vid)
-		return nullptr;
+  vid=SDL_SetVideoMode(CPC_VISIBLE_SCR_WIDTH*2,CPC_VISIBLE_SCR_HEIGHT*2,bpp,SDL_ANYFORMAT | SDL_DOUBLEBUF | SDL_HWSURFACE | SDL_HWPALETTE | (fs?SDL_FULLSCREEN:0));
+  if (!vid)
+    return nullptr;
   t->x_scale=1.0;
   t->y_scale=1.0;
   t->x_offset=0;
   t->y_offset=0;
-	SDL_FillRect(vid,nullptr,SDL_MapRGB(vid->format,0,0,0));
-	return vid;
+  SDL_FillRect(vid,nullptr,SDL_MapRGB(vid->format,0,0,0));
+  return vid;
 }
 
 void doublehw_setpal(SDL_Color* c)
 {
-	SDL_SetPalette(vid, SDL_LOGPAL | SDL_PHYSPAL, c, 0, 32); 
+  SDL_SetPalette(vid, SDL_LOGPAL | SDL_PHYSPAL, c, 0, 32); 
 }
 
 bool doublehw_lock()
 {
-	if (SDL_MUSTLOCK(vid))
-		return (SDL_LockSurface(vid)==0);
-	return true;
+  if (SDL_MUSTLOCK(vid))
+    return (SDL_LockSurface(vid)==0);
+  return true;
 }
 
 void doublehw_unlock()
 {
-	if (SDL_MUSTLOCK(vid))
-		SDL_UnlockSurface(vid);
+  if (SDL_MUSTLOCK(vid))
+    SDL_UnlockSurface(vid);
 }
 
 void doublehw_flip()
 {
-	SDL_Flip(vid);
+  SDL_Flip(vid);
 }
 
 void doublehw_close()
@@ -347,56 +347,56 @@ static int gl_scanlines;
 SDL_Surface* glscale_init(video_plugin* t,int w,int h, int bpp, bool fs)
 {
 #ifdef _WIN32
-	const char *gl_library = "OpenGL32.DLL";
+  const char *gl_library = "OpenGL32.DLL";
 #else
-	const char *gl_library = "libGL.so.1";
+  const char *gl_library = "libGL.so.1";
 #endif
-	int surface_bpp;
+  int surface_bpp;
 
-	gl_scanlines=CPC.scr_oglscanlines;
-	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 0);
-	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-	if (SDL_GL_LoadLibrary(gl_library)<0)
-	{
-		fprintf(stderr,"Unable to dynamically open GL lib : %s\n",SDL_GetError());
-		return nullptr;
-	}
+  gl_scanlines=CPC.scr_oglscanlines;
+  SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 0);
+  SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+  if (SDL_GL_LoadLibrary(gl_library)<0)
+  {
+    fprintf(stderr,"Unable to dynamically open GL lib : %s\n",SDL_GetError());
+    return nullptr;
+  }
 
-	if (!fs)
-	{
-		w=CPC_VISIBLE_SCR_WIDTH*2;
-		h=CPC_VISIBLE_SCR_HEIGHT*2;
-	}
-	vid=SDL_SetVideoMode(w,h,0,SDL_OPENGL | (fs?SDL_FULLSCREEN:0));
-	if (!vid)
-	{
-		fprintf(stderr, "Could not set requested video mode: %s\n", SDL_GetError());
-		return nullptr;
-	}
-	if (init_glfuncs()!=0)
-	{
-		fprintf(stderr, "Cannot init OpenGL functions: %s\n", SDL_GetError());
-		return nullptr;
-	}
+  if (!fs)
+  {
+    w=CPC_VISIBLE_SCR_WIDTH*2;
+    h=CPC_VISIBLE_SCR_HEIGHT*2;
+  }
+  vid=SDL_SetVideoMode(w,h,0,SDL_OPENGL | (fs?SDL_FULLSCREEN:0));
+  if (!vid)
+  {
+    fprintf(stderr, "Could not set requested video mode: %s\n", SDL_GetError());
+    return nullptr;
+  }
+  if (init_glfuncs()!=0)
+  {
+    fprintf(stderr, "Cannot init OpenGL functions: %s\n", SDL_GetError());
+    return nullptr;
+  }
 
-	int major, minor;
-	const char *version;
-	version = reinterpret_cast<const char *>(eglGetString(GL_VERSION));
-	if (sscanf(version, "%d.%d", &major, &minor) != 2) {
-		fprintf(stderr, "Unable to get OpenGL version\n");
-		return nullptr;
-	}
+  int major, minor;
+  const char *version;
+  version = reinterpret_cast<const char *>(eglGetString(GL_VERSION));
+  if (sscanf(version, "%d.%d", &major, &minor) != 2) {
+    fprintf(stderr, "Unable to get OpenGL version\n");
+    return nullptr;
+  }
 
-	GLint max_texsize;
-	eglGetIntegerv(GL_MAX_TEXTURE_SIZE,&max_texsize);
-	if (max_texsize<1024) {
+  GLint max_texsize;
+  eglGetIntegerv(GL_MAX_TEXTURE_SIZE,&max_texsize);
+  if (max_texsize<1024) {
       printf("Your OpenGL implementation doesn't support 1024x1024 textures: max size = %d\n", max_texsize);
       t->half_pixels = 1;
    }
-	if (max_texsize<512) {
-		fprintf(stderr, "Your OpenGL implementation doesn't support 512x512 textures\n");
-		return nullptr;
-	}
+  if (max_texsize<512) {
+    fprintf(stderr, "Your OpenGL implementation doesn't support 512x512 textures\n");
+    return nullptr;
+  }
 
    unsigned int original_width, original_height, tex_size;
    if (t->half_pixels) {
@@ -409,123 +409,123 @@ SDL_Surface* glscale_init(video_plugin* t,int w,int h, int bpp, bool fs)
       original_height = CPC_VISIBLE_SCR_HEIGHT * 2;
    }
 
-	t->x_scale=original_width/static_cast<float>(w);
-	t->y_scale=original_height/static_cast<float>(h);
-	t->x_offset=0;
-	t->y_offset=0;
+  t->x_scale=original_width/static_cast<float>(w);
+  t->y_scale=original_height/static_cast<float>(h);
+  t->x_offset=0;
+  t->y_offset=0;
 
-	// We have to react differently to the bpp parameter than with software rendering
-	// Here are the rules :
-	// for 8bpp OpenGL, we need the GL_EXT_paletted_texture extension
-	// for 16bpp OpenGL, we need OpenGL 1.2+
-	// for 24bpp reversed OpenGL, we need OpenGL 1.2+
-	surface_bpp=0;
-	switch(bpp)
-	{
-		case 8:
-			surface_bpp = (have_gl_extension("GL_EXT_paletted_texture"))?8:0;
-			break;
-		case 15:
-		case 16:
-			surface_bpp = ((major>1)||(major == 1 && minor >= 2))?16:0;
-			break;
-		case 24:
-		case 32:
-		default:
-			surface_bpp = ((major>1)||(major == 1 && minor >= 2))?24:0;
-			break;
-	}
-	if (surface_bpp==0) {
-		fprintf(stderr, "Your OpenGL implementation doesn't support %dbpp textures\n", bpp);
-		return nullptr;
-	}
+  // We have to react differently to the bpp parameter than with software rendering
+  // Here are the rules :
+  // for 8bpp OpenGL, we need the GL_EXT_paletted_texture extension
+  // for 16bpp OpenGL, we need OpenGL 1.2+
+  // for 24bpp reversed OpenGL, we need OpenGL 1.2+
+  surface_bpp=0;
+  switch(bpp)
+  {
+    case 8:
+      surface_bpp = (have_gl_extension("GL_EXT_paletted_texture"))?8:0;
+      break;
+    case 15:
+    case 16:
+      surface_bpp = ((major>1)||(major == 1 && minor >= 2))?16:0;
+      break;
+    case 24:
+    case 32:
+    default:
+      surface_bpp = ((major>1)||(major == 1 && minor >= 2))?24:0;
+      break;
+  }
+  if (surface_bpp==0) {
+    fprintf(stderr, "Your OpenGL implementation doesn't support %dbpp textures\n", bpp);
+    return nullptr;
+  }
 
-	eglDisable(GL_FOG);
-	eglDisable(GL_LIGHTING);
-	eglDisable(GL_CULL_FACE);
-	eglDisable(GL_DEPTH_TEST);
-	eglDisable(GL_BLEND);
-	eglDisable(GL_NORMALIZE);
-	eglDisable(GL_ALPHA_TEST);
-	eglEnable(GL_TEXTURE_2D);
-	eglBlendFunc (GL_SRC_ALPHA, GL_ONE);
+  eglDisable(GL_FOG);
+  eglDisable(GL_LIGHTING);
+  eglDisable(GL_CULL_FACE);
+  eglDisable(GL_DEPTH_TEST);
+  eglDisable(GL_BLEND);
+  eglDisable(GL_NORMALIZE);
+  eglDisable(GL_ALPHA_TEST);
+  eglEnable(GL_TEXTURE_2D);
+  eglBlendFunc (GL_SRC_ALPHA, GL_ONE);
 
-	eglGenTextures(1,&screen_texnum);
-	eglBindTexture(GL_TEXTURE_2D,screen_texnum);
-	eglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, CPC.scr_oglfilter?GL_LINEAR:GL_NEAREST);
-	eglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, CPC.scr_oglfilter?GL_LINEAR:GL_NEAREST);
-	tex_x=tex_size;
-	tex_y=tex_size;
+  eglGenTextures(1,&screen_texnum);
+  eglBindTexture(GL_TEXTURE_2D,screen_texnum);
+  eglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, CPC.scr_oglfilter?GL_LINEAR:GL_NEAREST);
+  eglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, CPC.scr_oglfilter?GL_LINEAR:GL_NEAREST);
+  tex_x=tex_size;
+  tex_y=tex_size;
 
-	switch(surface_bpp)
-	{
-		case 24:
-			eglTexImage2D(GL_TEXTURE_2D, 0,GL_RGB,tex_x,tex_y, 0,
-					GL_RGB,
-					GL_UNSIGNED_BYTE, nullptr);
-			break;
-		case 16:
-			eglTexImage2D(GL_TEXTURE_2D, 0,GL_RGB5,tex_x,tex_y, 0,
-					GL_RGB,
-					GL_UNSIGNED_BYTE, nullptr);
-			break;
-		case 8:
-			eglTexImage2D(GL_TEXTURE_2D, 0,GL_COLOR_INDEX8_EXT,tex_x,tex_y, 0,
-					GL_COLOR_INDEX,
-					GL_UNSIGNED_BYTE, nullptr);
-			break;
-	}
+  switch(surface_bpp)
+  {
+    case 24:
+      eglTexImage2D(GL_TEXTURE_2D, 0,GL_RGB,tex_x,tex_y, 0,
+          GL_RGB,
+          GL_UNSIGNED_BYTE, nullptr);
+      break;
+    case 16:
+      eglTexImage2D(GL_TEXTURE_2D, 0,GL_RGB5,tex_x,tex_y, 0,
+          GL_RGB,
+          GL_UNSIGNED_BYTE, nullptr);
+      break;
+    case 8:
+      eglTexImage2D(GL_TEXTURE_2D, 0,GL_COLOR_INDEX8_EXT,tex_x,tex_y, 0,
+          GL_COLOR_INDEX,
+          GL_UNSIGNED_BYTE, nullptr);
+      break;
+  }
 
-	if (gl_scanlines!=0)
-	{
-		Uint8 texmod;
-		texmod=(100-gl_scanlines)*255/100;
-		eglGenTextures(1,&modulate_texnum);
-		eglBindTexture(GL_TEXTURE_2D,modulate_texnum);
-		eglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, CPC.scr_oglfilter?GL_LINEAR:GL_NEAREST);
-		eglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, CPC.scr_oglfilter?GL_LINEAR:GL_NEAREST);
+  if (gl_scanlines!=0)
+  {
+    Uint8 texmod;
+    texmod=(100-gl_scanlines)*255/100;
+    eglGenTextures(1,&modulate_texnum);
+    eglBindTexture(GL_TEXTURE_2D,modulate_texnum);
+    eglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, CPC.scr_oglfilter?GL_LINEAR:GL_NEAREST);
+    eglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, CPC.scr_oglfilter?GL_LINEAR:GL_NEAREST);
 
-		Uint8 modulate_texture[]={
-			255,255,255,
-			0,0,0};
-		modulate_texture[3]=texmod;
-		modulate_texture[4]=texmod;
-		modulate_texture[5]=texmod;
-		eglTexImage2D(GL_TEXTURE_2D, 0,GL_RGB8,1,2, 0,GL_RGB,GL_UNSIGNED_BYTE, modulate_texture);
-	}
-	eglViewport(0,0,w,h);
-	eglMatrixMode(GL_PROJECTION);
-	eglLoadIdentity();
-	eglOrtho(0,w,h,0,-1.0, 1.0);
+    Uint8 modulate_texture[]={
+      255,255,255,
+      0,0,0};
+    modulate_texture[3]=texmod;
+    modulate_texture[4]=texmod;
+    modulate_texture[5]=texmod;
+    eglTexImage2D(GL_TEXTURE_2D, 0,GL_RGB8,1,2, 0,GL_RGB,GL_UNSIGNED_BYTE, modulate_texture);
+  }
+  eglViewport(0,0,w,h);
+  eglMatrixMode(GL_PROJECTION);
+  eglLoadIdentity();
+  eglOrtho(0,w,h,0,-1.0, 1.0);
 
-	eglMatrixMode(GL_MODELVIEW);
-	eglLoadIdentity();
+  eglMatrixMode(GL_MODELVIEW);
+  eglLoadIdentity();
 
    pub=SDL_CreateRGBSurface(SDL_SWSURFACE, original_width, original_height, surface_bpp, 0, 0, 0, 0);
-	return pub;
+  return pub;
 }
 
 void glscale_setpal(SDL_Color* c)
 {
-	SDL_SetPalette(pub, SDL_LOGPAL | SDL_PHYSPAL, c, 0, 32);
-	if (pub->format->palette)
-	{
-		Uint8* pal=static_cast<Uint8*>(malloc(sizeof(Uint8)*256*3));
-		for(int i=0;i<256;i++)
-		{
-			pal[3*i  ] = pub->format->palette->colors[i].r;
-			pal[3*i+1] = pub->format->palette->colors[i].g;
-			pal[3*i+2] = pub->format->palette->colors[i].b;
-		}
-		eglBindTexture(GL_TEXTURE_2D,screen_texnum);
-		eglColorTableEXT(GL_TEXTURE_2D,GL_RGB8,256,GL_RGB,GL_UNSIGNED_BYTE,pal);
-		free(pal);
-	}
+  SDL_SetPalette(pub, SDL_LOGPAL | SDL_PHYSPAL, c, 0, 32);
+  if (pub->format->palette)
+  {
+    Uint8* pal=static_cast<Uint8*>(malloc(sizeof(Uint8)*256*3));
+    for(int i=0;i<256;i++)
+    {
+      pal[3*i  ] = pub->format->palette->colors[i].r;
+      pal[3*i+1] = pub->format->palette->colors[i].g;
+      pal[3*i+2] = pub->format->palette->colors[i].b;
+    }
+    eglBindTexture(GL_TEXTURE_2D,screen_texnum);
+    eglColorTableEXT(GL_TEXTURE_2D,GL_RGB8,256,GL_RGB,GL_UNSIGNED_BYTE,pal);
+    free(pal);
+  }
 }
 
 bool glscale_lock()
 {
-	return true;
+  return true;
 }
 
 void glscale_unlock()
@@ -534,102 +534,102 @@ void glscale_unlock()
 
 void glscale_flip()
 {
-	eglDisable(GL_BLEND);
-	
-	if (gl_scanlines!=0)
-	{
-		eglActiveTextureARB(GL_TEXTURE1_ARB);
-		eglEnable(GL_TEXTURE_2D);
-		eglBindTexture(GL_TEXTURE_2D,modulate_texnum);
-		eglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-		eglColor4f(1.0,1.0,1.0,1.0);
-		eglActiveTextureARB(GL_TEXTURE0_ARB);
-	}
+  eglDisable(GL_BLEND);
+  
+  if (gl_scanlines!=0)
+  {
+    eglActiveTextureARB(GL_TEXTURE1_ARB);
+    eglEnable(GL_TEXTURE_2D);
+    eglBindTexture(GL_TEXTURE_2D,modulate_texnum);
+    eglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+    eglColor4f(1.0,1.0,1.0,1.0);
+    eglActiveTextureARB(GL_TEXTURE0_ARB);
+  }
 
-	eglEnable(GL_TEXTURE_2D);
-	eglBindTexture(GL_TEXTURE_2D,screen_texnum);
-	
-	if (CPC.scr_remanency && !CPC.scr_gui_is_currently_on)
-	{
-		/* draw again using the old texture */
-		eglBegin(GL_QUADS);
-		eglColor4f(1.0,1.0,1.0,1.0);
+  eglEnable(GL_TEXTURE_2D);
+  eglBindTexture(GL_TEXTURE_2D,screen_texnum);
+  
+  if (CPC.scr_remanency && !CPC.scr_gui_is_currently_on)
+  {
+    /* draw again using the old texture */
+    eglBegin(GL_QUADS);
+    eglColor4f(1.0,1.0,1.0,1.0);
 
-		eglTexCoord2f(0.f, 0.f);
-		if (gl_scanlines!=0)
-			eglMultiTexCoord2fARB(GL_TEXTURE1_ARB,0.f, 0.f);
-		eglVertex2i(0, 0);
+    eglTexCoord2f(0.f, 0.f);
+    if (gl_scanlines!=0)
+      eglMultiTexCoord2fARB(GL_TEXTURE1_ARB,0.f, 0.f);
+    eglVertex2i(0, 0);
 
-		eglTexCoord2f(0.f, static_cast<float>(pub->h)/tex_y);
-		if (gl_scanlines!=0)
-			eglMultiTexCoord2fARB(GL_TEXTURE1_ARB,0.f, vid->h/2);
-		eglVertex2i(0, vid->h);
+    eglTexCoord2f(0.f, static_cast<float>(pub->h)/tex_y);
+    if (gl_scanlines!=0)
+      eglMultiTexCoord2fARB(GL_TEXTURE1_ARB,0.f, vid->h/2);
+    eglVertex2i(0, vid->h);
 
-		eglTexCoord2f(static_cast<float>(pub->w)/tex_x, static_cast<float>(pub->h)/tex_y);
-		if (gl_scanlines!=0)
-			eglMultiTexCoord2fARB(GL_TEXTURE1_ARB,vid->w, vid->h/2);
-		eglVertex2i(vid->w, vid->h);
+    eglTexCoord2f(static_cast<float>(pub->w)/tex_x, static_cast<float>(pub->h)/tex_y);
+    if (gl_scanlines!=0)
+      eglMultiTexCoord2fARB(GL_TEXTURE1_ARB,vid->w, vid->h/2);
+    eglVertex2i(vid->w, vid->h);
 
-		eglTexCoord2f(static_cast<float>(pub->w)/tex_x, 0.f);
-		if (gl_scanlines!=0)
-			eglMultiTexCoord2fARB(GL_TEXTURE1_ARB,vid->w, 0);
-		eglVertex2i(vid->w, 0);
-		eglEnd();
+    eglTexCoord2f(static_cast<float>(pub->w)/tex_x, 0.f);
+    if (gl_scanlines!=0)
+      eglMultiTexCoord2fARB(GL_TEXTURE1_ARB,vid->w, 0);
+    eglVertex2i(vid->w, 0);
+    eglEnd();
 
-		/* enable blending for the subsequent pass */
-		eglEnable(GL_BLEND);
-		eglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	}
+    /* enable blending for the subsequent pass */
+    eglEnable(GL_BLEND);
+    eglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+  }
 
-	/* upload the texture */
-	switch(pub->format->BitsPerPixel)
-	{
-		case 24:
-			eglTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0,
-					pub->w, pub->h,
-					GL_BGR,GL_UNSIGNED_BYTE,
-					pub->pixels);
-			break;
-		case 16:
-			eglTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0,
-					pub->w, pub->h,
-					GL_RGB,GL_UNSIGNED_SHORT_5_6_5,
-					pub->pixels);
-			break;
-		case 8:
-			eglTexSubImage2D (GL_TEXTURE_2D, 0, 0, 0,
-					pub->w,pub->h, 
-					GL_COLOR_INDEX, GL_UNSIGNED_BYTE, 
-					pub->pixels);
-			break;
-	}
+  /* upload the texture */
+  switch(pub->format->BitsPerPixel)
+  {
+    case 24:
+      eglTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0,
+          pub->w, pub->h,
+          GL_BGR,GL_UNSIGNED_BYTE,
+          pub->pixels);
+      break;
+    case 16:
+      eglTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0,
+          pub->w, pub->h,
+          GL_RGB,GL_UNSIGNED_SHORT_5_6_5,
+          pub->pixels);
+      break;
+    case 8:
+      eglTexSubImage2D (GL_TEXTURE_2D, 0, 0, 0,
+          pub->w,pub->h, 
+          GL_COLOR_INDEX, GL_UNSIGNED_BYTE, 
+          pub->pixels);
+      break;
+  }
 
-	/* draw ! */
-	eglBegin(GL_QUADS);
-	eglColor4f(1.0,1.0,1.0,0.5);
+  /* draw ! */
+  eglBegin(GL_QUADS);
+  eglColor4f(1.0,1.0,1.0,0.5);
 
-	eglTexCoord2f(0.f, 0.f);
-	if (gl_scanlines!=0)
-		eglMultiTexCoord2fARB(GL_TEXTURE1_ARB,0.f, 0.f);
-	eglVertex2i(0, 0);
+  eglTexCoord2f(0.f, 0.f);
+  if (gl_scanlines!=0)
+    eglMultiTexCoord2fARB(GL_TEXTURE1_ARB,0.f, 0.f);
+  eglVertex2i(0, 0);
 
-	eglTexCoord2f(0.f, static_cast<float>(pub->h)/tex_y);
-	if (gl_scanlines!=0)
-		eglMultiTexCoord2fARB(GL_TEXTURE1_ARB,0.f, vid->h/2);
-	eglVertex2i(0, vid->h);
+  eglTexCoord2f(0.f, static_cast<float>(pub->h)/tex_y);
+  if (gl_scanlines!=0)
+    eglMultiTexCoord2fARB(GL_TEXTURE1_ARB,0.f, vid->h/2);
+  eglVertex2i(0, vid->h);
 
-	eglTexCoord2f(static_cast<float>(pub->w)/tex_x, static_cast<float>(pub->h)/tex_y);
-	if (gl_scanlines!=0)
-		eglMultiTexCoord2fARB(GL_TEXTURE1_ARB,vid->w, vid->h/2);
-	eglVertex2i(vid->w, vid->h);
+  eglTexCoord2f(static_cast<float>(pub->w)/tex_x, static_cast<float>(pub->h)/tex_y);
+  if (gl_scanlines!=0)
+    eglMultiTexCoord2fARB(GL_TEXTURE1_ARB,vid->w, vid->h/2);
+  eglVertex2i(vid->w, vid->h);
 
-	eglTexCoord2f(static_cast<float>(pub->w)/tex_x, 0.f);
-	if (gl_scanlines!=0)
-		eglMultiTexCoord2fARB(GL_TEXTURE1_ARB,vid->w, 0);
-	eglVertex2i(vid->w, 0);
-	eglEnd();
+  eglTexCoord2f(static_cast<float>(pub->w)/tex_x, 0.f);
+  if (gl_scanlines!=0)
+    eglMultiTexCoord2fARB(GL_TEXTURE1_ARB,vid->w, 0);
+  eglVertex2i(vid->w, 0);
+  eglEnd();
 
-	SDL_GL_SwapBuffers();
+  SDL_GL_SwapBuffers();
 }
 
 void glscale_close()
@@ -653,91 +653,91 @@ static Uint32 greenMask = 0x7E0;
 
 __inline__ int GetResult1 (Uint32 A, Uint32 B, Uint32 C, Uint32 D)
 {
-	int x = 0;
-	int y = 0;
-	int r = 0;
+  int x = 0;
+  int y = 0;
+  int r = 0;
 
-	if (A == C)
-		x += 1;
-	else if (B == C)
-		y += 1;
-	if (A == D)
-		x += 1;
-	else if (B == D)
-		y += 1;
-	if (x <= 1)
-		r += 1;
-	if (y <= 1)
-		r -= 1;
-	return r;
+  if (A == C)
+    x += 1;
+  else if (B == C)
+    y += 1;
+  if (A == D)
+    x += 1;
+  else if (B == D)
+    y += 1;
+  if (x <= 1)
+    r += 1;
+  if (y <= 1)
+    r -= 1;
+  return r;
 }
 
 __inline__ int GetResult2 (Uint32 A, Uint32 B, Uint32 C, Uint32 D)
 {
-	int x = 0;
-	int y = 0;
-	int r = 0;
+  int x = 0;
+  int y = 0;
+  int r = 0;
 
-	if (A == C)
-		x += 1;
-	else if (B == C)
-		y += 1;
-	if (A == D)
-		x += 1;
-	else if (B == D)
-		y += 1;
-	if (x <= 1)
-		r -= 1;
-	if (y <= 1)
-		r += 1;
-	return r;
+  if (A == C)
+    x += 1;
+  else if (B == C)
+    y += 1;
+  if (A == D)
+    x += 1;
+  else if (B == D)
+    y += 1;
+  if (x <= 1)
+    r -= 1;
+  if (y <= 1)
+    r += 1;
+  return r;
 }
 
 __inline__ int GetResult (Uint32 A, Uint32 B, Uint32 C, Uint32 D)
 {
-	int x = 0;
-	int y = 0;
-	int r = 0;
+  int x = 0;
+  int y = 0;
+  int r = 0;
 
-	if (A == C)
-		x += 1;
-	else if (B == C)
-		y += 1;
-	if (A == D)
-		x += 1;
-	else if (B == D)
-		y += 1;
-	if (x <= 1)
-		r += 1;
-	if (y <= 1)
-		r -= 1;
-	return r;
+  if (A == C)
+    x += 1;
+  else if (B == C)
+    y += 1;
+  if (A == D)
+    x += 1;
+  else if (B == D)
+    y += 1;
+  if (x <= 1)
+    r += 1;
+  if (y <= 1)
+    r -= 1;
+  return r;
 }
 
 
 __inline__ Uint32 INTERPOLATE (Uint32 A, Uint32 B)
 {
-	if (A != B)
-	{
-		return (((A & colorMask) >> 1) + ((B & colorMask) >> 1) +
-				(A & B & lowPixelMask));
-	}
+  if (A != B)
+  {
+    return (((A & colorMask) >> 1) + ((B & colorMask) >> 1) +
+        (A & B & lowPixelMask));
+  }
   return A;
 }
 
 __inline__ Uint32 Q_INTERPOLATE (Uint32 A, Uint32 B, Uint32 C, Uint32 D)
 {
-	Uint32 x = ((A & qcolorMask) >> 2) +
-		((B & qcolorMask) >> 2) +
-		((C & qcolorMask) >> 2) + ((D & qcolorMask) >> 2);
-	Uint32 y = (A & qlowpixelMask) +
-		(B & qlowpixelMask) + (C & qlowpixelMask) + (D & qlowpixelMask);
-	y = (y >> 2) & qlowpixelMask;
-	return x + y;
+  Uint32 x = ((A & qcolorMask) >> 2) +
+    ((B & qcolorMask) >> 2) +
+    ((C & qcolorMask) >> 2) + ((D & qcolorMask) >> 2);
+  Uint32 y = (A & qlowpixelMask) +
+    (B & qlowpixelMask) + (C & qlowpixelMask) + (D & qlowpixelMask);
+  y = (y >> 2) & qlowpixelMask;
+  return x + y;
 }
 
 void filter_supereagle(Uint8 *srcPtr, Uint32 srcPitch, /* Uint8 *deltaPtr,  */
-		 Uint8 *dstPtr, Uint32 dstPitch, int width, int height)
+     Uint8 *dstPtr, Uint32 dstPitch, int width, int height)
 {
     Uint8  *dP;
     Uint16 *bP;
@@ -745,200 +745,200 @@ void filter_supereagle(Uint8 *srcPtr, Uint32 srcPitch, /* Uint8 *deltaPtr,  */
 
 
 
-	Uint32 finish;
-	Uint32 Nextline = srcPitch >> 1;
+  Uint32 finish;
+  Uint32 Nextline = srcPitch >> 1;
 
-	inc_bP = 1;
+  inc_bP = 1;
 
-	for (; height ; height--)
-	{
-	    bP = reinterpret_cast<Uint16 *>(srcPtr);
-	    dP = dstPtr;
-	    for (finish = width; finish; finish -= inc_bP)
-	    {
-		Uint32 color4, color5, color6;
-		Uint32 color1, color2, color3;
-		Uint32 colorA1, colorA2, colorB1, colorB2, colorS1, colorS2;
-		Uint32 product1a, product1b, product2a, product2b;
-		colorB1 = *(bP - Nextline);
-		colorB2 = *(bP - Nextline + 1);
+  for (; height ; height--)
+  {
+      bP = reinterpret_cast<Uint16 *>(srcPtr);
+      dP = dstPtr;
+      for (finish = width; finish; finish -= inc_bP)
+      {
+    Uint32 color4, color5, color6;
+    Uint32 color1, color2, color3;
+    Uint32 colorA1, colorA2, colorB1, colorB2, colorS1, colorS2;
+    Uint32 product1a, product1b, product2a, product2b;
+    colorB1 = *(bP - Nextline);
+    colorB2 = *(bP - Nextline + 1);
 
-		color4 = *(bP - 1);
-		color5 = *(bP);
-		color6 = *(bP + 1);
-		colorS2 = *(bP + 2);
+    color4 = *(bP - 1);
+    color5 = *(bP);
+    color6 = *(bP + 1);
+    colorS2 = *(bP + 2);
 
-		color1 = *(bP + Nextline - 1);
-		color2 = *(bP + Nextline);
-		color3 = *(bP + Nextline + 1);
-		colorS1 = *(bP + Nextline + 2);
+    color1 = *(bP + Nextline - 1);
+    color2 = *(bP + Nextline);
+    color3 = *(bP + Nextline + 1);
+    colorS1 = *(bP + Nextline + 2);
 
-		colorA1 = *(bP + Nextline + Nextline);
-		colorA2 = *(bP + Nextline + Nextline + 1);
-		// --------------------------------------
-		if (color2 == color6 && color5 != color3)
-		{
-		    product1b = product2a = color2;
-		    if ((color1 == color2) || (color6 == colorB2))
-		    {
-			product1a = INTERPOLATE (color2, color5);
-			product1a = INTERPOLATE (color2, product1a);
+    colorA1 = *(bP + Nextline + Nextline);
+    colorA2 = *(bP + Nextline + Nextline + 1);
+    // --------------------------------------
+    if (color2 == color6 && color5 != color3)
+    {
+        product1b = product2a = color2;
+        if ((color1 == color2) || (color6 == colorB2))
+        {
+      product1a = INTERPOLATE (color2, color5);
+      product1a = INTERPOLATE (color2, product1a);
 //                       product1a = color2;
-		    }
-		    else
-		    {
-			product1a = INTERPOLATE (color5, color6);
-		    }
+        }
+        else
+        {
+      product1a = INTERPOLATE (color5, color6);
+        }
 
-		    if ((color6 == colorS2) || (color2 == colorA1))
-		    {
-			product2b = INTERPOLATE (color2, color3);
-			product2b = INTERPOLATE (color2, product2b);
+        if ((color6 == colorS2) || (color2 == colorA1))
+        {
+      product2b = INTERPOLATE (color2, color3);
+      product2b = INTERPOLATE (color2, product2b);
 //                       product2b = color2;
-		    }
-		    else
-		    {
-			product2b = INTERPOLATE (color2, color3);
-		    }
-		}
-		else if (color5 == color3 && color2 != color6)
-		{
-		    product2b = product1a = color5;
+        }
+        else
+        {
+      product2b = INTERPOLATE (color2, color3);
+        }
+    }
+    else if (color5 == color3 && color2 != color6)
+    {
+        product2b = product1a = color5;
 
-		    if ((colorB1 == color5) || (color3 == colorS1))
-		    {
-			product1b = INTERPOLATE (color5, color6);
-			product1b = INTERPOLATE (color5, product1b);
+        if ((colorB1 == color5) || (color3 == colorS1))
+        {
+      product1b = INTERPOLATE (color5, color6);
+      product1b = INTERPOLATE (color5, product1b);
 //                       product1b = color5;
-		    }
-		    else
-		    {
-			product1b = INTERPOLATE (color5, color6);
-		    }
+        }
+        else
+        {
+      product1b = INTERPOLATE (color5, color6);
+        }
 
-		    if ((color3 == colorA2) || (color4 == color5))
-		    {
-			product2a = INTERPOLATE (color5, color2);
-			product2a = INTERPOLATE (color5, product2a);
+        if ((color3 == colorA2) || (color4 == color5))
+        {
+      product2a = INTERPOLATE (color5, color2);
+      product2a = INTERPOLATE (color5, product2a);
 //                       product2a = color5;
-		    }
-		    else
-		    {
-			product2a = INTERPOLATE (color2, color3);
-		    }
+        }
+        else
+        {
+      product2a = INTERPOLATE (color2, color3);
+        }
 
-		}
-		else if (color5 == color3 && color2 == color6)
-		{
-		    int r = 0;
+    }
+    else if (color5 == color3 && color2 == color6)
+    {
+        int r = 0;
 
-		    r += GetResult (color6, color5, color1, colorA1);
-		    r += GetResult (color6, color5, color4, colorB1);
-		    r += GetResult (color6, color5, colorA2, colorS1);
-		    r += GetResult (color6, color5, colorB2, colorS2);
+        r += GetResult (color6, color5, color1, colorA1);
+        r += GetResult (color6, color5, color4, colorB1);
+        r += GetResult (color6, color5, colorA2, colorS1);
+        r += GetResult (color6, color5, colorB2, colorS2);
 
-		    if (r > 0)
-		    {
-			product1b = product2a = color2;
-			product1a = product2b = INTERPOLATE (color5, color6);
-		    }
-		    else if (r < 0)
-		    {
-			product2b = product1a = color5;
-			product1b = product2a = INTERPOLATE (color5, color6);
-		    }
-		    else
-		    {
-			product2b = product1a = color5;
-			product1b = product2a = color2;
-		    }
-		}
-		else
-		{
-		    product2b = product1a = INTERPOLATE (color2, color6);
-		    product2b =
-			Q_INTERPOLATE (color3, color3, color3, product2b);
-		    product1a =
-			Q_INTERPOLATE (color5, color5, color5, product1a);
+        if (r > 0)
+        {
+      product1b = product2a = color2;
+      product1a = product2b = INTERPOLATE (color5, color6);
+        }
+        else if (r < 0)
+        {
+      product2b = product1a = color5;
+      product1b = product2a = INTERPOLATE (color5, color6);
+        }
+        else
+        {
+      product2b = product1a = color5;
+      product1b = product2a = color2;
+        }
+    }
+    else
+    {
+        product2b = product1a = INTERPOLATE (color2, color6);
+        product2b =
+      Q_INTERPOLATE (color3, color3, color3, product2b);
+        product1a =
+      Q_INTERPOLATE (color5, color5, color5, product1a);
 
-		    product2a = product1b = INTERPOLATE (color5, color3);
-		    product2a =
-			Q_INTERPOLATE (color2, color2, color2, product2a);
-		    product1b =
-			Q_INTERPOLATE (color6, color6, color6, product1b);
+        product2a = product1b = INTERPOLATE (color5, color3);
+        product2a =
+      Q_INTERPOLATE (color2, color2, color2, product2a);
+        product1b =
+      Q_INTERPOLATE (color6, color6, color6, product1b);
 
 //                    product1a = color5;
 //                    product1b = color6;
 //                    product2a = color2;
 //                    product2b = color3;
-		}
+    }
 #if SDL_BYTEORDER == SDL_LIL_ENDIAN
-		product1a = product1a | (product1b << 16);
-		product2a = product2a | (product2b << 16);
+    product1a = product1a | (product1b << 16);
+    product2a = product2a | (product2b << 16);
 #else
     product1a = (product1a << 16) | product1b;
     product2a = (product2a << 16) | product2b;
 #endif
 
-		*(reinterpret_cast<Uint32 *>(dP)) = product1a;
-		*(reinterpret_cast<Uint32 *>(dP + dstPitch)) = product2a;
+    *(reinterpret_cast<Uint32 *>(dP)) = product1a;
+    *(reinterpret_cast<Uint32 *>(dP + dstPitch)) = product2a;
 
-		bP += inc_bP;
-		dP += sizeof (Uint32);
-	    }			// end of for ( finish= width etc..)
-	    srcPtr += srcPitch;
-	    dstPtr += dstPitch * 2;
-	}			// endof: for (height; height; height--)
+    bP += inc_bP;
+    dP += sizeof (Uint32);
+      }      // end of for ( finish= width etc..)
+      srcPtr += srcPitch;
+      dstPtr += dstPitch * 2;
+  }      // endof: for (height; height; height--)
 }
 
 SDL_Surface* seagle_init(video_plugin* t,int w,int h, int bpp, bool fs)
 {
-	if (bpp!=16)
+  if (bpp!=16)
   {
     std::cerr << t->name << " only works in 16 bits color mode - forcing 16 bpp" << std::endl;
     bpp = 16;
   }
-	if (!fs)
-	{
-		w=CPC_VISIBLE_SCR_WIDTH*2;
-		h=CPC_VISIBLE_SCR_HEIGHT*2;
-	}
-	vid=SDL_SetVideoMode(w,h,bpp,SDL_HWSURFACE | SDL_HWPALETTE | (fs?SDL_FULLSCREEN:0));
-	if (!vid)
-		return nullptr;
-	if (vid->format->BitsPerPixel!=16)
+  if (!fs)
+  {
+    w=CPC_VISIBLE_SCR_WIDTH*2;
+    h=CPC_VISIBLE_SCR_HEIGHT*2;
+  }
+  vid=SDL_SetVideoMode(w,h,bpp,SDL_HWSURFACE | SDL_HWPALETTE | (fs?SDL_FULLSCREEN:0));
+  if (!vid)
+    return nullptr;
+  if (vid->format->BitsPerPixel!=16)
   {
     std::cerr << t->name << ": SDL didn't return a 16 bpp surface but a " << static_cast<int>(vid->format->BitsPerPixel) << " bpp one." << std::endl;
-		return nullptr;
+    return nullptr;
   }
-	if (fs)
-	{
-		t->x_scale=0.5;
-		t->y_scale=0.5;
-		t->x_offset=static_cast<int>(w-CPC_VISIBLE_SCR_WIDTH/t->x_scale)/2;
-		t->y_offset=static_cast<int>(h-CPC_VISIBLE_SCR_HEIGHT/t->y_scale)/2;
-	}
-	else
-	{
-		t->x_scale=0.5;
-		t->y_scale=0.5;
-		t->x_offset=0;
-		t->y_offset=0;
-	}
-	SDL_FillRect(vid,nullptr,SDL_MapRGB(vid->format,0,0,0));
-	pub=SDL_CreateRGBSurface(SDL_SWSURFACE,CPC_VISIBLE_SCR_WIDTH,CPC_VISIBLE_SCR_HEIGHT,bpp,0,0,0,0);
-	return pub;
+  if (fs)
+  {
+    t->x_scale=0.5;
+    t->y_scale=0.5;
+    t->x_offset=static_cast<int>(w-CPC_VISIBLE_SCR_WIDTH/t->x_scale)/2;
+    t->y_offset=static_cast<int>(h-CPC_VISIBLE_SCR_HEIGHT/t->y_scale)/2;
+  }
+  else
+  {
+    t->x_scale=0.5;
+    t->y_scale=0.5;
+    t->x_offset=0;
+    t->y_offset=0;
+  }
+  SDL_FillRect(vid,nullptr,SDL_MapRGB(vid->format,0,0,0));
+  pub=SDL_CreateRGBSurface(SDL_SWSURFACE,CPC_VISIBLE_SCR_WIDTH,CPC_VISIBLE_SCR_HEIGHT,bpp,0,0,0,0);
+  return pub;
 }
 
 void seagle_setpal(SDL_Color* c)
 {
-	SDL_SetPalette(vid, SDL_LOGPAL | SDL_PHYSPAL, c, 0, 32); 
-	SDL_SetPalette(pub, SDL_LOGPAL | SDL_PHYSPAL, c, 0, 32); 
+  SDL_SetPalette(vid, SDL_LOGPAL | SDL_PHYSPAL, c, 0, 32); 
+  SDL_SetPalette(pub, SDL_LOGPAL | SDL_PHYSPAL, c, 0, 32); 
 }
 
 bool seagle_lock()
 {
-	return true;
+  return true;
 }
 
 void seagle_unlock()
@@ -947,16 +947,16 @@ void seagle_unlock()
 
 void seagle_flip()
 {
-	if (SDL_MUSTLOCK(vid))
-		SDL_LockSurface(vid);
-	SDL_Rect src;
-	SDL_Rect dst;
-	compute_rects(&src,&dst);
-	filter_supereagle(static_cast<Uint8*>(pub->pixels) + (2*src.x+src.y*pub->pitch) + (pub->pitch), pub->pitch,
-		 static_cast<Uint8*>(vid->pixels) + (2*dst.x+dst.y*vid->pitch), vid->pitch, src.w, src.h);
-	if (SDL_MUSTLOCK(vid))
-		SDL_UnlockSurface(vid);
-	SDL_UpdateRects(vid,1,&dst);
+  if (SDL_MUSTLOCK(vid))
+    SDL_LockSurface(vid);
+  SDL_Rect src;
+  SDL_Rect dst;
+  compute_rects(&src,&dst);
+  filter_supereagle(static_cast<Uint8*>(pub->pixels) + (2*src.x+src.y*pub->pitch) + (pub->pitch), pub->pitch,
+     static_cast<Uint8*>(vid->pixels) + (2*dst.x+dst.y*vid->pitch), vid->pitch, src.w, src.h);
+  if (SDL_MUSTLOCK(vid))
+    SDL_UnlockSurface(vid);
+  SDL_UpdateRects(vid,1,&dst);
 }
 
 void seagle_close()
@@ -970,81 +970,81 @@ void seagle_close()
 /* ------------------------------------------------------------------------------------ */
 void filter_scale2x(Uint8 *srcPtr, Uint32 srcPitch, 
                       Uint8 *dstPtr, Uint32 dstPitch,
-		      int width, int height)
+          int width, int height)
 {
-	unsigned int nextlineSrc = srcPitch / sizeof(short);
-	short *p = reinterpret_cast<short *>(srcPtr);
+  unsigned int nextlineSrc = srcPitch / sizeof(short);
+  short *p = reinterpret_cast<short *>(srcPtr);
 
-	unsigned int nextlineDst = dstPitch / sizeof(short);
-	short *q = reinterpret_cast<short *>(dstPtr);
+  unsigned int nextlineDst = dstPitch / sizeof(short);
+  short *q = reinterpret_cast<short *>(dstPtr);
 
-	while(height--) {
-		int i = 0, j = 0;
-		for(i = 0; i < width; ++i, j += 2) {
-			short B = *(p + i - nextlineSrc);
-			short D = *(p + i - 1);
-			short E = *(p + i);
-			short F = *(p + i + 1);
-			short H = *(p + i + nextlineSrc);
+  while(height--) {
+    int i = 0, j = 0;
+    for(i = 0; i < width; ++i, j += 2) {
+      short B = *(p + i - nextlineSrc);
+      short D = *(p + i - 1);
+      short E = *(p + i);
+      short F = *(p + i + 1);
+      short H = *(p + i + nextlineSrc);
 
-			*(q + j) = D == B && B != F && D != H ? D : E;
-			*(q + j + 1) = B == F && B != D && F != H ? F : E;
-			*(q + j + nextlineDst) = D == H && D != B && H != F ? D : E;
-			*(q + j + nextlineDst + 1) = H == F && D != H && B != F ? F : E;
-		}
-		p += nextlineSrc;
-		q += nextlineDst << 1;
-	}
+      *(q + j) = D == B && B != F && D != H ? D : E;
+      *(q + j + 1) = B == F && B != D && F != H ? F : E;
+      *(q + j + nextlineDst) = D == H && D != B && H != F ? D : E;
+      *(q + j + nextlineDst + 1) = H == F && D != H && B != F ? F : E;
+    }
+    p += nextlineSrc;
+    q += nextlineDst << 1;
+  }
 }
 
 SDL_Surface* scale2x_init(video_plugin* t,int w,int h, int bpp, bool fs)
 {
-	if (bpp!=16)
+  if (bpp!=16)
   {
     std::cerr << t->name << " only works in 16 bits color mode - forcing 16 bpp" << std::endl;
     bpp = 16;
   }
-	if (!fs)
-	{
-		w=CPC_VISIBLE_SCR_WIDTH*2;
-		h=CPC_VISIBLE_SCR_HEIGHT*2;
-	}
-	vid=SDL_SetVideoMode(w,h,bpp,SDL_HWSURFACE | SDL_HWPALETTE | (fs?SDL_FULLSCREEN:0));
-	if (!vid)
-		return nullptr;
-	if (vid->format->BitsPerPixel!=16)
+  if (!fs)
+  {
+    w=CPC_VISIBLE_SCR_WIDTH*2;
+    h=CPC_VISIBLE_SCR_HEIGHT*2;
+  }
+  vid=SDL_SetVideoMode(w,h,bpp,SDL_HWSURFACE | SDL_HWPALETTE | (fs?SDL_FULLSCREEN:0));
+  if (!vid)
+    return nullptr;
+  if (vid->format->BitsPerPixel!=16)
   {
     std::cerr << t->name << ": SDL didn't return a 16 bpp surface but a " << static_cast<int>(vid->format->BitsPerPixel) << " bpp one." << std::endl;
-		return nullptr;
+    return nullptr;
   }
-	if (fs)
-	{
-		t->x_scale=0.5;
-		t->y_scale=0.5;
-		t->x_offset=static_cast<int>(w-CPC_VISIBLE_SCR_WIDTH/t->x_scale)/2;
-		t->y_offset=static_cast<int>(h-CPC_VISIBLE_SCR_HEIGHT/t->y_scale)/2;
-	}
-	else
-	{
-		t->x_scale=0.5;
-		t->y_scale=0.5;
-		t->x_offset=0;
-		t->y_offset=0;
-	}
-	SDL_FillRect(vid,nullptr,SDL_MapRGB(vid->format,0,0,0));
-	pub=SDL_CreateRGBSurface(SDL_SWSURFACE,CPC_VISIBLE_SCR_WIDTH,CPC_VISIBLE_SCR_HEIGHT,bpp,0,0,0,0);
-	return pub;
+  if (fs)
+  {
+    t->x_scale=0.5;
+    t->y_scale=0.5;
+    t->x_offset=static_cast<int>(w-CPC_VISIBLE_SCR_WIDTH/t->x_scale)/2;
+    t->y_offset=static_cast<int>(h-CPC_VISIBLE_SCR_HEIGHT/t->y_scale)/2;
+  }
+  else
+  {
+    t->x_scale=0.5;
+    t->y_scale=0.5;
+    t->x_offset=0;
+    t->y_offset=0;
+  }
+  SDL_FillRect(vid,nullptr,SDL_MapRGB(vid->format,0,0,0));
+  pub=SDL_CreateRGBSurface(SDL_SWSURFACE,CPC_VISIBLE_SCR_WIDTH,CPC_VISIBLE_SCR_HEIGHT,bpp,0,0,0,0);
+  return pub;
 }
 
 void scale2x_setpal(SDL_Color* c)
 {
-	SDL_SetPalette(vid, SDL_LOGPAL | SDL_PHYSPAL, c, 0, 32); 
-	SDL_SetPalette(pub, SDL_LOGPAL | SDL_PHYSPAL, c, 0, 32); 
+  SDL_SetPalette(vid, SDL_LOGPAL | SDL_PHYSPAL, c, 0, 32); 
+  SDL_SetPalette(pub, SDL_LOGPAL | SDL_PHYSPAL, c, 0, 32); 
 }
 
 bool scale2x_lock()
 {
-	return true;
+  return true;
 }
 
 void scale2x_unlock()
@@ -1053,16 +1053,16 @@ void scale2x_unlock()
 
 void scale2x_flip()
 {
-	if (SDL_MUSTLOCK(vid))
-		SDL_LockSurface(vid);
-	SDL_Rect src;
-	SDL_Rect dst;
-	compute_rects(&src,&dst);
-	filter_scale2x(static_cast<Uint8*>(pub->pixels) + (2*src.x+src.y*pub->pitch) + (pub->pitch), pub->pitch,
-		 static_cast<Uint8*>(vid->pixels) + (2*dst.x+dst.y*vid->pitch), vid->pitch, src.w, src.h);
-	if (SDL_MUSTLOCK(vid))
-		SDL_UnlockSurface(vid);
-	SDL_UpdateRects(vid,1,&dst);
+  if (SDL_MUSTLOCK(vid))
+    SDL_LockSurface(vid);
+  SDL_Rect src;
+  SDL_Rect dst;
+  compute_rects(&src,&dst);
+  filter_scale2x(static_cast<Uint8*>(pub->pixels) + (2*src.x+src.y*pub->pitch) + (pub->pitch), pub->pitch,
+     static_cast<Uint8*>(vid->pixels) + (2*dst.x+dst.y*vid->pitch), vid->pitch, src.w, src.h);
+  if (SDL_MUSTLOCK(vid))
+    SDL_UnlockSurface(vid);
+  SDL_UpdateRects(vid,1,&dst);
 }
 
 void scale2x_close()
@@ -1075,245 +1075,245 @@ void scale2x_close()
 /* ascale2x video plugin --------------------------------------------------------------- */
 /* ------------------------------------------------------------------------------------ */
 void filter_ascale2x (Uint8 *srcPtr, Uint32 srcPitch,
-	     Uint8 *dstPtr, Uint32 dstPitch, int width, int height)
+       Uint8 *dstPtr, Uint32 dstPitch, int width, int height)
 {
     Uint8  *dP;
     Uint16 *bP;
     Uint32 inc_bP;
 
 
-	Uint32 finish;
-	Uint32 Nextline = srcPitch >> 1;
-	inc_bP = 1;
+  Uint32 finish;
+  Uint32 Nextline = srcPitch >> 1;
+  inc_bP = 1;
 
 
-	for (; height; height--)
-	{
-	    bP = reinterpret_cast<Uint16 *>(srcPtr);
-	    dP = dstPtr;
+  for (; height; height--)
+  {
+      bP = reinterpret_cast<Uint16 *>(srcPtr);
+      dP = dstPtr;
 
-	    for (finish = width; finish; finish -= inc_bP)
-	    {
+      for (finish = width; finish; finish -= inc_bP)
+      {
 
-		Uint32 colorA, colorB;
-		Uint32 colorC, colorD,
-		    colorE, colorF, colorG, colorH,
-		    colorI, colorJ, colorK, colorL,
+    Uint32 colorA, colorB;
+    Uint32 colorC, colorD,
+        colorE, colorF, colorG, colorH,
+        colorI, colorJ, colorK, colorL,
 
-		    colorM, colorN, colorO;
-		Uint32 product, product1, product2;
+        colorM, colorN, colorO;
+    Uint32 product, product1, product2;
 
 //---------------------------------------
 // Map of the pixels:                    I|E F|J
 //                                       G|A B|K
 //                                       H|C D|L
 //                                       M|N O|P
-		colorI = *(bP - Nextline - 1);
-		colorE = *(bP - Nextline);
-		colorF = *(bP - Nextline + 1);
-		colorJ = *(bP - Nextline + 2);
+    colorI = *(bP - Nextline - 1);
+    colorE = *(bP - Nextline);
+    colorF = *(bP - Nextline + 1);
+    colorJ = *(bP - Nextline + 2);
 
-		colorG = *(bP - 1);
-		colorA = *(bP);
-		colorB = *(bP + 1);
-		colorK = *(bP + 2);
+    colorG = *(bP - 1);
+    colorA = *(bP);
+    colorB = *(bP + 1);
+    colorK = *(bP + 2);
 
-		colorH = *(bP + Nextline - 1);
-		colorC = *(bP + Nextline);
-		colorD = *(bP + Nextline + 1);
-		colorL = *(bP + Nextline + 2);
+    colorH = *(bP + Nextline - 1);
+    colorC = *(bP + Nextline);
+    colorD = *(bP + Nextline + 1);
+    colorL = *(bP + Nextline + 2);
 
-		colorM = *(bP + Nextline + Nextline - 1);
-		colorN = *(bP + Nextline + Nextline);
-		colorO = *(bP + Nextline + Nextline + 1);
+    colorM = *(bP + Nextline + Nextline - 1);
+    colorN = *(bP + Nextline + Nextline);
+    colorO = *(bP + Nextline + Nextline + 1);
 
-		if ((colorA == colorD) && (colorB != colorC))
-		{
-		    if (((colorA == colorE) && (colorB == colorL)) ||
-			    ((colorA == colorC) && (colorA == colorF)
-			     && (colorB != colorE) && (colorB == colorJ)))
-		    {
-			product = colorA;
-		    }
-		    else
-		    {
-			product = INTERPOLATE (colorA, colorB);
-		    }
+    if ((colorA == colorD) && (colorB != colorC))
+    {
+        if (((colorA == colorE) && (colorB == colorL)) ||
+          ((colorA == colorC) && (colorA == colorF)
+           && (colorB != colorE) && (colorB == colorJ)))
+        {
+      product = colorA;
+        }
+        else
+        {
+      product = INTERPOLATE (colorA, colorB);
+        }
 
-		    if (((colorA == colorG) && (colorC == colorO)) ||
-			    ((colorA == colorB) && (colorA == colorH)
-			     && (colorG != colorC) && (colorC == colorM)))
-		    {
-			product1 = colorA;
-		    }
-		    else
-		    {
-			product1 = INTERPOLATE (colorA, colorC);
-		    }
-		    product2 = colorA;
-		}
-		else if ((colorB == colorC) && (colorA != colorD))
-		{
-		    if (((colorB == colorF) && (colorA == colorH)) ||
-			    ((colorB == colorE) && (colorB == colorD)
-			     && (colorA != colorF) && (colorA == colorI)))
-		    {
-			product = colorB;
-		    }
-		    else
-		    {
-			product = INTERPOLATE (colorA, colorB);
-		    }
+        if (((colorA == colorG) && (colorC == colorO)) ||
+          ((colorA == colorB) && (colorA == colorH)
+           && (colorG != colorC) && (colorC == colorM)))
+        {
+      product1 = colorA;
+        }
+        else
+        {
+      product1 = INTERPOLATE (colorA, colorC);
+        }
+        product2 = colorA;
+    }
+    else if ((colorB == colorC) && (colorA != colorD))
+    {
+        if (((colorB == colorF) && (colorA == colorH)) ||
+          ((colorB == colorE) && (colorB == colorD)
+           && (colorA != colorF) && (colorA == colorI)))
+        {
+      product = colorB;
+        }
+        else
+        {
+      product = INTERPOLATE (colorA, colorB);
+        }
 
-		    if (((colorC == colorH) && (colorA == colorF)) ||
-			    ((colorC == colorG) && (colorC == colorD)
-			     && (colorA != colorH) && (colorA == colorI)))
-		    {
-			product1 = colorC;
-		    }
-		    else
-		    {
-			product1 = INTERPOLATE (colorA, colorC);
-		    }
-		    product2 = colorB;
-		}
-		else if ((colorA == colorD) && (colorB == colorC))
-		{
-		    if (colorA == colorB)
-		    {
-			product = colorA;
-			product1 = colorA;
-			product2 = colorA;
-		    }
-		    else
-		    {
-			int r = 0;
+        if (((colorC == colorH) && (colorA == colorF)) ||
+          ((colorC == colorG) && (colorC == colorD)
+           && (colorA != colorH) && (colorA == colorI)))
+        {
+      product1 = colorC;
+        }
+        else
+        {
+      product1 = INTERPOLATE (colorA, colorC);
+        }
+        product2 = colorB;
+    }
+    else if ((colorA == colorD) && (colorB == colorC))
+    {
+        if (colorA == colorB)
+        {
+      product = colorA;
+      product1 = colorA;
+      product2 = colorA;
+        }
+        else
+        {
+      int r = 0;
 
-			product1 = INTERPOLATE (colorA, colorC);
-			product = INTERPOLATE (colorA, colorB);
+      product1 = INTERPOLATE (colorA, colorC);
+      product = INTERPOLATE (colorA, colorB);
 
-			r += GetResult1 (colorA, colorB, colorG, colorE);
-			r += GetResult2 (colorB, colorA, colorK, colorF);
-			r += GetResult2 (colorB, colorA, colorH, colorN);
-			r += GetResult1 (colorA, colorB, colorL, colorO);
+      r += GetResult1 (colorA, colorB, colorG, colorE);
+      r += GetResult2 (colorB, colorA, colorK, colorF);
+      r += GetResult2 (colorB, colorA, colorH, colorN);
+      r += GetResult1 (colorA, colorB, colorL, colorO);
 
-			if (r > 0)
-			    product2 = colorA;
-			else if (r < 0)
-			    product2 = colorB;
-			else
-			{
-			    product2 =
-				Q_INTERPOLATE (colorA, colorB, colorC,
-					       colorD);
-			}
-		    }
-		}
-		else
-		{
-		    product2 = Q_INTERPOLATE (colorA, colorB, colorC, colorD);
+      if (r > 0)
+          product2 = colorA;
+      else if (r < 0)
+          product2 = colorB;
+      else
+      {
+          product2 =
+        Q_INTERPOLATE (colorA, colorB, colorC,
+                 colorD);
+      }
+        }
+    }
+    else
+    {
+        product2 = Q_INTERPOLATE (colorA, colorB, colorC, colorD);
 
-		    if ((colorA == colorC) && (colorA == colorF)
-			    && (colorB != colorE) && (colorB == colorJ))
-		    {
-			product = colorA;
-		    }
-		    else
-			if ((colorB == colorE) && (colorB == colorD)
-			    && (colorA != colorF) && (colorA == colorI))
-		    {
-			product = colorB;
-		    }
-		    else
-		    {
-			product = INTERPOLATE (colorA, colorB);
-		    }
+        if ((colorA == colorC) && (colorA == colorF)
+          && (colorB != colorE) && (colorB == colorJ))
+        {
+      product = colorA;
+        }
+        else
+      if ((colorB == colorE) && (colorB == colorD)
+          && (colorA != colorF) && (colorA == colorI))
+        {
+      product = colorB;
+        }
+        else
+        {
+      product = INTERPOLATE (colorA, colorB);
+        }
 
-		    if ((colorA == colorB) && (colorA == colorH)
-			    && (colorG != colorC) && (colorC == colorM))
-		    {
-			product1 = colorA;
-		    }
-		    else
-			if ((colorC == colorG) && (colorC == colorD)
-			    && (colorA != colorH) && (colorA == colorI))
-		    {
-			product1 = colorC;
-		    }
-		    else
-		    {
-			product1 = INTERPOLATE (colorA, colorC);
-		    }
-		}
+        if ((colorA == colorB) && (colorA == colorH)
+          && (colorG != colorC) && (colorC == colorM))
+        {
+      product1 = colorA;
+        }
+        else
+      if ((colorC == colorG) && (colorC == colorD)
+          && (colorA != colorH) && (colorA == colorI))
+        {
+      product1 = colorC;
+        }
+        else
+        {
+      product1 = INTERPOLATE (colorA, colorC);
+        }
+    }
 #if SDL_BYTEORDER == SDL_LIL_ENDIAN
-		product = colorA | (product << 16);
-		product1 = product1 | (product2 << 16);
+    product = colorA | (product << 16);
+    product1 = product1 | (product2 << 16);
 #else
     product = (colorA << 16) | product;
     product1 = (product1 << 16) | product2;
 #endif
-		*(reinterpret_cast<Uint32 *>(dP)) = product;
-		*(reinterpret_cast<Uint32 *>(dP + dstPitch)) = product1;
+    *(reinterpret_cast<Uint32 *>(dP)) = product;
+    *(reinterpret_cast<Uint32 *>(dP + dstPitch)) = product1;
 
-		bP += inc_bP;
-		dP += sizeof (Uint32);
-	    }			// end of for ( finish= width etc..)
+    bP += inc_bP;
+    dP += sizeof (Uint32);
+      }      // end of for ( finish= width etc..)
 
-	    srcPtr += srcPitch;
-	    dstPtr += dstPitch * 2;
-	}			// endof: for (height; height; height--)
+      srcPtr += srcPitch;
+      dstPtr += dstPitch * 2;
+  }      // endof: for (height; height; height--)
 }
 
 
 
 SDL_Surface* ascale2x_init(video_plugin* t,int w,int h, int bpp, bool fs)
 {
-	if (bpp!=16)
+  if (bpp!=16)
   {
     std::cerr << t->name << " only works in 16 bits color mode - forcing 16 bpp" << std::endl;
     bpp = 16;
   }
-	if (!fs)
-	{
-		w=CPC_VISIBLE_SCR_WIDTH*2;
-		h=CPC_VISIBLE_SCR_HEIGHT*2;
-	}
-	vid=SDL_SetVideoMode(w,h,bpp,SDL_HWSURFACE | SDL_HWPALETTE | (fs?SDL_FULLSCREEN:0));
-	if (!vid)
-		return nullptr;
-	if (vid->format->BitsPerPixel!=16)
+  if (!fs)
+  {
+    w=CPC_VISIBLE_SCR_WIDTH*2;
+    h=CPC_VISIBLE_SCR_HEIGHT*2;
+  }
+  vid=SDL_SetVideoMode(w,h,bpp,SDL_HWSURFACE | SDL_HWPALETTE | (fs?SDL_FULLSCREEN:0));
+  if (!vid)
+    return nullptr;
+  if (vid->format->BitsPerPixel!=16)
   {
     std::cerr << t->name << ": SDL didn't return a 16 bpp surface but a " << static_cast<int>(vid->format->BitsPerPixel) << " bpp one." << std::endl;
-		return nullptr;
+    return nullptr;
   }
-	if (fs)
-	{
-		t->x_scale=0.5;
-		t->y_scale=0.5;
-		t->x_offset=static_cast<int>(w-CPC_VISIBLE_SCR_WIDTH/t->x_scale)/2;
-		t->y_offset=static_cast<int>(h-CPC_VISIBLE_SCR_HEIGHT/t->y_scale)/2;
-	}
-	else
-	{
-		t->x_scale=0.5;
-		t->y_scale=0.5;
-		t->x_offset=0;
-		t->y_offset=0;
-	}
-	SDL_FillRect(vid,nullptr,SDL_MapRGB(vid->format,0,0,0));
-	pub=SDL_CreateRGBSurface(SDL_SWSURFACE,CPC_VISIBLE_SCR_WIDTH,CPC_VISIBLE_SCR_HEIGHT,bpp,0,0,0,0);
-	return pub;
+  if (fs)
+  {
+    t->x_scale=0.5;
+    t->y_scale=0.5;
+    t->x_offset=static_cast<int>(w-CPC_VISIBLE_SCR_WIDTH/t->x_scale)/2;
+    t->y_offset=static_cast<int>(h-CPC_VISIBLE_SCR_HEIGHT/t->y_scale)/2;
+  }
+  else
+  {
+    t->x_scale=0.5;
+    t->y_scale=0.5;
+    t->x_offset=0;
+    t->y_offset=0;
+  }
+  SDL_FillRect(vid,nullptr,SDL_MapRGB(vid->format,0,0,0));
+  pub=SDL_CreateRGBSurface(SDL_SWSURFACE,CPC_VISIBLE_SCR_WIDTH,CPC_VISIBLE_SCR_HEIGHT,bpp,0,0,0,0);
+  return pub;
 }
 
 void ascale2x_setpal(SDL_Color* c)
 {
-	SDL_SetPalette(vid, SDL_LOGPAL | SDL_PHYSPAL, c, 0, 32); 
-	SDL_SetPalette(pub, SDL_LOGPAL | SDL_PHYSPAL, c, 0, 32); 
+  SDL_SetPalette(vid, SDL_LOGPAL | SDL_PHYSPAL, c, 0, 32); 
+  SDL_SetPalette(pub, SDL_LOGPAL | SDL_PHYSPAL, c, 0, 32); 
 }
 
 bool ascale2x_lock()
 {
-	return true;
+  return true;
 }
 
 void ascale2x_unlock()
@@ -1322,16 +1322,16 @@ void ascale2x_unlock()
 
 void ascale2x_flip()
 {
-	if (SDL_MUSTLOCK(vid))
-		SDL_LockSurface(vid);
-	SDL_Rect src;
-	SDL_Rect dst;
-	compute_rects(&src,&dst);
-	filter_ascale2x(static_cast<Uint8*>(pub->pixels) + (2*src.x+src.y*pub->pitch) + (pub->pitch), pub->pitch,
-		 static_cast<Uint8*>(vid->pixels) + (2*dst.x+dst.y*vid->pitch), vid->pitch, src.w, src.h);
-	if (SDL_MUSTLOCK(vid))
-		SDL_UnlockSurface(vid);
-	SDL_UpdateRects(vid,1,&dst);
+  if (SDL_MUSTLOCK(vid))
+    SDL_LockSurface(vid);
+  SDL_Rect src;
+  SDL_Rect dst;
+  compute_rects(&src,&dst);
+  filter_ascale2x(static_cast<Uint8*>(pub->pixels) + (2*src.x+src.y*pub->pitch) + (pub->pitch), pub->pitch,
+     static_cast<Uint8*>(vid->pixels) + (2*dst.x+dst.y*vid->pitch), vid->pitch, src.w, src.h);
+  if (SDL_MUSTLOCK(vid))
+    SDL_UnlockSurface(vid);
+  SDL_UpdateRects(vid,1,&dst);
 }
 
 void ascale2x_close()
@@ -1345,82 +1345,82 @@ void ascale2x_close()
 /* tv2x video plugin ------------------------------------------------------------------ */
 /* ------------------------------------------------------------------------------------ */
 void filter_tv2x(Uint8 *srcPtr, Uint32 srcPitch, 
-		Uint8 *dstPtr, Uint32 dstPitch, 
-		int width, int height)
+    Uint8 *dstPtr, Uint32 dstPitch, 
+    int width, int height)
 {
-	unsigned int nextlineSrc = srcPitch / sizeof(Uint16);
-	Uint16 *p = reinterpret_cast<Uint16 *>(srcPtr);
+  unsigned int nextlineSrc = srcPitch / sizeof(Uint16);
+  Uint16 *p = reinterpret_cast<Uint16 *>(srcPtr);
 
-	unsigned int nextlineDst = dstPitch / sizeof(Uint16);
-	Uint16 *q = reinterpret_cast<Uint16 *>(dstPtr);
+  unsigned int nextlineDst = dstPitch / sizeof(Uint16);
+  Uint16 *q = reinterpret_cast<Uint16 *>(dstPtr);
 
-	while(height--) {
-		int i = 0, j = 0;
-		for(; i < width; ++i, j += 2) {
-			Uint16 p1 = *(p + i);
-			Uint32 pi;
+  while(height--) {
+    int i = 0, j = 0;
+    for(; i < width; ++i, j += 2) {
+      Uint16 p1 = *(p + i);
+      Uint32 pi;
 
-			pi = (((p1 & redblueMask) * 7) >> 3) & redblueMask;
-			pi |= (((p1 & greenMask) * 7) >> 3) & greenMask;
+      pi = (((p1 & redblueMask) * 7) >> 3) & redblueMask;
+      pi |= (((p1 & greenMask) * 7) >> 3) & greenMask;
 
-			*(q + j) = p1;
-			*(q + j + 1) = p1;
-			*(q + j + nextlineDst) = pi;
-			*(q + j + nextlineDst + 1) = pi;
-		}
-		p += nextlineSrc;
-		q += nextlineDst << 1;
-	}
+      *(q + j) = p1;
+      *(q + j + 1) = p1;
+      *(q + j + nextlineDst) = pi;
+      *(q + j + nextlineDst + 1) = pi;
+    }
+    p += nextlineSrc;
+    q += nextlineDst << 1;
+  }
 }
 
 SDL_Surface* tv2x_init(video_plugin* t,int w,int h, int bpp, bool fs)
 {
-	if (bpp!=16)
+  if (bpp!=16)
   {
     std::cerr << t->name << " only works in 16 bits color mode - forcing 16 bpp" << std::endl;
     bpp = 16;
   }
-	if (!fs)
-	{
-		w=CPC_VISIBLE_SCR_WIDTH*2;
-		h=CPC_VISIBLE_SCR_HEIGHT*2;
-	}
-	vid=SDL_SetVideoMode(w,h,bpp,SDL_HWSURFACE | SDL_HWPALETTE | (fs?SDL_FULLSCREEN:0));
-	if (!vid)
-		return nullptr;
-	if (vid->format->BitsPerPixel!=16)
+  if (!fs)
+  {
+    w=CPC_VISIBLE_SCR_WIDTH*2;
+    h=CPC_VISIBLE_SCR_HEIGHT*2;
+  }
+  vid=SDL_SetVideoMode(w,h,bpp,SDL_HWSURFACE | SDL_HWPALETTE | (fs?SDL_FULLSCREEN:0));
+  if (!vid)
+    return nullptr;
+  if (vid->format->BitsPerPixel!=16)
   {
     std::cerr << t->name << ": SDL didn't return a 16 bpp surface but a " << static_cast<int>(vid->format->BitsPerPixel) << " bpp one." << std::endl;
-		return nullptr;
+    return nullptr;
   }
-	if (fs)
-	{
-		t->x_scale=0.5;
-		t->y_scale=0.5;
-		t->x_offset=static_cast<int>(w-CPC_VISIBLE_SCR_WIDTH/t->x_scale)/2;
-		t->y_offset=static_cast<int>(h-CPC_VISIBLE_SCR_HEIGHT/t->y_scale)/2;
-	}
-	else
-	{
-		t->x_scale=0.5;
-		t->y_scale=0.5;
-		t->x_offset=0;
-		t->y_offset=0;
-	}
-	SDL_FillRect(vid,nullptr,SDL_MapRGB(vid->format,0,0,0));
-	pub=SDL_CreateRGBSurface(SDL_SWSURFACE,CPC_VISIBLE_SCR_WIDTH,CPC_VISIBLE_SCR_HEIGHT,bpp,0,0,0,0);
-	return pub;
+  if (fs)
+  {
+    t->x_scale=0.5;
+    t->y_scale=0.5;
+    t->x_offset=static_cast<int>(w-CPC_VISIBLE_SCR_WIDTH/t->x_scale)/2;
+    t->y_offset=static_cast<int>(h-CPC_VISIBLE_SCR_HEIGHT/t->y_scale)/2;
+  }
+  else
+  {
+    t->x_scale=0.5;
+    t->y_scale=0.5;
+    t->x_offset=0;
+    t->y_offset=0;
+  }
+  SDL_FillRect(vid,nullptr,SDL_MapRGB(vid->format,0,0,0));
+  pub=SDL_CreateRGBSurface(SDL_SWSURFACE,CPC_VISIBLE_SCR_WIDTH,CPC_VISIBLE_SCR_HEIGHT,bpp,0,0,0,0);
+  return pub;
 }
 
 void tv2x_setpal(SDL_Color* c)
 {
-	SDL_SetPalette(vid, SDL_LOGPAL | SDL_PHYSPAL, c, 0, 32); 
-	SDL_SetPalette(pub, SDL_LOGPAL | SDL_PHYSPAL, c, 0, 32); 
+  SDL_SetPalette(vid, SDL_LOGPAL | SDL_PHYSPAL, c, 0, 32); 
+  SDL_SetPalette(pub, SDL_LOGPAL | SDL_PHYSPAL, c, 0, 32); 
 }
 
 bool tv2x_lock()
 {
-	return true;
+  return true;
 }
 
 void tv2x_unlock()
@@ -1429,16 +1429,16 @@ void tv2x_unlock()
 
 void tv2x_flip()
 {
-	if (SDL_MUSTLOCK(vid))
-		SDL_LockSurface(vid);
-	SDL_Rect src;
-	SDL_Rect dst;
-	compute_rects(&src,&dst);
-	filter_tv2x(static_cast<Uint8*>(pub->pixels) + (2*src.x+src.y*pub->pitch) + (pub->pitch), pub->pitch,
-		 static_cast<Uint8*>(vid->pixels) + (2*dst.x+dst.y*vid->pitch), vid->pitch, src.w, src.h);
-	if (SDL_MUSTLOCK(vid))
-		SDL_UnlockSurface(vid);
-	SDL_UpdateRects(vid,1,&dst);
+  if (SDL_MUSTLOCK(vid))
+    SDL_LockSurface(vid);
+  SDL_Rect src;
+  SDL_Rect dst;
+  compute_rects(&src,&dst);
+  filter_tv2x(static_cast<Uint8*>(pub->pixels) + (2*src.x+src.y*pub->pitch) + (pub->pitch), pub->pitch,
+     static_cast<Uint8*>(vid->pixels) + (2*dst.x+dst.y*vid->pitch), vid->pitch, src.w, src.h);
+  if (SDL_MUSTLOCK(vid))
+    SDL_UnlockSurface(vid);
+  SDL_UpdateRects(vid,1,&dst);
 }
 
 void tv2x_close()
@@ -1451,79 +1451,79 @@ void tv2x_close()
 /* Software bilinear video plugin ----------------------------------------------------- */
 /* ------------------------------------------------------------------------------------ */
 void filter_bilinear(Uint8 *srcPtr, Uint32 srcPitch, 
-		Uint8 *dstPtr, Uint32 dstPitch, 
-		int width, int height)
+    Uint8 *dstPtr, Uint32 dstPitch, 
+    int width, int height)
 {
-	unsigned int nextlineSrc = srcPitch / sizeof(Uint16);
-	Uint16 *p = reinterpret_cast<Uint16 *>(srcPtr);
-	unsigned int nextlineDst = dstPitch / sizeof(Uint16);
-	Uint16 *q = reinterpret_cast<Uint16 *>(dstPtr);
+  unsigned int nextlineSrc = srcPitch / sizeof(Uint16);
+  Uint16 *p = reinterpret_cast<Uint16 *>(srcPtr);
+  unsigned int nextlineDst = dstPitch / sizeof(Uint16);
+  Uint16 *q = reinterpret_cast<Uint16 *>(dstPtr);
 
-	while(height--) {
-		int i, ii;
-		for(i = 0, ii = 0; i < width; ++i, ii += 2) {
-			Uint16 A = *(p + i);
-			Uint16 B = *(p + i + 1);
-			Uint16 C = *(p + i + nextlineSrc);
-			Uint16 D = *(p + i + nextlineSrc + 1);
-			*(q + ii) = A;
-			*(q + ii + 1) = INTERPOLATE(A, B);
-			*(q + ii + nextlineDst) = INTERPOLATE(A, C);
-			*(q + ii + nextlineDst + 1) = Q_INTERPOLATE(A, B, C, D);
-		}
-		p += nextlineSrc;
-		q += nextlineDst << 1;
-	}
+  while(height--) {
+    int i, ii;
+    for(i = 0, ii = 0; i < width; ++i, ii += 2) {
+      Uint16 A = *(p + i);
+      Uint16 B = *(p + i + 1);
+      Uint16 C = *(p + i + nextlineSrc);
+      Uint16 D = *(p + i + nextlineSrc + 1);
+      *(q + ii) = A;
+      *(q + ii + 1) = INTERPOLATE(A, B);
+      *(q + ii + nextlineDst) = INTERPOLATE(A, C);
+      *(q + ii + nextlineDst + 1) = Q_INTERPOLATE(A, B, C, D);
+    }
+    p += nextlineSrc;
+    q += nextlineDst << 1;
+  }
 }
 
 SDL_Surface* swbilin_init(video_plugin* t,int w,int h, int bpp, bool fs)
 {
-	if (bpp!=16)
+  if (bpp!=16)
   {
     std::cerr << t->name << " only works in 16 bits color mode - forcing 16 bpp" << std::endl;
     bpp = 16;
   }
-	if (!fs)
-	{
-		w=CPC_VISIBLE_SCR_WIDTH*2;
-		h=CPC_VISIBLE_SCR_HEIGHT*2;
-	}
-	vid=SDL_SetVideoMode(w,h,bpp,SDL_HWSURFACE | SDL_HWPALETTE | (fs?SDL_FULLSCREEN:0));
-	if (!vid)
-		return nullptr;
-	if (vid->format->BitsPerPixel!=16)
+  if (!fs)
+  {
+    w=CPC_VISIBLE_SCR_WIDTH*2;
+    h=CPC_VISIBLE_SCR_HEIGHT*2;
+  }
+  vid=SDL_SetVideoMode(w,h,bpp,SDL_HWSURFACE | SDL_HWPALETTE | (fs?SDL_FULLSCREEN:0));
+  if (!vid)
+    return nullptr;
+  if (vid->format->BitsPerPixel!=16)
   {
     std::cerr << t->name << ": SDL didn't return a 16 bpp surface but a " << static_cast<int>(vid->format->BitsPerPixel) << " bpp one." << std::endl;
-		return nullptr;
+    return nullptr;
   }
-	if (fs)
-	{
-		t->x_scale=0.5;
-		t->y_scale=0.5;
-		t->x_offset=static_cast<int>(w-CPC_VISIBLE_SCR_WIDTH/t->x_scale)/2;
-		t->y_offset=static_cast<int>(h-CPC_VISIBLE_SCR_HEIGHT/t->y_scale)/2;
-	}
-	else
-	{
-		t->x_scale=0.5;
-		t->y_scale=0.5;
-		t->x_offset=0;
-		t->y_offset=0;
-	}
-	SDL_FillRect(vid,nullptr,SDL_MapRGB(vid->format,0,0,0));
-	pub=SDL_CreateRGBSurface(SDL_SWSURFACE,CPC_VISIBLE_SCR_WIDTH,CPC_VISIBLE_SCR_HEIGHT,bpp,0,0,0,0);
-	return pub;
+  if (fs)
+  {
+    t->x_scale=0.5;
+    t->y_scale=0.5;
+    t->x_offset=static_cast<int>(w-CPC_VISIBLE_SCR_WIDTH/t->x_scale)/2;
+    t->y_offset=static_cast<int>(h-CPC_VISIBLE_SCR_HEIGHT/t->y_scale)/2;
+  }
+  else
+  {
+    t->x_scale=0.5;
+    t->y_scale=0.5;
+    t->x_offset=0;
+    t->y_offset=0;
+  }
+  SDL_FillRect(vid,nullptr,SDL_MapRGB(vid->format,0,0,0));
+  pub=SDL_CreateRGBSurface(SDL_SWSURFACE,CPC_VISIBLE_SCR_WIDTH,CPC_VISIBLE_SCR_HEIGHT,bpp,0,0,0,0);
+  return pub;
 }
 
 void swbilin_setpal(SDL_Color* c)
 {
-	SDL_SetPalette(vid, SDL_LOGPAL | SDL_PHYSPAL, c, 0, 32); 
-	SDL_SetPalette(pub, SDL_LOGPAL | SDL_PHYSPAL, c, 0, 32); 
+  SDL_SetPalette(vid, SDL_LOGPAL | SDL_PHYSPAL, c, 0, 32); 
+  SDL_SetPalette(pub, SDL_LOGPAL | SDL_PHYSPAL, c, 0, 32); 
 }
 
 bool swbilin_lock()
 {
-	return true;
+  return true;
 }
 
 void swbilin_unlock()
@@ -1532,16 +1532,16 @@ void swbilin_unlock()
 
 void swbilin_flip()
 {
-	if (SDL_MUSTLOCK(vid))
-		SDL_LockSurface(vid);
-	SDL_Rect src;
-	SDL_Rect dst;
-	compute_rects(&src,&dst);
-	filter_bilinear(static_cast<Uint8*>(pub->pixels) + (2*src.x+src.y*pub->pitch) + (pub->pitch), pub->pitch,
-		 static_cast<Uint8*>(vid->pixels) + (2*dst.x+dst.y*vid->pitch), vid->pitch, src.w, src.h);
-	if (SDL_MUSTLOCK(vid))
-		SDL_UnlockSurface(vid);
-	SDL_UpdateRects(vid,1,&dst);
+  if (SDL_MUSTLOCK(vid))
+    SDL_LockSurface(vid);
+  SDL_Rect src;
+  SDL_Rect dst;
+  compute_rects(&src,&dst);
+  filter_bilinear(static_cast<Uint8*>(pub->pixels) + (2*src.x+src.y*pub->pitch) + (pub->pitch), pub->pitch,
+     static_cast<Uint8*>(vid->pixels) + (2*dst.x+dst.y*vid->pitch), vid->pitch, src.w, src.h);
+  if (SDL_MUSTLOCK(vid))
+    SDL_UnlockSurface(vid);
+  SDL_UpdateRects(vid,1,&dst);
 }
 
 void swbilin_close()
@@ -1595,17 +1595,17 @@ void filter_bicubic(Uint8 *srcPtr, Uint32 srcPitch,
   Uint16 *q = reinterpret_cast<Uint16 *>(dstPtr);
   int dx = width << 1, dy = height << 1;
   float fsx = static_cast<float>(width) / dx;
-	float fsy = static_cast<float>(height) / dy;
-	float v = 0.0f;
-	int j = 0;
-	for(; j < dy; ++j) {
-	  float u = 0.0f;
-	  int iv = static_cast<int>(v);
+  float fsy = static_cast<float>(height) / dy;
+  float v = 0.0f;
+  int j = 0;
+  for(; j < dy; ++j) {
+    float u = 0.0f;
+    int iv = static_cast<int>(v);
     float decy = v - iv;
     int i = 0;
-	  for(; i < dx; ++i) {
-		  int iu = static_cast<int>(u);
-		  float decx = u - iu;
+    for(; i < dx; ++i) {
+      int iu = static_cast<int>(u);
+      float decx = u - iu;
       float r, g, b;
       int m;
       r = g = b = 0.;
@@ -1620,60 +1620,60 @@ void filter_bicubic(Uint8 *srcPtr, Uint32 srcPitch,
       }
       *(q + i) = MAKE_RGB565(r, g, b);
       u += fsx;
-	  }
+    }
     q += nextlineDst;
-	  v += fsy;
+    v += fsy;
   }
 }
 
 SDL_Surface* swbicub_init(video_plugin* t,int w,int h, int bpp, bool fs)
 {
-	if (bpp!=16)
+  if (bpp!=16)
   {
     std::cerr << t->name << " only works in 16 bits color mode - forcing 16 bpp" << std::endl;
     bpp = 16;
   }
-	if (!fs)
-	{
-		w=CPC_VISIBLE_SCR_WIDTH*2;
-		h=CPC_VISIBLE_SCR_HEIGHT*2;
-	}
-	vid=SDL_SetVideoMode(w,h,bpp,SDL_HWSURFACE | SDL_HWPALETTE | (fs?SDL_FULLSCREEN:0));
-	if (!vid)
-		return nullptr;
-	if (vid->format->BitsPerPixel!=16)
+  if (!fs)
+  {
+    w=CPC_VISIBLE_SCR_WIDTH*2;
+    h=CPC_VISIBLE_SCR_HEIGHT*2;
+  }
+  vid=SDL_SetVideoMode(w,h,bpp,SDL_HWSURFACE | SDL_HWPALETTE | (fs?SDL_FULLSCREEN:0));
+  if (!vid)
+    return nullptr;
+  if (vid->format->BitsPerPixel!=16)
   {
     std::cerr << t->name << ": SDL didn't return a 16 bpp surface but a " << static_cast<int>(vid->format->BitsPerPixel) << " bpp one." << std::endl;
-		return nullptr;
+    return nullptr;
   }
-	if (fs)
-	{
-		t->x_scale=0.5;
-		t->y_scale=0.5;
-		t->x_offset=static_cast<int>(w-CPC_VISIBLE_SCR_WIDTH/t->x_scale)/2;
-		t->y_offset=static_cast<int>(h-CPC_VISIBLE_SCR_HEIGHT/t->y_scale)/2;
-	}
-	else
-	{
-		t->x_scale=0.5;
-		t->y_scale=0.5;
-		t->x_offset=0;
-		t->y_offset=0;
-	}
-	SDL_FillRect(vid,nullptr,SDL_MapRGB(vid->format,0,0,0));
-	pub=SDL_CreateRGBSurface(SDL_SWSURFACE,CPC_VISIBLE_SCR_WIDTH,CPC_VISIBLE_SCR_HEIGHT,bpp,0,0,0,0);
-	return pub;
+  if (fs)
+  {
+    t->x_scale=0.5;
+    t->y_scale=0.5;
+    t->x_offset=static_cast<int>(w-CPC_VISIBLE_SCR_WIDTH/t->x_scale)/2;
+    t->y_offset=static_cast<int>(h-CPC_VISIBLE_SCR_HEIGHT/t->y_scale)/2;
+  }
+  else
+  {
+    t->x_scale=0.5;
+    t->y_scale=0.5;
+    t->x_offset=0;
+    t->y_offset=0;
+  }
+  SDL_FillRect(vid,nullptr,SDL_MapRGB(vid->format,0,0,0));
+  pub=SDL_CreateRGBSurface(SDL_SWSURFACE,CPC_VISIBLE_SCR_WIDTH,CPC_VISIBLE_SCR_HEIGHT,bpp,0,0,0,0);
+  return pub;
 }
 
 void swbicub_setpal(SDL_Color* c)
 {
-	SDL_SetPalette(vid, SDL_LOGPAL | SDL_PHYSPAL, c, 0, 32); 
-	SDL_SetPalette(pub, SDL_LOGPAL | SDL_PHYSPAL, c, 0, 32); 
+  SDL_SetPalette(vid, SDL_LOGPAL | SDL_PHYSPAL, c, 0, 32); 
+  SDL_SetPalette(pub, SDL_LOGPAL | SDL_PHYSPAL, c, 0, 32); 
 }
 
 bool swbicub_lock()
 {
-	return true;
+  return true;
 }
 
 void swbicub_unlock()
@@ -1682,16 +1682,16 @@ void swbicub_unlock()
 
 void swbicub_flip()
 {
-	if (SDL_MUSTLOCK(vid))
-		SDL_LockSurface(vid);
-	SDL_Rect src;
-	SDL_Rect dst;
-	compute_rects(&src,&dst);
-	filter_bicubic(static_cast<Uint8*>(pub->pixels) + (2*src.x+src.y*pub->pitch) + (pub->pitch), pub->pitch,
-		 static_cast<Uint8*>(vid->pixels) + (2*dst.x+dst.y*vid->pitch), vid->pitch, src.w, src.h);
-	if (SDL_MUSTLOCK(vid))
-		SDL_UnlockSurface(vid);
-	SDL_UpdateRects(vid,1,&dst);
+  if (SDL_MUSTLOCK(vid))
+    SDL_LockSurface(vid);
+  SDL_Rect src;
+  SDL_Rect dst;
+  compute_rects(&src,&dst);
+  filter_bicubic(static_cast<Uint8*>(pub->pixels) + (2*src.x+src.y*pub->pitch) + (pub->pitch), pub->pitch,
+     static_cast<Uint8*>(vid->pixels) + (2*dst.x+dst.y*vid->pitch), vid->pitch, src.w, src.h);
+  if (SDL_MUSTLOCK(vid))
+    SDL_UnlockSurface(vid);
+  SDL_UpdateRects(vid,1,&dst);
 }
 
 void swbicub_close()
@@ -1706,86 +1706,86 @@ void swbicub_close()
 /* ------------------------------------------------------------------------------------ */
 static Uint16 DOT_16(Uint16 c, int j, int i) {
   static const Uint16 dotmatrix[16] = {
-	  0x01E0, 0x0007, 0x3800, 0x0000,
-	  0x39E7, 0x0000, 0x39E7, 0x0000,
-	  0x3800, 0x0000, 0x01E0, 0x0007,
-	  0x39E7, 0x0000, 0x39E7, 0x0000
+    0x01E0, 0x0007, 0x3800, 0x0000,
+    0x39E7, 0x0000, 0x39E7, 0x0000,
+    0x3800, 0x0000, 0x01E0, 0x0007,
+    0x39E7, 0x0000, 0x39E7, 0x0000
   };
   return c - ((c >> 2) & *(dotmatrix + ((j & 3) << 2) + (i & 3)));
 }
 
 void filter_dotmatrix(Uint8 *srcPtr, Uint32 srcPitch, 
-		Uint8 *dstPtr, Uint32 dstPitch,
-		int width, int height)
+    Uint8 *dstPtr, Uint32 dstPitch,
+    int width, int height)
 {
-	unsigned int nextlineSrc = srcPitch / sizeof(Uint16);
-	Uint16 *p = reinterpret_cast<Uint16 *>(srcPtr);
+  unsigned int nextlineSrc = srcPitch / sizeof(Uint16);
+  Uint16 *p = reinterpret_cast<Uint16 *>(srcPtr);
 
-	unsigned int nextlineDst = dstPitch / sizeof(Uint16);
-	Uint16 *q = reinterpret_cast<Uint16 *>(dstPtr);
+  unsigned int nextlineDst = dstPitch / sizeof(Uint16);
+  Uint16 *q = reinterpret_cast<Uint16 *>(dstPtr);
 
-	int i, ii, j, jj;
-	for(j = 0, jj = 0; j < height; ++j, jj += 2) {
-		for(i = 0, ii = 0; i < width; ++i, ii += 2) {
-			Uint16 c = *(p + i);
-			*(q + ii) = DOT_16(c, jj, ii);
-			*(q + ii + 1) = DOT_16(c, jj, ii + 1);
-			*(q + ii + nextlineDst) = DOT_16(c, jj + 1, ii);
-			*(q + ii + nextlineDst + 1) = DOT_16(c, jj + 1, ii + 1);
-		}
-		p += nextlineSrc;
-		q += nextlineDst << 1;
-	}
+  int i, ii, j, jj;
+  for(j = 0, jj = 0; j < height; ++j, jj += 2) {
+    for(i = 0, ii = 0; i < width; ++i, ii += 2) {
+      Uint16 c = *(p + i);
+      *(q + ii) = DOT_16(c, jj, ii);
+      *(q + ii + 1) = DOT_16(c, jj, ii + 1);
+      *(q + ii + nextlineDst) = DOT_16(c, jj + 1, ii);
+      *(q + ii + nextlineDst + 1) = DOT_16(c, jj + 1, ii + 1);
+    }
+    p += nextlineSrc;
+    q += nextlineDst << 1;
+  }
 }
 
 SDL_Surface* dotmat_init(video_plugin* t,int w,int h, int bpp, bool fs)
 {
-	if (bpp!=16)
+  if (bpp!=16)
   {
     std::cerr << t->name << " only works in 16 bits color mode - forcing 16 bpp" << std::endl;
     bpp = 16;
   }
-	if (!fs)
-	{
-		w=CPC_VISIBLE_SCR_WIDTH*2;
-		h=CPC_VISIBLE_SCR_HEIGHT*2;
-	}
-	vid=SDL_SetVideoMode(w,h,bpp,SDL_HWSURFACE | SDL_HWPALETTE | (fs?SDL_FULLSCREEN:0));
-	if (!vid)
-		return nullptr;
-	if (vid->format->BitsPerPixel!=16)
+  if (!fs)
+  {
+    w=CPC_VISIBLE_SCR_WIDTH*2;
+    h=CPC_VISIBLE_SCR_HEIGHT*2;
+  }
+  vid=SDL_SetVideoMode(w,h,bpp,SDL_HWSURFACE | SDL_HWPALETTE | (fs?SDL_FULLSCREEN:0));
+  if (!vid)
+    return nullptr;
+  if (vid->format->BitsPerPixel!=16)
   {
     std::cerr << t->name << ": SDL didn't return a 16 bpp surface but a " << static_cast<int>(vid->format->BitsPerPixel) << " bpp one." << std::endl;
-		return nullptr;
+    return nullptr;
   }
-	if (fs)
-	{
-		t->x_scale=0.5;
-		t->y_scale=0.5;
-		t->x_offset=static_cast<int>(w-CPC_VISIBLE_SCR_WIDTH/t->x_scale)/2;
-		t->y_offset=static_cast<int>(h-CPC_VISIBLE_SCR_HEIGHT/t->y_scale)/2;
-	}
-	else
-	{
-		t->x_scale=0.5;
-		t->y_scale=0.5;
-		t->x_offset=0;
-		t->y_offset=0;
-	}
-	SDL_FillRect(vid,nullptr,SDL_MapRGB(vid->format,0,0,0));
-	pub=SDL_CreateRGBSurface(SDL_SWSURFACE,CPC_VISIBLE_SCR_WIDTH,CPC_VISIBLE_SCR_HEIGHT,bpp,0,0,0,0);
-	return pub;
+  if (fs)
+  {
+    t->x_scale=0.5;
+    t->y_scale=0.5;
+    t->x_offset=static_cast<int>(w-CPC_VISIBLE_SCR_WIDTH/t->x_scale)/2;
+    t->y_offset=static_cast<int>(h-CPC_VISIBLE_SCR_HEIGHT/t->y_scale)/2;
+  }
+  else
+  {
+    t->x_scale=0.5;
+    t->y_scale=0.5;
+    t->x_offset=0;
+    t->y_offset=0;
+  }
+  SDL_FillRect(vid,nullptr,SDL_MapRGB(vid->format,0,0,0));
+  pub=SDL_CreateRGBSurface(SDL_SWSURFACE,CPC_VISIBLE_SCR_WIDTH,CPC_VISIBLE_SCR_HEIGHT,bpp,0,0,0,0);
+  return pub;
 }
 
 void dotmat_setpal(SDL_Color* c)
 {
-	SDL_SetPalette(vid, SDL_LOGPAL | SDL_PHYSPAL, c, 0, 32); 
-	SDL_SetPalette(pub, SDL_LOGPAL | SDL_PHYSPAL, c, 0, 32); 
+  SDL_SetPalette(vid, SDL_LOGPAL | SDL_PHYSPAL, c, 0, 32); 
+  SDL_SetPalette(pub, SDL_LOGPAL | SDL_PHYSPAL, c, 0, 32); 
 }
 
 bool dotmat_lock()
 {
-	return true;
+  return true;
 }
 
 void dotmat_unlock()
@@ -1794,16 +1794,16 @@ void dotmat_unlock()
 
 void dotmat_flip()
 {
-	if (SDL_MUSTLOCK(vid))
-		SDL_LockSurface(vid);
-	SDL_Rect src;
-	SDL_Rect dst;
-	compute_rects(&src,&dst);
-	filter_dotmatrix(static_cast<Uint8*>(pub->pixels) + (2*src.x+src.y*pub->pitch) + (pub->pitch), pub->pitch,
-		 static_cast<Uint8*>(vid->pixels) + (2*dst.x+dst.y*vid->pitch), vid->pitch, src.w, src.h);
-	if (SDL_MUSTLOCK(vid))
-		SDL_UnlockSurface(vid);
-	SDL_UpdateRects(vid,1,&dst);
+  if (SDL_MUSTLOCK(vid))
+    SDL_LockSurface(vid);
+  SDL_Rect src;
+  SDL_Rect dst;
+  compute_rects(&src,&dst);
+  filter_dotmatrix(static_cast<Uint8*>(pub->pixels) + (2*src.x+src.y*pub->pitch) + (pub->pitch), pub->pitch,
+     static_cast<Uint8*>(vid->pixels) + (2*dst.x+dst.y*vid->pitch), vid->pitch, src.w, src.h);
+  if (SDL_MUSTLOCK(vid))
+    SDL_UnlockSurface(vid);
+  SDL_UpdateRects(vid,1,&dst);
 }
 
 void dotmat_close()
