@@ -7,7 +7,7 @@ CAP32DIR="${TSTDIR}/../../../"
 
 rm -rv ${OUTPUT_DIR}
 mkdir -p ${OUTPUT_DIR}
-touch "${LOGFILE}"
+echo "" > "${LOGFILE}"
 find . -iname "*~" -exec rm -fv {} \;
 
 cd "$TSTDIR"
