@@ -1614,7 +1614,7 @@ void filter_bicubic(Uint8 *srcPtr, Uint32 srcPitch,
         int n;
         for(n = -1; n <= 2; ++n) {
           float r2 = CUBIC_WEIGHT(n - decx);
-          Uint16* pIn = p + (iu  + n) + (iv + m) * nextlineSrc;
+          Uint16* pIn = p + (iu  + n) + (iv + m) * static_cast<int>(nextlineSrc);
           MULT(*pIn, &r, &g, &b, r1 * r2);
         }
       }
