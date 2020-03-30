@@ -421,7 +421,6 @@ SDL_Surface* glscale_init(video_plugin* t,int w,int h, int bpp, bool fs)
   std::vector<int> candidates_bpp{bpp, 24, 16, 8};
   int surface_bpp = 0;
   for (int try_bpp : candidates_bpp) {
-    printf("Try %dbpp.\n", try_bpp);
     switch(try_bpp)
     {
       case 8:
@@ -437,7 +436,6 @@ SDL_Surface* glscale_init(video_plugin* t,int w,int h, int bpp, bool fs)
         surface_bpp = ((major>1)||(major == 1 && minor >= 2))?24:0;
         break;
     }
-    printf("Try result: %d.\n", surface_bpp);
     if (surface_bpp == 0) {
       fprintf(stderr, "Your OpenGL implementation doesn't support %dbpp textures\n", try_bpp);
     } else {
