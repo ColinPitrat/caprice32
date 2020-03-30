@@ -351,7 +351,6 @@ SDL_Surface* glscale_init(video_plugin* t,int w,int h, int bpp, bool fs)
 #else
   const char *gl_library = "libGL.so.1";
 #endif
-  int surface_bpp;
 
   gl_scanlines=CPC.scr_oglscanlines;
   SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 0);
@@ -421,8 +420,9 @@ SDL_Surface* glscale_init(video_plugin* t,int w,int h, int bpp, bool fs)
   // for 24bpp reversed OpenGL, we need OpenGL 1.2+
   std::vector<int> candidates_bpp{32, 24, 16, 8};
   candidates_bpp.insert(candidates_bpp.begin(), bpp);
-  surface_bpp=0;
+  int surface_bpp = 0;
   for (int try_bpp : candidates_bpp) {
+    printf("Try %dbpp.\n", try_bpp);
     switch(try_bpp)
     {
       case 8:
@@ -438,7 +438,8 @@ SDL_Surface* glscale_init(video_plugin* t,int w,int h, int bpp, bool fs)
         surface_bpp = ((major>1)||(major == 1 && minor >= 2))?24:0;
         break;
     }
-    if (surface_bpp==0) {
+    printf("Try result: %d.\n", surface_bpp);
+    if (surface_bpp == 0) {
       fprintf(stderr, "Your OpenGL implementation doesn't support %dbpp textures\n", bpp);
     } else {
       if (bpp != try_bpp) {
@@ -448,7 +449,7 @@ SDL_Surface* glscale_init(video_plugin* t,int w,int h, int bpp, bool fs)
       break;
     }
   }
-  if (surface_bpp==0) {
+  if (surface_bpp == 0) {
     fprintf(stderr, "FATAL: Couldn't find a supported OpenGL color depth.\n");
     return nullptr;
   }
