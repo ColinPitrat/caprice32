@@ -515,7 +515,6 @@ SDL_Surface* glscale_init(video_plugin* t,int w,int h, int bpp, bool fs)
   eglLoadIdentity();
 
   pub=SDL_CreateRGBSurface(SDL_SWSURFACE, original_width, original_height, surface_bpp, 0, 0, 0, 0);
-  return nullptr;
   return pub;
 }
 
