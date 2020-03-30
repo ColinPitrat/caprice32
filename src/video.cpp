@@ -419,24 +419,37 @@ SDL_Surface* glscale_init(video_plugin* t,int w,int h, int bpp, bool fs)
   // for 8bpp OpenGL, we need the GL_EXT_paletted_texture extension
   // for 16bpp OpenGL, we need OpenGL 1.2+
   // for 24bpp reversed OpenGL, we need OpenGL 1.2+
+  std::vector<int> candidates_bpp{32, 24, 16, 8};
+  candidates_bpp.insert(candidates_bpp.begin(), bpp);
   surface_bpp=0;
-  switch(bpp)
-  {
-    case 8:
-      surface_bpp = (have_gl_extension("GL_EXT_paletted_texture"))?8:0;
+  for (int try_bpp : candidates_bpp) {
+    switch(try_bpp)
+    {
+      case 8:
+        surface_bpp = (have_gl_extension("GL_EXT_paletted_texture"))?8:0;
+        break;
+      case 15:
+      case 16:
+        surface_bpp = ((major>1)||(major == 1 && minor >= 2))?16:0;
+        break;
+      case 24:
+      case 32:
+      default:
+        surface_bpp = ((major>1)||(major == 1 && minor >= 2))?24:0;
+        break;
+    }
+    if (surface_bpp==0) {
+      fprintf(stderr, "Your OpenGL implementation doesn't support %dbpp textures\n", bpp);
+    } else {
+      if (bpp != try_bpp) {
+        fprintf(stderr, "Switching to %dbpp instead of %dbpp as the latter is not supported.\n", try_bpp, bpp);
+        bpp = try_bpp;
+      }
       break;
-    case 15:
-    case 16:
-      surface_bpp = ((major>1)||(major == 1 && minor >= 2))?16:0;
-      break;
-    case 24:
-    case 32:
-    default:
-      surface_bpp = ((major>1)||(major == 1 && minor >= 2))?24:0;
-      break;
+    }
   }
   if (surface_bpp==0) {
-    fprintf(stderr, "Your OpenGL implementation doesn't support %dbpp textures\n", bpp);
+    fprintf(stderr, "FATAL: Couldn't find a supported OpenGL color depth.\n");
     return nullptr;
   }
 
