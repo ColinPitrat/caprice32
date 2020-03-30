@@ -34,7 +34,7 @@ do
   fi
 done
 
-if $rc -ne 0
+if [ $rc -ne 0 ]
 then
   cat "${LOGFILE}"
 fi
