@@ -418,8 +418,7 @@ SDL_Surface* glscale_init(video_plugin* t,int w,int h, int bpp, bool fs)
   // for 8bpp OpenGL, we need the GL_EXT_paletted_texture extension
   // for 16bpp OpenGL, we need OpenGL 1.2+
   // for 24bpp reversed OpenGL, we need OpenGL 1.2+
-  std::vector<int> candidates_bpp{32, 24, 16, 8};
-  candidates_bpp.insert(candidates_bpp.begin(), bpp);
+  std::vector<int> candidates_bpp{bpp, 24, 16, 8};
   int surface_bpp = 0;
   for (int try_bpp : candidates_bpp) {
     printf("Try %dbpp.\n", try_bpp);
@@ -441,6 +440,7 @@ SDL_Surface* glscale_init(video_plugin* t,int w,int h, int bpp, bool fs)
     printf("Try result: %d.\n", surface_bpp);
     if (surface_bpp == 0) {
       fprintf(stderr, "Your OpenGL implementation doesn't support %dbpp textures\n", bpp);
+      return nullptr;
     } else {
       if (bpp != try_bpp) {
         fprintf(stderr, "Switching to %dbpp instead of %dbpp as the latter is not supported.\n", try_bpp, bpp);

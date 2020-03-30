@@ -44,7 +44,7 @@ install:
 
 before_build:
 - msys64\usr\bin\bash -lc "%MINGW_DIR%/bin/g++ --version"
-- msys64\usr\bin\bash -lc "/usr/bin/make --version || echo \"sad\""
+- msys64\usr\bin\bash -lc "/usr/bin/make --version"
 - echo "NUMBER_OF_PROCESSORS=%NUMBER_OF_PROCESSORS%"
 
 build_script:
