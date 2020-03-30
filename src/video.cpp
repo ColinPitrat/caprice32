@@ -439,12 +439,11 @@ SDL_Surface* glscale_init(video_plugin* t,int w,int h, int bpp, bool fs)
     }
     printf("Try result: %d.\n", surface_bpp);
     if (surface_bpp == 0) {
-      fprintf(stderr, "Your OpenGL implementation doesn't support %dbpp textures\n", bpp);
+      fprintf(stderr, "Your OpenGL implementation doesn't support %dbpp textures\n", try_bpp);
     } else {
       if (bpp != try_bpp) {
         fprintf(stderr, "Switching to %dbpp instead of %dbpp as the latter is not supported.\n", try_bpp, bpp);
         bpp = try_bpp;
-        return nullptr;
       }
       break;
     }
@@ -516,6 +515,7 @@ SDL_Surface* glscale_init(video_plugin* t,int w,int h, int bpp, bool fs)
   eglLoadIdentity();
 
   pub=SDL_CreateRGBSurface(SDL_SWSURFACE, original_width, original_height, surface_bpp, 0, 0, 0, 0);
+  return nullptr;
   return pub;
 }
 
