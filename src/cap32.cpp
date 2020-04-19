@@ -180,36 +180,6 @@ double *video_get_rgb_color(int color) {
    return colours_rgb[color];
 }
 
-void testGreenPalette() {
-
-   double precision = 0.0001;
-
-   double G_LUMA_R =    0.2427;
-   double G_LUMA_G =    0.6380;
-   double G_LUMA_B =    0.1293;
-   double G_LUMA_BASE = 0.071;
-   double G_LUMA_COEF = 0.100;
-   double G_LUMA_PRIM = 0.050;
-
-   //test the new libretro palette (mode 1)
-   double *green_palette = video_get_green_palette(1);
-
-   for (int color = 0; color < 32; color++) {
-      double r = colours_rgb[color][0];
-      double g = colours_rgb[color][1];
-      double b = colours_rgb[color][2];
-
-      double green_luma = ((G_LUMA_R * r) + (G_LUMA_G * g) + (G_LUMA_B * b));
-         green_luma += (G_LUMA_BASE + G_LUMA_PRIM - (G_LUMA_COEF * green_luma));
-
-      double delta = abs(green_luma - green_palette[color]);
-
-      if (delta > precision) {
-    	  printf("warning green_luma value differs from calculated value:%f %f\n", green_luma, green_palette[color]);
-      }
-   }
-}
-
 SDL_Color colours[32];
 
 byte bit_values[8] = {
@@ -1987,8 +1957,6 @@ int cap32_main (int argc, char **argv)
    bool take_screenshot = false;
    SDL_Event event;
    std::vector<std::string> slot_list;
-
-   testGreenPalette();
 
    parseArguments(argc, argv, slot_list, args);
 
