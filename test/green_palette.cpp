@@ -24,13 +24,8 @@ TEST(GreenPalette, ValuesMatchFormula)
 	  double green_luma = ((G_LUMA_R * r) + (G_LUMA_G * g) + (G_LUMA_B * b));
 		 green_luma += (G_LUMA_BASE + G_LUMA_PRIM - (G_LUMA_COEF * green_luma));
 
-	  double delta = abs(green_luma - green_palette[color]);
-
-	  if (delta > precision) {
-		  printf("warning green_luma value differs from calculated value:%f %f\n", green_luma, green_palette[color]);
-	  }
-
-	  ASSERT_TRUE(delta <= precision);
+      EXPECT_NEAR(green_luma, green_palette[color], precision) <<
+    		  "green_luma value differs for " << color << ".";
    }
 }
 
