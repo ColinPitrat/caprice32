@@ -190,6 +190,8 @@ typedef struct {
    unsigned int scr_bpp;
    unsigned int scr_bps;
    unsigned int scr_line_offs;
+   unsigned int scr_green_mode;
+   unsigned int scr_green_blue_percent;
    unsigned char *scr_base;
    unsigned char *scr_pos;
    void (*scr_render)();
@@ -419,4 +421,6 @@ void ResetAYChipEmulation();
 void InitAYCounterVars();
 void InitAY();
 
+double *video_get_green_palette(int mode);
+double *video_get_rgb_color(int color);
 #endif

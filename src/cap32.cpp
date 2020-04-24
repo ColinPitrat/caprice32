@@ -141,7 +141,9 @@ double colours_rgb[32][3] = {
    { 0.5, 0.0, 0.0 }, { 0.5, 0.0, 1.0 },{ 0.5, 0.5, 0.0 }, { 0.5, 0.5, 1.0 }
 };
 
-double colours_green[32] = {
+// original RGB color to GREEN LUMA converted by Ulrich Doewich
+// unknown formula.
+double colours_green_classic[32] = {
    0.5647, 0.5647, 0.7529, 0.9412,
    0.1882, 0.3765, 0.4706, 0.6588,
    0.3765, 0.9412, 0.9098, 0.9725,
@@ -151,6 +153,32 @@ double colours_green[32] = {
    0.2824, 0.8471, 0.8157, 0.8784,
    0.2510, 0.3137, 0.5333, 0.5961
 };
+
+// added by a proposal from libretro project,
+// see https://github.com/ColinPitrat/caprice32/issues/135
+
+double colours_green_libretro[32] = {
+   0.5755,  0.5755,  0.7534,  0.9718,
+   0.1792,  0.3976,  0.4663,  0.6847,
+   0.3976,  0.9718,  0.9136,  1.0300,
+   0.3394,  0.4558,  0.6265,  0.7429,
+   0.1792,  0.7534,  0.6952,  0.8116,
+   0.1210,  0.2374,  0.4081,  0.5245,
+   0.2884,  0.8626,  0.8044,  0.9208,
+   0.2302,  0.3466,  0.5173,  0.6337
+};
+
+// interface to use the palette also from tests
+double *video_get_green_palette(int mode) {
+   if (!mode)
+      return colours_green_classic;
+   else
+      return colours_green_libretro;
+}
+
+double *video_get_rgb_color(int color) {
+   return colours_rgb[color];
+}
 
 SDL_Color colours[32];
 
@@ -1316,13 +1344,23 @@ int video_set_palette ()
       }
    } else {
       for (int n = 0; n < 32; n++) {
+         double *colours_green = video_get_green_palette(CPC.scr_green_mode);
+
          dword green = static_cast<dword>(colours_green[n] * (CPC.scr_intensity / 10.0) * 255);
          if (green > 255) {
-            green = 255;
+             green = 255;
          }
+
+         dword blue = static_cast<dword>(0.01 * CPC.scr_green_blue_percent * colours_green[n] * (CPC.scr_intensity / 10.0) * 255);
+
+         // unlikely, but we care though
+         if (blue > 255) {
+             blue = 255;
+         }
+
          colours[n].r = 0;
          colours[n].g = green;
-         colours[n].b = 0;
+         colours[n].b = blue;
       }
    }
 
@@ -1651,6 +1689,9 @@ void loadConfiguration (t_CPC &CPC, const std::string& configFilename)
    }
    CPC.scr_window = conf.getIntValue("video", "scr_window", 1) & 1;
 
+   CPC.scr_green_mode = conf.getIntValue("video", "scr_green_mode", 0) & 1;
+   CPC.scr_green_blue_percent = conf.getIntValue("video", "scr_green_blue_percent", 0);
+
    CPC.snd_enabled = conf.getIntValue("sound", "enabled", 1) & 1;
    CPC.snd_playback_rate = conf.getIntValue("sound", "playback_rate", 2);
    if (CPC.snd_playback_rate > (MAX_FREQ_ENTRIES-1)) {
@@ -1740,6 +1781,9 @@ void saveConfiguration (t_CPC &CPC, const std::string& configFilename)
    conf.setIntValue("video", "scr_intensity", CPC.scr_intensity);
    conf.setIntValue("video", "scr_remanency", CPC.scr_remanency);
    conf.setIntValue("video", "scr_window", CPC.scr_window);
+
+   conf.setIntValue("video", "scr_green_mode", CPC.scr_green_mode);
+   conf.setIntValue("video", "scr_green_blue_percent", CPC.scr_green_blue_percent);
 
    conf.setIntValue("sound", "enabled", CPC.snd_enabled);
    conf.setIntValue("sound", "playback_rate", CPC.snd_playback_rate);
