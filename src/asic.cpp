@@ -210,7 +210,7 @@ bool asic_register_page_write(word addr, byte val) {
          color += 16;
       }
       asic.sprites[id][x][y] = color;
-      LOG_DEBUG("Received sprite data for sprite " << id << ": x=" << x << ", y=" << y << ", color=" << static_cast<int>(val));
+      //LOG_DEBUG("Received sprite data for sprite " << id << ": x=" << x << ", y=" << y << ", color=" << static_cast<int>(val));
    } else if (addr >= 0x6000 && addr < 0x607D) {
       int id = ((addr - 0x6000) >> 3);
       int type = (addr & 0x7);
@@ -218,28 +218,28 @@ bool asic_register_page_write(word addr, byte val) {
          case 0:
             // X position
             asic.sprites_x[id] = (asic.sprites_x[id] & 0xFF00) | val;
-            LOG_DEBUG("Received sprite X for sprite " << id << " x=" << asic.sprites_x[id]);
+            //LOG_DEBUG("Received sprite X for sprite " << id << " x=" << asic.sprites_x[id]);
             // Mirrored in RAM image 4 bytes after
             pbRegisterPage[(addr & 0x3FFF) + 4] = val;
             break;
          case 1:
             // X position
             asic.sprites_x[id] = (asic.sprites_x[id] & 0x00FF) | (val << 8);
-            LOG_DEBUG("Received sprite X for sprite " << id << " x=" << asic.sprites_x[id]);
+            //LOG_DEBUG("Received sprite X for sprite " << id << " x=" << asic.sprites_x[id]);
             // Mirrored in RAM image 4 bytes after
             pbRegisterPage[(addr & 0x3FFF) + 4] = val;
             break;
          case 2:
             // Y position
             asic.sprites_y[id] = ((asic.sprites_y[id] & 0xFF00) | val);
-            LOG_DEBUG("Received sprite Y for sprite " << id << " y=" << asic.sprites_y[id]);
+            //LOG_DEBUG("Received sprite Y for sprite " << id << " y=" << asic.sprites_y[id]);
             // Mirrored in RAM image 4 bytes after
             pbRegisterPage[(addr & 0x3FFF) + 4] = val;
             break;
          case 3:
             // Y position
             asic.sprites_y[id] = ((asic.sprites_y[id] & 0x00FF) | (val << 8));
-            LOG_DEBUG("Received sprite Y for sprite " << id << " y=" << asic.sprites_y[id]);
+            //LOG_DEBUG("Received sprite Y for sprite " << id << " y=" << asic.sprites_y[id]);
             // Affect RAM image
             // Mirrored in RAM image 4 bytes after
             pbRegisterPage[(addr & 0x3FFF) + 4] = val;
@@ -248,11 +248,11 @@ bool asic_register_page_write(word addr, byte val) {
             // Magnification
             asic.sprites_mag_x[id] = decode_magnification(val >> 2);
             asic.sprites_mag_y[id] = decode_magnification(val);
-            LOG_DEBUG("Received sprite magnification for sprite " << id << " mx=" << asic.sprites_mag_x[id] << ", my=" << asic.sprites_mag_y[id]);
+            //LOG_DEBUG("Received sprite magnification for sprite " << id << " mx=" << asic.sprites_mag_x[id] << ", my=" << asic.sprites_mag_y[id]);
             // Write-only: does not affect pbRegisterPage
             return false;
          default:
-            LOG_DEBUG("Received sprite operation of unsupported type: " << type << " addr=" << std::hex << addr << " - val=" << static_cast<int>(val) << std::dec);
+            //LOG_DEBUG("Received sprite operation of unsupported type: " << type << " addr=" << std::hex << addr << " - val=" << static_cast<int>(val) << std::dec);
             break;
       }
    } else if (addr >= 0x6400 && addr < 0x6440) {
