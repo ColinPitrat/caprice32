@@ -210,7 +210,7 @@ bool asic_register_page_write(word addr, byte val) {
          color += 16;
       }
       asic.sprites[id][x][y] = color;
-      //LOG_DEBUG("Received sprite data for sprite " << id << ": x=" << x << ", y=" << y << ", color=" << static_cast<int>(val));
+      LOG_DEBUG("Received sprite data for sprite " << id << ": x=" << x << ", y=" << y << ", color=" << static_cast<int>(val));
    } else if (addr >= 0x6000 && addr < 0x607D) {
       int id = ((addr - 0x6000) >> 3);
       int type = (addr & 0x7);
@@ -218,28 +218,28 @@ bool asic_register_page_write(word addr, byte val) {
          case 0:
             // X position
             asic.sprites_x[id] = (asic.sprites_x[id] & 0xFF00) | val;
-            //LOG_DEBUG("Received sprite X for sprite " << id << " x=" << asic.sprites_x[id]);
+            LOG_DEBUG("Received sprite X for sprite " << id << " x=" << asic.sprites_x[id]);
             // Mirrored in RAM image 4 bytes after
             pbRegisterPage[(addr & 0x3FFF) + 4] = val;
             break;
          case 1:
             // X position
             asic.sprites_x[id] = (asic.sprites_x[id] & 0x00FF) | (val << 8);
-            //LOG_DEBUG("Received sprite X for sprite " << id << " x=" << asic.sprites_x[id]);
+            LOG_DEBUG("Received sprite X for sprite " << id << " x=" << asic.sprites_x[id]);
             // Mirrored in RAM image 4 bytes after
             pbRegisterPage[(addr & 0x3FFF) + 4] = val;
             break;
          case 2:
             // Y position
             asic.sprites_y[id] = ((asic.sprites_y[id] & 0xFF00) | val);
-            //LOG_DEBUG("Received sprite Y for sprite " << id << " y=" << asic.sprites_y[id]);
+            LOG_DEBUG("Received sprite Y for sprite " << id << " y=" << asic.sprites_y[id]);
             // Mirrored in RAM image 4 bytes after
             pbRegisterPage[(addr & 0x3FFF) + 4] = val;
             break;
          case 3:
             // Y position
             asic.sprites_y[id] = ((asic.sprites_y[id] & 0x00FF) | (val << 8));
-            //LOG_DEBUG("Received sprite Y for sprite " << id << " y=" << asic.sprites_y[id]);
+            LOG_DEBUG("Received sprite Y for sprite " << id << " y=" << asic.sprites_y[id]);
             // Affect RAM image
             // Mirrored in RAM image 4 bytes after
             pbRegisterPage[(addr & 0x3FFF) + 4] = val;
@@ -248,6 +248,7 @@ bool asic_register_page_write(word addr, byte val) {
             // Magnification
             asic.sprites_mag_x[id] = decode_magnification(val >> 2);
             asic.sprites_mag_y[id] = decode_magnification(val);
+            LOG_DEBUG("Received sprite magnification for sprite " << id << " mx=" << asic.sprites_mag_x[id] << ", my=" << asic.sprites_mag_y[id]);
             // Write-only: does not affect pbRegisterPage
             return false;
          default:
@@ -258,14 +259,14 @@ bool asic_register_page_write(word addr, byte val) {
       int colour = (addr & 0x3F) >> 1;
       if ((addr % 2) == 1) {
          double green = static_cast<double>(val & 0x0F)/16;
-         //LOG_DEBUG("Received color operation: color " << colour << " has green = " << green);
+         LOG_DEBUG("Received color operation: color " << colour << " has green = " << green);
          asic_colours[colour][1] = green;
          pbRegisterPage[(addr & 0x3FFF)] = (val & 0x0F);
          // TODO: find a cleaner way to do this - this is a copy paste from "Set ink value" in cap32.cpp
       } else {
          double red   = static_cast<double>((val & 0xF0) >> 4)/16;
          double blue  = static_cast<double>(val & 0x0F)/16;
-         //LOG_DEBUG("Received color operation: color " << colour << " has red = " << red << " and blue = " << blue);
+         LOG_DEBUG("Received color operation: color " << colour << " has red = " << red << " and blue = " << blue);
          asic_colours[colour][0] = red;
          asic_colours[colour][2] = blue;
          pbRegisterPage[(addr & 0x3FFF)] = val;

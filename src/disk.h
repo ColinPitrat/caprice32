@@ -96,7 +96,7 @@ struct t_drive {
    unsigned int sides; // total number of sides
    unsigned int current_side; // side being accessed
    unsigned int current_sector; // sector being accessed
-   unsigned int altered; // has the image been modified?
+   bool altered; // has the image been modified?
    unsigned int write_protected; // is the image write protected?
    unsigned int random_DEs; // sectors with Data Errors return random data?
    unsigned int flipped; // reverse the side to access?

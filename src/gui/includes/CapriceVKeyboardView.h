@@ -1,3 +1,6 @@
+#ifndef _WG_CAPRICEVKEYBOARDVIEW_H_
+#define _WG_CAPRICEVKEYBOARDVIEW_H_
+
 #include "wgui.h"
 #include "CapriceVKeyboard.h"
 
@@ -15,3 +18,5 @@ class CapriceVKeyboardView : public CView
 
     void PaintToSurface(SDL_Surface& ScreenSurface, SDL_Surface& FloatingSurface, const CPoint& Offset) const override;
 };
+
+#endif
