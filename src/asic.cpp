@@ -252,21 +252,21 @@ bool asic_register_page_write(word addr, byte val) {
             // Write-only: does not affect pbRegisterPage
             return false;
          default:
-            //LOG_DEBUG("Received sprite operation of unsupported type: " << type << " addr=" << std::hex << addr << " - val=" << static_cast<int>(val) << std::dec);
+            LOG_DEBUG("Received sprite operation of unsupported type: " << type << " addr=" << std::hex << addr << " - val=" << static_cast<int>(val) << std::dec);
             break;
       }
    } else if (addr >= 0x6400 && addr < 0x6440) {
       int colour = (addr & 0x3F) >> 1;
       if ((addr % 2) == 1) {
          double green = static_cast<double>(val & 0x0F)/16;
-         LOG_DEBUG("Received color operation: color " << colour << " has green = " << green);
+         //LOG_DEBUG("Received color operation: color " << colour << " has green = " << green);
          asic_colours[colour][1] = green;
          pbRegisterPage[(addr & 0x3FFF)] = (val & 0x0F);
          // TODO: find a cleaner way to do this - this is a copy paste from "Set ink value" in cap32.cpp
       } else {
          double red   = static_cast<double>((val & 0xF0) >> 4)/16;
          double blue  = static_cast<double>(val & 0x0F)/16;
-         LOG_DEBUG("Received color operation: color " << colour << " has red = " << red << " and blue = " << blue);
+         //LOG_DEBUG("Received color operation: color " << colour << " has red = " << red << " and blue = " << blue);
          asic_colours[colour][0] = red;
          asic_colours[colour][2] = blue;
          pbRegisterPage[(addr & 0x3FFF)] = val;
