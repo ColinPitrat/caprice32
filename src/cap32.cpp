@@ -172,8 +172,7 @@ double colours_green_libretro[32] = {
 double *video_get_green_palette(int mode) {
    if (!mode)
       return colours_green_classic;
-   else
-      return colours_green_libretro;
+   return colours_green_libretro;
 }
 
 double *video_get_rgb_color(int color) {
