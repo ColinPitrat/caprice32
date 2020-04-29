@@ -45,6 +45,7 @@
 #include "CapriceGui.h"
 #include "CapriceGuiView.h"
 #include "CapriceVKeyboardView.h"
+#include "CapriceLeavingWithoutSavingView.h"
 
 #include "errors.h"
 #include "log.h"
@@ -1820,94 +1821,81 @@ bool saveConfiguration (t_CPC &CPC, const std::string& configFilename)
 
 
 
-void doCleanUp ()
+SDL_Surface* prepareShowUI()
 {
-   printer_stop();
-   emulator_shutdown();
+   audio_pause();
+   CPC.scr_gui_is_currently_on = true;
+   SDL_ShowCursor(SDL_ENABLE);
+   // guiBackSurface will allow the GUI to capture the current frame
+   SDL_Surface* guiBackSurface(SDL_CreateRGBSurface(SDL_SWSURFACE, back_surface->w, back_surface->h, 32, 0x000000FF, 0x0000FF00, 0x00FF0000, 0x00000000));
+   SDL_BlitSurface(back_surface, nullptr, guiBackSurface, nullptr);
+   return guiBackSurface;
+}
 
-   dsk_eject(&driveA);
-   dsk_eject(&driveB);
-   tape_eject();
+void cleanupShowUI(SDL_Surface* guiBackSurface)
+{
+   SDL_FreeSurface(guiBackSurface);
+   // Clear SDL surface:
+   SDL_FillRect(back_surface, nullptr, SDL_MapRGB(back_surface->format, 0, 0, 0));
+   SDL_ShowCursor(SDL_DISABLE);
+   CPC.scr_gui_is_currently_on = false;
+   audio_resume();
+}
 
-   joysticks_shutdown();
-   audio_shutdown();
-   video_shutdown();
-
-   #ifdef DEBUG
-   if(pfoDebug) {
-     fclose(pfoDebug);
+bool userConfirmsQuitWithoutSaving()
+{
+   auto guiBackSurface = prepareShowUI();
+   bool confirmed = false;
+   // Show warning
+   try {
+      CapriceGui capriceGui;
+      capriceGui.Init();
+      CapriceLeavingWithoutSavingView capriceLeavingWarning(back_surface, guiBackSurface, CRect(0, 0, back_surface->w, back_surface->h));
+      capriceGui.SetMouseVisibility(true);
+      capriceGui.Exec();
+      confirmed = capriceLeavingWarning.Confirmed();
+   } catch(wGui::Wg_Ex_App& e) {
+      // TODO: improve: this is pretty silent if people don't look at the console
+      std::cout << "Failed displaying the leaving without saving dialog: " << e.what() << std::endl;
    }
-   #endif
-
-   SDL_Quit();
+   cleanupShowUI(guiBackSurface);
+   return confirmed;
 }
 
-void cleanExit(int returnCode)
-{
-    doCleanUp();
-    exit(returnCode);
-}
-
-// TODO: Deduplicate showVKeyboard and showGui
 void showVKeyboard()
 {
-  // Activate virtual keyboard
-  audio_pause();
-  CPC.scr_gui_is_currently_on = true;
-  SDL_ShowCursor(SDL_ENABLE);
-  // guiBackSurface will allow the GUI to capture the current frame
-  SDL_Surface* guiBackSurface(SDL_CreateRGBSurface(SDL_SWSURFACE, back_surface->w, back_surface->h, 32, 0x000000FF, 0x0000FF00, 0x00FF0000, 0x00000000));
-  SDL_BlitSurface(back_surface, nullptr, guiBackSurface, nullptr);
-  try {
-    CapriceGui capriceGui;
-    capriceGui.Init();
-    CapriceVKeyboardView capriceVKeyboardView(back_surface, guiBackSurface, CRect(0, 0, back_surface->w, back_surface->h));
-    capriceGui.SetMouseVisibility(true);
-    capriceGui.Exec();
-    auto newEvents = capriceVKeyboardView.GetEvents();
-    virtualKeyboardEvents.splice(virtualKeyboardEvents.end(), newEvents);
-  } catch(wGui::Wg_Ex_App& e) {
-    // TODO: improve: this is pretty silent if people don't look at the console
-    std::cout << "Failed displaying the virtual keyboard: " << e.what() << std::endl;
-  }
-  SDL_FreeSurface(guiBackSurface);
-  // Clear SDL surface:
-  SDL_FillRect(back_surface, nullptr, SDL_MapRGB(back_surface->format, 0, 0, 0));
-  SDL_ShowCursor(SDL_DISABLE);
-  CPC.scr_gui_is_currently_on = false;
-  audio_resume();
+   auto guiBackSurface = prepareShowUI();
+   // Activate virtual keyboard
+   try {
+      CapriceGui capriceGui;
+      capriceGui.Init();
+      CapriceVKeyboardView capriceVKeyboardView(back_surface, guiBackSurface, CRect(0, 0, back_surface->w, back_surface->h));
+      capriceGui.SetMouseVisibility(true);
+      capriceGui.Exec();
+      auto newEvents = capriceVKeyboardView.GetEvents();
+      virtualKeyboardEvents.splice(virtualKeyboardEvents.end(), newEvents);
+   } catch(wGui::Wg_Ex_App& e) {
+      // TODO: improve: this is pretty silent if people don't look at the console
+      std::cout << "Failed displaying the virtual keyboard: " << e.what() << std::endl;
+   }
+   cleanupShowUI(guiBackSurface);
 }
-
-
 
 void showGui()
 {
-  // Activate gui
-  audio_pause();
-  CPC.scr_gui_is_currently_on = true;
-  SDL_ShowCursor(SDL_ENABLE);
-  // guiBackSurface will allow the GUI to capture the current frame
-  SDL_Surface* guiBackSurface(SDL_CreateRGBSurface(SDL_SWSURFACE, back_surface->w, back_surface->h, 32, 0x000000FF, 0x0000FF00, 0x00FF0000, 0x00000000));
-  SDL_BlitSurface(back_surface, nullptr, guiBackSurface, nullptr);
-  try {
-    CapriceGui capriceGui;
-    capriceGui.Init();
-    CapriceGuiView capriceGuiView(back_surface, guiBackSurface, CRect(0, 0, back_surface->w, back_surface->h));
-    capriceGui.SetMouseVisibility(true);
-    capriceGui.Exec();
-  } catch(wGui::Wg_Ex_App& e) {
-    // TODO: improve: this is pretty silent if people don't look at the console
-    std::cout << "Failed displaying the GUI: " << e.what() << std::endl;
-  }
-  SDL_FreeSurface(guiBackSurface);
-  // Clear SDL surface:
-  SDL_FillRect(back_surface, nullptr, SDL_MapRGB(back_surface->format, 0, 0, 0));
-  SDL_ShowCursor(SDL_DISABLE);
-  CPC.scr_gui_is_currently_on = false;
-  audio_resume();
+   auto guiBackSurface = prepareShowUI();
+   try {
+      CapriceGui capriceGui;
+      capriceGui.Init();
+      CapriceGuiView capriceGuiView(back_surface, guiBackSurface, CRect(0, 0, back_surface->w, back_surface->h));
+      capriceGui.SetMouseVisibility(true);
+      capriceGui.Exec();
+   } catch(wGui::Wg_Ex_App& e) {
+      // TODO: improve: this is pretty silent if people don't look at the console
+      std::cout << "Failed displaying the GUI: " << e.what() << std::endl;
+   }
+   cleanupShowUI(guiBackSurface);
 }
-
-
 
 void set_osd_message(const std::string& message) {
    osd_timing = SDL_GetTicks() + 1000;
@@ -1949,10 +1937,44 @@ void dumpSnapshot() {
    }
 }
 
+bool driveAltered() {
+  return driveA.altered || driveB.altered;
+}
+
+void doCleanUp ()
+{
+   printer_stop();
+   emulator_shutdown();
+
+   dsk_eject(&driveA);
+   dsk_eject(&driveB);
+   tape_eject();
+
+   joysticks_shutdown();
+   audio_shutdown();
+   video_shutdown();
+
+   #ifdef DEBUG
+   if(pfoDebug) {
+     fclose(pfoDebug);
+   }
+   #endif
+
+   SDL_Quit();
+}
+
+void cleanExit(int returnCode, bool askIfUnsaved)
+{
+   if (askIfUnsaved && driveAltered() && !userConfirmsQuitWithoutSaving()) {
+     return;
+   }
+   doCleanUp();
+   exit(returnCode);
+}
+
 int cap32_main (int argc, char **argv)
 {
    int iExitCondition;
-   bool bolDone;
    bool take_screenshot = false;
    SDL_Event event;
    std::vector<std::string> slot_list;
@@ -2031,9 +2053,8 @@ int cap32_main (int argc, char **argv)
    audio_resume();
 
    iExitCondition = EC_FRAME_COMPLETE;
-   bolDone = false;
 
-   while (!bolDone) {
+   while (true) {
       if(!virtualKeyboardEvents.empty()
          && (nextVirtualEventFrameCount < dwFrameCountOverall)
          && (breakPointsToSkipBeforeProceedingWithVirtualEvents == 0)) {
@@ -2365,6 +2386,6 @@ int cap32_main (int argc, char **argv)
       }
    }
 
-   exit(0);
+   return 0;
 }
 

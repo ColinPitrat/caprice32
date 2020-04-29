@@ -248,6 +248,7 @@ bool asic_register_page_write(word addr, byte val) {
             // Magnification
             asic.sprites_mag_x[id] = decode_magnification(val >> 2);
             asic.sprites_mag_y[id] = decode_magnification(val);
+            //LOG_DEBUG("Received sprite magnification for sprite " << id << " mx=" << asic.sprites_mag_x[id] << ", my=" << asic.sprites_mag_y[id]);
             // Write-only: does not affect pbRegisterPage
             return false;
          default:

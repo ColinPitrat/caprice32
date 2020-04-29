@@ -18,6 +18,7 @@ namespace wGui {
 CapriceMenu::CapriceMenu(const CRect& WindowRect, CWindow* pParent, SDL_Surface* screen, CFontEngine* pFontEngine) :
   CFrame(WindowRect, pParent, pFontEngine, "Caprice32 - Menu", false), m_pScreenSurface(screen)
 {
+  CMessageServer::Instance().RegisterMessageClient(this, CMessage::CTRL_MESSAGEBOXRETURN);
   SetModal(true);
   std::map<MenuItem, std::string> buttons = {
     { MenuItem::OPTIONS, "Options" },
@@ -123,6 +124,15 @@ bool CapriceMenu::HandleMessage(CMessage* pMessage)
         }
       }
       break;
+    case CMessage::CTRL_MESSAGEBOXRETURN:
+      if (pMessage->Destination() == this) {
+        wGui::CValueMessage<CMessageBox::EButton> *pValueMessage = dynamic_cast<CValueMessage<CMessageBox::EButton>*>(pMessage);
+        if (pValueMessage && pValueMessage->Value() == CMessageBox::BUTTON_YES)
+        {
+          cleanExit(0, /*askIfUnsaved=*/false);
+        }
+      }
+      break;
     default:
       break;
     }
@@ -166,8 +176,14 @@ bool CapriceMenu::HandleMessage(CMessage* pMessage)
       }
     case MenuItem::QUIT:
       {
-        // atexit() takes care of all the cleanup
-        exit (0);
+        // TODO(cpitrat): Find a way to deduplicate this with the version in cap32.cpp/CapriceLeavingWithoutSavingView.cpp
+        // The problem is that userConfirmsQuitWithoutSaving doesn't work if a GUI is already displayed.
+        if (driveAltered()) {
+          wGui::CMessageBox* m_pMessageBox = new wGui::CMessageBox(CRect(CPoint(m_ClientRect.Width() /2 - 125, m_ClientRect.Height() /2 - 40), 250, 80), this, nullptr, "Quit without saving?", "Unsaved changes. Do you really want to quit?", CMessageBox::BUTTON_YES | CMessageBox::BUTTON_NO);
+          m_pMessageBox->SetModal(true);
+        } else {
+          cleanExit(0, /*askIfUnsaved=*/false);
+        }
         break;
       }
     case MenuItem::NONE:

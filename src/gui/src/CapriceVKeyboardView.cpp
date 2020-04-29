@@ -1,6 +1,3 @@
-#ifndef _WG_CAPRICEVKEYBOARDVIEW_H_
-#define _WG_CAPRICEVKEYBOARDVIEW_H_
-
 #include "CapriceVKeyboardView.h"
 
 CapriceVKeyboardView::CapriceVKeyboardView(SDL_Surface* surface, SDL_Surface* backSurface, const CRect& WindowRect) : CView(surface, backSurface, WindowRect)
@@ -30,5 +27,3 @@ void CapriceVKeyboardView::PaintToSurface(SDL_Surface& ScreenSurface, SDL_Surfac
     }
   }
 }
-
-#endif

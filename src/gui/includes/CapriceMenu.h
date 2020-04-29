@@ -49,6 +49,7 @@ namespace wGui
     protected:
       std::list<CapriceGuiViewButton> m_buttons;
       SDL_Surface *m_pScreenSurface;
+      bool m_confirmed_quit = false;
       
       CapriceMenu(const CapriceMenu&) = delete;
       CapriceMenu& operator=(const CapriceMenu&) = delete;
