@@ -119,6 +119,21 @@ TEST_F(ConfigurationTest, saveToFileAndMore)
   ASSERT_EQ(expectedConfig, buffer.str());
 }
 
+TEST_F(ConfigurationTest, saveToNonWritableFile)
+{
+  // Make a non-writable config file
+  auto configFileName = getTmpFilename(0);
+  ASSERT_EQ(0, chmod(configFileName.c_str(), S_IRUSR|S_IRGRP|S_IROTH));
+  std::string initalConfig = "[system]\nmodel=42\n";
+  configuration_.parseString(initalConfig);
+
+  EXPECT_FALSE(configuration_.saveToFile(getTmpFilename(0)));
+
+  // This works when the file is writable
+  ASSERT_EQ(0, chmod(configFileName.c_str(), S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH));
+  EXPECT_TRUE(configuration_.saveToFile(getTmpFilename(0)));
+}
+
 // TODO(cpitrat): test about every value in conf ?
 TEST_F(ConfigurationTest, loadConfigurationWithValidContent)
 {

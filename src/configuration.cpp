@@ -2,6 +2,7 @@
 #include <sstream>
 #include <cstring>
 #include <fstream>
+#include <iostream>
 
 namespace config
 {
@@ -62,11 +63,16 @@ namespace config
     return out;
   }
 
-  void Config::saveToFile(const std::string& configFilename) const
+  bool Config::saveToFile(const std::string& configFilename) const
   {
     std::ofstream configStream(configFilename);
     toStream(configStream);
     configStream.close();
+    bool success = configStream.good();
+    if (!success) {
+      std::cerr << "Couldn't save configuration to '" << configFilename << "'. Is the file writable?" << std::endl;
+    }
+    return success;
   }
 
   bool Config::hasValue(std::string section, std::string key) const

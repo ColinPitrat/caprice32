@@ -355,9 +355,9 @@ bool CapriceOptions::HandleMessage(CMessage* pMessage)
               CPC.joystick_emulation = (m_pCheckBoxJoystickEmulation->GetCheckBoxState() == CCheckBox::CHECKED)?1:0;
 
               // Check if any reset or re-init is required, e.g. emulator reset, sound system reset...
-              ProcessOptionChanges(CPC, pMessage->Source() == m_pButtonSave);
-
-              CloseFrame();
+              if (ProcessOptionChanges(CPC, pMessage->Source() == m_pButtonSave)) {
+                CloseFrame();
+              }
               bHandled = true;
               break;
             }
@@ -477,7 +477,7 @@ void CapriceOptions::EnableTab(std::string sTabName) {
 
 
 // Reinitialize parts of Caprice32 depending on options that have changed.
-void CapriceOptions::ProcessOptionChanges(t_CPC& CPC, bool saveChanges) {
+bool CapriceOptions::ProcessOptionChanges(t_CPC& CPC, bool saveChanges) {
     // if one of the following options has changed, re-init the CPC emulation :
     //  - CPC Model
     //  - amount of RAM
@@ -562,8 +562,16 @@ void CapriceOptions::ProcessOptionChanges(t_CPC& CPC, bool saveChanges) {
 
     if (saveChanges)
     {
-        saveConfiguration(CPC, getConfigurationFilename(true /* forWrite */));
+        std::string configuration_file = getConfigurationFilename(true /* forWrite */);
+        if (!saveConfiguration(CPC, configuration_file)) {
+          std::string message = "Couldn't save to " + configuration_file;
+          wGui::CMessageBox *pMessageBox = new wGui::CMessageBox(CRect(CPoint(m_ClientRect.Width() /2 - 125, m_ClientRect.Height() /2 - 30), 250, 60), this, nullptr, "Saving configuration failed", message, CMessageBox::BUTTON_OK);
+          pMessageBox->SetModal(true);
+          return false;
+        }
     }
+
+    return true;
 }
 
 } // namespace wGui

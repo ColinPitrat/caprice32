@@ -1748,7 +1748,7 @@ void loadConfiguration (t_CPC &CPC, const std::string& configFilename)
 
 
 
-void saveConfiguration (t_CPC &CPC, const std::string& configFilename)
+bool saveConfiguration (t_CPC &CPC, const std::string& configFilename)
 {
    config::Config conf;
 
@@ -1816,7 +1816,7 @@ void saveConfiguration (t_CPC &CPC, const std::string& configFilename)
    }
    conf.setStringValue("rom", "rom_mf2", CPC.rom_mf2);
 
-   conf.saveToFile(configFilename);
+   return conf.saveToFile(configFilename);
 }
 
 

@@ -16,7 +16,7 @@ namespace config
       void parseFile(const std::string& configFilename);
 
       std::ostream& toStream(std::ostream& out) const;
-      void saveToFile(const std::string& configFilename) const;
+      bool saveToFile(const std::string& configFilename) const;
 
       bool hasValue(std::string section, std::string key) const;
       int getIntValue(const std::string& section, const std::string& key, const int defaultValue) const;
