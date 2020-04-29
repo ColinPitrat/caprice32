@@ -525,7 +525,7 @@ int dsk_load (FILE *pfile, t_drive *drive)
         }
       }
     }
-    drive->altered = 0; // disk is as yet unmodified
+    drive->altered = false; // disk is as yet unmodified
   } else {
     if (memcmp(pbPtr, "EXTENDED", 8) == 0) { // extended DSK image?
       LOG_DEBUG("Loading extended disk");
@@ -601,7 +601,7 @@ int dsk_load (FILE *pfile, t_drive *drive)
           }
         }
       }
-      drive->altered = 0; // disk is as yet unmodified
+      drive->altered = false; // disk is as yet unmodified
     } else {
       LOG_ERROR("Unknown DSK type");
       dsk_eject(drive);
@@ -685,6 +685,7 @@ int dsk_save (const std::string &filename, t_drive *drive)
             }
          }
       }
+      drive->altered = false;  // Drive is not modified anymore
       fclose(pfileObject);
    } else {
       return ERR_DSK_WRITE; // write attempt failed
@@ -738,7 +739,7 @@ int dsk_format (t_drive *drive, int iFormat)
          memset(pbTempPtr, disk_format[iFormat].filler_byte, dwTrackSize);
       }
    }
-   drive->altered = 1; // flag disk as having been modified
+   drive->altered = true; // flag disk as having been modified
 
 exit:
    if (iRetCode != 0) { // on error, 'eject' disk from drive

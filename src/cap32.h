@@ -381,6 +381,7 @@ typedef struct {
 } t_VDU;
 
 // cap32.cpp
+bool driveAltered();
 void emulator_reset(bool bolMF2Reset);
 int  emulator_init();
 int  video_set_palette();
@@ -394,7 +395,7 @@ void audio_pause ();
 void audio_resume ();
 int video_init ();
 void video_shutdown ();
-void cleanExit(int returnCode);
+void cleanExit(int returnCode, bool askIfUnsaved = true);
 
 // Return the path to the best (i.e: most specific) configuration file.
 // Priority order is:

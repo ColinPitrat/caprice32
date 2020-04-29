@@ -541,7 +541,7 @@ void fdc_write_data(byte val)
                   memcpy(&FDC.result[RES_C], pbPtr, 4); // copy sector's CHRN to result buffer
                   FDC.result[RES_N] = FDC.command[CMD_C]; // overwrite with the N value from the writeID command
 
-                  active_drive->altered = 1; // indicate that the image has been modified
+                  active_drive->altered = true; // indicate that the image has been modified
                   FDC.phase = RESULT_PHASE; // switch to result phase
                }
                else if (FDC.command[CMD_R] != FDC.command[CMD_EOT]) { // haven't reached End of Track?
@@ -549,7 +549,7 @@ void fdc_write_data(byte val)
                   cmd_write();
                }
                else {
-                  active_drive->altered = 1; // indicate that the image has been modified
+                  active_drive->altered = true; // indicate that the image has been modified
 
                   FDC.result[RES_ST0] |= 0x40; // AT
                   FDC.result[RES_ST1] |= 0x80; // End of Cylinder
@@ -851,9 +851,11 @@ void fdc_write()
          FDC.phase = RESULT_PHASE; // switch to result phase
       }
       else if (active_track->sectors != 0) { // track is formatted?
+         active_drive->altered = true;
          cmd_write();
       }
       else { // unformatted track
+         active_drive->altered = true;
          FDC.result[RES_ST0] |= 0x40; // AT
          FDC.result[RES_ST1] |= 0x01; // Missing AM
 
@@ -958,6 +960,7 @@ void fdc_writeID()
          FDC.phase = RESULT_PHASE; // switch to result phase
       }
       else {
+         active_drive->altered = true;
          FDC.buffer_count = FDC.command[CMD_H] << 2; // number of sectors * 4 = number of bytes still outstanding
          FDC.buffer_ptr = pbGPBuffer; // buffer to temporarily hold the track format
          FDC.buffer_endptr = pbGPBuffer + FDC.buffer_count;

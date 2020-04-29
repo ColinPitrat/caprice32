@@ -392,7 +392,7 @@ void ipf_eject_hook (t_drive *drive)
 	_CAPSRemImage(id);
 	_CAPSExit();
 	unload_caps_library();
-	drive->altered = 0; // discard modifications
+	drive->altered = false; // discard modifications
 	drive->eject_hook = nullptr;
 }
 
@@ -501,7 +501,7 @@ int ipf_load (const std::string &filename, t_drive *drive)
 	// Set up the internal drive details
 	drive->tracks = cii.maxcylinder+1;
 	drive->sides = cii.maxhead;
-	drive->altered = 0;
+	drive->altered = false;
 	drive->track_hook = ipf_track_hook;
 	drive->eject_hook = ipf_eject_hook;
 
