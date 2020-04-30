@@ -126,6 +126,16 @@ typedef enum {
    CPC_CTRL_x,
    CPC_CTRL_y,
    CPC_CTRL_z,
+   CPC_CTRL_0,
+   CPC_CTRL_1,
+   CPC_CTRL_2,
+   CPC_CTRL_3,
+   CPC_CTRL_4,
+   CPC_CTRL_5,
+   CPC_CTRL_6,
+   CPC_CTRL_7,
+   CPC_CTRL_8,
+   CPC_CTRL_9,
    CPC_AMPERSAND,
    CPC_ASTERISK,
    CPC_AT,
@@ -215,7 +225,7 @@ typedef enum {
    CPC_FR_uGRAVE
 } CPC_KEYS;
 
-#define CPC_KEY_NUM 175    // Number of different keys on a CPC keyboard
+#define CPC_KEY_NUM 185    // Number of different keys on a CPC keyboard
 #define CPC_KEYBOARD_NUM 3 // Number of different keyboards supported.
 
 void applyKeypress(dword cpc_key, byte keyboard_matrix[], bool pressed);

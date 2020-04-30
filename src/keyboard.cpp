@@ -98,6 +98,16 @@ const dword InputMapper::cpc_kbd[CPC_KEYBOARD_NUM][CPC_KEY_NUM] = {
     0x77 | MOD_CPC_CTRL,    // CPC_CTRL_x
     0x53 | MOD_CPC_CTRL,    // CPC_CTRL_y
     0x87 | MOD_CPC_CTRL,    // CPC_CTRL_z
+    0x40 | MOD_CPC_CTRL,    // CPC_CTRL_0
+    0x80 | MOD_CPC_CTRL,    // CPC_CTRL_1
+    0x81 | MOD_CPC_CTRL,    // CPC_CTRL_2
+    0x71 | MOD_CPC_CTRL,    // CPC_CTRL_3
+    0x70 | MOD_CPC_CTRL,    // CPC_CTRL_4
+    0x61 | MOD_CPC_CTRL,    // CPC_CTRL_5
+    0x60 | MOD_CPC_CTRL,    // CPC_CTRL_6
+    0x51 | MOD_CPC_CTRL,    // CPC_CTRL_7
+    0x50 | MOD_CPC_CTRL,    // CPC_CTRL_8
+    0x41 | MOD_CPC_CTRL,    // CPC_CTRL_9
     0x60 | MOD_CPC_SHIFT,   // CPC_AMPERSAND
     0x35 | MOD_CPC_SHIFT,   // CPC_ASTERISK
     0x32,                   // CPC_AT
@@ -275,6 +285,16 @@ const dword InputMapper::cpc_kbd[CPC_KEYBOARD_NUM][CPC_KEY_NUM] = {
     0x77 | MOD_CPC_CTRL,    // CPC_CTRL_x
     0x53 | MOD_CPC_CTRL,    // CPC_CTRL_y
     0x73 | MOD_CPC_CTRL,    // CPC_CTRL_z
+    0x40 | MOD_CPC_CTRL,    // CPC_CTRL_0
+    0x80 | MOD_CPC_CTRL,    // CPC_CTRL_1
+    0x81 | MOD_CPC_CTRL,    // CPC_CTRL_2
+    0x71 | MOD_CPC_CTRL,    // CPC_CTRL_3
+    0x70 | MOD_CPC_CTRL,    // CPC_CTRL_4
+    0x61 | MOD_CPC_CTRL,    // CPC_CTRL_5
+    0x60 | MOD_CPC_CTRL,    // CPC_CTRL_6
+    0x51 | MOD_CPC_CTRL,    // CPC_CTRL_7
+    0x50 | MOD_CPC_CTRL,    // CPC_CTRL_8
+    0x41 | MOD_CPC_CTRL,    // CPC_CTRL_9
     0x80,                   // CPC_AMPERSAND
     0x21,                   // CPC_ASTERISK
     0x26 | MOD_CPC_SHIFT,   // CPC_AT
@@ -452,6 +472,16 @@ const dword InputMapper::cpc_kbd[CPC_KEYBOARD_NUM][CPC_KEY_NUM] = {
     0x77 | MOD_CPC_CTRL,    // CPC_CTRL_x
     0x53 | MOD_CPC_CTRL,    // CPC_CTRL_y
     0x87 | MOD_CPC_CTRL,    // CPC_CTRL_z
+    0x40 | MOD_CPC_CTRL,    // CPC_CTRL_0
+    0x80 | MOD_CPC_CTRL,    // CPC_CTRL_1
+    0x81 | MOD_CPC_CTRL,    // CPC_CTRL_2
+    0x71 | MOD_CPC_CTRL,    // CPC_CTRL_3
+    0x70 | MOD_CPC_CTRL,    // CPC_CTRL_4
+    0x61 | MOD_CPC_CTRL,    // CPC_CTRL_5
+    0x60 | MOD_CPC_CTRL,    // CPC_CTRL_6
+    0x51 | MOD_CPC_CTRL,    // CPC_CTRL_7
+    0x50 | MOD_CPC_CTRL,    // CPC_CTRL_8
+    0x41 | MOD_CPC_CTRL,    // CPC_CTRL_9
     0x60 | MOD_CPC_SHIFT,   // CPC_AMPERSAND
     0x21 | MOD_CPC_SHIFT,   // CPC_ASTERISK
     0x32,                   // CPC_AT
@@ -643,7 +673,7 @@ const std::map<const char, const CPC_KEYS> InputMapper::CPCkeysFromChars = {
     // Not (yet?) on virtual keyboard
     { '@', CPC_AT },
     { '^', CPC_POWER },
-    // Control keys (CPC_CTRL_a to CPC_CTRL_z) are not ont the virtual keyboard (yet?)
+    // Control keys (CPC_CTRL_a to CPC_CTRL_9) are not ont the virtual keyboard (yet?)
     //{ '~', {0, KMOD_NONE} } // should be pound but it's not part of base ascii (it's in extended ASCII)
 };
 
@@ -736,6 +766,16 @@ std::map<unsigned int, unsigned int> InputMapper::SDLkeysymFromCPCkeys_us = {
   { CPC_CTRL_x,      SDLK_x | MOD_PC_CTRL },
   { CPC_CTRL_y,      SDLK_y | MOD_PC_CTRL },
   { CPC_CTRL_z,      SDLK_z | MOD_PC_CTRL },
+  { CPC_CTRL_0,      SDLK_0 | MOD_PC_CTRL },
+  { CPC_CTRL_1,      SDLK_0 | MOD_PC_CTRL },
+  { CPC_CTRL_2,      SDLK_0 | MOD_PC_CTRL },
+  { CPC_CTRL_3,      SDLK_0 | MOD_PC_CTRL },
+  { CPC_CTRL_4,      SDLK_0 | MOD_PC_CTRL },
+  { CPC_CTRL_5,      SDLK_0 | MOD_PC_CTRL },
+  { CPC_CTRL_6,      SDLK_0 | MOD_PC_CTRL },
+  { CPC_CTRL_7,      SDLK_0 | MOD_PC_CTRL },
+  { CPC_CTRL_8,      SDLK_0 | MOD_PC_CTRL },
+  { CPC_CTRL_9,      SDLK_0 | MOD_PC_CTRL },
   { CPC_AMPERSAND,   SDLK_7 | MOD_PC_SHIFT },
   { CPC_ASTERISK,    SDLK_8 | MOD_PC_SHIFT },
   { CPC_AT,          SDLK_2 | MOD_PC_SHIFT },
@@ -909,6 +949,16 @@ const std::map<const std::string, const unsigned int> InputMapper::CPCkeysFromSt
    {"CPC_CTRL_x",      CPC_CTRL_x},
    {"CPC_CTRL_y",      CPC_CTRL_y},
    {"CPC_CTRL_z",      CPC_CTRL_z},
+   {"CPC_CTRL_0",      CPC_CTRL_0},
+   {"CPC_CTRL_1",      CPC_CTRL_1},
+   {"CPC_CTRL_2",      CPC_CTRL_2},
+   {"CPC_CTRL_3",      CPC_CTRL_3},
+   {"CPC_CTRL_4",      CPC_CTRL_4},
+   {"CPC_CTRL_5",      CPC_CTRL_5},
+   {"CPC_CTRL_6",      CPC_CTRL_6},
+   {"CPC_CTRL_7",      CPC_CTRL_7},
+   {"CPC_CTRL_8",      CPC_CTRL_8},
+   {"CPC_CTRL_9",      CPC_CTRL_9},
    {"CPC_AMPERSAND",   CPC_AMPERSAND},
    {"CPC_ASTERISK",    CPC_ASTERISK},
    {"CPC_AT",          CPC_AT},
