@@ -102,7 +102,7 @@ TEST_OBJECTS:=$(TEST_DEPENDS:.d=.o)
 .PHONY: all check_deps clean deb_pkg debug debug_flag distrib doc unit_test install
 
 WARNINGS = -Wall -Wextra -Wzero-as-null-pointer-constant -Wformat=2 -Wold-style-cast -Wmissing-include-dirs -Wlogical-op -Woverloaded-virtual -Wpointer-arith -Wredundant-decls
-COMMON_CFLAGS += $(CFLAGS) -std=c++11 $(IPATHS)
+COMMON_CFLAGS += $(CFLAGS) -std=c++17 $(IPATHS)
 DEBUG_FLAGS = -Werror -g -O0 -DDEBUG
 RELEASE_FLAGS = -O2 -funroll-loops -ffast-math -fomit-frame-pointer -fno-strength-reduce -finline-functions -s
 BUILD_FLAGS = $(RELEASE_FLAGS)

@@ -1325,17 +1325,17 @@ const std::map<const std::string, const unsigned int> InputMapper::SDLkeysFromSt
 
 // Format of a line: CPC_xxx\tSDLK_xxx\tMODIFIER
 // Last field is optional
-void InputMapper::process_cfg_line(char *line)
+bool InputMapper::process_cfg_line(char *line)
 {
   unsigned int cpc_key = 0, sdl_key = 0;
 
   char *pch = strtok(line, "\t");
   if (pch == nullptr || pch[0] == '#')
-    return;
+    return true;
 
   if (CPCkeysFromStrings.count(pch) == 0) {
     LOG_ERROR("Unknown CPC key " << pch << " found in mapping file. Ignoring it.");
-    return;
+    return false;
   }
 
   for (unsigned int field=0; field < 3; field++) {
@@ -1347,7 +1347,7 @@ void InputMapper::process_cfg_line(char *line)
       case 2:
         if (SDLkeysFromStrings.count(pch) == 0) {
           LOG_ERROR("Unknown SDL key or modifier " << pch << " found in mapping file. Ignoring it.");
-          return;
+          return false;
         }
         sdl_key |= SDLkeysFromStrings.at(pch);
         break;
@@ -1359,28 +1359,34 @@ void InputMapper::process_cfg_line(char *line)
       break;
   }
   SDLkeysymFromCPCkeys[cpc_key] = sdl_key;
-  return;
+  return true;
 }
 
 #define MAX_LINE_LENGTH 80
-void InputMapper::init()
+bool InputMapper::load_layout(const std::string& filename)
 {
-  std::string layout_file = CPC->resources_path + "/" + CPC->kbd_layout;
   std::filebuf fb;
-  unsigned int sdl_moddedkey;
   char line[MAX_LINE_LENGTH]; // sufficient for now ! TODO(sebhz): proper malloc'ing etc...
 
-  if (is_directory(layout_file) || (fb.open(layout_file, std::ios::in) == nullptr)) {
+  bool valid = true;
+  if (is_directory(filename) || (fb.open(filename, std::ios::in) == nullptr)) {
     SDLkeysymFromCPCkeys = SDLkeysymFromCPCkeys_us;
   }
   else {
     std::istream is(&fb);
     while (is.good()) {
       is.getline(line, MAX_LINE_LENGTH);
-      process_cfg_line(line);
+      valid &= process_cfg_line(line);
     }
     fb.close();
   }
+  return valid;
+}
+
+void InputMapper::init()
+{
+  std::string layout_file = CPC->resources_path + "/" + CPC->kbd_layout;
+  load_layout(layout_file);
 
   for (const auto &mapping : SDLkeysymFromCPCkeys) {
     CPCkeysFromSDLkeysym[mapping.second] = mapping.first;
@@ -1388,7 +1394,7 @@ void InputMapper::init()
 
   for (const auto &mapping : CPCkeysFromChars) {
     if (SDLkeysymFromCPCkeys.count(mapping.second) != 0) {
-      sdl_moddedkey = SDLkeysymFromCPCkeys[mapping.second];
+      unsigned int sdl_moddedkey = SDLkeysymFromCPCkeys[mapping.second];
       SDLkeysFromChars[mapping.first] = std::make_pair(static_cast<SDLKey>(sdl_moddedkey & 0xffff), static_cast<SDLMod>(sdl_moddedkey >> 16));
     }
   }

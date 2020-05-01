@@ -242,10 +242,11 @@ class InputMapper {
 		std::map<unsigned int, unsigned int> SDLkeysymFromCPCkeys;
 		t_CPC *CPC;
 
-		void process_cfg_line(char *line);
+		bool process_cfg_line(char *line);
 
 	public:
 		InputMapper(t_CPC *CPC);
+    bool load_layout(const std::string& filename);
 		void init();
 		dword CPCkeyFromKeysym(SDL_keysym keysym);
 		dword CPCkeyFromJoystickButton(SDL_JoyButtonEvent jbutton);
