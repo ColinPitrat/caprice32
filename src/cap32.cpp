@@ -1035,13 +1035,9 @@ void emulator_reset ()
    FDC.flags = STATUSDRVA_flag | STATUSDRVB_flag;
 
 // memory
-   if (bolMF2Reset) {
-      memset(pbRAM, 0, 64*1024); // clear only the first 64K of CPC memory
-   } else {
-      memset(pbRAM, 0, CPC.ram_size*1024); // clear all memory used for CPC RAM
-      if (pbMF2ROM) {
-         memset(pbMF2ROM+8192, 0, 8192); // clear the MF2's RAM area
-      }
+   memset(pbRAM, 0, CPC.ram_size*1024); // clear all memory used for CPC RAM
+   if (pbMF2ROM) {
+     memset(pbMF2ROM+8192, 0, 8192); // clear the MF2's RAM area
    }
    for (int n = 0; n < 4; n++) { // initialize active read/write bank configuration
       membank_read[n] = membank_config[0][n];
