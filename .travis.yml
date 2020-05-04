@@ -9,7 +9,7 @@ addons:
  apt:
   sources:
     - ubuntu-toolchain-r-test
-    - llvm-toolchain-precise-3.8
+    - llvm-toolchain-precise-5.0
   packages:
     - libsdl1.2-dev
     - libfreetype6-dev
@@ -17,8 +17,8 @@ addons:
     - libpng-dev
     - gcc-5
     - g++-5
-    - clang-3.8
-    - clang-tidy-3.8
+    - clang-5.0
+    - clang-tidy-5.0
     # For debian package validation
     - dpkg-dev
     - pbuilder
