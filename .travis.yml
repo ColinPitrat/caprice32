@@ -9,14 +9,14 @@ addons:
  apt:
   sources:
     - ubuntu-toolchain-r-test
-    - llvm-toolchain-precise-5.0
+    #- llvm-toolchain-precise-5.0
   packages:
     - libsdl1.2-dev
     - libfreetype6-dev
     - zlib1g-dev
     - libpng-dev
-    - gcc-5
-    - g++-5
+    - gcc-9
+    - g++-9
     - clang-5.0
     - clang-tidy-5.0
     # For debian package validation
@@ -29,7 +29,7 @@ addons:
 #To uncomment in case a core occurs:
 #    - gdb
 before_script:
-    - export CXX=g++-5
+    - export CXX=g++-9
     - wget http://softpres.org/_media/files:ipflib42_linux-x86_64.tar.gz -O /tmp/ipflib42_linux-x86_64.tar.gz
     - tar -xf /tmp/ipflib42_linux-x86_64.tar.gz 2>&1 >/dev/null
     - sudo cp -r x86_64-linux-gnu-capsimage/include/caps /usr/include
