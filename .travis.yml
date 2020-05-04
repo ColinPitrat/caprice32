@@ -15,8 +15,8 @@ addons:
     - libfreetype6-dev
     - zlib1g-dev
     - libpng-dev
-    - gcc-4.8
-    - g++-4.8
+    - gcc-5
+    - g++-5
     - clang-3.8
     - clang-tidy-3.8
     # For debian package validation
@@ -29,7 +29,7 @@ addons:
 #To uncomment in case a core occurs:
 #    - gdb
 before_script:
-    - export CXX=g++-4.8
+    - export CXX=g++-5
     - wget http://softpres.org/_media/files:ipflib42_linux-x86_64.tar.gz -O /tmp/ipflib42_linux-x86_64.tar.gz
     - tar -xf /tmp/ipflib42_linux-x86_64.tar.gz 2>&1 >/dev/null
     - sudo cp -r x86_64-linux-gnu-capsimage/include/caps /usr/include
