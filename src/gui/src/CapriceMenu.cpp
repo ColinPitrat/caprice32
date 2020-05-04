@@ -158,7 +158,7 @@ bool CapriceMenu::HandleMessage(CMessage* pMessage)
       }
     case MenuItem::RESET:
       {
-        emulator_reset(false);
+        emulator_reset();
         // Exit gui
         CMessageServer::Instance().QueueMessage(new CMessage(CMessage::APP_EXIT, nullptr, this));
         break;

@@ -382,7 +382,7 @@ typedef struct {
 
 // cap32.cpp
 bool driveAltered();
-void emulator_reset(bool bolMF2Reset);
+void emulator_reset();
 int  emulator_init();
 int  video_set_palette();
 void init_joystick_emulation();

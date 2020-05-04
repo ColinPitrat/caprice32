@@ -788,10 +788,10 @@ int snapshot_load (FILE *pfile)
       return ERR_OUT_OF_MEMORY;
     }
   }
-  emulator_reset(false);
+  emulator_reset();
   n = fread(pbRAM, dwSnapSize*1024, 1, pfile); // read memory dump into CPC RAM
   if (!n) {
-    emulator_reset(false);
+    emulator_reset();
     return ERR_SNA_INVALID;
   }
 
@@ -875,7 +875,7 @@ int snapshot_load (FILE *pfile)
     dwModel = sh.cpc_model; // determine the model it was saved for
     if (dwModel != CPC.model) { // different from what we're currently running?
       if (dwModel > 3) { // not one of the known models?
-        emulator_reset(false);
+        emulator_reset();
         return ERR_SNA_CPC_TYPE;
       }
       std::string romFilename = CPC.rom_path + "/" + chROMFile[dwModel];
@@ -883,12 +883,12 @@ int snapshot_load (FILE *pfile)
         n = fread(pbROM, 2*16384, 1, pfileObject);
         fclose(pfileObject);
         if (!n) {
-          emulator_reset(false);
+          emulator_reset();
           return ERR_CPC_ROM_MISSING;
         }
         CPC.model = dwModel;
       } else { // ROM image load failed
-        emulator_reset(false);
+        emulator_reset();
         return ERR_CPC_ROM_MISSING;
       }
     }

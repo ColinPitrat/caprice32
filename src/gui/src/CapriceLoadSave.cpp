@@ -147,7 +147,7 @@ bool CapriceLoadSave::HandleMessage(CMessage* pMessage)
                         file_load(filename, drive);
                       }
                       if (m_pTypeValue->GetSelectedIndex() == 4) {
-                        emulator_reset(false);
+                        emulator_reset();
                       }
                       break;
                     }

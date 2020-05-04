@@ -985,7 +985,7 @@ int emulator_patch_ROM ()
 }
 
 
-void emulator_reset (bool bolMF2Reset)
+void emulator_reset ()
 {
    if (CPC.model > 2) {
       if (pbCartridgePages[0] != nullptr) {
@@ -1167,7 +1167,7 @@ int emulator_init ()
       }
    }
 
-   emulator_reset(false);
+   emulator_reset();
    CPC.paused = false;
 
    return 0;
@@ -2186,7 +2186,7 @@ int cap32_main (int argc, char **argv)
 
                         case CAP32_RESET:
                            LOG_DEBUG("User requested emulator reset");
-                           emulator_reset(false);
+                           emulator_reset();
                            break;
 
                         case CAP32_JOY:

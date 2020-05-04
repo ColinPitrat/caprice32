@@ -3,9 +3,6 @@
 
 using namespace wGui;
 
-// Make caprice32 functions available here.
-extern void emulator_reset(bool);
-
 CapriceGuiView::CapriceGuiView(SDL_Surface* surface, SDL_Surface* backSurface, const CRect& WindowRect) : CView(surface, backSurface, WindowRect)
 {
   CMessageServer::Instance().RegisterMessageClient(this, CMessage::CTRL_MESSAGEBOXRETURN);
