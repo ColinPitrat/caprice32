@@ -23,6 +23,7 @@
 
 
 #include "wg_label.h"
+#include <string>
 
 
 namespace wGui

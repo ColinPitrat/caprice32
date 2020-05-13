@@ -27,6 +27,7 @@
 #include "wg_message_server.h"
 #include "wg_resources.h"
 #include "wg_view.h"
+#include <string>
 
 namespace wGui
 {

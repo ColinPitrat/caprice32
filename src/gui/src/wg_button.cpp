@@ -29,6 +29,7 @@
 #include "wg_message_server.h"
 #include "std_ex.h"
 #include <algorithm>
+#include <string>
 
 
 namespace wGui

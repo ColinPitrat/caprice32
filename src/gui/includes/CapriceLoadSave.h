@@ -6,6 +6,7 @@
 #include "wgui.h"
 #include "wg_frame.h"
 #include "wg_navigationbar.h"
+#include <string>
 
 class CapriceLoadSaveTest;
 

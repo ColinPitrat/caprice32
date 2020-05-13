@@ -5,6 +5,7 @@
 #include "SDL.h"
 #include <map>
 #include <list>
+#include <string>
 #include "cap32.h"
 
 #define MOD_CPC_SHIFT   (0x01 << 8)

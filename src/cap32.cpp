@@ -19,6 +19,7 @@
 #include <iostream>
 #include <sstream>
 #include <chrono>
+#include <string>
 #include <thread>
 
 #include "SDL.h"
@@ -40,7 +41,7 @@
 #include "fileutils.h"
 
 #include <errno.h>
-#include <string.h>
+#include <cstring>
 
 #include "CapriceGui.h"
 #include "CapriceGuiView.h"

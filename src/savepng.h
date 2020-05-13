@@ -9,6 +9,7 @@
  * See https://github.com/driedfruit/SDL_SavePNG
  */
 #include <SDL_video.h>
+#include <string>
 
 /*
  * Save an SDL_Surface as a PNG file.

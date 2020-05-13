@@ -1,8 +1,9 @@
 #include "stringutils.h"
 
-#include <string.h>
-#include <sstream>
 #include <algorithm>
+#include <cstring>
+#include <sstream>
+#include <string>
 
 namespace stringutils
 {

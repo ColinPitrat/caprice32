@@ -3,6 +3,7 @@
 
 #include "CapriceAbout.h"
 #include "cap32.h"
+#include <string>
 
 // CPC emulation properties, defined in cap32.h:
 extern t_CPC CPC;

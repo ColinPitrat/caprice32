@@ -30,6 +30,7 @@
 #include "wg_renderedstring.h"
 #include "wg_picture.h"
 #include <memory>
+#include <string>
 
 
 namespace wGui

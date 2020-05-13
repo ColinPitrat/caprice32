@@ -2,6 +2,7 @@
 
 #include "cap32.h"
 #include "slotshandler.h"
+#include <string>
 
 TEST(SlotHandlerTest, fillSlotsNoArg)
 {

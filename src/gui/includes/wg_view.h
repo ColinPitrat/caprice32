@@ -28,6 +28,7 @@
 #include "wg_window.h"
 #include "SDL.h"
 #include "wg_menu.h"
+#include <string>
 
 
 namespace wGui

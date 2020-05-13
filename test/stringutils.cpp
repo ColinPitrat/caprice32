@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 #include "stringutils.h"
+#include <string>
 
 TEST(StringUtils, SplitOnEmptyStringReturnsEmptyVector)
 {

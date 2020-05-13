@@ -15,6 +15,7 @@
 #include "CapriceRomSlots.h"
 #include "cap32.h"
 #include "video.h"
+#include <string>
 
 namespace wGui
 {

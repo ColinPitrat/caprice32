@@ -25,6 +25,7 @@
 #include "wg_fontengine.h"
 #include "wg_error.h"
 #include "wg_application.h"
+#include <string>
 
 
 namespace wGui {

@@ -16,6 +16,7 @@
 #include "ipf.h"
 #include "log.h"
 #include "slotshandler.h"
+#include <string>
 
 extern t_CPC CPC;
 

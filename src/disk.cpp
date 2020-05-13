@@ -1,6 +1,7 @@
 #include "disk.h"
 
 #include <sstream>
+#include <string>
 
 #include "log.h"
 

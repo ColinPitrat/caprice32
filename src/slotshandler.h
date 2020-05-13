@@ -17,6 +17,7 @@
 */
 
 #include "disk.h"
+#include <string>
 
 typedef enum {
   DSK_A,

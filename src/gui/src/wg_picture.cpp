@@ -23,6 +23,7 @@
 
 
 #include "wg_picture.h"
+#include <string>
 
 
 namespace wGui

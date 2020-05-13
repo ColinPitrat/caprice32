@@ -31,6 +31,7 @@
 #include "wg_timer.h"
 #include "wg_resources.h"
 #include <memory>
+#include <string>
 
 namespace wGui
 {

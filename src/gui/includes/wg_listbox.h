@@ -29,6 +29,7 @@
 #include "wg_painter.h"
 #include "wg_renderedstring.h"
 #include "wg_scrollbar.h"
+#include <string>
 #include <vector>
 
 

@@ -7,6 +7,7 @@
 #include "wgui.h"
 #include "wg_frame.h"
 #include "wg_label.h"
+#include <string>
 
 namespace wGui
 {

@@ -2,6 +2,7 @@
 
 #include "CapriceLoadSave.h"
 #include "cap32.h"
+#include <string>
 
 extern t_CPC CPC;
 

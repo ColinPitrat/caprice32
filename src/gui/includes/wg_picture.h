@@ -28,6 +28,7 @@
 #include "wg_window.h"
 #include "wg_painter.h"
 #include "wg_resource_handle.h"
+#include <string>
 
 
 namespace wGui

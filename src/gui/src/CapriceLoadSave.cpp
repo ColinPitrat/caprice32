@@ -11,7 +11,7 @@
 #include <sys/types.h>
 #include <dirent.h>
 #include <errno.h>
-#include <string.h>
+#include <cstring>
 #include <vector>
 #include <string>
 #include <algorithm>

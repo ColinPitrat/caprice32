@@ -32,6 +32,7 @@
 #include "wg_scrollbar.h"
 #include <vector>
 #include <map>
+#include <string>
 
 
 namespace wGui

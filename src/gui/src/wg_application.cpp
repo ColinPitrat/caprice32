@@ -27,6 +27,7 @@
 #include "video.h"
 #include <iostream>
 #include <fstream>
+#include <string>
 #include "cap32.h"
 
 // CPC emulation properties, defined in cap32.h:

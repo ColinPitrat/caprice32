@@ -3,8 +3,9 @@
 #include "CapriceMemoryTool.h"
 #include "cap32.h"
 #include "z80.h"
-#include <sstream>
 #include <iomanip>
+#include <sstream>
+#include <string>
 
 extern byte *pbRAM;
 extern t_CPC CPC;

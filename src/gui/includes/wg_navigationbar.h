@@ -27,6 +27,7 @@
 #include "wg_renderedstring.h"
 #include "wg_resource_handle.h"
 #include "wg_window.h"
+#include <string>
 #include <vector>
 
 namespace wGui

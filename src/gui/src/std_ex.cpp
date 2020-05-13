@@ -23,6 +23,7 @@
 
 #include "std_ex.h"
 #include <sstream>
+#include <string>
 
 
 namespace stdex

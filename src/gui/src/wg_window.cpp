@@ -30,6 +30,7 @@
 #include "wg_message_server.h"
 #include "wg_view.h"
 #include <algorithm>
+#include <string>
 
 namespace wGui
 {

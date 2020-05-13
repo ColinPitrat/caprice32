@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 #include "fileutils.h"
+#include <string>
 
 TEST(FileUtils, Listdirectory)
 {

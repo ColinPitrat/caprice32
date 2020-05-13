@@ -26,6 +26,7 @@
 #include "wg_application.h"
 #include <algorithm>
 #include <iostream>
+#include <string>
 
 namespace wGui
 {

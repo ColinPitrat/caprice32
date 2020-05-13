@@ -23,6 +23,7 @@
 
 
 #include "wg_messagebox.h"
+#include <string>
 
 namespace wGui
 {
