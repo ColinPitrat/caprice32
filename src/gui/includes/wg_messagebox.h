@@ -27,6 +27,7 @@
 
 #include "wg_frame.h"
 #include "wg_label.h"
+#include <map>
 #include <string>
 
 namespace wGui

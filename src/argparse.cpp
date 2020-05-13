@@ -3,6 +3,7 @@
 #include <getopt.h>
 #include <iostream>
 #include <fstream>
+#include <map>
 #include <string>
 #include "SDL.h"
 #include "cap32.h"

@@ -25,6 +25,7 @@
 #include "wg_error.h"
 #include "wutil_debug.h"
 #include "wg_application.h"
+#include <map>
 #include <string>
 
 namespace wGui
