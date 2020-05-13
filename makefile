@@ -273,10 +273,10 @@ deb_pkg: all
 
 clang-tidy:
 	if $(CLANG_TIDY) -checks=-*,$(CLANG_CHECKS) $(SOURCES) -header-filter=src/* -- $(COMMON_CFLAGS) | grep "."; then false; fi
-	tools/check_includes.sh
+	./tools/check_includes.sh
 
 clang-format:
-	./check_clang_format.sh $(CLANG_FORMAT) "-style=Google" $(SOURCES) $(TEST_SOURCES) $(HEADERS) $(TEST_HEADERS)
+	./tools/check_clang_format.sh $(CLANG_FORMAT) "-style=Google" $(SOURCES) $(TEST_SOURCES) $(HEADERS) $(TEST_HEADERS)
 
 fix-clang-format:
 	$(CLANG_FORMAT) -style=Google -i $(SOURCES) $(TEST_SOURCES) $(HEADERS) $(TEST_HEADERS)
