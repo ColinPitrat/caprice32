@@ -115,6 +115,11 @@ byte *membank_config[8][4];
 FILE *pfileObject;
 FILE *pfoPrinter;
 
+// Store shifted keys for correct remapping where shift is released before key release. 
+// Indexed by SDL_Scancode: https://wiki.libsdl.org/SDLScancodeLookup
+static constexpr int kSDL_Scancode_Max = 284;
+static bool shifted_keys[kSDL_Scancode_Max + 1] = {};
+
 #ifdef DEBUG
 dword dwDebugFlag = 0;
 FILE *pfoDebug = nullptr;
@@ -2078,10 +2083,14 @@ int cap32_main (int argc, char **argv)
       }
       
       while (SDL_PollEvent(&event)) {
+         auto shift_down = static_cast<bool>(event.key.keysym.mod & KMOD_SHIFT);
+
          switch (event.type) {
             case SDL_KEYDOWN:
                {
                   dword cpc_key = CPC.InputMapper->CPCkeyFromKeysym(event.key.keysym);
+                  // store shift state of physical keys for remapping if released after shift
+                  if (shift_down) shifted_keys[static_cast<int>(event.key.keysym.scancode)] = true;
                   if (!(cpc_key & MOD_EMU_KEY)) {
                      applyKeypress(cpc_key, keyboard_matrix, true);
                   }
@@ -2090,7 +2099,13 @@ int cap32_main (int argc, char **argv)
 
             case SDL_KEYUP:
                {
-                  dword cpc_key = CPC.InputMapper->CPCkeyFromKeysym(event.key.keysym);
+                  bool apply_shift = false;
+                  if (!shift_down) {
+                     auto idx = static_cast<int>(event.key.keysym.scancode);
+                     apply_shift = shifted_keys[idx];
+                     shifted_keys[idx] = false;
+                  }
+                  dword cpc_key = CPC.InputMapper->CPCkeyFromKeysym(event.key.keysym, apply_shift);
                   if (!(cpc_key & MOD_EMU_KEY)) {
                      applyKeypress(cpc_key, keyboard_matrix, false);
                   }

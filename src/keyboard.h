@@ -246,9 +246,9 @@ class InputMapper {
 
 	public:
 		InputMapper(t_CPC *CPC);
-    bool load_layout(const std::string& filename);
+		bool load_layout(const std::string& filename);
 		void init();
-		dword CPCkeyFromKeysym(SDL_keysym keysym);
+		dword CPCkeyFromKeysym(SDL_keysym keysym, bool apply_shift = false);
 		dword CPCkeyFromJoystickButton(SDL_JoyButtonEvent jbutton);
 		void CPCkeyFromJoystickAxis(SDL_JoyAxisEvent jaxis, dword *cpc_key, bool &release);
 		std::list<SDL_Event> StringToEvents(std::string toTranslate);
