@@ -24,6 +24,7 @@
 
 #include "wg_application.h"
 #include "wg_groupbox.h"
+#include <string>
 
 
 namespace wGui

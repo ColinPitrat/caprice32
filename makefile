@@ -169,15 +169,17 @@ doc: $(HTML_DOC)
 $(HTML_DOC): $(GROFF_DOC)
 	groff -mandoc -Thtml $< > $@
 
+cap32.cfg: cap32.cfg.tmpl
+	@sed 's/__SHARE_PATH__.*//' cap32.cfg.tmpl > cap32.cfg
+
 
 ifeq ($(PLATFORM),windows)
 DLLS = SDL.dll libbz2-1.dll libfreetype-6.dll libpng16-16.dll libstdc++-6.dll \
        libwinpthread-1.dll zlib1.dll libglib-2.0-0.dll libgraphite2.dll \
        libharfbuzz-0.dll libiconv-2.dll libintl-8.dll libpcre-1.dll
 
-$(TARGET): $(OBJECTS) $(MAIN)
+$(TARGET): $(OBJECTS) $(MAIN) cap32.cfg
 	$(CXX) $(LDFLAGS) -o $(TARGET) $(OBJECTS) $(MAIN) $(LIBS)
-	@sed -i 's/\/usr\/local\/share\/caprice32\///g' cap32.cfg
 
 distrib: $(TARGET)
 	mkdir -p $(ARCHIVE)
@@ -198,7 +200,7 @@ else
 
 SRC_PACKAGE_DIR=$(ARCHIVE)/caprice32-$(VERSION)
 
-$(TARGET): $(OBJECTS) $(MAIN)
+$(TARGET): $(OBJECTS) $(MAIN) cap32.cfg
 	$(CXX) $(LDFLAGS) -o $(TARGET) $(OBJECTS) $(MAIN) $(LIBS)
 
 # Create a debian source package
@@ -213,7 +215,8 @@ distrib: $(TARGET)
 install: $(TARGET)
 	install -D $(TARGET) $(DESTDIR)$(prefix)/bin/$(TARGET)
 	install -D $(GROFF_DOC) $(DESTDIR)$(prefix)/share/man/man6/cap32.6
-	install -D -m664 cap32.cfg $(DESTDIR)/etc/cap32.cfg
+	install -D -m664 cap32.cfg.tmpl $(DESTDIR)/etc/cap32.cfg
+	sed -i "s,__SHARE_PATH__,$(DESTDIR)$(prefix)," $(DESTDIR)/etc/cap32.cfg
 	mkdir -p $(DESTDIR)$(prefix)/share/caprice32
 	cp -r resources rom $(DESTDIR)$(prefix)/share/caprice32
 endif
@@ -273,9 +276,10 @@ deb_pkg: all
 
 clang-tidy:
 	if $(CLANG_TIDY) -checks=-*,$(CLANG_CHECKS) $(SOURCES) -header-filter=src/* -- $(COMMON_CFLAGS) | grep "."; then false; fi
+	./tools/check_includes.sh
 
 clang-format:
-	./check_clang_format.sh $(CLANG_FORMAT) "-style=Google" $(SOURCES) $(TEST_SOURCES) $(HEADERS) $(TEST_HEADERS)
+	./tools/check_clang_format.sh $(CLANG_FORMAT) "-style=Google" $(SOURCES) $(TEST_SOURCES) $(HEADERS) $(TEST_HEADERS)
 
 fix-clang-format:
 	$(CLANG_FORMAT) -style=Google -i $(SOURCES) $(TEST_SOURCES) $(HEADERS) $(TEST_HEADERS)

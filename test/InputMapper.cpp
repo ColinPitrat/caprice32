@@ -2,6 +2,7 @@
 
 #include "cap32.h"
 #include "keyboard.h"
+#include <string>
 
 extern t_CPC CPC;
 

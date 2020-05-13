@@ -1,10 +1,11 @@
 #include "zip.h"
 
-#include <string.h>
+#include <cstring>
 #include <strings.h>
 #include <zlib.h>
 #include <errno.h>
 #include <cstdio>
+#include <string>
 #include "errors.h"
 #include "log.h"
 

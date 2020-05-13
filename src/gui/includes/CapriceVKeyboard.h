@@ -4,6 +4,7 @@
 #include "wgui.h"
 #include "wg_frame.h"
 #include "wg_button.h"
+#include <string>
 
 namespace wGui
 {

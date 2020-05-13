@@ -3,6 +3,8 @@
 #include <getopt.h>
 #include <iostream>
 #include <fstream>
+#include <map>
+#include <string>
 #include "SDL.h"
 #include "cap32.h"
 #include "keyboard.h"
@@ -122,11 +124,23 @@ void parseArguments(int argc, char **argv, std::vector<std::string>& slot_list, 
             break;
 
          case 'V':
+            // Version
             std::cout << "Caprice32 " << VERSION_STRING;
 #ifdef HASH
             std::cout << (std::string(HASH).empty()?"":"-"+std::string(HASH));
 #endif
             std::cout << "\n";
+
+            // APP_PATH
+            std::cout << "APP_PATH: ";
+            #ifdef APP_PATH
+            std::cout << APP_PATH;
+            #else
+            std::cout << "Not provided";
+            #endif
+            std::cout << std::endl;
+
+            // Flags
             std::cout << "Compiled with:"
 #ifdef HAVE_GL
                       << " HAVE_GL"
@@ -138,6 +152,8 @@ void parseArguments(int argc, char **argv, std::vector<std::string>& slot_list, 
                       << " WITH_IPF"
 #endif
                       << "\n";
+
+            // Video plugins
             std::cout << "Number of video plugins available: "
                       << nb_video_plugins << std::endl;
             exit(0);

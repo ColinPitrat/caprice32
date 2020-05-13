@@ -24,6 +24,7 @@
 
 #include "wutil_log.h"
 #include <fstream>
+#include <string>
 
 
 namespace wUtil

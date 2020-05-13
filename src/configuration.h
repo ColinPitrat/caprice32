@@ -2,6 +2,7 @@
 #define CONFIGURATION_H
 
 #include <map>
+#include <string>
 
 namespace config
 {

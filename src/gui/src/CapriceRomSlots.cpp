@@ -2,6 +2,7 @@
 // Inherited from CFrame
 
 #include <dirent.h>
+#include <string>
 #include "CapriceRomSlots.h"
 #include "cap32.h"
 #include "fileutils.h"

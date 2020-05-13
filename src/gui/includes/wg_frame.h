@@ -28,6 +28,7 @@
 #include "wg_window.h"
 #include "wg_view.h"
 #include "wg_button.h"
+#include <string>
 
 
 namespace wGui

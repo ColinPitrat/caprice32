@@ -23,6 +23,7 @@
 
 #include "wg_view.h"
 #include "wg_tooltip.h"
+#include <string>
 
 namespace wGui
 {

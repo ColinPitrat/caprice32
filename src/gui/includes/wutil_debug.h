@@ -28,6 +28,7 @@
 #define _WUTIL_DEBUG_H_
 
 #include <iostream>
+#include <string>
 
 
 namespace wUtil

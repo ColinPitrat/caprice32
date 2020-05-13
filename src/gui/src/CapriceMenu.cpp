@@ -2,6 +2,7 @@
 // Inherited from CFrame
 
 #include <map>
+#include <string>
 #include "std_ex.h"
 #include "CapriceMenu.h"
 #include "CapriceOptions.h"

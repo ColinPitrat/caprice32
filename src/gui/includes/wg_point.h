@@ -26,6 +26,7 @@
 #define _WG_POINT_H_
 
 #include "std_ex.h"
+#include <string>
 
 namespace wGui
 {

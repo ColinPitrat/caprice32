@@ -3,6 +3,7 @@
 #include "wg_error.h"
 #include "wg_application.h"
 #include "cap32.h"
+#include <string>
 
 extern t_CPC CPC;
 

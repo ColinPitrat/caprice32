@@ -3,6 +3,7 @@
 #include "cap32.h"
 #include "argparse.h"
 #include "keyboard.h"
+#include <string>
 
 TEST(ArgParseTest, parseArgsNoArg)
 {

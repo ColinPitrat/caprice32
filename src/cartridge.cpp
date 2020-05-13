@@ -7,6 +7,7 @@
 #include <cstring>
 #include <algorithm>
 #include <memory>
+#include <string>
 
 const uint32_t CARTRIDGE_NB_PAGES = 32;
 const uint32_t CARTRIDGE_PAGE_SIZE = 16*1024;

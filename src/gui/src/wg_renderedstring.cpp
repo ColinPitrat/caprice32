@@ -26,6 +26,7 @@
 #include "wg_painter.h"
 #include "wg_error.h"
 #include <algorithm>
+#include <string>
 
 namespace wGui
 {

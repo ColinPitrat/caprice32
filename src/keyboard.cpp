@@ -1,6 +1,8 @@
 #include "keyboard.h"
 #include <iostream>
 #include <fstream>
+#include <map>
+#include <string>
 #include "cap32.h"
 #include "fileutils.h"
 #include "log.h"

@@ -30,6 +30,7 @@
 #include "SDL.h"
 #include <stdlib.h>
 #include <math.h>
+#include <string>
 
 namespace wGui
 {

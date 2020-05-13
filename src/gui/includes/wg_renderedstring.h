@@ -32,6 +32,7 @@
 #include "wg_color.h"
 #include "SDL.h"
 #include "std_ex.h"
+#include <string>
 
 
 namespace wGui

@@ -5,8 +5,9 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <fstream>
-#include <string.h>
+#include <cstring>
 #include <errno.h>
+#include <string>
 
 // TODO(cpitrat): Cleaner way to handle this
 extern char chAppPath[_MAX_PATH + 1];

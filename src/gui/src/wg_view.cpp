@@ -31,6 +31,7 @@
 #include "std_ex.h"
 #include "video.h"
 #include <algorithm>
+#include <string>
 
 extern video_plugin* vid_plugin;
 

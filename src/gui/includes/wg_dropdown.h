@@ -30,7 +30,7 @@
 #include "wg_editbox.h"
 #include "wg_listbox.h"
 #include <memory>
-
+#include <string>
 
 namespace wGui
 {

@@ -16,6 +16,9 @@
    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+// Keyboard layout is different depending on the version but mapping is actually handled by the ROM.
+// English is the default one.
+// http://www.cpcwiki.eu/index.php/Keyboard_Versions
 static unsigned char cpc_keytrans[MAX_ROM_MODS][240] = {
    { // french keyboard layout
       0xF0, 0xF3, 0xF1, 0x89, 0x86, 0x83, 0x8B, 0x8A, 0xF2, 0xE0, 0x87, 0x88, 0x85, 0x81, 0x82, 0x80,
@@ -53,6 +56,9 @@ static unsigned char cpc_keytrans[MAX_ROM_MODS][240] = {
    }
 };
 
+// Charset is different depending on the version. English is the default one.
+// http://www.cpcwiki.eu/index.php/Keyboard_Versions#Character_Set_ROMs
+// TODO: Support the Danish version
 static unsigned char cpc_charset[MAX_ROM_MODS][2048] = {
    { // french character set
       0xFF, 0xC3, 0xC3, 0xC3, 0xC3, 0xC3, 0xC3, 0xFF, 0xFF, 0xC0, 0xC0, 0xC0, 0xC0, 0xC0, 0xC0, 0xC0,
