@@ -63,6 +63,10 @@
 
 #define POLL_INTERVAL_MS 1
 
+#ifndef DESTDIR
+#define DESTDIR ""
+#endif
+
 extern byte bTapeLevel;
 extern t_z80regs z80;
 
@@ -1607,7 +1611,7 @@ std::string getConfigurationFilename(bool forWrite)
     { getenv("XDG_CONFIG_HOME"), "/cap32.cfg" },
     { getenv("HOME"), "/.config/cap32.cfg" },
     { getenv("HOME"), "/.cap32.cfg" },
-    { PATH_OK, "/etc/cap32.cfg"}
+    { DESTDIR, "/etc/cap32.cfg" },
   };
 
   for(const auto& p: configPaths){

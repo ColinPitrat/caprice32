@@ -75,6 +75,10 @@ else
 $(warning Notice: APP_PATH not specified.  Will look for cap32.cfg debug-style.  See `README.md` for details. )
 endif
 
+ifdef DESTDIR
+COMMON_CFLAGS += -DDESTDIR=\"$(DESTDIR)\"
+endif
+
 CLANG_FORMAT=clang-format
 CLANG_TIDY=clang-tidy-3.8
 CLANG_CHECKS=modernize-*,performance-*,misc-*,-misc-definitions-in-headers,readability-*,-readability-implicit-bool-cast,-readability-braces-around-statements,-readability-function-size
@@ -216,7 +220,7 @@ install: $(TARGET)
 	install -D $(TARGET) $(DESTDIR)$(prefix)/bin/$(TARGET)
 	install -D $(GROFF_DOC) $(DESTDIR)$(prefix)/share/man/man6/cap32.6
 	install -D -m664 cap32.cfg.tmpl $(DESTDIR)/etc/cap32.cfg
-	sed -i "s,__SHARE_PATH__,$(DESTDIR)$(prefix)," $(DESTDIR)/etc/cap32.cfg
+	sed -i "s,__SHARE_PATH__,$(DESTDIR)$(prefix)/share/caprice32," $(DESTDIR)/etc/cap32.cfg
 	mkdir -p $(DESTDIR)$(prefix)/share/caprice32
 	cp -r resources rom $(DESTDIR)$(prefix)/share/caprice32
 endif
