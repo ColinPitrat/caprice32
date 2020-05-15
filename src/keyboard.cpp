@@ -1402,14 +1402,14 @@ void InputMapper::init()
   }
 }
 
-dword InputMapper::CPCkeyFromKeysym(SDL_keysym keysym) {
+dword InputMapper::CPCkeyFromKeysym(SDL_keysym keysym, bool apply_shift /*= false*/) {
     dword sdl_key = keysym.sym;
 
-    if (keysym.mod & KMOD_SHIFT)  sdl_key |= MOD_PC_SHIFT;
-    if (keysym.mod & KMOD_CTRL)   sdl_key |= MOD_PC_CTRL;
-    if (keysym.mod & KMOD_MODE)   sdl_key |= MOD_PC_MODE;
-    if (keysym.mod & KMOD_META)   sdl_key |= MOD_PC_META;
-    if (keysym.mod & KMOD_ALT)    sdl_key |= MOD_PC_ALT;
+    if (apply_shift)            sdl_key |= MOD_PC_SHIFT;
+    if (keysym.mod & KMOD_CTRL) sdl_key |= MOD_PC_CTRL;
+    if (keysym.mod & KMOD_MODE) sdl_key |= MOD_PC_MODE;
+    if (keysym.mod & KMOD_META) sdl_key |= MOD_PC_META;
+    if (keysym.mod & KMOD_ALT) sdl_key  |= MOD_PC_ALT;
     // Ignore sticky modifiers (MOD_PC_NUM and MOD_PC_CAPS)
 
     auto cpc_key = CPCkeysFromSDLkeysym.find(sdl_key);
