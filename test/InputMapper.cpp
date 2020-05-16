@@ -106,7 +106,7 @@ TEST_F(InputMapperTest, Keymapping)
   // Exclaim
   keysym.sym = SDLK_1;
   keysym.mod = KMOD_LSHIFT;
-  ASSERT_EQ(0x80 | MOD_CPC_SHIFT, CPC.InputMapper->CPCkeyFromKeysym(keysym));
+  ASSERT_EQ(0x80 | MOD_CPC_SHIFT, CPC.InputMapper->CPCkeyFromKeysym(keysym, true));
 
   CPC.kbd_layout ="keymap_uk_linux.map";
   CPC.keyboard = 0;
@@ -114,7 +114,7 @@ TEST_F(InputMapperTest, Keymapping)
   // Pound
   keysym.sym = SDLK_3;
   keysym.mod = KMOD_RSHIFT;
-  ASSERT_EQ(0x30 | MOD_CPC_SHIFT, CPC.InputMapper->CPCkeyFromKeysym(keysym));
+  ASSERT_EQ(0x30 | MOD_CPC_SHIFT, CPC.InputMapper->CPCkeyFromKeysym(keysym, true));
 
   CPC.kbd_layout ="keymap_fr_win.map";
   CPC.keyboard = 1;
@@ -130,7 +130,7 @@ TEST_F(InputMapperTest, Keymapping)
   // N Tilde
   keysym.sym = SDLK_WORLD_81;
   keysym.mod = KMOD_LSHIFT;
-  ASSERT_EQ(0x35 | MOD_CPC_SHIFT, CPC.InputMapper->CPCkeyFromKeysym(keysym));
+  ASSERT_EQ(0x35 | MOD_CPC_SHIFT, CPC.InputMapper->CPCkeyFromKeysym(keysym, true));
 
 
 }
