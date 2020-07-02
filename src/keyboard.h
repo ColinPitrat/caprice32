@@ -177,6 +177,26 @@ typedef enum {
    CPC_F7,
    CPC_F8,
    CPC_F9,
+   CPC_CTRL_F0,
+   CPC_CTRL_F1,
+   CPC_CTRL_F2,
+   CPC_CTRL_F3,
+   CPC_CTRL_F4,
+   CPC_CTRL_F5,
+   CPC_CTRL_F6,
+   CPC_CTRL_F7,
+   CPC_CTRL_F8,
+   CPC_CTRL_F9,
+   CPC_SHIFT_F0,
+   CPC_SHIFT_F1,
+   CPC_SHIFT_F2,
+   CPC_SHIFT_F3,
+   CPC_SHIFT_F4,
+   CPC_SHIFT_F5,
+   CPC_SHIFT_F6,
+   CPC_SHIFT_F7,
+   CPC_SHIFT_F8,
+   CPC_SHIFT_F9,
    CPC_FPERIOD,
    CPC_GREATER,
    CPC_HASH,
@@ -226,7 +246,7 @@ typedef enum {
    CPC_FR_uGRAVE
 } CPC_KEYS;
 
-#define CPC_KEY_NUM 185    // Number of different keys on a CPC keyboard
+#define CPC_KEY_NUM 205    // Number of different keys on a CPC keyboard
 #define CPC_KEYBOARD_NUM 3 // Number of different keyboards supported.
 
 void applyKeypress(dword cpc_key, byte keyboard_matrix[], bool pressed);
