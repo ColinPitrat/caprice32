@@ -150,6 +150,26 @@ const dword InputMapper::cpc_kbd[CPC_KEYBOARD_NUM][CPC_KEY_NUM] = {
     0x12,                   // CPC_F7
     0x13,                   // CPC_F8
     0x03,                   // CPC_F9
+    0x17 | MOD_CPC_CTRL,    // CPC_CTRL_F0
+    0x15 | MOD_CPC_CTRL,    // CPC_CTRL_F1
+    0x16 | MOD_CPC_CTRL,    // CPC_CTRL_F2
+    0x05 | MOD_CPC_CTRL,    // CPC_CTRL_F3
+    0x24 | MOD_CPC_CTRL,    // CPC_CTRL_F4
+    0x14 | MOD_CPC_CTRL,    // CPC_CTRL_F5
+    0x04 | MOD_CPC_CTRL,    // CPC_CTRL_F6
+    0x12 | MOD_CPC_CTRL,    // CPC_CTRL_F7
+    0x13 | MOD_CPC_CTRL,    // CPC_CTRL_F8
+    0x03 | MOD_CPC_CTRL,    // CPC_CTRL_F9
+    0x17 | MOD_CPC_SHIFT,    // CPC_SHIFT_F0
+    0x15 | MOD_CPC_SHIFT,    // CPC_SHIFT_F1
+    0x16 | MOD_CPC_SHIFT,    // CPC_SHIFT_F2
+    0x05 | MOD_CPC_SHIFT,    // CPC_SHIFT_F3
+    0x24 | MOD_CPC_SHIFT,    // CPC_SHIFT_F4
+    0x14 | MOD_CPC_SHIFT,    // CPC_SHIFT_F5
+    0x04 | MOD_CPC_SHIFT,    // CPC_SHIFT_F6
+    0x12 | MOD_CPC_SHIFT,    // CPC_SHIFT_F7
+    0x13 | MOD_CPC_SHIFT,    // CPC_SHIFT_F8
+    0x03 | MOD_CPC_SHIFT,    // CPC_SHIFT_F9
     0x07,                   // CPC_FPERIOD
     0x37 | MOD_CPC_SHIFT,   // CPC_GREATER
     0x71 | MOD_CPC_SHIFT,   // CPC_HASH
@@ -337,6 +357,26 @@ const dword InputMapper::cpc_kbd[CPC_KEYBOARD_NUM][CPC_KEY_NUM] = {
     0x12,                   // CPC_F7
     0x13,                   // CPC_F8
     0x03,                   // CPC_F9
+    0x17 | MOD_CPC_CTRL,    // CPC_CTRL_F0
+    0x15 | MOD_CPC_CTRL,    // CPC_CTRL_F1
+    0x16 | MOD_CPC_CTRL,    // CPC_CTRL_F2
+    0x05 | MOD_CPC_CTRL,    // CPC_CTRL_F3
+    0x24 | MOD_CPC_CTRL,    // CPC_CTRL_F4
+    0x14 | MOD_CPC_CTRL,    // CPC_CTRL_F5
+    0x04 | MOD_CPC_CTRL,    // CPC_CTRL_F6
+    0x12 | MOD_CPC_CTRL,    // CPC_CTRL_F7
+    0x13 | MOD_CPC_CTRL,    // CPC_CTRL_F8
+    0x03 | MOD_CPC_CTRL,    // CPC_CTRL_F9
+    0x17 | MOD_CPC_SHIFT,    // CPC_SHIFT_F0
+    0x15 | MOD_CPC_SHIFT,    // CPC_SHIFT_F1
+    0x16 | MOD_CPC_SHIFT,    // CPC_SHIFT_F2
+    0x05 | MOD_CPC_SHIFT,    // CPC_SHIFT_F3
+    0x24 | MOD_CPC_SHIFT,    // CPC_SHIFT_F4
+    0x14 | MOD_CPC_SHIFT,    // CPC_SHIFT_F5
+    0x04 | MOD_CPC_SHIFT,    // CPC_SHIFT_F6
+    0x12 | MOD_CPC_SHIFT,    // CPC_SHIFT_F7
+    0x13 | MOD_CPC_SHIFT,    // CPC_SHIFT_F8
+    0x03 | MOD_CPC_SHIFT,    // CPC_SHIFT_F9
     0x07,                   // CPC_FPERIOD
     0x23 | MOD_CPC_SHIFT,   // CPC_GREATER
     0x23,                   // CPC_HASH
@@ -524,6 +564,26 @@ const dword InputMapper::cpc_kbd[CPC_KEYBOARD_NUM][CPC_KEY_NUM] = {
     0x12,                   // CPC_F7
     0x13,                   // CPC_F8
     0x03,                   // CPC_F9
+    0x17 | MOD_CPC_CTRL,    // CPC_CTRL_F0
+    0x15 | MOD_CPC_CTRL,    // CPC_CTRL_F1
+    0x16 | MOD_CPC_CTRL,    // CPC_CTRL_F2
+    0x05 | MOD_CPC_CTRL,    // CPC_CTRL_F3
+    0x24 | MOD_CPC_CTRL,    // CPC_CTRL_F4
+    0x14 | MOD_CPC_CTRL,    // CPC_CTRL_F5
+    0x04 | MOD_CPC_CTRL,    // CPC_CTRL_F6
+    0x12 | MOD_CPC_CTRL,    // CPC_CTRL_F7
+    0x13 | MOD_CPC_CTRL,    // CPC_CTRL_F8
+    0x03 | MOD_CPC_CTRL,    // CPC_CTRL_F9
+    0x17 | MOD_CPC_SHIFT,    // CPC_SHIFT_F0
+    0x15 | MOD_CPC_SHIFT,    // CPC_SHIFT_F1
+    0x16 | MOD_CPC_SHIFT,    // CPC_SHIFT_F2
+    0x05 | MOD_CPC_SHIFT,    // CPC_SHIFT_F3
+    0x24 | MOD_CPC_SHIFT,    // CPC_SHIFT_F4
+    0x14 | MOD_CPC_SHIFT,    // CPC_SHIFT_F5
+    0x04 | MOD_CPC_SHIFT,    // CPC_SHIFT_F6
+    0x12 | MOD_CPC_SHIFT,    // CPC_SHIFT_F7
+    0x13 | MOD_CPC_SHIFT,    // CPC_SHIFT_F8
+    0x03 | MOD_CPC_SHIFT,    // CPC_SHIFT_F9
     0x07,                   // CPC_FPERIOD
     0x37 | MOD_CPC_SHIFT,   // CPC_GREATER
     0x71 | MOD_CPC_SHIFT,   // CPC_HASH
@@ -818,6 +878,26 @@ std::map<unsigned int, unsigned int> InputMapper::SDLkeysymFromCPCkeys_us = {
   { CPC_F7,          SDLK_KP7 },
   { CPC_F8,          SDLK_KP8 },
   { CPC_F9,          SDLK_KP9 },
+  { CPC_CTRL_F0,     SDLK_KP0 | MOD_PC_CTRL },
+  { CPC_CTRL_F1,     SDLK_KP1 | MOD_PC_CTRL },
+  { CPC_CTRL_F2,     SDLK_KP2 | MOD_PC_CTRL },
+  { CPC_CTRL_F3,     SDLK_KP3 | MOD_PC_CTRL },
+  { CPC_CTRL_F4,     SDLK_KP4 | MOD_PC_CTRL },
+  { CPC_CTRL_F5,     SDLK_KP5 | MOD_PC_CTRL },
+  { CPC_CTRL_F6,     SDLK_KP6 | MOD_PC_CTRL },
+  { CPC_CTRL_F7,     SDLK_KP7 | MOD_PC_CTRL },
+  { CPC_CTRL_F8,     SDLK_KP8 | MOD_PC_CTRL },
+  { CPC_CTRL_F9,     SDLK_KP9 | MOD_PC_CTRL },
+  { CPC_SHIFT_F0,    SDLK_KP0 | MOD_PC_SHIFT },
+  { CPC_SHIFT_F1,    SDLK_KP1 | MOD_PC_SHIFT },
+  { CPC_SHIFT_F2,    SDLK_KP2 | MOD_PC_SHIFT },
+  { CPC_SHIFT_F3,    SDLK_KP3 | MOD_PC_SHIFT },
+  { CPC_SHIFT_F4,    SDLK_KP4 | MOD_PC_SHIFT },
+  { CPC_SHIFT_F5,    SDLK_KP5 | MOD_PC_SHIFT },
+  { CPC_SHIFT_F6,    SDLK_KP6 | MOD_PC_SHIFT },
+  { CPC_SHIFT_F7,    SDLK_KP7 | MOD_PC_SHIFT },
+  { CPC_SHIFT_F8,    SDLK_KP8 | MOD_PC_SHIFT },
+  { CPC_SHIFT_F9,    SDLK_KP9 | MOD_PC_SHIFT },
   { CPC_FPERIOD,     SDLK_KP_PERIOD },
   { CPC_GREATER,     SDLK_PERIOD | MOD_PC_SHIFT },
   { CPC_HASH,        SDLK_3 | MOD_PC_SHIFT },
@@ -1001,6 +1081,26 @@ const std::map<const std::string, const unsigned int> InputMapper::CPCkeysFromSt
    {"CPC_F7",          CPC_F7},
    {"CPC_F8",          CPC_F8},
    {"CPC_F9",          CPC_F9},
+   {"CPC_CTRL_F0",     CPC_CTRL_F0},
+   {"CPC_CTRL_F1",     CPC_CTRL_F1},
+   {"CPC_CTRL_F2",     CPC_CTRL_F2},
+   {"CPC_CTRL_F3",     CPC_CTRL_F3},
+   {"CPC_CTRL_F4",     CPC_CTRL_F4},
+   {"CPC_CTRL_F5",     CPC_CTRL_F5},
+   {"CPC_CTRL_F6",     CPC_CTRL_F6},
+   {"CPC_CTRL_F7",     CPC_CTRL_F7},
+   {"CPC_CTRL_F8",     CPC_CTRL_F8},
+   {"CPC_CTRL_F9",     CPC_CTRL_F9},
+   {"CPC_SHIFT_F0",    CPC_SHIFT_F0},
+   {"CPC_SHIFT_F1",    CPC_SHIFT_F1},
+   {"CPC_SHIFT_F2",    CPC_SHIFT_F2},
+   {"CPC_SHIFT_F3",    CPC_SHIFT_F3},
+   {"CPC_SHIFT_F4",    CPC_SHIFT_F4},
+   {"CPC_SHIFT_F5",    CPC_SHIFT_F5},
+   {"CPC_SHIFT_F6",    CPC_SHIFT_F6},
+   {"CPC_SHIFT_F7",    CPC_SHIFT_F7},
+   {"CPC_SHIFT_F8",    CPC_SHIFT_F8},
+   {"CPC_SHIFT_F9",    CPC_SHIFT_F9},
    {"CPC_FPERIOD",     CPC_FPERIOD},
    {"CPC_GREATER",     CPC_GREATER},
    {"CPC_HASH",        CPC_HASH},
