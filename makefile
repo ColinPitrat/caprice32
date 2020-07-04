@@ -194,7 +194,7 @@ distrib: $(TARGET)
 ifdef WITH_IPF
 	cp $(MINGW_PATH)/bin/$(CAPSIPFDLL) $(ARCHIVE)/CAPSImg.dll
 endif
-	cp cap32.cfg COPYING.txt README.md $(ARCHIVE)/
+	cp cap32.cfg.tmpl cap32.cfg COPYING.txt README.md $(ARCHIVE)/
 	cp -r resources/ rom/ licenses/ $(ARCHIVE)/
 	zip -r $(ARCHIVE).zip $(ARCHIVE)
 
