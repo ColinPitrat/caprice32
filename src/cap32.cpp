@@ -120,6 +120,13 @@ byte *membank_config[8][4];
 FILE *pfileObject;
 FILE *pfoPrinter;
 
+// Store shifted keys for correct remapping where shift release state is  
+// different from shift state when pressed. SDL1 scancodes are uint8 values but 
+// SDL2 has extended scancodes with max value of 284. Future proof this array 
+// with that number. 
+static constexpr int kSDL2_Scancode_Max = 284;
+static bool shifted_keys[kSDL2_Scancode_Max + 1] = {};
+
 #ifdef DEBUG
 dword dwDebugFlag = 0;
 FILE *pfoDebug = nullptr;
@@ -2086,7 +2093,11 @@ int cap32_main (int argc, char **argv)
          switch (event.type) {
             case SDL_KEYDOWN:
                {
-                  dword cpc_key = CPC.InputMapper->CPCkeyFromKeysym(event.key.keysym);
+                  auto shift_state = static_cast<bool>(event.key.keysym.mod & KMOD_SHIFT);
+                  // store shift state of physical keys for remapping if released after shift
+                  shifted_keys[event.key.keysym.scancode] = shift_state;
+
+                  dword cpc_key = CPC.InputMapper->CPCkeyFromKeysym(event.key.keysym, shift_state);
                   if (!(cpc_key & MOD_EMU_KEY)) {
                      applyKeypress(cpc_key, keyboard_matrix, true);
                   }
@@ -2095,7 +2106,12 @@ int cap32_main (int argc, char **argv)
 
             case SDL_KEYUP:
                {
-                  dword cpc_key = CPC.InputMapper->CPCkeyFromKeysym(event.key.keysym);
+                  bool shift_state = static_cast<bool>(event.key.keysym.mod & KMOD_SHIFT);
+                  auto scancode = event.key.keysym.scancode;
+                  if (shift_state != shifted_keys[scancode]) {
+                     shift_state = shifted_keys[scancode];
+                  }
+                  dword cpc_key = CPC.InputMapper->CPCkeyFromKeysym(event.key.keysym, shift_state);
                   if (!(cpc_key & MOD_EMU_KEY)) {
                      applyKeypress(cpc_key, keyboard_matrix, false);
                   }
