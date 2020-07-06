@@ -212,7 +212,7 @@ distrib: $(TARGET)
 	mkdir -p $(SRC_PACKAGE_DIR)
 	rm -fr $(SRC_PACKAGE_DIR)/*
 	cp -r src rom resources doc licenses debian $(SRC_PACKAGE_DIR)
-	cp main.cpp cap32.cfg makefile README.md INSTALL.md COPYING.txt $(SRC_PACKAGE_DIR)
+	cp main.cpp cap32.cfg.tmpl cap32.cfg makefile README.md INSTALL.md COPYING.txt $(SRC_PACKAGE_DIR)
 	tar jcf $(SRC_PACKAGE_DIR).tar.bz2 -C $(ARCHIVE) caprice32-$(VERSION)
 	ln -s caprice32-$(VERSION).tar.bz2 $(ARCHIVE)/caprice32_$(VERSION).orig.tar.bz2 || true
 
