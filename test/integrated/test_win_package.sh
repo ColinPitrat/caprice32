@@ -15,4 +15,8 @@ then
   echo "!! package test for ${ARCH} failed"
   cat ${LOGFILE}
   exit 1
+else
+  echo "The test was successful!"
+  cat printer.dat
+  cat ${LOGFILE}
 fi
