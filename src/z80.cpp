@@ -342,7 +342,7 @@ inline void write_mem(word addr, byte val) {
 }
 
 byte z80_read_mem(word addr) {
-  return read_mem(addr, val);
+  return read_mem(addr);
 }
 
 void z80_write_mem(word addr, byte val) {
