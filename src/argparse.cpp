@@ -18,6 +18,8 @@ const struct option long_options[] =
 {
    {"autocmd",  required_argument, nullptr, 'a'},
    {"cfg_file", required_argument, nullptr, 'c'},
+   {"inject", required_argument, nullptr, 'i'},
+   {"offset", required_argument, nullptr, 'o'},
    {"version",  no_argument, nullptr, 'V'},
    {"help",     no_argument, nullptr, 'h'},
    {"verbose",  no_argument, nullptr, 'v'},
@@ -39,6 +41,8 @@ void usage(std::ostream &os, char *progPath, int errcode)
    os << "   -a/--autocmd=<command>: execute command as soon as the emulator starts.\n";
    os << "   -c/--cfg_file=<file>:   use <file> as the emulator configuration file instead of the default.\n";
    os << "   -h/--help:              shows this help\n";
+   os << "   -i/--inject:            inject a binary in memory after the CPC startup finishes\n";
+   os << "   -o/--offset:            offset at which to inject the binary provided with -i (default: 0x6000)\n";
    os << "   -V/--version:           outputs version and exit\n";
    os << "   -v/--verbose:           be talkative\n";
    os << "\nslotfiles is an optional list of files giving the content of the various CPC ports.\n";
@@ -96,7 +100,7 @@ void parseArguments(int argc, char **argv, std::vector<std::string>& slot_list, 
 
    optind = 0; // To please test framework, when this function is called multiple times !
    while(true) {
-      c = getopt_long (argc, argv, "a:c:hvV",
+      c = getopt_long (argc, argv, "a:c:hi:o:vV",
                        long_options, &option_index);
 
       /* Detect the end of the options. */
@@ -117,6 +121,14 @@ void parseArguments(int argc, char **argv, std::vector<std::string>& slot_list, 
 
          case 'h':
             usage(std::cout, argv[0], 0);
+            break;
+
+         case 'i':
+            args.binFile = optarg;
+            break;
+
+         case 'o':
+            args.binOffset = std::stol(optarg, nullptr, 0);
             break;
 
          case 'v':

@@ -10,6 +10,8 @@ class CapriceArgs
       CapriceArgs();
       std::string autocmd;
       std::string cfgFilePath;
+      std::string binFile;
+      size_t binOffset;
 };
 
 std::string replaceCap32Keys(std::string command);

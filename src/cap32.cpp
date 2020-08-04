@@ -1197,6 +1197,42 @@ void emulator_shutdown ()
 
 
 
+void bin_load (const std::string& filename, const size_t offset)
+{
+  LOG_INFO("Load " << filename << " in memory at offset 0x" << std::hex << offset);
+  FILE *file;
+  if ((file = fopen(filename.c_str(), "rb")) == nullptr) {
+    LOG_ERROR("File not found: " << filename);
+    return;
+  }
+
+  size_t ram_size = 0XFFFF; // TODO: Find a way to have the real RAM size
+  size_t max_size = ram_size - offset;
+  fread(&pbRAM[offset], 1, max_size, file);
+  if (!feof(file)) {
+    LOG_ERROR("Bin file too big to fit in memory");
+    return;
+  }
+  if (ferror(file)) {
+    LOG_ERROR("Error reading the bin file: " << ferror(file));
+    return;
+  }
+  // Jump at the beginning of the program
+  z80.PC.w.l = offset;
+  // Setup the stack the way it would be if we had launch it with run"
+  write_mem(--z80.SP.w.l, 0x0);
+  write_mem(--z80.SP.w.l, 0x98);
+  write_mem(--z80.SP.w.l, 0x7f);
+  write_mem(--z80.SP.w.l, 0x89);
+  write_mem(--z80.SP.w.l, 0xb9);
+  write_mem(--z80.SP.w.l, 0xa2);
+
+  fclose(file);
+}
+
+
+
+
 int printer_start ()
 {
    if (!pfoPrinter) {
@@ -1977,6 +2013,7 @@ int cap32_main (int argc, char **argv)
 {
    int iExitCondition;
    bool take_screenshot = false;
+   bool bin_loaded = false;
    SDL_Event event;
    std::vector<std::string> slot_list;
 
@@ -2056,6 +2093,13 @@ int cap32_main (int argc, char **argv)
    iExitCondition = EC_FRAME_COMPLETE;
 
    while (true) {
+      // We can only load bin files after the CPC finished the init
+      if (!bin_loaded &&
+          dwFrameCountOverall > CPC.boot_time) {
+          bin_loaded = true;
+          if (!args.binFile.empty()) bin_load(args.binFile, args.binOffset);
+      }
+
       if(!virtualKeyboardEvents.empty()
          && (nextVirtualEventFrameCount < dwFrameCountOverall)
          && (breakPointsToSkipBeforeProceedingWithVirtualEvents == 0)) {
