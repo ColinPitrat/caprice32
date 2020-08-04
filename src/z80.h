@@ -57,9 +57,9 @@ typedef struct {
 #define EC_SOUND_BUFFER    50
 
 
+byte z80_read_mem(word addr);
+void z80_write_mem(word addr, byte val);
 
-byte read_mem(word addr);
-void write_mem(word addr, byte val);
 // TODO: put declaration or definition of these two methods somewhere else !!!
 byte z80_IN_handler(reg_pair port); // not provided by Z80.c
 void z80_OUT_handler(reg_pair port, byte val); // not provided by Z80.c

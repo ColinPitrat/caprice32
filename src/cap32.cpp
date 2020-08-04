@@ -1224,12 +1224,12 @@ void bin_load (const std::string& filename, const size_t offset)
   // Jump at the beginning of the program
   z80.PC.w.l = offset;
   // Setup the stack the way it would be if we had launch it with run"
-  write_mem(--z80.SP.w.l, 0x0);
-  write_mem(--z80.SP.w.l, 0x98);
-  write_mem(--z80.SP.w.l, 0x7f);
-  write_mem(--z80.SP.w.l, 0x89);
-  write_mem(--z80.SP.w.l, 0xb9);
-  write_mem(--z80.SP.w.l, 0xa2);
+  z80_write_mem(--z80.SP.w.l, 0x0);
+  z80_write_mem(--z80.SP.w.l, 0x98);
+  z80_write_mem(--z80.SP.w.l, 0x7f);
+  z80_write_mem(--z80.SP.w.l, 0x89);
+  z80_write_mem(--z80.SP.w.l, 0xb9);
+  z80_write_mem(--z80.SP.w.l, 0xa2);
 
   fclose(file);
 }

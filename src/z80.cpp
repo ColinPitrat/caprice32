@@ -341,6 +341,14 @@ inline void write_mem(word addr, byte val) {
    *(membank_write[addr >> 14] + (addr & 0x3fff)) = val; // writes a byte to a 16KB memory bank
 }
 
+byte z80_read_mem(word addr) {
+  return read_mem(addr, val);
+}
+
+void z80_write_mem(word addr, byte val) {
+  write_mem(addr, val);
+}
+
 
 
 #define z80_wait_states \
