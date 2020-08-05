@@ -9,9 +9,9 @@ branches:
 environment:
   access_token:
     secure: xEnxvlt8zNDwbgUO0uVJMmQGJS7k3sl28jxyJkLCRxGwnVgd49hkVqukPq2X4TpB
-  MSYS2_BASEVER: 20180531
+  MSYS2_BASEVER: 20200720
   MSYS2_ARCH: x86_64
-  MSYS2_URL: "http://kent.dl.sourceforge.net/project/msys2/Base/%MSYS2_ARCH%/msys2-base-%MSYS2_ARCH%-%MSYS2_BASEVER%.tar.xz"
+  MSYS2_URL: "http://repo.msys2.org/distrib/%MSYS2_ARCH%/msys2-base-%MSYS2_ARCH%-%MSYS2_BASEVER%.tar.xz"
   MSYS2_ARCHIVE: msys2.tar.xz
   MSYS2_SUBARCHIVE: msys2.tar
   IPF_LINUX_URL: "http://www.softpres.org/_media/files:ipflib42_linux-i686.tar.gz"
@@ -39,10 +39,10 @@ install:
 - 7z x "%MSYS2_SUBARCHIVE%" > NUL
   # msys2 advise to restart the shell after a first start
 - msys64\usr\bin\bash -lc ""
-- msys64\usr\bin\bash -lc "curl -O http://repo.msys2.org/msys/x86_64/msys2-keyring-r21.b39fb11-1-any.pkg.tar.xz"
-- msys64\usr\bin\bash -lc "curl -O http://repo.msys2.org/msys/x86_64/msys2-keyring-r21.b39fb11-1-any.pkg.tar.xz.sig"
+#- msys64\usr\bin\bash -lc "curl -O http://repo.msys2.org/msys/x86_64/msys2-keyring-r21.b39fb11-1-any.pkg.tar.xz"
+#- msys64\usr\bin\bash -lc "curl -O http://repo.msys2.org/msys/x86_64/msys2-keyring-r21.b39fb11-1-any.pkg.tar.xz.sig"
 #- msys64\usr\bin\bash -lc "pacman-key --verify msys2-keyring-r21.b39fb11-1-any.pkg.tar.xz.sig msys2-keyring-r21.b39fb11-1-any.pkg.tar.xz"
-- msys64\usr\bin\bash -lc "pacman -U --noconfirm msys2-keyring-r21.b39fb11-1-any.pkg.tar.xz"
+#- msys64\usr\bin\bash -lc "pacman -U --noconfirm msys2-keyring-r21.b39fb11-1-any.pkg.tar.xz"
 - msys64\usr\bin\bash -lc "for i in {1..3}; do pacman --noconfirm -Suy && break || sleep 15 ; done"
 - msys64\usr\bin\bash -lc "for i in {1..3}; do pacman --noconfirm -S %PACKAGES% && break || sleep 15 ; done"
 
