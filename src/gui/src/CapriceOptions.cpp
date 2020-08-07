@@ -118,9 +118,9 @@ CapriceOptions::CapriceOptions(const CRect& WindowRect, CWindow* pParent, CFontE
     // ---------------- 'Video' options ----------------
     m_pDropDownVideoPlugin = new CDropDown(CRect(CPoint(100,0),140,16), m_pGroupBoxTabVideo, false, 14); // Select video plugin
     unsigned int i = 0;
-    while(video_plugin_list[i].name)
+    for(const auto& plugin : video_plugin_list)
     {
-            m_pDropDownVideoPlugin->AddItem(SListItem(video_plugin_list[i].name));
+            m_pDropDownVideoPlugin->AddItem(SListItem(plugin.name));
             i++;
     }
     m_pDropDownVideoPlugin->SetListboxHeight(5);

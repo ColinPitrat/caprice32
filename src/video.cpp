@@ -1845,5 +1845,4 @@ std::vector<video_plugin> video_plugin_list =
 #ifdef HAVE_GL
 {"OpenGL scaling",                 glscale_init,  glscale_setpal,  glscale_lock,  glscale_unlock,  glscale_flip,  glscale_close,  0,         0, 0,          0, 0   },
 #endif
-{nullptr,                          nullptr,       nullptr,         nullptr,       nullptr,         nullptr,       nullptr,        0,         0, 0,          0, 0   }
 };
