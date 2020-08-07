@@ -1711,7 +1711,7 @@ void loadConfiguration (t_CPC &CPC, const std::string& configFilename)
    CPC.scr_fs_height = conf.getIntValue("video", "scr_height", 600);
    CPC.scr_fs_bpp = conf.getIntValue("video", "scr_bpp", 8);
    CPC.scr_style = conf.getIntValue("video", "scr_style", 0);
-   if (CPC.scr_style >= nb_video_plugins) {
+   if (CPC.scr_style >= video_plugin_list.size()) {
       CPC.scr_style = DEFAULT_VIDEO_PLUGIN;
       LOG_ERROR("Unsupported video plugin specified - defaulting to plugin " << video_plugin_list[DEFAULT_VIDEO_PLUGIN].name);
    }

@@ -167,7 +167,7 @@ void parseArguments(int argc, char **argv, std::vector<std::string>& slot_list, 
 
             // Video plugins
             std::cout << "Number of video plugins available: "
-                      << nb_video_plugins << std::endl;
+                      << video_plugin_list.size() << std::endl;
             exit(0);
             break;
 

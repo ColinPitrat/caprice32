@@ -20,6 +20,7 @@
 #define VIDEO_H
 
 #include "SDL.h"
+#include <vector>
 
 typedef struct video_plugin
 {
@@ -46,7 +47,6 @@ typedef struct video_plugin
 }
 video_plugin;
 
-extern video_plugin video_plugin_list[];
-extern unsigned int nb_video_plugins;
+extern std::vector<video_plugin> video_plugin_list;
 
 #endif

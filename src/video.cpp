@@ -1828,7 +1828,7 @@ void dotmat_close()
 /* End of video plugins --------------------------------------------------------------- */
 /* ------------------------------------------------------------------------------------ */
 
-video_plugin video_plugin_list[]=
+std::vector<video_plugin> video_plugin_list =
 {
 /* Name                            Init func      Palette func     Lock func      Unlock func      Flip func      Close func      Half size  X, Y offsets   X, Y scale  */
 {"Half size with hardware flip",   halfhw_init,   halfhw_setpal,   halfhw_lock,   halfhw_unlock,   halfhw_flip,   halfhw_close,   1,         0, 0,          0, 0   },
@@ -1847,5 +1847,3 @@ video_plugin video_plugin_list[]=
 #endif
 {nullptr,                          nullptr,       nullptr,         nullptr,       nullptr,         nullptr,       nullptr,        0,         0, 0,          0, 0   }
 };
-
-unsigned int nb_video_plugins = sizeof(video_plugin_list)/sizeof(video_plugin_list[0])-1;
