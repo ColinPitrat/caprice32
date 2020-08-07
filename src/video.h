@@ -37,30 +37,16 @@ typedef struct video_plugin
 	/* closes the plugin */
 	void (*close)();
 
-	/* what you can feed to this plugin : */
-	/* the pixel formats supported */
-	Uint32 formats;
 	/* this plugin wants : 0 half sized pixels (320x200 screen)/1 full sized pixels (640x200 screen)*/
 	Uint8 half_pixels;
 
 	/* mouse offset/scaling info */
 	int x_offset,y_offset;
 	float x_scale,y_scale;
-
 }
 video_plugin;
-
-/* the pixel formats video plugins can support */
-#define F8_BPP		1<<0
-#define F15_BPP		1<<1
-#define F16_BPP		1<<3
-#define F24_BPP		1<<5
-#define F32_BPP		1<<7
-
-#define ALL		0xffffffff
 
 extern video_plugin video_plugin_list[];
 extern unsigned int nb_video_plugins;
 
 #endif
-

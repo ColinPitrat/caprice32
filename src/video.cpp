@@ -1830,22 +1830,22 @@ void dotmat_close()
 
 video_plugin video_plugin_list[]=
 {
-/* Name                            Init func      Palette func     Lock func      Unlock func      Flip func      Close func      Pixel formats  Half size  X, Y offsets   X, Y scale  */
-{"Half size with hardware flip",   halfhw_init,   halfhw_setpal,   halfhw_lock,   halfhw_unlock,   halfhw_flip,   halfhw_close,   ALL,           1,         0, 0,          0, 0   },
-{"Double size with hardware flip", doublehw_init, doublehw_setpal, doublehw_lock, doublehw_unlock, doublehw_flip, doublehw_close, ALL,           0,         0, 0,          0, 0   },
-{"Half size",                      half_init,     half_setpal,     half_lock,     half_unlock,     half_flip,     half_close,     ALL,           1,         0, 0,          0, 0   },
-{"Double size",                    double_init,   double_setpal,   double_lock,   double_unlock,   double_flip,   double_close,   ALL,           0,         0, 0,          0, 0   },
-{"Super eagle",                    seagle_init,   seagle_setpal,   seagle_lock,   seagle_unlock,   seagle_flip,   seagle_close,   F16_BPP,       1,         0, 0,          0, 0   },
-{"Scale2x",                        scale2x_init,  scale2x_setpal,  scale2x_lock,  scale2x_unlock,  scale2x_flip,  scale2x_close,  F16_BPP,       1,         0, 0,          0, 0   },
-{"Advanced Scale2x",               ascale2x_init, ascale2x_setpal, ascale2x_lock, ascale2x_unlock, ascale2x_flip, ascale2x_close, F16_BPP,       1,         0, 0,          0, 0   },
-{"TV 2x",                          tv2x_init,     tv2x_setpal,     tv2x_lock,     tv2x_unlock,     tv2x_flip,     tv2x_close,     F16_BPP,       1,         0, 0,          0, 0   },
-{"Software bilinear",              swbilin_init,  swbilin_setpal,  swbilin_lock,  swbilin_unlock,  swbilin_flip,  swbilin_close,  F16_BPP,       1,         0, 0,          0, 0   },
-{"Software bicubic",               swbicub_init,  swbicub_setpal,  swbicub_lock,  swbicub_unlock,  swbicub_flip,  swbicub_close,  F16_BPP,       1,         0, 0,          0, 0   },
-{"Dot matrix",                     dotmat_init,   dotmat_setpal,   dotmat_lock,   dotmat_unlock,   dotmat_flip,   dotmat_close,   F16_BPP,       1,         0, 0,          0, 0   },
+/* Name                            Init func      Palette func     Lock func      Unlock func      Flip func      Close func      Half size  X, Y offsets   X, Y scale  */
+{"Half size with hardware flip",   halfhw_init,   halfhw_setpal,   halfhw_lock,   halfhw_unlock,   halfhw_flip,   halfhw_close,   1,         0, 0,          0, 0   },
+{"Double size with hardware flip", doublehw_init, doublehw_setpal, doublehw_lock, doublehw_unlock, doublehw_flip, doublehw_close, 0,         0, 0,          0, 0   },
+{"Half size",                      half_init,     half_setpal,     half_lock,     half_unlock,     half_flip,     half_close,     1,         0, 0,          0, 0   },
+{"Double size",                    double_init,   double_setpal,   double_lock,   double_unlock,   double_flip,   double_close,   0,         0, 0,          0, 0   },
+{"Super eagle",                    seagle_init,   seagle_setpal,   seagle_lock,   seagle_unlock,   seagle_flip,   seagle_close,   1,         0, 0,          0, 0   },
+{"Scale2x",                        scale2x_init,  scale2x_setpal,  scale2x_lock,  scale2x_unlock,  scale2x_flip,  scale2x_close,  1,         0, 0,          0, 0   },
+{"Advanced Scale2x",               ascale2x_init, ascale2x_setpal, ascale2x_lock, ascale2x_unlock, ascale2x_flip, ascale2x_close, 1,         0, 0,          0, 0   },
+{"TV 2x",                          tv2x_init,     tv2x_setpal,     tv2x_lock,     tv2x_unlock,     tv2x_flip,     tv2x_close,     1,         0, 0,          0, 0   },
+{"Software bilinear",              swbilin_init,  swbilin_setpal,  swbilin_lock,  swbilin_unlock,  swbilin_flip,  swbilin_close,  1,         0, 0,          0, 0   },
+{"Software bicubic",               swbicub_init,  swbicub_setpal,  swbicub_lock,  swbicub_unlock,  swbicub_flip,  swbicub_close,  1,         0, 0,          0, 0   },
+{"Dot matrix",                     dotmat_init,   dotmat_setpal,   dotmat_lock,   dotmat_unlock,   dotmat_flip,   dotmat_close,   1,         0, 0,          0, 0   },
 #ifdef HAVE_GL
-{"OpenGL scaling",                 glscale_init,  glscale_setpal,  glscale_lock,  glscale_unlock,  glscale_flip,  glscale_close,  ALL,           0,         0, 0,          0, 0   },
+{"OpenGL scaling",                 glscale_init,  glscale_setpal,  glscale_lock,  glscale_unlock,  glscale_flip,  glscale_close,  0,         0, 0,          0, 0   },
 #endif
-{nullptr,                          nullptr,       nullptr,         nullptr,       nullptr,         nullptr,       nullptr,        0,             0,         0, 0,          0, 0   }
+{nullptr,                          nullptr,       nullptr,         nullptr,       nullptr,         nullptr,       nullptr,        0,         0, 0,          0, 0   }
 };
 
 unsigned int nb_video_plugins = sizeof(video_plugin_list)/sizeof(video_plugin_list[0])-1;
