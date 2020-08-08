@@ -46,7 +46,7 @@ public:
 	};
 
 	//! Constructs a scroll bar, initilizes the limits to 0, and 100 with the position at 0
-  	//! \param WindowRect A CRect that defines the outer limits of the control
+	//! \param WindowRect A CRect that defines the outer limits of the control
 	//! \param pParent A pointer to the parent window
 	//! \param ScrollBarType Indicates if this is to be a vertical or horizontal scrollbar
 	CScrollBar(const CRect& WindowRect, CWindow* pParent, EScrollBarType ScrollBarType);
@@ -82,6 +82,12 @@ public:
 	//! \param MoveDistance The relative distance to move the window
 	void MoveWindow(const CPoint& MoveDistance) override;
 
+	//! Verifies if the button is a wheel event and scroll accordingly.
+	//! Logic extracted from OnMouseButtonDown to allow calling it from an associated widget.
+	//! \param Button A bitfield indicating which button was clicked
+	//! \return True if the event had an effect.
+	bool HandleMouseScroll(unsigned int Button);
+
 	//! This is called whenever the scrollbar is clicked on by the mouse
 	//! Only the topmost window that bounds the point will be called by the system
 	//! \param Point The point where the mouse clicked
@@ -89,7 +95,7 @@ public:
 	//! \return True if it's in the bounds of the scrollbar
 	bool OnMouseButtonDown(CPoint Point, unsigned int Button) override;
 
-  void SetIsFocusable(bool bFocusable) override;
+	void SetIsFocusable(bool bFocusable) override;
 
 	// CMessageClient overrides
 	//! CScrollBars handle MOUSE_BUTTONDOWN and MOUSE_BUTTONUP messages
@@ -110,7 +116,7 @@ protected:
 
 
 private:
-  CScrollBar(const CScrollBar&) = delete;
+	CScrollBar(const CScrollBar&) = delete;
 	CScrollBar& operator=(const CScrollBar&) = delete;
 };
 

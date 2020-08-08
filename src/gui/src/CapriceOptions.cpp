@@ -117,11 +117,9 @@ CapriceOptions::CapriceOptions(const CRect& WindowRect, CWindow* pParent, CFontE
 
     // ---------------- 'Video' options ----------------
     m_pDropDownVideoPlugin = new CDropDown(CRect(CPoint(100,0),140,16), m_pGroupBoxTabVideo, false, 14); // Select video plugin
-    unsigned int i = 0;
     for(const auto& plugin : video_plugin_list)
     {
-            m_pDropDownVideoPlugin->AddItem(SListItem(plugin.name));
-            i++;
+      m_pDropDownVideoPlugin->AddItem(SListItem(plugin.name));
     }
     m_pDropDownVideoPlugin->SetListboxHeight(5);
     m_pDropDownVideoPlugin->SelectItem(CPC.scr_style);
@@ -409,7 +407,7 @@ bool CapriceOptions::HandleMessage(CMessage* pMessage)
           }
         }
 #if __GNUC__ >= 7
-	[[gnu::fallthrough]];
+        [[gnu::fallthrough]];
 #endif
       case CMessage::CTRL_VALUECHANGING:
         if (pMessage->Destination() == m_pGroupBoxTabGeneral) {

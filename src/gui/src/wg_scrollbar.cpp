@@ -140,21 +140,31 @@ void CScrollBar::MoveWindow(const CPoint& MoveDistance)
 }
 
 
+bool CScrollBar::HandleMouseScroll(unsigned int Button)
+{
+	if (Button == CMouseMessage::WHEELUP)
+	{
+		Decrement();
+		std::cout << "Value: " << m_Value << std::endl;
+		return true;
+	}
+	if (Button == CMouseMessage::WHEELDOWN)
+	{
+		Increment();
+		std::cout << "Value: " << m_Value << std::endl;
+		return true;
+	}
+	return false;
+}
+
 bool CScrollBar::OnMouseButtonDown(CPoint Point, unsigned int Button)
 {
 	bool bResult = CWindow::OnMouseButtonDown(Point, Button);
 
  	if (!bResult && m_bVisible && m_ClientRect.HitTest(ViewToWindow(Point)) == CRect::RELPOS_INSIDE)
 	{
-		if (Button == CMouseMessage::WHEELUP)
-		{
-			Decrement();
-			bResult = true;
-		}
-		else if (Button == CMouseMessage::WHEELDOWN)
-		{
-			Increment();
-			bResult = true;
+		if (HandleMouseScroll(Button)) {
+			return true;
 		}
 		else if (Button == CMouseMessage::LEFT)
 		{

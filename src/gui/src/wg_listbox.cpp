@@ -239,29 +239,25 @@ void CListBox::PaintToSurface(SDL_Surface& ScreenSurface, SDL_Surface& FloatingS
 bool CListBox::OnMouseButtonDown(CPoint Point, unsigned int Button)
 {
 	CPoint WindowPoint(ViewToWindow(Point));
-	bool bResult = CWindow::OnMouseButtonDown(Point, Button);
- 	if (!bResult && m_bVisible && (Button == CMouseMessage::LEFT) &&
-		(m_WindowRect.SizeRect().HitTest(WindowPoint) == CRect::RELPOS_INSIDE))
-	{
-// judb for the moment disabled (this interferes with the keyboard focus handling, for example
-// closing a frame with the Escape button)
-// Should look at it when adding keyboard control for the entire gui.(most of the widgets don't respond
-// to keyboard events yet)
-//		if (CApplication::Instance()->GetKeyFocus() != this)
-//		{
-//			CApplication::Instance()->SetKeyFocus(this);
-//		}
-
-		if (!m_Items.empty() && m_ClientRect.HitTest(WindowPoint) == CRect::RELPOS_INSIDE)
-		{
-			// Prep the new selection
-      // judb m_iFocusedItem should be <= the number of items in the listbox (0-based, so m_Items.size() -1)
-			m_iFocusedItem = std::min((WindowPoint.YPos() + m_ClientRect.Top()) / m_iItemHeight + m_pVScrollbar->GetValue(), stdex::safe_static_cast<unsigned int>(m_Items.size()) - 1);
-		}
-		bResult = true;
-	}
-
-	return bResult;
+  if (CWindow::OnMouseButtonDown(Point, Button)) {
+    return true;
+  }
+  if (!m_bVisible) {
+    return false;
+  }
+  if (m_WindowRect.SizeRect().HitTest(WindowPoint) != CRect::RELPOS_INSIDE) {
+    return false;
+  }
+  if (m_pVScrollbar->HandleMouseScroll(Button)) {
+    return true;
+  }
+  if (Button == CMouseMessage::LEFT && !m_Items.empty()) {
+    // Prep the new selection
+    // judb m_iFocusedItem should be <= the number of items in the listbox (0-based, so m_Items.size() -1)
+    m_iFocusedItem = std::min((WindowPoint.YPos() + m_ClientRect.Top()) / m_iItemHeight + m_pVScrollbar->GetValue(), stdex::safe_static_cast<unsigned int>(m_Items.size()) - 1);
+    return true;
+  }
+  return false;
 }
 
 
