@@ -145,13 +145,11 @@ bool CScrollBar::HandleMouseScroll(unsigned int Button)
 	if (Button == CMouseMessage::WHEELUP)
 	{
 		Decrement();
-		std::cout << "Value: " << m_Value << std::endl;
 		return true;
 	}
 	if (Button == CMouseMessage::WHEELDOWN)
 	{
 		Increment();
-		std::cout << "Value: " << m_Value << std::endl;
 		return true;
 	}
 	return false;
