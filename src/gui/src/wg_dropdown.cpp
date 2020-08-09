@@ -34,7 +34,8 @@ namespace wGui
 
 CDropDown::CDropDown(const CRect& WindowRect, CWindow* pParent, bool bAllowEdit, unsigned int iItemHeight, CFontEngine* pFontEngine) :
   CWindow(WindowRect, pParent),
-  m_bAllowEdit(bAllowEdit)
+  m_bAllowEdit(bAllowEdit),
+  m_iItemCount(5)
 {
   m_pCViewAncestor = GetView();
   m_pEditBox = new CEditBox(CRect(0, 0, m_WindowRect.Width() - m_WindowRect.Height(), m_WindowRect.Height()), this, pFontEngine);
@@ -45,7 +46,7 @@ CDropDown::CDropDown(const CRect& WindowRect, CWindow* pParent, bool bAllowEdit,
     m_pEditBox->SetBackgroundColor(COLOR_WHITE);
   }
 
-  m_pListBox = new CListBox(CRect(0, m_WindowRect.Height(), m_WindowRect.Width(), m_WindowRect.Height() + iItemHeight * 5 + 1),
+  m_pListBox = new CListBox(CRect(0, m_WindowRect.Height(), m_WindowRect.Width(), m_WindowRect.Height() + iItemHeight * m_iItemCount + 2),
                             this, true, iItemHeight, pFontEngine);
   m_pListBox->SetVisible(false);
   m_pListBox->SetDropDown(this);
@@ -75,15 +76,16 @@ CDropDown::~CDropDown()
 
 void CDropDown::SetListboxHeight(int iItemCount)
 {
+  m_iItemCount = iItemCount;
   m_pListBox->SetWindowRect(
-      CRect(0, m_WindowRect.Height(), m_WindowRect.Width(), m_WindowRect.Height() + m_pListBox->GetItemHeight() * iItemCount + 1));
+      CRect(0, m_WindowRect.Height(), m_WindowRect.Width(), m_WindowRect.Height() + m_pListBox->GetItemHeight() * m_iItemCount + 2));
 }
 
 
 void CDropDown::SetWindowRect(const CRect& WindowRect)
 {
   CWindow::SetWindowRect(WindowRect);
-  m_pListBox->SetWindowRect(CRect(0, m_WindowRect.Height(), m_WindowRect.Width(), m_WindowRect.Height() + m_pListBox->GetItemHeight() * 5 + 1));
+  m_pListBox->SetWindowRect(CRect(0, m_WindowRect.Height(), m_WindowRect.Width(), m_WindowRect.Height() + m_pListBox->GetItemHeight() * m_iItemCount + 2));
   m_pDropButton->SetWindowRect(CRect(m_WindowRect.Width() - m_WindowRect.Height() + 1, 0, m_WindowRect.Width(), m_WindowRect.Height()));
   m_pEditBox->SetWindowRect(CRect(0, 0, m_WindowRect.Width() - m_WindowRect.Height(), m_WindowRect.Height()));
 }

@@ -79,11 +79,11 @@ public:
 	//! \return true if the item is selected
 	bool IsSelected(unsigned int iItemIndex) { return m_pListBox->IsSelected(iItemIndex); }
 
-    // judb get index of the selected item (-1 if none)
+	// judb get index of the selected item (-1 if none)
 	int GetSelectedIndex();
 
 	// judb select the item with index iItemIndex in the list, and display the item's name
-    // (in the area to the left of the dropdown arrow)
+	// (in the area to the left of the dropdown arrow)
 	void SelectItem(unsigned int iItemIndex);
 	//! Set an item as selected
 	//! \param iItemIndex The index of the item to change
@@ -118,8 +118,8 @@ public:
 	// slight override from CWindow: if visible is set to "true", the dropdown part should stay invisible:
 	void SetVisible(bool bVisible) override;
 
-  // Override the default behaviour: a focused drop-down list is in fact it's button being focused
-  void SetIsFocusable(bool bFocusable) override;
+	// Override the default behaviour: a focused drop-down list is in fact it's button being focused
+	void SetIsFocusable(bool bFocusable) override;
 
 	// CMessageClient overrides
 	//! CDropDown will handle MOUSE_BUTTONDOWN messages
@@ -139,12 +139,13 @@ protected:
 	CListBox* m_pListBox;  //!< A pointer to teh drop down's list box
 	CPictureButton* m_pDropButton;  //!< A pointer to the drop down's drop button
 	bool m_bAllowEdit;  //!< If false, the edit box will be read only, and the value can only be changed via the drop-down list
+	int m_iItemCount;  // !< Number of items to display in the drop down list.
 
 
 private:
-  CDropDown(const CDropDown&) = delete;
+	CDropDown(const CDropDown&) = delete;
 	CDropDown& operator=(const CDropDown&) = delete;
-  CView* m_pCViewAncestor;   // pointer to the (unique) CView of the application.
+	CView* m_pCViewAncestor;   // pointer to the (unique) CView of the application.
 };
 
 }
