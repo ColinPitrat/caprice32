@@ -86,6 +86,22 @@ void CScrollBar::SetValue(int iValue, bool bRedraw)  // virtual
 }
 
 
+void CScrollBar::SetMinLimit(int minLimit)
+{
+  CRangeControl<int>::SetMinLimit(minLimit);
+  RepositionThumb();
+  Draw();
+}
+
+
+void CScrollBar::SetMaxLimit(int maxLimit)
+{
+  CRangeControl<int>::SetMaxLimit(maxLimit);
+  RepositionThumb();
+  Draw();
+}
+
+
 void CScrollBar::Draw() const
 {
 	CWindow::Draw();
@@ -282,41 +298,45 @@ bool CScrollBar::HandleMessage(CMessage* pMessage)
 }
 
 
-void CScrollBar::RepositionThumb()  // virtual
+void CScrollBar::RepositionThumb()
 {
-	if (m_MinLimit != m_MaxLimit)
-	{
-		switch (m_ScrollBarType)
-		{
-		case VERTICAL:
-		{
-			int iThumbHeight = m_ClientRect.Height() / (m_MaxLimit - m_MinLimit + 1);
-			if (iThumbHeight < 10)
-			{
-				iThumbHeight = 10;
-			}
-			m_ThumbRect.SetTop(m_ClientRect.Top() + (m_ClientRect.Height() - iThumbHeight) * (m_Value - m_MinLimit) / (m_MaxLimit - m_MinLimit));
-            // judb removed '+ 1' at the end
-			m_ThumbRect.SetBottom(m_ThumbRect.Top() + iThumbHeight);
-			break;
-		}
-		case HORIZONTAL:
-		{
-			int iThumbWidth = m_ClientRect.Width() / (m_MaxLimit - m_MinLimit + 1);
-			if (iThumbWidth < 10)
-			{
-				iThumbWidth = 10;
-			}
-			m_ThumbRect.SetLeft(m_ClientRect.Left() + (m_ClientRect.Width() - iThumbWidth) * (m_Value - m_MinLimit) / (m_MaxLimit - m_MinLimit));
-            // judb removed '+ 1' at the end
-			m_ThumbRect.SetRight(m_ThumbRect.Left() + iThumbWidth);
-			break;
-		}
-		default:
-			throw(Wg_Ex_App("Unrecognized ScrollBar Type.", "CScrollBar::RepositionThumb"));
-			break;
-		}
-	}
+  int range = m_MaxLimit - m_MinLimit;
+  int value = m_Value - m_MinLimit;
+  int position = 0;
+  switch (m_ScrollBarType)
+  {
+    case VERTICAL:
+      {
+        int iThumbHeight = m_ClientRect.Height() / (range + 1);
+        if (iThumbHeight < 10)
+        {
+          iThumbHeight = 10;
+        }
+        if (range != 0) {
+          position = (m_ClientRect.Height() - iThumbHeight) * value / range;
+        }
+        m_ThumbRect.SetTop(m_ClientRect.Top() + position);
+        m_ThumbRect.SetBottom(m_ThumbRect.Top() + iThumbHeight);
+        break;
+      }
+    case HORIZONTAL:
+      {
+        int iThumbWidth = m_ClientRect.Width() / (range + 1);
+        if (iThumbWidth < 10)
+        {
+          iThumbWidth = 10;
+        }
+        if (range != 0) {
+          position = (m_ClientRect.Left() - iThumbWidth) * value / range;
+        }
+        m_ThumbRect.SetLeft(m_ClientRect.Left() + position);
+        m_ThumbRect.SetRight(m_ThumbRect.Left() + iThumbWidth);
+        break;
+      }
+    default:
+      throw(Wg_Ex_App("Unrecognized ScrollBar Type.", "CScrollBar::RepositionThumb"));
+      break;
+  }
 }
 
 }

@@ -69,6 +69,14 @@ public:
 	//! \param bRedraw indicates if the control should be redrawn (defaults to true)
 	void SetValue(int iValue, bool bRedraw = true) override;
 
+	//! Set the lower limit for the control.
+	//! \param minLimit The lower limit of the control
+	void SetMinLimit(int minLimit) override;
+
+	//! Set the upper limit for the control.
+	//! \param maxLimit The upper limit of the control
+	void SetMaxLimit(int maxLimit) override;
+
 
 	// CWindow overrides
 	//! Draws the scroll bar
