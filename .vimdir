@@ -1,0 +1,4 @@
+" This file is meant to be used with https://www.vim.org/scripts/script.php?script_id=1860
+setlocal expandtab
+setlocal sw=2
+setlocal ts=2
