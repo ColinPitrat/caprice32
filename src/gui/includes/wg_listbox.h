@@ -60,7 +60,7 @@ class CListBox : public CWindow
 {
 public:
 	//! Constructs a new listbox
-  	//! \param WindowRect A CRect that defines the outer limits of the control
+	//! \param WindowRect A CRect that defines the outer limits of the control
 	//! \param pParent A pointer to the parent window
 	//! \param bSingleSelection If true, only one item can be selected at a time, defaults to false
 	//! \param iItemHeight The height of the items in the list, defaults to 15
@@ -105,19 +105,19 @@ public:
 	bool IsSelected(unsigned int iItemIndex)
 		{ return (iItemIndex < m_SelectedItems.size() && m_SelectedItems.at(iItemIndex)); }
 
-    // Returns the index of the first selected item; returns -1 if there is no selection.
-    int getFirstSelectedIndex();
+	// Returns the index of the first selected item; returns -1 if there is no selection.
+	int getFirstSelectedIndex();
 
 	//! Set an item as selected
 	//! \param iItemIndex The index of the item to change
 	//! \param bSelected Will select the item if true, or unselect if false
 	void SetSelection(unsigned int iItemIndex, bool bSelected, bool bNotify = true);
 
-    //! Selects or deselects all items
-    void SetAllSelections(bool bSelected);
+	//! Selects or deselects all items
+	void SetAllSelections(bool bSelected);
 
-    //! Sets the focus rectangle on the specified item:
-    void SetFocus(unsigned int iItemIndex);
+	//! Sets the focus rectangle on the specified item:
+	void SetFocus(unsigned int iItemIndex);
 
 	//! Set the dropdown window this is a part of
 	//! \param pDropDown A pointer to the dropdown window
@@ -160,6 +160,8 @@ public:
 
 
 protected:
+	void UpdateMaxLimit();
+
 	CFontEngine* m_pFontEngine;  //!< A pointer to the font engine to use to render the text
 	CScrollBar* m_pVScrollbar;  //!< A pointer to the vertical scrollbar
 	unsigned int m_iItemHeight;  //!< The height of the items in the list
@@ -172,7 +174,7 @@ protected:
 
 
 private:
-  CListBox(const CListBox&) = delete;
+	CListBox(const CListBox&) = delete;
 	CListBox& operator=(const CListBox&) = delete;
 };
 

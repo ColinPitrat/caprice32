@@ -80,9 +80,7 @@ unsigned int CListBox::AddItem(SListItem ListItem)
 	m_Items.push_back(ListItem);
 	m_SelectedItems.push_back(false);
 	m_RenderedStrings.push_back(CRenderedString(m_pFontEngine, ListItem.sItemText, CRenderedString::VALIGN_TOP, CRenderedString::HALIGN_LEFT));
-	int iMax = m_Items.empty() ? 0 : m_Items.size() - 1;
-  // judb correction MaxLimit (number of 'scrolls' = number of items - visible number of items )
-	m_pVScrollbar->SetMaxLimit(stdex::MaxInt(iMax - (m_ClientRect.Height() / m_iItemHeight) + 1, 0));
+	UpdateMaxLimit();
 	Draw();
 	return m_Items.size();
 }
@@ -94,9 +92,7 @@ void CListBox::RemoveItem(unsigned int iItemIndex)
 	{
 		m_Items.erase(m_Items.begin() + iItemIndex);
 		m_SelectedItems.erase(m_SelectedItems.begin() + iItemIndex);
-		int iMax = m_Items.empty() ? 0 : m_Items.size() - 1;
-    // judb correction MaxLimit (number of 'scrolls' = number of items - visible number of items )
-		m_pVScrollbar->SetMaxLimit(stdex::MaxInt(iMax - (m_ClientRect.Height() / m_iItemHeight) + 1, 0));
+		UpdateMaxLimit();
 		Draw();
 	}
 }
@@ -106,9 +102,9 @@ void CListBox::ClearItems()
 {
 	m_Items.clear();
 	m_SelectedItems.clear();
-  m_RenderedStrings.clear();
+	m_RenderedStrings.clear();
 	m_pVScrollbar->SetMaxLimit(0);
-  m_pVScrollbar->SetValue(0);
+	m_pVScrollbar->SetValue(0);
 	Draw();
 }
 
@@ -208,6 +204,7 @@ void CListBox::SetWindowRect(const CRect& WindowRect)
 	m_ClientRect = CRect(2, 2, m_WindowRect.Width() - 16, m_WindowRect.Height() - 2);
 	CRect ScrollbarRect(m_WindowRect.SizeRect());
 	ScrollbarRect.Grow(-1);
+	UpdateMaxLimit();
 	m_pVScrollbar->SetWindowRect(
 		CRect(ScrollbarRect.Right() - 12, ScrollbarRect.Top(), ScrollbarRect.Right() + 1, ScrollbarRect.Bottom()) - CPoint(2, 2) /* client adjustment */);
 }
@@ -402,6 +399,12 @@ bool CListBox::HandleMessage(CMessage* pMessage)
 	}
 
 	return bHandled;
+}
+
+void CListBox::UpdateMaxLimit()
+{
+	int iMax = m_Items.empty() ? 0 : m_Items.size() - 1;
+	m_pVScrollbar->SetMaxLimit(stdex::MaxInt(iMax - (m_ClientRect.Height() / m_iItemHeight) + 1, 0));
 }
 
 }
