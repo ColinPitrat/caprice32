@@ -32,9 +32,9 @@ bool file_copy(FILE *in, FILE *out) {
 }
 
 bool is_directory(std::string filepath) {
-	struct stat _stat;
+  struct stat _stat;
 
-	return ( (stat(filepath.c_str(), &_stat) == 0) && (S_ISDIR(_stat.st_mode)) );
+  return ( (stat(filepath.c_str(), &_stat) == 0) && (S_ISDIR(_stat.st_mode)) );
 }
 
 // Returns a vector containing the names of the files in the specified directory
@@ -65,25 +65,25 @@ std::vector<std::string> listDirectory(std::string &directory) {
 // Returns a vector containing the names of the files having extension "ext" in
 // the specified directory
 std::vector<std::string> listDirectoryExt(std::string &directory, const std::string &ext) {
-	std::vector<std::string> allFiles = listDirectory(directory);
-	std::vector<std::string> matchingFiles;
-	std::string extension;
+  std::vector<std::string> allFiles = listDirectory(directory);
+  std::vector<std::string> matchingFiles;
+  std::string extension;
 
-	for (const auto& fileName : allFiles) {
-		extension = fileName.substr(fileName.find_last_of(".") + 1);
-		if (ext == extension) {
-			matchingFiles.push_back(fileName);
-		}
-	}
-	return matchingFiles;
+  for (const auto& fileName : allFiles) {
+    extension = fileName.substr(fileName.find_last_of(".") + 1);
+    if (ext == extension) {
+      matchingFiles.push_back(fileName);
+    }
+  }
+  return matchingFiles;
 }
 
 #define TIME_STRING_MAX_LENGTH 80
 std::string getDateString() {
-	char dateString[TIME_STRING_MAX_LENGTH]; // Should be more than enough
-	time_t t = std::time(nullptr);
-	if (std::strftime(dateString, sizeof(dateString), "%Y%m%d_%H%M%S", std::localtime(&t))) {
-		return std::string(dateString);
-	}
-	return "unknown_date";
+  char dateString[TIME_STRING_MAX_LENGTH]; // Should be more than enough
+  time_t t = std::time(nullptr);
+  if (std::strftime(dateString, sizeof(dateString), "%Y%m%d_%H%M%S", std::localtime(&t))) {
+    return std::string(dateString);
+  }
+  return "unknown_date";
 }

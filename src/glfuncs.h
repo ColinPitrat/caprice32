@@ -40,7 +40,6 @@ extern "C" {
 #undef GL_FUNC
 #undef GL_FUNC_OPTIONAL
 
-	
 extern int init_glfuncs();
 
 #ifdef __cplusplus

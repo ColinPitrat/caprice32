@@ -24,26 +24,26 @@
 
 typedef struct video_plugin
 {
-	/* the user-displayed name of this plugin */
-	const char* name;
-	/* initializes the video plugin ; returns the surface that you must draw into, nullptr in the (unlikely ;) event of a failure */
-	SDL_Surface* (*init)(video_plugin* t,int w,int h,int bpp,bool fs);
+  /* the user-displayed name of this plugin */
+  const char* name;
+  /* initializes the video plugin ; returns the surface that you must draw into, nullptr in the (unlikely ;) event of a failure */
+  SDL_Surface* (*init)(video_plugin* t,int w,int h,int bpp,bool fs);
 
-	void (*set_palette)(SDL_Color* c);
-	/* locks/unlocks the surface if needed */
-	bool (*lock)();
-	void (*unlock)();
-	/* "flips" the video surface. Note that this might not always do a real flip */
-	void (*flip)();
-	/* closes the plugin */
-	void (*close)();
+  void (*set_palette)(SDL_Color* c);
+  /* locks/unlocks the surface if needed */
+  bool (*lock)();
+  void (*unlock)();
+  /* "flips" the video surface. Note that this might not always do a real flip */
+  void (*flip)();
+  /* closes the plugin */
+  void (*close)();
 
-	/* this plugin wants : 0 half sized pixels (320x200 screen)/1 full sized pixels (640x200 screen)*/
-	Uint8 half_pixels;
+  /* this plugin wants : 0 half sized pixels (320x200 screen)/1 full sized pixels (640x200 screen)*/
+  Uint8 half_pixels;
 
-	/* mouse offset/scaling info */
-	int x_offset,y_offset;
-	float x_scale,y_scale;
+  /* mouse offset/scaling info */
+  int x_offset,y_offset;
+  float x_scale,y_scale;
 }
 video_plugin;
 

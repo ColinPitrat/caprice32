@@ -203,8 +203,8 @@ t_sector *find_sector(byte *requested_CHRN)
       FDC.result[RES_ST2] &= ~0x10; // remove possible No Cylinder flag
    }
 
-   if (loop_count && active_drive->track_hook)	// track looped and hook available?
-     active_drive->track_hook(active_drive);	// update flakey data
+   if (loop_count && active_drive->track_hook)  // track looped and hook available?
+     active_drive->track_hook(active_drive);  // update flakey data
 
    active_drive->current_sector = idx; // update sector table index for active drive
    return sector;
@@ -375,7 +375,7 @@ loop:
          }
          sector_size = 128 << FDC.command[CMD_N]; // determine number of bytes from N value
          FDC.buffer_count = sector_size; // init number of bytes to transfer
-	 FDC.buffer_ptr = sector->getDataForRead(); // pointer to sector data
+   FDC.buffer_ptr = sector->getDataForRead(); // pointer to sector data
          FDC.buffer_endptr = active_track->data + active_track->size; // pointer beyond end of track data
          FDC.flags &= ~SCANFAILED_flag; // reset scan failed flag
          FDC.result[RES_ST2] |= 0x08; // assume data matches: set Scan Equal Hit
@@ -635,7 +635,7 @@ byte fdc_read_data()
                         if (active_drive->current_sector >= active_track->sectors) { // index beyond number of sectors for this track?
                            active_drive->current_sector = 0; // reset index
                            if (active_drive->track_hook)
-                             active_drive->track_hook(active_drive);	// update flakey data
+                             active_drive->track_hook(active_drive);  // update flakey data
                         }
                         FDC.command[CMD_R]++; // advance to next sector
                         cmd_readtrk();
@@ -809,7 +809,7 @@ void fdc_readtrk()
          FDC.command[CMD_R] = 1; // set sector ID to 1
          active_drive->current_sector = 0; // reset sector table index
          if (active_drive->track_hook)
-           active_drive->track_hook(active_drive);	// update flakey data
+           active_drive->track_hook(active_drive);  // update flakey data
 
          cmd_readtrk();
       }
@@ -922,8 +922,8 @@ void fdc_readID()
          idx = active_drive->current_sector; // get the active sector index
          if (idx >= active_track->sectors) { // index beyond number of sectors for this track?
             idx = 0; // reset index
-            if (active_drive->track_hook)	// hook available?
-              active_drive->track_hook(active_drive);	// update flakey data
+            if (active_drive->track_hook)  // hook available?
+              active_drive->track_hook(active_drive);  // update flakey data
          }
          memcpy(&FDC.result[RES_C], &active_track->sector[idx].CHRN, 4); // copy sector's CHRN to result buffer
          active_drive->current_sector = idx + 1; // update sector table index for active drive

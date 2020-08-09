@@ -25,7 +25,7 @@ static bool fWrapped;
 static unsigned int uPos, uLastPos, uDecoded;
 static byte bLastData;
 static int nDataClock;
-static byte abDecoded[0x200000];	// 2MB
+static byte abDecoded[0x200000];  // 2MB
 static word s_wCRC;
 
 static struct CapsTrackInfoT1 cti;
@@ -53,76 +53,76 @@ static void *handle;
 static int unload_caps_library(void)
 {
 #ifdef WINDOWS
-	if (!FreeLibrary(handle)) return ERR_IPF_DYNLIB_LOAD;
-	return 0;
+  if (!FreeLibrary(handle)) return ERR_IPF_DYNLIB_LOAD;
+  return 0;
 #else
-	if (dlclose(handle) != 0) return ERR_IPF_DYNLIB_LOAD;
-	return 0;
+  if (dlclose(handle) != 0) return ERR_IPF_DYNLIB_LOAD;
+  return 0;
 #endif
 }
 
 static int load_caps_library(void)
 {
 #ifdef WINDOWS
-	handle = LoadLibrary("CAPSImg.dll");
-	if (!handle)
-	{
-		LOG_ERROR("CAPSImg.dll is required for IPF support");
-		return ERR_IPF_DYNLIB_LOAD;
-	}
-	else
-	{
-		_CAPSInit = reinterpret_cast<CapsLong (*)(void)>(GetProcAddress(handle, "CAPSInit"));
-		if (_CAPSInit == NULL) { unload_caps_library(); return ERR_IPF_DYNLIB_LOAD; }
-		_CAPSExit = reinterpret_cast<CapsLong (*)(void)>(GetProcAddress(handle, "CAPSExit"));
-		if (_CAPSExit == NULL) { unload_caps_library(); return ERR_IPF_DYNLIB_LOAD; }
-		_CAPSAddImage = reinterpret_cast<CapsLong (*)(void)>(GetProcAddress(handle, "CAPSAddImage"));
-		if (_CAPSAddImage == NULL) { unload_caps_library(); return ERR_IPF_DYNLIB_LOAD; }
-		_CAPSRemImage = reinterpret_cast<CapsLong (*)(CapsLong)>(GetProcAddress(handle, "CAPSRemImage"));
-		if (_CAPSRemImage == NULL) { unload_caps_library(); return ERR_IPF_DYNLIB_LOAD; }
-		_CAPSLockImage = reinterpret_cast<CapsLong (*)(CapsLong, char *)>(GetProcAddress(handle, "CAPSLockImage"));
-		if (_CAPSLockImage == NULL) { unload_caps_library(); return ERR_IPF_DYNLIB_LOAD; }
-		_CAPSUnlockImage = reinterpret_cast<CapsLong (*)(CapsLong)>(GetProcAddress(handle, "CAPSUnlockImage"));
-		if (_CAPSUnlockImage == NULL) { unload_caps_library(); return ERR_IPF_DYNLIB_LOAD; }
-		_CAPSGetImageInfo = reinterpret_cast<CapsLong (*)(struct CapsImageInfo *, CapsLong)>(GetProcAddress(handle, "CAPSGetImageInfo"));
-		if (_CAPSGetImageInfo == NULL) { unload_caps_library(); return ERR_IPF_DYNLIB_LOAD; }
-		_CAPSLockTrack = reinterpret_cast<CapsLong (*)(void *, CapsLong, CapsULong, CapsULong, CapsULong)>(GetProcAddress(handle, "CAPSLockTrack"));
-		if (_CAPSLockTrack == NULL) { unload_caps_library(); return ERR_IPF_DYNLIB_LOAD; }
-		_CAPSUnlockTrack = reinterpret_cast<CapsLong (*)(CapsLong, CapsULong, CapsULong)>(GetProcAddress(handle, "CAPSUnlockTrack"));
-		if (_CAPSUnlockTrack == NULL) { unload_caps_library(); return ERR_IPF_DYNLIB_LOAD; }
-		_CAPSGetVersionInfo = reinterpret_cast<CapsLong (*)(void *, CapsULong)>(GetProcAddress(handle, "CAPSGetVersionInfo"));
-		if (_CAPSGetVersionInfo == NULL) { unload_caps_library(); return ERR_IPF_DYNLIB_LOAD; }
-		return 0;
-	}
+  handle = LoadLibrary("CAPSImg.dll");
+  if (!handle)
+  {
+    LOG_ERROR("CAPSImg.dll is required for IPF support");
+    return ERR_IPF_DYNLIB_LOAD;
+  }
+  else
+  {
+    _CAPSInit = reinterpret_cast<CapsLong (*)(void)>(GetProcAddress(handle, "CAPSInit"));
+    if (_CAPSInit == NULL) { unload_caps_library(); return ERR_IPF_DYNLIB_LOAD; }
+    _CAPSExit = reinterpret_cast<CapsLong (*)(void)>(GetProcAddress(handle, "CAPSExit"));
+    if (_CAPSExit == NULL) { unload_caps_library(); return ERR_IPF_DYNLIB_LOAD; }
+    _CAPSAddImage = reinterpret_cast<CapsLong (*)(void)>(GetProcAddress(handle, "CAPSAddImage"));
+    if (_CAPSAddImage == NULL) { unload_caps_library(); return ERR_IPF_DYNLIB_LOAD; }
+    _CAPSRemImage = reinterpret_cast<CapsLong (*)(CapsLong)>(GetProcAddress(handle, "CAPSRemImage"));
+    if (_CAPSRemImage == NULL) { unload_caps_library(); return ERR_IPF_DYNLIB_LOAD; }
+    _CAPSLockImage = reinterpret_cast<CapsLong (*)(CapsLong, char *)>(GetProcAddress(handle, "CAPSLockImage"));
+    if (_CAPSLockImage == NULL) { unload_caps_library(); return ERR_IPF_DYNLIB_LOAD; }
+    _CAPSUnlockImage = reinterpret_cast<CapsLong (*)(CapsLong)>(GetProcAddress(handle, "CAPSUnlockImage"));
+    if (_CAPSUnlockImage == NULL) { unload_caps_library(); return ERR_IPF_DYNLIB_LOAD; }
+    _CAPSGetImageInfo = reinterpret_cast<CapsLong (*)(struct CapsImageInfo *, CapsLong)>(GetProcAddress(handle, "CAPSGetImageInfo"));
+    if (_CAPSGetImageInfo == NULL) { unload_caps_library(); return ERR_IPF_DYNLIB_LOAD; }
+    _CAPSLockTrack = reinterpret_cast<CapsLong (*)(void *, CapsLong, CapsULong, CapsULong, CapsULong)>(GetProcAddress(handle, "CAPSLockTrack"));
+    if (_CAPSLockTrack == NULL) { unload_caps_library(); return ERR_IPF_DYNLIB_LOAD; }
+    _CAPSUnlockTrack = reinterpret_cast<CapsLong (*)(CapsLong, CapsULong, CapsULong)>(GetProcAddress(handle, "CAPSUnlockTrack"));
+    if (_CAPSUnlockTrack == NULL) { unload_caps_library(); return ERR_IPF_DYNLIB_LOAD; }
+    _CAPSGetVersionInfo = reinterpret_cast<CapsLong (*)(void *, CapsULong)>(GetProcAddress(handle, "CAPSGetVersionInfo"));
+    if (_CAPSGetVersionInfo == NULL) { unload_caps_library(); return ERR_IPF_DYNLIB_LOAD; }
+    return 0;
+  }
 #else
-	handle = dlopen("libcapsimage.so.4", RTLD_LAZY);
-	if (!handle)
-	{
-		LOG_ERROR("Cannot open libcapsimage.so.4 needed for IPF support");
-		return ERR_IPF_DYNLIB_LOAD;
-	}
-	dlerror();
-	_CAPSInit = reinterpret_cast<CapsLong (*)(void)>(dlsym(handle, "CAPSInit"));
-	if (dlerror()) { unload_caps_library(); return ERR_IPF_DYNLIB_LOAD; }
-	_CAPSExit = reinterpret_cast<CapsLong (*)(void)>(dlsym(handle, "CAPSExit"));
-	if (dlerror()) { unload_caps_library(); return ERR_IPF_DYNLIB_LOAD; }
-	_CAPSAddImage = reinterpret_cast<CapsLong (*)(void)>(dlsym(handle, "CAPSAddImage"));
-	if (dlerror()) { unload_caps_library(); return ERR_IPF_DYNLIB_LOAD; }
-	_CAPSRemImage = reinterpret_cast<CapsLong (*)(CapsLong)>(dlsym(handle, "CAPSRemImage"));
-	if (dlerror()) { unload_caps_library(); return ERR_IPF_DYNLIB_LOAD; }
-	_CAPSLockImage = reinterpret_cast<CapsLong (*)(CapsLong, char *)>(dlsym(handle, "CAPSLockImage"));
-	if (dlerror()) { unload_caps_library(); return ERR_IPF_DYNLIB_LOAD; }
-	_CAPSUnlockImage = reinterpret_cast<CapsLong (*)(CapsLong)>(dlsym(handle, "CAPSUnlockImage"));
-	if (dlerror()) { unload_caps_library(); return ERR_IPF_DYNLIB_LOAD; }
-	_CAPSGetImageInfo = reinterpret_cast<CapsLong (*)(struct CapsImageInfo *, CapsLong)>(dlsym(handle, "CAPSGetImageInfo"));
-	if (dlerror()) { unload_caps_library(); return ERR_IPF_DYNLIB_LOAD; }
-	_CAPSLockTrack = reinterpret_cast<CapsLong (*)(void *, CapsLong, CapsULong, CapsULong, CapsULong)>(dlsym(handle, "CAPSLockTrack"));
-	if (dlerror()) { unload_caps_library(); return ERR_IPF_DYNLIB_LOAD; }
-	_CAPSUnlockTrack = reinterpret_cast<CapsLong (*)(CapsLong, CapsULong, CapsULong)>(dlsym(handle, "CAPSUnlockTrack"));
-	if (dlerror()) { unload_caps_library(); return ERR_IPF_DYNLIB_LOAD; }
-	_CAPSGetVersionInfo = reinterpret_cast<CapsLong (*)(void *, CapsULong)>(dlsym(handle, "CAPSGetVersionInfo"));
-	if (dlerror()) { unload_caps_library(); return ERR_IPF_DYNLIB_LOAD; }
-	return 0;
+  handle = dlopen("libcapsimage.so.4", RTLD_LAZY);
+  if (!handle)
+  {
+    LOG_ERROR("Cannot open libcapsimage.so.4 needed for IPF support");
+    return ERR_IPF_DYNLIB_LOAD;
+  }
+  dlerror();
+  _CAPSInit = reinterpret_cast<CapsLong (*)(void)>(dlsym(handle, "CAPSInit"));
+  if (dlerror()) { unload_caps_library(); return ERR_IPF_DYNLIB_LOAD; }
+  _CAPSExit = reinterpret_cast<CapsLong (*)(void)>(dlsym(handle, "CAPSExit"));
+  if (dlerror()) { unload_caps_library(); return ERR_IPF_DYNLIB_LOAD; }
+  _CAPSAddImage = reinterpret_cast<CapsLong (*)(void)>(dlsym(handle, "CAPSAddImage"));
+  if (dlerror()) { unload_caps_library(); return ERR_IPF_DYNLIB_LOAD; }
+  _CAPSRemImage = reinterpret_cast<CapsLong (*)(CapsLong)>(dlsym(handle, "CAPSRemImage"));
+  if (dlerror()) { unload_caps_library(); return ERR_IPF_DYNLIB_LOAD; }
+  _CAPSLockImage = reinterpret_cast<CapsLong (*)(CapsLong, char *)>(dlsym(handle, "CAPSLockImage"));
+  if (dlerror()) { unload_caps_library(); return ERR_IPF_DYNLIB_LOAD; }
+  _CAPSUnlockImage = reinterpret_cast<CapsLong (*)(CapsLong)>(dlsym(handle, "CAPSUnlockImage"));
+  if (dlerror()) { unload_caps_library(); return ERR_IPF_DYNLIB_LOAD; }
+  _CAPSGetImageInfo = reinterpret_cast<CapsLong (*)(struct CapsImageInfo *, CapsLong)>(dlsym(handle, "CAPSGetImageInfo"));
+  if (dlerror()) { unload_caps_library(); return ERR_IPF_DYNLIB_LOAD; }
+  _CAPSLockTrack = reinterpret_cast<CapsLong (*)(void *, CapsLong, CapsULong, CapsULong, CapsULong)>(dlsym(handle, "CAPSLockTrack"));
+  if (dlerror()) { unload_caps_library(); return ERR_IPF_DYNLIB_LOAD; }
+  _CAPSUnlockTrack = reinterpret_cast<CapsLong (*)(CapsLong, CapsULong, CapsULong)>(dlsym(handle, "CAPSUnlockTrack"));
+  if (dlerror()) { unload_caps_library(); return ERR_IPF_DYNLIB_LOAD; }
+  _CAPSGetVersionInfo = reinterpret_cast<CapsLong (*)(void *, CapsULong)>(dlsym(handle, "CAPSGetVersionInfo"));
+  if (dlerror()) { unload_caps_library(); return ERR_IPF_DYNLIB_LOAD; }
+  return 0;
 #endif
 }
 // CRC-16 CCITT, for track level header and data checksums
@@ -147,254 +147,254 @@ static void Crc (byte b_)
 // Read an MFM byte from the track
 static byte ReadByte ()
 {
-	byte b;
+  byte b;
 
-	// Convert bit position to byte offset+shift, and advance by 8 MFM bits
-	unsigned int uOffset = uPos >> 3, uShift = uPos & 7;
-	uPos += 8;
+  // Convert bit position to byte offset+shift, and advance by 8 MFM bits
+  unsigned int uOffset = uPos >> 3, uShift = uPos & 7;
+  uPos += 8;
 
-	// Byte-aligned?
-	if (!uShift)
-		b = cti.trackbuf[uOffset];
-	else
-		b = (cti.trackbuf[uOffset] << uShift) | (cti.trackbuf[uOffset+1] >> (8 - uShift));
+  // Byte-aligned?
+  if (!uShift)
+    b = cti.trackbuf[uOffset];
+  else
+    b = (cti.trackbuf[uOffset] << uShift) | (cti.trackbuf[uOffset+1] >> (8 - uShift));
 
-	// Track wrapped?
-	if (uPos >= cti.tracklen)
-	{
-		// Add the remaining bits from the start of the track (assumes cti.tracklen >= 8)
-		unsigned int uWrapBits = uPos - cti.tracklen;
-		b &= ~(((1 << uWrapBits)) - 1);
-		b |= cti.trackbuf[0] >> (8 - uWrapBits);
+  // Track wrapped?
+  if (uPos >= cti.tracklen)
+  {
+    // Add the remaining bits from the start of the track (assumes cti.tracklen >= 8)
+    unsigned int uWrapBits = uPos - cti.tracklen;
+    b &= ~(((1 << uWrapBits)) - 1);
+    b |= cti.trackbuf[0] >> (8 - uWrapBits);
 
-		uPos -= cti.tracklen;
-		fWrapped = true;
-	}
+    uPos -= cti.tracklen;
+    fWrapped = true;
+  }
 
-	return b;
+  return b;
 }
 
 // Read an MFM word from the track
 static word ReadWord ()
 {
-	uLastPos = uPos;
+  uLastPos = uPos;
 
-	// Read 16 bits of interleaved MFM clock and data bits
-	byte b1 = ReadByte(), b2 = ReadByte();
+  // Read 16 bits of interleaved MFM clock and data bits
+  byte b1 = ReadByte(), b2 = ReadByte();
 
-	// Extract the clock bits
-	byte bClock =((b1 << 0) & 0x80) | ((b1 << 1) & 0x40) | ((b1 << 2) & 0x20) | ((b1 << 3) & 0x10) |
-				 ((b2 >> 4) & 0x08) | ((b2 >> 3) & 0x04) | ((b2 >> 2) & 0x02) | ((b2 >> 1) & 0x01);
+  // Extract the clock bits
+  byte bClock =((b1 << 0) & 0x80) | ((b1 << 1) & 0x40) | ((b1 << 2) & 0x20) | ((b1 << 3) & 0x10) |
+         ((b2 >> 4) & 0x08) | ((b2 >> 3) & 0x04) | ((b2 >> 2) & 0x02) | ((b2 >> 1) & 0x01);
 
-	// Extract the data bits
-	byte bData = ((b1 << 1) & 0x80) | ((b1 << 2) & 0x40) | ((b1 << 3) & 0x20) | ((b1 << 4) & 0x10) |
-				 ((b2 >> 3) & 0x08) | ((b2 >> 2) & 0x04) | ((b2 >> 1) & 0x02) | ((b2 >> 0) & 0x01);
+  // Extract the data bits
+  byte bData = ((b1 << 1) & 0x80) | ((b1 << 2) & 0x40) | ((b1 << 3) & 0x20) | ((b1 << 4) & 0x10) |
+         ((b2 >> 3) & 0x08) | ((b2 >> 2) & 0x04) | ((b2 >> 1) & 0x02) | ((b2 >> 0) & 0x01);
 
-	// Calculate the expected clock bits for the data byte
-	byte bGoodClock = 0;
-	if (!(bData & 0x80) && !(bLastData & 1)) bGoodClock |= 0x80;
-	if (!(bData & 0xc0)) bGoodClock |= 0x40;
-	if (!(bData & 0x60)) bGoodClock |= 0x20;
-	if (!(bData & 0x30)) bGoodClock |= 0x10;
-	if (!(bData & 0x18)) bGoodClock |= 0x08;
-	if (!(bData & 0x0c)) bGoodClock |= 0x04;
-	if (!(bData & 0x06)) bGoodClock |= 0x02;
-	if (!(bData & 0x03)) bGoodClock |= 0x01;
+  // Calculate the expected clock bits for the data byte
+  byte bGoodClock = 0;
+  if (!(bData & 0x80) && !(bLastData & 1)) bGoodClock |= 0x80;
+  if (!(bData & 0xc0)) bGoodClock |= 0x40;
+  if (!(bData & 0x60)) bGoodClock |= 0x20;
+  if (!(bData & 0x30)) bGoodClock |= 0x10;
+  if (!(bData & 0x18)) bGoodClock |= 0x08;
+  if (!(bData & 0x0c)) bGoodClock |= 0x04;
+  if (!(bData & 0x06)) bGoodClock |= 0x02;
+  if (!(bData & 0x03)) bGoodClock |= 0x01;
 
-	// Determine the actual clock difference, needed to recognise address marks
-	bClock ^= bGoodClock;
+  // Determine the actual clock difference, needed to recognise address marks
+  bClock ^= bGoodClock;
 
-	// Store the decoded data for easier sector data extraction
-	abDecoded[uDecoded++] = bLastData = bData;
+  // Store the decoded data for easier sector data extraction
+  abDecoded[uDecoded++] = bLastData = bData;
 
-	// Return a word containing the separated clock and data bytes
-	return (bClock << 8) | bData;
+  // Return a word containing the separated clock and data bytes
+  return (bClock << 8) | bData;
 }
 
 // Read a data byte, discarding the clock bits
 static byte ReadDataByte()
 {
-	return ReadWord() & 0xff;
+  return ReadWord() & 0xff;
 }
 
 // Process the MFM track data to extract sector headers and data fields
 static void ReadTrack (t_track *pt_)
 {
-	t_sector *ps = nullptr;
-	unsigned int uHeaderOffset = 0;
+  t_sector *ps = nullptr;
+  unsigned int uHeaderOffset = 0;
 
-	// Initialise scanning state
-	uPos = uDecoded = 0;
-	fWrapped = false;
-	bLastData = 0x00;
-	nDataClock = 0;
+  // Initialise scanning state
+  uPos = uDecoded = 0;
+  fWrapped = false;
+  bLastData = 0x00;
+  nDataClock = 0;
 
-	// Return if no track data or if updating and track not flakey
-	if (!cti.tracklen)
-		return;
-	else if (pt_->data && !(cti.type & CTIT_FLAG_FLAKEY))
-		return;
+  // Return if no track data or if updating and track not flakey
+  if (!cti.tracklen)
+    return;
+  else if (pt_->data && !(cti.type & CTIT_FLAG_FLAKEY))
+    return;
 
-	// Loop until end of track, completing sectors that spanning the track wrapping point
-	while (!fWrapped || ps)
-	{
-		byte bAM;
+  // Loop until end of track, completing sectors that spanning the track wrapping point
+  while (!fWrapped || ps)
+  {
+    byte bAM;
 
-		// Continue iff we find 3xA1 with missing clock bits
-		if (ReadWord() != 0x04a1) { uPos -= 15; uDecoded--; continue; }	// advance by 1 bit on mismatches, discard decoded byte
-		if (ReadWord() != 0x04a1) continue;
-		if (ReadWord() != 0x04a1) continue;
+    // Continue iff we find 3xA1 with missing clock bits
+    if (ReadWord() != 0x04a1) { uPos -= 15; uDecoded--; continue; }  // advance by 1 bit on mismatches, discard decoded byte
+    if (ReadWord() != 0x04a1) continue;
+    if (ReadWord() != 0x04a1) continue;
 
-		// CRC 3xA1 + address mark
-		s_wCRC = 0xcdb4;
-		Crc(bAM = ReadDataByte());
+    // CRC 3xA1 + address mark
+    s_wCRC = 0xcdb4;
+    Crc(bAM = ReadDataByte());
 
-		switch (bAM)
-		{
-			case 0xfe:	// id address mark
-			{
-				// Check we've room for another sector
-				if (pt_->sectors >= DSK_SECTORMAX)
-					continue;
+    switch (bAM)
+    {
+      case 0xfe:  // id address mark
+      {
+        // Check we've room for another sector
+        if (pt_->sectors >= DSK_SECTORMAX)
+          continue;
 
-				// Allocate new sector
-				ps = &pt_->sector[pt_->sectors++];
+        // Allocate new sector
+        ps = &pt_->sector[pt_->sectors++];
 
-				// Read ID header and CRC
-				Crc(ps->CHRN[0] = ReadDataByte());
-				Crc(ps->CHRN[1] = ReadDataByte());
-				Crc(ps->CHRN[2] = ReadDataByte());
-				Crc(ps->CHRN[3] = ReadDataByte());
-				Crc(ReadDataByte());
-				Crc(ReadDataByte());
+        // Read ID header and CRC
+        Crc(ps->CHRN[0] = ReadDataByte());
+        Crc(ps->CHRN[1] = ReadDataByte());
+        Crc(ps->CHRN[2] = ReadDataByte());
+        Crc(ps->CHRN[3] = ReadDataByte());
+        Crc(ReadDataByte());
+        Crc(ReadDataByte());
 
-				// If the header CRC is bad we ignore it
-				if (s_wCRC)
-				{
-					pt_->sectors--;
-					ps = nullptr;
-					continue;
-				}
+        // If the header CRC is bad we ignore it
+        if (s_wCRC)
+        {
+          pt_->sectors--;
+          ps = nullptr;
+          continue;
+        }
 
-				// Remember the track position of the header
-				uHeaderOffset = uLastPos;
-				continue;
-			}
+        // Remember the track position of the header
+        uHeaderOffset = uLastPos;
+        continue;
+      }
 
-			case 0xfb: case 0xfa:	// data address mark (+alt)
-			case 0xf8: case 0xf9:	// data address mark with control mark (+alt)
-			{
-				// Remember where the data started and the wrap status
-				unsigned int uDataPos = uPos;
-				bool fDataWrapped = fWrapped;
+      case 0xfb: case 0xfa:  // data address mark (+alt)
+      case 0xf8: case 0xf9:  // data address mark with control mark (+alt)
+      {
+        // Remember where the data started and the wrap status
+        unsigned int uDataPos = uPos;
+        bool fDataWrapped = fWrapped;
 
-				// Ignore the data field if there's no associated header
-				if (!ps)
-					continue;
+        // Ignore the data field if there's no associated header
+        if (!ps)
+          continue;
 
-				// Check the byte distance between header and data fields
-				unsigned int uOffset = (uLastPos - uHeaderOffset) >> 4;
+        // Check the byte distance between header and data fields
+        unsigned int uOffset = (uLastPos - uHeaderOffset) >> 4;
 
-				// If it's too close or too far, the data isn't accessible
-				if (uOffset < 32 || uOffset >= 64)
-				{
-					ps->flags[1] &= ~0x01;	// no data
-					ps = nullptr;
-					continue;
-				}
+        // If it's too close or too far, the data isn't accessible
+        if (uOffset < 32 || uOffset >= 64)
+        {
+          ps->flags[1] &= ~0x01;  // no data
+          ps = nullptr;
+          continue;
+        }
 
-				// Flag the control mark if the DAM indicates one
-				if (bAM == 0xf8 || bAM == 0xf9)
-					ps->flags[1] |= 0x40;
+        // Flag the control mark if the DAM indicates one
+        if (bAM == 0xf8 || bAM == 0xf9)
+          ps->flags[1] |= 0x40;
 
-				// Set the data position in the buffer and sector size
-				ps->setData(abDecoded + uDecoded);
-				unsigned int sector_size = (ps->CHRN[3] <= 7) ? (128 << ps->CHRN[3]) : 0x8000;
-				ps->setSizes(sector_size, sector_size);
+        // Set the data position in the buffer and sector size
+        ps->setData(abDecoded + uDecoded);
+        unsigned int sector_size = (ps->CHRN[3] <= 7) ? (128 << ps->CHRN[3]) : 0x8000;
+        ps->setSizes(sector_size, sector_size);
 
-				// Decode and CRC the data field
-				for (unsigned int u = 0 ; u < ps->getTotalSize() ; u++)
-					Crc(ReadDataByte());
+        // Decode and CRC the data field
+        for (unsigned int u = 0 ; u < ps->getTotalSize() ; u++)
+          Crc(ReadDataByte());
 
-				// Include data CRC bytes
-				Crc(ReadDataByte());
-				Crc(ReadDataByte());
+        // Include data CRC bytes
+        Crc(ReadDataByte());
+        Crc(ReadDataByte());
 
-				// Bad CRC?
-				if (s_wCRC)
-				{
-					// Flag a data CRC error
-					ps->flags[0] |= 0x20;
-					ps->flags[1] |= 0x20;
-				}
+        // Bad CRC?
+        if (s_wCRC)
+        {
+          // Flag a data CRC error
+          ps->flags[0] |= 0x20;
+          ps->flags[1] |= 0x20;
+        }
 
-				// To allow for read-track protections, overread the first data field to 4K
-				if (pt_->sectors == 1 && ps->getTotalSize() < 4096)
-				{
-					for (unsigned int u = 0 ; u < (4096 - ps->getTotalSize()) ; u++)
-						Crc(ReadDataByte());
-				}
+        // To allow for read-track protections, overread the first data field to 4K
+        if (pt_->sectors == 1 && ps->getTotalSize() < 4096)
+        {
+          for (unsigned int u = 0 ; u < (4096 - ps->getTotalSize()) ; u++)
+            Crc(ReadDataByte());
+        }
 
-				// Sector complete
-				ps = nullptr;
+        // Sector complete
+        ps = nullptr;
 
-				// Step back up to just after the data position to check for more address marks
-				// as sectors could be overlapping
-				uPos = uDataPos;
-				fWrapped = fDataWrapped;
-				continue;
-			}
-		}
-	}
+        // Step back up to just after the data position to check for more address marks
+        // as sectors could be overlapping
+        uPos = uDataPos;
+        fWrapped = fDataWrapped;
+        continue;
+      }
+    }
+  }
 
-	// Data buffer not allocated yet?
-	if (!pt_->data)
-	{
-		// Allocate enough for the full decoded size, allowing for expanded overlapping sectors
-		memcpy(pt_->data = static_cast<byte*>(malloc(uDecoded)), abDecoded, pt_->size = uDecoded);
-		auto offset = (pt_->data-abDecoded);
+  // Data buffer not allocated yet?
+  if (!pt_->data)
+  {
+    // Allocate enough for the full decoded size, allowing for expanded overlapping sectors
+    memcpy(pt_->data = static_cast<byte*>(malloc(uDecoded)), abDecoded, pt_->size = uDecoded);
+    auto offset = (pt_->data-abDecoded);
 
-		// Set the sector data pointers for the new buffer
-		for (unsigned int u = 0 ; u < pt_->sectors ; u++)
-			pt_->sector[u].setData(pt_->sector[u].getDataForWrite()+offset);
-	}
+    // Set the sector data pointers for the new buffer
+    for (unsigned int u = 0 ; u < pt_->sectors ; u++)
+      pt_->sector[u].setData(pt_->sector[u].getDataForWrite()+offset);
+  }
 }
 
 // Track hook, called each disk rotation to allow flakey data to be updated
 void ipf_track_hook (t_drive *drive)
 {
-	byte cyl = drive->current_track, head = drive->current_side;
-	long id = drive->ipf_id;
+  byte cyl = drive->current_track, head = drive->current_side;
+  long id = drive->ipf_id;
 
-	// Re-lock and update the track (note: don't use CAPSUnlockTrack() first as it resets the flakey data RNG!)
-	cti.type = 1;
-	if (_CAPSLockTrack(reinterpret_cast<CapsTrackInfo*>(&cti), id, cyl, head, dwLockFlags) == imgeOk)
-	{
-		t_track *pt = &drive->track[cyl][head];
+  // Re-lock and update the track (note: don't use CAPSUnlockTrack() first as it resets the flakey data RNG!)
+  cti.type = 1;
+  if (_CAPSLockTrack(reinterpret_cast<CapsTrackInfo*>(&cti), id, cyl, head, dwLockFlags) == imgeOk)
+  {
+    t_track *pt = &drive->track[cyl][head];
 
-		if (!cti.tracklen)
-			memset(pt, 0, sizeof(*pt));
-		else
-		{
-			// Convert track length to bits if supported
-			if (!(dwLockFlags & DI_LOCK_TRKBIT)) cti.tracklen <<= 3;
+    if (!cti.tracklen)
+      memset(pt, 0, sizeof(*pt));
+    else
+    {
+      // Convert track length to bits if supported
+      if (!(dwLockFlags & DI_LOCK_TRKBIT)) cti.tracklen <<= 3;
 
-			ReadTrack(pt);
-		}
-	}
+      ReadTrack(pt);
+    }
+  }
 }
 
 // Eject hook, for additional disk image clean-up
 void ipf_eject_hook (t_drive *drive)
 {
-	long id = drive->ipf_id;
+  long id = drive->ipf_id;
 
-	_CAPSUnlockImage(id);
-	_CAPSRemImage(id);
-	_CAPSExit();
-	unload_caps_library();
-	drive->altered = false; // discard modifications
-	drive->eject_hook = nullptr;
+  _CAPSUnlockImage(id);
+  _CAPSRemImage(id);
+  _CAPSExit();
+  unload_caps_library();
+  drive->altered = false; // discard modifications
+  drive->eject_hook = nullptr;
 }
 
 int ipf_load (FILE *pfileIn, t_drive *drive)
@@ -433,109 +433,109 @@ int ipf_load (FILE *pfileIn, t_drive *drive)
 // Attempt to load the supplied file as an IPF disk image
 int ipf_load (const std::string &filename, t_drive *drive)
 {
-	char sz[4];
-	long id = -1;
-	struct CapsImageInfo cii;
-	struct CapsVersionInfo vi = { 0, 0, 0, 0 };
+  char sz[4];
+  long id = -1;
+  struct CapsImageInfo cii;
+  struct CapsVersionInfo vi = { 0, 0, 0, 0 };
 
-	dsk_eject(drive);
+  dsk_eject(drive);
 
-	FILE *f = fopen(filename.c_str(), "rb");
-	if (!f)
+  FILE *f = fopen(filename.c_str(), "rb");
+  if (!f)
     {
-		LOG_ERROR("Couldn't open file: " << filename);
-		return ERR_DSK_INVALID;
+    LOG_ERROR("Couldn't open file: " << filename);
+    return ERR_DSK_INVALID;
     }
 
-	// Check for IPF file signature
-	if (!fread(sz, 4, 1, f) || fclose(f) || memcmp(sz, "CAPS", sizeof(sz)))
-	{
-		fclose(f);
-		LOG_ERROR("Wrong IPF header in: " << filename);
-		return ERR_DSK_INVALID;
-	}
+  // Check for IPF file signature
+  if (!fread(sz, 4, 1, f) || fclose(f) || memcmp(sz, "CAPS", sizeof(sz)))
+  {
+    fclose(f);
+    LOG_ERROR("Wrong IPF header in: " << filename);
+    return ERR_DSK_INVALID;
+  }
 
-	// Ensure the SPS library is present before we try to use the delay-load calls
-	int sts = load_caps_library();
-	if (sts) return sts;
+  // Ensure the SPS library is present before we try to use the delay-load calls
+  int sts = load_caps_library();
+  if (sts) return sts;
 
-	// Check that the DLL supports the CapsTrackInfoT1 structure we need
-	if (_CAPSGetVersionInfo(&vi, 0) != imgeOk || vi.release < 4) // compatible DLL?
-	{
-		LOG_ERROR("IPF shared library is too old. Requiring version >=4. Please upgrade it");
-		return ERR_DSK_INVALID;
-	}
+  // Check that the DLL supports the CapsTrackInfoT1 structure we need
+  if (_CAPSGetVersionInfo(&vi, 0) != imgeOk || vi.release < 4) // compatible DLL?
+  {
+    LOG_ERROR("IPF shared library is too old. Requiring version >=4. Please upgrade it");
+    return ERR_DSK_INVALID;
+  }
 
-	// Use bit lengths if available
-	dwLockFlags |= vi.flag & (DI_LOCK_OVLBIT|DI_LOCK_TRKBIT);
+  // Use bit lengths if available
+  dwLockFlags |= vi.flag & (DI_LOCK_OVLBIT|DI_LOCK_TRKBIT);
 
-	// Initialise the library
-	if (_CAPSInit() != imgeOk)
-	{
-		LOG_ERROR("IPF shared library initialisation failed!");
-		return ERR_DSK_INVALID;
-	}
+  // Initialise the library
+  if (_CAPSInit() != imgeOk)
+  {
+    LOG_ERROR("IPF shared library initialisation failed!");
+    return ERR_DSK_INVALID;
+  }
 
-	// Create a new image container
-	id = _CAPSAddImage();
+  // Create a new image container
+  id = _CAPSAddImage();
 
-	// Attach the IPF file to the container
-	if (_CAPSLockImage(id, const_cast<char*>(filename.c_str())) != imgeOk)
-	{
-		_CAPSRemImage(id);
-		_CAPSExit();
-		unload_caps_library();
-		LOG_ERROR("Couldn't lock image: " << filename);
-		return ERR_DSK_INVALID;
-	}
+  // Attach the IPF file to the container
+  if (_CAPSLockImage(id, const_cast<char*>(filename.c_str())) != imgeOk)
+  {
+    _CAPSRemImage(id);
+    _CAPSExit();
+    unload_caps_library();
+    LOG_ERROR("Couldn't lock image: " << filename);
+    return ERR_DSK_INVALID;
+  }
 
-	// Get details about the contents of the image
-	if (_CAPSGetImageInfo(&cii, id) != imgeOk)
-	{
-		_CAPSRemImage(id);
-		_CAPSExit();
-		unload_caps_library();
-		LOG_ERROR("Couldn't get image info: " << filename);
-		return ERR_DSK_INVALID;
-	}
+  // Get details about the contents of the image
+  if (_CAPSGetImageInfo(&cii, id) != imgeOk)
+  {
+    _CAPSRemImage(id);
+    _CAPSExit();
+    unload_caps_library();
+    LOG_ERROR("Couldn't get image info: " << filename);
+    return ERR_DSK_INVALID;
+  }
 
-	// Set up the internal drive details
-	drive->tracks = cii.maxcylinder+1;
-	drive->sides = cii.maxhead;
-	drive->altered = false;
-	drive->track_hook = ipf_track_hook;
-	drive->eject_hook = ipf_eject_hook;
+  // Set up the internal drive details
+  drive->tracks = cii.maxcylinder+1;
+  drive->sides = cii.maxhead;
+  drive->altered = false;
+  drive->track_hook = ipf_track_hook;
+  drive->eject_hook = ipf_eject_hook;
 
-	// Load all tracks from the image
-	for (byte cyl = static_cast<byte>(cii.mincylinder); cyl <= cii.maxcylinder ; cyl++)
-	{
-		for (byte head = static_cast<byte>(cii.minhead); head <= cii.maxhead ; head++)
-		{
-			cti.type = 1;
-			if (_CAPSLockTrack(reinterpret_cast<CapsTrackInfo*>(&cti), id, cyl, head, dwLockFlags) != imgeOk)
-			{
-				LOG_ERROR("Failed to lock IPF track, please upgrade IPF shared library.");
-				_CAPSUnlockImage(id);
-				_CAPSRemImage(id);
-				_CAPSExit();
-				unload_caps_library();
-				return ERR_DSK_INVALID;
-			}
+  // Load all tracks from the image
+  for (byte cyl = static_cast<byte>(cii.mincylinder); cyl <= cii.maxcylinder ; cyl++)
+  {
+    for (byte head = static_cast<byte>(cii.minhead); head <= cii.maxhead ; head++)
+    {
+      cti.type = 1;
+      if (_CAPSLockTrack(reinterpret_cast<CapsTrackInfo*>(&cti), id, cyl, head, dwLockFlags) != imgeOk)
+      {
+        LOG_ERROR("Failed to lock IPF track, please upgrade IPF shared library.");
+        _CAPSUnlockImage(id);
+        _CAPSRemImage(id);
+        _CAPSExit();
+        unload_caps_library();
+        return ERR_DSK_INVALID;
+      }
 
-			t_track *pt = &drive->track[cyl][head];
+      t_track *pt = &drive->track[cyl][head];
 
-			if (!cti.tracklen)
-				memset(pt, 0, sizeof(*pt));
-			else
-				ReadTrack(pt);
+      if (!cti.tracklen)
+        memset(pt, 0, sizeof(*pt));
+      else
+        ReadTrack(pt);
 
-			_CAPSUnlockTrack(id, cyl, head);
-		}
-	}
+      _CAPSUnlockTrack(id, cyl, head);
+    }
+  }
 
-	// Store the IPF id for later use
-	drive->ipf_id = id;
+  // Store the IPF id for later use
+  drive->ipf_id = id;
 
-	return 0;
+  return 0;
 }
 #endif

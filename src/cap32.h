@@ -311,7 +311,7 @@ typedef struct {
 } t_FDC;
 
 typedef struct {
-	unsigned int hs_count;
+   unsigned int hs_count;
    unsigned char ROM_config;
    unsigned char lower_ROM_bank;
    bool registerPageOn;
@@ -342,7 +342,7 @@ typedef struct {
       };
       int64_t both;
    } cycle_count;
-	unsigned int buffer_full;
+   unsigned int buffer_full;
    unsigned char control;
    unsigned char reg_select;
    union {
