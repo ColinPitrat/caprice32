@@ -43,6 +43,7 @@ install:
 #- msys64\usr\bin\bash -lc "curl -O http://repo.msys2.org/msys/x86_64/msys2-keyring-r21.b39fb11-1-any.pkg.tar.xz.sig"
 #- msys64\usr\bin\bash -lc "pacman-key --verify msys2-keyring-r21.b39fb11-1-any.pkg.tar.xz.sig msys2-keyring-r21.b39fb11-1-any.pkg.tar.xz"
 #- msys64\usr\bin\bash -lc "pacman -U --noconfirm msys2-keyring-r21.b39fb11-1-any.pkg.tar.xz"
+- msys64\usr\bin\bash -lc "pacman --noconfirm -Suy" & exit 0
 - msys64\usr\bin\bash -lc "for i in {1..3}; do pacman --noconfirm -Suy && break || sleep 15 ; done"
 - msys64\usr\bin\bash -lc "for i in {1..3}; do pacman --noconfirm -S %PACKAGES% && break || sleep 15 ; done"
 
