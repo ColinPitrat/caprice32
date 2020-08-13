@@ -39,12 +39,13 @@ install:
 - 7z x "%MSYS2_SUBARCHIVE%" > NUL
   # msys2 advise to restart the shell after a first start
 - msys64\usr\bin\bash -lc ""
-#- msys64\usr\bin\bash -lc "curl -O http://repo.msys2.org/msys/x86_64/msys2-keyring-r21.b39fb11-1-any.pkg.tar.xz"
-#- msys64\usr\bin\bash -lc "curl -O http://repo.msys2.org/msys/x86_64/msys2-keyring-r21.b39fb11-1-any.pkg.tar.xz.sig"
-#- msys64\usr\bin\bash -lc "pacman-key --verify msys2-keyring-r21.b39fb11-1-any.pkg.tar.xz.sig msys2-keyring-r21.b39fb11-1-any.pkg.tar.xz"
-#- msys64\usr\bin\bash -lc "pacman -U --noconfirm msys2-keyring-r21.b39fb11-1-any.pkg.tar.xz"
+# Allow three updates to fail (can happen with 'To complete this update all MSYS2 processes including this terminal will be closed.' killing bash itself.
 - msys64\usr\bin\bash -lc "pacman --noconfirm -Suy" & exit 0
-- msys64\usr\bin\bash -lc "for i in {1..3}; do pacman --noconfirm -Suy && break || sleep 15 ; done"
+- msys64\usr\bin\bash -lc "pacman --noconfirm -Suy" & exit 0
+- msys64\usr\bin\bash -lc "pacman --noconfirm -Suy" & exit 0
+# The last one should succeed with nothing to update.
+- msys64\usr\bin\bash -lc "pacman --noconfirm -Suy"
+# Install packages. Three attempts as this can fail with network error sometims.
 - msys64\usr\bin\bash -lc "for i in {1..3}; do pacman --noconfirm -S %PACKAGES% && break || sleep 15 ; done"
 
 before_build:
