@@ -27,7 +27,7 @@ SDL.dll
 zlib1.dll
 EOF
 
-ldd cap32.exe | grep mingw | sed 's/ =>.*//' | sed 's/ *//' | sort > ${ACTUAL}
+ldd cap32.exe | grep mingw | sed 's/ =>.*//' | sed 's/^[ \t]*//' | sort > ${ACTUAL}
 
 if ! diff ${ACTUAL} ${EXPECTED}
 then
