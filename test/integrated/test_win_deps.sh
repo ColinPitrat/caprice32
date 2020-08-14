@@ -8,7 +8,7 @@ cat << EOF > ${EXPECTED}
 I don't know yet
 EOF
 
-ldd release/cap32-${ARCH} > ${ACTUAL}
+ldd cap32.exe > ${ACTUAL}
 
 cat ${ACTUAL}
 
