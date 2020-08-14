@@ -27,8 +27,11 @@ SDL.dll
 zlib1.dll
 EOF
 
+echo "ldd output:"
+ldd cap32.exe
 ldd cap32.exe | grep mingw | sed 's/ =>.*//' | sed 's/^[ \t]*//' | sort > ${ACTUAL}
 
+echo "mingw dependencies:"
 cat "${ACTUAL}"
 
 if ! diff ${ACTUAL} ${EXPECTED}
