@@ -8,6 +8,12 @@ ARCH=$1
 ACTUAL=$(mktemp)
 EXPECTED=$(mktemp)
 
+if [ "${ARCH}" -eq "win32" ]
+then
+  echo "Skipping test for ${ARCH}"
+  exit 0
+fi
+
 cat << EOF > ${EXPECTED}
 libbrotlicommon.dll
 libbrotlidec.dll
@@ -29,6 +35,7 @@ EOF
 
 echo "ldd output:"
 ldd cap32.exe
+
 ldd cap32.exe | grep mingw | sed 's/ =>.*//' | sed 's/^[ \t]*//' | sort > ${ACTUAL}
 
 echo "mingw dependencies:"
