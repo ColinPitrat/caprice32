@@ -8,7 +8,7 @@ ARCH=$1
 ACTUAL=$(mktemp)
 EXPECTED=$(mktemp)
 
-if [ "${ARCH}" -eq "win32" ]
+if [ "${ARCH}" == "win32" ]
 then
   echo "Skipping test for ${ARCH}"
   exit 0
