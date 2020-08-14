@@ -29,13 +29,12 @@ EOF
 
 ldd cap32.exe | grep mingw | sed 's/ =>.*//' | sed 's/^[ \t]*//' | sort > ${ACTUAL}
 
+cat "${ACTUAL}"
+
 if ! diff ${ACTUAL} ${EXPECTED}
 then
   echo "!! dependencies test for ${ARCH} failed"
-  cat ${LOGFILE}
   exit 1
 else
   echo "The test was successful!"
-  cat printer.dat
-  cat ${LOGFILE}
 fi
