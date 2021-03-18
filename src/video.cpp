@@ -102,6 +102,8 @@ static void compute_rects(SDL_Rect* src, SDL_Rect* dst)
   /* the src width is too big */
   if (dw>0)
   {
+    // To ensure src is not bigger than dst for odd widths.
+    dw += 1;
     src->w-=dw/2;
     src->x+=dw/4;
 
@@ -116,6 +118,8 @@ static void compute_rects(SDL_Rect* src, SDL_Rect* dst)
   /* the src height is too big */
   if (dh>0)
   {
+    // To ensure src is not bigger than dst for odd heights.
+    dh += 1;
     src->h-=dh/2;
     src->y+=dh/4;
     
