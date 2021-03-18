@@ -49,4 +49,7 @@ video_plugin;
 
 extern std::vector<video_plugin> video_plugin_list;
 
+/* Only exposed for testing purposes. Do not use. */
+void compute_rects_for_tests(SDL_Rect* src, SDL_Rect* dst);
+
 #endif

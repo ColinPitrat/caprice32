@@ -42,7 +42,7 @@
 // the real video surface
 SDL_Surface* vid = nullptr;
 // the video surface shown by the plugin to the application
-static SDL_Surface* pub = nullptr;
+SDL_Surface* pub = nullptr;
 
 extern t_CPC CPC;
 
@@ -75,9 +75,16 @@ static bool have_gl_extension (const char *nom_ext)
 }
 #endif
 
-// computes the clipping of two rectangles and changes src and dst accordingly
-// dst is the screen
-// src is the internal window
+/* Computes the clipping of pub and vid surfaces and put the result in src and dst accordingly.
+ *
+ * This provides the rectangles to clip to obtain a centered doubled CPC display
+ * in the middle of the dst surface if it fits
+ *
+ * dst is the screen
+ * src is the internal window
+ *
+ * Only exposed for testing purposes. Shouldn't be used outside of video.cpp
+ */
 static void compute_rects(SDL_Rect* src, SDL_Rect* dst)
 {
   /* initialise the source rect to full source */
@@ -117,9 +124,17 @@ static void compute_rects(SDL_Rect* src, SDL_Rect* dst)
   }
   else
   {
+    // Without this -=, the bottom of the screen has line with random pixels.
+    // With this, they are black instead which is slightly better.
+    // Investigating where this comes from and how to avoid it would be nice!
     src->h-=2*2;
     dst->h=CPC_VISIBLE_SCR_HEIGHT*2;
   }
+}
+
+void compute_rects_for_tests(SDL_Rect* src, SDL_Rect* dst)
+{
+  compute_rects(src, dst);
 }
 
 /* ------------------------------------------------------------------------------------ */
