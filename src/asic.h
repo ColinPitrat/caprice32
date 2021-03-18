@@ -35,8 +35,8 @@ struct asic_t {
   int lockSeqPos;
 
   bool extend_border;
-  int hscroll;
-  int vscroll;
+  unsigned int hscroll;
+  unsigned int vscroll;
   byte sprites[16][16][16];
   int16_t sprites_x[16];
   int16_t sprites_y[16];

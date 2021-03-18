@@ -825,14 +825,14 @@ static inline byte getRAMByte(int video_address) {
    return *(pbRAM + video_address);
 }
 
-dword shiftLittleEndianDwordTriplet(dword val1, dword val2, dword val3, int byteShift) {
+dword shiftLittleEndianDwordTriplet(dword val1, dword val2, dword val3, unsigned int byteShift) {
    if (byteShift == 0) {
       return val3;
    }
    if (byteShift == 4) {
       return val2;
    }
-   if (byteShift == 8) {
+   if (byteShift >= 8) {
       return val1;
    }
    if (byteShift < 4) {
@@ -856,8 +856,8 @@ void prerender_normal()
 
 void prerender_normal_plus()
 {
-   int byteOffset = asic.hscroll / 8;
-   int byteShift = asic.hscroll % 8;
+   unsigned int byteOffset = asic.hscroll / 8;
+   unsigned int byteShift = asic.hscroll % 8;
    unsigned int next_address = CRTC.next_address;
    if(asic.vscroll) {
       if (CRTC.raster_count + asic.vscroll <= CRTC.registers[9]) {
@@ -901,8 +901,8 @@ void prerender_normal_half()
 
 void prerender_normal_half_plus()
 {
-   int byteOffset = (asic.hscroll / 2) / 4;
-   int byteShift = ((asic.hscroll / 2) % 4);
+   unsigned int byteOffset = (asic.hscroll / 2) / 4;
+   unsigned int byteShift = ((asic.hscroll / 2) % 4);
    unsigned int next_address = CRTC.next_address;
    if(asic.vscroll) {
       if (CRTC.raster_count + asic.vscroll <= CRTC.registers[9]) {
