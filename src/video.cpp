@@ -44,8 +44,10 @@ SDL_Renderer* renderer = nullptr;
 SDL_Texture* texture = nullptr;
 SDL_GLContext glcontext;
 
-// the real video surface
+// the video surface ready to display
 SDL_Surface* vid = nullptr;
+// the video surface scaled with same format as pub
+SDL_Surface* scaled = nullptr;
 // the video surface shown by the plugin to the application
 SDL_Surface* pub = nullptr;
 
@@ -80,84 +82,26 @@ static bool have_gl_extension (const char *nom_ext)
 }
 #endif
 
-/* Computes the clipping of pub and vid surfaces and put the result in src and dst accordingly.
- *
- * This provides the rectangles to clip to obtain a centered doubled CPC display
- * in the middle of the dst surface if it fits
- *
- * dst is the screen
- * src is the internal window
- *
- * Only exposed for testing purposes. Shouldn't be used outside of video.cpp
- */
-static void compute_rects(SDL_Rect* src, SDL_Rect* dst)
+// Returns a bpp compatible with the renderer
+int renderer_bpp(SDL_Renderer *sdl_renderer)
 {
-  /* initialise the source rect to full source */
-  src->x=0;
-  src->y=0;
-  src->w=pub->w;
-  src->h=pub->h;
-  
-  dst->x=(vid->w-CPC_VISIBLE_SCR_WIDTH*2)/2,
-  dst->y=(vid->h-CPC_VISIBLE_SCR_HEIGHT*2)/2;
-  dst->w=vid->w;
-  dst->h=vid->h;
-  
-  int dw=src->w*2-dst->w;
-  /* the src width is too big */
-  if (dw>0)
-  {
-    // To ensure src is not bigger than dst for odd widths.
-    dw += 1;
-    src->w-=dw/2;
-    src->x+=dw/4;
-
-    dst->x=0;
-    dst->w=vid->w;
-  }
-  else
-  {
-    dst->w=CPC_VISIBLE_SCR_WIDTH*2;
-  }
-  int dh=src->h*2-dst->h;
-  /* the src height is too big */
-  if (dh>0)
-  {
-    // To ensure src is not bigger than dst for odd heights.
-    dh += 1;
-    src->h-=dh/2;
-    src->y+=dh/4;
-    
-    dst->y=0;
-    dst->h=vid->h;
-  }
-  else
-  {
-    // Without this -=, the bottom of the screen has line with random pixels.
-    // With this, they are black instead which is slightly better.
-    // Investigating where this comes from and how to avoid it would be nice!
-    src->h-=2*2;
-    dst->h=CPC_VISIBLE_SCR_HEIGHT*2;
-  }
-}
-
-void compute_rects_for_tests(SDL_Rect* src, SDL_Rect* dst)
-{
-  compute_rects(src, dst);
+  SDL_RendererInfo infos;
+  SDL_GetRendererInfo(sdl_renderer, &infos);
+  return SDL_BITSPERPIXEL(infos.texture_formats[0]);
 }
 
 /* ------------------------------------------------------------------------------------ */
 /* Half size video plugin ------------------------------------------------------------- */
 /* ------------------------------------------------------------------------------------ */
-SDL_Surface* half_init(video_plugin* t, int w __attribute__((unused)), int h __attribute__((unused)), int bpp, bool fs)
+SDL_Surface* half_init(video_plugin* t, int w __attribute__((unused)), int h __attribute__((unused)), int bpp __attribute__((unused)), bool fs)
 {
   SDL_CreateWindowAndRenderer(CPC_VISIBLE_SCR_WIDTH, CPC_VISIBLE_SCR_HEIGHT, (fs?SDL_WINDOW_FULLSCREEN_DESKTOP:SDL_WINDOW_SHOWN), &window, &renderer);
   if (!window || !renderer) return nullptr;
   SDL_SetWindowTitle(window, "Caprice32 " VERSION_STRING);
-  texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_UNKNOWN, SDL_TEXTUREACCESS_STREAMING, CPC_VISIBLE_SCR_WIDTH, CPC_VISIBLE_SCR_HEIGHT);
-  if (!texture) return nullptr;
-  vid = SDL_CreateRGBSurface(0, CPC_VISIBLE_SCR_WIDTH, CPC_VISIBLE_SCR_HEIGHT, bpp, 0, 0, 0, 0);
+  vid = SDL_CreateRGBSurface(0, CPC_VISIBLE_SCR_WIDTH*2, CPC_VISIBLE_SCR_HEIGHT*2, renderer_bpp(renderer), 0, 0, 0, 0);
   if (!vid) return nullptr;
+  texture = SDL_CreateTextureFromSurface(renderer, vid);
+  if (!texture) return nullptr;
   SDL_FillRect(vid, nullptr, SDL_MapRGB(vid->format,0,0,0));
   t->x_scale=1.0;
   t->y_scale=1.0;
@@ -171,18 +115,8 @@ void half_setpal(SDL_Color* c)
   SDL_SetPaletteColors(vid->format->palette, c, 0, 32);
 }
 
-bool half_lock()
-{
-  return true;
-}
-
-void half_unlock()
-{
-}
-
 void half_flip()
 {
-  // SDL1->2: SDL_Flip(vid);
   SDL_UpdateTexture(texture, nullptr, vid->pixels, vid->pitch);
   SDL_RenderCopy(renderer, texture, nullptr, nullptr);
   SDL_RenderPresent(renderer);
@@ -193,67 +127,16 @@ void half_close()
 }
 
 /* ------------------------------------------------------------------------------------ */
-/* Half size with hardware flip video plugin ------------------------------------------ */
-/* ------------------------------------------------------------------------------------ */
-SDL_Surface* halfhw_init(video_plugin* t, int w __attribute__((unused)), int h __attribute__((unused)), int bpp, bool fs)
-{
-  SDL_CreateWindowAndRenderer(CPC_VISIBLE_SCR_WIDTH, CPC_VISIBLE_SCR_HEIGHT, (fs?SDL_WINDOW_FULLSCREEN_DESKTOP:SDL_WINDOW_SHOWN), &window, &renderer);
-  if (!window || !renderer) return nullptr;
-  SDL_SetWindowTitle(window, "Caprice32 " VERSION_STRING);
-  texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_UNKNOWN, SDL_TEXTUREACCESS_STREAMING, CPC_VISIBLE_SCR_WIDTH, CPC_VISIBLE_SCR_HEIGHT);
-  if (!texture) return nullptr;
-  vid = SDL_CreateRGBSurface(0, CPC_VISIBLE_SCR_WIDTH, CPC_VISIBLE_SCR_HEIGHT, bpp, 0, 0, 0, 0);
-  if (!vid) return nullptr;
-  SDL_FillRect(vid, nullptr, SDL_MapRGB(vid->format,0,0,0));
-  t->x_scale=1.0;
-  t->y_scale=1.0;
-  t->x_offset=0;
-  t->y_offset=0;
-  return vid;
-}
-
-void halfhw_setpal(SDL_Color* c)
-{
-  SDL_SetPaletteColors(vid->format->palette, c, 0, 32);
-}
-
-bool halfhw_lock()
-{
-  if (SDL_MUSTLOCK(vid))
-    return (SDL_LockSurface(vid)==0);
-  return true;
-}
-
-void halfhw_unlock()
-{
-  if (SDL_MUSTLOCK(vid))
-    SDL_UnlockSurface(vid);
-}
-
-void halfhw_flip()
-{
-  // SDL1->2: SDL_Flip(vid);
-  SDL_UpdateTexture(texture, nullptr, vid->pixels, vid->pitch);
-  //SDL_RenderClear(sdlRenderer);
-  SDL_RenderCopy(renderer, texture, nullptr, nullptr);
-  SDL_RenderPresent(renderer);
-}
-
-void halfhw_close()
-{
-}
-
-/* ------------------------------------------------------------------------------------ */
 /* Double size video plugin ----------------------------------------------------------- */
 /* ------------------------------------------------------------------------------------ */
-SDL_Surface* double_init(video_plugin* t, int w __attribute__((unused)), int h __attribute__((unused)), int bpp, bool fs)
+SDL_Surface* double_init(video_plugin* t, int w __attribute__((unused)), int h __attribute__((unused)), int bpp __attribute__((unused)), bool fs)
 {
   SDL_CreateWindowAndRenderer(CPC_VISIBLE_SCR_WIDTH*2, CPC_VISIBLE_SCR_HEIGHT*2, (fs?SDL_WINDOW_FULLSCREEN_DESKTOP:SDL_WINDOW_SHOWN), &window, &renderer);
   if (!window || !renderer) return nullptr;
   SDL_SetWindowTitle(window, "Caprice32 " VERSION_STRING);
-  //texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_UNKNOWN, SDL_TEXTUREACCESS_STREAMING, CPC_VISIBLE_SCR_WIDTH*2, CPC_VISIBLE_SCR_HEIGHT*2);
-  //if (!texture) return nullptr;
-  vid = SDL_CreateRGBSurface(0, CPC_VISIBLE_SCR_WIDTH*2, CPC_VISIBLE_SCR_HEIGHT*2, bpp, 0, 0, 0, 0);
+  vid = SDL_CreateRGBSurface(0, CPC_VISIBLE_SCR_WIDTH*2, CPC_VISIBLE_SCR_HEIGHT*2, renderer_bpp(renderer), 0, 0, 0, 0);
+  //vid = SDL_CreateRGBSurfaceWithFormat(0, CPC_VISIBLE_SCR_WIDTH*2, CPC_VISIBLE_SCR_HEIGHT*2, 32, SDL_PIXELFORMAT_RGB888);
+  //vid = SDL_CreateRGBSurfaceWithFormat(0, CPC_VISIBLE_SCR_WIDTH*2, CPC_VISIBLE_SCR_HEIGHT*2, SDL_BITSPERPIXEL(infos.texture_formats[0]), infos.texture_formats[0]);
   if (!vid) return nullptr;
   texture = SDL_CreateTextureFromSurface(renderer, vid);
   if (!texture) return nullptr;
@@ -270,15 +153,6 @@ void double_setpal(SDL_Color* c)
   SDL_SetPaletteColors(vid->format->palette, c, 0, 32);
 }
 
-bool double_lock()
-{
-  return true;
-}
-
-void double_unlock()
-{
-}
-
 void double_flip()
 {
   SDL_UpdateTexture(texture, nullptr, vid->pixels, vid->pitch);
@@ -288,58 +162,6 @@ void double_flip()
 
 void double_close()
 {
-}
-
-/* ------------------------------------------------------------------------------------ */
-/* Double size with hardware flip video plugin ---------------------------------------- */
-/* ------------------------------------------------------------------------------------ */
-SDL_Surface* doublehw_init(video_plugin* t, int w __attribute__((unused)), int h __attribute__((unused)), int bpp, bool fs)
-{
-  SDL_CreateWindowAndRenderer(CPC_VISIBLE_SCR_WIDTH*2, CPC_VISIBLE_SCR_HEIGHT*2, (fs?SDL_WINDOW_FULLSCREEN_DESKTOP:SDL_WINDOW_SHOWN), &window, &renderer);
-  if (!window || !renderer) return nullptr;
-  SDL_SetWindowTitle(window, "Caprice32 " VERSION_STRING);
-  texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_UNKNOWN, SDL_TEXTUREACCESS_STREAMING, CPC_VISIBLE_SCR_WIDTH*2, CPC_VISIBLE_SCR_HEIGHT*2);
-  if (!texture) return nullptr;
-  vid = SDL_CreateRGBSurface(0, CPC_VISIBLE_SCR_WIDTH*2, CPC_VISIBLE_SCR_HEIGHT*2, bpp, 0, 0, 0, 0);
-  if (!vid) return nullptr;
-  SDL_FillRect(vid, nullptr, SDL_MapRGB(vid->format,0,0,0));
-  t->x_scale=1.0;
-  t->y_scale=1.0;
-  t->x_offset=0;
-  t->y_offset=0;
-  return vid;
-}
-
-void doublehw_setpal(SDL_Color* c)
-{
-  SDL_SetPaletteColors(vid->format->palette, c, 0, 32);
-}
-
-bool doublehw_lock()
-{
-  std::cout << "cpitrat: doublehw_lock" << std::endl;
-  if (SDL_MUSTLOCK(vid))
-    return (SDL_LockSurface(vid)==0);
-  return true;
-}
-
-void doublehw_unlock()
-{
-  std::cout << "cpitrat: doublehw_unlock" << std::endl;
-  if (SDL_MUSTLOCK(vid))
-    SDL_UnlockSurface(vid);
-}
-
-void doublehw_flip()
-{
-  SDL_UpdateTexture(texture, nullptr, vid->pixels, vid->pitch);
-  SDL_RenderCopy(renderer, texture, nullptr, nullptr);
-  SDL_RenderPresent(renderer);
-}
-
-void doublehw_close()
-{
-  std::cout << "cpitrat: doublehw_close" << std::endl;
 }
 
 #ifdef HAVE_GL
@@ -543,15 +365,6 @@ void glscale_setpal(SDL_Color* c)
   }
 }
 
-bool glscale_lock()
-{
-  return true;
-}
-
-void glscale_unlock()
-{
-}
-
 void glscale_flip()
 {
   eglDisable(GL_BLEND);
@@ -658,6 +471,161 @@ void glscale_close()
   pub = nullptr;
 }
 #endif // HAVE_GL
+
+/* ------------------------------------------------------------------------------------ */
+/* Common 2x software scaling code ---------------------------------------------------- */
+/* ------------------------------------------------------------------------------------ */
+
+/* Computes the clipping of pub and scaled surfaces and put the result in src and dst accordingly.
+ *
+ * This provides the rectangles to clip to obtain a centered doubled CPC display
+ * in the middle of the dst surface if it fits
+ *
+ * dst is the screen
+ * src is the internal window
+ *
+ * Only exposed for testing purposes. Shouldn't be used outside of video.cpp
+ */
+static void compute_rects(SDL_Rect* src, SDL_Rect* dst)
+{
+  /* initialise the source rect to full source */
+  src->x=0;
+  src->y=0;
+  src->w=pub->w;
+  src->h=pub->h;
+  
+  dst->x=(scaled->w-CPC_VISIBLE_SCR_WIDTH*2)/2,
+  dst->y=(scaled->h-CPC_VISIBLE_SCR_HEIGHT*2)/2;
+  dst->w=scaled->w;
+  dst->h=scaled->h;
+  
+  int dw=src->w*2-dst->w;
+  /* the src width is too big */
+  if (dw>0)
+  {
+    // To ensure src is not bigger than dst for odd widths.
+    dw += 1;
+    src->w-=dw/2;
+    src->x+=dw/4;
+
+    dst->x=0;
+    dst->w=scaled->w;
+  }
+  else
+  {
+    dst->w=CPC_VISIBLE_SCR_WIDTH*2;
+  }
+  int dh=src->h*2-dst->h;
+  /* the src height is too big */
+  if (dh>0)
+  {
+    // To ensure src is not bigger than dst for odd heights.
+    dh += 1;
+    src->h-=dh/2;
+    src->y+=dh/4;
+    
+    dst->y=0;
+    dst->h=scaled->h;
+  }
+  else
+  {
+    // Without this -=, the bottom of the screen has line with random pixels.
+    // With this, they are black instead which is slightly better.
+    // Investigating where this comes from and how to avoid it would be nice!
+    src->h-=2*2;
+    dst->h=CPC_VISIBLE_SCR_HEIGHT*2;
+  }
+}
+
+void compute_rects_for_tests(SDL_Rect* src, SDL_Rect* dst)
+{
+  compute_rects(src, dst);
+}
+
+SDL_Surface* swscale_init(video_plugin* t, int w __attribute__((unused)), int h __attribute__((unused)), int bpp __attribute__((unused)), bool fs)
+{
+  SDL_CreateWindowAndRenderer(CPC_VISIBLE_SCR_WIDTH*2, CPC_VISIBLE_SCR_HEIGHT*2, (fs?SDL_WINDOW_FULLSCREEN_DESKTOP:SDL_WINDOW_SHOWN), &window, &renderer);
+  if (!window || !renderer) return nullptr;
+  /*
+  std::cout << "cpitrat: Renderer info:" << std::endl;
+  SDL_RendererInfo infos;
+  SDL_GetRendererInfo(renderer, &infos);
+  std::cout << "  name: " << infos.name << std::endl;
+  std::cout << "  flags: " << infos.flags << std::endl;
+  std::cout << "  #texture formats: " << infos.num_texture_formats << std::endl;
+  for (unsigned int i = 0; i < infos.num_texture_formats; i++) {
+    std::cout << "     format: " << SDL_GetPixelFormatName(infos.texture_formats[i]) << std::endl;
+  }
+  */
+  SDL_SetWindowTitle(window, "Caprice32 " VERSION_STRING);
+  vid = SDL_CreateRGBSurface(0, CPC_VISIBLE_SCR_WIDTH*2, CPC_VISIBLE_SCR_HEIGHT*2, renderer_bpp(renderer), 0, 0, 0, 0);
+  if (!vid) return nullptr;
+  texture = SDL_CreateTextureFromSurface(renderer, vid);
+  if (!texture) return nullptr;
+
+  scaled = SDL_CreateRGBSurface(0, CPC_VISIBLE_SCR_WIDTH*2, CPC_VISIBLE_SCR_HEIGHT*2, 16, 0, 0, 0, 0);
+  if (!scaled) return nullptr;
+  if (scaled->format->BitsPerPixel!=16)
+  {
+    std::cerr << t->name << ": SDL didn't return a 16 bpp surface but a " << static_cast<int>(scaled->format->BitsPerPixel) << " bpp one." << std::endl;
+    return nullptr;
+  }
+  t->x_scale=0.5;
+  t->y_scale=0.5;
+  t->x_offset=0;
+  t->y_offset=0;
+  SDL_FillRect(vid, nullptr, SDL_MapRGB(vid->format,0,0,0));
+  pub = SDL_CreateRGBSurface(0, CPC_VISIBLE_SCR_WIDTH, CPC_VISIBLE_SCR_HEIGHT, 16, 0, 0, 0, 0);
+  if (pub->format->BitsPerPixel!=16)
+  {
+    std::cerr << t->name << ": SDL didn't return a 16 bpp surface but a " << static_cast<int>(pub->format->BitsPerPixel) << " bpp one." << std::endl;
+    return nullptr;
+  }
+
+   std::cout << "cpitrat: vid properties: " << std::endl;
+   std::cout << " format: " << SDL_GetPixelFormatName(vid->format->format) << std::endl;
+   std::cout << " bpp: " << static_cast<int>(vid->format->BitsPerPixel) << std::endl;
+   std::cout << " Bpp: " << static_cast<int>(vid->format->BytesPerPixel) << std::endl;
+   std::cout << " palette: " << vid->format->palette << std::endl;
+   if (vid->format->palette) 
+     std::cout << " palette #colors: " << vid->format->palette->ncolors << std::endl;
+   std::cout << " rmask: " << vid->format->Rmask << std::endl;
+   std::cout << " gmask: " << vid->format->Gmask << std::endl;
+   std::cout << " bmask: " << vid->format->Bmask << std::endl;
+   std::cout << " amask: " << vid->format->Amask << std::endl;
+   std::cout << " width: " << vid->w << std::endl;
+   std::cout << " height: " << vid->h << std::endl;
+   std::cout << " pitch: " << vid->pitch << std::endl;
+
+   std::cout << "cpitrat: scaled properties: " << std::endl;
+   std::cout << " format: " << SDL_GetPixelFormatName(scaled->format->format) << std::endl;
+   std::cout << " bpp: " << static_cast<int>(scaled->format->BitsPerPixel) << std::endl;
+   std::cout << " Bpp: " << static_cast<int>(scaled->format->BytesPerPixel) << std::endl;
+   std::cout << " palette: " << scaled->format->palette << std::endl;
+   if (scaled->format->palette) 
+     std::cout << " palette #colors: " << scaled->format->palette->ncolors << std::endl;
+   std::cout << " rmask: " << scaled->format->Rmask << std::endl;
+   std::cout << " gmask: " << scaled->format->Gmask << std::endl;
+   std::cout << " bmask: " << scaled->format->Bmask << std::endl;
+   std::cout << " amask: " << scaled->format->Amask << std::endl;
+   std::cout << " width: " << scaled->w << std::endl;
+   std::cout << " height: " << scaled->h << std::endl;
+   std::cout << " pitch: " << scaled->pitch << std::endl;
+
+  return pub;
+}
+
+void swscale_setpal(SDL_Color* c)
+{
+  SDL_SetPaletteColors(scaled->format->palette, c, 0, 32);
+  SDL_SetPaletteColors(pub->format->palette, c, 0, 32);
+}
+
+void swscale_close()
+{
+  SDL_FreeSurface(pub);
+  pub = nullptr;
+}
 
 /* ------------------------------------------------------------------------------------ */
 /* Super eagle video plugin ----------------------------------------------------------- */
@@ -911,88 +879,22 @@ void filter_supereagle(Uint8 *srcPtr, Uint32 srcPitch, /* Uint8 *deltaPtr,  */
   }      // endof: for (height; height; height--)
 }
 
-SDL_Surface* seagle_init(video_plugin* t,int w,int h, int bpp, bool fs)
-{
-  if (bpp!=16)
-  {
-    std::cerr << t->name << " only works in 16 bits color mode - forcing 16 bpp" << std::endl;
-    bpp = 16;
-  }
-  if (!fs)
-  {
-    w=CPC_VISIBLE_SCR_WIDTH*2;
-    h=CPC_VISIBLE_SCR_HEIGHT*2;
-  }
-  // SDL1->2: vid=SDL_SetVideoMode(w,h,bpp,SDL_HWSURFACE | SDL_HWPALETTE | (fs?SDL_FULLSCREEN:0));
-  if (fs) {
-    SDL_CreateWindowAndRenderer(0, 0, SDL_WINDOW_FULLSCREEN_DESKTOP | SDL_WINDOW_OPENGL, &window, &renderer);
-  } else {
-    SDL_CreateWindowAndRenderer(w, h, SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL, &window, &renderer);
-  }
-  if (!window || !renderer) return nullptr;
-  SDL_SetWindowTitle(window, "Caprice32 " VERSION_STRING);
-  texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_UNKNOWN, SDL_TEXTUREACCESS_STREAMING, w, h);
-  if (!texture) return nullptr;
-  vid = SDL_CreateRGBSurface(0, CPC_VISIBLE_SCR_WIDTH, CPC_VISIBLE_SCR_HEIGHT, bpp, 0, 0, 0, 0);
-  if (!vid) return nullptr;
-  if (vid->format->BitsPerPixel!=16)
-  {
-    std::cerr << t->name << ": SDL didn't return a 16 bpp surface but a " << static_cast<int>(vid->format->BitsPerPixel) << " bpp one." << std::endl;
-    return nullptr;
-  }
-  if (fs)
-  {
-    t->x_scale=0.5;
-    t->y_scale=0.5;
-    t->x_offset=static_cast<int>(w-CPC_VISIBLE_SCR_WIDTH/t->x_scale)/2;
-    t->y_offset=static_cast<int>(h-CPC_VISIBLE_SCR_HEIGHT/t->y_scale)/2;
-  }
-  else
-  {
-    t->x_scale=0.5;
-    t->y_scale=0.5;
-    t->x_offset=0;
-    t->y_offset=0;
-  }
-  SDL_FillRect(vid,nullptr,SDL_MapRGB(vid->format,0,0,0));
-  pub=SDL_CreateRGBSurface(0, CPC_VISIBLE_SCR_WIDTH, CPC_VISIBLE_SCR_HEIGHT, bpp, 0, 0, 0, 0);
-  return pub;
-}
-
-void seagle_setpal(SDL_Color* c)
-{
-  SDL_SetPaletteColors(vid->format->palette, c, 0, 32);
-  SDL_SetPaletteColors(pub->format->palette, c, 0, 32);
-}
-
-bool seagle_lock()
-{
-  return true;
-}
-
-void seagle_unlock()
-{
-}
-
 void seagle_flip()
 {
-  if (SDL_MUSTLOCK(vid))
-    SDL_LockSurface(vid);
+  if (SDL_MUSTLOCK(scaled))
+    SDL_LockSurface(scaled);
   SDL_Rect src;
   SDL_Rect dst;
   compute_rects(&src,&dst);
   filter_supereagle(static_cast<Uint8*>(pub->pixels) + (2*src.x+src.y*pub->pitch) + (pub->pitch), pub->pitch,
-     static_cast<Uint8*>(vid->pixels) + (2*dst.x+dst.y*vid->pitch), vid->pitch, src.w, src.h);
-  if (SDL_MUSTLOCK(vid))
-    SDL_UnlockSurface(vid);
-  // SDL1->2: SDL_UpdateRects(vid,1,&dst);
+     static_cast<Uint8*>(scaled->pixels) + (2*dst.x+dst.y*scaled->pitch), scaled->pitch, src.w, src.h);
+  if (SDL_MUSTLOCK(scaled))
+    SDL_UnlockSurface(scaled);
+  // Blit to convert from 16bpp to pixel format compatible with renderer.
+  SDL_BlitSurface(scaled, nullptr, vid, nullptr);
+  SDL_UpdateTexture(texture, nullptr, vid->pixels, vid->pitch);
+  SDL_RenderCopy(renderer, texture, nullptr, nullptr);
   SDL_RenderPresent(renderer);
-}
-
-void seagle_close()
-{
-  SDL_FreeSurface(pub);
-  pub = nullptr;
 }
 
 /* ------------------------------------------------------------------------------------ */
@@ -1027,88 +929,22 @@ void filter_scale2x(Uint8 *srcPtr, Uint32 srcPitch,
   }
 }
 
-SDL_Surface* scale2x_init(video_plugin* t,int w,int h, int bpp, bool fs)
-{
-  if (bpp!=16)
-  {
-    std::cerr << t->name << " only works in 16 bits color mode - forcing 16 bpp" << std::endl;
-    bpp = 16;
-  }
-  if (!fs)
-  {
-    w=CPC_VISIBLE_SCR_WIDTH*2;
-    h=CPC_VISIBLE_SCR_HEIGHT*2;
-  }
-  // SDL1->2: vid=SDL_SetVideoMode(w,h,bpp,SDL_HWSURFACE | SDL_HWPALETTE | (fs?SDL_FULLSCREEN:0));
-  if (fs) {
-    SDL_CreateWindowAndRenderer(0, 0, SDL_WINDOW_FULLSCREEN_DESKTOP | SDL_WINDOW_OPENGL, &window, &renderer);
-  } else {
-    SDL_CreateWindowAndRenderer(w, h, SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL, &window, &renderer);
-  }
-  if (!window || !renderer) return nullptr;
-  SDL_SetWindowTitle(window, "Caprice32 " VERSION_STRING);
-  texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_UNKNOWN, SDL_TEXTUREACCESS_STREAMING, w, h);
-  if (!texture) return nullptr;
-  vid = SDL_CreateRGBSurface(0, CPC_VISIBLE_SCR_WIDTH, CPC_VISIBLE_SCR_HEIGHT, bpp, 0, 0, 0, 0);
-  if (!vid) return nullptr;
-  if (vid->format->BitsPerPixel!=16)
-  {
-    std::cerr << t->name << ": SDL didn't return a 16 bpp surface but a " << static_cast<int>(vid->format->BitsPerPixel) << " bpp one." << std::endl;
-    return nullptr;
-  }
-  if (fs)
-  {
-    t->x_scale=0.5;
-    t->y_scale=0.5;
-    t->x_offset=static_cast<int>(w-CPC_VISIBLE_SCR_WIDTH/t->x_scale)/2;
-    t->y_offset=static_cast<int>(h-CPC_VISIBLE_SCR_HEIGHT/t->y_scale)/2;
-  }
-  else
-  {
-    t->x_scale=0.5;
-    t->y_scale=0.5;
-    t->x_offset=0;
-    t->y_offset=0;
-  }
-  SDL_FillRect(vid,nullptr,SDL_MapRGB(vid->format,0,0,0));
-  pub=SDL_CreateRGBSurface(0,CPC_VISIBLE_SCR_WIDTH,CPC_VISIBLE_SCR_HEIGHT,bpp,0,0,0,0);
-  return pub;
-}
-
-void scale2x_setpal(SDL_Color* c)
-{
-  SDL_SetPaletteColors(vid->format->palette, c, 0, 32);
-  SDL_SetPaletteColors(pub->format->palette, c, 0, 32);
-}
-
-bool scale2x_lock()
-{
-  return true;
-}
-
-void scale2x_unlock()
-{
-}
-
 void scale2x_flip()
 {
-  if (SDL_MUSTLOCK(vid))
-    SDL_LockSurface(vid);
+  if (SDL_MUSTLOCK(scaled))
+    SDL_LockSurface(scaled);
   SDL_Rect src;
   SDL_Rect dst;
   compute_rects(&src,&dst);
   filter_scale2x(static_cast<Uint8*>(pub->pixels) + (2*src.x+src.y*pub->pitch) + (pub->pitch), pub->pitch,
-     static_cast<Uint8*>(vid->pixels) + (2*dst.x+dst.y*vid->pitch), vid->pitch, src.w, src.h);
-  if (SDL_MUSTLOCK(vid))
-    SDL_UnlockSurface(vid);
-  // SDL1->2: SDL_UpdateRects(vid,1,&dst);
+     static_cast<Uint8*>(scaled->pixels) + (2*dst.x+dst.y*scaled->pitch), scaled->pitch, src.w, src.h);
+  if (SDL_MUSTLOCK(scaled))
+    SDL_UnlockSurface(scaled);
+  // Blit to convert from 16bpp to pixel format compatible with renderer.
+  SDL_BlitSurface(scaled, nullptr, vid, nullptr);
+  SDL_UpdateTexture(texture, nullptr, vid->pixels, vid->pitch);
+  SDL_RenderCopy(renderer, texture, nullptr, nullptr);
   SDL_RenderPresent(renderer);
-}
-
-void scale2x_close()
-{
-  SDL_FreeSurface(pub);
-  pub = nullptr;
 }
 
 /* ------------------------------------------------------------------------------------ */
@@ -1306,88 +1142,22 @@ void filter_ascale2x (Uint8 *srcPtr, Uint32 srcPitch,
 
 
 
-SDL_Surface* ascale2x_init(video_plugin* t,int w,int h, int bpp, bool fs)
-{
-  if (bpp!=16)
-  {
-    std::cerr << t->name << " only works in 16 bits color mode - forcing 16 bpp" << std::endl;
-    bpp = 16;
-  }
-  if (!fs)
-  {
-    w=CPC_VISIBLE_SCR_WIDTH*2;
-    h=CPC_VISIBLE_SCR_HEIGHT*2;
-  }
-  // SDL1->2: vid=SDL_SetVideoMode(w,h,bpp,SDL_HWSURFACE | SDL_HWPALETTE | (fs?SDL_FULLSCREEN:0));
-  if (fs) {
-    SDL_CreateWindowAndRenderer(0, 0, SDL_WINDOW_FULLSCREEN_DESKTOP | SDL_WINDOW_OPENGL, &window, &renderer);
-  } else {
-    SDL_CreateWindowAndRenderer(w, h, SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL, &window, &renderer);
-  }
-  if (!window || !renderer) return nullptr;
-  SDL_SetWindowTitle(window, "Caprice32 " VERSION_STRING);
-  texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_UNKNOWN, SDL_TEXTUREACCESS_STREAMING, w, h);
-  if (!texture) return nullptr;
-  vid = SDL_CreateRGBSurface(0, CPC_VISIBLE_SCR_WIDTH, CPC_VISIBLE_SCR_HEIGHT, bpp, 0, 0, 0, 0);
-  if (!vid) return nullptr;
-  if (vid->format->BitsPerPixel!=16)
-  {
-    std::cerr << t->name << ": SDL didn't return a 16 bpp surface but a " << static_cast<int>(vid->format->BitsPerPixel) << " bpp one." << std::endl;
-    return nullptr;
-  }
-  if (fs)
-  {
-    t->x_scale=0.5;
-    t->y_scale=0.5;
-    t->x_offset=static_cast<int>(w-CPC_VISIBLE_SCR_WIDTH/t->x_scale)/2;
-    t->y_offset=static_cast<int>(h-CPC_VISIBLE_SCR_HEIGHT/t->y_scale)/2;
-  }
-  else
-  {
-    t->x_scale=0.5;
-    t->y_scale=0.5;
-    t->x_offset=0;
-    t->y_offset=0;
-  }
-  SDL_FillRect(vid,nullptr,SDL_MapRGB(vid->format,0,0,0));
-  pub=SDL_CreateRGBSurface(0,CPC_VISIBLE_SCR_WIDTH,CPC_VISIBLE_SCR_HEIGHT,bpp,0,0,0,0);
-  return pub;
-}
-
-void ascale2x_setpal(SDL_Color* c)
-{
-  SDL_SetPaletteColors(vid->format->palette, c, 0, 32);
-  SDL_SetPaletteColors(pub->format->palette, c, 0, 32);
-}
-
-bool ascale2x_lock()
-{
-  return true;
-}
-
-void ascale2x_unlock()
-{
-}
-
 void ascale2x_flip()
 {
-  if (SDL_MUSTLOCK(vid))
-    SDL_LockSurface(vid);
+  if (SDL_MUSTLOCK(scaled))
+    SDL_LockSurface(scaled);
   SDL_Rect src;
   SDL_Rect dst;
   compute_rects(&src,&dst);
   filter_ascale2x(static_cast<Uint8*>(pub->pixels) + (2*src.x+src.y*pub->pitch) + (pub->pitch), pub->pitch,
-     static_cast<Uint8*>(vid->pixels) + (2*dst.x+dst.y*vid->pitch), vid->pitch, src.w, src.h);
-  if (SDL_MUSTLOCK(vid))
-    SDL_UnlockSurface(vid);
-  // SDL1->2: SDL_UpdateRects(vid,1,&dst);
+     static_cast<Uint8*>(scaled->pixels) + (2*dst.x+dst.y*scaled->pitch), scaled->pitch, src.w, src.h);
+  if (SDL_MUSTLOCK(scaled))
+    SDL_UnlockSurface(scaled);
+  // Blit to convert from 16bpp to pixel format compatible with renderer.
+  SDL_BlitSurface(scaled, nullptr, vid, nullptr);
+  SDL_UpdateTexture(texture, nullptr, vid->pixels, vid->pitch);
+  SDL_RenderCopy(renderer, texture, nullptr, nullptr);
   SDL_RenderPresent(renderer);
-}
-
-void ascale2x_close()
-{
-  SDL_FreeSurface(pub);
-  pub = nullptr;
 }
 
 
@@ -1423,88 +1193,22 @@ void filter_tv2x(Uint8 *srcPtr, Uint32 srcPitch,
   }
 }
 
-SDL_Surface* tv2x_init(video_plugin* t,int w,int h, int bpp, bool fs)
-{
-  if (bpp!=16)
-  {
-    std::cerr << t->name << " only works in 16 bits color mode - forcing 16 bpp" << std::endl;
-    bpp = 16;
-  }
-  if (!fs)
-  {
-    w=CPC_VISIBLE_SCR_WIDTH*2;
-    h=CPC_VISIBLE_SCR_HEIGHT*2;
-  }
-  // SDL1->2: vid=SDL_SetVideoMode(w,h,bpp,SDL_HWSURFACE | SDL_HWPALETTE | (fs?SDL_FULLSCREEN:0));
-  if (fs) {
-    SDL_CreateWindowAndRenderer(0, 0, SDL_WINDOW_FULLSCREEN_DESKTOP | SDL_WINDOW_OPENGL, &window, &renderer);
-  } else {
-    SDL_CreateWindowAndRenderer(w, h, SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL, &window, &renderer);
-  }
-  if (!window || !renderer) return nullptr;
-  SDL_SetWindowTitle(window, "Caprice32 " VERSION_STRING);
-  texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_UNKNOWN, SDL_TEXTUREACCESS_STREAMING, w, h);
-  if (!texture) return nullptr;
-  vid = SDL_CreateRGBSurface(0, CPC_VISIBLE_SCR_WIDTH, CPC_VISIBLE_SCR_HEIGHT, bpp, 0, 0, 0, 0);
-  if (!vid) return nullptr;
-  if (vid->format->BitsPerPixel!=16)
-  {
-    std::cerr << t->name << ": SDL didn't return a 16 bpp surface but a " << static_cast<int>(vid->format->BitsPerPixel) << " bpp one." << std::endl;
-    return nullptr;
-  }
-  if (fs)
-  {
-    t->x_scale=0.5;
-    t->y_scale=0.5;
-    t->x_offset=static_cast<int>(w-CPC_VISIBLE_SCR_WIDTH/t->x_scale)/2;
-    t->y_offset=static_cast<int>(h-CPC_VISIBLE_SCR_HEIGHT/t->y_scale)/2;
-  }
-  else
-  {
-    t->x_scale=0.5;
-    t->y_scale=0.5;
-    t->x_offset=0;
-    t->y_offset=0;
-  }
-  SDL_FillRect(vid,nullptr,SDL_MapRGB(vid->format,0,0,0));
-  pub=SDL_CreateRGBSurface(0,CPC_VISIBLE_SCR_WIDTH,CPC_VISIBLE_SCR_HEIGHT,bpp,0,0,0,0);
-  return pub;
-}
-
-void tv2x_setpal(SDL_Color* c)
-{
-  SDL_SetPaletteColors(vid->format->palette, c, 0, 32);
-  SDL_SetPaletteColors(pub->format->palette, c, 0, 32);
-}
-
-bool tv2x_lock()
-{
-  return true;
-}
-
-void tv2x_unlock()
-{
-}
-
 void tv2x_flip()
 {
-  if (SDL_MUSTLOCK(vid))
-    SDL_LockSurface(vid);
+  if (SDL_MUSTLOCK(scaled))
+    SDL_LockSurface(scaled);
   SDL_Rect src;
   SDL_Rect dst;
   compute_rects(&src,&dst);
   filter_tv2x(static_cast<Uint8*>(pub->pixels) + (2*src.x+src.y*pub->pitch) + (pub->pitch), pub->pitch,
-     static_cast<Uint8*>(vid->pixels) + (2*dst.x+dst.y*vid->pitch), vid->pitch, src.w, src.h);
-  if (SDL_MUSTLOCK(vid))
-    SDL_UnlockSurface(vid);
-  // SDL1->2: SDL_UpdateRects(vid,1,&dst);
+     static_cast<Uint8*>(scaled->pixels) + (2*dst.x+dst.y*scaled->pitch), scaled->pitch, src.w, src.h);
+  if (SDL_MUSTLOCK(scaled))
+    SDL_UnlockSurface(scaled);
+  // Blit to convert from 16bpp to pixel format compatible with renderer.
+  SDL_BlitSurface(scaled, nullptr, vid, nullptr);
+  SDL_UpdateTexture(texture, nullptr, vid->pixels, vid->pitch);
+  SDL_RenderCopy(renderer, texture, nullptr, nullptr);
   SDL_RenderPresent(renderer);
-}
-
-void tv2x_close()
-{
-  SDL_FreeSurface(pub);
-  pub = nullptr;
 }
 
 /* ------------------------------------------------------------------------------------ */
@@ -1536,88 +1240,22 @@ void filter_bilinear(Uint8 *srcPtr, Uint32 srcPitch,
   }
 }
 
-SDL_Surface* swbilin_init(video_plugin* t,int w,int h, int bpp, bool fs)
-{
-  if (bpp!=16)
-  {
-    std::cerr << t->name << " only works in 16 bits color mode - forcing 16 bpp" << std::endl;
-    bpp = 16;
-  }
-  if (!fs)
-  {
-    w=CPC_VISIBLE_SCR_WIDTH*2;
-    h=CPC_VISIBLE_SCR_HEIGHT*2;
-  }
-  // SDL1->2: vid=SDL_SetVideoMode(w,h,bpp,SDL_HWSURFACE | SDL_HWPALETTE | (fs?SDL_FULLSCREEN:0));
-  if (fs) {
-    SDL_CreateWindowAndRenderer(0, 0, SDL_WINDOW_FULLSCREEN_DESKTOP | SDL_WINDOW_OPENGL, &window, &renderer);
-  } else {
-    SDL_CreateWindowAndRenderer(w, h, SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL, &window, &renderer);
-  }
-  if (!window || !renderer) return nullptr;
-  SDL_SetWindowTitle(window, "Caprice32 " VERSION_STRING);
-  texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_UNKNOWN, SDL_TEXTUREACCESS_STREAMING, w, h);
-  if (!texture) return nullptr;
-  vid = SDL_CreateRGBSurface(0, CPC_VISIBLE_SCR_WIDTH, CPC_VISIBLE_SCR_HEIGHT, bpp, 0, 0, 0, 0);
-  if (!vid) return nullptr;
-  if (vid->format->BitsPerPixel!=16)
-  {
-    std::cerr << t->name << ": SDL didn't return a 16 bpp surface but a " << static_cast<int>(vid->format->BitsPerPixel) << " bpp one." << std::endl;
-    return nullptr;
-  }
-  if (fs)
-  {
-    t->x_scale=0.5;
-    t->y_scale=0.5;
-    t->x_offset=static_cast<int>(w-CPC_VISIBLE_SCR_WIDTH/t->x_scale)/2;
-    t->y_offset=static_cast<int>(h-CPC_VISIBLE_SCR_HEIGHT/t->y_scale)/2;
-  }
-  else
-  {
-    t->x_scale=0.5;
-    t->y_scale=0.5;
-    t->x_offset=0;
-    t->y_offset=0;
-  }
-  SDL_FillRect(vid,nullptr,SDL_MapRGB(vid->format,0,0,0));
-  pub=SDL_CreateRGBSurface(0,CPC_VISIBLE_SCR_WIDTH,CPC_VISIBLE_SCR_HEIGHT,bpp,0,0,0,0);
-  return pub;
-}
-
-void swbilin_setpal(SDL_Color* c)
-{
-  SDL_SetPaletteColors(vid->format->palette, c, 0, 32);
-  SDL_SetPaletteColors(pub->format->palette, c, 0, 32);
-}
-
-bool swbilin_lock()
-{
-  return true;
-}
-
-void swbilin_unlock()
-{
-}
-
 void swbilin_flip()
 {
-  if (SDL_MUSTLOCK(vid))
-    SDL_LockSurface(vid);
+  if (SDL_MUSTLOCK(scaled))
+    SDL_LockSurface(scaled);
   SDL_Rect src;
   SDL_Rect dst;
   compute_rects(&src,&dst);
   filter_bilinear(static_cast<Uint8*>(pub->pixels) + (2*src.x+src.y*pub->pitch) + (pub->pitch), pub->pitch,
-     static_cast<Uint8*>(vid->pixels) + (2*dst.x+dst.y*vid->pitch), vid->pitch, src.w, src.h);
-  if (SDL_MUSTLOCK(vid))
-    SDL_UnlockSurface(vid);
-  // SDL1->2: SDL_UpdateRects(vid,1,&dst);
+     static_cast<Uint8*>(scaled->pixels) + (2*dst.x+dst.y*scaled->pitch), scaled->pitch, src.w, src.h);
+  if (SDL_MUSTLOCK(scaled))
+    SDL_UnlockSurface(scaled);
+  // Blit to convert from 16bpp to pixel format compatible with renderer.
+  SDL_BlitSurface(scaled, nullptr, vid, nullptr);
+  SDL_UpdateTexture(texture, nullptr, vid->pixels, vid->pitch);
+  SDL_RenderCopy(renderer, texture, nullptr, nullptr);
   SDL_RenderPresent(renderer);
-}
-
-void swbilin_close()
-{
-  SDL_FreeSurface(pub);
-  pub = nullptr;
 }
 
 /* ------------------------------------------------------------------------------------ */
@@ -1696,90 +1334,23 @@ void filter_bicubic(Uint8 *srcPtr, Uint32 srcPitch,
   }
 }
 
-SDL_Surface* swbicub_init(video_plugin* t,int w,int h, int bpp, bool fs)
-{
-  if (bpp!=16)
-  {
-    std::cerr << t->name << " only works in 16 bits color mode - forcing 16 bpp" << std::endl;
-    bpp = 16;
-  }
-  if (!fs)
-  {
-    w=CPC_VISIBLE_SCR_WIDTH*2;
-    h=CPC_VISIBLE_SCR_HEIGHT*2;
-  }
-  // SDL1->2: vid=SDL_SetVideoMode(w,h,bpp,SDL_HWSURFACE | SDL_HWPALETTE | (fs?SDL_FULLSCREEN:0));
-  if (fs) {
-    SDL_CreateWindowAndRenderer(0, 0, SDL_WINDOW_FULLSCREEN_DESKTOP | SDL_WINDOW_OPENGL, &window, &renderer);
-  } else {
-    SDL_CreateWindowAndRenderer(w, h, SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL, &window, &renderer);
-  }
-  if (!window || !renderer) return nullptr;
-  SDL_SetWindowTitle(window, "Caprice32 " VERSION_STRING);
-  texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_UNKNOWN, SDL_TEXTUREACCESS_STREAMING, w, h);
-  if (!texture) return nullptr;
-  vid = SDL_CreateRGBSurface(0, CPC_VISIBLE_SCR_WIDTH, CPC_VISIBLE_SCR_HEIGHT, bpp, 0, 0, 0, 0);
-  if (!vid) return nullptr;
-  if (vid->format->BitsPerPixel!=16)
-  {
-    std::cerr << t->name << ": SDL didn't return a 16 bpp surface but a " << static_cast<int>(vid->format->BitsPerPixel) << " bpp one." << std::endl;
-    return nullptr;
-  }
-  if (fs)
-  {
-    t->x_scale=0.5;
-    t->y_scale=0.5;
-    t->x_offset=static_cast<int>(w-CPC_VISIBLE_SCR_WIDTH/t->x_scale)/2;
-    t->y_offset=static_cast<int>(h-CPC_VISIBLE_SCR_HEIGHT/t->y_scale)/2;
-  }
-  else
-  {
-    t->x_scale=0.5;
-    t->y_scale=0.5;
-    t->x_offset=0;
-    t->y_offset=0;
-  }
-  SDL_FillRect(vid,nullptr,SDL_MapRGB(vid->format,0,0,0));
-  pub=SDL_CreateRGBSurface(0,CPC_VISIBLE_SCR_WIDTH,CPC_VISIBLE_SCR_HEIGHT,bpp,0,0,0,0);
-  return pub;
-}
-
-void swbicub_setpal(SDL_Color* c)
-{
-  SDL_SetPaletteColors(vid->format->palette, c, 0, 32);
-  SDL_SetPaletteColors(pub->format->palette, c, 0, 32);
-}
-
-bool swbicub_lock()
-{
-  return true;
-}
-
-void swbicub_unlock()
-{
-}
-
 void swbicub_flip()
 {
-  if (SDL_MUSTLOCK(vid))
-    SDL_LockSurface(vid);
+  if (SDL_MUSTLOCK(scaled))
+    SDL_LockSurface(scaled);
   SDL_Rect src;
   SDL_Rect dst;
   compute_rects(&src,&dst);
   filter_bicubic(static_cast<Uint8*>(pub->pixels) + (2*src.x+src.y*pub->pitch) + (pub->pitch), pub->pitch,
-     static_cast<Uint8*>(vid->pixels) + (2*dst.x+dst.y*vid->pitch), vid->pitch, src.w, src.h);
-  if (SDL_MUSTLOCK(vid))
-    SDL_UnlockSurface(vid);
-  // SDL1->2: SDL_UpdateRects(vid,1,&dst);
+     static_cast<Uint8*>(scaled->pixels) + (2*dst.x+dst.y*scaled->pitch), scaled->pitch, src.w, src.h);
+  if (SDL_MUSTLOCK(scaled))
+    SDL_UnlockSurface(scaled);
+  // Blit to convert from 16bpp to pixel format compatible with renderer.
+  SDL_BlitSurface(scaled, nullptr, vid, nullptr);
+  SDL_UpdateTexture(texture, nullptr, vid->pixels, vid->pitch);
+  SDL_RenderCopy(renderer, texture, nullptr, nullptr);
   SDL_RenderPresent(renderer);
 }
-
-void swbicub_close()
-{
-  SDL_FreeSurface(pub);
-  pub = nullptr;
-}
-
 
 /* ------------------------------------------------------------------------------------ */
 /* Dot matrix video plugin ------------------------------------------------------------ */
@@ -1818,90 +1389,23 @@ void filter_dotmatrix(Uint8 *srcPtr, Uint32 srcPitch,
   }
 }
 
-SDL_Surface* dotmat_init(video_plugin* t,int w,int h, int bpp, bool fs)
-{
-  if (bpp!=16)
-  {
-    std::cerr << t->name << " only works in 16 bits color mode - forcing 16 bpp" << std::endl;
-    bpp = 16;
-  }
-  if (!fs)
-  {
-    w=CPC_VISIBLE_SCR_WIDTH*2;
-    h=CPC_VISIBLE_SCR_HEIGHT*2;
-  }
-  // SDL1->2: vid=SDL_SetVideoMode(w,h,bpp,SDL_HWSURFACE | SDL_HWPALETTE | (fs?SDL_FULLSCREEN:0));
-  if (fs) {
-    SDL_CreateWindowAndRenderer(0, 0, SDL_WINDOW_FULLSCREEN_DESKTOP | SDL_WINDOW_OPENGL, &window, &renderer);
-  } else {
-    SDL_CreateWindowAndRenderer(w, h, SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL, &window, &renderer);
-  }
-  if (!window || !renderer) return nullptr;
-  SDL_SetWindowTitle(window, "Caprice32 " VERSION_STRING);
-  texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_UNKNOWN, SDL_TEXTUREACCESS_STREAMING, w, h);
-  if (!texture) return nullptr;
-  vid = SDL_CreateRGBSurface(0, CPC_VISIBLE_SCR_WIDTH, CPC_VISIBLE_SCR_HEIGHT, bpp, 0, 0, 0, 0);
-  if (!vid) return nullptr;
-  if (vid->format->BitsPerPixel!=16)
-  {
-    std::cerr << t->name << ": SDL didn't return a 16 bpp surface but a " << static_cast<int>(vid->format->BitsPerPixel) << " bpp one." << std::endl;
-    return nullptr;
-  }
-  if (fs)
-  {
-    t->x_scale=0.5;
-    t->y_scale=0.5;
-    t->x_offset=static_cast<int>(w-CPC_VISIBLE_SCR_WIDTH/t->x_scale)/2;
-    t->y_offset=static_cast<int>(h-CPC_VISIBLE_SCR_HEIGHT/t->y_scale)/2;
-  }
-  else
-  {
-    t->x_scale=0.5;
-    t->y_scale=0.5;
-    t->x_offset=0;
-    t->y_offset=0;
-  }
-  SDL_FillRect(vid,nullptr,SDL_MapRGB(vid->format,0,0,0));
-  pub=SDL_CreateRGBSurface(0,CPC_VISIBLE_SCR_WIDTH,CPC_VISIBLE_SCR_HEIGHT,bpp,0,0,0,0);
-  return pub;
-}
-
-void dotmat_setpal(SDL_Color* c)
-{
-  SDL_SetPaletteColors(vid->format->palette, c, 0, 32);
-  SDL_SetPaletteColors(pub->format->palette, c, 0, 32);
-}
-
-bool dotmat_lock()
-{
-  return true;
-}
-
-void dotmat_unlock()
-{
-}
-
 void dotmat_flip()
 {
-  if (SDL_MUSTLOCK(vid))
-    SDL_LockSurface(vid);
+  if (SDL_MUSTLOCK(scaled))
+    SDL_LockSurface(scaled);
   SDL_Rect src;
   SDL_Rect dst;
   compute_rects(&src,&dst);
   filter_dotmatrix(static_cast<Uint8*>(pub->pixels) + (2*src.x+src.y*pub->pitch) + (pub->pitch), pub->pitch,
-     static_cast<Uint8*>(vid->pixels) + (2*dst.x+dst.y*vid->pitch), vid->pitch, src.w, src.h);
-  if (SDL_MUSTLOCK(vid))
-    SDL_UnlockSurface(vid);
-  // SDL1->2: SDL_UpdateRects(vid,1,&dst);
+     static_cast<Uint8*>(scaled->pixels) + (2*dst.x+dst.y*scaled->pitch), scaled->pitch, src.w, src.h);
+  if (SDL_MUSTLOCK(scaled))
+    SDL_UnlockSurface(scaled);
+  // Blit to convert from 16bpp to pixel format compatible with renderer.
+  SDL_BlitSurface(scaled, nullptr, vid, nullptr);
+  SDL_UpdateTexture(texture, nullptr, vid->pixels, vid->pitch);
+  SDL_RenderCopy(renderer, texture, nullptr, nullptr);
   SDL_RenderPresent(renderer);
 }
-
-void dotmat_close()
-{
-  SDL_FreeSurface(pub);
-  pub = nullptr;
-}
-
 
 /* ------------------------------------------------------------------------------------ */
 /* End of video plugins --------------------------------------------------------------- */
@@ -1909,19 +1413,20 @@ void dotmat_close()
 
 std::vector<video_plugin> video_plugin_list =
 {
-/* Name                            Init func      Palette func     Lock func      Unlock func      Flip func      Close func      Half size  X, Y offsets   X, Y scale  */
-{"Half size with hardware flip",   halfhw_init,   halfhw_setpal,   halfhw_lock,   halfhw_unlock,   halfhw_flip,   halfhw_close,   1,         0, 0,          0, 0   },
-{"Double size with hardware flip", doublehw_init, doublehw_setpal, doublehw_lock, doublehw_unlock, doublehw_flip, doublehw_close, 0,         0, 0,          0, 0   },
-{"Half size",                      half_init,     half_setpal,     half_lock,     half_unlock,     half_flip,     half_close,     1,         0, 0,          0, 0   },
-{"Double size",                    double_init,   double_setpal,   double_lock,   double_unlock,   double_flip,   double_close,   0,         0, 0,          0, 0   },
-{"Super eagle",                    seagle_init,   seagle_setpal,   seagle_lock,   seagle_unlock,   seagle_flip,   seagle_close,   1,         0, 0,          0, 0   },
-{"Scale2x",                        scale2x_init,  scale2x_setpal,  scale2x_lock,  scale2x_unlock,  scale2x_flip,  scale2x_close,  1,         0, 0,          0, 0   },
-{"Advanced Scale2x",               ascale2x_init, ascale2x_setpal, ascale2x_lock, ascale2x_unlock, ascale2x_flip, ascale2x_close, 1,         0, 0,          0, 0   },
-{"TV 2x",                          tv2x_init,     tv2x_setpal,     tv2x_lock,     tv2x_unlock,     tv2x_flip,     tv2x_close,     1,         0, 0,          0, 0   },
-{"Software bilinear",              swbilin_init,  swbilin_setpal,  swbilin_lock,  swbilin_unlock,  swbilin_flip,  swbilin_close,  1,         0, 0,          0, 0   },
-{"Software bicubic",               swbicub_init,  swbicub_setpal,  swbicub_lock,  swbicub_unlock,  swbicub_flip,  swbicub_close,  1,         0, 0,          0, 0   },
-{"Dot matrix",                     dotmat_init,   dotmat_setpal,   dotmat_lock,   dotmat_unlock,   dotmat_flip,   dotmat_close,   1,         0, 0,          0, 0   },
+// Hardware flip version are the same as software ones since switch to SDL2. Kept for compatibility of config, would be nice to not display them in the UI.
+/* Name                            Init func      Palette func     Flip func      Close func      Half size  X, Y offsets   X, Y scale  */
+{"Half size with hardware flip",   half_init,     half_setpal,     half_flip,     half_close,     1,         0, 0,          0, 0   },
+{"Double size with hardware flip", double_init,   double_setpal,   double_flip,   double_close,   0,         0, 0,          0, 0   },
+{"Half size",                      half_init,     half_setpal,     half_flip,     half_close,     1,         0, 0,          0, 0   },
+{"Double size",                    double_init,   double_setpal,   double_flip,   double_close,   0,         0, 0,          0, 0   },
+{"Super eagle",                    swscale_init,  swscale_setpal,  seagle_flip,   swscale_close,  1,         0, 0,          0, 0   },
+{"Scale2x",                        swscale_init,  swscale_setpal,  scale2x_flip,  swscale_close,  1,         0, 0,          0, 0   },
+{"Advanced Scale2x",               swscale_init,  swscale_setpal,  ascale2x_flip, swscale_close,  1,         0, 0,          0, 0   },
+{"TV 2x",                          swscale_init,  swscale_setpal,  tv2x_flip,     swscale_close,  1,         0, 0,          0, 0   },
+{"Software bilinear",              swscale_init,  swscale_setpal,  swbilin_flip,  swscale_close,  1,         0, 0,          0, 0   },
+{"Software bicubic",               swscale_init,  swscale_setpal,  swbicub_flip,  swscale_close,  1,         0, 0,          0, 0   },
+{"Dot matrix",                     swscale_init,  swscale_setpal,  dotmat_flip,   swscale_close,  1,         0, 0,          0, 0   },
 #ifdef HAVE_GL
-{"OpenGL scaling",                 glscale_init,  glscale_setpal,  glscale_lock,  glscale_unlock,  glscale_flip,  glscale_close,  0,         0, 0,          0, 0   },
+{"OpenGL scaling",                 glscale_init,  glscale_setpal,  glscale_flip,  glscale_close,  0,         0, 0,          0, 0   },
 #endif
 };

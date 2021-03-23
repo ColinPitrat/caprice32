@@ -30,9 +30,6 @@ typedef struct video_plugin
   SDL_Surface* (*init)(video_plugin* t,int w,int h,int bpp,bool fs);
 
   void (*set_palette)(SDL_Color* c);
-  /* locks/unlocks the surface if needed */
-  bool (*lock)();
-  void (*unlock)();
   /* "flips" the video surface. Note that this might not always do a real flip */
   void (*flip)();
   /* closes the plugin */

@@ -43,7 +43,7 @@
 #include <errno.h>
 #include <cstring>
 
-// TODO: Restore GUI
+// TODO(SDL2): Restore GUI
 /*
 #include "CapriceGui.h"
 #include "CapriceGuiView.h"
@@ -819,7 +819,7 @@ void print (byte *pbAddr, const char *pchStr, bool bolColour)
    switch (CPC.scr_bpp)
    {
       case 32:
-         dwColour = bolColour ? 0x00ffffff : 0;
+         dwColour = bolColour ? 0xffffffff : 0;
          for (int n = 0; n < iLen; n++) {
             iIdx = static_cast<int>(pchStr[n]); // get the ASCII value
             if ((iIdx < FNT_MIN_CHAR) || (iIdx > FNT_MAX_CHAR)) { // limit it to the range of chars in the font
@@ -1456,7 +1456,6 @@ void video_set_style ()
    switch(CPC.scr_bpp)
    {
       case 32:
-        std::cout << "cpitrat: Render 32bpp" << std::endl;
                switch(dwYScale) {
                  case 1:
                    CPC.scr_render = render32bpp;
@@ -1468,7 +1467,6 @@ void video_set_style ()
                break;
 
       case 24:
-        std::cout << "cpitrat: Render 24bpp" << std::endl;
                switch(dwYScale) {
                  case 1:
                    CPC.scr_render = render24bpp;
@@ -1481,7 +1479,6 @@ void video_set_style ()
 
       case 16:
       case 15:
-        std::cout << "cpitrat: Render 16bpp" << std::endl;
                switch(dwYScale) {
                  case 1:
                    CPC.scr_render = render16bpp;
@@ -1493,7 +1490,6 @@ void video_set_style ()
                break;
 
       case 8:
-        std::cout << "cpitrat: Render 8bpp" << std::endl;
                switch(dwYScale) {
                  case 1:
                    CPC.scr_render = render8bpp;
@@ -1524,7 +1520,6 @@ int video_init ()
    }
 
    CPC.scr_bpp = back_surface->format->BitsPerPixel; // bit depth of the surface
-   std::cout << "cpitrat: Vid: " << CPC.scr_bpp << "bpp" << std::endl;
    video_set_style(); // select rendering style
 
    int iErrCode = video_set_palette(); // init CPC colours
@@ -1532,18 +1527,13 @@ int video_init ()
       return iErrCode;
    }
 
-   vid_plugin->lock();
    CPC.scr_bps = back_surface->pitch; // rendered screen line length in bytes
    CPC.scr_line_offs = CPC.scr_bps * dwYScale;
    CPC.scr_pos =
    CPC.scr_base = static_cast<byte *>(back_surface->pixels); // memory address of back buffer
    CPC.scr_gui_is_currently_on = false;
 
-   vid_plugin->unlock();
-
    SDL_ShowCursor(SDL_DISABLE); // hide the mouse cursor
-
-   // SDL1->2: SDL_WM_SetCaption("Caprice32 " VERSION_STRING, "Caprice32");
 
    crtc_init();
 
@@ -1554,9 +1544,6 @@ int video_init ()
 
 void video_shutdown ()
 {
-   if (back_surface) {
-      vid_plugin->unlock();
-   }
    vid_plugin->close();
    SDL_QuitSubSystem(SDL_INIT_VIDEO);
 }
@@ -1893,7 +1880,7 @@ void cleanupShowUI(SDL_Surface* guiBackSurface)
 
 bool userConfirmsQuitWithoutSaving()
 {
-// TODO: Restore GUI
+// TODO(SDL2): Restore GUI
 /*
    auto guiBackSurface = prepareShowUI();
    bool confirmed = false;
@@ -1917,7 +1904,7 @@ return true;
 
 void showVKeyboard()
 {
-// TODO: Restore GUI
+// TODO(SDL2): Restore GUI
 /*
    auto guiBackSurface = prepareShowUI();
    // Activate virtual keyboard
@@ -1939,7 +1926,7 @@ void showVKeyboard()
 
 void showGui()
 {
-// TODO: Restore GUI
+// TODO(SDL2): Restore GUI
 /*
    auto guiBackSurface = prepareShowUI();
    try {
@@ -2331,7 +2318,7 @@ int cap32_main (int argc, char **argv)
             }
             break;
 
-/* Restore pausing on focus loss
+/* TODO(SDL2): Restore pausing on focus loss
             // Code shamelessly copied from http://sdl.beuc.net/sdl.wiki/Event_Examples
             // TODO: What if we were paused because of other reason than losing focus and then only lost focus
             //       the right thing to do here is to restore focus but keep paused... implementing this require
@@ -2400,9 +2387,6 @@ int cap32_main (int argc, char **argv)
             }
          }
 
-         if (!vid_plugin->lock()) { // lock the video buffer
-           continue; // skip the emulation if we can't get a lock
-         }
          dword dwOffset = CPC.scr_pos - CPC.scr_base; // offset in current surface row
          if (VDU.scrln > 0) {
             CPC.scr_base = static_cast<byte *>(back_surface->pixels) + (VDU.scrln * CPC.scr_line_offs); // determine current position
@@ -2440,14 +2424,11 @@ int cap32_main (int argc, char **argv)
                print(static_cast<byte *>(back_surface->pixels) + CPC.scr_line_offs, chStr, true); // display the frames per second counter
             }
             asic_draw_sprites();
-            vid_plugin->unlock();
             video_display(); // update PC display
             if (take_screenshot) {
               dumpScreen();
               take_screenshot = false;
             }
-         } else {
-            vid_plugin->unlock();
          }
       }
       else { // We are paused. No need to burn CPU cycles
