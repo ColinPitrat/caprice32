@@ -43,10 +43,13 @@
 #include <errno.h>
 #include <cstring>
 
+// TODO: Restore GUI
+/*
 #include "CapriceGui.h"
 #include "CapriceGuiView.h"
 #include "CapriceVKeyboardView.h"
 #include "CapriceLeavingWithoutSavingView.h"
+*/
 
 #include "errors.h"
 #include "log.h"
@@ -1453,6 +1456,7 @@ void video_set_style ()
    switch(CPC.scr_bpp)
    {
       case 32:
+        std::cout << "cpitrat: Render 32bpp" << std::endl;
                switch(dwYScale) {
                  case 1:
                    CPC.scr_render = render32bpp;
@@ -1464,6 +1468,7 @@ void video_set_style ()
                break;
 
       case 24:
+        std::cout << "cpitrat: Render 24bpp" << std::endl;
                switch(dwYScale) {
                  case 1:
                    CPC.scr_render = render24bpp;
@@ -1476,6 +1481,7 @@ void video_set_style ()
 
       case 16:
       case 15:
+        std::cout << "cpitrat: Render 16bpp" << std::endl;
                switch(dwYScale) {
                  case 1:
                    CPC.scr_render = render16bpp;
@@ -1487,6 +1493,7 @@ void video_set_style ()
                break;
 
       case 8:
+        std::cout << "cpitrat: Render 8bpp" << std::endl;
                switch(dwYScale) {
                  case 1:
                    CPC.scr_render = render8bpp;
@@ -1517,6 +1524,7 @@ int video_init ()
    }
 
    CPC.scr_bpp = back_surface->format->BitsPerPixel; // bit depth of the surface
+   std::cout << "cpitrat: Vid: " << CPC.scr_bpp << "bpp" << std::endl;
    video_set_style(); // select rendering style
 
    int iErrCode = video_set_palette(); // init CPC colours
@@ -1535,7 +1543,7 @@ int video_init ()
 
    SDL_ShowCursor(SDL_DISABLE); // hide the mouse cursor
 
-   SDL_WM_SetCaption("Caprice32 " VERSION_STRING, "Caprice32");
+   // SDL1->2: SDL_WM_SetCaption("Caprice32 " VERSION_STRING, "Caprice32");
 
    crtc_init();
 
@@ -1885,6 +1893,8 @@ void cleanupShowUI(SDL_Surface* guiBackSurface)
 
 bool userConfirmsQuitWithoutSaving()
 {
+// TODO: Restore GUI
+/*
    auto guiBackSurface = prepareShowUI();
    bool confirmed = false;
    // Show warning
@@ -1901,10 +1911,14 @@ bool userConfirmsQuitWithoutSaving()
    }
    cleanupShowUI(guiBackSurface);
    return confirmed;
+   */
+return true;
 }
 
 void showVKeyboard()
 {
+// TODO: Restore GUI
+/*
    auto guiBackSurface = prepareShowUI();
    // Activate virtual keyboard
    try {
@@ -1920,10 +1934,13 @@ void showVKeyboard()
       std::cout << "Failed displaying the virtual keyboard: " << e.what() << std::endl;
    }
    cleanupShowUI(guiBackSurface);
+   */
 }
 
 void showGui()
 {
+// TODO: Restore GUI
+/*
    auto guiBackSurface = prepareShowUI();
    try {
       CapriceGui capriceGui;
@@ -1936,6 +1953,7 @@ void showGui()
       std::cout << "Failed displaying the GUI: " << e.what() << std::endl;
    }
    cleanupShowUI(guiBackSurface);
+*/
 }
 
 void set_osd_message(const std::string& message) {
@@ -2313,6 +2331,7 @@ int cap32_main (int argc, char **argv)
             }
             break;
 
+/* Restore pausing on focus loss
             // Code shamelessly copied from http://sdl.beuc.net/sdl.wiki/Event_Examples
             // TODO: What if we were paused because of other reason than losing focus and then only lost focus
             //       the right thing to do here is to restore focus but keep paused... implementing this require
@@ -2346,6 +2365,7 @@ int cap32_main (int argc, char **argv)
                   }
                }
                break;
+               */
 
             case SDL_QUIT:
                cleanExit(0);

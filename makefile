@@ -51,8 +51,10 @@ else
 prefix = /usr/local
 TARGET = cap32
 TEST_TARGET = test_runner
-IPATHS = -Isrc/ -Isrc/gui/includes `pkg-config --cflags freetype2` `sdl-config --cflags` `pkg-config --cflags libpng`
-LIBS = `sdl-config --libs` -lz `pkg-config --libs freetype2` `pkg-config --libs libpng`
+# TODO: Restore GUI
+#IPATHS = -Isrc/ -Isrc/gui/includes `pkg-config --cflags freetype2` `sdl2-config --cflags` `pkg-config --cflags libpng`
+IPATHS = -Isrc/ `pkg-config --cflags freetype2` `sdl2-config --cflags` `pkg-config --cflags libpng`
+LIBS = `sdl2-config --libs` -lz `pkg-config --libs freetype2` `pkg-config --libs libpng`
 CXX ?= g++
 COMMON_CFLAGS = -fPIC
 ifdef WITH_IPF
@@ -93,8 +95,9 @@ GROFF_DOC:=doc/man6/cap32.6
 
 MAIN:=$(OBJDIR)/main.o
 
-SOURCES:=$(shell find $(SRCDIR) -name \*.cpp)
-HEADERS:=$(shell find $(SRCDIR) -name \*.h)
+# TODO: Restore gui
+SOURCES:=$(shell find $(SRCDIR) -name \*.cpp | grep -v gui)
+HEADERS:=$(shell find $(SRCDIR) -name \*.h | grep -v gui)
 DEPENDS:=$(foreach file,$(SOURCES:.cpp=.d),$(shell echo "$(OBJDIR)/$(file)"))
 OBJECTS:=$(DEPENDS:.d=.o)
 
@@ -156,7 +159,7 @@ endif
 
 ifeq ($(PLATFORM),linux)
 check_deps:
-	@sdl-config --cflags >/dev/null 2>&1 || (echo "Error: missing dependency libsdl-1.2. Try installing libsdl 1.2 development package (e.g: libsdl1.2-dev)" && false)
+	@sdl2-config --cflags >/dev/null 2>&1 || (echo "Error: missing dependency libSDL2. Try installing libsdl2 development package (e.g: libsdl2-dev)" && false)
 	@pkg-config --cflags freetype2 >/dev/null 2>&1 || (echo "Error: missing dependency libfreetype. Try installing libfreetype development package (e.g: libfreetype6-dev)" && false)
 	@pkg-config --cflags zlib >/dev/null 2>&1 || (echo "Error: missing dependency zlib. Try installing zlib development package (e.g: zlib-devel)" && false)
 	@pkg-config --cflags libpng >/dev/null 2>&1 || (echo "Error: missing dependency libpng. Try installing libpng development package (e.g: libpng-devel)" && false)

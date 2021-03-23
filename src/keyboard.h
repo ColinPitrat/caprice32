@@ -257,7 +257,7 @@ class InputMapper {
     static const std::map<const std::string, const unsigned int> CPCkeysFromStrings;
     static const std::map<const std::string, const unsigned int> SDLkeysFromStrings;
     static const std::map<const char, const CPC_KEYS> CPCkeysFromChars;
-    std::map<char, std::pair<SDLKey, SDLMod>> SDLkeysFromChars;
+    std::map<char, std::pair<SDL_Keycode, SDL_Keymod>> SDLkeysFromChars;
     static std::map<unsigned int, unsigned int> SDLkeysymFromCPCkeys_us;
     std::map<unsigned int, unsigned int> CPCkeysFromSDLkeysym;
     std::map<unsigned int, unsigned int> SDLkeysymFromCPCkeys;
@@ -269,7 +269,7 @@ class InputMapper {
     InputMapper(t_CPC *CPC);
     bool load_layout(const std::string& filename);
     void init();
-    dword CPCkeyFromKeysym(SDL_keysym keysym);
+    dword CPCkeyFromKeysym(SDL_Keysym keysym);
     dword CPCkeyFromJoystickButton(SDL_JoyButtonEvent jbutton);
     void CPCkeyFromJoystickAxis(SDL_JoyAxisEvent jaxis, dword *cpc_key, bool &release);
     std::list<SDL_Event> StringToEvents(std::string toTranslate);
