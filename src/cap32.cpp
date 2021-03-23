@@ -2318,41 +2318,27 @@ int cap32_main (int argc, char **argv)
             }
             break;
 
-/* TODO(SDL2): Restore pausing on focus loss
             // Code shamelessly copied from http://sdl.beuc.net/sdl.wiki/Event_Examples
             // TODO: What if we were paused because of other reason than losing focus and then only lost focus
             //       the right thing to do here is to restore focus but keep paused... implementing this require
             //       keeping track of pause source, which will be a pain.
-            case SDL_ACTIVEEVENT:
-               if (event.active.state == (SDL_APPINPUTFOCUS | SDL_APPACTIVE) ) {
-                  if (event.active.gain == 0) {
-                     _appWindowState = Minimized;
-                     cpc_pause(); // Always paused when iconified
-                  } else {
-                     if (_appWindowState == LostFocus ) {
-                         _appWindowState = GainedFocus;
-                         if (CPC.auto_pause)
-                            cpc_resume();
-                     } else {
-                         _appWindowState = Restored;
-                         cpc_resume(); // Always unpause when restoring from iconified
-                     }
-                  }
-               }
-               else if (event.active.state & SDL_APPINPUTFOCUS) {
-                  if (event.active.gain == 0) {
-                      _appWindowState = LostFocus;
-                      if (CPC.auto_pause)
-                         cpc_pause();
-                  }
-                  else {
-                      _appWindowState = GainedFocus;
-                      if (CPC.auto_pause)
-                         cpc_resume();
-                  }
-               }
-               break;
-               */
+            case SDL_WINDOWEVENT:
+            switch (event.window.event) {
+              case SDL_WINDOWEVENT_TAKE_FOCUS:
+              case SDL_WINDOWEVENT_FOCUS_GAINED:
+              case SDL_WINDOWEVENT_ENTER:
+                if (CPC.auto_pause) {
+                  cpc_resume();
+                }
+                break;
+              case SDL_WINDOWEVENT_FOCUS_LOST:
+              case SDL_WINDOWEVENT_LEAVE:
+                if (CPC.auto_pause) {
+                  cpc_pause();
+                }
+                break;
+            }
+            break;
 
             case SDL_QUIT:
                cleanExit(0);
