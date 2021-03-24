@@ -5,6 +5,10 @@ branches:
   - latest
 #To uncomment in case a core occurs:
 #sudo: required
+# xenial & xvfb to support integrated tests with SDL2 (https://stackoverflow.com/questions/60677892/failed-to-connect-to-mir-on-travis-server)
+dist: xenial
+services:
+ - xvfb
 addons:
  apt:
   sources:
