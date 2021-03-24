@@ -47,7 +47,7 @@ SDL_Surface *SDL_PNGFormatAlpha(SDL_Surface *src)
   /* Convert 32bpp alpha-less image to 24bpp alpha-less image */
   rect.w = src->w;
   rect.h = src->h;
-  surf = SDL_CreateRGBSurface(SDL_SWSURFACE, src->w, src->h, 24, rmask, gmask, bmask, 0);
+  surf = SDL_CreateRGBSurface(0, src->w, src->h, 24, rmask, gmask, bmask, 0);
   SDL_LowerBlit(src, &rect, surf, &rect);
 
   return surf;
