@@ -1166,6 +1166,8 @@ const std::map<const std::string, const unsigned int> InputMapper::CPCkeysFromSt
 };
 
 const std::map<const std::string, const unsigned int> InputMapper::SDLkeysFromStrings = {
+  /*@{*/
+    /** @name ASCII mapped keysyms */
   { "SDLK_BACKSPACE", SDLK_BACKSPACE},
   { "SDLK_TAB", SDLK_TAB},
   { "SDLK_CLEAR", SDLK_CLEAR},
@@ -1237,7 +1239,7 @@ const std::map<const std::string, const unsigned int> InputMapper::SDLkeysFromSt
   { "SDLK_y", SDLK_y},
   { "SDLK_z", SDLK_z},
   { "SDLK_DELETE", SDLK_DELETE},
-  /* End of ASCII mapped keysyms */
+  { "SDLK_PERCENT", SDLK_PERCENT},
   /*@}*/
     /** @name Numeric keypad */
   /*@{*/
@@ -1312,10 +1314,14 @@ const std::map<const std::string, const unsigned int> InputMapper::SDLkeysFromSt
   { "SDLK_SYSREQ", SDLK_SYSREQ},
   { "SDLK_PAUSE", SDLK_PAUSE},
   { "SDLK_MENU", SDLK_MENU},
-  { "SDLK_POWER", SDLK_POWER},    /**< Power Macintosh power key */
-  //{ "SDLK_EURO", SDLK_EURO},    /**< Some european keyboards */
+  { "SDLK_POWER", SDLK_POWER},  /**< Power Macintosh power key */
   { "SDLK_UNDO", SDLK_UNDO},    /**< Atari keyboard has Undo */
-       /*@}*/
+  /*@}*/
+  /*@{*/
+    /** @name Fake SDL keycodes */
+  { "SDLK_uGRAVE", 249},
+  { "SDLK_CIRC", 0x40000000},
+  /*@}*/
   { "MOD_PC_SHIFT", MOD_PC_SHIFT},
   { "MOD_PC_CTRL", MOD_PC_CTRL},
   { "MOD_PC_MODE", MOD_PC_MODE},
