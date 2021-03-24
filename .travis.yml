@@ -11,8 +11,6 @@ addons:
     - ubuntu-toolchain-r-test
     #- llvm-toolchain-precise-5.0
   packages:
-  # TODO(SDL2): Remove SDL 1.2
-    - libsdl1.2-dev
     - libsdl2-dev
     - libfreetype6-dev
     - zlib1g-dev
