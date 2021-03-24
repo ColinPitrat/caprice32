@@ -251,6 +251,16 @@ typedef enum {
 
 void applyKeypress(dword cpc_key, byte keyboard_matrix[], bool pressed);
 
+class LineParsingResult {
+  public:
+    bool valid = true;
+    bool contains_mapping = false;
+    unsigned int cpc_key = 0;
+    unsigned int sdl_key = 0;
+    std::string cpc_key_name;
+    std::string sdl_key_name;
+};
+
 class InputMapper {
   private:
     static const dword cpc_kbd[CPC_KEYBOARD_NUM][CPC_KEY_NUM];
@@ -263,7 +273,7 @@ class InputMapper {
     std::map<unsigned int, unsigned int> SDLkeysymFromCPCkeys;
     t_CPC *CPC;
 
-    bool process_cfg_line(char *line);
+    LineParsingResult process_cfg_line(char *line);
 
   public:
     InputMapper(t_CPC *CPC);

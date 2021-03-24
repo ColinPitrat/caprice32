@@ -2,6 +2,7 @@
 #include <iostream>
 #include <fstream>
 #include <map>
+#include <set>
 #include <string>
 #include "cap32.h"
 #include "fileutils.h"
@@ -1319,6 +1320,7 @@ const std::map<const std::string, const unsigned int> InputMapper::SDLkeysFromSt
   /*@}*/
   /*@{*/
     /** @name Fake SDL keycodes */
+  { "SDLK_NTILDE", 47},
   { "SDLK_uGRAVE", 249},
   { "SDLK_CIRC", 0x40000000},
   /*@}*/
@@ -1331,31 +1333,35 @@ const std::map<const std::string, const unsigned int> InputMapper::SDLkeysFromSt
 
 // Format of a line: CPC_xxx\tSDLK_xxx\tMODIFIER
 // Last field is optional
-bool InputMapper::process_cfg_line(char *line)
+LineParsingResult InputMapper::process_cfg_line(char *line)
 {
-  unsigned int cpc_key = 0, sdl_key = 0;
+  LineParsingResult result;
 
   char *pch = strtok(line, "\t");
-  if (pch == nullptr || pch[0] == '#')
-    return true;
+  if (pch == nullptr || pch[0] == '#') return result;
 
   if (CPCkeysFromStrings.count(pch) == 0) {
     LOG_ERROR("Unknown CPC key " << pch << " found in mapping file. Ignoring it.");
-    return false;
+    result.valid = false;
+    return result;
   }
 
   for (unsigned int field=0; field < 3; field++) {
     switch (field) {
       case 0:
-        cpc_key = CPCkeysFromStrings.at(pch);
+        result.cpc_key = CPCkeysFromStrings.at(pch);
+        result.cpc_key_name += pch;
         break;
       case 1:
       case 2:
         if (SDLkeysFromStrings.count(pch) == 0) {
           LOG_ERROR("Unknown SDL key or modifier " << pch << " found in mapping file. Ignoring it.");
-          return false;
+          result.valid = false;
+          return result;
         }
-        sdl_key |= SDLkeysFromStrings.at(pch);
+        result.sdl_key |= SDLkeysFromStrings.at(pch);
+        if (field > 1) result.sdl_key_name += " ";
+        result.sdl_key_name += pch;
         break;
       default:
         break;
@@ -1364,8 +1370,9 @@ bool InputMapper::process_cfg_line(char *line)
     if (pch == nullptr)
       break;
   }
-  SDLkeysymFromCPCkeys[cpc_key] = sdl_key;
-  return true;
+  result.contains_mapping = true;
+  SDLkeysymFromCPCkeys[result.cpc_key] = result.sdl_key;
+  return result;
 }
 
 #define MAX_LINE_LENGTH 80
@@ -1380,9 +1387,25 @@ bool InputMapper::load_layout(const std::string& filename)
   }
   else {
     std::istream is(&fb);
+    std::set<unsigned int> mapped_cpc_keys;
+    std::set<unsigned int> mapped_sdl_keys;
     while (is.good()) {
       is.getline(line, MAX_LINE_LENGTH);
-      valid &= process_cfg_line(line);
+      auto parsed_line = process_cfg_line(line);
+      valid &= parsed_line.valid;
+      if (!parsed_line.contains_mapping) continue;
+      // Verify that each CPC key is mapped only once
+      if (mapped_cpc_keys.count(parsed_line.cpc_key) != 0) {
+        LOG_ERROR("Mapping '" << filename << "' contains a CPC key multiple times: " << parsed_line.cpc_key_name);
+        valid = false;
+      }
+      mapped_cpc_keys.insert(parsed_line.cpc_key);
+      // And that no SDL key combination is mapped to 2 different CPC keys
+      if (mapped_sdl_keys.count(parsed_line.sdl_key) != 0) {
+        LOG_ERROR("Mapping '" << filename << "' contains a SDL key multiple times: " << parsed_line.sdl_key_name);
+        valid = false;
+      }
+      mapped_sdl_keys.insert(parsed_line.sdl_key);
     }
     fb.close();
   }
