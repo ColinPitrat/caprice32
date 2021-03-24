@@ -42,8 +42,8 @@ ifeq ($(PLATFORM),windows)
 TARGET = cap32.exe
 TEST_TARGET = test_runner.exe
 MINGW_PATH = /usr/$(TRIPLE)
-IPATHS = -Isrc/ -Isrc/gui/includes -I$(MINGW_PATH)/include -I$(MINGW_PATH)/include/SDL -I$(MINGW_PATH)/include/freetype2
-LIBS = $(MINGW_PATH)/lib/libSDL.dll.a $(MINGW_PATH)/lib/libfreetype.dll.a $(MINGW_PATH)/lib/libz.dll.a $(MINGW_PATH)/lib/libpng16.dll.a $(MINGW_PATH)/lib/libpng.dll.a
+IPATHS = -Isrc/ -Isrc/gui/includes -I$(MINGW_PATH)/include -I$(MINGW_PATH)/include/SDL2 -I$(MINGW_PATH)/include/freetype2
+LIBS = $(MINGW_PATH)/lib/libSDL2.dll.a $(MINGW_PATH)/lib/libfreetype.dll.a $(MINGW_PATH)/lib/libz.dll.a $(MINGW_PATH)/lib/libpng16.dll.a $(MINGW_PATH)/lib/libpng.dll.a
 COMMON_CFLAGS = -DWINDOWS
 CXX = $(TRIPLE)-g++
 
@@ -178,7 +178,7 @@ cap32.cfg: cap32.cfg.tmpl
 
 
 ifeq ($(PLATFORM),windows)
-DLLS = SDL.dll libbz2-1.dll libfreetype-6.dll libpng16-16.dll libstdc++-6.dll \
+DLLS = SDL2.dll libbz2-1.dll libfreetype-6.dll libpng16-16.dll libstdc++-6.dll \
        libwinpthread-1.dll zlib1.dll libglib-2.0-0.dll libgraphite2.dll \
        libharfbuzz-0.dll libiconv-2.dll libintl-8.dll libpcre-1.dll \
 			 libbrotlidec.dll libbrotlicommon.dll
