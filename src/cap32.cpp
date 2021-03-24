@@ -2007,6 +2007,7 @@ void cleanExit(int returnCode, bool askIfUnsaved)
 }
 
 // TODO(SDL2): Remove this once not needed to debug keymaps anymore
+#include <map>
 std::map<SDL_Keycode, std::string> keycode_names = {
     {SDLK_UNKNOWN, "SDLK_UNKNOWN"},
     {SDLK_RETURN, "SDLK_RETURN"},
