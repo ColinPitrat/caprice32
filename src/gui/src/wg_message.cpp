@@ -48,12 +48,20 @@ CSDLMessage::CSDLMessage(const EMessageType MessageType, const CMessageClient* p
 
 
 CKeyboardMessage::CKeyboardMessage(const EMessageType MessageType, const CMessageClient* pDestination, const CMessageClient* pSource,
-		unsigned char ScanCode, SDL_Keymod Modifiers, SDL_KeyCode Key, Uint16 Unicode) :
+		unsigned char ScanCode, SDL_Keymod Modifiers, SDL_Keycode Key) :
 	CMessage(MessageType, pDestination, pSource),
 	ScanCode(ScanCode),
 	Modifiers(Modifiers),
-	Key(Key),
-	Unicode(Unicode)
+	Key(Key)
+{
+
+}
+
+
+CTextInputMessage::CTextInputMessage(const EMessageType MessageType, const CMessageClient* pDestination, const CMessageClient* pSource,
+		std::string Text) :
+	CMessage(MessageType, pDestination, pSource),
+	Text(Text)
 {
 
 }

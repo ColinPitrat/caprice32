@@ -81,6 +81,7 @@ CTextBox::CTextBox(const CRect& WindowRect, CWindow* pParent, CFontEngine* pFont
 	CMessageServer::Instance().RegisterMessageClient(this, CMessage::CTRL_TIMER);
 	CMessageServer::Instance().RegisterMessageClient(this, CMessage::CTRL_GAININGKEYFOCUS);
 	CMessageServer::Instance().RegisterMessageClient(this, CMessage::CTRL_LOSINGKEYFOCUS);
+	CMessageServer::Instance().RegisterMessageClient(this, CMessage::TEXTINPUT);
 	Draw();
 }
 
@@ -498,12 +499,13 @@ bool CTextBox::HandleMessage(CMessage* pMessage)  // virtual
 			}
 			break;
 		case CMessage::CTRL_GAININGKEYFOCUS:
-			if (pMessage->Destination() == this)
+			if (pMessage->Destination() == this && !m_bReadOnly)
 			{
 				m_pCursorTimer->StartTimer(750, true);
 				m_bDrawCursor = true;
 				Draw();
 				bHandled = true;
+        SDL_StartTextInput();
 			}
 			break;
 		case CMessage::CTRL_LOSINGKEYFOCUS:
@@ -512,8 +514,30 @@ bool CTextBox::HandleMessage(CMessage* pMessage)  // virtual
 				m_pCursorTimer->StopTimer();
 				Draw();
 				bHandled = true;
+        SDL_StopTextInput();
 			}
 			break;
+    case CMessage::TEXTINPUT:
+			if (pMessage->Destination() == this)
+      {
+        CTextInputMessage* pTextInputMessage = dynamic_cast<CTextInputMessage*>(pMessage);
+        if (pTextInputMessage && !m_bReadOnly)
+        {
+          std::string sBuffer = m_sWindowText;
+          sBuffer.insert(m_SelStart, pTextInputMessage->Text);
+          m_SelStart += pTextInputMessage->Text.length();
+          if (m_sWindowText != sBuffer)
+          {
+            CMessageServer::Instance().QueueMessage(new TStringMessage(CMessage::CTRL_VALUECHANGE, m_pParentWindow, this, sBuffer));
+            m_sWindowText = sBuffer;
+            PrepareWindowText(sBuffer);
+          }
+          m_bDrawCursor = true;
+          m_bScrollToCursor = true;  // a key was pressed, so we need to make sure that the cursor is visible
+          Draw();
+        }
+      }
+      break;
 		case CMessage::KEYBOARD_KEYDOWN:
 			if (m_bVisible)
 			{
@@ -766,6 +790,8 @@ bool CTextBox::HandleMessage(CMessage* pMessage)  // virtual
 						sBuffer.insert(m_SelStart++, 1, '\n');
 						break;
 					default:
+          /*
+            // TODO(SDL2): Cleanup
 						if (pKeyboardMessage->Unicode)
 						{
 							if ((pKeyboardMessage->Unicode & 0xFF80) == 0)
@@ -779,6 +805,7 @@ bool CTextBox::HandleMessage(CMessage* pMessage)  // virtual
 								wUtil::Trace("CTextBox::HandleMessage : CTextBox can't handle Unicode characters yet.");
 							}
 						}
+            */
 						break;
 					}
 

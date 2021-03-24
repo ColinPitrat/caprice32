@@ -232,7 +232,7 @@ bool CNavigationBar::HandleMessage(CMessage* pMessage) {
 					default:
             // Let the parent handle it
             CMessageServer::Instance().QueueMessage(new CKeyboardMessage(CMessage::KEYBOARD_KEYDOWN, m_pParentWindow, this,
-                  pKeyMsg->ScanCode, pKeyMsg->Modifiers, pKeyMsg->Key, pKeyMsg->Unicode));
+                  pKeyMsg->ScanCode, pKeyMsg->Modifiers, pKeyMsg->Key));
             break;
 						bHandled = false;
 						break;

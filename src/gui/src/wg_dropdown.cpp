@@ -157,7 +157,7 @@ bool CDropDown::HandleMessage(CMessage* pMessage)
                 CMessageServer::Instance().QueueMessage(
                     new CKeyboardMessage(CMessage::KEYBOARD_KEYDOWN, m_pParentWindow, this,
                                          pKeyboardMessage->ScanCode, pKeyboardMessage->Modifiers,
-                                         pKeyboardMessage->Key, pKeyboardMessage->Unicode));
+                                         pKeyboardMessage->Key));
                 break;
             }
           }

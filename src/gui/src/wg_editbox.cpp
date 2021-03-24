@@ -69,6 +69,7 @@ CEditBox::CEditBox(const CRect& WindowRect, CWindow* pParent, CFontEngine* pFont
 	CMessageServer::Instance().RegisterMessageClient(this, CMessage::CTRL_TIMER);
 	CMessageServer::Instance().RegisterMessageClient(this, CMessage::CTRL_GAININGKEYFOCUS);
 	CMessageServer::Instance().RegisterMessageClient(this, CMessage::CTRL_LOSINGKEYFOCUS);
+	CMessageServer::Instance().RegisterMessageClient(this, CMessage::TEXTINPUT);
 
 	Draw();
 }
@@ -416,12 +417,13 @@ bool CEditBox::HandleMessage(CMessage* pMessage)
 			}
 			break;
 		case CMessage::CTRL_GAININGKEYFOCUS:
-			if (pMessage->Destination() == this)
+			if (pMessage->Destination() == this && !m_bReadOnly)
 			{
 				m_pCursorTimer->StartTimer(750, true);
 				m_bDrawCursor = true;
 				Draw();
 				bHandled = true;
+        SDL_StartTextInput();
 			}
 			break;
 		case CMessage::CTRL_LOSINGKEYFOCUS:
@@ -430,8 +432,40 @@ bool CEditBox::HandleMessage(CMessage* pMessage)
 				m_pCursorTimer->StopTimer();
 				Draw();
 				bHandled = true;
+        SDL_StopTextInput();
 			}
 			break;
+    case CMessage::TEXTINPUT:
+			if (pMessage->Destination() == this)
+			{
+        CTextInputMessage* pTextInputMessage = dynamic_cast<CTextInputMessage*>(pMessage);
+        if (pTextInputMessage && !m_bReadOnly)
+        {
+          std::string sBuffer = m_sWindowText;
+          // TODO: Find a clean way to handle real unicode. Here we assume this is only ASCII.
+          for (auto val : pTextInputMessage->Text)
+          {
+                // Ignore extended ASCII chars
+                if ((val & 0xFF80) != 0) continue;
+                if(m_contentType == NUMBER && (val < '0' || val > '9')) continue;
+                if(m_contentType == HEXNUMBER && (val < '0' || val > '9') && (val < 'A' || val > 'F') && (val < 'a' || val > 'f')) continue;
+                if(m_contentType == HEXNUMBER && val >= 'a' && val <= 'z') val += 'A' - 'a';
+                if(m_contentType == ALPHA && (val < 'A' || val > 'Z') && (val < 'a' || val > 'z')) continue;
+                if(m_contentType == ALPHANUM && (val < '0' || val > '9') && (val < 'A' || val > 'Z') && (val < 'a' || val > 'z')) continue;
+								sBuffer.insert(m_SelStart++, 1, val);
+          }
+          if (m_sWindowText != sBuffer)
+          {
+            CMessageServer::Instance().QueueMessage(new TStringMessage(CMessage::CTRL_VALUECHANGE, m_pParentWindow, this, sBuffer));
+          }
+          m_sWindowText = sBuffer;
+          CWindow::SetWindowText(sBuffer);
+          m_pRenderedString.reset(new CRenderedString(m_pFontEngine, sBuffer, CRenderedString::VALIGN_NORMAL, CRenderedString::HALIGN_LEFT));
+          m_bDrawCursor = true;
+          Draw();
+        }
+      }
+      break;
 		case CMessage::KEYBOARD_KEYDOWN:
 			if (m_bVisible)
 			{
@@ -609,9 +643,11 @@ bool CEditBox::HandleMessage(CMessage* pMessage)
           case SDLK_TAB:
             // Not for us - let parent handle it
             CMessageServer::Instance().QueueMessage(new CKeyboardMessage(CMessage::KEYBOARD_KEYDOWN, m_pParentWindow, this,
-                  pKeyboardMessage->ScanCode, pKeyboardMessage->Modifiers, pKeyboardMessage->Key, pKeyboardMessage->Unicode));
+                  pKeyboardMessage->ScanCode, pKeyboardMessage->Modifiers, pKeyboardMessage->Key));
             break;
 					default:
+            /*
+            // TODO(SDL2): Cleanup
 						if (pKeyboardMessage->Unicode)
 						{
 							if ((pKeyboardMessage->Unicode & 0xFF80) == 0)
@@ -641,6 +677,7 @@ bool CEditBox::HandleMessage(CMessage* pMessage)
 								wUtil::Trace("CEditBox::HandleMessage : CEditBox can't handle Unicode characters yet.");
 							}
 						}
+            */
 						break;
 					}
 

@@ -53,20 +53,24 @@ void CApplication::HandleSDLEvent(SDL_Event event)
             CMessage::CTRL_RESIZE, nullptr, this, CPoint(event.window.data1, event.window.data2)));
     }
 		break;
-    /* TODO(SDL2): Find unicode from KEY (or switch to text input)
+  case SDL_TEXTINPUT:
+    std::cout << "Text input event: " << event.text.text << std::endl;
+    CMessageServer::Instance().QueueMessage(new CTextInputMessage(
+          CMessage::TEXTINPUT, CApplication::Instance()->GetKeyFocus(), this,
+          std::string(event.text.text)));
+    break;
 	case SDL_KEYDOWN:
 		CMessageServer::Instance().QueueMessage(new CKeyboardMessage(
 			CMessage::KEYBOARD_KEYDOWN, CApplication::Instance()->GetKeyFocus(), this,
-			event.key.keysym.scancode, event.key.keysym.mod,
-			event.key.keysym.sym, event.key.keysym.unicode));
+			event.key.keysym.scancode, static_cast<SDL_Keymod>(event.key.keysym.mod),
+			event.key.keysym.sym));
 		break;
 	case SDL_KEYUP:
 		CMessageServer::Instance().QueueMessage(new CKeyboardMessage(
 			CMessage::KEYBOARD_KEYUP, CApplication::Instance()->GetKeyFocus(), this,
-			event.key.keysym.scancode, event.key.keysym.mod,
-			event.key.keysym.sym, event.key.keysym.unicode));
+			event.key.keysym.scancode, static_cast<SDL_Keymod>(event.key.keysym.mod),
+			event.key.keysym.sym));
 		break;
-    */
 	case SDL_MOUSEBUTTONDOWN:
 		CMessageServer::Instance().QueueMessage(new CMouseMessage(
 			CMessage::MOUSE_BUTTONDOWN, CApplication::Instance()->GetMouseFocus(), this,
@@ -102,7 +106,7 @@ void CApplication::HandleSDLEvent(SDL_Event event)
 		break;
   case SDL_JOYAXISMOTION:
     {
-      SDL_KeyCode key(SDLK_UNKNOWN);
+      SDL_Keycode key(SDLK_UNKNOWN);
       switch(event.jaxis.axis) {
         case 0:
         case 2:
@@ -126,10 +130,10 @@ void CApplication::HandleSDLEvent(SDL_Event event)
       if (key != SDLK_UNKNOWN) {
         CMessageServer::Instance().QueueMessage(new CKeyboardMessage(
               CMessage::KEYBOARD_KEYDOWN, CApplication::Instance()->GetKeyFocus(), this,
-              0, KMOD_NONE, key, 0));
+              0, KMOD_NONE, key));
         CMessageServer::Instance().QueueMessage(new CKeyboardMessage(
               CMessage::KEYBOARD_KEYUP, CApplication::Instance()->GetKeyFocus(), this,
-              0, KMOD_NONE, key, 0));
+              0, KMOD_NONE, key));
       }
       break;
     }
@@ -140,7 +144,7 @@ void CApplication::HandleSDLEvent(SDL_Event event)
       if (event.type == SDL_JOYBUTTONUP) {
         type = CMessage::KEYBOARD_KEYUP;
       }
-      SDL_KeyCode key;
+      SDL_Keycode key(SDLK_UNKNOWN);
       SDL_Keymod mod = KMOD_NONE;
       bool ignore_event = false;
       // TODO: arbitrary binding: validate with various joystick models
@@ -167,7 +171,7 @@ void CApplication::HandleSDLEvent(SDL_Event event)
       if (!ignore_event) {
         CMessageServer::Instance().QueueMessage(new CKeyboardMessage(
               type, CApplication::Instance()->GetKeyFocus(), this,
-              0, mod, key, 0));
+              0, mod, key));
       }
       break;
     }
