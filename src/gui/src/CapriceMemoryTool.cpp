@@ -133,11 +133,9 @@ bool CapriceMemoryTool::HandleMessage(CMessage* pMessage)
             }
             if (pMessage->Source() == m_pButtonCopy) {
               std::cout << m_pTextMemContent->GetWindowText() << std::endl;
-            /* Requires SDL2
               if(SDL_SetClipboardText(m_pTextMemContent->GetWindowText().c_str()) < 0) {
                 fprintf(stderr, "Error while copying data to clipboard: %s\n", SDL_GetError());
               }
-              */
               bHandled = true;
               break;
             }

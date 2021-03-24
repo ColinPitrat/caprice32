@@ -3,7 +3,7 @@
 #include "cap32.h"
 
 extern SDL_Surface* pub;
-extern SDL_Surface* vid;
+extern SDL_Surface* scaled;
 
 namespace
 {
@@ -42,7 +42,7 @@ class ComputeRectsTest : public testing::Test {
     // Some checks that should be valid for any call.
     void ExpectValid() {
       ExpectRectInSurface(&src, pub);
-      ExpectRectInSurface(&dst, vid);
+      ExpectRectInSurface(&dst, scaled);
       ExpectSrcFitsInDst();
     }
 
@@ -57,12 +57,12 @@ class ComputeRectsTest : public testing::Test {
 TEST_F(ComputeRectsTest, DefaultSize)
 {
   pub = CreateSurface(CPC_VISIBLE_SCR_WIDTH, CPC_VISIBLE_SCR_HEIGHT);
-  vid = CreateSurface(2*CPC_VISIBLE_SCR_WIDTH, 2*CPC_VISIBLE_SCR_HEIGHT);
+  scaled = CreateSurface(2*CPC_VISIBLE_SCR_WIDTH, 2*CPC_VISIBLE_SCR_HEIGHT);
 
   compute_rects_for_tests(&src, &dst);
 
   ExpectFullSrc();
-  ExpectRectMatchesSurface(&dst, vid);
+  ExpectRectMatchesSurface(&dst, scaled);
   ExpectValid();
 }
 
@@ -71,7 +71,7 @@ TEST_F(ComputeRectsTest, BiggerVid)
   for (auto offset : { 1, 2, 3, 10, 17, 50, 100, 101 }) 
   {
     pub = CreateSurface(CPC_VISIBLE_SCR_WIDTH, CPC_VISIBLE_SCR_HEIGHT);
-    vid = CreateSurface(2*CPC_VISIBLE_SCR_WIDTH + offset, 2*CPC_VISIBLE_SCR_HEIGHT + offset);
+    scaled = CreateSurface(2*CPC_VISIBLE_SCR_WIDTH + offset, 2*CPC_VISIBLE_SCR_HEIGHT + offset);
 
     compute_rects_for_tests(&src, &dst);
 
@@ -89,7 +89,7 @@ TEST_F(ComputeRectsTest, BiggerPub)
   for (auto offset : { 1, 2, 3, 10, 17, 50, 100, 101, CPC_VISIBLE_SCR_WIDTH, CPC_VISIBLE_SCR_WIDTH+10 }) 
   {
     pub = CreateSurface(CPC_VISIBLE_SCR_WIDTH, CPC_VISIBLE_SCR_HEIGHT);
-    vid = CreateSurface(2*CPC_VISIBLE_SCR_WIDTH - offset, 2*CPC_VISIBLE_SCR_HEIGHT - offset);
+    scaled = CreateSurface(2*CPC_VISIBLE_SCR_WIDTH - offset, 2*CPC_VISIBLE_SCR_HEIGHT - offset);
 
     compute_rects_for_tests(&src, &dst);
 
@@ -98,7 +98,7 @@ TEST_F(ComputeRectsTest, BiggerPub)
     EXPECT_EQ(src.w, CPC_VISIBLE_SCR_WIDTH - (offset+1)/2);
     // TODO: There is obviously a problem if offset/2 < 4 compared to when offset = 0 (where we have -4 here)
     EXPECT_EQ(src.h, CPC_VISIBLE_SCR_HEIGHT - (offset+1)/2);
-    ExpectRectMatchesSurface(&dst, vid);
+    ExpectRectMatchesSurface(&dst, scaled);
     ExpectValid();
   }
 }

@@ -139,14 +139,14 @@ public:
 	//! \param pSource A pointer to the window that created the message
 	//! \param ScanCode The scan code of the key pressed
 	//! \param Modifiers Any modifier keys that are being pressed (alt, ctrl, shift, etc)
-	//! \param Key The SDLKey that defines the key pressed
+	//! \param Key The SDL_Keysym that defines the key pressed
 	//! \param Unicode The unicode character the keypress corresponds to
 	CKeyboardMessage(const EMessageType MessageType, const CMessageClient* pDestination, const CMessageClient* pSource,
-		unsigned char ScanCode, SDLMod Modifiers, SDLKey Key, Uint16 Unicode);
+		unsigned char ScanCode, SDL_Keymod Modifiers, SDL_KeyCode Key, Uint16 Unicode);
 
 	unsigned char ScanCode;  //!< The scan code of the key pressed
-	SDLMod Modifiers;  //!< Any modifier keys that are being pressed (alt, ctrl, shift, etc)
-	SDLKey Key;  //!< The SDLKey that defines the key pressed
+	SDL_Keymod Modifiers;  //!< Any modifier keys that are being pressed (alt, ctrl, shift, etc)
+	SDL_KeyCode Key;  //!< The SDL_Keysym that defines the key pressed
 	Uint16 Unicode;  //!< The unicode character the keypress corresponds to
 };
 

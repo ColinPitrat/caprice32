@@ -47,10 +47,13 @@ void CApplication::HandleSDLEvent(SDL_Event event)
 	// this will turn an SDL event into a wGui message
 	switch (event.type)
 	{
-	case SDL_VIDEORESIZE:
-		CMessageServer::Instance().QueueMessage(new TPointMessage(
-			CMessage::CTRL_RESIZE, nullptr, this, CPoint(event.resize.w, event.resize.h)));
+  case SDL_WINDOWEVENT_RESIZED:
+    if (event.window.event == SDL_WINDOWEVENT_SIZE_CHANGED) {
+      CMessageServer::Instance().QueueMessage(new TPointMessage(
+            CMessage::CTRL_RESIZE, nullptr, this, CPoint(event.window.data1, event.window.data2)));
+    }
 		break;
+    /* TODO(SDL2): Find unicode from KEY (or switch to text input)
 	case SDL_KEYDOWN:
 		CMessageServer::Instance().QueueMessage(new CKeyboardMessage(
 			CMessage::KEYBOARD_KEYDOWN, CApplication::Instance()->GetKeyFocus(), this,
@@ -63,6 +66,7 @@ void CApplication::HandleSDLEvent(SDL_Event event)
 			event.key.keysym.scancode, event.key.keysym.mod,
 			event.key.keysym.sym, event.key.keysym.unicode));
 		break;
+    */
 	case SDL_MOUSEBUTTONDOWN:
 		CMessageServer::Instance().QueueMessage(new CMouseMessage(
 			CMessage::MOUSE_BUTTONDOWN, CApplication::Instance()->GetMouseFocus(), this,
@@ -75,6 +79,21 @@ void CApplication::HandleSDLEvent(SDL_Event event)
 			CPoint(static_cast<int>((event.button.x-vid_plugin->x_offset)*vid_plugin->x_scale), static_cast<int>((event.button.y-vid_plugin->y_offset)*vid_plugin->y_scale)), CPoint(),
 			CMouseMessage::TranslateSDLButton(event.button.button)));
 		break;
+  case SDL_MOUSEWHEEL:
+    {
+      // TODO(SDL2): Verify that mouse wheel works as expected
+      unsigned int wheeldirection = CMouseMessage::NONE;
+      if (event.wheel.x > 0 || event.wheel.y > 0) {
+        wheeldirection = CMouseMessage::WHEELUP;
+      } else {
+        wheeldirection = CMouseMessage::WHEELDOWN;
+      }
+      CMessageServer::Instance().QueueMessage(new CMouseMessage(
+            CMessage::MOUSE_BUTTONDOWN, CApplication::Instance()->GetMouseFocus(), this,
+            CPoint(static_cast<int>((event.button.x-vid_plugin->x_offset)*vid_plugin->x_scale), static_cast<int>((event.button.y-vid_plugin->y_offset)*vid_plugin->y_scale)), CPoint(),
+            wheeldirection));
+      break;
+    }
 	case SDL_MOUSEMOTION:
 		CMessageServer::Instance().QueueMessage(new CMouseMessage(
 			CMessage::MOUSE_MOVE, CApplication::Instance()->GetMouseFocus(), this,
@@ -83,7 +102,7 @@ void CApplication::HandleSDLEvent(SDL_Event event)
 		break;
   case SDL_JOYAXISMOTION:
     {
-      SDLKey key(SDLK_UNKNOWN);
+      SDL_KeyCode key(SDLK_UNKNOWN);
       switch(event.jaxis.axis) {
         case 0:
         case 2:
@@ -121,8 +140,8 @@ void CApplication::HandleSDLEvent(SDL_Event event)
       if (event.type == SDL_JOYBUTTONUP) {
         type = CMessage::KEYBOARD_KEYUP;
       }
-      SDLKey key;
-      SDLMod mod = KMOD_NONE;
+      SDL_KeyCode key;
+      SDL_Keymod mod = KMOD_NONE;
       bool ignore_event = false;
       // TODO: arbitrary binding: validate with various joystick models
       switch (event.jbutton.button) {
@@ -267,7 +286,8 @@ void CApplication::SetMouseFocus(CWindow* pWindow)
 void CApplication::Init()
 {
 	CMessageServer::Instance().RegisterMessageClient(this, CMessage::APP_EXIT, CMessageServer::PRIORITY_LAST);
-	SDL_EnableUNICODE(1);
+  // TODO(SDL2): Fix support of text input
+	//SDL_EnableUNICODE(1);
 
     // judb removed references to wgui.conf; for caprice32 we may integrate these settings in cap32.cfg:
     m_pDefaultFontEngine = GetFontEngine(CPC.resources_path + "/vera_sans.ttf", 8); // default size was 10
