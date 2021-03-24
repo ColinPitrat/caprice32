@@ -1863,7 +1863,7 @@ SDL_Surface* prepareShowUI()
    CPC.scr_gui_is_currently_on = true;
    SDL_ShowCursor(SDL_ENABLE);
    // guiBackSurface will allow the GUI to capture the current frame
-   SDL_Surface* guiBackSurface(SDL_CreateRGBSurface(SDL_SWSURFACE, back_surface->w, back_surface->h, 32, 0x000000FF, 0x0000FF00, 0x00FF0000, 0x00000000));
+   SDL_Surface* guiBackSurface(SDL_CreateRGBSurface(0, back_surface->w, back_surface->h, 32, 0x000000FF, 0x0000FF00, 0x00FF0000, 0x00000000));
    SDL_BlitSurface(back_surface, nullptr, guiBackSurface, nullptr);
    return guiBackSurface;
 }
