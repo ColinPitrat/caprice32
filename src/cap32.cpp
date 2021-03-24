@@ -43,13 +43,10 @@
 #include <errno.h>
 #include <cstring>
 
-// TODO(SDL2): Restore GUI
-/*
 #include "CapriceGui.h"
 #include "CapriceGuiView.h"
 #include "CapriceVKeyboardView.h"
 #include "CapriceLeavingWithoutSavingView.h"
-*/
 
 #include "errors.h"
 #include "log.h"
@@ -1880,8 +1877,6 @@ void cleanupShowUI(SDL_Surface* guiBackSurface)
 
 bool userConfirmsQuitWithoutSaving()
 {
-// TODO(SDL2): Restore GUI
-/*
    auto guiBackSurface = prepareShowUI();
    bool confirmed = false;
    // Show warning
@@ -1898,14 +1893,10 @@ bool userConfirmsQuitWithoutSaving()
    }
    cleanupShowUI(guiBackSurface);
    return confirmed;
-   */
-return true;
 }
 
 void showVKeyboard()
 {
-// TODO(SDL2): Restore GUI
-/*
    auto guiBackSurface = prepareShowUI();
    // Activate virtual keyboard
    try {
@@ -1921,13 +1912,10 @@ void showVKeyboard()
       std::cout << "Failed displaying the virtual keyboard: " << e.what() << std::endl;
    }
    cleanupShowUI(guiBackSurface);
-   */
 }
 
 void showGui()
 {
-// TODO(SDL2): Restore GUI
-/*
    auto guiBackSurface = prepareShowUI();
    try {
       CapriceGui capriceGui;
@@ -1940,7 +1928,6 @@ void showGui()
       std::cout << "Failed displaying the GUI: " << e.what() << std::endl;
    }
    cleanupShowUI(guiBackSurface);
-*/
 }
 
 void set_osd_message(const std::string& message) {
