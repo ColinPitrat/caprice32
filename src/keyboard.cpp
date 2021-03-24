@@ -1399,6 +1399,10 @@ bool InputMapper::load_layout(const std::string& filename)
         LOG_ERROR("Mapping '" << filename << "' contains a CPC key multiple times: " << parsed_line.cpc_key_name);
         valid = false;
       }
+      /*
+       * Deactivate this check: we do want to be able to have CPC keys mapped to the same SDL keys.
+       * This is needed for the virtual keyboard, as (for example) the "|cpm" command actually produces "ùcpm" on a CPC with a french keyboard.
+       * So we need CPC_PIPE to have the same mapping as CPC_uGRAVE.
       mapped_cpc_keys.insert(parsed_line.cpc_key);
       // And that no SDL key combination is mapped to 2 different CPC keys
       if (mapped_sdl_keys.count(parsed_line.sdl_key) != 0) {
@@ -1406,6 +1410,7 @@ bool InputMapper::load_layout(const std::string& filename)
         valid = false;
       }
       mapped_sdl_keys.insert(parsed_line.sdl_key);
+      */
     }
     fb.close();
   }
