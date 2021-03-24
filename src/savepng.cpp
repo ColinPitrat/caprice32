@@ -31,7 +31,7 @@
 /* libpng callbacks */
 static void png_error_SDL(png_structp ctx, png_const_charp str)
 {
-  SDL_SetError("libpng: %s (ctx is %08lx)\n", str, reinterpret_cast<std::uintptr_t>(ctx));
+  SDL_SetError("libpng: %s (ctx is %" PRIXPTR ")\n", str, reinterpret_cast<std::uintptr_t>(ctx));
 }
 static void png_write_SDL(png_structp png_ptr, png_bytep data, png_size_t length)
 {
