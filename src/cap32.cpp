@@ -1907,6 +1907,7 @@ void showVKeyboard()
       capriceGui.Exec();
       auto newEvents = capriceVKeyboardView.GetEvents();
       virtualKeyboardEvents.splice(virtualKeyboardEvents.end(), newEvents);
+      nextVirtualEventFrameCount = dwFrameCountOverall;
    } catch(wGui::Wg_Ex_App& e) {
       // TODO: improve: this is pretty silent if people don't look at the console
       std::cout << "Failed displaying the virtual keyboard: " << e.what() << std::endl;
