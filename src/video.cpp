@@ -172,7 +172,7 @@ static int tex_x,tex_y;
 static GLuint screen_texnum,modulate_texnum;
 static int gl_scanlines;
 
-SDL_Surface* glscale_init(video_plugin* t,int w,int h, int bpp, bool fs)
+SDL_Surface* glscale_init(video_plugin* t, int w __attribute__((unused)), int h __attribute__((unused)), int bpp, bool fs)
 {
 #ifdef _WIN32
   const char *gl_library = "OpenGL32.DLL";
@@ -189,20 +189,19 @@ SDL_Surface* glscale_init(video_plugin* t,int w,int h, int bpp, bool fs)
     return nullptr;
   }
 
-  if (!fs)
-  {
-    w=CPC_VISIBLE_SCR_WIDTH*2;
-    h=CPC_VISIBLE_SCR_HEIGHT*2;
+  int width = CPC_VISIBLE_SCR_WIDTH*2;
+  int height = CPC_VISIBLE_SCR_HEIGHT*2;
+  SDL_CreateWindowAndRenderer(width, height, (fs?SDL_WINDOW_FULLSCREEN_DESKTOP:SDL_WINDOW_SHOWN), &window, &renderer);
+  if (!window || !renderer) return nullptr;
+  if (fs) {
+    SDL_DisplayMode display;
+    SDL_GetCurrentDisplayMode(0, &display);
+    width = display.w;
+    height = display.h;
   }
-  // SDL1->2: vid=SDL_SetVideoMode(w,h,0,SDL_OPENGL | (fs?SDL_FULLSCREEN:0));
-  window = SDL_CreateWindow("Caprice32 " VERSION_STRING, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, w, h, (fs?SDL_WINDOW_FULLSCREEN_DESKTOP:0) | SDL_WINDOW_OPENGL);
-  if (!window) return nullptr;
+  vid = SDL_CreateRGBSurface(0, width, height, renderer_bpp(renderer), 0, 0, 0, 0);
+  if (!vid) return nullptr;
   glcontext = SDL_GL_CreateContext(window);
-  if (!texture)
-  {
-    fprintf(stderr, "Could not set requested video mode: %s\n", SDL_GetError());
-    return nullptr;
-  }
   if (init_glfuncs()!=0)
   {
     fprintf(stderr, "Cannot init OpenGL functions: %s\n", SDL_GetError());
@@ -239,8 +238,8 @@ SDL_Surface* glscale_init(video_plugin* t,int w,int h, int bpp, bool fs)
       original_height = CPC_VISIBLE_SCR_HEIGHT * 2;
    }
 
-  t->x_scale=original_width/static_cast<float>(w);
-  t->y_scale=original_height/static_cast<float>(h);
+  t->x_scale=original_width/static_cast<float>(width);
+  t->y_scale=original_height/static_cast<float>(height);
   t->x_offset=0;
   t->y_offset=0;
 
@@ -335,10 +334,10 @@ SDL_Surface* glscale_init(video_plugin* t,int w,int h, int bpp, bool fs)
     modulate_texture[5]=texmod;
     eglTexImage2D(GL_TEXTURE_2D, 0,GL_RGB8,1,2, 0,GL_RGB,GL_UNSIGNED_BYTE, modulate_texture);
   }
-  eglViewport(0,0,w,h);
+  eglViewport(0, 0, width, height);
   eglMatrixMode(GL_PROJECTION);
   eglLoadIdentity();
-  eglOrtho(0,w,h,0,-1.0, 1.0);
+  eglOrtho(0, width, height, 0, -1.0, 1.0);
 
   eglMatrixMode(GL_MODELVIEW);
   eglLoadIdentity();
