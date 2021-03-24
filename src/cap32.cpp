@@ -2244,10 +2244,12 @@ std::map<SDL_Keycode, std::string> keycode_names = {
     {SDLK_KBDILLUMUP, "SDLK_KBDILLUMUP"},
     {SDLK_EJECT, "SDLK_EJECT"},
     {SDLK_SLEEP, "SDLK_SLEEP"},
+    /* Only in SDL > 2.0.5
     {SDLK_APP1, "SDLK_APP1"},
     {SDLK_APP2, "SDLK_APP2"},
     {SDLK_AUDIOREWIND, "SDLK_AUDIOREWIND"},
     {SDLK_AUDIOFASTFORWARD, "SDLK_AUDIOFASTFORWARD"},
+    */
 };
 
 int cap32_main (int argc, char **argv)
@@ -2557,7 +2559,8 @@ int cap32_main (int argc, char **argv)
             //       keeping track of pause source, which will be a pain.
             case SDL_WINDOWEVENT:
             switch (event.window.event) {
-              case SDL_WINDOWEVENT_TAKE_FOCUS:
+              // TODO(SDL2): TAKE_FOCUS is only in SDL > 2.0.5
+              //case SDL_WINDOWEVENT_TAKE_FOCUS:
               case SDL_WINDOWEVENT_FOCUS_GAINED:
               case SDL_WINDOWEVENT_ENTER:
                 if (CPC.auto_pause) {
