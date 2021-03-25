@@ -90,24 +90,32 @@ int renderer_bpp(SDL_Renderer *sdl_renderer)
   return SDL_BITSPERPIXEL(infos.texture_formats[0]);
 }
 
+// Common init code for direct access to the rendering surface (no specific processing done by video plugin)
+SDL_Surface* direct_init(video_plugin* t, int w, int h, bool fs)
+{
+  SDL_CreateWindowAndRenderer(w, h, (fs?SDL_WINDOW_FULLSCREEN_DESKTOP:SDL_WINDOW_SHOWN), &window, &renderer);
+  if (!window || !renderer) return nullptr;
+  SDL_SetWindowTitle(window, "Caprice32 " VERSION_STRING);
+  vid = SDL_CreateRGBSurface(0, w, h, renderer_bpp(renderer), 0, 0, 0, 0);
+  if (!vid) return nullptr;
+  texture = SDL_CreateTextureFromSurface(renderer, vid);
+  if (!texture) return nullptr;
+  SDL_FillRect(vid, nullptr, SDL_MapRGB(vid->format,0,0,0));
+  int width, height;
+  SDL_GetWindowSize(window, &width, &height);
+  t->x_scale=w/static_cast<float>(width);
+  t->y_scale=h/static_cast<float>(height);
+  t->x_offset=0;
+  t->y_offset=0;
+  return vid;
+}
+
 /* ------------------------------------------------------------------------------------ */
 /* Half size video plugin ------------------------------------------------------------- */
 /* ------------------------------------------------------------------------------------ */
 SDL_Surface* half_init(video_plugin* t, int w __attribute__((unused)), int h __attribute__((unused)), int bpp __attribute__((unused)), bool fs)
 {
-  SDL_CreateWindowAndRenderer(CPC_VISIBLE_SCR_WIDTH, CPC_VISIBLE_SCR_HEIGHT, (fs?SDL_WINDOW_FULLSCREEN_DESKTOP:SDL_WINDOW_SHOWN), &window, &renderer);
-  if (!window || !renderer) return nullptr;
-  SDL_SetWindowTitle(window, "Caprice32 " VERSION_STRING);
-  vid = SDL_CreateRGBSurface(0, CPC_VISIBLE_SCR_WIDTH*2, CPC_VISIBLE_SCR_HEIGHT*2, renderer_bpp(renderer), 0, 0, 0, 0);
-  if (!vid) return nullptr;
-  texture = SDL_CreateTextureFromSurface(renderer, vid);
-  if (!texture) return nullptr;
-  SDL_FillRect(vid, nullptr, SDL_MapRGB(vid->format,0,0,0));
-  t->x_scale=1.0;
-  t->y_scale=1.0;
-  t->x_offset=0;
-  t->y_offset=0;
-  return vid;
+  return direct_init(t, CPC_VISIBLE_SCR_WIDTH, CPC_VISIBLE_SCR_HEIGHT, fs);
 }
 
 void half_setpal(SDL_Color* c)
@@ -131,21 +139,7 @@ void half_close()
 /* ------------------------------------------------------------------------------------ */
 SDL_Surface* double_init(video_plugin* t, int w __attribute__((unused)), int h __attribute__((unused)), int bpp __attribute__((unused)), bool fs)
 {
-  SDL_CreateWindowAndRenderer(CPC_VISIBLE_SCR_WIDTH*2, CPC_VISIBLE_SCR_HEIGHT*2, (fs?SDL_WINDOW_FULLSCREEN_DESKTOP:SDL_WINDOW_SHOWN), &window, &renderer);
-  if (!window || !renderer) return nullptr;
-  SDL_SetWindowTitle(window, "Caprice32 " VERSION_STRING);
-  vid = SDL_CreateRGBSurface(0, CPC_VISIBLE_SCR_WIDTH*2, CPC_VISIBLE_SCR_HEIGHT*2, renderer_bpp(renderer), 0, 0, 0, 0);
-  //vid = SDL_CreateRGBSurfaceWithFormat(0, CPC_VISIBLE_SCR_WIDTH*2, CPC_VISIBLE_SCR_HEIGHT*2, 32, SDL_PIXELFORMAT_RGB888);
-  //vid = SDL_CreateRGBSurfaceWithFormat(0, CPC_VISIBLE_SCR_WIDTH*2, CPC_VISIBLE_SCR_HEIGHT*2, SDL_BITSPERPIXEL(infos.texture_formats[0]), infos.texture_formats[0]);
-  if (!vid) return nullptr;
-  texture = SDL_CreateTextureFromSurface(renderer, vid);
-  if (!texture) return nullptr;
-  SDL_FillRect(vid, nullptr, SDL_MapRGB(vid->format,0,0,0));
-  t->x_scale=1.0;
-  t->y_scale=1.0;
-  t->x_offset=0;
-  t->y_offset=0;
-  return vid;
+  return direct_init(t, CPC_VISIBLE_SCR_WIDTH*2, CPC_VISIBLE_SCR_HEIGHT*2, fs);
 }
 
 void double_setpal(SDL_Color* c)
@@ -558,8 +552,10 @@ SDL_Surface* swscale_init(video_plugin* t, int w __attribute__((unused)), int h 
     std::cerr << t->name << ": SDL didn't return a 16 bpp surface but a " << static_cast<int>(scaled->format->BitsPerPixel) << " bpp one." << std::endl;
     return nullptr;
   }
-  t->x_scale=0.5;
-  t->y_scale=0.5;
+  int width, height;
+  SDL_GetWindowSize(window, &width, &height);
+  t->x_scale=CPC_VISIBLE_SCR_WIDTH/static_cast<float>(width);
+  t->y_scale=CPC_VISIBLE_SCR_HEIGHT/static_cast<float>(height);
   t->x_offset=0;
   t->y_offset=0;
   SDL_FillRect(vid, nullptr, SDL_MapRGB(vid->format,0,0,0));
