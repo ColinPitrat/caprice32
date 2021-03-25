@@ -54,7 +54,6 @@ void CApplication::HandleSDLEvent(SDL_Event event)
     }
 		break;
   case SDL_TEXTINPUT:
-    std::cout << "Text input event: " << event.text.text << std::endl;
     CMessageServer::Instance().QueueMessage(new CTextInputMessage(
           CMessage::TEXTINPUT, CApplication::Instance()->GetKeyFocus(), this,
           std::string(event.text.text)));

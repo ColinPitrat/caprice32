@@ -790,22 +790,6 @@ bool CTextBox::HandleMessage(CMessage* pMessage)  // virtual
 						sBuffer.insert(m_SelStart++, 1, '\n');
 						break;
 					default:
-          /*
-            // TODO(SDL2): Cleanup
-						if (pKeyboardMessage->Unicode)
-						{
-							if ((pKeyboardMessage->Unicode & 0xFF80) == 0)
-							{
-								SelDelete(&sBuffer);
-								// we are deliberately truncating the unicode data, so don't use safe_static_cast
-								sBuffer.insert(m_SelStart++, 1, static_cast<char>(pKeyboardMessage->Unicode & 0x7F));
-							}
-							else
-							{
-								wUtil::Trace("CTextBox::HandleMessage : CTextBox can't handle Unicode characters yet.");
-							}
-						}
-            */
 						break;
 					}
 

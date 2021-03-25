@@ -442,6 +442,7 @@ bool CEditBox::HandleMessage(CMessage* pMessage)
         if (pTextInputMessage && !m_bReadOnly)
         {
           std::string sBuffer = m_sWindowText;
+          SelDelete(&sBuffer);
           // TODO: Find a clean way to handle real unicode. Here we assume this is only ASCII.
           for (auto val : pTextInputMessage->Text)
           {
@@ -646,38 +647,6 @@ bool CEditBox::HandleMessage(CMessage* pMessage)
                   pKeyboardMessage->ScanCode, pKeyboardMessage->Modifiers, pKeyboardMessage->Key));
             break;
 					default:
-            /*
-            // TODO(SDL2): Cleanup
-						if (pKeyboardMessage->Unicode)
-						{
-							if ((pKeyboardMessage->Unicode & 0xFF80) == 0)
-							{
-								SelDelete(&sBuffer);
-								// we are deliberately truncating the unicode data, so don't use safe_static_cast
-                char val = static_cast<char>(pKeyboardMessage->Unicode & 0x7F);
-                if(m_contentType == NUMBER && (val < '0' || val > '9')) {
-                  break;
-                }
-                if(m_contentType == HEXNUMBER && (val < '0' || val > '9') && (val < 'A' || val > 'F') && (val < 'a' || val > 'f')) {
-                  break;
-                }
-                if(m_contentType == HEXNUMBER && val >= 'a' && val <= 'z') {
-                    val += 'A' - 'a';
-                }
-                if(m_contentType == ALPHA && (val < 'A' || val > 'Z') && (val < 'a' || val > 'z')) {
-                  break;
-                }
-                if(m_contentType == ALPHANUM && (val < '0' || val > '9') && (val < 'A' || val > 'Z') && (val < 'a' || val > 'z')) {
-                  break;
-                }
-								sBuffer.insert(m_SelStart++, 1, val);
-							}
-							else
-							{
-								wUtil::Trace("CEditBox::HandleMessage : CEditBox can't handle Unicode characters yet.");
-							}
-						}
-            */
 						break;
 					}
 
