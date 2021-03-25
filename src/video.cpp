@@ -545,17 +545,6 @@ SDL_Surface* swscale_init(video_plugin* t, int w __attribute__((unused)), int h 
 {
   SDL_CreateWindowAndRenderer(CPC_VISIBLE_SCR_WIDTH*2, CPC_VISIBLE_SCR_HEIGHT*2, (fs?SDL_WINDOW_FULLSCREEN_DESKTOP:SDL_WINDOW_SHOWN), &window, &renderer);
   if (!window || !renderer) return nullptr;
-  /*
-  std::cout << "cpitrat: Renderer info:" << std::endl;
-  SDL_RendererInfo infos;
-  SDL_GetRendererInfo(renderer, &infos);
-  std::cout << "  name: " << infos.name << std::endl;
-  std::cout << "  flags: " << infos.flags << std::endl;
-  std::cout << "  #texture formats: " << infos.num_texture_formats << std::endl;
-  for (unsigned int i = 0; i < infos.num_texture_formats; i++) {
-    std::cout << "     format: " << SDL_GetPixelFormatName(infos.texture_formats[i]) << std::endl;
-  }
-  */
   SDL_SetWindowTitle(window, "Caprice32 " VERSION_STRING);
   vid = SDL_CreateRGBSurface(0, CPC_VISIBLE_SCR_WIDTH*2, CPC_VISIBLE_SCR_HEIGHT*2, renderer_bpp(renderer), 0, 0, 0, 0);
   if (!vid) return nullptr;
@@ -580,36 +569,6 @@ SDL_Surface* swscale_init(video_plugin* t, int w __attribute__((unused)), int h 
     std::cerr << t->name << ": SDL didn't return a 16 bpp surface but a " << static_cast<int>(pub->format->BitsPerPixel) << " bpp one." << std::endl;
     return nullptr;
   }
-
-   std::cout << "cpitrat: vid properties: " << std::endl;
-   std::cout << " format: " << SDL_GetPixelFormatName(vid->format->format) << std::endl;
-   std::cout << " bpp: " << static_cast<int>(vid->format->BitsPerPixel) << std::endl;
-   std::cout << " Bpp: " << static_cast<int>(vid->format->BytesPerPixel) << std::endl;
-   std::cout << " palette: " << vid->format->palette << std::endl;
-   if (vid->format->palette) 
-     std::cout << " palette #colors: " << vid->format->palette->ncolors << std::endl;
-   std::cout << " rmask: " << vid->format->Rmask << std::endl;
-   std::cout << " gmask: " << vid->format->Gmask << std::endl;
-   std::cout << " bmask: " << vid->format->Bmask << std::endl;
-   std::cout << " amask: " << vid->format->Amask << std::endl;
-   std::cout << " width: " << vid->w << std::endl;
-   std::cout << " height: " << vid->h << std::endl;
-   std::cout << " pitch: " << vid->pitch << std::endl;
-
-   std::cout << "cpitrat: scaled properties: " << std::endl;
-   std::cout << " format: " << SDL_GetPixelFormatName(scaled->format->format) << std::endl;
-   std::cout << " bpp: " << static_cast<int>(scaled->format->BitsPerPixel) << std::endl;
-   std::cout << " Bpp: " << static_cast<int>(scaled->format->BytesPerPixel) << std::endl;
-   std::cout << " palette: " << scaled->format->palette << std::endl;
-   if (scaled->format->palette) 
-     std::cout << " palette #colors: " << scaled->format->palette->ncolors << std::endl;
-   std::cout << " rmask: " << scaled->format->Rmask << std::endl;
-   std::cout << " gmask: " << scaled->format->Gmask << std::endl;
-   std::cout << " bmask: " << scaled->format->Bmask << std::endl;
-   std::cout << " amask: " << scaled->format->Amask << std::endl;
-   std::cout << " width: " << scaled->w << std::endl;
-   std::cout << " height: " << scaled->h << std::endl;
-   std::cout << " pitch: " << scaled->pitch << std::endl;
 
   return pub;
 }
