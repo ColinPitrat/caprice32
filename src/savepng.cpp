@@ -32,6 +32,7 @@
 // https://stackoverflow.com/questions/14071713/what-is-wrong-with-printfllx
 // https://github.com/dosbox-staging/dosbox-staging/issues/64
 #if defined(__MINGW64__) && !defined(__clang__)
+#undef PRIxPTR
 #define PRIxPTR "I64x"
 #endif
 
