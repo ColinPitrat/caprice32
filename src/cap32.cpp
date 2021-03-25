@@ -2245,12 +2245,12 @@ std::map<SDL_Keycode, std::string> keycode_names = {
     {SDLK_KBDILLUMUP, "SDLK_KBDILLUMUP"},
     {SDLK_EJECT, "SDLK_EJECT"},
     {SDLK_SLEEP, "SDLK_SLEEP"},
-    /* Only in SDL > 2.0.5
+    #if SDL_VERSION_ATLEAST(2, 0, 6)
     {SDLK_APP1, "SDLK_APP1"},
     {SDLK_APP2, "SDLK_APP2"},
     {SDLK_AUDIOREWIND, "SDLK_AUDIOREWIND"},
     {SDLK_AUDIOFASTFORWARD, "SDLK_AUDIOFASTFORWARD"},
-    */
+    #endif
 };
 
 int cap32_main (int argc, char **argv)
@@ -2554,14 +2554,14 @@ int cap32_main (int argc, char **argv)
             }
             break;
 
-            // Code shamelessly copied from http://sdl.beuc.net/sdl.wiki/Event_Examples
             // TODO: What if we were paused because of other reason than losing focus and then only lost focus
             //       the right thing to do here is to restore focus but keep paused... implementing this require
             //       keeping track of pause source, which will be a pain.
             case SDL_WINDOWEVENT:
             switch (event.window.event) {
-              // TODO(SDL2): TAKE_FOCUS is only in SDL > 2.0.5
-              //case SDL_WINDOWEVENT_TAKE_FOCUS:
+              #if SDL_VERSION_ATLEAST(2, 0, 5)
+              case SDL_WINDOWEVENT_TAKE_FOCUS:
+              #endif
               case SDL_WINDOWEVENT_FOCUS_GAINED:
               case SDL_WINDOWEVENT_ENTER:
                 if (CPC.auto_pause) {
