@@ -161,7 +161,7 @@ bool CView::HandleMessage(CMessage* pMessage)
 			TPointMessage* pResizeMessage = dynamic_cast<TPointMessage*>(pMessage);
 			if (pResizeMessage && pResizeMessage->Source() == CApplication::Instance())
 			{
-        std::cerr << "cpitrat: CView::HandleMessage called received a CTRL_RESIZE message - not migrated to SDL2" << std::endl;
+        std::cerr << "CView::HandleMessage called received a CTRL_RESIZE message - not migrated to SDL2" << std::endl;
         /*
 				CWindow::SetWindowRect(CRect(m_WindowRect.TopLeft(), m_WindowRect.TopLeft() + pResizeMessage->Value()));
 
