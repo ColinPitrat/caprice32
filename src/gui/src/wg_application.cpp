@@ -88,16 +88,17 @@ void CApplication::HandleSDLEvent(SDL_Event event)
 		break;
   case SDL_MOUSEWHEEL:
     {
-      // TODO(SDL2): Verify that mouse wheel works as expected
       unsigned int wheeldirection = CMouseMessage::NONE;
       if (event.wheel.x > 0 || event.wheel.y > 0) {
         wheeldirection = CMouseMessage::WHEELUP;
       } else {
         wheeldirection = CMouseMessage::WHEELDOWN;
       }
+      int x, y;
+      SDL_GetMouseState(&x, &y);
       CMessageServer::Instance().QueueMessage(new CMouseMessage(
             CMessage::MOUSE_BUTTONDOWN, CApplication::Instance()->GetMouseFocus(), this,
-            CPoint(static_cast<int>((event.button.x-vid_plugin->x_offset)*vid_plugin->x_scale), static_cast<int>((event.button.y-vid_plugin->y_offset)*vid_plugin->y_scale)), CPoint(),
+            CPoint(static_cast<int>((x-vid_plugin->x_offset)*vid_plugin->x_scale), static_cast<int>((y-vid_plugin->y_offset)*vid_plugin->y_scale)), CPoint(),
             wheeldirection));
       break;
     }
@@ -293,12 +294,10 @@ void CApplication::SetMouseFocus(CWindow* pWindow)
 void CApplication::Init()
 {
 	CMessageServer::Instance().RegisterMessageClient(this, CMessage::APP_EXIT, CMessageServer::PRIORITY_LAST);
-  // TODO(SDL2): Fix support of text input
-	//SDL_EnableUNICODE(1);
 
-    // judb removed references to wgui.conf; for caprice32 we may integrate these settings in cap32.cfg:
-    m_pDefaultFontEngine = GetFontEngine(CPC.resources_path + "/vera_sans.ttf", 8); // default size was 10
-    m_DefaultBackgroundColor = DEFAULT_BACKGROUND_COLOR;
+	// judb removed references to wgui.conf; for caprice32 we may integrate these settings in cap32.cfg:
+	m_pDefaultFontEngine = GetFontEngine(CPC.resources_path + "/vera_sans.ttf", 8); // default size was 10
+	m_DefaultBackgroundColor = DEFAULT_BACKGROUND_COLOR;
 	m_DefaultForegroundColor = DEFAULT_FOREGROUND_COLOR;
 	m_DefaultSelectionColor  = DEFAULT_SELECTION_COLOR;
 	m_bInited = true;
