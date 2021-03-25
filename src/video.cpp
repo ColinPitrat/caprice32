@@ -212,7 +212,7 @@ SDL_Surface* glscale_init(video_plugin* t, int w __attribute__((unused)), int h 
   const char *version;
   version = reinterpret_cast<const char *>(eglGetString(GL_VERSION));
   if (sscanf(version, "%d.%d", &major, &minor) != 2) {
-    fprintf(stderr, "Unable to get OpenGL version\n");
+    fprintf(stderr, "Unable to get OpenGL version: got %s.\n", version);
     return nullptr;
   }
 
