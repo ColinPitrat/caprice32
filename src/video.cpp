@@ -191,7 +191,7 @@ SDL_Surface* glscale_init(video_plugin* t, int w __attribute__((unused)), int h 
 
   int width = CPC_VISIBLE_SCR_WIDTH*2;
   int height = CPC_VISIBLE_SCR_HEIGHT*2;
-  SDL_CreateWindowAndRenderer(width, height, (fs?SDL_WINDOW_FULLSCREEN_DESKTOP:SDL_WINDOW_SHOWN), &window, &renderer);
+  SDL_CreateWindowAndRenderer(width, height, (fs?SDL_WINDOW_FULLSCREEN_DESKTOP:SDL_WINDOW_SHOWN) | SDL_WINDOW_OPENGL, &window, &renderer);
   if (!window || !renderer) return nullptr;
   if (fs) {
     SDL_DisplayMode display;
