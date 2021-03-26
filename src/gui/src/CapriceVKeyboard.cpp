@@ -153,7 +153,7 @@ namespace wGui {
               if(!result.empty() && result[result.size()-1] != '\b') {
                 result = result.substr(0, result.size()-1);
                 // If the char was a special char, also remove the escaping char
-                if(!result.empty() && result[result.size()-1] != '\a') {
+                if(!result.empty() && result[result.size()-1] == '\a') {
                   result = result.substr(0, result.size()-1);
                 }
                 m_result->SetWindowText(result);
@@ -162,7 +162,6 @@ namespace wGui {
               // Otherwise put backspace in the output
               pressed = "\b";
             } else if(pressed.size() == 2 && pressed[0] == 'F' && pressed[1] >= '0' && pressed[1] <= '9') {
-               std::cout << "Pressed F" << pressed[1] << std::endl;
                int fkey = CPC_F0 + pressed[1] - '0';
                pressed = "\a";
                pressed += static_cast<char>(fkey);
