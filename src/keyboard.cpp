@@ -1471,7 +1471,7 @@ std::list<SDL_Event> InputMapper::StringToEvents(std::string toTranslate) {
       }
       SDL_Event key;
       if (escaped || cap32_cmd) {
-        int keycode = c;
+        int keycode = static_cast<unsigned char>(c);
         if (cap32_cmd) {
           keycode += MOD_EMU_KEY;
         }
