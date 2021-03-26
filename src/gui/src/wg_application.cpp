@@ -73,9 +73,6 @@ void CApplication::HandleSDLEvent(SDL_Event event)
 	case SDL_MOUSEBUTTONDOWN:
 		CMessageServer::Instance().QueueMessage(new CMouseMessage(
 			CMessage::MOUSE_BUTTONDOWN, CApplication::Instance()->GetMouseFocus(), this,
-			// TODO(SDL2): x_scale is not sufficient anymore when in fullscreen (or even in windowed mode if we ever support resizing) as the rendering surface resolution may not be the display resolution.
-			// We would need to know the actual resolution to have the proper scaling.
-      // SDL_GetWindowSize should provide all the information we need
 			CPoint(static_cast<int>((event.button.x-vid_plugin->x_offset)*vid_plugin->x_scale), static_cast<int>((event.button.y-vid_plugin->y_offset)*vid_plugin->y_scale)), CPoint(),
 			CMouseMessage::TranslateSDLButton(event.button.button)));
 		break;
