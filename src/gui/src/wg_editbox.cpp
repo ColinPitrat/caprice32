@@ -479,7 +479,7 @@ bool CEditBox::HandleMessage(CMessage* pMessage)
 					switch(pKeyboardMessage->Key)
 					{
 					case SDLK_BACKSPACE:
-						if (m_SelLength > 0)
+						if (m_SelLength != 0)
 						{
 							SelDelete(&sBuffer);
 						}
@@ -495,7 +495,7 @@ bool CEditBox::HandleMessage(CMessage* pMessage)
 					case SDLK_DELETE:
 						if (m_SelStart < sBuffer.length())
 						{
-							if (m_SelLength > 0)
+							if (m_SelLength != 0)
 							{
 								SelDelete(&sBuffer);
 							}
