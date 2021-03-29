@@ -29,7 +29,6 @@
 #include "wg_resources.h"
 #include "std_ex.h"
 
-
 namespace wGui
 {
 
@@ -43,6 +42,8 @@ CScrollBar::CScrollBar(const CRect& WindowRect, CWindow* pParent, EScrollBarType
 	switch (m_ScrollBarType)
 	{
 	case VERTICAL:
+		// m_ClientRect is the area that doesn't contain the buttons.
+		// The height of the button is the width of the bar (they are square).
 		m_ClientRect = CRect(0, m_WindowRect.Width(), m_WindowRect.Width() - 1, m_WindowRect.Height() - m_WindowRect.Width() - 1);
 		m_pBtnUpLeft = new CPictureButton(CRect(0, -m_ClientRect.Width(), m_ClientRect.Width() - 1, -1),
 			this, CwgBitmapResourceHandle(WGRES_UP_ARROW_BITMAP));
@@ -51,6 +52,8 @@ CScrollBar::CScrollBar(const CRect& WindowRect, CWindow* pParent, EScrollBarType
 			this, CwgBitmapResourceHandle(WGRES_DOWN_ARROW_BITMAP));
 		break;
 	case HORIZONTAL:
+		// m_ClientRect is the area that doesn't contain the buttons.
+		// The width of the button is the height of the bar (they are square).
 		m_ClientRect = CRect(m_WindowRect.Height(), 0, m_WindowRect.Width() - m_WindowRect.Height() - 1, m_WindowRect.Height() - 1);
 		m_pBtnUpLeft = new CPictureButton(CRect(-m_ClientRect.Height(), 0, -1, m_ClientRect.Height() - 1),
 			this, CwgBitmapResourceHandle(WGRES_LEFT_ARROW_BITMAP));
@@ -327,7 +330,7 @@ void CScrollBar::RepositionThumb()
           iThumbWidth = 10;
         }
         if (range != 0) {
-          position = (m_ClientRect.Left() - iThumbWidth) * value / range;
+          position = (m_ClientRect.Width() - iThumbWidth) * value / range;
         }
         m_ThumbRect.SetLeft(m_ClientRect.Left() + position);
         m_ThumbRect.SetRight(m_ThumbRect.Left() + iThumbWidth);
