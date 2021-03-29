@@ -95,7 +95,6 @@ void compute_scale(video_plugin* t, int w, int h, float sw_scaling)
   int win_width, win_height;
   SDL_GetWindowSize(window, &win_width, &win_height);
   if (CPC.scr_preserve_aspect_ratio != 0) {
-    std::cout << "preserve aspect ratio " << std::endl;
     float win_x_scale, win_y_scale;
     win_x_scale = w/static_cast<float>(win_width);
     win_y_scale = h/static_cast<float>(win_height);
@@ -111,7 +110,6 @@ void compute_scale(video_plugin* t, int w, int h, float sw_scaling)
     t->x_scale=scale;
     t->y_scale=scale;
   } else {
-    std::cout << "DO NOT preserve aspect ratio " << std::endl;
     t->x_offset=0;
     t->y_offset=0;
     t->x_scale=w/static_cast<float>(win_width);
@@ -268,10 +266,7 @@ SDL_Surface* glscale_init(video_plugin* t, int w __attribute__((unused)), int h 
       original_height = CPC_VISIBLE_SCR_HEIGHT * 2;
    }
 
-  t->x_scale=original_width/static_cast<float>(width);
-  t->y_scale=original_height/static_cast<float>(height);
-  t->x_offset=0;
-  t->y_offset=0;
+  compute_scale(t, original_width, original_height, 1.0);
 
   // We have to react differently to the bpp parameter than with software rendering
   // Here are the rules :
@@ -364,7 +359,11 @@ SDL_Surface* glscale_init(video_plugin* t, int w __attribute__((unused)), int h 
     modulate_texture[5]=texmod;
     eglTexImage2D(GL_TEXTURE_2D, 0,GL_RGB8,1,2, 0,GL_RGB,GL_UNSIGNED_BYTE, modulate_texture);
   }
-  eglViewport(0, 0, width, height);
+  if (CPC.scr_preserve_aspect_ratio) {
+    eglViewport(t->x_offset, t->y_offset, t->width, t->height);
+  } else {
+    eglViewport(0, 0, width, height);
+  }
   eglMatrixMode(GL_PROJECTION);
   eglLoadIdentity();
   eglOrtho(0, width, height, 0, -1.0, 1.0);
@@ -397,6 +396,8 @@ void glscale_setpal(SDL_Color* c)
 void glscale_flip(video_plugin* t __attribute__((unused)))
 {
   eglDisable(GL_BLEND);
+  eglClearColor(0,0,0,1);
+  eglClear(GL_COLOR_BUFFER_BIT);
   
   if (gl_scanlines!=0)
   {
@@ -588,22 +589,8 @@ SDL_Surface* swscale_init(video_plugin* t, int w __attribute__((unused)), int h 
     std::cerr << t->name << ": SDL didn't return a 16 bpp surface but a " << static_cast<int>(scaled->format->BitsPerPixel) << " bpp one." << std::endl;
     return nullptr;
   }
-  /*
-  int width, height;
-  SDL_GetWindowSize(window, &width, &height);
-  t->x_scale=CPC_VISIBLE_SCR_WIDTH/static_cast<float>(width);
-  t->y_scale=CPC_VISIBLE_SCR_HEIGHT/static_cast<float>(height);
-  t->x_offset=0;
-  t->y_offset=0;
-  */
   SDL_FillRect(vid, nullptr, SDL_MapRGB(vid->format,0,0,0));
   compute_scale(t, CPC_VISIBLE_SCR_WIDTH, CPC_VISIBLE_SCR_HEIGHT, 2.0);
-  std::cout << "x_scale: " << t->x_scale << std::endl;
-  std::cout << "y_scale: " << t->y_scale << std::endl;
-  std::cout << "x_offset: " << t->x_offset << std::endl;
-  std::cout << "y_offset: " << t->y_offset << std::endl;
-  std::cout << "width: " << t->width << std::endl;
-  std::cout << "height: " << t->height << std::endl;
   pub = SDL_CreateRGBSurface(0, CPC_VISIBLE_SCR_WIDTH, CPC_VISIBLE_SCR_HEIGHT, 16, 0, 0, 0, 0);
   if (pub->format->BitsPerPixel!=16)
   {
