@@ -1549,7 +1549,7 @@ void video_shutdown ()
 
 void video_display ()
 {
-   vid_plugin->flip();
+   vid_plugin->flip(vid_plugin);
 }
 
 
@@ -1702,6 +1702,7 @@ void loadConfiguration (t_CPC &CPC, const std::string& configFilename)
    CPC.scr_fs_width = conf.getIntValue("video", "scr_width", 800);
    CPC.scr_fs_height = conf.getIntValue("video", "scr_height", 600);
    CPC.scr_fs_bpp = conf.getIntValue("video", "scr_bpp", 8);
+   CPC.scr_preserve_aspect_ratio = conf.getIntValue("video", "scr_preserve_aspect_ratio", 1);
    CPC.scr_style = conf.getIntValue("video", "scr_style", 0);
    if (CPC.scr_style >= video_plugin_list.size()) {
       CPC.scr_style = DEFAULT_VIDEO_PLUGIN;
@@ -1805,6 +1806,7 @@ bool saveConfiguration (t_CPC &CPC, const std::string& configFilename)
    conf.setIntValue("video", "scr_width", CPC.scr_fs_width);
    conf.setIntValue("video", "scr_height", CPC.scr_fs_height);
    conf.setIntValue("video", "scr_bpp", CPC.scr_fs_bpp);
+   conf.setIntValue("video", "scr_preserve_aspect_ratio", CPC.scr_preserve_aspect_ratio);
    conf.setIntValue("video", "scr_style", CPC.scr_style);
    conf.setIntValue("video", "scr_oglfilter", CPC.scr_oglfilter);
    conf.setIntValue("video", "scr_oglscanlines", CPC.scr_oglscanlines);

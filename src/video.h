@@ -31,7 +31,7 @@ typedef struct video_plugin
 
   void (*set_palette)(SDL_Color* c);
   /* "flips" the video surface. Note that this might not always do a real flip */
-  void (*flip)();
+  void (*flip)(video_plugin* t);
   /* closes the plugin */
   void (*close)();
 
@@ -39,8 +39,10 @@ typedef struct video_plugin
   Uint8 half_pixels;
 
   /* mouse offset/scaling info */
-  int x_offset,y_offset;
-  float x_scale,y_scale;
+  int x_offset, y_offset;
+  float x_scale, y_scale;
+  /* width & height of the surface to display */
+  int width, height;
 }
 video_plugin;
 

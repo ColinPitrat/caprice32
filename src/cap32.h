@@ -188,6 +188,7 @@ typedef struct {
    unsigned int scr_remanency;
    unsigned int scr_window;
    unsigned int scr_bpp;
+   unsigned int scr_preserve_aspect_ratio;
    unsigned int scr_bps;
    unsigned int scr_line_offs;
    unsigned int scr_green_mode;

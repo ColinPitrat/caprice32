@@ -90,6 +90,35 @@ int renderer_bpp(SDL_Renderer *sdl_renderer)
   return SDL_BITSPERPIXEL(infos.texture_formats[0]);
 }
 
+void compute_scale(video_plugin* t, int w, int h, float sw_scaling)
+{
+  int win_width, win_height;
+  SDL_GetWindowSize(window, &win_width, &win_height);
+  if (CPC.scr_preserve_aspect_ratio != 0) {
+    std::cout << "preserve aspect ratio " << std::endl;
+    float win_x_scale, win_y_scale;
+    win_x_scale = w/static_cast<float>(win_width);
+    win_y_scale = h/static_cast<float>(win_height);
+    float scale = max(win_x_scale, win_y_scale);
+    t->width=w/scale*sw_scaling;
+    t->width=w/scale;
+    t->height=h/scale*sw_scaling;
+    t->height=h/scale;
+    float x_offset = 0.5*(win_width-t->width);
+    float y_offset = 0.5*(win_height-t->height);
+    t->x_offset=x_offset;
+    t->y_offset=y_offset;
+    t->x_scale=scale;
+    t->y_scale=scale;
+  } else {
+    std::cout << "DO NOT preserve aspect ratio " << std::endl;
+    t->x_offset=0;
+    t->y_offset=0;
+    t->x_scale=w/static_cast<float>(win_width);
+    t->y_scale=h/static_cast<float>(win_height);
+  }
+}
+
 // Common init code for direct access to the rendering surface (no specific processing done by video plugin)
 SDL_Surface* direct_init(video_plugin* t, int w, int h, bool fs)
 {
@@ -101,12 +130,7 @@ SDL_Surface* direct_init(video_plugin* t, int w, int h, bool fs)
   texture = SDL_CreateTextureFromSurface(renderer, vid);
   if (!texture) return nullptr;
   SDL_FillRect(vid, nullptr, SDL_MapRGB(vid->format,0,0,0));
-  int width, height;
-  SDL_GetWindowSize(window, &width, &height);
-  t->x_scale=w/static_cast<float>(width);
-  t->y_scale=h/static_cast<float>(height);
-  t->x_offset=0;
-  t->y_offset=0;
+  compute_scale(t, w, h, 1.0);
   return vid;
 }
 
@@ -123,10 +147,16 @@ void half_setpal(SDL_Color* c)
   SDL_SetPaletteColors(vid->format->palette, c, 0, 32);
 }
 
-void half_flip()
+void half_flip(video_plugin* t)
 {
   SDL_UpdateTexture(texture, nullptr, vid->pixels, vid->pitch);
-  SDL_RenderCopy(renderer, texture, nullptr, nullptr);
+  SDL_RenderClear(renderer);
+  if (CPC.scr_preserve_aspect_ratio != 0) {
+    SDL_Rect dest_rect = { t->x_offset, t->y_offset, t->width, t->height };
+    SDL_RenderCopy(renderer, texture, nullptr, &dest_rect);
+  } else {
+    SDL_RenderCopy(renderer, texture, nullptr, nullptr);
+  }
   SDL_RenderPresent(renderer);
 }
 
@@ -147,10 +177,16 @@ void double_setpal(SDL_Color* c)
   SDL_SetPaletteColors(vid->format->palette, c, 0, 32);
 }
 
-void double_flip()
+void double_flip(video_plugin* t __attribute__((unused)))
 {
   SDL_UpdateTexture(texture, nullptr, vid->pixels, vid->pitch);
-  SDL_RenderCopy(renderer, texture, nullptr, nullptr);
+  SDL_RenderClear(renderer);
+  if (CPC.scr_preserve_aspect_ratio != 0) {
+    SDL_Rect dest_rect = { t->x_offset, t->y_offset, t->width, t->height };
+    SDL_RenderCopy(renderer, texture, nullptr, &dest_rect);
+  } else {
+    SDL_RenderCopy(renderer, texture, nullptr, nullptr);
+  }
   SDL_RenderPresent(renderer);
 }
 
@@ -358,7 +394,7 @@ void glscale_setpal(SDL_Color* c)
   }
 }
 
-void glscale_flip()
+void glscale_flip(video_plugin* t __attribute__((unused)))
 {
   eglDisable(GL_BLEND);
   
@@ -552,13 +588,22 @@ SDL_Surface* swscale_init(video_plugin* t, int w __attribute__((unused)), int h 
     std::cerr << t->name << ": SDL didn't return a 16 bpp surface but a " << static_cast<int>(scaled->format->BitsPerPixel) << " bpp one." << std::endl;
     return nullptr;
   }
+  /*
   int width, height;
   SDL_GetWindowSize(window, &width, &height);
   t->x_scale=CPC_VISIBLE_SCR_WIDTH/static_cast<float>(width);
   t->y_scale=CPC_VISIBLE_SCR_HEIGHT/static_cast<float>(height);
   t->x_offset=0;
   t->y_offset=0;
+  */
   SDL_FillRect(vid, nullptr, SDL_MapRGB(vid->format,0,0,0));
+  compute_scale(t, CPC_VISIBLE_SCR_WIDTH, CPC_VISIBLE_SCR_HEIGHT, 2.0);
+  std::cout << "x_scale: " << t->x_scale << std::endl;
+  std::cout << "y_scale: " << t->y_scale << std::endl;
+  std::cout << "x_offset: " << t->x_offset << std::endl;
+  std::cout << "y_offset: " << t->y_offset << std::endl;
+  std::cout << "width: " << t->width << std::endl;
+  std::cout << "height: " << t->height << std::endl;
   pub = SDL_CreateRGBSurface(0, CPC_VISIBLE_SCR_WIDTH, CPC_VISIBLE_SCR_HEIGHT, 16, 0, 0, 0, 0);
   if (pub->format->BitsPerPixel!=16)
   {
@@ -567,6 +612,22 @@ SDL_Surface* swscale_init(video_plugin* t, int w __attribute__((unused)), int h 
   }
 
   return pub;
+}
+
+// Common code to all software plugin to display the vid surface after it's been computed.
+void swscale_blit(video_plugin* t)
+{
+  // Blit to convert from 16bpp to pixel format compatible with renderer.
+  SDL_BlitSurface(scaled, nullptr, vid, nullptr);
+  SDL_UpdateTexture(texture, nullptr, vid->pixels, vid->pitch);
+  SDL_RenderClear(renderer);
+  if (CPC.scr_preserve_aspect_ratio != 0) {
+    SDL_Rect dest_rect = { t->x_offset, t->y_offset, t->width, t->height };
+    SDL_RenderCopy(renderer, texture, nullptr, &dest_rect);
+  } else {
+    SDL_RenderCopy(renderer, texture, nullptr, nullptr);
+  }
+  SDL_RenderPresent(renderer);
 }
 
 void swscale_setpal(SDL_Color* c)
@@ -833,7 +894,7 @@ void filter_supereagle(Uint8 *srcPtr, Uint32 srcPitch, /* Uint8 *deltaPtr,  */
   }      // endof: for (height; height; height--)
 }
 
-void seagle_flip()
+void seagle_flip(video_plugin* t)
 {
   if (SDL_MUSTLOCK(scaled))
     SDL_LockSurface(scaled);
@@ -844,11 +905,7 @@ void seagle_flip()
      static_cast<Uint8*>(scaled->pixels) + (2*dst.x+dst.y*scaled->pitch), scaled->pitch, src.w, src.h);
   if (SDL_MUSTLOCK(scaled))
     SDL_UnlockSurface(scaled);
-  // Blit to convert from 16bpp to pixel format compatible with renderer.
-  SDL_BlitSurface(scaled, nullptr, vid, nullptr);
-  SDL_UpdateTexture(texture, nullptr, vid->pixels, vid->pitch);
-  SDL_RenderCopy(renderer, texture, nullptr, nullptr);
-  SDL_RenderPresent(renderer);
+  swscale_blit(t);
 }
 
 /* ------------------------------------------------------------------------------------ */
@@ -883,7 +940,7 @@ void filter_scale2x(Uint8 *srcPtr, Uint32 srcPitch,
   }
 }
 
-void scale2x_flip()
+void scale2x_flip(video_plugin* t __attribute__((unused)))
 {
   if (SDL_MUSTLOCK(scaled))
     SDL_LockSurface(scaled);
@@ -894,11 +951,7 @@ void scale2x_flip()
      static_cast<Uint8*>(scaled->pixels) + (2*dst.x+dst.y*scaled->pitch), scaled->pitch, src.w, src.h);
   if (SDL_MUSTLOCK(scaled))
     SDL_UnlockSurface(scaled);
-  // Blit to convert from 16bpp to pixel format compatible with renderer.
-  SDL_BlitSurface(scaled, nullptr, vid, nullptr);
-  SDL_UpdateTexture(texture, nullptr, vid->pixels, vid->pitch);
-  SDL_RenderCopy(renderer, texture, nullptr, nullptr);
-  SDL_RenderPresent(renderer);
+  swscale_blit(t);
 }
 
 /* ------------------------------------------------------------------------------------ */
@@ -1096,7 +1149,7 @@ void filter_ascale2x (Uint8 *srcPtr, Uint32 srcPitch,
 
 
 
-void ascale2x_flip()
+void ascale2x_flip(video_plugin* t __attribute__((unused)))
 {
   if (SDL_MUSTLOCK(scaled))
     SDL_LockSurface(scaled);
@@ -1107,11 +1160,7 @@ void ascale2x_flip()
      static_cast<Uint8*>(scaled->pixels) + (2*dst.x+dst.y*scaled->pitch), scaled->pitch, src.w, src.h);
   if (SDL_MUSTLOCK(scaled))
     SDL_UnlockSurface(scaled);
-  // Blit to convert from 16bpp to pixel format compatible with renderer.
-  SDL_BlitSurface(scaled, nullptr, vid, nullptr);
-  SDL_UpdateTexture(texture, nullptr, vid->pixels, vid->pitch);
-  SDL_RenderCopy(renderer, texture, nullptr, nullptr);
-  SDL_RenderPresent(renderer);
+  swscale_blit(t);
 }
 
 
@@ -1147,7 +1196,7 @@ void filter_tv2x(Uint8 *srcPtr, Uint32 srcPitch,
   }
 }
 
-void tv2x_flip()
+void tv2x_flip(video_plugin* t __attribute__((unused)))
 {
   if (SDL_MUSTLOCK(scaled))
     SDL_LockSurface(scaled);
@@ -1158,11 +1207,7 @@ void tv2x_flip()
      static_cast<Uint8*>(scaled->pixels) + (2*dst.x+dst.y*scaled->pitch), scaled->pitch, src.w, src.h);
   if (SDL_MUSTLOCK(scaled))
     SDL_UnlockSurface(scaled);
-  // Blit to convert from 16bpp to pixel format compatible with renderer.
-  SDL_BlitSurface(scaled, nullptr, vid, nullptr);
-  SDL_UpdateTexture(texture, nullptr, vid->pixels, vid->pitch);
-  SDL_RenderCopy(renderer, texture, nullptr, nullptr);
-  SDL_RenderPresent(renderer);
+  swscale_blit(t);
 }
 
 /* ------------------------------------------------------------------------------------ */
@@ -1194,7 +1239,7 @@ void filter_bilinear(Uint8 *srcPtr, Uint32 srcPitch,
   }
 }
 
-void swbilin_flip()
+void swbilin_flip(video_plugin* t __attribute__((unused)))
 {
   if (SDL_MUSTLOCK(scaled))
     SDL_LockSurface(scaled);
@@ -1205,11 +1250,7 @@ void swbilin_flip()
      static_cast<Uint8*>(scaled->pixels) + (2*dst.x+dst.y*scaled->pitch), scaled->pitch, src.w, src.h);
   if (SDL_MUSTLOCK(scaled))
     SDL_UnlockSurface(scaled);
-  // Blit to convert from 16bpp to pixel format compatible with renderer.
-  SDL_BlitSurface(scaled, nullptr, vid, nullptr);
-  SDL_UpdateTexture(texture, nullptr, vid->pixels, vid->pitch);
-  SDL_RenderCopy(renderer, texture, nullptr, nullptr);
-  SDL_RenderPresent(renderer);
+  swscale_blit(t);
 }
 
 /* ------------------------------------------------------------------------------------ */
@@ -1288,7 +1329,7 @@ void filter_bicubic(Uint8 *srcPtr, Uint32 srcPitch,
   }
 }
 
-void swbicub_flip()
+void swbicub_flip(video_plugin* t __attribute__((unused)))
 {
   if (SDL_MUSTLOCK(scaled))
     SDL_LockSurface(scaled);
@@ -1299,11 +1340,7 @@ void swbicub_flip()
      static_cast<Uint8*>(scaled->pixels) + (2*dst.x+dst.y*scaled->pitch), scaled->pitch, src.w, src.h);
   if (SDL_MUSTLOCK(scaled))
     SDL_UnlockSurface(scaled);
-  // Blit to convert from 16bpp to pixel format compatible with renderer.
-  SDL_BlitSurface(scaled, nullptr, vid, nullptr);
-  SDL_UpdateTexture(texture, nullptr, vid->pixels, vid->pitch);
-  SDL_RenderCopy(renderer, texture, nullptr, nullptr);
-  SDL_RenderPresent(renderer);
+  swscale_blit(t);
 }
 
 /* ------------------------------------------------------------------------------------ */
@@ -1343,7 +1380,7 @@ void filter_dotmatrix(Uint8 *srcPtr, Uint32 srcPitch,
   }
 }
 
-void dotmat_flip()
+void dotmat_flip(video_plugin* t __attribute__((unused)))
 {
   if (SDL_MUSTLOCK(scaled))
     SDL_LockSurface(scaled);
@@ -1354,11 +1391,7 @@ void dotmat_flip()
      static_cast<Uint8*>(scaled->pixels) + (2*dst.x+dst.y*scaled->pitch), scaled->pitch, src.w, src.h);
   if (SDL_MUSTLOCK(scaled))
     SDL_UnlockSurface(scaled);
-  // Blit to convert from 16bpp to pixel format compatible with renderer.
-  SDL_BlitSurface(scaled, nullptr, vid, nullptr);
-  SDL_UpdateTexture(texture, nullptr, vid->pixels, vid->pitch);
-  SDL_RenderCopy(renderer, texture, nullptr, nullptr);
-  SDL_RenderPresent(renderer);
+  swscale_blit(t);
 }
 
 /* ------------------------------------------------------------------------------------ */
@@ -1368,19 +1401,19 @@ void dotmat_flip()
 std::vector<video_plugin> video_plugin_list =
 {
 // Hardware flip version are the same as software ones since switch to SDL2. Kept for compatibility of config, would be nice to not display them in the UI.
-/* Name                            Init func      Palette func     Flip func      Close func      Half size  X, Y offsets   X, Y scale  */
-{"Half size with hardware flip",   half_init,     half_setpal,     half_flip,     half_close,     1,         0, 0,          0, 0   },
-{"Double size with hardware flip", double_init,   double_setpal,   double_flip,   double_close,   0,         0, 0,          0, 0   },
-{"Half size",                      half_init,     half_setpal,     half_flip,     half_close,     1,         0, 0,          0, 0   },
-{"Double size",                    double_init,   double_setpal,   double_flip,   double_close,   0,         0, 0,          0, 0   },
-{"Super eagle",                    swscale_init,  swscale_setpal,  seagle_flip,   swscale_close,  1,         0, 0,          0, 0   },
-{"Scale2x",                        swscale_init,  swscale_setpal,  scale2x_flip,  swscale_close,  1,         0, 0,          0, 0   },
-{"Advanced Scale2x",               swscale_init,  swscale_setpal,  ascale2x_flip, swscale_close,  1,         0, 0,          0, 0   },
-{"TV 2x",                          swscale_init,  swscale_setpal,  tv2x_flip,     swscale_close,  1,         0, 0,          0, 0   },
-{"Software bilinear",              swscale_init,  swscale_setpal,  swbilin_flip,  swscale_close,  1,         0, 0,          0, 0   },
-{"Software bicubic",               swscale_init,  swscale_setpal,  swbicub_flip,  swscale_close,  1,         0, 0,          0, 0   },
-{"Dot matrix",                     swscale_init,  swscale_setpal,  dotmat_flip,   swscale_close,  1,         0, 0,          0, 0   },
+/* Name                            Init func      Palette func     Flip func      Close func      Half size  X, Y offsets   X, Y scale  width, height */
+{"Half size with hardware flip",   half_init,     half_setpal,     half_flip,     half_close,     1,         0, 0,          0, 0, 0, 0 },
+{"Double size with hardware flip", double_init,   double_setpal,   double_flip,   double_close,   0,         0, 0,          0, 0, 0, 0 },
+{"Half size",                      half_init,     half_setpal,     half_flip,     half_close,     1,         0, 0,          0, 0, 0, 0 },
+{"Double size",                    double_init,   double_setpal,   double_flip,   double_close,   0,         0, 0,          0, 0, 0, 0 },
+{"Super eagle",                    swscale_init,  swscale_setpal,  seagle_flip,   swscale_close,  1,         0, 0,          0, 0, 0, 0 },
+{"Scale2x",                        swscale_init,  swscale_setpal,  scale2x_flip,  swscale_close,  1,         0, 0,          0, 0, 0, 0 },
+{"Advanced Scale2x",               swscale_init,  swscale_setpal,  ascale2x_flip, swscale_close,  1,         0, 0,          0, 0, 0, 0 },
+{"TV 2x",                          swscale_init,  swscale_setpal,  tv2x_flip,     swscale_close,  1,         0, 0,          0, 0, 0, 0 },
+{"Software bilinear",              swscale_init,  swscale_setpal,  swbilin_flip,  swscale_close,  1,         0, 0,          0, 0, 0, 0 },
+{"Software bicubic",               swscale_init,  swscale_setpal,  swbicub_flip,  swscale_close,  1,         0, 0,          0, 0, 0, 0 },
+{"Dot matrix",                     swscale_init,  swscale_setpal,  dotmat_flip,   swscale_close,  1,         0, 0,          0, 0, 0, 0 },
 #ifdef HAVE_GL
-{"OpenGL scaling",                 glscale_init,  glscale_setpal,  glscale_flip,  glscale_close,  0,         0, 0,          0, 0   },
+{"OpenGL scaling",                 glscale_init,  glscale_setpal,  glscale_flip,  glscale_close,  0,         0, 0,          0, 0, 0, 0 },
 #endif
 };

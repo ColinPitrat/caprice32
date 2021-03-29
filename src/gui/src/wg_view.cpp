@@ -137,7 +137,7 @@ bool CView::HandleMessage(CMessage* pMessage)
 				SDL_BlitSurface(pFloatingSurface, &SourceRect, m_pScreenSurface, &DestRect);
 				SDL_FreeSurface(pFloatingSurface);
 				//SDL_UpdateRect(m_pScreenSurface, 0, 0, 0, 0);
-				vid_plugin->flip();
+				vid_plugin->flip(vid_plugin);
 
 				bHandled = true;
 			}

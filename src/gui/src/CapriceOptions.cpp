@@ -154,18 +154,24 @@ CapriceOptions::CapriceOptions(const CRect& WindowRect, CWindow* pParent, CFontE
     sprintf(intensityValue, "%2.1f ", CPC.scr_intensity / 10.0);
     m_pLabelIntensityValue = new CLabel(CPoint(230, 10), m_pGroupBoxMonitor, intensityValue);
 
-    m_pCheckBoxShowFps      = new CCheckBox(CRect(CPoint(10, 94), 10, 10), m_pGroupBoxTabVideo);
+    m_pCheckBoxShowFps      = new CCheckBox(CRect(CPoint(10, 90), 10, 10), m_pGroupBoxTabVideo);
     if (CPC.scr_fps == 1) {
         m_pCheckBoxShowFps->SetCheckBoxState(CCheckBox::CHECKED);
     }
     m_pCheckBoxShowFps->SetIsFocusable(true);
-    m_pLabelShowFps      = new CLabel(CPoint(27, 95), m_pGroupBoxTabVideo, "Show emulation speed");
-    m_pCheckBoxFullScreen   = new CCheckBox(CRect(CPoint(10, 114), 10, 10), m_pGroupBoxTabVideo);
+    m_pLabelShowFps      = new CLabel(CPoint(27, 91), m_pGroupBoxTabVideo, "Show emulation speed");
+    m_pCheckBoxFullScreen   = new CCheckBox(CRect(CPoint(10, 110), 10, 10), m_pGroupBoxTabVideo);
     if (CPC.scr_window == 0) {
         m_pCheckBoxFullScreen->SetCheckBoxState(CCheckBox::CHECKED);
     }
     m_pCheckBoxFullScreen->SetIsFocusable(true);
-    m_pLabelFullScreen      = new CLabel(CPoint(27, 115), m_pGroupBoxTabVideo, "Full screen");
+    m_pLabelFullScreen      = new CLabel(CPoint(27, 111), m_pGroupBoxTabVideo, "Full screen");
+    m_pCheckBoxAspectRatio   = new CCheckBox(CRect(CPoint(10, 130), 10, 10), m_pGroupBoxTabVideo);
+    if (CPC.scr_preserve_aspect_ratio == 1) {
+        m_pCheckBoxAspectRatio->SetCheckBoxState(CCheckBox::CHECKED);
+    }
+    m_pCheckBoxAspectRatio->SetIsFocusable(true);
+    m_pLabelAspectRatio      = new CLabel(CPoint(27, 131), m_pGroupBoxTabVideo, "Preserve aspect ratio");
     // ---------------- 'Audio' Options ----------------
     m_pCheckBoxEnableSound = new CCheckBox(CRect(CPoint(10,0), 10,10), m_pGroupBoxTabAudio);    // Show emulation speed
     if (CPC.snd_enabled == 1) {
@@ -331,6 +337,7 @@ bool CapriceOptions::HandleMessage(CMessage* pMessage)
               // 'Video' settings
               CPC.scr_fps = (m_pCheckBoxShowFps->GetCheckBoxState() == CCheckBox::CHECKED)?1:0;
               CPC.scr_window = (m_pCheckBoxFullScreen->GetCheckBoxState() == CCheckBox::CHECKED)?0:1;
+              CPC.scr_preserve_aspect_ratio = (m_pCheckBoxAspectRatio->GetCheckBoxState() == CCheckBox::CHECKED)?1:0;
               CPC.scr_tube = (m_pRadioButtonMonochrome->GetState() == CRadioButton::CHECKED)?1:0;
               CPC.scr_intensity = m_pScrollBarIntensity->GetValue();
               CPC.scr_style = m_pDropDownVideoPlugin->GetSelectedIndex();
@@ -537,7 +544,7 @@ bool CapriceOptions::ProcessOptionChanges(t_CPC& CPC, bool saveChanges) {
     }
 
     // Restart video subsystem
-    if (CPC.model != m_oldCPCsettings.model || CPC.scr_window != m_oldCPCsettings.scr_window || CPC.scr_style != m_oldCPCsettings.scr_style)
+    if (CPC.model != m_oldCPCsettings.model || CPC.scr_window != m_oldCPCsettings.scr_window || CPC.scr_style != m_oldCPCsettings.scr_style || CPC.scr_preserve_aspect_ratio != m_oldCPCsettings.scr_preserve_aspect_ratio)
     {
         audio_pause();
         SDL_Delay(20);

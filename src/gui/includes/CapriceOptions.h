@@ -77,7 +77,9 @@ namespace wGui
       CLabel* m_pLabelShowFps;           // text label for above checkbox
       CCheckBox* m_pCheckBoxShowFps;     // Show emulation speed
       CLabel* m_pLabelFullScreen;
-      CCheckBox* m_pCheckBoxFullScreen; // Full screen toggle
+      CCheckBox* m_pCheckBoxFullScreen;  // Full screen toggle
+      CLabel* m_pLabelAspectRatio;
+      CCheckBox* m_pCheckBoxAspectRatio; // Preserve aspect ratio toggle
       CGroupBox* m_pGroupBoxMonitor;
       CRadioButton* m_pRadioButtonColour; // Colour or monochrome monitor
       CLabel* m_pLabelColour;
