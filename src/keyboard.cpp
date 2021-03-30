@@ -1323,6 +1323,7 @@ const std::map<const std::string, const unsigned int> InputMapper::SDLkeysFromSt
   { "SDLK_NTILDE", 47},
   { "SDLK_uGRAVE", 249},
   { "SDLK_CIRC", 0x40000000},
+  { "SDLK_ESZETT", 223},
   /*@}*/
   { "MOD_PC_SHIFT", MOD_PC_SHIFT},
   { "MOD_PC_CTRL", MOD_PC_CTRL},
