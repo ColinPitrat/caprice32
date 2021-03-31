@@ -1302,6 +1302,8 @@ int audio_init ()
       return 1;
    }
 
+   LOG_DEBUG("Audio: Desired: Freq: " << desired->freq << ", Format: " << desired->format << ", Channels: " << desired->channels << ", Samples: " << desired->samples);
+   LOG_DEBUG("Audio: Obtained: Freq: " << obtained->freq << ", Format: " << obtained->format << ", Channels: " << obtained->channels << ", Samples: " << obtained->samples);
    free(desired);
    audio_spec = obtained;
 
@@ -1622,6 +1624,8 @@ void update_timings()
    dwTicksTarget = SDL_GetTicks();
    dwTicksTargetFPS = dwTicksTarget;
    dwTicksTarget += dwTicksOffset;
+   // These are only used for frames timing if sound is disabled. Otherwise timing is controlled by the PSG.
+   LOG_DEBUG("Timing: First frame at " << dwTicksTargetFPS << " - next frame in " << dwTicksOffset << " ( " << FRAME_PERIOD_MS << "/(" << CPC.speed << "/" << CPC_BASE_FREQUENCY_MHZ << ") ) at " << dwTicksTarget);
 }
 
 // Recalculate emulation speed (to verify, seems to work reasonably well)
