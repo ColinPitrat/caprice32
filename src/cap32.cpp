@@ -829,11 +829,12 @@ void print (byte *pbAddr, const char *pchStr, bool bolColour)
                bRow = bFont[iIdx]; // get the bitmap information for one row
                for (int iCol = 0; iCol < FNT_CHAR_WIDTH; iCol++) { // loop for all columns in the font character
                   if (bRow & 0x80) { // is the bit set?
-                     *(reinterpret_cast<dword*>(pbPixel)+1) = 0; // draw the "shadow"
-                     *(reinterpret_cast<dword*>(pbPixel+CPC.scr_line_offs+1)) = 0;
-                     *(reinterpret_cast<dword*>(pbPixel+CPC.scr_line_offs)) = 0;
                      *(reinterpret_cast<dword*>(pbPixel)) = dwColour; // draw the character pixel
-                     *(reinterpret_cast<dword *>(pbPixel+CPC.scr_bps)) = dwColour; // draw the second line in case dwYScale == 2 (will be overwritten by shadow otherwise)
+                     *(reinterpret_cast<dword*>(pbPixel+CPC.scr_bps)) = dwColour; // draw the second line in case dwYScale == 2 (will be overwritten by shadow otherwise)
+                     *(reinterpret_cast<dword*>(pbPixel)+1) = 0; // draw the "shadow" on the right
+                     *(reinterpret_cast<dword*>(pbPixel+CPC.scr_bps)+1) = 0; // second line of shadow on the right
+                     *(reinterpret_cast<dword*>(pbPixel+CPC.scr_line_offs)) = 0; // shadow on the line below
+                     *(reinterpret_cast<dword*>(pbPixel+CPC.scr_line_offs)+1) = 0; // shadow below & on the right
                   }
                   pbPixel += 4; // update the screen position
                   bRow <<= 1; // advance to the next bit
@@ -859,11 +860,12 @@ void print (byte *pbAddr, const char *pchStr, bool bolColour)
                bRow = bFont[iIdx]; // get the bitmap information for one row
                for (int iCol = 0; iCol < FNT_CHAR_WIDTH; iCol++) { // loop for all columns in the font character
                   if (bRow & 0x80) { // is the bit set?
-                     *(reinterpret_cast<dword *>(pbPixel+1)) = 0; // draw the "shadow"
-                     *(reinterpret_cast<dword *>(pbPixel+CPC.scr_line_offs)) = 0;
-                     *(reinterpret_cast<dword *>(pbPixel+CPC.scr_line_offs+1)) = 0;
                      *(reinterpret_cast<dword *>(pbPixel)) = dwColour; // draw the character pixel
                      *(reinterpret_cast<dword *>(pbPixel+CPC.scr_bps)) = dwColour; // draw the second line in case dwYScale == 2 (will be overwritten by shadow otherwise)
+                     *(reinterpret_cast<dword *>(pbPixel+1)) = 0; // draw the "shadow" on the right
+                     *(reinterpret_cast<dword *>(pbPixel+CPC.scr_bps)+1) = 0; // second line of shadow on the right
+                     *(reinterpret_cast<dword *>(pbPixel+CPC.scr_line_offs)) = 0; // shadow on the line below
+                     *(reinterpret_cast<dword *>(pbPixel+CPC.scr_line_offs)+1) = 0; // shadow below & on the right
                   }
                   pbPixel += 3; // update the screen position
                   bRow <<= 1; // advance to the next bit
@@ -890,11 +892,12 @@ void print (byte *pbAddr, const char *pchStr, bool bolColour)
                bRow = bFont[iIdx]; // get the bitmap information for one row
                for (int iCol = 0; iCol < FNT_CHAR_WIDTH; iCol++) { // loop for all columns in the font character
                   if (bRow & 0x80) { // is the bit set?
-                     *(reinterpret_cast<word *>(pbPixel)+1) = 0; // draw the "shadow"
-                     *(reinterpret_cast<word *>(pbPixel+CPC.scr_line_offs)) = 0;
-                     *(reinterpret_cast<word *>(pbPixel+CPC.scr_line_offs)+1) = 0;
                      *(reinterpret_cast<word *>(pbPixel)) = wColour; // draw the character pixel
                      *(reinterpret_cast<word *>(pbPixel+CPC.scr_bps)) = wColour; // draw the second line in case dwYScale == 2 (will be overwritten by shadow otherwise)
+                     *(reinterpret_cast<word *>(pbPixel)+1) = 0; // draw the "shadow" on the right
+                     *(reinterpret_cast<word *>(pbPixel+CPC.scr_bps)+1) = 0; // second line of shadow on the right
+                     *(reinterpret_cast<word *>(pbPixel+CPC.scr_line_offs)) = 0; // shadow on the line below
+                     *(reinterpret_cast<word *>(pbPixel+CPC.scr_line_offs)+1) = 0; // shadow below & on the right
                   }
                   pbPixel += 2; // update the screen position
                   bRow <<= 1; // advance to the next bit
@@ -920,11 +923,12 @@ void print (byte *pbAddr, const char *pchStr, bool bolColour)
                bRow = bFont[iIdx]; // get the bitmap information for one row
                for (int iCol = 0; iCol < FNT_CHAR_WIDTH; iCol++) { // loop for all columns in the font character
                   if (bRow & 0x80) { // is the bit set?
-                     *(pbPixel+1) = 0; // draw the "shadow"
-                     *(pbPixel+CPC.scr_line_offs) = 0;
-                     *(pbPixel+CPC.scr_line_offs+1) = 0;
                      *pbPixel = bColour; // draw the character pixel
                      *(pbPixel+CPC.scr_bps) = bColour; // draw the second line in case dwYScale == 2 (will be overwritten by shadow otherwise)
+                     *(pbPixel+1) = 0; // draw the "shadow" on the right
+                     *(pbPixel+CPC.scr_bps) = 0; // second line of shadow on the right
+                     *(pbPixel+CPC.scr_line_offs) = 0; // shadow on the line below
+                     *(pbPixel+CPC.scr_line_offs+1) = 0; // shadow below & on the right
                   }
                   pbPixel++; // update the screen position
                   bRow <<= 1; // advance to the next bit
