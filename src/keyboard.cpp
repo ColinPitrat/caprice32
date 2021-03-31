@@ -1320,10 +1320,13 @@ const std::map<const std::string, const unsigned int> InputMapper::SDLkeysFromSt
   /*@}*/
   /*@{*/
     /** @name Fake SDL keycodes */
-  { "SDLK_NTILDE", 47},
+  { "SDLK_nTILDE", 241},
   { "SDLK_uGRAVE", 249},
+  { "SDLK_cCEDIL", 231},
   { "SDLK_CIRC", 0x40000000},
   { "SDLK_ESZETT", 223},
+  { "SDLK_DEGREE", 186},
+  { "SDLK_INV_QUESTION", 161},
   /*@}*/
   { "MOD_PC_SHIFT", MOD_PC_SHIFT},
   { "MOD_PC_CTRL", MOD_PC_CTRL},
