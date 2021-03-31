@@ -109,9 +109,10 @@ WARNINGS = -Wall -Wextra -Wzero-as-null-pointer-constant -Wformat=2 -Wold-style-
 COMMON_CFLAGS += $(CFLAGS) -std=c++17 $(IPATHS)
 DEBUG_FLAGS = -Werror -g -O0 -DDEBUG -fsanitize=alignment
 RELEASE_FLAGS = -O2 -funroll-loops -ffast-math -fomit-frame-pointer -fno-strength-reduce -finline-functions -s
+DEBUG_LIBS = $(LIBS) -lubsan
 BUILD_FLAGS = $(RELEASE_FLAGS)
 
-debug: BUILD_FLAGS:=$(DEBUG_FLAGS)
+debug: BUILD_FLAGS:=$(DEBUG_FLAGS) LIBS:=$(DEBUG_LIBS)
 
 ifndef DEBUG
 ifeq ($(LAST_BUILD_IN_DEBUG), 1)
@@ -126,7 +127,7 @@ endif
 
 ifdef DEBUG
 BUILD_FLAGS = $(DEBUG_FLAGS)
-LIBS += -lubsan
+LIBS = $(DEBUG_LIBS)
 all: check_deps debug
 else
 all: check_deps distrib
