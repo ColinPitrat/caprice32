@@ -117,7 +117,6 @@ ifndef DEBUG
 ifeq ($(LAST_BUILD_IN_DEBUG), 1)
 FORCED_DEBUG = 1
 DEBUG = 1
-LIBS += -lubsan
 endif
 endif
 
@@ -127,6 +126,7 @@ endif
 
 ifdef DEBUG
 BUILD_FLAGS = $(DEBUG_FLAGS)
+LIBS += -lubsan
 all: check_deps debug
 else
 all: check_deps distrib
