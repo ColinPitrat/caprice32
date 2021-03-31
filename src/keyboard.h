@@ -15,6 +15,7 @@
 #define MOD_PC_SHIFT    (KMOD_SHIFT << 16)
 #define MOD_PC_CTRL     (KMOD_CTRL << 16)
 #define MOD_PC_MODE     (KMOD_MODE << 16)
+// MOD_PC_ALT shouldn't be used: SDLK_LALT is mapped as a non-modifier key to CPC_COPY.
 #define MOD_PC_ALT      (KMOD_LALT << 16)
 #define MOD_PC_NUM      (KMOD_NUM << 16)
 #define MOD_PC_CAPS     (KMOD_CAPS << 16)
