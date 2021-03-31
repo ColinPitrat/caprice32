@@ -45,10 +45,10 @@ namespace zip
       }
       pbPtr = pbGPBuffer + (256 - 22); // pointer to end of central directory (under ideal conditions)
       while (pbPtr != static_cast<byte *>(pbGPBuffer)) {
-        if (*reinterpret_cast<dword *>(pbPtr) == 0x06054b50) { // check for end of central directory signature
+        if (*reinterpret_cast<word *>(pbPtr) == 0x4b50 && *reinterpret_cast<word *>(pbPtr+2) == 0x0605) { // check for end of central directory signature
           wCentralDirEntries = *reinterpret_cast<word *>(pbPtr + 10);
           wCentralDirSize = *reinterpret_cast<word *>(pbPtr + 12);
-          dwCentralDirPosition = *reinterpret_cast<dword *>(pbPtr + 16);
+          dwCentralDirPosition = *(reinterpret_cast<word *>(pbPtr + 16)) + (*(reinterpret_cast<word *>(pbPtr + 18)) << 16);
           break;
         }
         pbPtr--; // move backwards through buffer
