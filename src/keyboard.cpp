@@ -1330,6 +1330,7 @@ const std::map<const std::string, const unsigned int> InputMapper::SDLkeysFromSt
   /*@}*/
   { "MOD_PC_SHIFT", MOD_PC_SHIFT},
   { "MOD_PC_CTRL", MOD_PC_CTRL},
+  // MODE is AltGr or right Alt
   { "MOD_PC_MODE", MOD_PC_MODE},
   { "MOD_PC_ALT", MOD_PC_ALT}
 };
@@ -1441,10 +1442,11 @@ void InputMapper::init()
 dword InputMapper::CPCkeyFromKeysym(SDL_Keysym keysym) {
     dword sdl_key = keysym.sym;
 
-    if (keysym.mod & KMOD_SHIFT)  sdl_key |= MOD_PC_SHIFT;
-    if (keysym.mod & KMOD_CTRL)   sdl_key |= MOD_PC_CTRL;
-    if (keysym.mod & KMOD_MODE)   sdl_key |= MOD_PC_MODE;
-    if (keysym.mod & KMOD_ALT)    sdl_key |= MOD_PC_ALT;
+    if (keysym.mod & KMOD_SHIFT)                sdl_key |= MOD_PC_SHIFT;
+    if (keysym.mod & KMOD_CTRL)                 sdl_key |= MOD_PC_CTRL;
+    if (keysym.mod & (KMOD_MODE | KMOD_RALT))   sdl_key |= MOD_PC_MODE;
+    // Only LALT can be used for Alt as RALT is used for Mode (AltGr)
+    if (keysym.mod & KMOD_LALT)                 sdl_key |= MOD_PC_ALT;
     // Ignore sticky modifiers (MOD_PC_NUM and MOD_PC_CAPS)
 
     auto cpc_key = CPCkeysFromSDLkeysym.find(sdl_key);

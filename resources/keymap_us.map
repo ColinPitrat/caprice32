@@ -168,8 +168,8 @@ CPC_SLASH	SDLK_SLASH
 CPC_SPACE	SDLK_SPACE
 CPC_TAB	SDLK_TAB
 CPC_UNDERSCORE	SDLK_MINUS	MOD_PC_SHIFT
-# No pound on a US keyboard... emulating it with Alt + P
-CPC_POUND	SDLK_p	MOD_PC_ALT
+# No pound on a US keyboard... emulating it with AltGr + P
+CPC_POUND	SDLK_p	MOD_PC_MODE
 #
 # Emulator keymap
 #

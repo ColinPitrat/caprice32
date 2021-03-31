@@ -15,8 +15,7 @@
 #define MOD_PC_SHIFT    (KMOD_SHIFT << 16)
 #define MOD_PC_CTRL     (KMOD_CTRL << 16)
 #define MOD_PC_MODE     (KMOD_MODE << 16)
-#define MOD_PC_META     (KMOD_META << 16)
-#define MOD_PC_ALT      (KMOD_ALT << 16)
+#define MOD_PC_ALT      (KMOD_LALT << 16)
 #define MOD_PC_NUM      (KMOD_NUM << 16)
 #define MOD_PC_CAPS     (KMOD_CAPS << 16)
 
