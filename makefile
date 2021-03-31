@@ -112,7 +112,8 @@ RELEASE_FLAGS = -O2 -funroll-loops -ffast-math -fomit-frame-pointer -fno-strengt
 DEBUG_LIBS = $(LIBS) -lubsan
 BUILD_FLAGS = $(RELEASE_FLAGS)
 
-debug: BUILD_FLAGS:=$(DEBUG_FLAGS) LIBS:=$(DEBUG_LIBS)
+debug: BUILD_FLAGS:=$(DEBUG_FLAGS)
+debug: LIBS:=$(DEBUG_LIBS)
 
 ifndef DEBUG
 ifeq ($(LAST_BUILD_IN_DEBUG), 1)
