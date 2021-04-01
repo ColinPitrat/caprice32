@@ -1,4 +1,7 @@
 language: cpp
+arch:
+  - amd64
+  - s390x  # Big endian arch
 # Do not build latest as this is just a tag on the latest successful release by appveyor
 branches:
   except:
