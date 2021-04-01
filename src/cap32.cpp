@@ -2649,6 +2649,8 @@ int cap32_main (int argc, char **argv)
 
          if (iExitCondition == EC_FRAME_COMPLETE) { // emulation finished rendering a complete frame?
             dwFrameCountOverall++;
+            // TODO(cpitrat): Remove this after investigation
+            if (dwFrameCountOverall > 1000) return 0;
             dwFrameCount++;
             if (SDL_GetTicks() < osd_timing) {
                print(static_cast<byte *>(back_surface->pixels) + CPC.scr_line_offs, osd_message.c_str(), true);
