@@ -544,9 +544,9 @@ void z80_write_mem(word addr, byte val) {
 
 #define RET \
 { \
-   LOG_INFO("RET: _SPl: " << _SP << ": " << read_mem(_SP); \
+   LOG_INFO("RET: _SPl: " << _SP << ": " << read_mem(_SP)); \
    z80.PC.b.l = read_mem(_SP++); \
-   LOG_INFO("RET: _SPh: " << _SP << ": " << read_mem(_SP); \
+   LOG_INFO("RET: _SPh: " << _SP << ": " << read_mem(_SP)); \
    z80.PC.b.h = read_mem(_SP++); \
    LOG_INFO("RET: _PCdword: " << _PCdword << " - break_point: " << z80.break_point); \
 }
