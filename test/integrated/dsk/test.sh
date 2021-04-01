@@ -13,7 +13,7 @@ cd "$TSTDIR"
 export SDL_VIDEODRIVER=dummy
 
 #$CAP32DIR/cap32 -c cap32.cfg -a "run\"hello" -a "call 0" -a CAP32_WAITBREAK -a CAP32_EXIT hello.zip >> "${LOGFILE}" 2>&1
-$CAP32DIR/cap32 -c cap32.cfg -a "run\"hello" -a "call 0" -a CAP32_WAITBREAK -a CAP32_EXIT hello.zip | grep -a -C 10 "z80_execute ended with breakpoint"
+$CAP32DIR/cap32 -c cap32.cfg -a "run\"hello" -a "call 0" -a CAP32_WAITBREAK -a CAP32_EXIT hello.zip 2>&1 | grep -a -C 10 "z80_execute ended with breakpoint"
 
 if $DIFF output/printer.dat expected.dat >> "${LOGFILE}"
 then
