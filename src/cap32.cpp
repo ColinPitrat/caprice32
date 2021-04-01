@@ -1301,11 +1301,18 @@ int audio_init ()
    desired->callback = audio_update;
    desired->userdata = nullptr;
 
-   if (SDL_OpenAudio(desired, obtained) < 0) {
-      fprintf(stderr, "Could not open audio: %s\n", SDL_GetError());
-      return 1;
+   for (int i = 0; i < SDL_GetNumAudioDevices(0); i++) {
+      LOG_DEBUG("Audio: device " << i << ": " << SDL_GetAudioDeviceName(i, 0));
    }
 
+   auto device_id = SDL_OpenAudioDevice(nullptr, 0, desired, obtained, SDL_AUDIO_ALLOW_ANY_CHANGE);
+   if (device_id == 0) {
+      LOG_ERROR("Could not open audio: " << SDL_GetError());
+      return 1;
+   }
+   SDL_PauseAudioDevice(device_id, 0);
+
+   LOG_DEBUG("Audio: Device ID: " << device_id);
    LOG_DEBUG("Audio: Desired: Freq: " << desired->freq << ", Format: " << desired->format << ", Channels: " << desired->channels << ", Samples: " << desired->samples);
    LOG_DEBUG("Audio: Obtained: Freq: " << obtained->freq << ", Format: " << obtained->format << ", Channels: " << obtained->channels << ", Samples: " << obtained->samples);
    free(desired);
