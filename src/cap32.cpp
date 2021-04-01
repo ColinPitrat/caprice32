@@ -1088,10 +1088,6 @@ int emulator_init ()
    pbRAM = pbRAMbuffer + 1;
    pbROM = new byte [32*1024]; // allocate memory for 32K of ROM
    pbRegisterPage = new byte [16*1024];
-   if ((!pbGPBuffer) || (!pbRAMbuffer) || (!pbROM) || (!pbRegisterPage)) {
-      LOG_ERROR("Failed allocating memory in emulator_init. Out of memory ?");
-      return ERR_OUT_OF_MEMORY;
-   }
    pbROMlo = pbROM;
    pbROMhi =
    pbExpansionROM = pbROM + 16384;
@@ -1145,9 +1141,6 @@ int emulator_init ()
       if (!pbMF2ROM) {
          pbMF2ROM = new byte [16384]; // allocate the space needed for the Multiface 2: 8K ROM + 8K RAM
          pbMF2ROMbackup = new byte [8192]; // allocate the space needed for the backup of the MF2 ROM
-         if ((!pbMF2ROM) || (!pbMF2ROMbackup)) {
-            return ERR_OUT_OF_MEMORY;
-         }
          memset(pbMF2ROM, 0, 16384); // clear memory
          std::string romFilename = CPC.rom_path + "/" + CPC.rom_mf2;
          bool MF2error = false;
