@@ -1302,7 +1302,7 @@ int audio_init ()
    desired->userdata = nullptr;
 
    for (int i = 0; i < SDL_GetNumAudioDevices(0); i++) {
-      LOG_DEBUG("Audio: device " << i << ": " << SDL_GetAudioDeviceName(i, 0));
+      LOG_INFO("Audio: device " << i << ": " << SDL_GetAudioDeviceName(i, 0));
    }
 
    auto device_id = SDL_OpenAudioDevice(nullptr, 0, desired, obtained, SDL_AUDIO_ALLOW_ANY_CHANGE);
@@ -1312,9 +1312,9 @@ int audio_init ()
    }
    SDL_PauseAudioDevice(device_id, 0);
 
-   LOG_DEBUG("Audio: Device ID: " << device_id);
-   LOG_DEBUG("Audio: Desired: Freq: " << desired->freq << ", Format: " << desired->format << ", Channels: " << desired->channels << ", Samples: " << desired->samples);
-   LOG_DEBUG("Audio: Obtained: Freq: " << obtained->freq << ", Format: " << obtained->format << ", Channels: " << obtained->channels << ", Samples: " << obtained->samples);
+   LOG_INFO("Audio: Device ID: " << device_id);
+   LOG_INFO("Audio: Desired: Freq: " << desired->freq << ", Format: " << desired->format << ", Channels: " << desired->channels << ", Samples: " << desired->samples);
+   LOG_INFO("Audio: Obtained: Freq: " << obtained->freq << ", Format: " << obtained->format << ", Channels: " << obtained->channels << ", Samples: " << obtained->samples);
    free(desired);
    audio_spec = obtained;
 
@@ -1636,7 +1636,7 @@ void update_timings()
    dwTicksTargetFPS = dwTicksTarget;
    dwTicksTarget += dwTicksOffset;
    // These are only used for frames timing if sound is disabled. Otherwise timing is controlled by the PSG.
-   LOG_DEBUG("Timing: First frame at " << dwTicksTargetFPS << " - next frame in " << dwTicksOffset << " ( " << FRAME_PERIOD_MS << "/(" << CPC.speed << "/" << CPC_BASE_FREQUENCY_MHZ << ") ) at " << dwTicksTarget);
+   LOG_INFO("Timing: First frame at " << dwTicksTargetFPS << " - next frame in " << dwTicksOffset << " ( " << FRAME_PERIOD_MS << "/(" << CPC.speed << "/" << CPC_BASE_FREQUENCY_MHZ << ") ) at " << dwTicksTarget);
 }
 
 // Recalculate emulation speed (to verify, seems to work reasonably well)
