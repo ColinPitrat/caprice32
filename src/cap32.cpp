@@ -2631,17 +2631,18 @@ int cap32_main (int argc, char **argv)
          iExitCondition = z80_execute(); // run the emulation until an exit condition is met
          
          if (iExitCondition == EC_BREAKPOINT) {
+            LOG_INFO("z80_execute ended with breakpoint");
             // We have to clear breakpoint to let the z80 emulator move on.
             z80.break_point = 0xffffffff; // clear break point
             z80.trace = 1; // make sure we'll be here to rearm break point at the next z80 instruction.
 
             if (breakPointsToSkipBeforeProceedingWithVirtualEvents>0) {
                breakPointsToSkipBeforeProceedingWithVirtualEvents--;
-               LOG_DEBUG("Decremented breakpoint skip counter to " << breakPointsToSkipBeforeProceedingWithVirtualEvents);
+               LOG_INFO("Decremented breakpoint skip counter to " << breakPointsToSkipBeforeProceedingWithVirtualEvents);
             }
          } else {
             if (z80.break_point == 0xffffffff) { // TODO(cpcitor) clean up 0xffffffff into a value like Z80_BREAKPOINT_NONE
-               LOG_DEBUG("Rearming EC_BREAKPOINT.");
+               LOG_INFO("Rearming EC_BREAKPOINT.");
                z80.break_point = 0; // set break point for next time
             }
          }
