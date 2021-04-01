@@ -107,7 +107,7 @@ TEST_OBJECTS:=$(TEST_DEPENDS:.d=.o)
 
 WARNINGS = -Wall -Wextra -Wzero-as-null-pointer-constant -Wformat=2 -Wold-style-cast -Wmissing-include-dirs -Wlogical-op -Woverloaded-virtual -Wpointer-arith -Wredundant-decls
 COMMON_CFLAGS += $(CFLAGS) -std=c++17 $(IPATHS)
-DEBUG_FLAGS = -Werror -g -O0 -DDEBUG -fsanitize=alignment
+DEBUG_FLAGS = -Werror -g -O0 -DDEBUG -fsanitize=undefined
 RELEASE_FLAGS = -O2 -funroll-loops -ffast-math -fomit-frame-pointer -fno-strength-reduce -finline-functions -s
 DEBUG_LIBS = $(LIBS) -lubsan
 BUILD_FLAGS = $(RELEASE_FLAGS)
