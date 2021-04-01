@@ -20,28 +20,45 @@
 #define CRTC_H
 
 #include "types.h"
+#include "SDL_endian.h"
 
 // The next 4 bytes must remain together
 typedef union {
    dword combined;
    struct {
+#if SDL_BYTEORDER == SDL_LIL_ENDIAN
       byte monVSYNC;
       byte inHSYNC;
+#endif
       union {
          word combined;
          struct {
+#if SDL_BYTEORDER == SDL_LIL_ENDIAN
             byte DISPTIMG;
             byte HDSPTIMG;
+#else
+            byte HDSPTIMG;
+            byte DISPTIMG;
+#endif
          };
       } dt;
+#if SDL_BYTEORDER != SDL_LIL_ENDIAN
+      byte inHSYNC;
+      byte monVSYNC;
+#endif
    };
 } t_flags1;
 // The next two bytes must remain together
 typedef union {
    word combined;
    struct {
+#if SDL_BYTEORDER == SDL_LIL_ENDIAN
       byte NewDISPTIMG;
       byte NewHDSPTIMG;
+#else
+      byte NewHDSPTIMG;
+      byte NewDISPTIMG;
+#endif
    };
 } t_new_dt;
 

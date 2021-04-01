@@ -27,6 +27,7 @@
 #include "cap32.h"
 #include "z80.h"
 #include "log.h"
+#include "SDL_endian.h"
 
 extern t_CPC CPC;
 extern t_PSG PSG;
@@ -48,8 +49,13 @@ int Level_PP[256];
 
 union TLoopCount {
    struct {
+#if SDL_BYTEORDER == SDL_LIL_ENDIAN
       dword Lo;
       dword Hi;
+#else
+      dword Hi;
+      dword Lo;
+#endif
    };
    int64_t Re;
 } LoopCount;
@@ -61,8 +67,13 @@ void (*Case_EnvType)();
 
 union TCounter {
    struct {
+#if SDL_BYTEORDER == SDL_LIL_ENDIAN
       word Lo;
       word Hi;
+#else
+      word Hi;
+      word Lo;
+#endif
    };
    dword Re;
 };
@@ -70,16 +81,26 @@ TCounter Ton_Counter_A, Ton_Counter_B, Ton_Counter_C, Noise_Counter;
 
 union TNoise {
    struct {
+#if SDL_BYTEORDER == SDL_LIL_ENDIAN
       word Low;
       word Val;
+#else
+      word Val;
+      word Low;
+#endif
    };
    dword Seed;
 } Noise;
 
 union TEnvelopeCounter {
    struct {
+#if SDL_BYTEORDER == SDL_LIL_ENDIAN
       dword Lo;
       dword Hi;
+#else
+      dword Hi;
+      dword Lo;
+#endif
    };
    int64_t Re;
 } Envelope_Counter;

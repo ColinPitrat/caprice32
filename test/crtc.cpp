@@ -30,7 +30,7 @@ TEST_F(CrtcTest, ShiftLittleEndianDwordTriplet)
    EXPECT_EQ(0x01234567, val);
 }
 
-// This test verifies that access to union as they are used extensively in the code works.
+// Verifies that access to t_new_dt union works fine
 TEST_F(CrtcTest, NewDtCombinedAccess)
 {
   t_new_dt new_dt;
@@ -39,4 +39,18 @@ TEST_F(CrtcTest, NewDtCombinedAccess)
   new_dt.NewDISPTIMG = 0x23;
 
   EXPECT_EQ(0x0123, new_dt.combined);
+}
+
+// Verifies that access to t_flags1 unions works fine
+TEST_F(CrtcTest, Flags1CombinedAccess)
+{
+  t_flags1 flags1;
+
+  flags1.dt.HDSPTIMG = 0x01;
+  flags1.dt.DISPTIMG = 0x23;
+  flags1.inHSYNC = 0x45;
+  flags1.monVSYNC = 0x67;
+
+  EXPECT_EQ(0x01234567, flags1.combined);
+  EXPECT_EQ(0x0123, flags1.dt.combined);
 }

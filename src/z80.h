@@ -19,7 +19,7 @@
 #ifndef Z80_H
 #define Z80_H
 
-#include "SDL.h"
+#include "SDL_endian.h"
 #include "types.h"
 #include "crtc.h"
 
