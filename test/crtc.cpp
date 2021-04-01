@@ -30,3 +30,13 @@ TEST_F(CrtcTest, ShiftLittleEndianDwordTriplet)
    EXPECT_EQ(0x01234567, val);
 }
 
+// This test verifies that access to union as they are used extensively in the code works.
+TEST_F(CrtcTest, NewDtCombinedAccess)
+{
+  t_new_dt new_dt;
+
+  new_dt.NewHDSPTIMG = 0x01;
+  new_dt.NewDISPTIMG = 0x23;
+
+  EXPECT_EQ(0x0123, new_dt.combined);
+}
