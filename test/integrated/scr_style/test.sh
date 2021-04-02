@@ -24,7 +24,7 @@ rc=0
 for style in `seq 0 $last_plugin`
 do
   sed -i "s/^scr_style=.*$/scr_style=${style}/" cap32.cfg
-  $CAP32DIR/cap32 -c cap32.cfg -a "print #8,\"style=${style}\"" -a CAP32_EXIT >> "${LOGFILE}" 2>&1
+  $CAP32DIR/cap32 -c cap32.cfg -a "print #8,\"style=${style}\"" -a CAP32_EXIT
 
   mv ${OUTPUT_DIR}/printer.dat ${OUTPUT_DIR}/printer.dat.${style}
   if ! $DIFF ${OUTPUT_DIR}/printer.dat.${style} model/printer.dat.${style} >> "${LOGFILE}"
