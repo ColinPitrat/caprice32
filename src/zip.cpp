@@ -185,7 +185,7 @@ namespace zip
       }
       dwSize -= 16384; // advance to next chunck
     } while ((dwSize > 0) && (iStatus == Z_OK)) ; // loop until done
-    if (iStatus != Z_STREAM_END) {
+    if (iStatus != Z_STREAM_END && iStatus != Z_OK) {
       LOG_ERROR("Couldn't unzip file: " << zi.filename << " (" << iStatus << ")");
       return ERR_FILE_UNZIP_FAILED; // abort on error
     }
