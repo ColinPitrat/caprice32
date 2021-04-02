@@ -13,9 +13,7 @@ fi
 export DIFF=$DIFF
 echo "Using diff: $DIFF"
 
-# TODO(cpitrat): Revert this, stuff in dsk/test.sh and src/z80.cpp after finished investigating
-#for tst in */test.sh
-for tst in dsk/test.sh
+for tst in */test.sh
 do
   TSTDIR=`dirname "${tst}"`
   TSTNAME=`basename "$TSTDIR"`

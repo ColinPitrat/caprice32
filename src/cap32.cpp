@@ -67,7 +67,6 @@
 #define DESTDIR ""
 #endif
 
-extern bool debug_s390x;
 extern byte bTapeLevel;
 extern t_z80regs z80;
 
@@ -2441,9 +2440,8 @@ int cap32_main (int argc, char **argv)
                         case CAP32_WAITBREAK:
                            breakPointsToSkipBeforeProceedingWithVirtualEvents++;
                            LOG_INFO("Will skip " << breakPointsToSkipBeforeProceedingWithVirtualEvents << " before processing more virtual events.");
-                           LOG_INFO("Setting z80.break_point=0 (was " << z80.break_point << ").");
+                           LOG_DEBUG("Setting z80.break_point=0 (was " << z80.break_point << ").");
                            z80.break_point = 0; // set break point to address 0. FIXME would be interesting to change this via a parameter of CAP32_WAITBREAK on command line.
-                           debug_s390x = true;
                            break;
 
                         case CAP32_SNAPSHOT:
@@ -2633,27 +2631,23 @@ int cap32_main (int argc, char **argv)
          iExitCondition = z80_execute(); // run the emulation until an exit condition is met
          
          if (iExitCondition == EC_BREAKPOINT) {
-            LOG_INFO("z80_execute ended with breakpoint");
-            debug_s390x = false;
             // We have to clear breakpoint to let the z80 emulator move on.
             z80.break_point = 0xffffffff; // clear break point
             z80.trace = 1; // make sure we'll be here to rearm break point at the next z80 instruction.
 
             if (breakPointsToSkipBeforeProceedingWithVirtualEvents>0) {
                breakPointsToSkipBeforeProceedingWithVirtualEvents--;
-               LOG_INFO("Decremented breakpoint skip counter to " << breakPointsToSkipBeforeProceedingWithVirtualEvents);
+               LOG_DEBUG("Decremented breakpoint skip counter to " << breakPointsToSkipBeforeProceedingWithVirtualEvents);
             }
          } else {
             if (z80.break_point == 0xffffffff) { // TODO(cpcitor) clean up 0xffffffff into a value like Z80_BREAKPOINT_NONE
-               LOG_INFO("Rearming EC_BREAKPOINT.");
+               LOG_DEBUG("Rearming EC_BREAKPOINT.");
                z80.break_point = 0; // set break point for next time
             }
          }
 
          if (iExitCondition == EC_FRAME_COMPLETE) { // emulation finished rendering a complete frame?
             dwFrameCountOverall++;
-            // TODO(cpitrat): Remove this after investigation
-            if (dwFrameCountOverall > 20000) return 0;
             dwFrameCount++;
             if (SDL_GetTicks() < osd_timing) {
                print(static_cast<byte *>(back_surface->pixels) + CPC.scr_line_offs, osd_message.c_str(), true);
