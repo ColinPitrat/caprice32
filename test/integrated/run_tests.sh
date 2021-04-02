@@ -23,7 +23,7 @@ do
   echo " ** Running ${TSTNAME}: "
   BEGIN=`date +%s`
   result="FAIL"
-  if sh test.sh
+  if bash test.sh
   then
     let OK=$OK+1
     result="PASS"
