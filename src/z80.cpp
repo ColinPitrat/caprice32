@@ -34,6 +34,8 @@
 
 #include "z80_macros.h"
 
+bool debug_s390x = false;
+
 extern t_CPC CPC;
 extern t_FDC FDC;
 extern t_GateArray GateArray;
@@ -424,7 +426,7 @@ void z80_write_mem(word addr, byte val) {
    write_mem(--_SP, z80.PC.b.h); /* store high byte of current PC */ \
    write_mem(--_SP, z80.PC.b.l); /* store low byte of current PC */ \
    _PC = dest.w.l; /* continue execution at subroutine */ \
-   LOG_INFO("CALL: _PCdword: " << _PCdword << " - break_point: " << z80.break_point); \
+   if (debug_s390x) LOG_INFO("CALL: _PCdword: " << _PCdword << " - break_point: " << z80.break_point); \
 }
 
 #define CP(value) \
@@ -544,11 +546,11 @@ void z80_write_mem(word addr, byte val) {
 
 #define RET \
 { \
-   LOG_INFO("RET: _SPl: " << _SP << ": " << static_cast<int>(read_mem(_SP))); \
+   if (debug_s390x) LOG_INFO("RET: _SPl: " << _SP << ": " << static_cast<int>(read_mem(_SP))); \
    z80.PC.b.l = read_mem(_SP++); \
-   LOG_INFO("RET: _SPh: " << _SP << ": " << static_cast<int>(read_mem(_SP))); \
+   if (debug_s390x) LOG_INFO("RET: _SPh: " << _SP << ": " << static_cast<int>(read_mem(_SP))); \
    z80.PC.b.h = read_mem(_SP++); \
-   LOG_INFO("RET: _PCdword: " << _PCdword << " - break_point: " << z80.break_point); \
+   if (debug_s390x) LOG_INFO("RET: _PCdword: " << _PCdword << " - break_point: " << z80.break_point); \
 }
 
 #define RLA \
@@ -1054,7 +1056,7 @@ int z80_execute()
          return EC_CYCLE_COUNT; // exit emulation loop
       }
    }
-   LOG_INFO("_PCdword: " << _PCdword << " - break_point: " << z80.break_point);
+   if (debug_s390x) LOG_INFO("_PCdword: " << _PCdword << " - break_point: " << z80.break_point);
    return EC_BREAKPOINT;
 }
 
