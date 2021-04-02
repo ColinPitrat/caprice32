@@ -146,8 +146,8 @@ namespace zip
       fclose(*pfileOut);
       return ERR_FILE_UNZIP_FAILED;
     }
-    dwSize = *reinterpret_cast<dword *>(pbGPBuffer + 18); // length of compressed data
-    dwOffset += 30 + *reinterpret_cast<word *>(pbGPBuffer + 26) + *reinterpret_cast<word *>(pbGPBuffer + 28);
+    dwSize = (*(pbGPBuffer + 21) << 24) + (*(pbGPBuffer + 20) << 16) + (*(pbGPBuffer + 19) << 8) + *(pbGPBuffer + 18);
+    dwOffset += 30 + (*(pbGPBuffer + 27) << 8) + *(pbGPBuffer + 26) + (*(pbGPBuffer + 29) << 8) + *(pbGPBuffer + 28);
     if (fseek(pfileIn, dwOffset, SEEK_SET) != 0) {  // move file pointer to start of compressed data
       LOG_ERROR("Couldn't read zip file: " << zi.filename);
       fclose(pfileIn);
@@ -185,7 +185,7 @@ namespace zip
       }
       dwSize -= 16384; // advance to next chunck
     } while ((dwSize > 0) && (iStatus == Z_OK)) ; // loop until done
-    if (iStatus != Z_STREAM_END && iStatus != Z_OK) {
+    if (iStatus != Z_STREAM_END) {
       LOG_ERROR("Couldn't unzip file: " << zi.filename << " (" << iStatus << ")");
       return ERR_FILE_UNZIP_FAILED; // abort on error
     }
