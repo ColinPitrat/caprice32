@@ -111,7 +111,7 @@ DEBUG_FLAGS = -Werror -g -O0 -DDEBUG -fsanitize=undefined
 RELEASE_FLAGS = -O2 -funroll-loops -ffast-math -fomit-frame-pointer -fno-strength-reduce -finline-functions -s
 BUILD_FLAGS = $(RELEASE_FLAGS)
 
-ifneq ($(PLATFORM),windows)
+ifeq ($(PLATFORM),linux)
 # -lubsan is not available on mingw
 DEBUG_FLAGS += -fsanitize=undefined
 DEBUG_LIBS += -lubsan
