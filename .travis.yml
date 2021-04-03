@@ -42,13 +42,13 @@ before_script:
     - wget http://softpres.org/_media/files:ipflib42_linux-x86_64.tar.gz -O /tmp/ipflib42_linux-x86_64.tar.gz
     - tar -xf /tmp/ipflib42_linux-x86_64.tar.gz 2>&1 >/dev/null
     - sudo cp -r x86_64-linux-gnu-capsimage/include/caps /usr/include
+    - /usr/bin/Xvfb :99 -screen 0 1024x768x24& true
 
 # Build and test both in release and debug to ensure both works fine
 script: 
 #To uncomment in case a core occurs:
 # - ulimit -c unlimited
 # - sudo sysctl kernel.core_pattern=core
- - /usr/bin/Xvfb :99 -screen 0 1024x768x24& true
  - make WITH_IPF=true
  - make WITH_IPF=true unit_test
  - make e2e_test
