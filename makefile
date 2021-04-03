@@ -109,8 +109,13 @@ WARNINGS = -Wall -Wextra -Wzero-as-null-pointer-constant -Wformat=2 -Wold-style-
 COMMON_CFLAGS += $(CFLAGS) -std=c++17 $(IPATHS)
 DEBUG_FLAGS = -Werror -g -O0 -DDEBUG -fsanitize=undefined
 RELEASE_FLAGS = -O2 -funroll-loops -ffast-math -fomit-frame-pointer -fno-strength-reduce -finline-functions -s
-DEBUG_LIBS = $(LIBS) -lubsan
 BUILD_FLAGS = $(RELEASE_FLAGS)
+
+ifneq ($(PLATFORM),windows)
+# -lubsan is not available on mingw
+DEBUG_FLAGS += -fsanitize=undefined
+DEBUG_LIBS += -lubsan
+endif
 
 debug: BUILD_FLAGS:=$(DEBUG_FLAGS)
 debug: LIBS:=$(DEBUG_LIBS)
