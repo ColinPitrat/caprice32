@@ -110,6 +110,7 @@ COMMON_CFLAGS += $(CFLAGS) -std=c++17 $(IPATHS)
 DEBUG_FLAGS = -Werror -g -O0 -DDEBUG
 RELEASE_FLAGS = -O2 -funroll-loops -ffast-math -fomit-frame-pointer -fno-strength-reduce -finline-functions -s
 BUILD_FLAGS = $(RELEASE_FLAGS)
+DEBUG_LIBS = $(LIBS)
 
 ifeq ($(PLATFORM),linux)
 # -lubsan is not available on mingw
