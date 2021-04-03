@@ -1298,7 +1298,7 @@ int audio_init ()
       LOG_INFO("Audio: device " << i << ": " << SDL_GetAudioDeviceName(i, 0));
    }
 
-   auto device_id = SDL_OpenAudioDevice(nullptr, 0, desired, obtained, SDL_AUDIO_ALLOW_ANY_CHANGE);
+   auto device_id = SDL_OpenAudioDevice(nullptr, 0, desired, obtained, 0 /* no change allowed */);
    if (device_id == 0) {
       LOG_ERROR("Could not open audio: " << SDL_GetError());
       return 1;
