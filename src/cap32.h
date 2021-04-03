@@ -41,6 +41,12 @@ class InputMapper;
 
 #define VERSION_STRING "v4.6.0"
 
+#ifdef WINDOWS
+#define PACKED __attribute__((packed,gcc_struct))
+#else
+#define PACKED __attribute__((packed))
+#endif
+
 #ifndef _MAX_PATH
  #ifdef _POSIX_PATH_MAX
  #define _MAX_PATH _POSIX_PATH_MAX
@@ -388,7 +394,7 @@ typedef struct {
          unsigned char _noise, _mixer, _ampa, _ampb, _ampc;
          unsigned short Envelope;
          unsigned char _envtype, _porta, portb;
-      } __attribute__((packed, gcc_struct));
+      } PACKED;
    } RegisterAY;
    int AmplitudeEnv;
    bool FirstPeriod;
