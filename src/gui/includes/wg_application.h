@@ -175,12 +175,6 @@ public:
 	//! \param pCursorResourceHandle A pointer to the cursor resource handle, if no cursor is specified, the cursor will revert to the system default
 	virtual void SetMouseCursor(CCursorResourceHandle* pCursorResourceHandle = nullptr);
 
-	//! Changes the mouse position
-	//! When this is called a new SDL_MOUSEMOTION event is triggered
-	//! \param Point the position where the mouse pointer should be warped
-	virtual void SetMousePosition( const CPoint& Point )
-		{ SDL_WarpMouse(stdex::safe_static_cast<Uint16>(Point.XPos()), stdex::safe_static_cast<Uint16>(Point.YPos())); }
-
 	//! Changes the visibility of the mouse
 	//! \param bVisible if the mouse has to be drawn or not
 	virtual void SetMouseVisibility( bool bVisible ) { SDL_ShowCursor(bVisible); }

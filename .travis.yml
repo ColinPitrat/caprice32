@@ -5,13 +5,17 @@ branches:
   - latest
 #To uncomment in case a core occurs:
 #sudo: required
+# xenial & xvfb to support integrated tests with SDL2 (https://stackoverflow.com/questions/60677892/failed-to-connect-to-mir-on-travis-server)
+dist: xenial
+services:
+ - xvfb
 addons:
  apt:
   sources:
     - ubuntu-toolchain-r-test
     #- llvm-toolchain-precise-5.0
   packages:
-    - libsdl1.2-dev
+    - libsdl2-dev
     - libfreetype6-dev
     - zlib1g-dev
     - libpng-dev

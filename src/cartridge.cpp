@@ -30,9 +30,6 @@ void cpr_eject ()
 int cartridge_init()
 {
    pbCartridgeImage = new byte [CARTRIDGE_MAX_SIZE]; // attempt to allocate the general purpose buffer
-   if (pbCartridgeImage == nullptr) {
-      return ERR_OUT_OF_MEMORY;
-   }
    for(uint32_t i = 0; i < CARTRIDGE_NB_PAGES; ++i) {
       pbCartridgePages[i] = &pbCartridgeImage[i*CARTRIDGE_PAGE_SIZE];
    }

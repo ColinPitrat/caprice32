@@ -49,25 +49,11 @@ enum class EFocusDirection {
 class CView : public CWindow
 {
 public:
-	//! \param WindowRect A CRect that defines the outer limits of the control
-	//! \param sTitle The window title, which will appear in the title bar of the view
-	//! \param bResizable If true, the window will be resizable (defaults to true)
-	//! \param bFullScreen If true, the window will be created full-screen, and the bResizable parameter will be ignored (defaults to false)
-	CView(const CRect& WindowRect, std::string sTitle, bool bResizable = true, bool bFullScreen = false);
-
 	// judb; surface is an existing SDL surface, WindowRect is the area in which we want to draw the gui:
 	CView(SDL_Surface* surface, SDL_Surface* backSurface, const CRect& WindowRect);
 
 	//! Standard Destructor
 	~CView() override;
-
-	//! Indicates if the view is resizable (set in the constructor)
-	//! \return true if the view is resizable
-	bool IsResizable() const { return m_bResizable; }
-
-	//! Indicates id the view is fullscreen (set in the constructor)
-	//! \return true if the view was created as fullscreen
-	bool IsFullScreen() const { return m_bFullScreen; }
 
 	//! Attaches a standard menu to the view, if the view already has a menu, the old menu will be deleted
 	//! \param pMenu A pointer to the menu, the CView is then responsible for cleaning it up, passing in 0 will delete the current menu
@@ -76,12 +62,6 @@ public:
 	//! Gets the menu for the view
 	//! \return A pointer to the view's menu, 0 if the view doesn't have a menu
 	CMenu* GetMenu() const { return m_pMenu; }
-
-	//! Switch from current mode to other mode ( resizable / fullscreen )
-	//! \param WindowRect The rectangle that specifies the size of the view
-	//! \param bResizable If true, the window will be resizable (defaults to true)
-	//! \param bFullScreen If true, the window will be created full-screen, and the bResizable parameter will be ignored (defaults to false)
-	virtual void SwitchMode( const CRect& WindowRect, bool bResizable, bool bFullScreen );
 
 	//! Sets the current floating window, which will be drawn on top of all other controls
 	//! \param pWindow A pointer to the window to set as the floating window
@@ -103,24 +83,18 @@ public:
 	//! \param sText The text to assign to the view
 	void SetWindowText(const std::string& sText) override;
 
-	// CWindow Overrides
-	//! Set the WindowRect of the view, which is the size of the view ( it recreates the SDL_surface )
-	//! \param WindowRect The rectangle that specifies the size of the view
- 	void SetWindowRect(const CRect& WindowRect) override;
-
 	// CMessageClient overrides
 	//! Handles APP_PAINT messages with itself or 0 as the destination, and will redraw all of it's children as well as itself
 	bool HandleMessage(CMessage* pMessage) override;
 
 protected:
-	bool m_bResizable;  //!< Indicates if the view is resizable
-	bool m_bFullScreen;  //!< Indicates if the view was created as fullscreen
 	CMenu* m_pMenu;  //!< A pointer to the view's menu
 	CWindow* m_pFloatingWindow;  //!< A pointer to the current floating window.  This will be drawn overtop of everything else.
+	SDL_Window* m_pWindow;  //!< A pointer to the window
 	SDL_Surface* m_pScreenSurface;  //!< A pointer to the actual screen surface
 
-  SDL_Surface* m_pBackSurface;  // Caprice32-specific; contains the current Caprice32 output surface
-                                // so we can draw the gui on top of it.
+	SDL_Surface* m_pBackSurface;  // Caprice32-specific; contains the current Caprice32 output surface
+	                              // so we can draw the gui on top of it.
 
 private:
 	//! A pointer to the one allowed view, this is due to the SDL limitation of having only one window

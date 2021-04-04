@@ -3,6 +3,7 @@
 #include "CapriceMemoryTool.h"
 #include "cap32.h"
 #include "z80.h"
+#include "log.h"
 #include <iomanip>
 #include <sstream>
 #include <string>
@@ -58,8 +59,6 @@ CapriceMemoryTool::CapriceMemoryTool(const CRect& WindowRect, CWindow* pParent, 
     m_pButtonCopy      = new CButton( CRect(CPoint(240, 75), 75, 20),   this, "Dump to stdout");
     m_pButtonCopy->SetIsFocusable(true);
 
-    // The list box is way to slow to handle so much elements
-    //m_pListMemContent  = new CListBox(CRect(CPoint(25, 75), 275, 100), this, true);
     m_pTextMemContent  = new CTextBox(CRect(CPoint(15, 105), 300, 102), this, m_pMonoFontEngine);
     m_pButtonClose     = new CButton( CRect(CPoint(15, 220), 300, 20),  this, "Close");
     m_pButtonClose->SetIsFocusable(true);
@@ -133,11 +132,9 @@ bool CapriceMemoryTool::HandleMessage(CMessage* pMessage)
             }
             if (pMessage->Source() == m_pButtonCopy) {
               std::cout << m_pTextMemContent->GetWindowText() << std::endl;
-            /* Requires SDL2
               if(SDL_SetClipboardText(m_pTextMemContent->GetWindowText().c_str()) < 0) {
-                fprintf(stderr, "Error while copying data to clipboard: %s\n", SDL_GetError());
+                LOG_ERROR("Error while copying data to clipboard: " << SDL_GetError());
               }
-              */
               bHandled = true;
               break;
             }
@@ -149,37 +146,6 @@ bool CapriceMemoryTool::HandleMessage(CMessage* pMessage)
           }
         }
         break;
-
-/*
-      case CMessage::KEYBOARD_KEYDOWN:
-        if(m_bVisible)
-        {
-          CKeyboardMessage* pKeyboardMessage = dynamic_cast<CKeyboardMessage*>(pMessage);
-          if (pKeyboardMessage && pKeyboardMessage->Key == SDLK_TAB) {
-            if(CApplication::Instance()->GetKeyFocus() == m_pPokeAdress) {
-              CApplication::Instance()->SetKeyFocus(m_pPokeValue);
-              bHandled = true;
-              break;
-            }
-            if(CApplication::Instance()->GetKeyFocus() == m_pPokeValue) {
-              CApplication::Instance()->SetKeyFocus(m_pAdressValue);
-              bHandled = true;
-              break;
-            }
-            if(CApplication::Instance()->GetKeyFocus() == m_pAdressValue) {
-              CApplication::Instance()->SetKeyFocus(m_pFilterValue);
-              bHandled = true;
-              break;
-            }
-            if(CApplication::Instance()->GetKeyFocus() == m_pFilterValue) {
-              CApplication::Instance()->SetKeyFocus(m_pPokeAdress);
-              bHandled = true;
-              break;
-            }
-          }
-        }
-        break;
-        */
 
       case CMessage::CTRL_VALUECHANGE:
         if (pMessage->Destination() == m_pBytesPerLine) {
@@ -222,7 +188,6 @@ void CapriceMemoryTool::UpdateTextMemory() {
   for(unsigned int i = 0; i < 65536/m_bytesPerLine; i++) {
     std::ostringstream memLine;
     memLine << std::uppercase << std::setfill('0') << std::setw(4) << std::hex << i*m_bytesPerLine << " : ";
-    //memText << std::setfill('0') << std::setw(4) << std::hex << i*m_bytesPerLine << " : ";
     bool displayLine = false;
     bool filterAdress = (m_displayValue >= 0 && m_displayValue <= 65535);
     bool filterValue = (m_filterValue >= 0 && m_filterValue <= 255);
@@ -237,12 +202,10 @@ void CapriceMemoryTool::UpdateTextMemory() {
       if(filterAdress && (i*m_bytesPerLine+j == static_cast<unsigned int>(m_displayValue))) {
         displayLine = true;
       }
-      //memText << std::setw(2) << static_cast<unsigned int>(pbRAM[i*m_bytesPerLine+j]) << " ";
     }
     if(displayLine) {
       memText << memLine.str() << "\n";
     }
-    //m_pListMemContent->AddItem(SListItem(memLine.str()));
   }
   m_pTextMemContent->SetWindowText(memText.str().substr(0, memText.str().size()-1));
 }

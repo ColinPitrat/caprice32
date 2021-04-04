@@ -98,7 +98,7 @@ TEST_F(InputMapperTest, StringToEventsWithSpecialChar)
 
 TEST_F(InputMapperTest, Keymapping)
 {
-  SDL_keysym keysym;
+  SDL_Keysym keysym;
 
   CPC.kbd_layout ="keymap_us.map";
   CPC.keyboard = 0;
@@ -128,7 +128,7 @@ TEST_F(InputMapperTest, Keymapping)
   CPC.keyboard = 2;
   CPC.InputMapper->init();
   // N Tilde
-  keysym.sym = SDLK_WORLD_81;
+  keysym.sym = 241; // Magic value for the non-existent SDLK_nTILDE
   keysym.mod = KMOD_LSHIFT;
   ASSERT_EQ(0x35 | MOD_CPC_SHIFT, CPC.InputMapper->CPCkeyFromKeysym(keysym));
 

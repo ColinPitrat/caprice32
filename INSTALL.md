@@ -74,9 +74,9 @@ git clone https://github.com/ColinPitrat/caprice32.git
 cd caprice32
 ```
 
-Install g++, make, sdl1.2 and freetype.
+Install g++, make, sdl2 and freetype.
 
-`sudo apt-get install g++ make libsdl1.2-dev libfreetype6-dev`
+`sudo apt-get install g++ make libsdl2-dev libfreetype6-dev`
 
 Finally build the linux binary.
 
@@ -177,15 +177,15 @@ Adjust the windows part in the makefile.
 ifeq ($(PLATFORM),windows)
 TARGET = cap32.exe
 TEST_TARGET = test_runner.exe
-IPATHS = -Isrc/ -Isrc/gui/includes -I$(MINGW_PATH)/include -I$(MINGW_PATH)/include/SDL -I$(MINGW_PATH)/include/freetype2
-LIBS = $(MINGW_PATH)/lib/libSDL.dll.a $(MINGW_PATH)/lib/libfreetype.dll.a $(MINGW_PATH)/lib/libz.dll.a $(MINGW_PATH)/lib/libpng16.dll.a $(MINGW_PATH)/lib/libpng.dll.a
+IPATHS = -Isrc/ -Isrc/gui/includes -I$(MINGW_PATH)/include -I$(MINGW_PATH)/include/SDL2 -I$(MINGW_PATH)/include/freetype2
+LIBS = $(MINGW_PATH)/lib/libSDL2.dll.a $(MINGW_PATH)/lib/libfreetype.dll.a $(MINGW_PATH)/lib/libz.dll.a $(MINGW_PATH)/lib/libpng16.dll.a $(MINGW_PATH)/lib/libpng.dll.a
 COMMON_CFLAGS = -DWINDOWS
 CXX = $(MINGW_PATH)/bin/g++
 ```
 
-Install SDL 1.2.15.
+Install SDL 2
 
-`pacman -S mingw-w64-i686-SDL`
+`pacman -S mingw-w64-i686-SDL2`
 
 Install freetype.
 

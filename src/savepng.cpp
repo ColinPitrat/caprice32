@@ -28,10 +28,18 @@
 #define amask 0xFF000000
 #endif
 
+// MinGW is unhappy with PRIxPTR on win64, we have to override it.
+// https://stackoverflow.com/questions/14071713/what-is-wrong-with-printfllx
+// https://github.com/dosbox-staging/dosbox-staging/issues/64
+#if defined(__MINGW64__) && !defined(__clang__)
+#undef PRIxPTR
+#define PRIxPTR "I64x"
+#endif
+
 /* libpng callbacks */
 static void png_error_SDL(png_structp ctx, png_const_charp str)
 {
-  SDL_SetError("libpng: %s (ctx is %08x)\n", str, reinterpret_cast<std::uintptr_t>(ctx));
+  SDL_SetError("libpng: %s (ctx is %" PRIxPTR ")\n", str, reinterpret_cast<std::uintptr_t>(ctx));
 }
 static void png_write_SDL(png_structp png_ptr, png_bytep data, png_size_t length)
 {
@@ -47,7 +55,7 @@ SDL_Surface *SDL_PNGFormatAlpha(SDL_Surface *src)
   /* Convert 32bpp alpha-less image to 24bpp alpha-less image */
   rect.w = src->w;
   rect.h = src->h;
-  surf = SDL_CreateRGBSurface(SDL_SWSURFACE, src->w, src->h, 24, rmask, gmask, bmask, 0);
+  surf = SDL_CreateRGBSurface(0, src->w, src->h, 24, rmask, gmask, bmask, 0);
   SDL_LowerBlit(src, &rect, surf, &rect);
 
   return surf;

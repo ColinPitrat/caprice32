@@ -25,6 +25,7 @@
 #include "wg_message.h"
 #include "wutil_debug.h"
 #include "std_ex.h"
+#include <string>
 
 
 namespace wGui
@@ -48,12 +49,20 @@ CSDLMessage::CSDLMessage(const EMessageType MessageType, const CMessageClient* p
 
 
 CKeyboardMessage::CKeyboardMessage(const EMessageType MessageType, const CMessageClient* pDestination, const CMessageClient* pSource,
-		unsigned char ScanCode, SDLMod Modifiers, SDLKey Key, Uint16 Unicode) :
+		unsigned char ScanCode, SDL_Keymod Modifiers, SDL_Keycode Key) :
 	CMessage(MessageType, pDestination, pSource),
 	ScanCode(ScanCode),
 	Modifiers(Modifiers),
-	Key(Key),
-	Unicode(Unicode)
+	Key(Key)
+{
+
+}
+
+
+CTextInputMessage::CTextInputMessage(const EMessageType MessageType, const CMessageClient* pDestination, const CMessageClient* pSource,
+		std::string Text) :
+	CMessage(MessageType, pDestination, pSource),
+	Text(Text)
 {
 
 }
@@ -83,12 +92,6 @@ unsigned int CMouseMessage::TranslateSDLButton(Uint8 SDLButton)
 		break;
 	case SDL_BUTTON_MIDDLE:
 		Button = MIDDLE;
-		break;
-	case SDL_BUTTON_WHEELUP:
-		Button = WHEELUP;
-		break;
-	case SDL_BUTTON_WHEELDOWN:
-		Button = WHEELDOWN;
 		break;
 	default:
 		wUtil::Trace("Untranslated SDL Button # " + stdex::itoa(SDLButton));

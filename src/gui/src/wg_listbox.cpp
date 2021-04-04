@@ -374,7 +374,7 @@ bool CListBox::HandleMessage(CMessage* pMessage)
 					{
             // Not for us - let parent handle it
             CMessageServer::Instance().QueueMessage(new CKeyboardMessage(CMessage::KEYBOARD_KEYDOWN, m_pParentWindow, this,
-                  pKeyMsg->ScanCode, pKeyMsg->Modifiers, pKeyMsg->Key, pKeyMsg->Unicode));
+                  pKeyMsg->ScanCode, pKeyMsg->Modifiers, pKeyMsg->Key));
 						bHandled=false;
 						break;
 					}

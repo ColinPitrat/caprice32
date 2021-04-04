@@ -77,7 +77,7 @@ unsigned int CNavigationBar::AddItem(SNavBarItem NavBarItem) {
     if (NavBarItem.sPictureFilename != "") {
         m_Bitmaps.push_back(new CBitmapFileResourceHandle(NavBarItem.sPictureFilename));
         // Set transparency color to COLOR_WHITE:
-        SDL_SetColorKey(m_Bitmaps.at(m_Bitmaps.size() - 1)->Bitmap(), SDL_SRCCOLORKEY, COLOR_WHITE.SDLColor(m_pSDLSurface->format));
+        SDL_SetColorKey(m_Bitmaps.at(m_Bitmaps.size() - 1)->Bitmap(), SDL_TRUE, COLOR_WHITE.SDLColor(m_pSDLSurface->format));
     } else {
         m_Bitmaps.push_back(nullptr);
     }
@@ -232,7 +232,7 @@ bool CNavigationBar::HandleMessage(CMessage* pMessage) {
 					default:
             // Let the parent handle it
             CMessageServer::Instance().QueueMessage(new CKeyboardMessage(CMessage::KEYBOARD_KEYDOWN, m_pParentWindow, this,
-                  pKeyMsg->ScanCode, pKeyMsg->Modifiers, pKeyMsg->Key, pKeyMsg->Unicode));
+                  pKeyMsg->ScanCode, pKeyMsg->Modifiers, pKeyMsg->Key));
             break;
 						bHandled = false;
 						break;

@@ -29,7 +29,7 @@ libpcre-1.dll
 libpng16-16.dll
 libstdc++-6.dll
 libwinpthread-1.dll
-SDL.dll
+SDL2.dll
 zlib1.dll
 EOF
 

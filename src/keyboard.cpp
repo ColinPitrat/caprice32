@@ -2,6 +2,7 @@
 #include <iostream>
 #include <fstream>
 #include <map>
+#include <set>
 #include <string>
 #include "cap32.h"
 #include "fileutils.h"
@@ -739,7 +740,7 @@ const std::map<const char, const CPC_KEYS> InputMapper::CPCkeysFromChars = {
     //{ '~', {0, KMOD_NONE} } // should be pound but it's not part of base ascii (it's in extended ASCII)
 };
 
-std::map<unsigned int, unsigned int> InputMapper::SDLkeysymFromCPCkeys_us = {
+std::map<unsigned int, PCKey> InputMapper::SDLkeysymFromCPCkeys_us = {
   { CPC_0,           SDLK_0 },
   { CPC_1,           SDLK_1 },
   { CPC_2,           SDLK_2 },
@@ -868,36 +869,36 @@ std::map<unsigned int, unsigned int> InputMapper::SDLkeysymFromCPCkeys_us = {
   { CPC_EQUAL,       SDLK_EQUALS },
   { CPC_ESC,         SDLK_ESCAPE },
   { CPC_EXCLAMATN,   SDLK_1 | MOD_PC_SHIFT },
-  { CPC_F0,          SDLK_KP0 },
-  { CPC_F1,          SDLK_KP1 },
-  { CPC_F2,          SDLK_KP2 },
-  { CPC_F3,          SDLK_KP3 },
-  { CPC_F4,          SDLK_KP4 },
-  { CPC_F5,          SDLK_KP5 },
-  { CPC_F6,          SDLK_KP6 },
-  { CPC_F7,          SDLK_KP7 },
-  { CPC_F8,          SDLK_KP8 },
-  { CPC_F9,          SDLK_KP9 },
-  { CPC_CTRL_F0,     SDLK_KP0 | MOD_PC_CTRL },
-  { CPC_CTRL_F1,     SDLK_KP1 | MOD_PC_CTRL },
-  { CPC_CTRL_F2,     SDLK_KP2 | MOD_PC_CTRL },
-  { CPC_CTRL_F3,     SDLK_KP3 | MOD_PC_CTRL },
-  { CPC_CTRL_F4,     SDLK_KP4 | MOD_PC_CTRL },
-  { CPC_CTRL_F5,     SDLK_KP5 | MOD_PC_CTRL },
-  { CPC_CTRL_F6,     SDLK_KP6 | MOD_PC_CTRL },
-  { CPC_CTRL_F7,     SDLK_KP7 | MOD_PC_CTRL },
-  { CPC_CTRL_F8,     SDLK_KP8 | MOD_PC_CTRL },
-  { CPC_CTRL_F9,     SDLK_KP9 | MOD_PC_CTRL },
-  { CPC_SHIFT_F0,    SDLK_KP0 | MOD_PC_SHIFT },
-  { CPC_SHIFT_F1,    SDLK_KP1 | MOD_PC_SHIFT },
-  { CPC_SHIFT_F2,    SDLK_KP2 | MOD_PC_SHIFT },
-  { CPC_SHIFT_F3,    SDLK_KP3 | MOD_PC_SHIFT },
-  { CPC_SHIFT_F4,    SDLK_KP4 | MOD_PC_SHIFT },
-  { CPC_SHIFT_F5,    SDLK_KP5 | MOD_PC_SHIFT },
-  { CPC_SHIFT_F6,    SDLK_KP6 | MOD_PC_SHIFT },
-  { CPC_SHIFT_F7,    SDLK_KP7 | MOD_PC_SHIFT },
-  { CPC_SHIFT_F8,    SDLK_KP8 | MOD_PC_SHIFT },
-  { CPC_SHIFT_F9,    SDLK_KP9 | MOD_PC_SHIFT },
+  { CPC_F0,          SDLK_KP_0 },
+  { CPC_F1,          SDLK_KP_1 },
+  { CPC_F2,          SDLK_KP_2 },
+  { CPC_F3,          SDLK_KP_3 },
+  { CPC_F4,          SDLK_KP_4 },
+  { CPC_F5,          SDLK_KP_5 },
+  { CPC_F6,          SDLK_KP_6 },
+  { CPC_F7,          SDLK_KP_7 },
+  { CPC_F8,          SDLK_KP_8 },
+  { CPC_F9,          SDLK_KP_9 },
+  { CPC_CTRL_F0,     SDLK_KP_0 | MOD_PC_CTRL },
+  { CPC_CTRL_F1,     SDLK_KP_1 | MOD_PC_CTRL },
+  { CPC_CTRL_F2,     SDLK_KP_2 | MOD_PC_CTRL },
+  { CPC_CTRL_F3,     SDLK_KP_3 | MOD_PC_CTRL },
+  { CPC_CTRL_F4,     SDLK_KP_4 | MOD_PC_CTRL },
+  { CPC_CTRL_F5,     SDLK_KP_5 | MOD_PC_CTRL },
+  { CPC_CTRL_F6,     SDLK_KP_6 | MOD_PC_CTRL },
+  { CPC_CTRL_F7,     SDLK_KP_7 | MOD_PC_CTRL },
+  { CPC_CTRL_F8,     SDLK_KP_8 | MOD_PC_CTRL },
+  { CPC_CTRL_F9,     SDLK_KP_9 | MOD_PC_CTRL },
+  { CPC_SHIFT_F0,    SDLK_KP_0 | MOD_PC_SHIFT },
+  { CPC_SHIFT_F1,    SDLK_KP_1 | MOD_PC_SHIFT },
+  { CPC_SHIFT_F2,    SDLK_KP_2 | MOD_PC_SHIFT },
+  { CPC_SHIFT_F3,    SDLK_KP_3 | MOD_PC_SHIFT },
+  { CPC_SHIFT_F4,    SDLK_KP_4 | MOD_PC_SHIFT },
+  { CPC_SHIFT_F5,    SDLK_KP_5 | MOD_PC_SHIFT },
+  { CPC_SHIFT_F6,    SDLK_KP_6 | MOD_PC_SHIFT },
+  { CPC_SHIFT_F7,    SDLK_KP_7 | MOD_PC_SHIFT },
+  { CPC_SHIFT_F8,    SDLK_KP_8 | MOD_PC_SHIFT },
+  { CPC_SHIFT_F9,    SDLK_KP_9 | MOD_PC_SHIFT },
   { CPC_FPERIOD,     SDLK_KP_PERIOD },
   { CPC_GREATER,     SDLK_PERIOD | MOD_PC_SHIFT },
   { CPC_HASH,        SDLK_3 | MOD_PC_SHIFT },
@@ -938,8 +939,8 @@ std::map<unsigned int, unsigned int> InputMapper::SDLkeysymFromCPCkeys_us = {
   { CAP32_SPEED,     SDLK_F9 },
   { CAP32_DEBUG,     SDLK_F12 },
   { CAP32_TAPEPLAY,  SDLK_F4 },
-  { CAP32_DELAY,     SDLK_BREAK },
-  { CAP32_WAITBREAK, SDLK_BREAK | MOD_PC_SHIFT }
+  { CAP32_DELAY,     SDLK_PAUSE },
+  { CAP32_WAITBREAK, SDLK_PAUSE | MOD_PC_SHIFT }
 };
 
 const std::map<const std::string, const unsigned int> InputMapper::CPCkeysFromStrings = {
@@ -1165,7 +1166,9 @@ const std::map<const std::string, const unsigned int> InputMapper::CPCkeysFromSt
    {"CAP32_WAITBREAK", CAP32_WAITBREAK},
 };
 
-const std::map<const std::string, const unsigned int> InputMapper::SDLkeysFromStrings = {
+const std::map<const std::string, const PCKey> InputMapper::SDLkeysFromStrings = {
+  /*@{*/
+    /** @name ASCII mapped keysyms */
   { "SDLK_BACKSPACE", SDLK_BACKSPACE},
   { "SDLK_TAB", SDLK_TAB},
   { "SDLK_CLEAR", SDLK_CLEAR},
@@ -1237,119 +1240,20 @@ const std::map<const std::string, const unsigned int> InputMapper::SDLkeysFromSt
   { "SDLK_y", SDLK_y},
   { "SDLK_z", SDLK_z},
   { "SDLK_DELETE", SDLK_DELETE},
-  /* End of ASCII mapped keysyms */
-  /*@}*/
-  /** @name International keyboard syms */
-  /*@{*/
-  { "SDLK_WORLD_0", SDLK_WORLD_0},    /* 0xA0 */
-  { "SDLK_WORLD_1", SDLK_WORLD_1},
-  { "SDLK_WORLD_2", SDLK_WORLD_2},
-  { "SDLK_WORLD_3", SDLK_WORLD_3},
-  { "SDLK_WORLD_4", SDLK_WORLD_4},
-  { "SDLK_WORLD_5", SDLK_WORLD_5},
-  { "SDLK_WORLD_6", SDLK_WORLD_6},
-  { "SDLK_WORLD_7", SDLK_WORLD_7},
-  { "SDLK_WORLD_8", SDLK_WORLD_8},
-  { "SDLK_WORLD_9", SDLK_WORLD_9},
-  { "SDLK_WORLD_10", SDLK_WORLD_10},
-  { "SDLK_WORLD_11", SDLK_WORLD_11},
-  { "SDLK_WORLD_12", SDLK_WORLD_12},
-  { "SDLK_WORLD_13", SDLK_WORLD_13},
-  { "SDLK_WORLD_14", SDLK_WORLD_14},
-  { "SDLK_WORLD_15", SDLK_WORLD_15},
-  { "SDLK_WORLD_16", SDLK_WORLD_16},
-  { "SDLK_WORLD_17", SDLK_WORLD_17},
-  { "SDLK_WORLD_18", SDLK_WORLD_18},
-  { "SDLK_WORLD_19", SDLK_WORLD_19},
-  { "SDLK_WORLD_20", SDLK_WORLD_20},
-  { "SDLK_WORLD_21", SDLK_WORLD_21},
-  { "SDLK_WORLD_22", SDLK_WORLD_22},
-  { "SDLK_WORLD_23", SDLK_WORLD_23},
-  { "SDLK_WORLD_24", SDLK_WORLD_24},
-  { "SDLK_WORLD_25", SDLK_WORLD_25},
-  { "SDLK_WORLD_26", SDLK_WORLD_26},
-  { "SDLK_WORLD_27", SDLK_WORLD_27},
-  { "SDLK_WORLD_28", SDLK_WORLD_28},
-  { "SDLK_WORLD_29", SDLK_WORLD_29},
-  { "SDLK_WORLD_30", SDLK_WORLD_30},
-  { "SDLK_WORLD_31", SDLK_WORLD_31},
-  { "SDLK_WORLD_32", SDLK_WORLD_32},
-  { "SDLK_WORLD_33", SDLK_WORLD_33},
-  { "SDLK_WORLD_34", SDLK_WORLD_34},
-  { "SDLK_WORLD_35", SDLK_WORLD_35},
-  { "SDLK_WORLD_36", SDLK_WORLD_36},
-  { "SDLK_WORLD_37", SDLK_WORLD_37},
-  { "SDLK_WORLD_38", SDLK_WORLD_38},
-  { "SDLK_WORLD_39", SDLK_WORLD_39},
-  { "SDLK_WORLD_40", SDLK_WORLD_40},
-  { "SDLK_WORLD_41", SDLK_WORLD_41},
-  { "SDLK_WORLD_42", SDLK_WORLD_42},
-  { "SDLK_WORLD_43", SDLK_WORLD_43},
-  { "SDLK_WORLD_44", SDLK_WORLD_44},
-  { "SDLK_WORLD_45", SDLK_WORLD_45},
-  { "SDLK_WORLD_46", SDLK_WORLD_46},
-  { "SDLK_WORLD_47", SDLK_WORLD_47},
-  { "SDLK_WORLD_48", SDLK_WORLD_48},
-  { "SDLK_WORLD_49", SDLK_WORLD_49},
-  { "SDLK_WORLD_50", SDLK_WORLD_50},
-  { "SDLK_WORLD_51", SDLK_WORLD_51},
-  { "SDLK_WORLD_52", SDLK_WORLD_52},
-  { "SDLK_WORLD_53", SDLK_WORLD_53},
-  { "SDLK_WORLD_54", SDLK_WORLD_54},
-  { "SDLK_WORLD_55", SDLK_WORLD_55},
-  { "SDLK_WORLD_56", SDLK_WORLD_56},
-  { "SDLK_WORLD_57", SDLK_WORLD_57},
-  { "SDLK_WORLD_58", SDLK_WORLD_58},
-  { "SDLK_WORLD_59", SDLK_WORLD_59},
-  { "SDLK_WORLD_60", SDLK_WORLD_60},
-  { "SDLK_WORLD_61", SDLK_WORLD_61},
-  { "SDLK_WORLD_62", SDLK_WORLD_62},
-  { "SDLK_WORLD_63", SDLK_WORLD_63},
-  { "SDLK_WORLD_64", SDLK_WORLD_64},
-  { "SDLK_WORLD_65", SDLK_WORLD_65},
-  { "SDLK_WORLD_66", SDLK_WORLD_66},
-  { "SDLK_WORLD_67", SDLK_WORLD_67},
-  { "SDLK_WORLD_68", SDLK_WORLD_68},
-  { "SDLK_WORLD_69", SDLK_WORLD_69},
-  { "SDLK_WORLD_70", SDLK_WORLD_70},
-  { "SDLK_WORLD_71", SDLK_WORLD_71},
-  { "SDLK_WORLD_72", SDLK_WORLD_72},
-  { "SDLK_WORLD_73", SDLK_WORLD_73},
-  { "SDLK_WORLD_74", SDLK_WORLD_74},
-  { "SDLK_WORLD_75", SDLK_WORLD_75},
-  { "SDLK_WORLD_76", SDLK_WORLD_76},
-  { "SDLK_WORLD_77", SDLK_WORLD_77},
-  { "SDLK_WORLD_78", SDLK_WORLD_78},
-  { "SDLK_WORLD_79", SDLK_WORLD_79},
-  { "SDLK_WORLD_80", SDLK_WORLD_80},
-  { "SDLK_WORLD_81", SDLK_WORLD_81},
-  { "SDLK_WORLD_82", SDLK_WORLD_82},
-  { "SDLK_WORLD_83", SDLK_WORLD_83},
-  { "SDLK_WORLD_84", SDLK_WORLD_84},
-  { "SDLK_WORLD_85", SDLK_WORLD_85},
-  { "SDLK_WORLD_86", SDLK_WORLD_86},
-  { "SDLK_WORLD_87", SDLK_WORLD_87},
-  { "SDLK_WORLD_88", SDLK_WORLD_88},
-  { "SDLK_WORLD_89", SDLK_WORLD_89},
-  { "SDLK_WORLD_90", SDLK_WORLD_90},
-  { "SDLK_WORLD_91", SDLK_WORLD_91},
-  { "SDLK_WORLD_92", SDLK_WORLD_92},
-  { "SDLK_WORLD_93", SDLK_WORLD_93},
-  { "SDLK_WORLD_94", SDLK_WORLD_94},
-  { "SDLK_WORLD_95", SDLK_WORLD_95},    /* 0xFF */
+  { "SDLK_PERCENT", SDLK_PERCENT},
   /*@}*/
     /** @name Numeric keypad */
   /*@{*/
-  { "SDLK_KP0", SDLK_KP0},
-  { "SDLK_KP1", SDLK_KP1},
-  { "SDLK_KP2", SDLK_KP2},
-  { "SDLK_KP3", SDLK_KP3},
-  { "SDLK_KP4", SDLK_KP4},
-  { "SDLK_KP5", SDLK_KP5},
-  { "SDLK_KP6", SDLK_KP6},
-  { "SDLK_KP7", SDLK_KP7},
-  { "SDLK_KP8", SDLK_KP8},
-  { "SDLK_KP9", SDLK_KP9},
+  { "SDLK_KP_0", SDLK_KP_0},
+  { "SDLK_KP_1", SDLK_KP_1},
+  { "SDLK_KP_2", SDLK_KP_2},
+  { "SDLK_KP_3", SDLK_KP_3},
+  { "SDLK_KP_4", SDLK_KP_4},
+  { "SDLK_KP_5", SDLK_KP_5},
+  { "SDLK_KP_6", SDLK_KP_6},
+  { "SDLK_KP_7", SDLK_KP_7},
+  { "SDLK_KP_8", SDLK_KP_8},
+  { "SDLK_KP_9", SDLK_KP_9},
   { "SDLK_KP_PERIOD", SDLK_KP_PERIOD},
   { "SDLK_KP_DIVIDE", SDLK_KP_DIVIDE},
   { "SDLK_KP_MULTIPLY", SDLK_KP_MULTIPLY},
@@ -1390,68 +1294,80 @@ const std::map<const std::string, const unsigned int> InputMapper::SDLkeysFromSt
   /*@}*/
     /** @name Key state modifier keys */
   /*@{*/
-  { "SDLK_NUMLOCK", SDLK_NUMLOCK},
+  { "SDLK_NUMLOCKCLEAR", SDLK_NUMLOCKCLEAR},
   { "SDLK_CAPSLOCK", SDLK_CAPSLOCK},
-  { "SDLK_SCROLLOCK", SDLK_SCROLLOCK},
+  { "SDLK_SCROLLLOCK", SDLK_SCROLLLOCK},
   { "SDLK_RSHIFT", SDLK_RSHIFT},
   { "SDLK_LSHIFT", SDLK_LSHIFT},
   { "SDLK_RCTRL", SDLK_RCTRL},
   { "SDLK_LCTRL", SDLK_LCTRL},
   { "SDLK_RALT", SDLK_RALT},
   { "SDLK_LALT", SDLK_LALT},
-  { "SDLK_RMETA", SDLK_RMETA},
-  { "SDLK_LMETA", SDLK_LMETA},
-  { "SDLK_LSUPER", SDLK_LSUPER},    /**< Left "Windows" key */
-  { "SDLK_RSUPER", SDLK_RSUPER},    /**< Right "Windows" key */
+  { "SDLK_LGUI", SDLK_LGUI},    /**< Left "Windows" key */
+  { "SDLK_RGUI", SDLK_RGUI},    /**< Right "Windows" key */
   { "SDLK_MODE", SDLK_MODE},    /**< "Alt Gr" key */
-  { "SDLK_COMPOSE", SDLK_COMPOSE},    /**< Multi-key compose key */
+  { "SDLK_APPLICATION", SDLK_APPLICATION},    /**< Multi-key compose key */
   /*@}*/
     /** @name Miscellaneous function keys */
   /*@{*/
   { "SDLK_HELP", SDLK_HELP},
-  { "SDLK_PRINT", SDLK_PRINT},
+  { "SDLK_PRINTSCREEN", SDLK_PRINTSCREEN},
   { "SDLK_SYSREQ", SDLK_SYSREQ},
-  { "SDLK_BREAK", SDLK_BREAK},
+  { "SDLK_PAUSE", SDLK_PAUSE},
   { "SDLK_MENU", SDLK_MENU},
-  { "SDLK_POWER", SDLK_POWER},    /**< Power Macintosh power key */
-  { "SDLK_EURO", SDLK_EURO},    /**< Some european keyboards */
+  { "SDLK_POWER", SDLK_POWER},  /**< Power Macintosh power key */
   { "SDLK_UNDO", SDLK_UNDO},    /**< Atari keyboard has Undo */
-       /*@}*/
+  /*@}*/
+  /*@{*/
+    /** @name Fake SDL keycodes */
+  { "SDLK_nTILDE", 241},
+  { "SDLK_uGRAVE", 249},
+  { "SDLK_cCEDIL", 231},
+  { "SDLK_CIRC", 0x40000000},
+  { "SDLK_ESZETT", 223},
+  { "SDLK_DEGREE", 186},
+  { "SDLK_INV_QUESTION", 161},
+  /*@}*/
   { "MOD_PC_SHIFT", MOD_PC_SHIFT},
   { "MOD_PC_CTRL", MOD_PC_CTRL},
+  // MODE is AltGr or right Alt
   { "MOD_PC_MODE", MOD_PC_MODE},
-  { "MOD_PC_META", MOD_PC_META},
-  { "MOD_PC_ALT", MOD_PC_ALT}
+  // Alt key is mapped to COPY, ignore it as a modifier
+  //{ "MOD_PC_ALT", MOD_PC_ALT}
 };
 
 
 // Format of a line: CPC_xxx\tSDLK_xxx\tMODIFIER
 // Last field is optional
-bool InputMapper::process_cfg_line(char *line)
+LineParsingResult InputMapper::process_cfg_line(char *line)
 {
-  unsigned int cpc_key = 0, sdl_key = 0;
+  LineParsingResult result;
 
   char *pch = strtok(line, "\t");
-  if (pch == nullptr || pch[0] == '#')
-    return true;
+  if (pch == nullptr || pch[0] == '#') return result;
 
   if (CPCkeysFromStrings.count(pch) == 0) {
     LOG_ERROR("Unknown CPC key " << pch << " found in mapping file. Ignoring it.");
-    return false;
+    result.valid = false;
+    return result;
   }
 
   for (unsigned int field=0; field < 3; field++) {
     switch (field) {
       case 0:
-        cpc_key = CPCkeysFromStrings.at(pch);
+        result.cpc_key = CPCkeysFromStrings.at(pch);
+        result.cpc_key_name += pch;
         break;
       case 1:
       case 2:
         if (SDLkeysFromStrings.count(pch) == 0) {
           LOG_ERROR("Unknown SDL key or modifier " << pch << " found in mapping file. Ignoring it.");
-          return false;
+          result.valid = false;
+          return result;
         }
-        sdl_key |= SDLkeysFromStrings.at(pch);
+        result.sdl_key |= SDLkeysFromStrings.at(pch);
+        if (field > 1) result.sdl_key_name += " ";
+        result.sdl_key_name += pch;
         break;
       default:
         break;
@@ -1460,8 +1376,9 @@ bool InputMapper::process_cfg_line(char *line)
     if (pch == nullptr)
       break;
   }
-  SDLkeysymFromCPCkeys[cpc_key] = sdl_key;
-  return true;
+  result.contains_mapping = true;
+  SDLkeysymFromCPCkeys[result.cpc_key] = result.sdl_key;
+  return result;
 }
 
 #define MAX_LINE_LENGTH 80
@@ -1476,9 +1393,30 @@ bool InputMapper::load_layout(const std::string& filename)
   }
   else {
     std::istream is(&fb);
+    std::set<unsigned int> mapped_cpc_keys;
+    std::set<PCKey> mapped_sdl_keys;
     while (is.good()) {
       is.getline(line, MAX_LINE_LENGTH);
-      valid &= process_cfg_line(line);
+      // This triggers the error even if the line just fits, but relying on failbit doesn't work (it's set also at EOF) so that will have to do.
+      if (strlen(line) >= MAX_LINE_LENGTH-1) {
+        LOG_ERROR("Mapping '" << filename << "' contains a line longer than " << MAX_LINE_LENGTH << " char, this is invalid: '" << line << "'");
+        valid = false;
+      }
+      auto parsed_line = process_cfg_line(line);
+      valid &= parsed_line.valid;
+      if (!parsed_line.contains_mapping) continue;
+      // Verify that each CPC key is mapped only once
+      if (mapped_cpc_keys.count(parsed_line.cpc_key) != 0) {
+        LOG_ERROR("Mapping '" << filename << "' contains a CPC key multiple times: " << parsed_line.cpc_key_name);
+        valid = false;
+      }
+      mapped_cpc_keys.insert(parsed_line.cpc_key);
+      // And that no SDL key combination is mapped to 2 different CPC keys
+      if (mapped_sdl_keys.count(parsed_line.sdl_key) != 0) {
+        LOG_ERROR("Mapping '" << filename << "' contains a SDL key multiple times: " << parsed_line.sdl_key_name);
+        valid = false;
+      }
+      mapped_sdl_keys.insert(parsed_line.sdl_key);
     }
     fb.close();
   }
@@ -1487,6 +1425,11 @@ bool InputMapper::load_layout(const std::string& filename)
 
 void InputMapper::init()
 {
+  // Ensure we're starting from a fresh state
+  SDLkeysymFromCPCkeys.clear();
+  CPCkeysFromSDLkeysym.clear();
+  SDLkeysFromChars.clear();
+
   std::string layout_file = CPC->resources_path + "/" + CPC->kbd_layout;
   load_layout(layout_file);
 
@@ -1496,20 +1439,20 @@ void InputMapper::init()
 
   for (const auto &mapping : CPCkeysFromChars) {
     if (SDLkeysymFromCPCkeys.count(mapping.second) != 0) {
-      unsigned int sdl_moddedkey = SDLkeysymFromCPCkeys[mapping.second];
-      SDLkeysFromChars[mapping.first] = std::make_pair(static_cast<SDLKey>(sdl_moddedkey & 0xffff), static_cast<SDLMod>(sdl_moddedkey >> 16));
+      PCKey sdl_moddedkey = SDLkeysymFromCPCkeys[mapping.second];
+      SDLkeysFromChars[mapping.first] = std::make_pair(static_cast<SDL_Keycode>(sdl_moddedkey & BITMASK_NOMOD), static_cast<SDL_Keymod>(sdl_moddedkey >> BITSHIFT_MOD));
     }
   }
 }
 
-dword InputMapper::CPCkeyFromKeysym(SDL_keysym keysym) {
-    dword sdl_key = keysym.sym;
+dword InputMapper::CPCkeyFromKeysym(SDL_Keysym keysym) {
+    PCKey sdl_key = keysym.sym;
 
-    if (keysym.mod & KMOD_SHIFT)  sdl_key |= MOD_PC_SHIFT;
-    if (keysym.mod & KMOD_CTRL)   sdl_key |= MOD_PC_CTRL;
-    if (keysym.mod & KMOD_MODE)   sdl_key |= MOD_PC_MODE;
-    if (keysym.mod & KMOD_META)   sdl_key |= MOD_PC_META;
-    if (keysym.mod & KMOD_ALT)    sdl_key |= MOD_PC_ALT;
+    if (keysym.mod & KMOD_SHIFT)                sdl_key |= MOD_PC_SHIFT;
+    if (keysym.mod & KMOD_CTRL)                 sdl_key |= MOD_PC_CTRL;
+    // Map right alt to Mode (AltGr). Not clear what determines whether SDL2 uses one or the other and if both can happen together.
+    if (keysym.mod & (KMOD_MODE | KMOD_RALT))   sdl_key |= MOD_PC_MODE;
+    // Not mapping KMOD_LALT, the key itself is mapped to CPC_COPY.
     // Ignore sticky modifiers (MOD_PC_NUM and MOD_PC_CAPS)
 
     auto cpc_key = CPCkeysFromSDLkeysym.find(sdl_key);
@@ -1525,7 +1468,7 @@ std::list<SDL_Event> InputMapper::StringToEvents(std::string toTranslate) {
     std::list<SDL_Event> result;
     bool escaped = false;
     bool cap32_cmd = false;
-    std::map<unsigned int, unsigned int>::iterator sdl_keysym;
+    std::map<unsigned int, PCKey>::iterator sdl_keysym;
 
     for (auto c : toTranslate) {
       if (c == '\a') {
@@ -1540,15 +1483,15 @@ std::list<SDL_Event> InputMapper::StringToEvents(std::string toTranslate) {
       }
       SDL_Event key;
       if (escaped || cap32_cmd) {
-        int keycode = c;
+        int keycode = static_cast<unsigned char>(c);
         if (cap32_cmd) {
           keycode += MOD_EMU_KEY;
         }
         // Lookup the SDL key corresponding to this emulator command
         sdl_keysym = SDLkeysymFromCPCkeys.find(keycode);
         if (sdl_keysym != SDLkeysymFromCPCkeys.end()) {
-          key.key.keysym.sym = static_cast<SDLKey>(sdl_keysym->second & 0xffff);
-          key.key.keysym.mod = static_cast<SDLMod>(sdl_keysym->second >> 16);
+          key.key.keysym.sym = static_cast<SDL_Keycode>(sdl_keysym->second & BITMASK_NOMOD);
+          key.key.keysym.mod = static_cast<SDL_Keymod>(sdl_keysym->second >> BITSHIFT_MOD);
         }
         escaped = false;
         cap32_cmd = false;
@@ -1590,7 +1533,7 @@ void InputMapper::set_joystick_emulation()
   for (dword n = 0; n < 6; n++) {
     int cpc_idx = joy_layout[n][1]; // get the CPC key to change the assignment for
     if (cpc_idx) {
-      dword pc_idx = SDLkeysymFromCPCkeys[cpc_idx]; // SDL key corresponding to the CPC key to remap
+      PCKey pc_idx = SDLkeysymFromCPCkeys[cpc_idx]; // SDL key corresponding to the CPC key to remap
       if (CPC->joystick_emulation) {
         CPCkeysFromSDLkeysym[pc_idx] = joy_layout[n][0];
       }

@@ -98,7 +98,7 @@ void CWindow::SetWindowRect(const CRect& WindowRect)
 	m_WindowRect = WindowRect;
 	if (m_pSDLSurface)
 		SDL_FreeSurface(m_pSDLSurface);
-	m_pSDLSurface = SDL_CreateRGBSurface(SDL_SWSURFACE, m_WindowRect.Width(), m_WindowRect.Height(),
+	m_pSDLSurface = SDL_CreateRGBSurface(0, m_WindowRect.Width(), m_WindowRect.Height(),
 		CApplication::Instance()->GetBitsPerPixel(), 0x000000FF, 0x0000FF00, 0x00FF0000, /*0xFF000000*/ 0);
 	if (!m_pSDLSurface)
 	{

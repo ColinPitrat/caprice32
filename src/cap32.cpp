@@ -816,7 +816,7 @@ void print (byte *pbAddr, const char *pchStr, bool bolColour)
    switch (CPC.scr_bpp)
    {
       case 32:
-         dwColour = bolColour ? 0x00ffffff : 0;
+         dwColour = bolColour ? 0xffffffff : 0;
          for (int n = 0; n < iLen; n++) {
             iIdx = static_cast<int>(pchStr[n]); // get the ASCII value
             if ((iIdx < FNT_MIN_CHAR) || (iIdx > FNT_MAX_CHAR)) { // limit it to the range of chars in the font
@@ -829,11 +829,12 @@ void print (byte *pbAddr, const char *pchStr, bool bolColour)
                bRow = bFont[iIdx]; // get the bitmap information for one row
                for (int iCol = 0; iCol < FNT_CHAR_WIDTH; iCol++) { // loop for all columns in the font character
                   if (bRow & 0x80) { // is the bit set?
-                     *(reinterpret_cast<dword*>(pbPixel)+1) = 0; // draw the "shadow"
-                     *(reinterpret_cast<dword*>(pbPixel+CPC.scr_line_offs+1)) = 0;
-                     *(reinterpret_cast<dword*>(pbPixel+CPC.scr_line_offs)) = 0;
                      *(reinterpret_cast<dword*>(pbPixel)) = dwColour; // draw the character pixel
-                     *(reinterpret_cast<dword *>(pbPixel+CPC.scr_bps)) = dwColour; // draw the second line in case dwYScale == 2 (will be overwritten by shadow otherwise)
+                     *(reinterpret_cast<dword*>(pbPixel+CPC.scr_bps)) = dwColour; // draw the second line in case dwYScale == 2 (will be overwritten by shadow otherwise)
+                     *(reinterpret_cast<dword*>(pbPixel)+1) = 0; // draw the "shadow" on the right
+                     *(reinterpret_cast<dword*>(pbPixel+CPC.scr_bps)+1) = 0; // second line of shadow on the right
+                     *(reinterpret_cast<dword*>(pbPixel+CPC.scr_line_offs)) = 0; // shadow on the line below
+                     *(reinterpret_cast<dword*>(pbPixel+CPC.scr_line_offs)+1) = 0; // shadow below & on the right
                   }
                   pbPixel += 4; // update the screen position
                   bRow <<= 1; // advance to the next bit
@@ -859,11 +860,12 @@ void print (byte *pbAddr, const char *pchStr, bool bolColour)
                bRow = bFont[iIdx]; // get the bitmap information for one row
                for (int iCol = 0; iCol < FNT_CHAR_WIDTH; iCol++) { // loop for all columns in the font character
                   if (bRow & 0x80) { // is the bit set?
-                     *(reinterpret_cast<dword *>(pbPixel+1)) = 0; // draw the "shadow"
-                     *(reinterpret_cast<dword *>(pbPixel+CPC.scr_line_offs)) = 0;
-                     *(reinterpret_cast<dword *>(pbPixel+CPC.scr_line_offs+1)) = 0;
                      *(reinterpret_cast<dword *>(pbPixel)) = dwColour; // draw the character pixel
                      *(reinterpret_cast<dword *>(pbPixel+CPC.scr_bps)) = dwColour; // draw the second line in case dwYScale == 2 (will be overwritten by shadow otherwise)
+                     *(reinterpret_cast<dword *>(pbPixel+1)) = 0; // draw the "shadow" on the right
+                     *(reinterpret_cast<dword *>(pbPixel+CPC.scr_bps)+1) = 0; // second line of shadow on the right
+                     *(reinterpret_cast<dword *>(pbPixel+CPC.scr_line_offs)) = 0; // shadow on the line below
+                     *(reinterpret_cast<dword *>(pbPixel+CPC.scr_line_offs)+1) = 0; // shadow below & on the right
                   }
                   pbPixel += 3; // update the screen position
                   bRow <<= 1; // advance to the next bit
@@ -890,11 +892,12 @@ void print (byte *pbAddr, const char *pchStr, bool bolColour)
                bRow = bFont[iIdx]; // get the bitmap information for one row
                for (int iCol = 0; iCol < FNT_CHAR_WIDTH; iCol++) { // loop for all columns in the font character
                   if (bRow & 0x80) { // is the bit set?
-                     *(reinterpret_cast<word *>(pbPixel)+1) = 0; // draw the "shadow"
-                     *(reinterpret_cast<word *>(pbPixel+CPC.scr_line_offs)) = 0;
-                     *(reinterpret_cast<word *>(pbPixel+CPC.scr_line_offs)+1) = 0;
                      *(reinterpret_cast<word *>(pbPixel)) = wColour; // draw the character pixel
                      *(reinterpret_cast<word *>(pbPixel+CPC.scr_bps)) = wColour; // draw the second line in case dwYScale == 2 (will be overwritten by shadow otherwise)
+                     *(reinterpret_cast<word *>(pbPixel)+1) = 0; // draw the "shadow" on the right
+                     *(reinterpret_cast<word *>(pbPixel+CPC.scr_bps)+1) = 0; // second line of shadow on the right
+                     *(reinterpret_cast<word *>(pbPixel+CPC.scr_line_offs)) = 0; // shadow on the line below
+                     *(reinterpret_cast<word *>(pbPixel+CPC.scr_line_offs)+1) = 0; // shadow below & on the right
                   }
                   pbPixel += 2; // update the screen position
                   bRow <<= 1; // advance to the next bit
@@ -920,11 +923,12 @@ void print (byte *pbAddr, const char *pchStr, bool bolColour)
                bRow = bFont[iIdx]; // get the bitmap information for one row
                for (int iCol = 0; iCol < FNT_CHAR_WIDTH; iCol++) { // loop for all columns in the font character
                   if (bRow & 0x80) { // is the bit set?
-                     *(pbPixel+1) = 0; // draw the "shadow"
-                     *(pbPixel+CPC.scr_line_offs) = 0;
-                     *(pbPixel+CPC.scr_line_offs+1) = 0;
                      *pbPixel = bColour; // draw the character pixel
                      *(pbPixel+CPC.scr_bps) = bColour; // draw the second line in case dwYScale == 2 (will be overwritten by shadow otherwise)
+                     *(pbPixel+1) = 0; // draw the "shadow" on the right
+                     *(pbPixel+CPC.scr_bps) = 0; // second line of shadow on the right
+                     *(pbPixel+CPC.scr_line_offs) = 0; // shadow on the line below
+                     *(pbPixel+CPC.scr_line_offs+1) = 0; // shadow below & on the right
                   }
                   pbPixel++; // update the screen position
                   bRow <<= 1; // advance to the next bit
@@ -1084,10 +1088,6 @@ int emulator_init ()
    pbRAM = pbRAMbuffer + 1;
    pbROM = new byte [32*1024]; // allocate memory for 32K of ROM
    pbRegisterPage = new byte [16*1024];
-   if ((!pbGPBuffer) || (!pbRAMbuffer) || (!pbROM) || (!pbRegisterPage)) {
-      LOG_ERROR("Failed allocating memory in emulator_init. Out of memory ?");
-      return ERR_OUT_OF_MEMORY;
-   }
    pbROMlo = pbROM;
    pbROMhi =
    pbExpansionROM = pbROM + 16384;
@@ -1141,9 +1141,6 @@ int emulator_init ()
       if (!pbMF2ROM) {
          pbMF2ROM = new byte [16384]; // allocate the space needed for the Multiface 2: 8K ROM + 8K RAM
          pbMF2ROMbackup = new byte [8192]; // allocate the space needed for the backup of the MF2 ROM
-         if ((!pbMF2ROM) || (!pbMF2ROMbackup)) {
-            return ERR_OUT_OF_MEMORY;
-         }
          memset(pbMF2ROM, 0, 16384); // clear memory
          std::string romFilename = CPC.rom_path + "/" + CPC.rom_mf2;
          bool MF2error = false;
@@ -1297,11 +1294,19 @@ int audio_init ()
    desired->callback = audio_update;
    desired->userdata = nullptr;
 
-   if (SDL_OpenAudio(desired, obtained) < 0) {
-      fprintf(stderr, "Could not open audio: %s\n", SDL_GetError());
-      return 1;
+   for (int i = 0; i < SDL_GetNumAudioDevices(0); i++) {
+      LOG_VERBOSE("Audio: device " << i << ": " << SDL_GetAudioDeviceName(i, 0));
    }
 
+   auto device_id = SDL_OpenAudioDevice(nullptr, 0, desired, obtained, 0 /* no change allowed */);
+   if (device_id == 0) {
+      LOG_ERROR("Could not open audio: " << SDL_GetError());
+      return 1;
+   }
+   SDL_PauseAudioDevice(device_id, 0);
+
+   LOG_VERBOSE("Audio: Desired: Freq: " << desired->freq << ", Format: " << desired->format << ", Channels: " << desired->channels << ", Samples: " << desired->samples);
+   LOG_VERBOSE("Audio: Obtained: Freq: " << obtained->freq << ", Format: " << obtained->format << ", Channels: " << obtained->channels << ", Samples: " << obtained->samples);
    free(desired);
    audio_spec = obtained;
 
@@ -1503,7 +1508,7 @@ void video_set_style ()
 int video_init ()
 {
    if (SDL_InitSubSystem(SDL_INIT_VIDEO) < 0) { // initialize the video subsystem
-      std::cerr << "Init of video subsystem failed: " << SDL_GetError() << std::endl;
+      LOG_ERROR("Init of video subsystem failed: " << SDL_GetError());
       return ERR_VIDEO_INIT;
    }
 
@@ -1512,7 +1517,7 @@ int video_init ()
    back_surface=vid_plugin->init(vid_plugin, CPC.scr_fs_width, CPC.scr_fs_height, CPC.scr_fs_bpp, CPC.scr_window==0);
 
    if (!back_surface) { // attempt to set the required video mode
-      std::cerr << "Could not set requested video mode: " << SDL_GetError() << std::endl;
+      LOG_ERROR("Could not set requested video mode: " << SDL_GetError());
       return ERR_VIDEO_SET_MODE;
    }
 
@@ -1524,18 +1529,13 @@ int video_init ()
       return iErrCode;
    }
 
-   vid_plugin->lock();
    CPC.scr_bps = back_surface->pitch; // rendered screen line length in bytes
    CPC.scr_line_offs = CPC.scr_bps * dwYScale;
    CPC.scr_pos =
    CPC.scr_base = static_cast<byte *>(back_surface->pixels); // memory address of back buffer
    CPC.scr_gui_is_currently_on = false;
 
-   vid_plugin->unlock();
-
    SDL_ShowCursor(SDL_DISABLE); // hide the mouse cursor
-
-   SDL_WM_SetCaption("Caprice32 " VERSION_STRING, "Caprice32");
 
    crtc_init();
 
@@ -1546,9 +1546,6 @@ int video_init ()
 
 void video_shutdown ()
 {
-   if (back_surface) {
-      vid_plugin->unlock();
-   }
    vid_plugin->close();
    SDL_QuitSubSystem(SDL_INIT_VIDEO);
 }
@@ -1557,7 +1554,7 @@ void video_shutdown ()
 
 void video_display ()
 {
-   vid_plugin->flip();
+   vid_plugin->flip(vid_plugin);
 }
 
 
@@ -1630,6 +1627,8 @@ void update_timings()
    dwTicksTarget = SDL_GetTicks();
    dwTicksTargetFPS = dwTicksTarget;
    dwTicksTarget += dwTicksOffset;
+   // These are only used for frames timing if sound is disabled. Otherwise timing is controlled by the PSG.
+   LOG_VERBOSE("Timing: First frame at " << dwTicksTargetFPS << " - next frame in " << dwTicksOffset << " ( " << FRAME_PERIOD_MS << "/(" << CPC.speed << "/" << CPC_BASE_FREQUENCY_MHZ << ") ) at " << dwTicksTarget);
 }
 
 // Recalculate emulation speed (to verify, seems to work reasonably well)
@@ -1710,6 +1709,7 @@ void loadConfiguration (t_CPC &CPC, const std::string& configFilename)
    CPC.scr_fs_width = conf.getIntValue("video", "scr_width", 800);
    CPC.scr_fs_height = conf.getIntValue("video", "scr_height", 600);
    CPC.scr_fs_bpp = conf.getIntValue("video", "scr_bpp", 8);
+   CPC.scr_preserve_aspect_ratio = conf.getIntValue("video", "scr_preserve_aspect_ratio", 1);
    CPC.scr_style = conf.getIntValue("video", "scr_style", 0);
    if (CPC.scr_style >= video_plugin_list.size()) {
       CPC.scr_style = DEFAULT_VIDEO_PLUGIN;
@@ -1813,6 +1813,7 @@ bool saveConfiguration (t_CPC &CPC, const std::string& configFilename)
    conf.setIntValue("video", "scr_width", CPC.scr_fs_width);
    conf.setIntValue("video", "scr_height", CPC.scr_fs_height);
    conf.setIntValue("video", "scr_bpp", CPC.scr_fs_bpp);
+   conf.setIntValue("video", "scr_preserve_aspect_ratio", CPC.scr_preserve_aspect_ratio);
    conf.setIntValue("video", "scr_style", CPC.scr_style);
    conf.setIntValue("video", "scr_oglfilter", CPC.scr_oglfilter);
    conf.setIntValue("video", "scr_oglscanlines", CPC.scr_oglscanlines);
@@ -1868,7 +1869,7 @@ SDL_Surface* prepareShowUI()
    CPC.scr_gui_is_currently_on = true;
    SDL_ShowCursor(SDL_ENABLE);
    // guiBackSurface will allow the GUI to capture the current frame
-   SDL_Surface* guiBackSurface(SDL_CreateRGBSurface(SDL_SWSURFACE, back_surface->w, back_surface->h, 32, 0x000000FF, 0x0000FF00, 0x00FF0000, 0x00000000));
+   SDL_Surface* guiBackSurface(SDL_CreateRGBSurface(0, back_surface->w, back_surface->h, 32, 0x000000FF, 0x0000FF00, 0x00FF0000, 0x00000000));
    SDL_BlitSurface(back_surface, nullptr, guiBackSurface, nullptr);
    return guiBackSurface;
 }
@@ -1915,6 +1916,7 @@ void showVKeyboard()
       capriceGui.Exec();
       auto newEvents = capriceVKeyboardView.GetEvents();
       virtualKeyboardEvents.splice(virtualKeyboardEvents.end(), newEvents);
+      nextVirtualEventFrameCount = dwFrameCountOverall;
    } catch(wGui::Wg_Ex_App& e) {
       // TODO: improve: this is pretty silent if people don't look at the console
       std::cout << "Failed displaying the virtual keyboard: " << e.what() << std::endl;
@@ -1969,9 +1971,9 @@ void dumpSnapshot() {
    }
    std::string dumpFile = "snapshot_" + getDateString() + ".sna";
    std::string dumpPath = dir + "/" + dumpFile;
-   LOG_DEBUG("Dumping machine snapshot to " + dumpPath);
+   LOG_INFO("Dumping machine snapshot to " + dumpPath);
    if (snapshot_save(dumpPath)) {
-     LOG_DEBUG("Could not write machine snapshot to " + dumpPath);
+     LOG_ERROR("Could not write machine snapshot to " + dumpPath);
    }
    else {
      set_osd_message("Captured machine snapshot to " + dumpFile);
@@ -2012,6 +2014,505 @@ void cleanExit(int returnCode, bool askIfUnsaved)
    doCleanUp();
    exit(returnCode);
 }
+
+// TODO(SDL2): Remove these 2 maps once not needed to debug keymaps anymore
+#include <map>
+std::map<SDL_Keycode, std::string> keycode_names = {
+    {SDLK_UNKNOWN, "SDLK_UNKNOWN"},
+    {SDLK_RETURN, "SDLK_RETURN"},
+    {SDLK_ESCAPE, "SDLK_ESCAPE"},
+    {SDLK_BACKSPACE, "SDLK_BACKSPACE"},
+    {SDLK_TAB, "SDLK_TAB"},
+    {SDLK_SPACE, "SDLK_SPACE"},
+    {SDLK_EXCLAIM, "SDLK_EXCLAIM"},
+    {SDLK_QUOTEDBL, "SDLK_QUOTEDBL"},
+    {SDLK_HASH, "SDLK_HASH"},
+    {SDLK_PERCENT, "SDLK_PERCENT"},
+    {SDLK_DOLLAR, "SDLK_DOLLAR"},
+    {SDLK_AMPERSAND, "SDLK_AMPERSAND"},
+    {SDLK_QUOTE, "SDLK_QUOTE"},
+    {SDLK_LEFTPAREN, "SDLK_LEFTPAREN"},
+    {SDLK_RIGHTPAREN, "SDLK_RIGHTPAREN"},
+    {SDLK_ASTERISK, "SDLK_ASTERISK"},
+    {SDLK_PLUS, "SDLK_PLUS"},
+    {SDLK_COMMA, "SDLK_COMMA"},
+    {SDLK_MINUS, "SDLK_MINUS"},
+    {SDLK_PERIOD, "SDLK_PERIOD"},
+    {SDLK_SLASH, "SDLK_SLASH"},
+    {SDLK_0, "SDLK_0"},
+    {SDLK_1, "SDLK_1"},
+    {SDLK_2, "SDLK_2"},
+    {SDLK_3, "SDLK_3"},
+    {SDLK_4, "SDLK_4"},
+    {SDLK_5, "SDLK_5"},
+    {SDLK_6, "SDLK_6"},
+    {SDLK_7, "SDLK_7"},
+    {SDLK_8, "SDLK_8"},
+    {SDLK_9, "SDLK_9"},
+    {SDLK_COLON, "SDLK_COLON"},
+    {SDLK_SEMICOLON, "SDLK_SEMICOLON"},
+    {SDLK_LESS, "SDLK_LESS"},
+    {SDLK_EQUALS, "SDLK_EQUALS"},
+    {SDLK_GREATER, "SDLK_GREATER"},
+    {SDLK_QUESTION, "SDLK_QUESTION"},
+    {SDLK_AT, "SDLK_AT"},
+    {SDLK_LEFTBRACKET, "SDLK_LEFTBRACKET"},
+    {SDLK_BACKSLASH, "SDLK_BACKSLASH"},
+    {SDLK_RIGHTBRACKET, "SDLK_RIGHTBRACKET"},
+    {SDLK_CARET, "SDLK_CARET"},
+    {SDLK_UNDERSCORE, "SDLK_UNDERSCORE"},
+    {SDLK_BACKQUOTE, "SDLK_BACKQUOTE"},
+    {SDLK_a, "SDLK_a"},
+    {SDLK_b, "SDLK_b"},
+    {SDLK_c, "SDLK_c"},
+    {SDLK_d, "SDLK_d"},
+    {SDLK_e, "SDLK_e"},
+    {SDLK_f, "SDLK_f"},
+    {SDLK_g, "SDLK_g"},
+    {SDLK_h, "SDLK_h"},
+    {SDLK_i, "SDLK_i"},
+    {SDLK_j, "SDLK_j"},
+    {SDLK_k, "SDLK_k"},
+    {SDLK_l, "SDLK_l"},
+    {SDLK_m, "SDLK_m"},
+    {SDLK_n, "SDLK_n"},
+    {SDLK_o, "SDLK_o"},
+    {SDLK_p, "SDLK_p"},
+    {SDLK_q, "SDLK_q"},
+    {SDLK_r, "SDLK_r"},
+    {SDLK_s, "SDLK_s"},
+    {SDLK_t, "SDLK_t"},
+    {SDLK_u, "SDLK_u"},
+    {SDLK_v, "SDLK_v"},
+    {SDLK_w, "SDLK_w"},
+    {SDLK_x, "SDLK_x"},
+    {SDLK_y, "SDLK_y"},
+    {SDLK_z, "SDLK_z"},
+    {SDLK_CAPSLOCK, "SDLK_CAPSLOCK"},
+    {SDLK_F1, "SDLK_F1"},
+    {SDLK_F2, "SDLK_F2"},
+    {SDLK_F3, "SDLK_F3"},
+    {SDLK_F4, "SDLK_F4"},
+    {SDLK_F5, "SDLK_F5"},
+    {SDLK_F6, "SDLK_F6"},
+    {SDLK_F7, "SDLK_F7"},
+    {SDLK_F8, "SDLK_F8"},
+    {SDLK_F9, "SDLK_F9"},
+    {SDLK_F10, "SDLK_F10"},
+    {SDLK_F11, "SDLK_F11"},
+    {SDLK_F12, "SDLK_F12"},
+    {SDLK_PRINTSCREEN, "SDLK_PRINTSCREEN"},
+    {SDLK_SCROLLLOCK, "SDLK_SCROLLLOCK"},
+    {SDLK_PAUSE, "SDLK_PAUSE"},
+    {SDLK_INSERT, "SDLK_INSERT"},
+    {SDLK_HOME, "SDLK_HOME"},
+    {SDLK_PAGEUP, "SDLK_PAGEUP"},
+    {SDLK_DELETE, "SDLK_DELETE"},
+    {SDLK_END, "SDLK_END"},
+    {SDLK_PAGEDOWN, "SDLK_PAGEDOWN"},
+    {SDLK_RIGHT, "SDLK_RIGHT"},
+    {SDLK_LEFT, "SDLK_LEFT"},
+    {SDLK_DOWN, "SDLK_DOWN"},
+    {SDLK_UP, "SDLK_UP"},
+    {SDLK_NUMLOCKCLEAR, "SDLK_NUMLOCKCLEAR"},
+    {SDLK_KP_DIVIDE, "SDLK_KP_DIVIDE"},
+    {SDLK_KP_MULTIPLY, "SDLK_KP_MULTIPLY"},
+    {SDLK_KP_MINUS, "SDLK_KP_MINUS"},
+    {SDLK_KP_PLUS, "SDLK_KP_PLUS"},
+    {SDLK_KP_ENTER, "SDLK_KP_ENTER"},
+    {SDLK_KP_1, "SDLK_KP_1"},
+    {SDLK_KP_2, "SDLK_KP_2"},
+    {SDLK_KP_3, "SDLK_KP_3"},
+    {SDLK_KP_4, "SDLK_KP_4"},
+    {SDLK_KP_5, "SDLK_KP_5"},
+    {SDLK_KP_6, "SDLK_KP_6"},
+    {SDLK_KP_7, "SDLK_KP_7"},
+    {SDLK_KP_8, "SDLK_KP_8"},
+    {SDLK_KP_9, "SDLK_KP_9"},
+    {SDLK_KP_0, "SDLK_KP_0"},
+    {SDLK_KP_PERIOD, "SDLK_KP_PERIOD"},
+    {SDLK_APPLICATION, "SDLK_APPLICATION"},
+    {SDLK_POWER, "SDLK_POWER"},
+    {SDLK_KP_EQUALS, "SDLK_KP_EQUALS"},
+    {SDLK_F13, "SDLK_F13"},
+    {SDLK_F14, "SDLK_F14"},
+    {SDLK_F15, "SDLK_F15"},
+    {SDLK_F16, "SDLK_F16"},
+    {SDLK_F17, "SDLK_F17"},
+    {SDLK_F18, "SDLK_F18"},
+    {SDLK_F19, "SDLK_F19"},
+    {SDLK_F20, "SDLK_F20"},
+    {SDLK_F21, "SDLK_F21"},
+    {SDLK_F22, "SDLK_F22"},
+    {SDLK_F23, "SDLK_F23"},
+    {SDLK_F24, "SDLK_F24"},
+    {SDLK_EXECUTE, "SDLK_EXECUTE"},
+    {SDLK_HELP, "SDLK_HELP"},
+    {SDLK_MENU, "SDLK_MENU"},
+    {SDLK_SELECT, "SDLK_SELECT"},
+    {SDLK_STOP, "SDLK_STOP"},
+    {SDLK_AGAIN, "SDLK_AGAIN"},
+    {SDLK_UNDO, "SDLK_UNDO"},
+    {SDLK_CUT, "SDLK_CUT"},
+    {SDLK_COPY, "SDLK_COPY"},
+    {SDLK_PASTE, "SDLK_PASTE"},
+    {SDLK_FIND, "SDLK_FIND"},
+    {SDLK_MUTE, "SDLK_MUTE"},
+    {SDLK_VOLUMEUP, "SDLK_VOLUMEUP"},
+    {SDLK_VOLUMEDOWN, "SDLK_VOLUMEDOWN"},
+    {SDLK_KP_COMMA, "SDLK_KP_COMMA"},
+    {SDLK_KP_EQUALSAS400, "SDLK_KP_EQUALSAS400"},
+    {SDLK_ALTERASE, "SDLK_ALTERASE"},
+    {SDLK_SYSREQ, "SDLK_SYSREQ"},
+    {SDLK_CANCEL, "SDLK_CANCEL"},
+    {SDLK_CLEAR, "SDLK_CLEAR"},
+    {SDLK_PRIOR, "SDLK_PRIOR"},
+    {SDLK_RETURN2, "SDLK_RETURN2"},
+    {SDLK_SEPARATOR, "SDLK_SEPARATOR"},
+    {SDLK_OUT, "SDLK_OUT"},
+    {SDLK_OPER, "SDLK_OPER"},
+    {SDLK_CLEARAGAIN, "SDLK_CLEARAGAIN"},
+    {SDLK_CRSEL, "SDLK_CRSEL"},
+    {SDLK_EXSEL, "SDLK_EXSEL"},
+    {SDLK_KP_00, "SDLK_KP_00"},
+    {SDLK_KP_000, "SDLK_KP_000"},
+    {SDLK_THOUSANDSSEPARATOR, "SDLK_THOUSANDSSEPARATOR"},
+    {SDLK_DECIMALSEPARATOR, "SDLK_DECIMALSEPARATOR"},
+    {SDLK_CURRENCYUNIT, "SDLK_CURRENCYUNIT"},
+    {SDLK_CURRENCYSUBUNIT, "SDLK_CURRENCYSUBUNIT"},
+    {SDLK_KP_LEFTPAREN, "SDLK_KP_LEFTPAREN"},
+    {SDLK_KP_RIGHTPAREN, "SDLK_KP_RIGHTPAREN"},
+    {SDLK_KP_LEFTBRACE, "SDLK_KP_LEFTBRACE"},
+    {SDLK_KP_RIGHTBRACE, "SDLK_KP_RIGHTBRACE"},
+    {SDLK_KP_TAB, "SDLK_KP_TAB"},
+    {SDLK_KP_BACKSPACE, "SDLK_KP_BACKSPACE"},
+    {SDLK_KP_A, "SDLK_KP_A"},
+    {SDLK_KP_B, "SDLK_KP_B"},
+    {SDLK_KP_C, "SDLK_KP_C"},
+    {SDLK_KP_D, "SDLK_KP_D"},
+    {SDLK_KP_E, "SDLK_KP_E"},
+    {SDLK_KP_F, "SDLK_KP_F"},
+    {SDLK_KP_XOR, "SDLK_KP_XOR"},
+    {SDLK_KP_POWER, "SDLK_KP_POWER"},
+    {SDLK_KP_PERCENT, "SDLK_KP_PERCENT"},
+    {SDLK_KP_LESS, "SDLK_KP_LESS"},
+    {SDLK_KP_GREATER, "SDLK_KP_GREATER"},
+    {SDLK_KP_AMPERSAND, "SDLK_KP_AMPERSAND"},
+    {SDLK_KP_DBLAMPERSAND, "SDLK_KP_DBLAMPERSAND"},
+    {SDLK_KP_VERTICALBAR, "SDLK_KP_VERTICALBAR"},
+    {SDLK_KP_DBLVERTICALBAR, "SDLK_KP_DBLVERTICALBAR"},
+    {SDLK_KP_COLON, "SDLK_KP_COLON"},
+    {SDLK_KP_HASH, "SDLK_KP_HASH"},
+    {SDLK_KP_SPACE, "SDLK_KP_SPACE"},
+    {SDLK_KP_AT, "SDLK_KP_AT"},
+    {SDLK_KP_EXCLAM, "SDLK_KP_EXCLAM"},
+    {SDLK_KP_MEMSTORE, "SDLK_KP_MEMSTORE"},
+    {SDLK_KP_MEMRECALL, "SDLK_KP_MEMRECALL"},
+    {SDLK_KP_MEMCLEAR, "SDLK_KP_MEMCLEAR"},
+    {SDLK_KP_MEMADD, "SDLK_KP_MEMADD"},
+    {SDLK_KP_MEMSUBTRACT, "SDLK_KP_MEMSUBTRACT"},
+    {SDLK_KP_MEMMULTIPLY, "SDLK_KP_MEMMULTIPLY"},
+    {SDLK_KP_MEMDIVIDE, "SDLK_KP_MEMDIVIDE"},
+    {SDLK_KP_PLUSMINUS, "SDLK_KP_PLUSMINUS"},
+    {SDLK_KP_CLEAR, "SDLK_KP_CLEAR"},
+    {SDLK_KP_CLEARENTRY, "SDLK_KP_CLEARENTRY"},
+    {SDLK_KP_BINARY, "SDLK_KP_BINARY"},
+    {SDLK_KP_OCTAL, "SDLK_KP_OCTAL"},
+    {SDLK_KP_DECIMAL, "SDLK_KP_DECIMAL"},
+    {SDLK_KP_HEXADECIMAL, "SDLK_KP_HEXADECIMAL"},
+    {SDLK_LCTRL, "SDLK_LCTRL"},
+    {SDLK_LSHIFT, "SDLK_LSHIFT"},
+    {SDLK_LALT, "SDLK_LALT"},
+    {SDLK_LGUI, "SDLK_LGUI"},
+    {SDLK_RCTRL, "SDLK_RCTRL"},
+    {SDLK_RSHIFT, "SDLK_RSHIFT"},
+    {SDLK_RALT, "SDLK_RALT"},
+    {SDLK_RGUI, "SDLK_RGUI"},
+    {SDLK_MODE, "SDLK_MODE"},
+    {SDLK_AUDIONEXT, "SDLK_AUDIONEXT"},
+    {SDLK_AUDIOPREV, "SDLK_AUDIOPREV"},
+    {SDLK_AUDIOSTOP, "SDLK_AUDIOSTOP"},
+    {SDLK_AUDIOPLAY, "SDLK_AUDIOPLAY"},
+    {SDLK_AUDIOMUTE, "SDLK_AUDIOMUTE"},
+    {SDLK_MEDIASELECT, "SDLK_MEDIASELECT"},
+    {SDLK_WWW, "SDLK_WWW"},
+    {SDLK_MAIL, "SDLK_MAIL"},
+    {SDLK_CALCULATOR, "SDLK_CALCULATOR"},
+    {SDLK_COMPUTER, "SDLK_COMPUTER"},
+    {SDLK_AC_SEARCH, "SDLK_AC_SEARCH"},
+    {SDLK_AC_HOME, "SDLK_AC_HOME"},
+    {SDLK_AC_BACK, "SDLK_AC_BACK"},
+    {SDLK_AC_FORWARD, "SDLK_AC_FORWARD"},
+    {SDLK_AC_STOP, "SDLK_AC_STOP"},
+    {SDLK_AC_REFRESH, "SDLK_AC_REFRESH"},
+    {SDLK_AC_BOOKMARKS, "SDLK_AC_BOOKMARKS"},
+    {SDLK_BRIGHTNESSDOWN, "SDLK_BRIGHTNESSDOWN"},
+    {SDLK_BRIGHTNESSUP, "SDLK_BRIGHTNESSUP"},
+    {SDLK_DISPLAYSWITCH, "SDLK_DISPLAYSWITCH"},
+    {SDLK_KBDILLUMTOGGLE, "SDLK_KBDILLUMTOGGLE"},
+    {SDLK_KBDILLUMDOWN, "SDLK_KBDILLUMDOWN"},
+    {SDLK_KBDILLUMUP, "SDLK_KBDILLUMUP"},
+    {SDLK_EJECT, "SDLK_EJECT"},
+    {SDLK_SLEEP, "SDLK_SLEEP"},
+    #if SDL_VERSION_ATLEAST(2, 0, 6)
+    {SDLK_APP1, "SDLK_APP1"},
+    {SDLK_APP2, "SDLK_APP2"},
+    {SDLK_AUDIOREWIND, "SDLK_AUDIOREWIND"},
+    {SDLK_AUDIOFASTFORWARD, "SDLK_AUDIOFASTFORWARD"},
+    #endif
+};
+
+std::map<SDL_Scancode, std::string> scancode_names = {
+    {SDL_SCANCODE_UNKNOWN, "SDL_SCANCODE_UNKNOWN"},
+    {SDL_SCANCODE_A, "SDL_SCANCODE_A"},
+    {SDL_SCANCODE_B, "SDL_SCANCODE_B"},
+    {SDL_SCANCODE_C, "SDL_SCANCODE_C"},
+    {SDL_SCANCODE_D, "SDL_SCANCODE_D"},
+    {SDL_SCANCODE_E, "SDL_SCANCODE_E"},
+    {SDL_SCANCODE_F, "SDL_SCANCODE_F"},
+    {SDL_SCANCODE_G, "SDL_SCANCODE_G"},
+    {SDL_SCANCODE_H, "SDL_SCANCODE_H"},
+    {SDL_SCANCODE_I, "SDL_SCANCODE_I"},
+    {SDL_SCANCODE_J, "SDL_SCANCODE_J"},
+    {SDL_SCANCODE_K, "SDL_SCANCODE_K"},
+    {SDL_SCANCODE_L, "SDL_SCANCODE_L"},
+    {SDL_SCANCODE_M, "SDL_SCANCODE_M"},
+    {SDL_SCANCODE_N, "SDL_SCANCODE_N"},
+    {SDL_SCANCODE_O, "SDL_SCANCODE_O"},
+    {SDL_SCANCODE_P, "SDL_SCANCODE_P"},
+    {SDL_SCANCODE_Q, "SDL_SCANCODE_Q"},
+    {SDL_SCANCODE_R, "SDL_SCANCODE_R"},
+    {SDL_SCANCODE_S, "SDL_SCANCODE_S"},
+    {SDL_SCANCODE_T, "SDL_SCANCODE_T"},
+    {SDL_SCANCODE_U, "SDL_SCANCODE_U"},
+    {SDL_SCANCODE_V, "SDL_SCANCODE_V"},
+    {SDL_SCANCODE_W, "SDL_SCANCODE_W"},
+    {SDL_SCANCODE_X, "SDL_SCANCODE_X"},
+    {SDL_SCANCODE_Y, "SDL_SCANCODE_Y"},
+    {SDL_SCANCODE_Z, "SDL_SCANCODE_Z"},
+    {SDL_SCANCODE_1, "SDL_SCANCODE_1"},
+    {SDL_SCANCODE_2, "SDL_SCANCODE_2"},
+    {SDL_SCANCODE_3, "SDL_SCANCODE_3"},
+    {SDL_SCANCODE_4, "SDL_SCANCODE_4"},
+    {SDL_SCANCODE_5, "SDL_SCANCODE_5"},
+    {SDL_SCANCODE_6, "SDL_SCANCODE_6"},
+    {SDL_SCANCODE_7, "SDL_SCANCODE_7"},
+    {SDL_SCANCODE_8, "SDL_SCANCODE_8"},
+    {SDL_SCANCODE_9, "SDL_SCANCODE_9"},
+    {SDL_SCANCODE_0, "SDL_SCANCODE_0"},
+    {SDL_SCANCODE_RETURN, "SDL_SCANCODE_RETURN"},
+    {SDL_SCANCODE_ESCAPE, "SDL_SCANCODE_ESCAPE"},
+    {SDL_SCANCODE_BACKSPACE, "SDL_SCANCODE_BACKSPACE"},
+    {SDL_SCANCODE_TAB, "SDL_SCANCODE_TAB"},
+    {SDL_SCANCODE_SPACE, "SDL_SCANCODE_SPACE"},
+    {SDL_SCANCODE_MINUS, "SDL_SCANCODE_MINUS"},
+    {SDL_SCANCODE_EQUALS, "SDL_SCANCODE_EQUALS"},
+    {SDL_SCANCODE_LEFTBRACKET, "SDL_SCANCODE_LEFTBRACKET"},
+    {SDL_SCANCODE_RIGHTBRACKET, "SDL_SCANCODE_RIGHTBRACKET"},
+    {SDL_SCANCODE_BACKSLASH, "SDL_SCANCODE_BACKSLASH"},
+    {SDL_SCANCODE_NONUSHASH, "SDL_SCANCODE_NONUSHASH"},
+    {SDL_SCANCODE_SEMICOLON, "SDL_SCANCODE_SEMICOLON"},
+    {SDL_SCANCODE_APOSTROPHE, "SDL_SCANCODE_APOSTROPHE"},
+    {SDL_SCANCODE_GRAVE, "SDL_SCANCODE_GRAVE"},
+    {SDL_SCANCODE_COMMA, "SDL_SCANCODE_COMMA"},
+    {SDL_SCANCODE_PERIOD, "SDL_SCANCODE_PERIOD"},
+    {SDL_SCANCODE_SLASH, "SDL_SCANCODE_SLASH"},
+    {SDL_SCANCODE_CAPSLOCK, "SDL_SCANCODE_CAPSLOCK"},
+    {SDL_SCANCODE_F1, "SDL_SCANCODE_F1"},
+    {SDL_SCANCODE_F2, "SDL_SCANCODE_F2"},
+    {SDL_SCANCODE_F3, "SDL_SCANCODE_F3"},
+    {SDL_SCANCODE_F4, "SDL_SCANCODE_F4"},
+    {SDL_SCANCODE_F5, "SDL_SCANCODE_F5"},
+    {SDL_SCANCODE_F6, "SDL_SCANCODE_F6"},
+    {SDL_SCANCODE_F7, "SDL_SCANCODE_F7"},
+    {SDL_SCANCODE_F8, "SDL_SCANCODE_F8"},
+    {SDL_SCANCODE_F9, "SDL_SCANCODE_F9"},
+    {SDL_SCANCODE_F10, "SDL_SCANCODE_F10"},
+    {SDL_SCANCODE_F11, "SDL_SCANCODE_F11"},
+    {SDL_SCANCODE_F12, "SDL_SCANCODE_F12"},
+    {SDL_SCANCODE_PRINTSCREEN, "SDL_SCANCODE_PRINTSCREEN"},
+    {SDL_SCANCODE_SCROLLLOCK, "SDL_SCANCODE_SCROLLLOCK"},
+    {SDL_SCANCODE_PAUSE, "SDL_SCANCODE_PAUSE"},
+    {SDL_SCANCODE_INSERT, "SDL_SCANCODE_INSERT"},
+    {SDL_SCANCODE_HOME, "SDL_SCANCODE_HOME"},
+    {SDL_SCANCODE_PAGEUP, "SDL_SCANCODE_PAGEUP"},
+    {SDL_SCANCODE_DELETE, "SDL_SCANCODE_DELETE"},
+    {SDL_SCANCODE_END, "SDL_SCANCODE_END"},
+    {SDL_SCANCODE_PAGEDOWN, "SDL_SCANCODE_PAGEDOWN"},
+    {SDL_SCANCODE_RIGHT, "SDL_SCANCODE_RIGHT"},
+    {SDL_SCANCODE_LEFT, "SDL_SCANCODE_LEFT"},
+    {SDL_SCANCODE_DOWN, "SDL_SCANCODE_DOWN"},
+    {SDL_SCANCODE_UP, "SDL_SCANCODE_UP"},
+    {SDL_SCANCODE_NUMLOCKCLEAR, "SDL_SCANCODE_NUMLOCKCLEAR"},
+    {SDL_SCANCODE_KP_DIVIDE, "SDL_SCANCODE_KP_DIVIDE"},
+    {SDL_SCANCODE_KP_MULTIPLY, "SDL_SCANCODE_KP_MULTIPLY"},
+    {SDL_SCANCODE_KP_MINUS, "SDL_SCANCODE_KP_MINUS"},
+    {SDL_SCANCODE_KP_PLUS, "SDL_SCANCODE_KP_PLUS"},
+    {SDL_SCANCODE_KP_ENTER, "SDL_SCANCODE_KP_ENTER"},
+    {SDL_SCANCODE_KP_1, "SDL_SCANCODE_KP_1"},
+    {SDL_SCANCODE_KP_2, "SDL_SCANCODE_KP_2"},
+    {SDL_SCANCODE_KP_3, "SDL_SCANCODE_KP_3"},
+    {SDL_SCANCODE_KP_4, "SDL_SCANCODE_KP_4"},
+    {SDL_SCANCODE_KP_5, "SDL_SCANCODE_KP_5"},
+    {SDL_SCANCODE_KP_6, "SDL_SCANCODE_KP_6"},
+    {SDL_SCANCODE_KP_7, "SDL_SCANCODE_KP_7"},
+    {SDL_SCANCODE_KP_8, "SDL_SCANCODE_KP_8"},
+    {SDL_SCANCODE_KP_9, "SDL_SCANCODE_KP_9"},
+    {SDL_SCANCODE_KP_0, "SDL_SCANCODE_KP_0"},
+    {SDL_SCANCODE_KP_PERIOD, "SDL_SCANCODE_KP_PERIOD"},
+    {SDL_SCANCODE_NONUSBACKSLASH, "SDL_SCANCODE_NONUSBACKSLASH"},
+    {SDL_SCANCODE_APPLICATION, "SDL_SCANCODE_APPLICATION"},
+    {SDL_SCANCODE_POWER, "SDL_SCANCODE_POWER"},
+    {SDL_SCANCODE_KP_EQUALS, "SDL_SCANCODE_KP_EQUALS"},
+    {SDL_SCANCODE_F13, "SDL_SCANCODE_F13"},
+    {SDL_SCANCODE_F14, "SDL_SCANCODE_F14"},
+    {SDL_SCANCODE_F15, "SDL_SCANCODE_F15"},
+    {SDL_SCANCODE_F16, "SDL_SCANCODE_F16"},
+    {SDL_SCANCODE_F17, "SDL_SCANCODE_F17"},
+    {SDL_SCANCODE_F18, "SDL_SCANCODE_F18"},
+    {SDL_SCANCODE_F19, "SDL_SCANCODE_F19"},
+    {SDL_SCANCODE_F20, "SDL_SCANCODE_F20"},
+    {SDL_SCANCODE_F21, "SDL_SCANCODE_F21"},
+    {SDL_SCANCODE_F22, "SDL_SCANCODE_F22"},
+    {SDL_SCANCODE_F23, "SDL_SCANCODE_F23"},
+    {SDL_SCANCODE_F24, "SDL_SCANCODE_F24"},
+    {SDL_SCANCODE_EXECUTE, "SDL_SCANCODE_EXECUTE"},
+    {SDL_SCANCODE_HELP, "SDL_SCANCODE_HELP"},
+    {SDL_SCANCODE_MENU, "SDL_SCANCODE_MENU"},
+    {SDL_SCANCODE_SELECT, "SDL_SCANCODE_SELECT"},
+    {SDL_SCANCODE_STOP, "SDL_SCANCODE_STOP"},
+    {SDL_SCANCODE_AGAIN, "SDL_SCANCODE_AGAIN"},
+    {SDL_SCANCODE_UNDO, "SDL_SCANCODE_UNDO"},
+    {SDL_SCANCODE_CUT, "SDL_SCANCODE_CUT"},
+    {SDL_SCANCODE_COPY, "SDL_SCANCODE_COPY"},
+    {SDL_SCANCODE_PASTE, "SDL_SCANCODE_PASTE"},
+    {SDL_SCANCODE_FIND, "SDL_SCANCODE_FIND"},
+    {SDL_SCANCODE_MUTE, "SDL_SCANCODE_MUTE"},
+    {SDL_SCANCODE_VOLUMEUP, "SDL_SCANCODE_VOLUMEUP"},
+    {SDL_SCANCODE_VOLUMEDOWN, "SDL_SCANCODE_VOLUMEDOWN"},
+/*     {SDL_SCANCODE_LOCKINGCAPSLOCK, "SDL_SCANCODE_LOCKINGCAPSLOCK"}, */
+/*     {SDL_SCANCODE_LOCKINGNUMLOCK, "SDL_SCANCODE_LOCKINGNUMLOCK"}, */
+/*     {SDL_SCANCODE_LOCKINGSCROLLLOCK, "SDL_SCANCODE_LOCKINGSCROLLLOCK"}, */
+    {SDL_SCANCODE_KP_COMMA, "SDL_SCANCODE_KP_COMMA"},
+    {SDL_SCANCODE_KP_EQUALSAS400, "SDL_SCANCODE_KP_EQUALSAS400"},
+    {SDL_SCANCODE_INTERNATIONAL1, "SDL_SCANCODE_INTERNATIONAL1"},
+    {SDL_SCANCODE_INTERNATIONAL2, "SDL_SCANCODE_INTERNATIONAL2"},
+    {SDL_SCANCODE_INTERNATIONAL3, "SDL_SCANCODE_INTERNATIONAL3"},
+    {SDL_SCANCODE_INTERNATIONAL4, "SDL_SCANCODE_INTERNATIONAL4"},
+    {SDL_SCANCODE_INTERNATIONAL5, "SDL_SCANCODE_INTERNATIONAL5"},
+    {SDL_SCANCODE_INTERNATIONAL6, "SDL_SCANCODE_INTERNATIONAL6"},
+    {SDL_SCANCODE_INTERNATIONAL7, "SDL_SCANCODE_INTERNATIONAL7"},
+    {SDL_SCANCODE_INTERNATIONAL8, "SDL_SCANCODE_INTERNATIONAL8"},
+    {SDL_SCANCODE_INTERNATIONAL9, "SDL_SCANCODE_INTERNATIONAL9"},
+    {SDL_SCANCODE_LANG1, "SDL_SCANCODE_LANG1"},
+    {SDL_SCANCODE_LANG2, "SDL_SCANCODE_LANG2"},
+    {SDL_SCANCODE_LANG3, "SDL_SCANCODE_LANG3"},
+    {SDL_SCANCODE_LANG4, "SDL_SCANCODE_LANG4"},
+    {SDL_SCANCODE_LANG5, "SDL_SCANCODE_LANG5"},
+    {SDL_SCANCODE_LANG6, "SDL_SCANCODE_LANG6"},
+    {SDL_SCANCODE_LANG7, "SDL_SCANCODE_LANG7"},
+    {SDL_SCANCODE_LANG8, "SDL_SCANCODE_LANG8"},
+    {SDL_SCANCODE_LANG9, "SDL_SCANCODE_LANG9"},
+    {SDL_SCANCODE_ALTERASE, "SDL_SCANCODE_ALTERASE"},
+    {SDL_SCANCODE_SYSREQ, "SDL_SCANCODE_SYSREQ"},
+    {SDL_SCANCODE_CANCEL, "SDL_SCANCODE_CANCEL"},
+    {SDL_SCANCODE_CLEAR, "SDL_SCANCODE_CLEAR"},
+    {SDL_SCANCODE_PRIOR, "SDL_SCANCODE_PRIOR"},
+    {SDL_SCANCODE_RETURN2, "SDL_SCANCODE_RETURN2"},
+    {SDL_SCANCODE_SEPARATOR, "SDL_SCANCODE_SEPARATOR"},
+    {SDL_SCANCODE_OUT, "SDL_SCANCODE_OUT"},
+    {SDL_SCANCODE_OPER, "SDL_SCANCODE_OPER"},
+    {SDL_SCANCODE_CLEARAGAIN, "SDL_SCANCODE_CLEARAGAIN"},
+    {SDL_SCANCODE_CRSEL, "SDL_SCANCODE_CRSEL"},
+    {SDL_SCANCODE_EXSEL, "SDL_SCANCODE_EXSEL"},
+    {SDL_SCANCODE_KP_00, "SDL_SCANCODE_KP_00"},
+    {SDL_SCANCODE_KP_000, "SDL_SCANCODE_KP_000"},
+    {SDL_SCANCODE_THOUSANDSSEPARATOR, "SDL_SCANCODE_THOUSANDSSEPARATOR"},
+    {SDL_SCANCODE_DECIMALSEPARATOR, "SDL_SCANCODE_DECIMALSEPARATOR"},
+    {SDL_SCANCODE_CURRENCYUNIT, "SDL_SCANCODE_CURRENCYUNIT"},
+    {SDL_SCANCODE_CURRENCYSUBUNIT, "SDL_SCANCODE_CURRENCYSUBUNIT"},
+    {SDL_SCANCODE_KP_LEFTPAREN, "SDL_SCANCODE_KP_LEFTPAREN"},
+    {SDL_SCANCODE_KP_RIGHTPAREN, "SDL_SCANCODE_KP_RIGHTPAREN"},
+    {SDL_SCANCODE_KP_LEFTBRACE, "SDL_SCANCODE_KP_LEFTBRACE"},
+    {SDL_SCANCODE_KP_RIGHTBRACE, "SDL_SCANCODE_KP_RIGHTBRACE"},
+    {SDL_SCANCODE_KP_TAB, "SDL_SCANCODE_KP_TAB"},
+    {SDL_SCANCODE_KP_BACKSPACE, "SDL_SCANCODE_KP_BACKSPACE"},
+    {SDL_SCANCODE_KP_A, "SDL_SCANCODE_KP_A"},
+    {SDL_SCANCODE_KP_B, "SDL_SCANCODE_KP_B"},
+    {SDL_SCANCODE_KP_C, "SDL_SCANCODE_KP_C"},
+    {SDL_SCANCODE_KP_D, "SDL_SCANCODE_KP_D"},
+    {SDL_SCANCODE_KP_E, "SDL_SCANCODE_KP_E"},
+    {SDL_SCANCODE_KP_F, "SDL_SCANCODE_KP_F"},
+    {SDL_SCANCODE_KP_XOR, "SDL_SCANCODE_KP_XOR"},
+    {SDL_SCANCODE_KP_POWER, "SDL_SCANCODE_KP_POWER"},
+    {SDL_SCANCODE_KP_PERCENT, "SDL_SCANCODE_KP_PERCENT"},
+    {SDL_SCANCODE_KP_LESS, "SDL_SCANCODE_KP_LESS"},
+    {SDL_SCANCODE_KP_GREATER, "SDL_SCANCODE_KP_GREATER"},
+    {SDL_SCANCODE_KP_AMPERSAND, "SDL_SCANCODE_KP_AMPERSAND"},
+    {SDL_SCANCODE_KP_DBLAMPERSAND, "SDL_SCANCODE_KP_DBLAMPERSAND"},
+    {SDL_SCANCODE_KP_VERTICALBAR, "SDL_SCANCODE_KP_VERTICALBAR"},
+    {SDL_SCANCODE_KP_DBLVERTICALBAR, "SDL_SCANCODE_KP_DBLVERTICALBAR"},
+    {SDL_SCANCODE_KP_COLON, "SDL_SCANCODE_KP_COLON"},
+    {SDL_SCANCODE_KP_HASH, "SDL_SCANCODE_KP_HASH"},
+    {SDL_SCANCODE_KP_SPACE, "SDL_SCANCODE_KP_SPACE"},
+    {SDL_SCANCODE_KP_AT, "SDL_SCANCODE_KP_AT"},
+    {SDL_SCANCODE_KP_EXCLAM, "SDL_SCANCODE_KP_EXCLAM"},
+    {SDL_SCANCODE_KP_MEMSTORE, "SDL_SCANCODE_KP_MEMSTORE"},
+    {SDL_SCANCODE_KP_MEMRECALL, "SDL_SCANCODE_KP_MEMRECALL"},
+    {SDL_SCANCODE_KP_MEMCLEAR, "SDL_SCANCODE_KP_MEMCLEAR"},
+    {SDL_SCANCODE_KP_MEMADD, "SDL_SCANCODE_KP_MEMADD"},
+    {SDL_SCANCODE_KP_MEMSUBTRACT, "SDL_SCANCODE_KP_MEMSUBTRACT"},
+    {SDL_SCANCODE_KP_MEMMULTIPLY, "SDL_SCANCODE_KP_MEMMULTIPLY"},
+    {SDL_SCANCODE_KP_MEMDIVIDE, "SDL_SCANCODE_KP_MEMDIVIDE"},
+    {SDL_SCANCODE_KP_PLUSMINUS, "SDL_SCANCODE_KP_PLUSMINUS"},
+    {SDL_SCANCODE_KP_CLEAR, "SDL_SCANCODE_KP_CLEAR"},
+    {SDL_SCANCODE_KP_CLEARENTRY, "SDL_SCANCODE_KP_CLEARENTRY"},
+    {SDL_SCANCODE_KP_BINARY, "SDL_SCANCODE_KP_BINARY"},
+    {SDL_SCANCODE_KP_OCTAL, "SDL_SCANCODE_KP_OCTAL"},
+    {SDL_SCANCODE_KP_DECIMAL, "SDL_SCANCODE_KP_DECIMAL"},
+    {SDL_SCANCODE_KP_HEXADECIMAL, "SDL_SCANCODE_KP_HEXADECIMAL"},
+    {SDL_SCANCODE_LCTRL, "SDL_SCANCODE_LCTRL"},
+    {SDL_SCANCODE_LSHIFT, "SDL_SCANCODE_LSHIFT"},
+    {SDL_SCANCODE_LALT, "SDL_SCANCODE_LALT"},
+    {SDL_SCANCODE_LGUI, "SDL_SCANCODE_LGUI"},
+    {SDL_SCANCODE_RCTRL, "SDL_SCANCODE_RCTRL"},
+    {SDL_SCANCODE_RSHIFT, "SDL_SCANCODE_RSHIFT"},
+    {SDL_SCANCODE_RALT, "SDL_SCANCODE_RALT"},
+    {SDL_SCANCODE_RGUI, "SDL_SCANCODE_RGUI"},
+    {SDL_SCANCODE_MODE, "SDL_SCANCODE_MODE"},
+    {SDL_SCANCODE_AUDIONEXT, "SDL_SCANCODE_AUDIONEXT"},
+    {SDL_SCANCODE_AUDIOPREV, "SDL_SCANCODE_AUDIOPREV"},
+    {SDL_SCANCODE_AUDIOSTOP, "SDL_SCANCODE_AUDIOSTOP"},
+    {SDL_SCANCODE_AUDIOPLAY, "SDL_SCANCODE_AUDIOPLAY"},
+    {SDL_SCANCODE_AUDIOMUTE, "SDL_SCANCODE_AUDIOMUTE"},
+    {SDL_SCANCODE_MEDIASELECT, "SDL_SCANCODE_MEDIASELECT"},
+    {SDL_SCANCODE_WWW, "SDL_SCANCODE_WWW"},
+    {SDL_SCANCODE_MAIL, "SDL_SCANCODE_MAIL"},
+    {SDL_SCANCODE_CALCULATOR, "SDL_SCANCODE_CALCULATOR"},
+    {SDL_SCANCODE_COMPUTER, "SDL_SCANCODE_COMPUTER"},
+    {SDL_SCANCODE_AC_SEARCH, "SDL_SCANCODE_AC_SEARCH"},
+    {SDL_SCANCODE_AC_HOME, "SDL_SCANCODE_AC_HOME"},
+    {SDL_SCANCODE_AC_BACK, "SDL_SCANCODE_AC_BACK"},
+    {SDL_SCANCODE_AC_FORWARD, "SDL_SCANCODE_AC_FORWARD"},
+    {SDL_SCANCODE_AC_STOP, "SDL_SCANCODE_AC_STOP"},
+    {SDL_SCANCODE_AC_REFRESH, "SDL_SCANCODE_AC_REFRESH"},
+    {SDL_SCANCODE_AC_BOOKMARKS, "SDL_SCANCODE_AC_BOOKMARKS"},
+    {SDL_SCANCODE_BRIGHTNESSDOWN, "SDL_SCANCODE_BRIGHTNESSDOWN"},
+    {SDL_SCANCODE_BRIGHTNESSUP, "SDL_SCANCODE_BRIGHTNESSUP"},
+    {SDL_SCANCODE_DISPLAYSWITCH, "SDL_SCANCODE_DISPLAYSWITCH"},
+    {SDL_SCANCODE_KBDILLUMTOGGLE, "SDL_SCANCODE_KBDILLUMTOGGLE"},
+    {SDL_SCANCODE_KBDILLUMDOWN, "SDL_SCANCODE_KBDILLUMDOWN"},
+    {SDL_SCANCODE_KBDILLUMUP, "SDL_SCANCODE_KBDILLUMUP"},
+    {SDL_SCANCODE_EJECT, "SDL_SCANCODE_EJECT"},
+    {SDL_SCANCODE_SLEEP, "SDL_SCANCODE_SLEEP"},
+    {SDL_SCANCODE_APP1, "SDL_SCANCODE_APP1"},
+    {SDL_SCANCODE_APP2, "SDL_SCANCODE_APP2"},
+    #if SDL_VERSION_ATLEAST(2, 0, 6)
+    {SDL_SCANCODE_AUDIOREWIND, "SDL_SCANCODE_AUDIOREWIND"},
+    {SDL_SCANCODE_AUDIOFASTFORWARD, "SDL_SCANCODE_AUDIOFASTFORWARD"},
+    #endif
+    {SDL_NUM_SCANCODES, "SDL_NUM_SCANCODES"},
+};
 
 int cap32_main (int argc, char **argv)
 {
@@ -2134,6 +2635,7 @@ int cap32_main (int argc, char **argv)
          switch (event.type) {
             case SDL_KEYDOWN:
                {
+                  LOG_VERBOSE("Keyboard: pressed: " << SDL_GetKeyName(event.key.keysym.sym) << " - keycode: " << keycode_names[event.key.keysym.sym] << " (" << event.key.keysym.sym << ") - scancode: " << scancode_names[event.key.keysym.scancode] << " (" << event.key.keysym.scancode << ")");
                   dword cpc_key = CPC.InputMapper->CPCkeyFromKeysym(event.key.keysym);
                   if (!(cpc_key & MOD_EMU_KEY)) {
                      applyKeypress(cpc_key, keyboard_matrix, true);
@@ -2189,7 +2691,7 @@ int cap32_main (int argc, char **argv)
                         case CAP32_WAITBREAK:
                            breakPointsToSkipBeforeProceedingWithVirtualEvents++;
                            LOG_INFO("Will skip " << breakPointsToSkipBeforeProceedingWithVirtualEvents << " before processing more virtual events.");
-                           LOG_DEBUG("Setting z80.break_point=0 (was " << z80.break_point << ").");
+                           LOG_VERBOSE("Setting z80.break_point=0 (was " << z80.break_point << ").");
                            z80.break_point = 0; // set break point to address 0. FIXME would be interesting to change this via a parameter of CAP32_WAITBREAK on command line.
                            break;
 
@@ -2198,14 +2700,14 @@ int cap32_main (int argc, char **argv)
                            break;
 
                         case CAP32_TAPEPLAY:
-                           LOG_DEBUG("Request to play tape");
+                           LOG_VERBOSE("Request to play tape");
                            Tape_Rewind();
                            if (pbTapeImage) {
                               if (CPC.tape_play_button) {
-                                 LOG_DEBUG("Play button released");
+                                 LOG_VERBOSE("Play button released");
                                  CPC.tape_play_button = 0;
                               } else {
-                                 LOG_DEBUG("Play button pushed");
+                                 LOG_VERBOSE("Play button pushed");
                                  CPC.tape_play_button = 0x10;
                               }
                            }
@@ -2234,7 +2736,7 @@ int cap32_main (int argc, char **argv)
                            break;
 
                         case CAP32_RESET:
-                           LOG_DEBUG("User requested emulator reset");
+                           LOG_VERBOSE("User requested emulator reset");
                            emulator_reset();
                            break;
 
@@ -2313,39 +2815,28 @@ int cap32_main (int argc, char **argv)
             }
             break;
 
-            // Code shamelessly copied from http://sdl.beuc.net/sdl.wiki/Event_Examples
             // TODO: What if we were paused because of other reason than losing focus and then only lost focus
             //       the right thing to do here is to restore focus but keep paused... implementing this require
             //       keeping track of pause source, which will be a pain.
-            case SDL_ACTIVEEVENT:
-               if (event.active.state == (SDL_APPINPUTFOCUS | SDL_APPACTIVE) ) {
-                  if (event.active.gain == 0) {
-                     _appWindowState = Minimized;
-                     cpc_pause(); // Always paused when iconified
-                  } else {
-                     if (_appWindowState == LostFocus ) {
-                         _appWindowState = GainedFocus;
-                         if (CPC.auto_pause)
-                            cpc_resume();
-                     } else {
-                         _appWindowState = Restored;
-                         cpc_resume(); // Always unpause when restoring from iconified
-                     }
-                  }
-               }
-               else if (event.active.state & SDL_APPINPUTFOCUS) {
-                  if (event.active.gain == 0) {
-                      _appWindowState = LostFocus;
-                      if (CPC.auto_pause)
-                         cpc_pause();
-                  }
-                  else {
-                      _appWindowState = GainedFocus;
-                      if (CPC.auto_pause)
-                         cpc_resume();
-                  }
-               }
-               break;
+            case SDL_WINDOWEVENT:
+            switch (event.window.event) {
+              #if SDL_VERSION_ATLEAST(2, 0, 5)
+              case SDL_WINDOWEVENT_TAKE_FOCUS:
+              #endif
+              case SDL_WINDOWEVENT_FOCUS_GAINED:
+              case SDL_WINDOWEVENT_ENTER:
+                if (CPC.auto_pause) {
+                  cpc_resume();
+                }
+                break;
+              case SDL_WINDOWEVENT_FOCUS_LOST:
+              case SDL_WINDOWEVENT_LEAVE:
+                if (CPC.auto_pause) {
+                  cpc_pause();
+                }
+                break;
+            }
+            break;
 
             case SDL_QUIT:
                cleanExit(0);
@@ -2380,9 +2871,6 @@ int cap32_main (int argc, char **argv)
             }
          }
 
-         if (!vid_plugin->lock()) { // lock the video buffer
-           continue; // skip the emulation if we can't get a lock
-         }
          dword dwOffset = CPC.scr_pos - CPC.scr_base; // offset in current surface row
          if (VDU.scrln > 0) {
             CPC.scr_base = static_cast<byte *>(back_surface->pixels) + (VDU.scrln * CPC.scr_line_offs); // determine current position
@@ -2420,14 +2908,11 @@ int cap32_main (int argc, char **argv)
                print(static_cast<byte *>(back_surface->pixels) + CPC.scr_line_offs, chStr, true); // display the frames per second counter
             }
             asic_draw_sprites();
-            vid_plugin->unlock();
             video_display(); // update PC display
             if (take_screenshot) {
               dumpScreen();
               take_screenshot = false;
             }
-         } else {
-            vid_plugin->unlock();
          }
       }
       else { // We are paused. No need to burn CPU cycles

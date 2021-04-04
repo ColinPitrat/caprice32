@@ -30,6 +30,7 @@
 #include "wg_frame.h"
 #include "std_ex.h"
 #include "video.h"
+#include "log.h"
 #include <algorithm>
 #include <string>
 
@@ -40,34 +41,6 @@ namespace wGui
 {
 
 CView* CView::m_pInstance = nullptr;
-
-
-CView::CView(const CRect& WindowRect, std::string sTitle, bool bResizable, bool bFullScreen) :
-	CWindow(WindowRect, nullptr),
-	m_bResizable(bResizable),
-	m_bFullScreen(bFullScreen),
-	m_pMenu(nullptr),
-	m_pFloatingWindow(nullptr),
-	m_pScreenSurface(nullptr)
-{
-	if (m_pInstance)
-	{
-		throw(Wg_Ex_App("Cannot have more than one view at a time!", "CView::CView"));
-	}
-	m_pInstance = this;
-
-	CMessageServer::Instance().RegisterMessageClient(this, CMessage::APP_PAINT);
-	CMessageServer::Instance().RegisterMessageClient(this, CMessage::APP_DESTROY_FRAME, CMessageServer::PRIORITY_FIRST);
-	CMessageServer::Instance().RegisterMessageClient(this, CMessage::CTRL_RESIZE);
-	CMessageServer::Instance().RegisterMessageClient(this, CMessage::MOUSE_BUTTONDOWN, CMessageServer::PRIORITY_FIRST);
-	CMessageServer::Instance().RegisterMessageClient(this, CMessage::MOUSE_BUTTONUP, CMessageServer::PRIORITY_FIRST);
-
-	SetWindowRect(WindowRect);
-	SetWindowText(sTitle);
-	CApplication::Instance()->GetApplicationLog().AddLogEntry("Created new CView : " + sTitle, APP_LOG_INFO);
-	Draw();
-}
-
 
 
 CView::CView(SDL_Surface* surface, SDL_Surface* backSurface, const CRect& WindowRect) :
@@ -139,42 +112,8 @@ void CView::AttachMenu(CMenu* pMenu)
 void CView::SetWindowText(const std::string& sText)
 {
 	CWindow::SetWindowText(sText);
-	SDL_WM_SetCaption(m_sWindowText.c_str(), "");
+  SDL_SetWindowTitle(m_pWindow, m_sWindowText.c_str());
 }
-
-
-void CView::SetWindowRect(const CRect& WindowRect)
-{
-	CWindow::SetWindowRect(WindowRect);
-	m_ClientRect = CRect(0, 0, m_WindowRect.Width(), m_WindowRect.Height());
-
-	Uint32 iFlags = SDL_SWSURFACE | SDL_ANYFORMAT ;
-	if (m_bResizable && !m_bFullScreen)
-	{
-		iFlags |= SDL_RESIZABLE ;
-	}
-	if (m_bFullScreen)
-	{
-		iFlags |= SDL_FULLSCREEN ;
-		m_bResizable = false;
-	}
-
-	m_pScreenSurface = SDL_SetVideoMode(m_WindowRect.Width(), m_WindowRect.Height(), CApplication::Instance()->GetBitsPerPixel(), iFlags);
-	if (m_pScreenSurface == nullptr)
-		throw( Wg_Ex_SDL(std::string("Could not set video mode: ") + SDL_GetError(), "CView::SetWindowRect") );
-}
-
-
-
-
-void CView::SwitchMode(const CRect& WindowRect, bool bResizable, bool bFullScreen)
-{
-	m_bResizable = bResizable;
-	m_bFullScreen = bFullScreen;
-
-	SetWindowRect(WindowRect);
-}
-
 
 
 bool CView::HandleMessage(CMessage* pMessage)
@@ -188,8 +127,7 @@ bool CView::HandleMessage(CMessage* pMessage)
 		case CMessage::APP_PAINT :
 			if (pMessage->Destination() == this || pMessage->Destination() == nullptr)
 			{
-				vid_plugin->lock();
-				SDL_Surface* pFloatingSurface = SDL_CreateRGBSurface(SDL_SWSURFACE, m_pScreenSurface->w, m_pScreenSurface->h, CApplication::Instance()->GetBitsPerPixel(), 0x000000FF, 0x0000FF00, 0x00FF0000, 0xFF000000);
+				SDL_Surface* pFloatingSurface = SDL_CreateRGBSurface(0, m_pScreenSurface->w, m_pScreenSurface->h, CApplication::Instance()->GetBitsPerPixel(), 0x000000FF, 0x0000FF00, 0x00FF0000, 0xFF000000);
 				PaintToSurface(*m_pScreenSurface, *pFloatingSurface, CPoint(0, 0));
 				// judb use entire application SDL surface (otherwise strange clipping effects occur
 				// when moving frames, also clipping of listboxes.)
@@ -200,8 +138,7 @@ bool CView::HandleMessage(CMessage* pMessage)
 				SDL_BlitSurface(pFloatingSurface, &SourceRect, m_pScreenSurface, &DestRect);
 				SDL_FreeSurface(pFloatingSurface);
 				//SDL_UpdateRect(m_pScreenSurface, 0, 0, 0, 0);
-				vid_plugin->unlock();
-				vid_plugin->flip();
+				vid_plugin->flip(vid_plugin);
 
 				bHandled = true;
 			}
@@ -225,12 +162,9 @@ bool CView::HandleMessage(CMessage* pMessage)
 			TPointMessage* pResizeMessage = dynamic_cast<TPointMessage*>(pMessage);
 			if (pResizeMessage && pResizeMessage->Source() == CApplication::Instance())
 			{
+        LOG_ERROR("CView::HandleMessage called received a CTRL_RESIZE message - not migrated to SDL2");
+        /*
 				CWindow::SetWindowRect(CRect(m_WindowRect.TopLeft(), m_WindowRect.TopLeft() + pResizeMessage->Value()));
-				Uint32 iFlags = SDL_SWSURFACE | SDL_ANYFORMAT;
-				if(m_bResizable)
-				{
-					iFlags |= SDL_RESIZABLE;
-				}
 
 				m_ClientRect = CRect(m_ClientRect.Left(), m_ClientRect.Top(), m_WindowRect.Width(), m_WindowRect.Height());
 				m_ClientRect.ClipTo(m_WindowRect.SizeRect());
@@ -238,6 +172,7 @@ bool CView::HandleMessage(CMessage* pMessage)
 				m_pScreenSurface = SDL_SetVideoMode(m_WindowRect.Width(), m_WindowRect.Height(), DEFAULT_BPP, iFlags);
 				if (m_pScreenSurface == nullptr)
 					throw( Wg_Ex_SDL(std::string("Could not set video mode : ") + SDL_GetError(), "CView::HandleMessage") );
+        */
 
 				bHandled = true;
 			}
