@@ -1430,7 +1430,7 @@ void InputMapper::init()
   for (const auto &mapping : CPCkeysFromChars) {
     if (SDLkeysymFromCPCkeys.count(mapping.second) != 0) {
       PCKey sdl_moddedkey = SDLkeysymFromCPCkeys[mapping.second];
-      SDLkeysFromChars[mapping.first] = std::make_pair(static_cast<SDL_Keycode>(sdl_moddedkey & 0xffff), static_cast<SDL_Keymod>(sdl_moddedkey >> BITSHIFT_MOD));
+      SDLkeysFromChars[mapping.first] = std::make_pair(static_cast<SDL_Keycode>(sdl_moddedkey & BITMASK_NOMOD), static_cast<SDL_Keymod>(sdl_moddedkey >> BITSHIFT_MOD));
     }
   }
 }
@@ -1480,7 +1480,7 @@ std::list<SDL_Event> InputMapper::StringToEvents(std::string toTranslate) {
         // Lookup the SDL key corresponding to this emulator command
         sdl_keysym = SDLkeysymFromCPCkeys.find(keycode);
         if (sdl_keysym != SDLkeysymFromCPCkeys.end()) {
-          key.key.keysym.sym = static_cast<SDL_Keycode>(sdl_keysym->second & 0xffff);
+          key.key.keysym.sym = static_cast<SDL_Keycode>(sdl_keysym->second & BITMASK_NOMOD);
           key.key.keysym.mod = static_cast<SDL_Keymod>(sdl_keysym->second >> BITSHIFT_MOD);
         }
         escaped = false;

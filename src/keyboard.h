@@ -13,6 +13,7 @@
 #define MOD_EMU_KEY     (0x10 << 8)
 
 #define BITSHIFT_MOD 32
+#define BITMASK_NOMOD ((static_cast<PCKey>(1)<<BITSHIFT_MOD) - 1)
 #define MOD_PC_SHIFT    (static_cast<PCKey>(KMOD_SHIFT) << BITSHIFT_MOD)
 #define MOD_PC_CTRL     (static_cast<PCKey>(KMOD_CTRL) << BITSHIFT_MOD)
 #define MOD_PC_MODE     (static_cast<PCKey>(KMOD_MODE) << BITSHIFT_MOD)
