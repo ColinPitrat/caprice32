@@ -1295,7 +1295,7 @@ int audio_init ()
    desired->userdata = nullptr;
 
    for (int i = 0; i < SDL_GetNumAudioDevices(0); i++) {
-      LOG_INFO("Audio: device " << i << ": " << SDL_GetAudioDeviceName(i, 0));
+      LOG_VERBOSE("Audio: device " << i << ": " << SDL_GetAudioDeviceName(i, 0));
    }
 
    auto device_id = SDL_OpenAudioDevice(nullptr, 0, desired, obtained, 0 /* no change allowed */);
@@ -1305,9 +1305,8 @@ int audio_init ()
    }
    SDL_PauseAudioDevice(device_id, 0);
 
-   LOG_INFO("Audio: Device ID: " << device_id);
-   LOG_INFO("Audio: Desired: Freq: " << desired->freq << ", Format: " << desired->format << ", Channels: " << desired->channels << ", Samples: " << desired->samples);
-   LOG_INFO("Audio: Obtained: Freq: " << obtained->freq << ", Format: " << obtained->format << ", Channels: " << obtained->channels << ", Samples: " << obtained->samples);
+   LOG_VERBOSE("Audio: Desired: Freq: " << desired->freq << ", Format: " << desired->format << ", Channels: " << desired->channels << ", Samples: " << desired->samples);
+   LOG_VERBOSE("Audio: Obtained: Freq: " << obtained->freq << ", Format: " << obtained->format << ", Channels: " << obtained->channels << ", Samples: " << obtained->samples);
    free(desired);
    audio_spec = obtained;
 
@@ -1629,7 +1628,7 @@ void update_timings()
    dwTicksTargetFPS = dwTicksTarget;
    dwTicksTarget += dwTicksOffset;
    // These are only used for frames timing if sound is disabled. Otherwise timing is controlled by the PSG.
-   LOG_INFO("Timing: First frame at " << dwTicksTargetFPS << " - next frame in " << dwTicksOffset << " ( " << FRAME_PERIOD_MS << "/(" << CPC.speed << "/" << CPC_BASE_FREQUENCY_MHZ << ") ) at " << dwTicksTarget);
+   LOG_VERBOSE("Timing: First frame at " << dwTicksTargetFPS << " - next frame in " << dwTicksOffset << " ( " << FRAME_PERIOD_MS << "/(" << CPC.speed << "/" << CPC_BASE_FREQUENCY_MHZ << ") ) at " << dwTicksTarget);
 }
 
 // Recalculate emulation speed (to verify, seems to work reasonably well)
@@ -1972,9 +1971,9 @@ void dumpSnapshot() {
    }
    std::string dumpFile = "snapshot_" + getDateString() + ".sna";
    std::string dumpPath = dir + "/" + dumpFile;
-   LOG_DEBUG("Dumping machine snapshot to " + dumpPath);
+   LOG_INFO("Dumping machine snapshot to " + dumpPath);
    if (snapshot_save(dumpPath)) {
-     LOG_DEBUG("Could not write machine snapshot to " + dumpPath);
+     LOG_ERROR("Could not write machine snapshot to " + dumpPath);
    }
    else {
      set_osd_message("Captured machine snapshot to " + dumpFile);
@@ -2384,7 +2383,7 @@ int cap32_main (int argc, char **argv)
          switch (event.type) {
             case SDL_KEYDOWN:
                {
-                  std::cout << "cpitrat: pressed: " << SDL_GetKeyName(event.key.keysym.sym) << "(" << event.key.keysym.sym << ": " << keycode_names[event.key.keysym.sym] << ")" << std::endl;
+                  LOG_VERBOSE("Keyboard: pressed: " << SDL_GetKeyName(event.key.keysym.sym) << "(" << event.key.keysym.sym << ": " << keycode_names[event.key.keysym.sym] << ")");
                   dword cpc_key = CPC.InputMapper->CPCkeyFromKeysym(event.key.keysym);
                   if (!(cpc_key & MOD_EMU_KEY)) {
                      applyKeypress(cpc_key, keyboard_matrix, true);
@@ -2440,7 +2439,7 @@ int cap32_main (int argc, char **argv)
                         case CAP32_WAITBREAK:
                            breakPointsToSkipBeforeProceedingWithVirtualEvents++;
                            LOG_INFO("Will skip " << breakPointsToSkipBeforeProceedingWithVirtualEvents << " before processing more virtual events.");
-                           LOG_DEBUG("Setting z80.break_point=0 (was " << z80.break_point << ").");
+                           LOG_VERBOSE("Setting z80.break_point=0 (was " << z80.break_point << ").");
                            z80.break_point = 0; // set break point to address 0. FIXME would be interesting to change this via a parameter of CAP32_WAITBREAK on command line.
                            break;
 
@@ -2449,14 +2448,14 @@ int cap32_main (int argc, char **argv)
                            break;
 
                         case CAP32_TAPEPLAY:
-                           LOG_DEBUG("Request to play tape");
+                           LOG_VERBOSE("Request to play tape");
                            Tape_Rewind();
                            if (pbTapeImage) {
                               if (CPC.tape_play_button) {
-                                 LOG_DEBUG("Play button released");
+                                 LOG_VERBOSE("Play button released");
                                  CPC.tape_play_button = 0;
                               } else {
-                                 LOG_DEBUG("Play button pushed");
+                                 LOG_VERBOSE("Play button pushed");
                                  CPC.tape_play_button = 0x10;
                               }
                            }
@@ -2485,7 +2484,7 @@ int cap32_main (int argc, char **argv)
                            break;
 
                         case CAP32_RESET:
-                           LOG_DEBUG("User requested emulator reset");
+                           LOG_VERBOSE("User requested emulator reset");
                            emulator_reset();
                            break;
 
