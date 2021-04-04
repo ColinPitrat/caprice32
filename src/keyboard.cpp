@@ -1397,6 +1397,11 @@ bool InputMapper::load_layout(const std::string& filename)
     std::set<PCKey> mapped_sdl_keys;
     while (is.good()) {
       is.getline(line, MAX_LINE_LENGTH);
+      // This triggers the error even if the line just fits, but relying on failbit doesn't work (it's set also at EOF) so that will have to do.
+      if (strlen(line) >= MAX_LINE_LENGTH-1) {
+        LOG_ERROR("Mapping '" << filename << "' contains a line longer than " << MAX_LINE_LENGTH << " char, this is invalid: '" << line << "'");
+        valid = false;
+      }
       auto parsed_line = process_cfg_line(line);
       valid &= parsed_line.valid;
       if (!parsed_line.contains_mapping) continue;
