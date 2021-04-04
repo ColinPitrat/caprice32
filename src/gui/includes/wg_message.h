@@ -68,7 +68,7 @@ public:
 		CTRL_VALUECHANGING,  //!< CValueMessage generated when a control's text or value is in the process of changing via user input
 		KEYBOARD_KEYDOWN,  //!< CKeyboardMessage generated when a keyboard key is pressed
 		KEYBOARD_KEYUP,  //!< CKeyboardMessage generated when a keyboard key is released
-    TEXTINPUT, //!< CTextInput generated when text is typed in a field that supports it
+		TEXTINPUT, //!< CTextInput generated when text is typed in a field that supports it
 		MOUSE_BUTTONDOWN,  //!< CMouseMessage generated when a mouse button is pressed
 		MOUSE_BUTTONUP,  //!< CMouseMessage generated when a mouse button is released
 		MOUSE_MOVE,  //!< CMouseMessage generated when a mouse is moved
