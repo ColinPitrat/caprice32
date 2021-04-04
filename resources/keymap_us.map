@@ -1,3 +1,4 @@
+# vim: set noexpandtab:
 #
 # CPC/Emulator to host keymap
 # Line format: CPC_KEY<tab>HOST_KEY<tab>[OPTIONAL_MODIFIER]

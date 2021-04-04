@@ -12,13 +12,16 @@
 #define MOD_CPC_CTRL    (0x02 << 8)
 #define MOD_EMU_KEY     (0x10 << 8)
 
-#define MOD_PC_SHIFT    (KMOD_SHIFT << 16)
-#define MOD_PC_CTRL     (KMOD_CTRL << 16)
-#define MOD_PC_MODE     (KMOD_MODE << 16)
+#define BITSHIFT_MOD 32
+#define MOD_PC_SHIFT    (static_cast<PCKey>(KMOD_SHIFT) << BITSHIFT_MOD)
+#define MOD_PC_CTRL     (static_cast<PCKey>(KMOD_CTRL) << BITSHIFT_MOD)
+#define MOD_PC_MODE     (static_cast<PCKey>(KMOD_MODE) << BITSHIFT_MOD)
 // MOD_PC_ALT shouldn't be used: SDLK_LALT is mapped as a non-modifier key to CPC_COPY.
-#define MOD_PC_ALT      (KMOD_LALT << 16)
-#define MOD_PC_NUM      (KMOD_NUM << 16)
-#define MOD_PC_CAPS     (KMOD_CAPS << 16)
+#define MOD_PC_ALT      (static_cast<PCKey>(KMOD_LALT) << BITSHIFT_MOD)
+#define MOD_PC_NUM      (static_cast<PCKey>(KMOD_NUM) << BITSHIFT_MOD)
+#define MOD_PC_CAPS     (static_cast<PCKey>(KMOD_CAPS) << BITSHIFT_MOD)
+
+typedef qword PCKey;
 
 typedef enum {
    CAP32_EXIT = MOD_EMU_KEY,
@@ -256,7 +259,7 @@ class LineParsingResult {
     bool valid = true;
     bool contains_mapping = false;
     unsigned int cpc_key = 0;
-    unsigned int sdl_key = 0;
+    PCKey sdl_key = 0;
     std::string cpc_key_name;
     std::string sdl_key_name;
 };
@@ -265,12 +268,12 @@ class InputMapper {
   private:
     static const dword cpc_kbd[CPC_KEYBOARD_NUM][CPC_KEY_NUM];
     static const std::map<const std::string, const unsigned int> CPCkeysFromStrings;
-    static const std::map<const std::string, const unsigned int> SDLkeysFromStrings;
+    static const std::map<const std::string, const PCKey> SDLkeysFromStrings;
     static const std::map<const char, const CPC_KEYS> CPCkeysFromChars;
     std::map<char, std::pair<SDL_Keycode, SDL_Keymod>> SDLkeysFromChars;
-    static std::map<unsigned int, unsigned int> SDLkeysymFromCPCkeys_us;
-    std::map<unsigned int, unsigned int> CPCkeysFromSDLkeysym;
-    std::map<unsigned int, unsigned int> SDLkeysymFromCPCkeys;
+    static std::map<unsigned int, PCKey> SDLkeysymFromCPCkeys_us;
+    std::map<PCKey, unsigned int> CPCkeysFromSDLkeysym;
+    std::map<unsigned int, PCKey> SDLkeysymFromCPCkeys;
     t_CPC *CPC;
 
     LineParsingResult process_cfg_line(char *line);

@@ -1,3 +1,10 @@
+# vim: set noexpandtab:
+#
+# CPC/Emulator to host keymap
+# Line format: CPC_KEY<tab>HOST_KEY<tab>[OPTIONAL_MODIFIER]
+# Edit this at your own risk. It is *strongly* advised to back up this
+# file before trying to modify it.
+#
 CPC_0	SDLK_0
 CPC_1	SDLK_1
 CPC_2	SDLK_2
