@@ -1420,6 +1420,11 @@ bool InputMapper::load_layout(const std::string& filename)
 
 void InputMapper::init()
 {
+  // Ensure we're starting from a fresh state
+  SDLkeysymFromCPCkeys.clear();
+  CPCkeysFromSDLkeysym.clear();
+  SDLkeysFromChars.clear();
+
   std::string layout_file = CPC->resources_path + "/" + CPC->kbd_layout;
   load_layout(layout_file);
 
