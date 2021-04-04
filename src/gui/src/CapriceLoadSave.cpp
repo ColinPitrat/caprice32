@@ -6,6 +6,7 @@
 #include "slotshandler.h"
 #include "cartridge.h"
 #include "stringutils.h"
+#include "log.h"
 
 #include <iostream>
 #include <sys/types.h>
@@ -281,16 +282,16 @@ std::string CapriceLoadSave::simplifyDirPath(std::string path)
   char simplepath[PATH_MAX+1];
 #endif
   if(realpath(path.c_str(), simplepath) == nullptr) {
-    std::cerr << "Couldn't simplify path '" << path << "': " << strerror(errno) << std::endl;
+    LOG_ERROR("Couldn't simplify path '" << path << "': " << strerror(errno));
     return ".";
   }
   struct stat entry_infos;
   if(stat(simplepath, &entry_infos) != 0) {
-    std::cerr << "Could not retrieve info on " << simplepath << ": " << strerror(errno) << std::endl;
+    LOG_ERROR("Could not retrieve info on " << simplepath << ": " << strerror(errno));
     return ".";
   }
   if(!S_ISDIR(entry_infos.st_mode)) {
-    std::cerr << simplepath << " is not a directory." << std::endl;
+    LOG_ERROR(simplepath << " is not a directory.");
     return ".";
   }
   return std::string(simplepath);
@@ -317,7 +318,7 @@ void CapriceLoadSave::UpdateFilesList()
 
   dp = opendir(m_pDirectoryValue->GetWindowText().c_str());
   if(dp == nullptr) {
-    std::cerr << "Could not open " << m_pDirectoryValue->GetWindowText() << ": " << strerror(errno) << std::endl;
+    LOG_ERROR("Could not open " << m_pDirectoryValue->GetWindowText() << ": " << strerror(errno));
   } else {
     std::vector<std::string> directories;
     std::vector<std::string> files;
@@ -327,7 +328,7 @@ void CapriceLoadSave::UpdateFilesList()
       struct stat entry_infos;
       std::string full_name = m_pDirectoryValue->GetWindowText() + "/" + entry_name;
       if(stat(full_name.c_str(), &entry_infos) != 0) {
-        std::cerr << "Could not retrieve info on " << full_name << ": " << strerror(errno) << std::endl;
+        LOG_ERROR("Could not retrieve info on " << full_name << ": " << strerror(errno));
       }
       if(/*ep->d_type == DT_DIR*/S_ISDIR(entry_infos.st_mode) && (ep->d_name[0] != '.' || entry_name == "..")) {
         directories.push_back(entry_name + "/");
@@ -336,7 +337,7 @@ void CapriceLoadSave::UpdateFilesList()
       }
     }
     if(closedir(dp) != 0) {
-      std::cerr << "Could not close directory: " << strerror(errno) << std::endl;
+      LOG_ERROR("Could not close directory: " << strerror(errno));
     }
     std::sort(directories.begin(), directories.end(), stringutils::caseInsensitiveCompare);
     std::sort(files.begin(), files.end(), stringutils::caseInsensitiveCompare);
