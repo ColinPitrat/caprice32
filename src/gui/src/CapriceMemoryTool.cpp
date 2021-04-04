@@ -3,6 +3,7 @@
 #include "CapriceMemoryTool.h"
 #include "cap32.h"
 #include "z80.h"
+#include "log.h"
 #include <iomanip>
 #include <sstream>
 #include <string>
@@ -132,7 +133,7 @@ bool CapriceMemoryTool::HandleMessage(CMessage* pMessage)
             if (pMessage->Source() == m_pButtonCopy) {
               std::cout << m_pTextMemContent->GetWindowText() << std::endl;
               if(SDL_SetClipboardText(m_pTextMemContent->GetWindowText().c_str()) < 0) {
-                std::cerr << "Error while copying data to clipboard: " << SDL_GetError() << std::endl;
+                LOG_ERROR("Error while copying data to clipboard: " << SDL_GetError());
               }
               bHandled = true;
               break;

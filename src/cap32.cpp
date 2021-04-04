@@ -1509,7 +1509,7 @@ void video_set_style ()
 int video_init ()
 {
    if (SDL_InitSubSystem(SDL_INIT_VIDEO) < 0) { // initialize the video subsystem
-      std::cerr << "Init of video subsystem failed: " << SDL_GetError() << std::endl;
+      LOG_ERROR("Init of video subsystem failed: " << SDL_GetError());
       return ERR_VIDEO_INIT;
    }
 
@@ -1518,7 +1518,7 @@ int video_init ()
    back_surface=vid_plugin->init(vid_plugin, CPC.scr_fs_width, CPC.scr_fs_height, CPC.scr_fs_bpp, CPC.scr_window==0);
 
    if (!back_surface) { // attempt to set the required video mode
-      std::cerr << "Could not set requested video mode: " << SDL_GetError() << std::endl;
+      LOG_ERROR("Could not set requested video mode: " << SDL_GetError());
       return ERR_VIDEO_SET_MODE;
    }
 
