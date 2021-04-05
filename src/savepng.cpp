@@ -10,6 +10,7 @@
 #include <png.h>
 #include <cstdint>
 #include <string>
+#include <memory>
 
 #define SUCCESS 0
 #define ERROR (-1)
@@ -122,14 +123,13 @@ int SDL_SavePNG(SDL_Surface *src, const std::string& file)
       && (pal = surface->format->palette))
   {
     colortype |= PNG_COLOR_MASK_PALETTE;
-    png_colorp pal_ptr = static_cast<png_colorp>(malloc(pal->ncolors * sizeof(png_color)));
+    std::unique_ptr<png_color[]> pal_ptr = std::make_unique<png_color[]>(pal->ncolors);
     for (i = 0; i < pal->ncolors; i++) {
       pal_ptr[i].red   = pal->colors[i].r;
       pal_ptr[i].green = pal->colors[i].g;
       pal_ptr[i].blue  = pal->colors[i].b;
     }
-    png_set_PLTE(png_ptr, info_ptr, pal_ptr, pal->ncolors);
-    free(pal_ptr);
+    png_set_PLTE(png_ptr, info_ptr, pal_ptr.get(), pal->ncolors);
   }
   else if (surface->format->BytesPerPixel > 3 || surface->format->Amask)
     colortype |= PNG_COLOR_MASK_ALPHA;
@@ -148,11 +148,10 @@ int SDL_SavePNG(SDL_Surface *src, const std::string& file)
   /* Write everything */
   png_write_info(png_ptr, info_ptr);
 #ifdef USE_ROW_POINTERS
-  png_bytep *row_pointers = static_cast<png_bytep*>(malloc(sizeof(png_bytep)*surface->h));
+  std::unique_ptr<png_bytep[]> row_pointers = std::make_unique<png_bytep[]>(surface->h);
   for (i = 0; i < surface->h; i++)
     row_pointers[i] = static_cast<png_bytep>(static_cast<void*>(static_cast<char*>(surface->pixels) + i * surface->pitch));
-  png_write_image(png_ptr, row_pointers);
-  free(row_pointers);
+  png_write_image(png_ptr, row_pointers.get());
 #else
   for (i = 0; i < surface->h; i++)
     png_write_row(png_ptr, (png_bytep)(Uint8*)surface->pixels + i * surface->pitch);

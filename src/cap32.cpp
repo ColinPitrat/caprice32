@@ -79,7 +79,7 @@ extern t_disk_format disk_format[];
 
 extern byte* pbCartridgePages[];
 
-SDL_AudioDeviceId audio_device_id = 0;
+SDL_AudioDeviceID audio_device_id = 0;
 SDL_Surface *back_surface = nullptr;
 video_plugin* vid_plugin;
 SDL_Joystick* joysticks[MAX_NB_JOYSTICKS];
@@ -1302,7 +1302,7 @@ int audio_init ()
    SDL_PauseAudioDevice(audio_device_id, 0);
 
    LOG_VERBOSE("Audio: Desired: Freq: " << desired.freq << ", Format: " << desired.format << ", Channels: " << desired.channels << ", Samples: " << desired.samples);
-   LOG_VERBOSE("Audio: Obtained: Freq: " << obtained->freq << ", Format: " << obtained->format << ", Channels: " << obtained->channels << ", Samples: " << obtained->samples);
+   LOG_VERBOSE("Audio: Obtained: Freq: " << obtained.freq << ", Format: " << obtained.format << ", Channels: " << obtained.channels << ", Samples: " << obtained.samples);
 
    CPC.snd_buffersize = obtained.size; // size is samples * channels * bytes per sample (1 or 2)
    pbSndBuffer = static_cast<byte *>(malloc(CPC.snd_buffersize)); // allocate the sound data buffer
