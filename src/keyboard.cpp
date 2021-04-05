@@ -740,7 +740,7 @@ const std::map<const char, const CPC_KEYS> InputMapper::CPCkeysFromChars = {
     //{ '~', {0, KMOD_NONE} } // should be pound but it's not part of base ascii (it's in extended ASCII)
 };
 
-std::map<unsigned int, unsigned int> InputMapper::SDLkeysymFromCPCkeys_us = {
+std::map<unsigned int, PCKey> InputMapper::SDLkeysymFromCPCkeys_us = {
   { CPC_0,           SDLK_0 },
   { CPC_1,           SDLK_1 },
   { CPC_2,           SDLK_2 },
@@ -1166,7 +1166,7 @@ const std::map<const std::string, const unsigned int> InputMapper::CPCkeysFromSt
    {"CAP32_WAITBREAK", CAP32_WAITBREAK},
 };
 
-const std::map<const std::string, const unsigned int> InputMapper::SDLkeysFromStrings = {
+const std::map<const std::string, const PCKey> InputMapper::SDLkeysFromStrings = {
   /*@{*/
     /** @name ASCII mapped keysyms */
   { "SDLK_BACKSPACE", SDLK_BACKSPACE},
@@ -1394,9 +1394,14 @@ bool InputMapper::load_layout(const std::string& filename)
   else {
     std::istream is(&fb);
     std::set<unsigned int> mapped_cpc_keys;
-    std::set<unsigned int> mapped_sdl_keys;
+    std::set<PCKey> mapped_sdl_keys;
     while (is.good()) {
       is.getline(line, MAX_LINE_LENGTH);
+      // This triggers the error even if the line just fits, but relying on failbit doesn't work (it's set also at EOF) so that will have to do.
+      if (strlen(line) >= MAX_LINE_LENGTH-1) {
+        LOG_ERROR("Mapping '" << filename << "' contains a line longer than " << MAX_LINE_LENGTH << " char, this is invalid: '" << line << "'");
+        valid = false;
+      }
       auto parsed_line = process_cfg_line(line);
       valid &= parsed_line.valid;
       if (!parsed_line.contains_mapping) continue;
@@ -1405,10 +1410,6 @@ bool InputMapper::load_layout(const std::string& filename)
         LOG_ERROR("Mapping '" << filename << "' contains a CPC key multiple times: " << parsed_line.cpc_key_name);
         valid = false;
       }
-      /*
-       * Deactivate this check: we do want to be able to have CPC keys mapped to the same SDL keys.
-       * This is needed for the virtual keyboard, as (for example) the "|cpm" command actually produces "ùcpm" on a CPC with a french keyboard.
-       * So we need CPC_PIPE to have the same mapping as CPC_uGRAVE.
       mapped_cpc_keys.insert(parsed_line.cpc_key);
       // And that no SDL key combination is mapped to 2 different CPC keys
       if (mapped_sdl_keys.count(parsed_line.sdl_key) != 0) {
@@ -1416,7 +1417,6 @@ bool InputMapper::load_layout(const std::string& filename)
         valid = false;
       }
       mapped_sdl_keys.insert(parsed_line.sdl_key);
-      */
     }
     fb.close();
   }
@@ -1425,6 +1425,11 @@ bool InputMapper::load_layout(const std::string& filename)
 
 void InputMapper::init()
 {
+  // Ensure we're starting from a fresh state
+  SDLkeysymFromCPCkeys.clear();
+  CPCkeysFromSDLkeysym.clear();
+  SDLkeysFromChars.clear();
+
   std::string layout_file = CPC->resources_path + "/" + CPC->kbd_layout;
   load_layout(layout_file);
 
@@ -1434,14 +1439,14 @@ void InputMapper::init()
 
   for (const auto &mapping : CPCkeysFromChars) {
     if (SDLkeysymFromCPCkeys.count(mapping.second) != 0) {
-      unsigned int sdl_moddedkey = SDLkeysymFromCPCkeys[mapping.second];
-      SDLkeysFromChars[mapping.first] = std::make_pair(static_cast<SDL_Keycode>(sdl_moddedkey & 0xffff), static_cast<SDL_Keymod>(sdl_moddedkey >> 16));
+      PCKey sdl_moddedkey = SDLkeysymFromCPCkeys[mapping.second];
+      SDLkeysFromChars[mapping.first] = std::make_pair(static_cast<SDL_Keycode>(sdl_moddedkey & BITMASK_NOMOD), static_cast<SDL_Keymod>(sdl_moddedkey >> BITSHIFT_MOD));
     }
   }
 }
 
 dword InputMapper::CPCkeyFromKeysym(SDL_Keysym keysym) {
-    dword sdl_key = keysym.sym;
+    PCKey sdl_key = keysym.sym;
 
     if (keysym.mod & KMOD_SHIFT)                sdl_key |= MOD_PC_SHIFT;
     if (keysym.mod & KMOD_CTRL)                 sdl_key |= MOD_PC_CTRL;
@@ -1463,7 +1468,7 @@ std::list<SDL_Event> InputMapper::StringToEvents(std::string toTranslate) {
     std::list<SDL_Event> result;
     bool escaped = false;
     bool cap32_cmd = false;
-    std::map<unsigned int, unsigned int>::iterator sdl_keysym;
+    std::map<unsigned int, PCKey>::iterator sdl_keysym;
 
     for (auto c : toTranslate) {
       if (c == '\a') {
@@ -1485,8 +1490,8 @@ std::list<SDL_Event> InputMapper::StringToEvents(std::string toTranslate) {
         // Lookup the SDL key corresponding to this emulator command
         sdl_keysym = SDLkeysymFromCPCkeys.find(keycode);
         if (sdl_keysym != SDLkeysymFromCPCkeys.end()) {
-          key.key.keysym.sym = static_cast<SDL_Keycode>(sdl_keysym->second & 0xffff);
-          key.key.keysym.mod = static_cast<SDL_Keymod>(sdl_keysym->second >> 16);
+          key.key.keysym.sym = static_cast<SDL_Keycode>(sdl_keysym->second & BITMASK_NOMOD);
+          key.key.keysym.mod = static_cast<SDL_Keymod>(sdl_keysym->second >> BITSHIFT_MOD);
         }
         escaped = false;
         cap32_cmd = false;
@@ -1528,7 +1533,7 @@ void InputMapper::set_joystick_emulation()
   for (dword n = 0; n < 6; n++) {
     int cpc_idx = joy_layout[n][1]; // get the CPC key to change the assignment for
     if (cpc_idx) {
-      dword pc_idx = SDLkeysymFromCPCkeys[cpc_idx]; // SDL key corresponding to the CPC key to remap
+      PCKey pc_idx = SDLkeysymFromCPCkeys[cpc_idx]; // SDL key corresponding to the CPC key to remap
       if (CPC->joystick_emulation) {
         CPCkeysFromSDLkeysym[pc_idx] = joy_layout[n][0];
       }

@@ -1,3 +1,10 @@
+# vim: set noexpandtab cc=80:
+#
+# CPC/Emulator to host keymap
+# Line format: CPC_KEY<tab>HOST_KEY<tab>[OPTIONAL_MODIFIER]
+# Edit this at your own risk. It is *strongly* advised to back up this
+# file before trying to modify it.
+#
 CPC_0	SDLK_0
 CPC_1	SDLK_1
 CPC_2	SDLK_2
@@ -138,7 +145,11 @@ CPC_F9	SDLK_KP_9
 CPC_FPERIOD	SDLK_KP_PERIOD
 CPC_GREATER	SDLK_LESS	MOD_PC_SHIFT
 CPC_HASH	SDLK_3	MOD_PC_MODE
+# This doesn't work because no keycode corresponds to the needed key.
+# With scancode this would be SDL_SCANCODE_LEFTBRACKET with MOD_PC_MODE
 CPC_LBRACKET	SDLK_BACKQUOTE	MOD_PC_MODE
+# This doesn't work because no keycode corresponds to the needed key.
+# With scancode this would be SDL_SCANCODE_APOSTROPHE with MOD_PC_MODE
 CPC_LCBRACE	SDLK_QUOTE	MOD_PC_MODE
 CPC_LEFTPAREN	SDLK_8	MOD_PC_SHIFT
 CPC_LESS	SDLK_LESS
@@ -150,7 +161,11 @@ CPC_PIPE	SDLK_1	MOD_PC_MODE
 CPC_PLUS	SDLK_PLUS
 CPC_QUESTION	SDLK_QUOTE	MOD_PC_SHIFT
 CPC_QUOTE	SDLK_QUOTE
+# This doesn't work because no keycode corresponds to the needed key.
+# With scancode this would be SDL_SCANCODE_RIGHTBRACKET with MOD_PC_MODE
 CPC_RBRACKET	SDLK_PLUS	MOD_PC_MODE
+# This doesn't work because no keycode corresponds to the needed key.
+# With scancode this would be SDL_SCANCODE_BACKSLASH with MOD_PC_MODE
 CPC_RCBRACE	SDLK_cCEDIL	MOD_PC_MODE
 CPC_RETURN	SDLK_RETURN
 CPC_RIGHTPAREN	SDLK_9	MOD_PC_SHIFT

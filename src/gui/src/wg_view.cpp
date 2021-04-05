@@ -30,6 +30,7 @@
 #include "wg_frame.h"
 #include "std_ex.h"
 #include "video.h"
+#include "log.h"
 #include <algorithm>
 #include <string>
 
@@ -161,7 +162,7 @@ bool CView::HandleMessage(CMessage* pMessage)
 			TPointMessage* pResizeMessage = dynamic_cast<TPointMessage*>(pMessage);
 			if (pResizeMessage && pResizeMessage->Source() == CApplication::Instance())
 			{
-        std::cerr << "CView::HandleMessage called received a CTRL_RESIZE message - not migrated to SDL2" << std::endl;
+        LOG_ERROR("CView::HandleMessage called received a CTRL_RESIZE message - not migrated to SDL2");
         /*
 				CWindow::SetWindowRect(CRect(m_WindowRect.TopLeft(), m_WindowRect.TopLeft() + pResizeMessage->Value()));
 

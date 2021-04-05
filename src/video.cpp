@@ -32,6 +32,7 @@
 
 #include "video.h"
 #include "cap32.h"
+#include "log.h"
 #ifdef HAVE_GL
 #include "SDL_opengl.h"
 #include "glfuncs.h"
@@ -586,7 +587,7 @@ SDL_Surface* swscale_init(video_plugin* t, int w __attribute__((unused)), int h 
   if (!scaled) return nullptr;
   if (scaled->format->BitsPerPixel!=16)
   {
-    std::cerr << t->name << ": SDL didn't return a 16 bpp surface but a " << static_cast<int>(scaled->format->BitsPerPixel) << " bpp one." << std::endl;
+    LOG_ERROR(t->name << ": SDL didn't return a 16 bpp surface but a " << static_cast<int>(scaled->format->BitsPerPixel) << " bpp one.");
     return nullptr;
   }
   SDL_FillRect(vid, nullptr, SDL_MapRGB(vid->format,0,0,0));
@@ -594,7 +595,7 @@ SDL_Surface* swscale_init(video_plugin* t, int w __attribute__((unused)), int h 
   pub = SDL_CreateRGBSurface(0, CPC_VISIBLE_SCR_WIDTH, CPC_VISIBLE_SCR_HEIGHT, 16, 0, 0, 0, 0);
   if (pub->format->BitsPerPixel!=16)
   {
-    std::cerr << t->name << ": SDL didn't return a 16 bpp surface but a " << static_cast<int>(pub->format->BitsPerPixel) << " bpp one." << std::endl;
+    LOG_ERROR(t->name << ": SDL didn't return a 16 bpp surface but a " << static_cast<int>(pub->format->BitsPerPixel) << " bpp one.");
     return nullptr;
   }
 

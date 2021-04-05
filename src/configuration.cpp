@@ -1,4 +1,5 @@
 #include "configuration.h"
+#include "log.h"
 #include <sstream>
 #include <cstring>
 #include <fstream>
@@ -71,7 +72,7 @@ namespace config
     configStream.close();
     bool success = configStream.good();
     if (!success) {
-      std::cerr << "Couldn't save configuration to '" << configFilename << "'. Is the file writable?" << std::endl;
+      LOG_ERROR("Couldn't save configuration to '" << configFilename << "'. Is the file writable?");
     }
     return success;
   }

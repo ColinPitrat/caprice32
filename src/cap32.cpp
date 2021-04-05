@@ -1088,10 +1088,6 @@ int emulator_init ()
    pbRAM = pbRAMbuffer + 1;
    pbROM = new byte [32*1024]; // allocate memory for 32K of ROM
    pbRegisterPage = new byte [16*1024];
-   if ((!pbGPBuffer) || (!pbRAMbuffer) || (!pbROM) || (!pbRegisterPage)) {
-      LOG_ERROR("Failed allocating memory in emulator_init. Out of memory ?");
-      return ERR_OUT_OF_MEMORY;
-   }
    pbROMlo = pbROM;
    pbROMhi =
    pbExpansionROM = pbROM + 16384;
@@ -1145,9 +1141,6 @@ int emulator_init ()
       if (!pbMF2ROM) {
          pbMF2ROM = new byte [16384]; // allocate the space needed for the Multiface 2: 8K ROM + 8K RAM
          pbMF2ROMbackup = new byte [8192]; // allocate the space needed for the backup of the MF2 ROM
-         if ((!pbMF2ROM) || (!pbMF2ROMbackup)) {
-            return ERR_OUT_OF_MEMORY;
-         }
          memset(pbMF2ROM, 0, 16384); // clear memory
          std::string romFilename = CPC.rom_path + "/" + CPC.rom_mf2;
          bool MF2error = false;
@@ -1301,13 +1294,19 @@ int audio_init ()
    desired->callback = audio_update;
    desired->userdata = nullptr;
 
-   if (SDL_OpenAudio(desired, obtained) < 0) {
-      fprintf(stderr, "Could not open audio: %s\n", SDL_GetError());
-      return 1;
+   for (int i = 0; i < SDL_GetNumAudioDevices(0); i++) {
+      LOG_VERBOSE("Audio: device " << i << ": " << SDL_GetAudioDeviceName(i, 0));
    }
 
-   LOG_DEBUG("Audio: Desired: Freq: " << desired->freq << ", Format: " << desired->format << ", Channels: " << desired->channels << ", Samples: " << desired->samples);
-   LOG_DEBUG("Audio: Obtained: Freq: " << obtained->freq << ", Format: " << obtained->format << ", Channels: " << obtained->channels << ", Samples: " << obtained->samples);
+   auto device_id = SDL_OpenAudioDevice(nullptr, 0, desired, obtained, 0 /* no change allowed */);
+   if (device_id == 0) {
+      LOG_ERROR("Could not open audio: " << SDL_GetError());
+      return 1;
+   }
+   SDL_PauseAudioDevice(device_id, 0);
+
+   LOG_VERBOSE("Audio: Desired: Freq: " << desired->freq << ", Format: " << desired->format << ", Channels: " << desired->channels << ", Samples: " << desired->samples);
+   LOG_VERBOSE("Audio: Obtained: Freq: " << obtained->freq << ", Format: " << obtained->format << ", Channels: " << obtained->channels << ", Samples: " << obtained->samples);
    free(desired);
    audio_spec = obtained;
 
@@ -1509,7 +1508,7 @@ void video_set_style ()
 int video_init ()
 {
    if (SDL_InitSubSystem(SDL_INIT_VIDEO) < 0) { // initialize the video subsystem
-      std::cerr << "Init of video subsystem failed: " << SDL_GetError() << std::endl;
+      LOG_ERROR("Init of video subsystem failed: " << SDL_GetError());
       return ERR_VIDEO_INIT;
    }
 
@@ -1518,7 +1517,7 @@ int video_init ()
    back_surface=vid_plugin->init(vid_plugin, CPC.scr_fs_width, CPC.scr_fs_height, CPC.scr_fs_bpp, CPC.scr_window==0);
 
    if (!back_surface) { // attempt to set the required video mode
-      std::cerr << "Could not set requested video mode: " << SDL_GetError() << std::endl;
+      LOG_ERROR("Could not set requested video mode: " << SDL_GetError());
       return ERR_VIDEO_SET_MODE;
    }
 
@@ -1629,7 +1628,7 @@ void update_timings()
    dwTicksTargetFPS = dwTicksTarget;
    dwTicksTarget += dwTicksOffset;
    // These are only used for frames timing if sound is disabled. Otherwise timing is controlled by the PSG.
-   LOG_DEBUG("Timing: First frame at " << dwTicksTargetFPS << " - next frame in " << dwTicksOffset << " ( " << FRAME_PERIOD_MS << "/(" << CPC.speed << "/" << CPC_BASE_FREQUENCY_MHZ << ") ) at " << dwTicksTarget);
+   LOG_VERBOSE("Timing: First frame at " << dwTicksTargetFPS << " - next frame in " << dwTicksOffset << " ( " << FRAME_PERIOD_MS << "/(" << CPC.speed << "/" << CPC_BASE_FREQUENCY_MHZ << ") ) at " << dwTicksTarget);
 }
 
 // Recalculate emulation speed (to verify, seems to work reasonably well)
@@ -1972,9 +1971,9 @@ void dumpSnapshot() {
    }
    std::string dumpFile = "snapshot_" + getDateString() + ".sna";
    std::string dumpPath = dir + "/" + dumpFile;
-   LOG_DEBUG("Dumping machine snapshot to " + dumpPath);
+   LOG_INFO("Dumping machine snapshot to " + dumpPath);
    if (snapshot_save(dumpPath)) {
-     LOG_DEBUG("Could not write machine snapshot to " + dumpPath);
+     LOG_ERROR("Could not write machine snapshot to " + dumpPath);
    }
    else {
      set_osd_message("Captured machine snapshot to " + dumpFile);
@@ -2016,7 +2015,7 @@ void cleanExit(int returnCode, bool askIfUnsaved)
    exit(returnCode);
 }
 
-// TODO(SDL2): Remove this once not needed to debug keymaps anymore
+// TODO(SDL2): Remove these 2 maps once not needed to debug keymaps anymore
 #include <map>
 std::map<SDL_Keycode, std::string> keycode_names = {
     {SDLK_UNKNOWN, "SDLK_UNKNOWN"},
@@ -2263,6 +2262,258 @@ std::map<SDL_Keycode, std::string> keycode_names = {
     #endif
 };
 
+std::map<SDL_Scancode, std::string> scancode_names = {
+    {SDL_SCANCODE_UNKNOWN, "SDL_SCANCODE_UNKNOWN"},
+    {SDL_SCANCODE_A, "SDL_SCANCODE_A"},
+    {SDL_SCANCODE_B, "SDL_SCANCODE_B"},
+    {SDL_SCANCODE_C, "SDL_SCANCODE_C"},
+    {SDL_SCANCODE_D, "SDL_SCANCODE_D"},
+    {SDL_SCANCODE_E, "SDL_SCANCODE_E"},
+    {SDL_SCANCODE_F, "SDL_SCANCODE_F"},
+    {SDL_SCANCODE_G, "SDL_SCANCODE_G"},
+    {SDL_SCANCODE_H, "SDL_SCANCODE_H"},
+    {SDL_SCANCODE_I, "SDL_SCANCODE_I"},
+    {SDL_SCANCODE_J, "SDL_SCANCODE_J"},
+    {SDL_SCANCODE_K, "SDL_SCANCODE_K"},
+    {SDL_SCANCODE_L, "SDL_SCANCODE_L"},
+    {SDL_SCANCODE_M, "SDL_SCANCODE_M"},
+    {SDL_SCANCODE_N, "SDL_SCANCODE_N"},
+    {SDL_SCANCODE_O, "SDL_SCANCODE_O"},
+    {SDL_SCANCODE_P, "SDL_SCANCODE_P"},
+    {SDL_SCANCODE_Q, "SDL_SCANCODE_Q"},
+    {SDL_SCANCODE_R, "SDL_SCANCODE_R"},
+    {SDL_SCANCODE_S, "SDL_SCANCODE_S"},
+    {SDL_SCANCODE_T, "SDL_SCANCODE_T"},
+    {SDL_SCANCODE_U, "SDL_SCANCODE_U"},
+    {SDL_SCANCODE_V, "SDL_SCANCODE_V"},
+    {SDL_SCANCODE_W, "SDL_SCANCODE_W"},
+    {SDL_SCANCODE_X, "SDL_SCANCODE_X"},
+    {SDL_SCANCODE_Y, "SDL_SCANCODE_Y"},
+    {SDL_SCANCODE_Z, "SDL_SCANCODE_Z"},
+    {SDL_SCANCODE_1, "SDL_SCANCODE_1"},
+    {SDL_SCANCODE_2, "SDL_SCANCODE_2"},
+    {SDL_SCANCODE_3, "SDL_SCANCODE_3"},
+    {SDL_SCANCODE_4, "SDL_SCANCODE_4"},
+    {SDL_SCANCODE_5, "SDL_SCANCODE_5"},
+    {SDL_SCANCODE_6, "SDL_SCANCODE_6"},
+    {SDL_SCANCODE_7, "SDL_SCANCODE_7"},
+    {SDL_SCANCODE_8, "SDL_SCANCODE_8"},
+    {SDL_SCANCODE_9, "SDL_SCANCODE_9"},
+    {SDL_SCANCODE_0, "SDL_SCANCODE_0"},
+    {SDL_SCANCODE_RETURN, "SDL_SCANCODE_RETURN"},
+    {SDL_SCANCODE_ESCAPE, "SDL_SCANCODE_ESCAPE"},
+    {SDL_SCANCODE_BACKSPACE, "SDL_SCANCODE_BACKSPACE"},
+    {SDL_SCANCODE_TAB, "SDL_SCANCODE_TAB"},
+    {SDL_SCANCODE_SPACE, "SDL_SCANCODE_SPACE"},
+    {SDL_SCANCODE_MINUS, "SDL_SCANCODE_MINUS"},
+    {SDL_SCANCODE_EQUALS, "SDL_SCANCODE_EQUALS"},
+    {SDL_SCANCODE_LEFTBRACKET, "SDL_SCANCODE_LEFTBRACKET"},
+    {SDL_SCANCODE_RIGHTBRACKET, "SDL_SCANCODE_RIGHTBRACKET"},
+    {SDL_SCANCODE_BACKSLASH, "SDL_SCANCODE_BACKSLASH"},
+    {SDL_SCANCODE_NONUSHASH, "SDL_SCANCODE_NONUSHASH"},
+    {SDL_SCANCODE_SEMICOLON, "SDL_SCANCODE_SEMICOLON"},
+    {SDL_SCANCODE_APOSTROPHE, "SDL_SCANCODE_APOSTROPHE"},
+    {SDL_SCANCODE_GRAVE, "SDL_SCANCODE_GRAVE"},
+    {SDL_SCANCODE_COMMA, "SDL_SCANCODE_COMMA"},
+    {SDL_SCANCODE_PERIOD, "SDL_SCANCODE_PERIOD"},
+    {SDL_SCANCODE_SLASH, "SDL_SCANCODE_SLASH"},
+    {SDL_SCANCODE_CAPSLOCK, "SDL_SCANCODE_CAPSLOCK"},
+    {SDL_SCANCODE_F1, "SDL_SCANCODE_F1"},
+    {SDL_SCANCODE_F2, "SDL_SCANCODE_F2"},
+    {SDL_SCANCODE_F3, "SDL_SCANCODE_F3"},
+    {SDL_SCANCODE_F4, "SDL_SCANCODE_F4"},
+    {SDL_SCANCODE_F5, "SDL_SCANCODE_F5"},
+    {SDL_SCANCODE_F6, "SDL_SCANCODE_F6"},
+    {SDL_SCANCODE_F7, "SDL_SCANCODE_F7"},
+    {SDL_SCANCODE_F8, "SDL_SCANCODE_F8"},
+    {SDL_SCANCODE_F9, "SDL_SCANCODE_F9"},
+    {SDL_SCANCODE_F10, "SDL_SCANCODE_F10"},
+    {SDL_SCANCODE_F11, "SDL_SCANCODE_F11"},
+    {SDL_SCANCODE_F12, "SDL_SCANCODE_F12"},
+    {SDL_SCANCODE_PRINTSCREEN, "SDL_SCANCODE_PRINTSCREEN"},
+    {SDL_SCANCODE_SCROLLLOCK, "SDL_SCANCODE_SCROLLLOCK"},
+    {SDL_SCANCODE_PAUSE, "SDL_SCANCODE_PAUSE"},
+    {SDL_SCANCODE_INSERT, "SDL_SCANCODE_INSERT"},
+    {SDL_SCANCODE_HOME, "SDL_SCANCODE_HOME"},
+    {SDL_SCANCODE_PAGEUP, "SDL_SCANCODE_PAGEUP"},
+    {SDL_SCANCODE_DELETE, "SDL_SCANCODE_DELETE"},
+    {SDL_SCANCODE_END, "SDL_SCANCODE_END"},
+    {SDL_SCANCODE_PAGEDOWN, "SDL_SCANCODE_PAGEDOWN"},
+    {SDL_SCANCODE_RIGHT, "SDL_SCANCODE_RIGHT"},
+    {SDL_SCANCODE_LEFT, "SDL_SCANCODE_LEFT"},
+    {SDL_SCANCODE_DOWN, "SDL_SCANCODE_DOWN"},
+    {SDL_SCANCODE_UP, "SDL_SCANCODE_UP"},
+    {SDL_SCANCODE_NUMLOCKCLEAR, "SDL_SCANCODE_NUMLOCKCLEAR"},
+    {SDL_SCANCODE_KP_DIVIDE, "SDL_SCANCODE_KP_DIVIDE"},
+    {SDL_SCANCODE_KP_MULTIPLY, "SDL_SCANCODE_KP_MULTIPLY"},
+    {SDL_SCANCODE_KP_MINUS, "SDL_SCANCODE_KP_MINUS"},
+    {SDL_SCANCODE_KP_PLUS, "SDL_SCANCODE_KP_PLUS"},
+    {SDL_SCANCODE_KP_ENTER, "SDL_SCANCODE_KP_ENTER"},
+    {SDL_SCANCODE_KP_1, "SDL_SCANCODE_KP_1"},
+    {SDL_SCANCODE_KP_2, "SDL_SCANCODE_KP_2"},
+    {SDL_SCANCODE_KP_3, "SDL_SCANCODE_KP_3"},
+    {SDL_SCANCODE_KP_4, "SDL_SCANCODE_KP_4"},
+    {SDL_SCANCODE_KP_5, "SDL_SCANCODE_KP_5"},
+    {SDL_SCANCODE_KP_6, "SDL_SCANCODE_KP_6"},
+    {SDL_SCANCODE_KP_7, "SDL_SCANCODE_KP_7"},
+    {SDL_SCANCODE_KP_8, "SDL_SCANCODE_KP_8"},
+    {SDL_SCANCODE_KP_9, "SDL_SCANCODE_KP_9"},
+    {SDL_SCANCODE_KP_0, "SDL_SCANCODE_KP_0"},
+    {SDL_SCANCODE_KP_PERIOD, "SDL_SCANCODE_KP_PERIOD"},
+    {SDL_SCANCODE_NONUSBACKSLASH, "SDL_SCANCODE_NONUSBACKSLASH"},
+    {SDL_SCANCODE_APPLICATION, "SDL_SCANCODE_APPLICATION"},
+    {SDL_SCANCODE_POWER, "SDL_SCANCODE_POWER"},
+    {SDL_SCANCODE_KP_EQUALS, "SDL_SCANCODE_KP_EQUALS"},
+    {SDL_SCANCODE_F13, "SDL_SCANCODE_F13"},
+    {SDL_SCANCODE_F14, "SDL_SCANCODE_F14"},
+    {SDL_SCANCODE_F15, "SDL_SCANCODE_F15"},
+    {SDL_SCANCODE_F16, "SDL_SCANCODE_F16"},
+    {SDL_SCANCODE_F17, "SDL_SCANCODE_F17"},
+    {SDL_SCANCODE_F18, "SDL_SCANCODE_F18"},
+    {SDL_SCANCODE_F19, "SDL_SCANCODE_F19"},
+    {SDL_SCANCODE_F20, "SDL_SCANCODE_F20"},
+    {SDL_SCANCODE_F21, "SDL_SCANCODE_F21"},
+    {SDL_SCANCODE_F22, "SDL_SCANCODE_F22"},
+    {SDL_SCANCODE_F23, "SDL_SCANCODE_F23"},
+    {SDL_SCANCODE_F24, "SDL_SCANCODE_F24"},
+    {SDL_SCANCODE_EXECUTE, "SDL_SCANCODE_EXECUTE"},
+    {SDL_SCANCODE_HELP, "SDL_SCANCODE_HELP"},
+    {SDL_SCANCODE_MENU, "SDL_SCANCODE_MENU"},
+    {SDL_SCANCODE_SELECT, "SDL_SCANCODE_SELECT"},
+    {SDL_SCANCODE_STOP, "SDL_SCANCODE_STOP"},
+    {SDL_SCANCODE_AGAIN, "SDL_SCANCODE_AGAIN"},
+    {SDL_SCANCODE_UNDO, "SDL_SCANCODE_UNDO"},
+    {SDL_SCANCODE_CUT, "SDL_SCANCODE_CUT"},
+    {SDL_SCANCODE_COPY, "SDL_SCANCODE_COPY"},
+    {SDL_SCANCODE_PASTE, "SDL_SCANCODE_PASTE"},
+    {SDL_SCANCODE_FIND, "SDL_SCANCODE_FIND"},
+    {SDL_SCANCODE_MUTE, "SDL_SCANCODE_MUTE"},
+    {SDL_SCANCODE_VOLUMEUP, "SDL_SCANCODE_VOLUMEUP"},
+    {SDL_SCANCODE_VOLUMEDOWN, "SDL_SCANCODE_VOLUMEDOWN"},
+/*     {SDL_SCANCODE_LOCKINGCAPSLOCK, "SDL_SCANCODE_LOCKINGCAPSLOCK"}, */
+/*     {SDL_SCANCODE_LOCKINGNUMLOCK, "SDL_SCANCODE_LOCKINGNUMLOCK"}, */
+/*     {SDL_SCANCODE_LOCKINGSCROLLLOCK, "SDL_SCANCODE_LOCKINGSCROLLLOCK"}, */
+    {SDL_SCANCODE_KP_COMMA, "SDL_SCANCODE_KP_COMMA"},
+    {SDL_SCANCODE_KP_EQUALSAS400, "SDL_SCANCODE_KP_EQUALSAS400"},
+    {SDL_SCANCODE_INTERNATIONAL1, "SDL_SCANCODE_INTERNATIONAL1"},
+    {SDL_SCANCODE_INTERNATIONAL2, "SDL_SCANCODE_INTERNATIONAL2"},
+    {SDL_SCANCODE_INTERNATIONAL3, "SDL_SCANCODE_INTERNATIONAL3"},
+    {SDL_SCANCODE_INTERNATIONAL4, "SDL_SCANCODE_INTERNATIONAL4"},
+    {SDL_SCANCODE_INTERNATIONAL5, "SDL_SCANCODE_INTERNATIONAL5"},
+    {SDL_SCANCODE_INTERNATIONAL6, "SDL_SCANCODE_INTERNATIONAL6"},
+    {SDL_SCANCODE_INTERNATIONAL7, "SDL_SCANCODE_INTERNATIONAL7"},
+    {SDL_SCANCODE_INTERNATIONAL8, "SDL_SCANCODE_INTERNATIONAL8"},
+    {SDL_SCANCODE_INTERNATIONAL9, "SDL_SCANCODE_INTERNATIONAL9"},
+    {SDL_SCANCODE_LANG1, "SDL_SCANCODE_LANG1"},
+    {SDL_SCANCODE_LANG2, "SDL_SCANCODE_LANG2"},
+    {SDL_SCANCODE_LANG3, "SDL_SCANCODE_LANG3"},
+    {SDL_SCANCODE_LANG4, "SDL_SCANCODE_LANG4"},
+    {SDL_SCANCODE_LANG5, "SDL_SCANCODE_LANG5"},
+    {SDL_SCANCODE_LANG6, "SDL_SCANCODE_LANG6"},
+    {SDL_SCANCODE_LANG7, "SDL_SCANCODE_LANG7"},
+    {SDL_SCANCODE_LANG8, "SDL_SCANCODE_LANG8"},
+    {SDL_SCANCODE_LANG9, "SDL_SCANCODE_LANG9"},
+    {SDL_SCANCODE_ALTERASE, "SDL_SCANCODE_ALTERASE"},
+    {SDL_SCANCODE_SYSREQ, "SDL_SCANCODE_SYSREQ"},
+    {SDL_SCANCODE_CANCEL, "SDL_SCANCODE_CANCEL"},
+    {SDL_SCANCODE_CLEAR, "SDL_SCANCODE_CLEAR"},
+    {SDL_SCANCODE_PRIOR, "SDL_SCANCODE_PRIOR"},
+    {SDL_SCANCODE_RETURN2, "SDL_SCANCODE_RETURN2"},
+    {SDL_SCANCODE_SEPARATOR, "SDL_SCANCODE_SEPARATOR"},
+    {SDL_SCANCODE_OUT, "SDL_SCANCODE_OUT"},
+    {SDL_SCANCODE_OPER, "SDL_SCANCODE_OPER"},
+    {SDL_SCANCODE_CLEARAGAIN, "SDL_SCANCODE_CLEARAGAIN"},
+    {SDL_SCANCODE_CRSEL, "SDL_SCANCODE_CRSEL"},
+    {SDL_SCANCODE_EXSEL, "SDL_SCANCODE_EXSEL"},
+    {SDL_SCANCODE_KP_00, "SDL_SCANCODE_KP_00"},
+    {SDL_SCANCODE_KP_000, "SDL_SCANCODE_KP_000"},
+    {SDL_SCANCODE_THOUSANDSSEPARATOR, "SDL_SCANCODE_THOUSANDSSEPARATOR"},
+    {SDL_SCANCODE_DECIMALSEPARATOR, "SDL_SCANCODE_DECIMALSEPARATOR"},
+    {SDL_SCANCODE_CURRENCYUNIT, "SDL_SCANCODE_CURRENCYUNIT"},
+    {SDL_SCANCODE_CURRENCYSUBUNIT, "SDL_SCANCODE_CURRENCYSUBUNIT"},
+    {SDL_SCANCODE_KP_LEFTPAREN, "SDL_SCANCODE_KP_LEFTPAREN"},
+    {SDL_SCANCODE_KP_RIGHTPAREN, "SDL_SCANCODE_KP_RIGHTPAREN"},
+    {SDL_SCANCODE_KP_LEFTBRACE, "SDL_SCANCODE_KP_LEFTBRACE"},
+    {SDL_SCANCODE_KP_RIGHTBRACE, "SDL_SCANCODE_KP_RIGHTBRACE"},
+    {SDL_SCANCODE_KP_TAB, "SDL_SCANCODE_KP_TAB"},
+    {SDL_SCANCODE_KP_BACKSPACE, "SDL_SCANCODE_KP_BACKSPACE"},
+    {SDL_SCANCODE_KP_A, "SDL_SCANCODE_KP_A"},
+    {SDL_SCANCODE_KP_B, "SDL_SCANCODE_KP_B"},
+    {SDL_SCANCODE_KP_C, "SDL_SCANCODE_KP_C"},
+    {SDL_SCANCODE_KP_D, "SDL_SCANCODE_KP_D"},
+    {SDL_SCANCODE_KP_E, "SDL_SCANCODE_KP_E"},
+    {SDL_SCANCODE_KP_F, "SDL_SCANCODE_KP_F"},
+    {SDL_SCANCODE_KP_XOR, "SDL_SCANCODE_KP_XOR"},
+    {SDL_SCANCODE_KP_POWER, "SDL_SCANCODE_KP_POWER"},
+    {SDL_SCANCODE_KP_PERCENT, "SDL_SCANCODE_KP_PERCENT"},
+    {SDL_SCANCODE_KP_LESS, "SDL_SCANCODE_KP_LESS"},
+    {SDL_SCANCODE_KP_GREATER, "SDL_SCANCODE_KP_GREATER"},
+    {SDL_SCANCODE_KP_AMPERSAND, "SDL_SCANCODE_KP_AMPERSAND"},
+    {SDL_SCANCODE_KP_DBLAMPERSAND, "SDL_SCANCODE_KP_DBLAMPERSAND"},
+    {SDL_SCANCODE_KP_VERTICALBAR, "SDL_SCANCODE_KP_VERTICALBAR"},
+    {SDL_SCANCODE_KP_DBLVERTICALBAR, "SDL_SCANCODE_KP_DBLVERTICALBAR"},
+    {SDL_SCANCODE_KP_COLON, "SDL_SCANCODE_KP_COLON"},
+    {SDL_SCANCODE_KP_HASH, "SDL_SCANCODE_KP_HASH"},
+    {SDL_SCANCODE_KP_SPACE, "SDL_SCANCODE_KP_SPACE"},
+    {SDL_SCANCODE_KP_AT, "SDL_SCANCODE_KP_AT"},
+    {SDL_SCANCODE_KP_EXCLAM, "SDL_SCANCODE_KP_EXCLAM"},
+    {SDL_SCANCODE_KP_MEMSTORE, "SDL_SCANCODE_KP_MEMSTORE"},
+    {SDL_SCANCODE_KP_MEMRECALL, "SDL_SCANCODE_KP_MEMRECALL"},
+    {SDL_SCANCODE_KP_MEMCLEAR, "SDL_SCANCODE_KP_MEMCLEAR"},
+    {SDL_SCANCODE_KP_MEMADD, "SDL_SCANCODE_KP_MEMADD"},
+    {SDL_SCANCODE_KP_MEMSUBTRACT, "SDL_SCANCODE_KP_MEMSUBTRACT"},
+    {SDL_SCANCODE_KP_MEMMULTIPLY, "SDL_SCANCODE_KP_MEMMULTIPLY"},
+    {SDL_SCANCODE_KP_MEMDIVIDE, "SDL_SCANCODE_KP_MEMDIVIDE"},
+    {SDL_SCANCODE_KP_PLUSMINUS, "SDL_SCANCODE_KP_PLUSMINUS"},
+    {SDL_SCANCODE_KP_CLEAR, "SDL_SCANCODE_KP_CLEAR"},
+    {SDL_SCANCODE_KP_CLEARENTRY, "SDL_SCANCODE_KP_CLEARENTRY"},
+    {SDL_SCANCODE_KP_BINARY, "SDL_SCANCODE_KP_BINARY"},
+    {SDL_SCANCODE_KP_OCTAL, "SDL_SCANCODE_KP_OCTAL"},
+    {SDL_SCANCODE_KP_DECIMAL, "SDL_SCANCODE_KP_DECIMAL"},
+    {SDL_SCANCODE_KP_HEXADECIMAL, "SDL_SCANCODE_KP_HEXADECIMAL"},
+    {SDL_SCANCODE_LCTRL, "SDL_SCANCODE_LCTRL"},
+    {SDL_SCANCODE_LSHIFT, "SDL_SCANCODE_LSHIFT"},
+    {SDL_SCANCODE_LALT, "SDL_SCANCODE_LALT"},
+    {SDL_SCANCODE_LGUI, "SDL_SCANCODE_LGUI"},
+    {SDL_SCANCODE_RCTRL, "SDL_SCANCODE_RCTRL"},
+    {SDL_SCANCODE_RSHIFT, "SDL_SCANCODE_RSHIFT"},
+    {SDL_SCANCODE_RALT, "SDL_SCANCODE_RALT"},
+    {SDL_SCANCODE_RGUI, "SDL_SCANCODE_RGUI"},
+    {SDL_SCANCODE_MODE, "SDL_SCANCODE_MODE"},
+    {SDL_SCANCODE_AUDIONEXT, "SDL_SCANCODE_AUDIONEXT"},
+    {SDL_SCANCODE_AUDIOPREV, "SDL_SCANCODE_AUDIOPREV"},
+    {SDL_SCANCODE_AUDIOSTOP, "SDL_SCANCODE_AUDIOSTOP"},
+    {SDL_SCANCODE_AUDIOPLAY, "SDL_SCANCODE_AUDIOPLAY"},
+    {SDL_SCANCODE_AUDIOMUTE, "SDL_SCANCODE_AUDIOMUTE"},
+    {SDL_SCANCODE_MEDIASELECT, "SDL_SCANCODE_MEDIASELECT"},
+    {SDL_SCANCODE_WWW, "SDL_SCANCODE_WWW"},
+    {SDL_SCANCODE_MAIL, "SDL_SCANCODE_MAIL"},
+    {SDL_SCANCODE_CALCULATOR, "SDL_SCANCODE_CALCULATOR"},
+    {SDL_SCANCODE_COMPUTER, "SDL_SCANCODE_COMPUTER"},
+    {SDL_SCANCODE_AC_SEARCH, "SDL_SCANCODE_AC_SEARCH"},
+    {SDL_SCANCODE_AC_HOME, "SDL_SCANCODE_AC_HOME"},
+    {SDL_SCANCODE_AC_BACK, "SDL_SCANCODE_AC_BACK"},
+    {SDL_SCANCODE_AC_FORWARD, "SDL_SCANCODE_AC_FORWARD"},
+    {SDL_SCANCODE_AC_STOP, "SDL_SCANCODE_AC_STOP"},
+    {SDL_SCANCODE_AC_REFRESH, "SDL_SCANCODE_AC_REFRESH"},
+    {SDL_SCANCODE_AC_BOOKMARKS, "SDL_SCANCODE_AC_BOOKMARKS"},
+    {SDL_SCANCODE_BRIGHTNESSDOWN, "SDL_SCANCODE_BRIGHTNESSDOWN"},
+    {SDL_SCANCODE_BRIGHTNESSUP, "SDL_SCANCODE_BRIGHTNESSUP"},
+    {SDL_SCANCODE_DISPLAYSWITCH, "SDL_SCANCODE_DISPLAYSWITCH"},
+    {SDL_SCANCODE_KBDILLUMTOGGLE, "SDL_SCANCODE_KBDILLUMTOGGLE"},
+    {SDL_SCANCODE_KBDILLUMDOWN, "SDL_SCANCODE_KBDILLUMDOWN"},
+    {SDL_SCANCODE_KBDILLUMUP, "SDL_SCANCODE_KBDILLUMUP"},
+    {SDL_SCANCODE_EJECT, "SDL_SCANCODE_EJECT"},
+    {SDL_SCANCODE_SLEEP, "SDL_SCANCODE_SLEEP"},
+    {SDL_SCANCODE_APP1, "SDL_SCANCODE_APP1"},
+    {SDL_SCANCODE_APP2, "SDL_SCANCODE_APP2"},
+    #if SDL_VERSION_ATLEAST(2, 0, 6)
+    {SDL_SCANCODE_AUDIOREWIND, "SDL_SCANCODE_AUDIOREWIND"},
+    {SDL_SCANCODE_AUDIOFASTFORWARD, "SDL_SCANCODE_AUDIOFASTFORWARD"},
+    #endif
+    {SDL_NUM_SCANCODES, "SDL_NUM_SCANCODES"},
+};
+
 int cap32_main (int argc, char **argv)
 {
    int iExitCondition;
@@ -2384,7 +2635,7 @@ int cap32_main (int argc, char **argv)
          switch (event.type) {
             case SDL_KEYDOWN:
                {
-                  std::cout << "cpitrat: pressed: " << SDL_GetKeyName(event.key.keysym.sym) << "(" << event.key.keysym.sym << ": " << keycode_names[event.key.keysym.sym] << ")" << std::endl;
+                  LOG_VERBOSE("Keyboard: pressed: " << SDL_GetKeyName(event.key.keysym.sym) << " - keycode: " << keycode_names[event.key.keysym.sym] << " (" << event.key.keysym.sym << ") - scancode: " << scancode_names[event.key.keysym.scancode] << " (" << event.key.keysym.scancode << ")");
                   dword cpc_key = CPC.InputMapper->CPCkeyFromKeysym(event.key.keysym);
                   if (!(cpc_key & MOD_EMU_KEY)) {
                      applyKeypress(cpc_key, keyboard_matrix, true);
@@ -2440,7 +2691,7 @@ int cap32_main (int argc, char **argv)
                         case CAP32_WAITBREAK:
                            breakPointsToSkipBeforeProceedingWithVirtualEvents++;
                            LOG_INFO("Will skip " << breakPointsToSkipBeforeProceedingWithVirtualEvents << " before processing more virtual events.");
-                           LOG_DEBUG("Setting z80.break_point=0 (was " << z80.break_point << ").");
+                           LOG_VERBOSE("Setting z80.break_point=0 (was " << z80.break_point << ").");
                            z80.break_point = 0; // set break point to address 0. FIXME would be interesting to change this via a parameter of CAP32_WAITBREAK on command line.
                            break;
 
@@ -2449,14 +2700,14 @@ int cap32_main (int argc, char **argv)
                            break;
 
                         case CAP32_TAPEPLAY:
-                           LOG_DEBUG("Request to play tape");
+                           LOG_VERBOSE("Request to play tape");
                            Tape_Rewind();
                            if (pbTapeImage) {
                               if (CPC.tape_play_button) {
-                                 LOG_DEBUG("Play button released");
+                                 LOG_VERBOSE("Play button released");
                                  CPC.tape_play_button = 0;
                               } else {
-                                 LOG_DEBUG("Play button pushed");
+                                 LOG_VERBOSE("Play button pushed");
                                  CPC.tape_play_button = 0x10;
                               }
                            }
@@ -2485,7 +2736,7 @@ int cap32_main (int argc, char **argv)
                            break;
 
                         case CAP32_RESET:
-                           LOG_DEBUG("User requested emulator reset");
+                           LOG_VERBOSE("User requested emulator reset");
                            emulator_reset();
                            break;
 

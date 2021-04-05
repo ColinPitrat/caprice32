@@ -90,11 +90,11 @@ public:
 protected:
 	CMenu* m_pMenu;  //!< A pointer to the view's menu
 	CWindow* m_pFloatingWindow;  //!< A pointer to the current floating window.  This will be drawn overtop of everything else.
-  SDL_Window* m_pWindow;  //!< A pointer to the window
+	SDL_Window* m_pWindow;  //!< A pointer to the window
 	SDL_Surface* m_pScreenSurface;  //!< A pointer to the actual screen surface
 
-  SDL_Surface* m_pBackSurface;  // Caprice32-specific; contains the current Caprice32 output surface
-                                // so we can draw the gui on top of it.
+	SDL_Surface* m_pBackSurface;  // Caprice32-specific; contains the current Caprice32 output surface
+	                              // so we can draw the gui on top of it.
 
 private:
 	//! A pointer to the one allowed view, this is due to the SDL limitation of having only one window
