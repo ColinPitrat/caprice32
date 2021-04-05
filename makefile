@@ -43,7 +43,7 @@ TARGET = cap32.exe
 TEST_TARGET = test_runner.exe
 MINGW_PATH = /usr/$(TRIPLE)
 IPATHS = -Isrc/ -Isrc/gui/includes -I$(MINGW_PATH)/include -I$(MINGW_PATH)/include/SDL2 -I$(MINGW_PATH)/include/freetype2
-LIBS = $(MINGW_PATH)/lib/libSDL2.dll.a $(MINGW_PATH)/lib/libfreetype.dll.a $(MINGW_PATH)/lib/libz.dll.a $(MINGW_PATH)/lib/libpng16.dll.a $(MINGW_PATH)/lib/libpng.dll.a
+RELEASE_LIBS = $(MINGW_PATH)/lib/libSDL2.dll.a $(MINGW_PATH)/lib/libfreetype.dll.a $(MINGW_PATH)/lib/libz.dll.a $(MINGW_PATH)/lib/libpng16.dll.a $(MINGW_PATH)/lib/libpng.dll.a
 COMMON_CFLAGS = -DWINDOWS
 CXX = $(TRIPLE)-g++
 
@@ -52,11 +52,11 @@ prefix = /usr/local
 TARGET = cap32
 TEST_TARGET = test_runner
 IPATHS = -Isrc/ -Isrc/gui/includes `pkg-config --cflags freetype2` `sdl2-config --cflags` `pkg-config --cflags libpng`
-LIBS = `sdl2-config --libs` -lz `pkg-config --libs freetype2` `pkg-config --libs libpng`
+RELEASE_LIBS = `sdl2-config --libs` -lz `pkg-config --libs freetype2` `pkg-config --libs libpng`
 CXX ?= g++
 COMMON_CFLAGS = -fPIC
 ifdef WITH_IPF
-LIBS += -ldl
+RELEASE_LIBS += -ldl
 endif
 endif
 
@@ -110,7 +110,8 @@ COMMON_CFLAGS += $(CFLAGS) -std=c++17 $(IPATHS)
 DEBUG_FLAGS = -Werror -g -O0 -DDEBUG
 RELEASE_FLAGS = -O2 -funroll-loops -ffast-math -fomit-frame-pointer -fno-strength-reduce -finline-functions -s
 BUILD_FLAGS = $(RELEASE_FLAGS)
-DEBUG_LIBS = $(LIBS)
+DEBUG_LIBS = $(RELEASE_LIBS)
+LIBS = $(RELEASE_LIBS)
 
 ifeq ($(PLATFORM),linux)
 # -lubsan is not available on mingw
