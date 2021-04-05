@@ -1332,9 +1332,11 @@ void audio_shutdown ()
    SDL_CloseAudio();
    if (pbSndBuffer) {
       free(pbSndBuffer);
+      pbSndBuffer = nullptr;
    }
    if (audio_spec) {
       free(audio_spec);
+      audio_spec = nullptr;
    }
 }
 
