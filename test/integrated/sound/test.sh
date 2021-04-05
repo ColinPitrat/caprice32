@@ -14,6 +14,7 @@ export SDL_VIDEODRIVER=dummy
 export SDL_AUDIODRIVER=disk
 export SDL_DISKAUDIOFILE=output/sdlaudio.raw
 
+# TODO: Test multiple formats: 8bpp, 16bpp, mono, stereo, various sampling rates
 $CAP32DIR/cap32 -c cap32.cfg -a "run\"scale" -a CAP32_WAITBREAK -a CAP32_EXIT scale.zip
 
 # Hexdump, which will ignore repeated lines, in particular the start of 0s which
