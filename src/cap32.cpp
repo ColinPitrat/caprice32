@@ -79,8 +79,6 @@ extern t_disk_format disk_format[];
 
 extern byte* pbCartridgePages[];
 
-SDL_AudioSpec *audio_spec = nullptr;
-
 SDL_Surface *back_surface = nullptr;
 video_plugin* vid_plugin;
 SDL_Joystick* joysticks[MAX_NB_JOYSTICKS];
@@ -1278,39 +1276,34 @@ int audio_align_samples (int given)
 
 int audio_init ()
 {
-   SDL_AudioSpec *desired, *obtained;
+   SDL_AudioSpec desired, obtained;
 
    if (!CPC.snd_enabled) {
       return 0;
    }
 
-   desired = static_cast<SDL_AudioSpec *>(malloc(sizeof(SDL_AudioSpec)));
-   obtained = static_cast<SDL_AudioSpec *>(malloc(sizeof(SDL_AudioSpec)));
-
-   desired->freq = freq_table[CPC.snd_playback_rate];
-   desired->format = CPC.snd_bits ? AUDIO_S16LSB : AUDIO_S8;
-   desired->channels = CPC.snd_stereo+1;
-   desired->samples = audio_align_samples(desired->freq * FRAME_PERIOD_MS / 1000);
-   desired->callback = audio_update;
-   desired->userdata = nullptr;
+   desired.freq = freq_table[CPC.snd_playback_rate];
+   desired.format = CPC.snd_bits ? AUDIO_S16LSB : AUDIO_S8;
+   desired.channels = CPC.snd_stereo+1;
+   desired.samples = audio_align_samples(desired.freq * FRAME_PERIOD_MS / 1000);
+   desired.callback = audio_update;
+   desired.userdata = nullptr;
 
    for (int i = 0; i < SDL_GetNumAudioDevices(0); i++) {
       LOG_VERBOSE("Audio: device " << i << ": " << SDL_GetAudioDeviceName(i, 0));
    }
 
-   auto device_id = SDL_OpenAudioDevice(nullptr, 0, desired, obtained, 0 /* no change allowed */);
+   auto device_id = SDL_OpenAudioDevice(nullptr, 0, &desired, &obtained, 0 /* no change allowed */);
    if (device_id == 0) {
       LOG_ERROR("Could not open audio: " << SDL_GetError());
       return 1;
    }
    SDL_PauseAudioDevice(device_id, 0);
 
-   LOG_VERBOSE("Audio: Desired: Freq: " << desired->freq << ", Format: " << desired->format << ", Channels: " << desired->channels << ", Samples: " << desired->samples);
-   LOG_VERBOSE("Audio: Obtained: Freq: " << obtained->freq << ", Format: " << obtained->format << ", Channels: " << obtained->channels << ", Samples: " << obtained->samples);
-   free(desired);
-   audio_spec = obtained;
+   LOG_VERBOSE("Audio: Desired: Freq: " << desired.freq << ", Format: " << desired.format << ", Channels: " << desired.channels << ", Samples: " << desired.samples);
+   LOG_VERBOSE("Audio: Obtained: Freq: " << obtained.freq << ", Format: " << obtained.format << ", Channels: " << obtained.channels << ", Samples: " << obtained.samples);
 
-   CPC.snd_buffersize = audio_spec->size; // size is samples * channels * bytes per sample (1 or 2)
+   CPC.snd_buffersize = obtained.size; // size is samples * channels * bytes per sample (1 or 2)
    pbSndBuffer = static_cast<byte *>(malloc(CPC.snd_buffersize)); // allocate the sound data buffer
    pbSndBufferEnd = pbSndBuffer + CPC.snd_buffersize;
    memset(pbSndBuffer, 0, CPC.snd_buffersize);
@@ -1332,9 +1325,6 @@ void audio_shutdown ()
    SDL_CloseAudio();
    if (pbSndBuffer) {
       free(pbSndBuffer);
-   }
-   if (audio_spec) {
-      free(audio_spec);
    }
 }
 
