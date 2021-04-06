@@ -23,6 +23,7 @@
 */
 
 #include <math.h>
+#include <memory>
 
 #include "cap32.h"
 #include "z80.h"
@@ -32,7 +33,7 @@ extern t_CPC CPC;
 extern t_PSG PSG;
 extern dword freq_table[];
 
-extern byte *pbSndBuffer;
+extern std::unique_ptr<byte[]> pbSndBuffer;
 extern byte *pbSndBufferEnd;
 extern byte bTapeLevel;
 
@@ -466,7 +467,7 @@ void Synthesizer_Stereo16()
    Left_Chan = 0;
    Right_Chan = Left_Chan;
    if (CPC.snd_bufferptr >= pbSndBufferEnd) {
-      CPC.snd_bufferptr = pbSndBuffer;
+      CPC.snd_bufferptr = pbSndBuffer.get();
       PSG.buffer_full = 1;
    }
 }
@@ -491,7 +492,7 @@ void Synthesizer_Stereo8()
    Left_Chan = 0;
    Right_Chan = Left_Chan;
    if (CPC.snd_bufferptr >= pbSndBufferEnd) {
-      CPC.snd_bufferptr = pbSndBuffer;
+      CPC.snd_bufferptr = pbSndBuffer.get();
       PSG.buffer_full = 1;
    }
 }
@@ -595,7 +596,7 @@ void Synthesizer_Mono16()
    CPC.snd_bufferptr += 2;
    Left_Chan = 0;
    if (CPC.snd_bufferptr >= pbSndBufferEnd) {
-      CPC.snd_bufferptr = pbSndBuffer;
+      CPC.snd_bufferptr = pbSndBuffer.get();
       PSG.buffer_full = 1;
    }
 }
@@ -616,7 +617,7 @@ void Synthesizer_Mono8()
    CPC.snd_bufferptr++;
    Left_Chan = 0;
    if (CPC.snd_bufferptr >= pbSndBufferEnd) {
-      CPC.snd_bufferptr = pbSndBuffer;
+      CPC.snd_bufferptr = pbSndBuffer.get();
       PSG.buffer_full = 1;
    }
 }
