@@ -94,8 +94,8 @@ std::string osd_message;
 
 dword dwBreakPoint, dwTrace, dwMF2ExitAddr;
 dword dwMF2Flags = 0;
+std::unique_ptr<byte[]> pbSndBuffer;
 byte *pbGPBuffer = nullptr;
-byte *pbSndBuffer = nullptr;
 byte *pbSndBufferEnd = nullptr;
 byte *pbSndStream = nullptr;
 byte *membank_read[4], *membank_write[4], *memmap_ROM[256];
@@ -1257,7 +1257,7 @@ void printer_stop ()
 
 void audio_update (void *userdata __attribute__((unused)), byte *stream, int len)
 {
-   memcpy(stream, pbSndBuffer, len);
+   memcpy(stream, pbSndBuffer.get(), len);
    dwSndBufferCopied = 1;
 }
 
@@ -1305,10 +1305,10 @@ int audio_init ()
    LOG_VERBOSE("Audio: Obtained: Freq: " << obtained.freq << ", Format: " << obtained.format << ", Channels: " << obtained.channels << ", Samples: " << obtained.samples);
 
    CPC.snd_buffersize = obtained.size; // size is samples * channels * bytes per sample (1 or 2)
-   pbSndBuffer = static_cast<byte *>(malloc(CPC.snd_buffersize)); // allocate the sound data buffer
-   pbSndBufferEnd = pbSndBuffer + CPC.snd_buffersize;
-   memset(pbSndBuffer, 0, CPC.snd_buffersize);
-   CPC.snd_bufferptr = pbSndBuffer; // init write cursor
+   pbSndBuffer = std::make_unique<byte[]>(CPC.snd_buffersize); // allocate the sound data buffer
+   pbSndBufferEnd = pbSndBuffer.get() + CPC.snd_buffersize;
+   memset(pbSndBuffer.get(), 0, CPC.snd_buffersize);
+   CPC.snd_bufferptr = pbSndBuffer.get(); // init write cursor
 
    InitAY();
 
@@ -1325,9 +1325,6 @@ void audio_shutdown ()
 {
    SDL_CloseAudioDevice(audio_device_id);
    audio_device_id = 0;
-   if (pbSndBuffer) {
-      free(pbSndBuffer);
-   }
 }
 
 

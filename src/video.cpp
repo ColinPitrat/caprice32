@@ -1335,7 +1335,7 @@ void swbicub_flip(video_plugin* t __attribute__((unused)))
 /* Dot matrix video plugin ------------------------------------------------------------ */
 /* ------------------------------------------------------------------------------------ */
 static Uint16 DOT_16(Uint16 c, int j, int i) {
-  static const Uint16 dotmatrix[16] = {
+  static constexpr Uint16 dotmatrix[16] = {
     0x01E0, 0x0007, 0x3800, 0x0000,
     0x39E7, 0x0000, 0x39E7, 0x0000,
     0x3800, 0x0000, 0x01E0, 0x0007,
