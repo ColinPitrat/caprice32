@@ -205,6 +205,9 @@ SDL_Surface* glscale_init(video_plugin* t, int w __attribute__((unused)), int h 
 {
 #ifdef _WIN32
   const char *gl_library = "OpenGL32.DLL";
+#elif defined __APPLE__
+  #undef HAVE_GL
+  const char *gl_library = nullptr;
 #else
   const char *gl_library = "libGL.so.1";
 #endif
