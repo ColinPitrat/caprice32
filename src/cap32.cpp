@@ -527,7 +527,7 @@ void z80_OUT_handler (reg_pair port, byte val)
                 fprintf(pfoDebug, "mem 0x%02x\r\n", val);
              }
              #endif
-             LOG_DEBUG("RAM config: " << static_cast<int>(val));
+             LOG_DEBUG("RAM config: " << std::hex << static_cast<int>(val) << std::dec);
              GateArray.RAM_config = val;
              ga_memory_manager();
              if (CPC.mf2) { // MF2 enabled?
