@@ -642,7 +642,7 @@ const std::map<const char, const CPC_KEYS> InputMapper::CPCkeysFromChars = {
     { '&', CPC_AMPERSAND },
     { '#', CPC_HASH },
     { '"', CPC_DBLQUOTE },
-    { '\'', CPC_BACKSLASH },
+    { '\'', CPC_QUOTE },
     { '(', CPC_LEFTPAREN },
     { '-', CPC_MINUS },
     { '_', CPC_UNDERSCORE },
