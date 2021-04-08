@@ -13,6 +13,14 @@ fi
 export DIFF=$DIFF
 echo "Using diff: $DIFF"
 
+SED=sed
+if [ ! sed --version | grep GNU ]
+then
+  SED=gsed
+fi
+export SED=$SED
+echo "Using sed: $SED"
+
 for tst in */test.sh
 do
   TSTDIR=`dirname "${tst}"`
