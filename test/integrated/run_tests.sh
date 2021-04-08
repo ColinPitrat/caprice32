@@ -14,7 +14,7 @@ export DIFF=$DIFF
 echo "Using diff: $DIFF"
 
 SED=sed
-if [ ! sed --version | grep GNU ]
+if ! sed --version | grep GNU
 then
   SED=gsed
 fi
