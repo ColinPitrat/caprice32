@@ -282,8 +282,8 @@ deb_pkg: all
 BUNDLE_DIR=release/cap32-macos/Caprice32-$(VERSION).app
 macos_bundle: all
 	mkdir -p $(BUNDLE_DIR)
-	install -D $(TARGET) $(BUNDLE_DIR)/Contents/MacOS/Caprice32-$(VERSION)
-	install -D -m664 cap32.cfg.tmpl $(BUNDLE_DIR)/Contents/MacOS/cap32.cfg
+	install $(TARGET) $(BUNDLE_DIR)/Contents/MacOS/Caprice32-$(VERSION)
+	install -m664 cap32.cfg.tmpl $(BUNDLE_DIR)/Contents/MacOS/cap32.cfg
 	sed -i "s,__SHARE_PATH__,../Resources," $(BUNDLE_DIR)/Contents/Resources/cap32.cfg
 	cp -r resources rom $(BUNDLE_DIR)/Contents/Resources
 	hdiutil create -volname Caprice32-$(VERSION) -srcfolder $(BUNDLE_DIR) -ov -format UDZO release/cap32-macos/Caprice32-$(VERSION).dmg
