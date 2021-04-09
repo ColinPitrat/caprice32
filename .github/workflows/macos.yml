@@ -15,3 +15,9 @@ jobs:
       - run: make WITHOUT_GL=1 unit_test
       - run: alias sed=gsed && make WITHOUT_GL=1 e2e_test
       - run: make macos_bundle
+      - uses: skx/github-action-publish-binaries@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          releaseId: latest
+          args: 'release/cap32-macos/Caprice32*.app'
