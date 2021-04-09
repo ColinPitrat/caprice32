@@ -1640,6 +1640,7 @@ std::string getConfigurationFilename(bool forWrite)
     { getenv("HOME"), "/.config/cap32.cfg" },
     { getenv("HOME"), "/.cap32.cfg" },
     { DESTDIR, "/etc/cap32.cfg" },
+    { chAppPath, "../Resources/cap32.cfg" }, // To find the configuration from the bundle on MacOS
   };
 
   for(const auto& p: configPaths){

@@ -14,3 +14,4 @@ jobs:
       - run: make WITHOUT_GL=1
       - run: make WITHOUT_GL=1 unit_test
       - run: alias sed=gsed && make WITHOUT_GL=1 e2e_test
+      - run: make macos_bundle
