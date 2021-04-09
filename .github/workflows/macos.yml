@@ -15,9 +15,11 @@ jobs:
       - run: make WITHOUT_GL=1 unit_test
       - run: alias sed=gsed && make WITHOUT_GL=1 e2e_test
       - run: make macos_bundle
-      - uses: skx/github-action-publish-binaries@master
+      - uses: actions/upload-release-asset@v1.0.1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          releaseId: latest
-          args: 'release/cap32-macos/Caprice32*.app'
+          upload_url: 'htts://github.com/ColinPitrat/caprice32/releases/tag/latest'
+          asset_path: 'release/cap32-macos/Caprice32.app'
+          asset_name: 'Caprice32.app'
+          asset_content_type: 'com.apple.disk-image'
