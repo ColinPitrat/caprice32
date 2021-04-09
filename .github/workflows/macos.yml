@@ -22,6 +22,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: 'htts://github.com/ColinPitrat/caprice32/releases/tag/latest'
-          asset_path: 'release/cap32-macos/Caprice32.app'
-          asset_name: 'Caprice32.app'
+          asset_path: 'release/cap32-macos/Caprice32.dmg'
+          asset_name: 'Caprice32.dmg'
           asset_content_type: 'com.apple.disk-image'
