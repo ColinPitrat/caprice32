@@ -15,13 +15,22 @@ jobs:
       - run: make WITHOUT_GL=1 unit_test
       - run: alias sed=gsed && make WITHOUT_GL=1 e2e_test
       - run: make macos_bundle
+      - uses: actions/create-release@v1
+        id: create_release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: 'latest'
+          release_name: 'Caprice32 latest'
+          draft: false
+          prerelease: false
       - uses: actions/upload-release-asset@v1.0.1
         # Only release latest when building master
         if: ${{ github.ref == 'refs/heads/master' }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          upload_url: '/ColinPitrat/caprice32/releases/tag/latest'
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: 'release/cap32-macos/Caprice32.dmg'
           asset_name: 'Caprice32.dmg'
           asset_content_type: 'com.apple.disk-image'
