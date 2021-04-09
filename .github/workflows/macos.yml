@@ -15,7 +15,7 @@ jobs:
       - run: make WITHOUT_GL=1 unit_test
       - run: alias sed=gsed && make WITHOUT_GL=1 e2e_test
       - run: make macos_bundle
-      - run: upload_url=$(curl -sL  https://api.github.com/repos/ColinPitrat/caprice32/releases/latest | grep upload_url | cut -d '"' -f 4) && echo ::set-env name=UPLOAD_URL::$upload_url
+      - run: upload_url=$(curl -sL  https://api.github.com/repos/ColinPitrat/caprice32/releases/latest | grep upload_url | cut -d '"' -f 4) && echo "UPLOAD_URL=$upload_url" >> $GITHUB_ENV
       - uses: actions/upload-release-asset@v1.0.1
         # Only release latest when building master
         if: ${{ github.ref == 'refs/heads/master' }}
