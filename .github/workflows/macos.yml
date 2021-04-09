@@ -16,6 +16,8 @@ jobs:
       - run: alias sed=gsed && make WITHOUT_GL=1 e2e_test
       - run: make macos_bundle
       - uses: actions/upload-release-asset@v1.0.1
+        # Only release latest when building master
+        if: ${{ github.ref == 'refs/heads/master' }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
