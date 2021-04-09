@@ -279,14 +279,14 @@ deb_pkg: all
 	sed -i "1s/(.*)/($(VERSION)-$(REVISION))/" release/cap32-linux/caprice32-$(VERSION)/debian/changelog
 	cd release/cap32-linux/caprice32-$(VERSION)/debian && debuild -us -uc --lintian-opts --profile debian
 
-BUNDLE_DIR=release/cap32-macos/Caprice32-$(VERSION).app
+BUNDLE_DIR=release/cap32-macos/Caprice32.app
 macos_bundle: all
   mkdir -p $(BUNDLE_DIR)
-	install -D $(TARGET) $(BUNDLE_DIR)/Contents/MacOS/Caprice32-$(VERSION)
+	install -D $(TARGET) $(BUNDLE_DIR)/Contents/MacOS/Caprice32
 	install -D -m664 cap32.cfg.tmpl $(BUNDLE_DIR)/Contents/MacOS/cap32.cfg
 	sed -i "s,__SHARE_PATH__,../Resources," $(BUNDLE_DIR)/Contents/Resources/cap32.cfg
 	cp -r resources rom $(BUNDLE_DIR)/Contents/Resources
-	hdiutil create -volname Caprice32-$(VERSION) -srcfolder $(BUNDLE_DIR) -ov -format UDZO release/cap32-macos/Caprice32-$(VERSION).dmg
+	hdiutil create -volname Caprice32-$(VERSION) -srcfolder $(BUNDLE_DIR) -ov -format UDZO release/cap32-macos/Caprice32.dmg
 
 clang-tidy:
 	if $(CLANG_TIDY) -checks=-*,$(CLANG_CHECKS) $(SOURCES) -header-filter=src/* -- $(COMMON_CFLAGS) | grep "."; then false; fi
