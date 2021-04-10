@@ -1640,6 +1640,8 @@ std::string getConfigurationFilename(bool forWrite)
 
   const char* PATH_OK = "";
 
+  // Directly putting binPath.c_str() in the brace-enclosed initializer list fails on Windows
+  char *binPath_cstr = binPath.c_str();
   std::vector<std::pair<const char*, std::string>> configPaths = {
     { PATH_OK, args.cfgFilePath}, // First look in any user supplied configuration file path
     { chAppPath, "/cap32.cfg" }, // If not found, cap32.cfg in the same directory as the executable
@@ -1647,7 +1649,7 @@ std::string getConfigurationFilename(bool forWrite)
     { getenv("HOME"), "/.config/cap32.cfg" },
     { getenv("HOME"), "/.cap32.cfg" },
     { DESTDIR, "/etc/cap32.cfg" },
-    { binPath.c_str(), "/../Resources/cap32.cfg" }, // To find the configuration from the bundle on MacOS
+    { binPath_cstr, "/../Resources/cap32.cfg" }, // To find the configuration from the bundle on MacOS
   };
 
   for(const auto& p: configPaths){
