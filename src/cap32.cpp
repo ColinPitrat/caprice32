@@ -136,6 +136,11 @@ dword freq_table[MAX_FREQ_ENTRIES] = {
 
 #include "font.h"
 
+void set_osd_message(const std::string& message) {
+   osd_timing = SDL_GetTicks() + 10000;
+   osd_message = " " + message;
+}
+
 double colours_rgb[32][3] = {
    { 0.5, 0.5, 0.5 }, { 0.5, 0.5, 0.5 },{ 0.0, 1.0, 0.5 }, { 1.0, 1.0, 0.5 },
    { 0.0, 0.0, 0.5 }, { 1.0, 0.0, 0.5 },{ 0.0, 0.5, 0.5 }, { 1.0, 0.5, 0.5 },
@@ -1096,7 +1101,7 @@ int emulator_init ()
    ga_init_banking(); // init the CPC memory banking map
    if ((iErr = emulator_patch_ROM())) {
       LOG_ERROR("Failed patching the ROM");
-      return iErr;
+      //return iErr;
    }
 
    for (iRomNum = 0; iRomNum < 16; iRomNum++) { // loop for ROMs 0-15
@@ -1642,7 +1647,7 @@ std::string getConfigurationFilename(bool forWrite)
     { getenv("HOME"), "/.config/cap32.cfg" },
     { getenv("HOME"), "/.cap32.cfg" },
     { DESTDIR, "/etc/cap32.cfg" },
-    { binPath.c_str(), "../Resources/cap32.cfg" }, // To find the configuration from the bundle on MacOS
+    { binPath.c_str(), "/../Resources/cap32.cfg" }, // To find the configuration from the bundle on MacOS
   };
 
   for(const auto& p: configPaths){
@@ -1651,6 +1656,11 @@ std::string getConfigurationFilename(bool forWrite)
     std::string s = std::string(p.first) + p.second;
     if (access(s.c_str(), mode) == 0) {
       std::cout << "Using configuration file" << (forWrite ? " to save" : "") << ": " << s << std::endl;
+      // Dirty hack for MacOS Bundle to work: change dir to the bin dir
+      // cap32.cfg is edited to have relative paths from the bin dir
+      if (p.second == "/../Resources/cap32.cfg") {
+              std::filesystem::current_path(binPath);
+      }
       return s;
     }
   }
@@ -1702,7 +1712,7 @@ void loadConfiguration (t_CPC &CPC, const std::string& configFilename)
    CPC.scr_fs_height = conf.getIntValue("video", "scr_height", 600);
    CPC.scr_fs_bpp = conf.getIntValue("video", "scr_bpp", 8);
    CPC.scr_preserve_aspect_ratio = conf.getIntValue("video", "scr_preserve_aspect_ratio", 1);
-   CPC.scr_style = conf.getIntValue("video", "scr_style", 0);
+   CPC.scr_style = conf.getIntValue("video", "scr_style", 1);
    if (CPC.scr_style >= video_plugin_list.size()) {
       CPC.scr_style = DEFAULT_VIDEO_PLUGIN;
       LOG_ERROR("Unsupported video plugin specified - defaulting to plugin " << video_plugin_list[DEFAULT_VIDEO_PLUGIN].name);
@@ -1930,11 +1940,6 @@ void showGui()
       std::cout << "Failed displaying the GUI: " << e.what() << std::endl;
    }
    cleanupShowUI(guiBackSurface);
-}
-
-void set_osd_message(const std::string& message) {
-   osd_timing = SDL_GetTicks() + 1000;
-   osd_message = " " + message;
 }
 
 void dumpScreen() {
@@ -2514,7 +2519,7 @@ int cap32_main (int argc, char **argv)
    SDL_Event event;
    std::vector<std::string> slot_list;
 
-   binPath = std::filesystem::path(argv[0]).parent_path();
+   binPath = std::filesystem::absolute(std::filesystem::path(argv[0]).parent_path());
    parseArguments(argc, argv, slot_list, args);
 
    if (SDL_Init(SDL_INIT_AUDIO | SDL_INIT_TIMER | SDL_INIT_NOPARACHUTE) < 0) { // initialize SDL
@@ -2572,7 +2577,8 @@ int cap32_main (int argc, char **argv)
    // pbGPBuffer to be initialized.
    if (emulator_init()) {
       fprintf(stderr, "emulator_init() failed. Aborting.\n");
-      cleanExit(-1);
+
+      //cleanExit(-1);
    }
 
    // Really load the various drives, if needed
