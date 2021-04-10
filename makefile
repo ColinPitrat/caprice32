@@ -279,7 +279,7 @@ deb_pkg: all
 	# Both changelog files need to be patched with the proper version !
 	sed -i "1s/(.*)/($(VERSION)-$(REVISION))/" debian/changelog
 	sed -i "1s/(.*)/($(VERSION)-$(REVISION))/" release/cap32-linux/caprice32-$(VERSION)/debian/changelog
-	cd release/cap32-linux/caprice32-$(VERSION)/debian && debuild -us -uc --lintian-opts --profile debian
+	cd release/cap32-linux/caprice32-$(VERSION)/debian && debuild -e CXX -us -uc --lintian-opts --profile debian
 
 BUNDLE_DIR=release/cap32-macos/Caprice32.app
 macos_bundle: all
