@@ -21,6 +21,7 @@
 #include <chrono>
 #include <string>
 #include <thread>
+#include <filesystem>
 
 #include "SDL.h"
 
@@ -194,6 +195,7 @@ byte bit_values[8] = {
 #include "rom_mods.h"
 
 char chAppPath[_MAX_PATH + 1];
+std::filesystem::path binPath; // Where the binary is
 char chROMSelected[_MAX_PATH + 1];
 std::string chROMFile[4] = {
    "cpc464.rom",
@@ -1640,7 +1642,7 @@ std::string getConfigurationFilename(bool forWrite)
     { getenv("HOME"), "/.config/cap32.cfg" },
     { getenv("HOME"), "/.cap32.cfg" },
     { DESTDIR, "/etc/cap32.cfg" },
-    { chAppPath, "../Resources/cap32.cfg" }, // To find the configuration from the bundle on MacOS
+    { binPath.c_str(), "../Resources/cap32.cfg" }, // To find the configuration from the bundle on MacOS
   };
 
   for(const auto& p: configPaths){
@@ -2512,6 +2514,7 @@ int cap32_main (int argc, char **argv)
    SDL_Event event;
    std::vector<std::string> slot_list;
 
+   binPath = std::filesystem::path(argv[0]).parent_path();
    parseArguments(argc, argv, slot_list, args);
 
    if (SDL_Init(SDL_INIT_AUDIO | SDL_INIT_TIMER | SDL_INIT_NOPARACHUTE) < 0) { // initialize SDL
