@@ -60,6 +60,8 @@ LIBS += -ldl
 endif
 endif
 
+$(info Using CXX=$(CXX))
+
 ifdef WITH_IPF
 COMMON_CFLAGS += -DWITH_IPF
 endif
@@ -72,7 +74,7 @@ endif
 ifdef APP_PATH
 COMMON_CFLAGS += -DAPP_PATH=\"$(APP_PATH)\"
 else
-$(warning Notice: APP_PATH not specified.  Will look for cap32.cfg debug-style.  See `README.md` for details. )
+$(info Notice: APP_PATH not specified.  Will look for cap32.cfg debug-style.  See `README.md` for details. )
 endif
 
 ifdef DESTDIR
