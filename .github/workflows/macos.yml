@@ -16,6 +16,13 @@ jobs:
       - run: alias sed=gsed && make e2e_test
       - run: make macos_bundle
       - run: upload_url=$(curl -sL  https://api.github.com/repos/ColinPitrat/caprice32/releases/latest | grep upload_url | cut -d '"' -f 4) && echo "UPLOAD_URL=$upload_url" | tee -a $GITHUB_ENV
+      - uses: mknejp/delete-release-assets@v1
+        with:
+          token: ${{ github.token }}
+          tag: latest
+          assets: Caprice32.dmg
+          fail-if-no-assets: false
+          fail-if-no-release: false
       - uses: actions/upload-release-asset@v1.0.1
         # Only release latest when building master
         if: ${{ github.ref == 'refs/heads/master' }}
