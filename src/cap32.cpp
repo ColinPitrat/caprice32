@@ -1641,7 +1641,7 @@ std::string getConfigurationFilename(bool forWrite)
   const char* PATH_OK = "";
 
   // Directly putting binPath.c_str() in the brace-enclosed initializer list fails on Windows
-  const char *binPath_cstr = binPath.c_str();
+  const char *binPath_cstr = binPath.string().c_str();
   std::vector<std::pair<const char*, std::string>> configPaths = {
     { PATH_OK, args.cfgFilePath}, // First look in any user supplied configuration file path
     { chAppPath, "/cap32.cfg" }, // If not found, cap32.cfg in the same directory as the executable
