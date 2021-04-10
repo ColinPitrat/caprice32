@@ -60,8 +60,6 @@ LIBS += -ldl
 endif
 endif
 
-$(info Using CXX=$(CXX))
-
 ifdef WITH_IPF
 COMMON_CFLAGS += -DWITH_IPF
 endif
