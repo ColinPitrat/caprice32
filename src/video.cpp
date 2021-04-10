@@ -38,6 +38,7 @@
 #include "glfuncs.h"
 #endif
 #include <math.h>
+#include <memory>
 #include <iostream>
 
 SDL_Window* window = nullptr;
@@ -381,7 +382,7 @@ void glscale_setpal(SDL_Color* c)
   SDL_SetPaletteColors(pub->format->palette, c, 0, 32);
   if (pub->format->palette)
   {
-    Uint8* pal=static_cast<Uint8*>(malloc(sizeof(Uint8)*256*3));
+    std::unique_ptr<Uint8[]> pal = std::make_unique<Uint8[]>(256*3);
     for(int i=0;i<256;i++)
     {
       pal[3*i  ] = pub->format->palette->colors[i].r;
@@ -389,8 +390,7 @@ void glscale_setpal(SDL_Color* c)
       pal[3*i+2] = pub->format->palette->colors[i].b;
     }
     eglBindTexture(GL_TEXTURE_2D,screen_texnum);
-    eglColorTableEXT(GL_TEXTURE_2D,GL_RGB8,256,GL_RGB,GL_UNSIGNED_BYTE,pal);
-    free(pal);
+    eglColorTableEXT(GL_TEXTURE_2D,GL_RGB8,256,GL_RGB,GL_UNSIGNED_BYTE,pal.get());
   }
 }
 

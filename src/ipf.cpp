@@ -351,7 +351,8 @@ static void ReadTrack (t_track *pt_)
   if (!pt_->data)
   {
     // Allocate enough for the full decoded size, allowing for expanded overlapping sectors
-    memcpy(pt_->data = static_cast<byte*>(malloc(uDecoded)), abDecoded, pt_->size = uDecoded);
+    // TODO: This is not freed. Use a unique_ptr or shared_ptr to make it cleaner. 
+    memcpy(pt_->data = new byte[uDecoded], abDecoded, pt_->size = uDecoded);
     auto offset = (pt_->data-abDecoded);
 
     // Set the sector data pointers for the new buffer
