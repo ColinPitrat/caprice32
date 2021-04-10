@@ -16,6 +16,20 @@
    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+// Makefile doesn't pass HAVE_GL directly to reduce the likelihood
+// of using HAVE_GL without including this header.
+// We need the header included for every use of HAVE_GL (at least) to be able to
+// deactivate OpenGL on MacOS.
+#ifdef WITH_GL
+#define HAVE_GL
+#endif
+
+// It seems there's no OpenGL on MacOS anymore:
+// https://github.com/ColinPitrat/caprice32/pull/201
+#ifdef __APPLE__
+#undef HAVE_GL
+#endif
+
 #ifdef HAVE_GL
 
 #ifndef GLFUNCS_H

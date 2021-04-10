@@ -11,6 +11,7 @@
 #include "stringutils.h"
 #include "log.h"
 #include "video.h"
+#include "glfuncs.h"  // For HAVE_GL
 
 extern bool log_verbose;
 

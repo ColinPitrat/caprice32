@@ -33,9 +33,9 @@
 #include "video.h"
 #include "cap32.h"
 #include "log.h"
+#include "glfuncs.h"
 #ifdef HAVE_GL
 #include "SDL_opengl.h"
-#include "glfuncs.h"
 #endif
 #include <math.h>
 #include <memory>

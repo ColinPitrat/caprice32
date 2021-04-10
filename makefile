@@ -121,7 +121,7 @@ endif
 endif
 
 ifndef WITHOUT_GL
-COMMON_CFLAGS += -DHAVE_GL
+COMMON_CFLAGS += -DWITH_GL
 endif
 
 ifdef DEBUG
