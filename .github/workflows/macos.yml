@@ -17,7 +17,7 @@ jobs:
       - run: make macos_bundle
 
       # Only upload asset to a release when pushing a tag
-      - uses: jonfriesen/get-release-by-tag@v1.0.0
+      - uses: jonfriesen/get-release-by-tag@v0.0.11
         id: get_release_by_tag
         if: ${{ startsWith(github.ref, 'refs/tags/') }}
         env:
