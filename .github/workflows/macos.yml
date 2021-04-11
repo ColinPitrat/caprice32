@@ -21,7 +21,7 @@ jobs:
         id: get_release_by_tag
         if: ${{ startsWith(github.ref, 'refs/tags/') }}
         env:
-          token: ${{ github.token }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: ${{ github.ref }}
       # Delete the asset if it already exists (should only be useful for latest)
