@@ -289,7 +289,8 @@ macos_bundle: all
 	install -m664 cap32.cfg.tmpl $(BUNDLE_DIR)/Contents/Resources/cap32.cfg
 	gsed -i "s,__SHARE_PATH__,../Resources," $(BUNDLE_DIR)/Contents/Resources/cap32.cfg
 	cp -r resources rom $(BUNDLE_DIR)/Contents/Resources
-	hdiutil create -volname Caprice32-$(VERSION) -srcfolder $(BUNDLE_DIR) -ov -format UDZO release/cap32-macos/Caprice32.dmg
+	# Retry hdiutil up to 3 times: it occasionally fails with "Resource Busy"
+	for i in 1 2 3; do hdiutil create -volname Caprice32-$(VERSION) -srcfolder $(BUNDLE_DIR) -ov -format UDZO release/cap32-macos/Caprice32.dmg && break || sleep 5; done
 
 clang-tidy:
 	if $(CLANG_TIDY) -checks=-*,$(CLANG_CHECKS) $(SOURCES) -header-filter=src/* -- $(COMMON_CFLAGS) | grep "."; then false; fi
