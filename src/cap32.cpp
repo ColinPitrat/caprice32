@@ -2746,6 +2746,17 @@ int cap32_main (int argc, char **argv)
                            set_osd_message(std::string("Joystick emulation: ") + (CPC.joystick_emulation ? "on" : "off"));
                            break;
 
+                        case CAP32_PASTE:
+                           set_osd_message("Pasting...");
+                           {
+                             auto content = std::string(SDL_GetClipboardText());
+                             LOG_VERBOSE("Pasting '" << content << "'");
+                             auto newEvents = CPC.InputMapper->StringToEvents(content);
+                             virtualKeyboardEvents.splice(virtualKeyboardEvents.end(), newEvents);
+                             nextVirtualEventFrameCount = dwFrameCountOverall;
+                             break;
+                           }
+
                         case CAP32_EXIT:
                            cleanExit (0);
                            break;
