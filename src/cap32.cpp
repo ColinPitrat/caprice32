@@ -1674,6 +1674,7 @@ void loadConfiguration (t_CPC &CPC, const std::string& configFilename)
 {
    config::Config conf;
    conf.parseFile(configFilename);
+   conf.setOverrides(args.cfgOverrides);
 
    std::string appPath = chAppPath;
    const char *chFileName = configFilename.c_str();

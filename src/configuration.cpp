@@ -8,6 +8,19 @@
 
 namespace config
 {
+  bool hasValue(const ConfigMap& config, const std::string& section, const std::string& key)
+  {
+    if(config.find(section) != config.end())
+    {
+      auto configSection = config.at(section);
+      if(configSection.find(key) != configSection.end())
+      {
+        return true;
+      }
+    }
+    return false;
+  }
+
   std::istream& Config::parseStream(std::istream& configStream)
   {
     std::streamsize maxSize = 256;
@@ -77,22 +90,18 @@ namespace config
     return success;
   }
 
-  bool Config::hasValue(std::string section, std::string key) const
+  void Config::setOverrides(const ConfigMap& overrides)
   {
-    if(config_.find(section) != config_.end())
-    {
-      auto configSection = config_.at(section);
-      if(configSection.find(key) != configSection.end())
-      {
-        return true;
-      }
-    }
-    return false;
+    overrides_ = overrides;
   }
 
   int Config::getIntValue(const std::string& section, const std::string& key, const int defaultValue) const
   {
-    if(hasValue(section, key))
+    if(hasValue(overrides_, section, key))
+    {
+      return atoi(overrides_.at(section).at(key).c_str());
+    }
+    if(hasValue(config_, section, key))
     {
       return atoi(config_.at(section).at(key).c_str());
     }
@@ -101,7 +110,11 @@ namespace config
 
   std::string Config::getStringValue(const std::string& section, const std::string& key, const std::string& defaultValue) const
   {
-    if(hasValue(section, key))
+    if(hasValue(overrides_, section, key))
+    {
+      return std::string(overrides_.at(section).at(key));
+    }
+    if(hasValue(config_, section, key))
     {
       return std::string(config_.at(section).at(key));
     }
@@ -110,6 +123,7 @@ namespace config
 
   void Config::setStringValue(const std::string& section, const std::string& key, const std::string& value)
   {
+    overrides_[section][key] = value;
     config_[section][key] = value;
   }
 
@@ -117,6 +131,12 @@ namespace config
   {
     std::ostringstream oss;
     oss << value;
+    overrides_[section][key] = oss.str();
     config_[section][key] = oss.str();
+  }
+
+  ConfigMap Config::getConfigMapForTests() const
+  {
+    return config_;
   }
 }

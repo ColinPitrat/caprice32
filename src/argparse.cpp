@@ -21,6 +21,7 @@ const struct option long_options[] =
    {"cfg_file", required_argument, nullptr, 'c'},
    {"inject", required_argument, nullptr, 'i'},
    {"offset", required_argument, nullptr, 'o'},
+   {"override", required_argument, nullptr, 'O'},
    {"version",  no_argument, nullptr, 'V'},
    {"help",     no_argument, nullptr, 'h'},
    {"verbose",  no_argument, nullptr, 'v'},
@@ -44,6 +45,7 @@ void usage(std::ostream &os, char *progPath, int errcode)
    os << "   -h/--help:              shows this help\n";
    os << "   -i/--inject:            inject a binary in memory after the CPC startup finishes\n";
    os << "   -o/--offset:            offset at which to inject the binary provided with -i (default: 0x6000)\n";
+   os << "   -O/--override:          override an option from the config. Can be repeated. (example: -o system.model=3)\n";
    os << "   -V/--version:           outputs version and exit\n";
    os << "   -v/--verbose:           be talkative\n";
    os << "\nslotfiles is an optional list of files giving the content of the various CPC ports.\n";
@@ -101,7 +103,7 @@ void parseArguments(int argc, char **argv, std::vector<std::string>& slot_list, 
 
    optind = 0; // To please test framework, when this function is called multiple times !
    while(true) {
-      c = getopt_long (argc, argv, "a:c:hi:o:vV",
+      c = getopt_long (argc, argv, "a:c:hi:o:O:vV",
                        long_options, &option_index);
 
       /* Detect the end of the options. */
@@ -131,6 +133,27 @@ void parseArguments(int argc, char **argv, std::vector<std::string>& slot_list, 
          case 'o':
             args.binOffset = std::stol(optarg, nullptr, 0);
             break;
+
+         case 'O':
+            {
+              std::string opt(optarg);
+              bool invalid = false;
+              auto key_value_separator = opt.find('=');
+              if (key_value_separator == std::string::npos) invalid = true;
+              std::string key = opt.substr(0, key_value_separator);
+              std::string value = opt.substr(key_value_separator+1);
+              auto section_item_separator = key.find('.');
+              if (section_item_separator == std::string::npos) invalid = true;
+              std::string section = key.substr(0, section_item_separator);
+              std::string item = key.substr(section_item_separator+1);
+              if (invalid || section.empty() || item.empty()) {
+                LOG_ERROR("Couldn't parse override: '" << opt << "'");
+              } else {
+                args.cfgOverrides[section][item] = value;
+                LOG_INFO("Override configuration: " << section << "." << item << " = " << value);
+              }
+              break;
+            }
 
          case 'v':
             log_verbose = true;
