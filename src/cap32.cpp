@@ -1101,7 +1101,7 @@ int emulator_init ()
    ga_init_banking(); // init the CPC memory banking map
    if ((iErr = emulator_patch_ROM())) {
       LOG_ERROR("Failed patching the ROM");
-      //return iErr;
+      return iErr;
    }
 
    for (iRomNum = 0; iRomNum < 16; iRomNum++) { // loop for ROMs 0-15
@@ -2578,8 +2578,7 @@ int cap32_main (int argc, char **argv)
    // pbGPBuffer to be initialized.
    if (emulator_init()) {
       fprintf(stderr, "emulator_init() failed. Aborting.\n");
-
-      //cleanExit(-1);
+      cleanExit(-1);
    }
 
    // Really load the various drives, if needed
