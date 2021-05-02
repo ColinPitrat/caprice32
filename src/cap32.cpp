@@ -2525,7 +2525,7 @@ int cap32_main (int argc, char **argv)
    } catch(...) {
      // Dirty fallback in case the executable is found in the path.
      // binPath is only use for bundles anyway, where this is not the case.
-     binPath = std::filesystem::absolute('.');
+     binPath = std::filesystem::absolute(".");
    }
    parseArguments(argc, argv, slot_list, args);
 
