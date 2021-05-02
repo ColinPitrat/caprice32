@@ -2520,7 +2520,13 @@ int cap32_main (int argc, char **argv)
    SDL_Event event;
    std::vector<std::string> slot_list;
 
-   binPath = std::filesystem::absolute(std::filesystem::path(argv[0]).parent_path());
+   try {
+     binPath = std::filesystem::absolute(std::filesystem::path(argv[0]).parent_path());
+   } catch(...) {
+     // Dirty fallback in case the executable is found in the path.
+     // binPath is only use for bundles anyway, where this is not the case.
+     binPath = std::filesystem::absolute('.');
+   }
    parseArguments(argc, argv, slot_list, args);
 
    if (SDL_Init(SDL_INIT_AUDIO | SDL_INIT_TIMER | SDL_INIT_NOPARACHUTE) < 0) { // initialize SDL
