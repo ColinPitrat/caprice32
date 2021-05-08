@@ -103,7 +103,7 @@ TEST_HEADERS:=$(shell find $(TSTDIR) -name \*.h)
 TEST_DEPENDS:=$(foreach file,$(TEST_SOURCES:.cpp=.d),$(shell echo "$(OBJDIR)/$(file)"))
 TEST_OBJECTS:=$(TEST_DEPENDS:.d=.o)
 
-.PHONY: all check_deps clean deb_pkg debug debug_flag distrib doc unit_test install
+.PHONY: all check_deps clean deb_pkg debug debug_flag distrib doc unit_test install doxygen
 
 WARNINGS = -Wall -Wextra -Wzero-as-null-pointer-constant -Wformat=2 -Wold-style-cast -Wmissing-include-dirs -Wlogical-op -Woverloaded-virtual -Wpointer-arith -Wredundant-decls
 COMMON_CFLAGS += $(CFLAGS) -std=c++17 $(IPATHS)
@@ -302,8 +302,11 @@ clang-format:
 fix-clang-format:
 	$(CLANG_FORMAT) -style=Google -i $(SOURCES) $(TEST_SOURCES) $(HEADERS) $(TEST_HEADERS)
 
+doxygen:
+	doxygen doxygen.cfg
+
 clean:
-	rm -rf obj/ release/ .pc/
+	rm -rf obj/ release/ .pc/ doxygen/
 	rm -f test_runner test_runner.exe cap32 cap32.exe .debug tags
 
 -include $(DEPENDS) $(TEST_DEPENDS)
