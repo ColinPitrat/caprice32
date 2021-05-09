@@ -40,7 +40,8 @@ typedef enum {
    CAP32_SNAPSHOT,
    CAP32_WAITBREAK,
    CAP32_DELAY,
-   CAP32_PASTE
+   CAP32_PASTE,
+   CAP32_DEVTOOLS
 } CAP32_KEYS;
 
 typedef enum {

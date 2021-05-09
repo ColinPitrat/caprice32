@@ -27,6 +27,7 @@
 
 #include "cap32.h"
 #include "crtc.h"
+#include "devtools.h"
 #include "disk.h"
 #include "tape.h"
 #include "video.h"
@@ -84,6 +85,7 @@ SDL_AudioDeviceID audio_device_id = 0;
 SDL_Surface *back_surface = nullptr;
 video_plugin* vid_plugin;
 SDL_Joystick* joysticks[MAX_NB_JOYSTICKS];
+DevTools devtools;
 
 dword dwTicks, dwTicksOffset, dwTicksTarget, dwTicksTargetFPS;
 dword dwFPS, dwFrameCount;
@@ -717,6 +719,7 @@ void z80_OUT_handler (reg_pair port, byte val)
       if (pfoPrinter) {
          if (!(CPC.printer_port & 0x80)) { // only grab data bytes; ignore the strobe signal
             fputc(CPC.printer_port, pfoPrinter); // capture printer output to file
+            fflush(pfoPrinter);
          }
       }
    }
@@ -1943,6 +1946,17 @@ void showGui()
    cleanupShowUI(guiBackSurface);
 }
 
+void toggleDevTools()
+{
+  if (!devtools.IsActive()) {
+    if (!devtools.Activate()) {
+      LOG_ERROR("Failed to activate developers tools");
+    }
+  } else {
+    devtools.Deactivate();
+  }
+}
+
 void dumpScreen() {
    std::string dir = CPC.sdump_dir;
    if (!is_directory(dir)) {
@@ -2636,7 +2650,13 @@ int cap32_main (int argc, char **argv)
          virtualKeyboardEvents.pop_front();
       }
       
+      if (devtools.IsActive()) {
+        devtools.Update();
+      }
       while (SDL_PollEvent(&event)) {
+         if (devtools.IsActive()) {
+            if (devtools.PassEvent(event)) continue;
+         }
          switch (event.type) {
             case SDL_KEYDOWN:
                {
@@ -2666,6 +2686,12 @@ int cap32_main (int argc, char **argv)
                         case CAP32_VKBD:
                           {
                             showVKeyboard();
+                            break;
+                          }
+
+                        case CAP32_DEVTOOLS:
+                          {
+                            toggleDevTools();
                             break;
                           }
 
