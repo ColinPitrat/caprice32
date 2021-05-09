@@ -87,6 +87,9 @@ public:
 	//! Handles APP_PAINT messages with itself or 0 as the destination, and will redraw all of it's children as well as itself
 	bool HandleMessage(CMessage* pMessage) override;
 
+  //! Display the view on the screen surface
+  virtual void Flip() const;
+
 protected:
 	CMenu* m_pMenu;  //!< A pointer to the view's menu
 	CWindow* m_pFloatingWindow;  //!< A pointer to the current floating window.  This will be drawn overtop of everything else.

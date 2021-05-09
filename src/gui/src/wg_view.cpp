@@ -116,6 +116,11 @@ void CView::SetWindowText(const std::string& sText)
 }
 
 
+void CView::Flip() const
+{
+  vid_plugin->flip(vid_plugin);
+}
+
 bool CView::HandleMessage(CMessage* pMessage)
 {
 	bool bHandled = false;
@@ -138,7 +143,7 @@ bool CView::HandleMessage(CMessage* pMessage)
 				SDL_BlitSurface(pFloatingSurface, &SourceRect, m_pScreenSurface, &DestRect);
 				SDL_FreeSurface(pFloatingSurface);
 				//SDL_UpdateRect(m_pScreenSurface, 0, 0, 0, 0);
-				vid_plugin->flip(vid_plugin);
+				Flip();
 
 				bHandled = true;
 			}

@@ -300,6 +300,35 @@ void CApplication::Init()
 }
 
 
+void CApplication::ProcessEvent(SDL_Event& event)
+{
+  if (!m_bInited)
+  {
+    throw(Wg_Ex_App("Application Init() was not called!", "CApplication::Step"));
+  }
+
+  m_bRunning = true;
+  CMessageServer::Instance().IgnoreAllNewMessages(false);
+  CMessageServer::Instance().QueueMessage(new CMessage(CMessage::APP_PAINT, nullptr, this));
+  HandleSDLEvent(event);
+  CMessageServer::Instance().DeliverMessage();
+}
+
+
+void CApplication::Update()
+{
+  if (!m_bInited)
+  {
+    throw(Wg_Ex_App("Application Init() was not called!", "CApplication::Step"));
+  }
+
+  m_bRunning = true;
+  CMessageServer::Instance().IgnoreAllNewMessages(false);
+  CMessageServer::Instance().QueueMessage(new CMessage(CMessage::APP_PAINT, nullptr, this));
+  CMessageServer::Instance().DeliverMessage();
+}
+
+
 void CApplication::Exec()
 {
 	try
