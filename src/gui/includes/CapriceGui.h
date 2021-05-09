@@ -1,3 +1,6 @@
+#ifndef CAPRICEGUI_H
+#define CAPRICEGUI_H
+
 #include "wgui.h"
 
 class CapriceGui : public wGui::CApplication
@@ -7,3 +10,4 @@ class CapriceGui : public wGui::CApplication
 		void Init() override;
 };
 
+#endif
