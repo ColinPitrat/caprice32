@@ -47,6 +47,9 @@ void CApplication::HandleSDLEvent(SDL_Event event)
 	// this will turn an SDL event into a wGui message
 	switch (event.type)
 	{
+  case SDL_WINDOWEVENT:
+    CMessageServer::Instance().QueueMessage(new CMessage(CMessage::APP_PAINT, nullptr, this));
+    break;
   case SDL_WINDOWEVENT_RESIZED:
     if (event.window.event == SDL_WINDOWEVENT_SIZE_CHANGED) {
       CMessageServer::Instance().QueueMessage(new TPointMessage(
