@@ -3,10 +3,7 @@
 
 #include <string>
 #include <vector>
-
-typedef unsigned char byte;
-typedef unsigned short word;
-typedef unsigned int dword;
+#include "types.h"
 
 namespace zip
 {
