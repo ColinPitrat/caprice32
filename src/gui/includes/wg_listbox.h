@@ -73,7 +73,7 @@ public:
 
 	//! Gets the height of the items
 	//! \return The height of the items in the listbox
-	unsigned int GetItemHeight() { return m_iItemHeight; }
+	unsigned int GetItemHeight() const { return m_iItemHeight; }
 
 	//! Sets the heigh of the items in the listbox
 	//! \param iItemHeight The height of the items in the listbox

@@ -104,7 +104,7 @@ void CNavigationBar::ClearItems()
 }
 
 
-unsigned int CNavigationBar::getSelectedIndex() {
+unsigned int CNavigationBar::getSelectedIndex() const {
     return m_iSelectedItem;
 }
 
@@ -121,7 +121,7 @@ void CNavigationBar::SelectItem(unsigned int iItemIndex) {
 }
 
 
-unsigned int CNavigationBar::getFocusedIndex() {
+unsigned int CNavigationBar::getFocusedIndex() const {
     return m_iFocusedItem;
 }
 

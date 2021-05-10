@@ -58,11 +58,11 @@ public:
 
 	//! Gets the resource ID of the handle
 	//! \return The resource ID of the handle
-	TResourceId GetResourceId() { return m_ResourceId; }
+	TResourceId GetResourceId() const { return m_ResourceId; }
 
 	//! Gets the handle's internal reference count
 	//! \return The reference count of the handle
-	unsigned int GetRefCount() { return m_RefCountMap[m_ResourceId]; }
+	unsigned int GetRefCount() const { return m_RefCountMap[m_ResourceId]; }
 
 protected:
 	//! The resource ID for the handle

@@ -15,7 +15,7 @@ class CapriceLeavingWithoutSavingView : public CView
   public:
     CapriceLeavingWithoutSavingView(SDL_Surface* surface, SDL_Surface* backSurface, const CRect& WindowRect);
 
-    bool Confirmed();
+    bool Confirmed() const;
 
     void PaintToSurface(SDL_Surface& ScreenSurface, SDL_Surface& FloatingSurface, const CPoint& Offset) const override;
 

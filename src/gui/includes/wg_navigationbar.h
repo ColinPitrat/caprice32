@@ -68,11 +68,11 @@ public:
 
 	//! Gets the height of the items
 	//! \return The height of the items in the navigation bar
-	unsigned int GetItemHeight() { return m_iItemHeight; }
+	unsigned int GetItemHeight() const { return m_iItemHeight; }
 
 	//! Gets the width of the items
 	//! \return The width of the items in the navigation bar
-	unsigned int GetItemWidth() { return m_iItemWidth; }
+	unsigned int GetItemWidth() const { return m_iItemWidth; }
 
 	//! Sets the height of the items in the navigation bar
 	//! \param iItemHeight The height of the items in the navigation bar
@@ -109,14 +109,14 @@ public:
 		{ return (iItemIndex < m_Items.size() && m_iSelectedItem == iItemIndex); }
 
   // Returns the index of the selected item; returns -1 if there is no selection.
-  unsigned int getSelectedIndex();
+  unsigned int getSelectedIndex() const;
 
 	//! Selects an item in the navigation bar.
 	//! \param iItemIndex The index of the item to select.
 	void SelectItem(unsigned int iItemIndex);
 
   // Returns the index of the focused item; returns -1 if there is no selection.
-  unsigned int getFocusedIndex();
+  unsigned int getFocusedIndex() const;
 
 	//! Focus an item in the navigation bar.
 	//! \param iItemIndex The index of the item to focus.
