@@ -43,19 +43,19 @@ public:
 	Wg_Ex_Base(std::string sWhat, std::string sWhere) : m_sWhat(std::move(sWhat)), m_sWhere(std::move(sWhere)) { }
 
 	//! Standard Destructor
-	~Wg_Ex_Base() throw() override = default;
+	~Wg_Ex_Base() noexcept override = default;
 
 	//! Gets a text description of the exception
 	//! \return A string describing what caused the exception
-	const char* what() const throw() override { return m_sWhat.c_str(); }
+	const char* what() const noexcept override { return m_sWhat.c_str(); }
 
 	//! Gets a text description of where the exception happened
 	//! \return A string describing where the exception was raised
-	virtual const char* where() const throw() { return m_sWhere.c_str(); }
+	virtual const char* where() const noexcept { return m_sWhere.c_str(); }
 
 	//! Gets a text description of the exception
 	//! \return A std::string reference describing what caused the exception
-	virtual const std::string& std_what() const throw() { return m_sWhat; }
+	virtual const std::string& std_what() const noexcept { return m_sWhat; }
 
 private:
 	std::string m_sWhat;
