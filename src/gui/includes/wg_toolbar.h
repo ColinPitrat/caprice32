@@ -102,8 +102,8 @@ protected:
 	//! Reposition all the buttons in the toolbar
 	void RepositionButtons();
 
-	using t_ButtonIDPair std::pair<CButton*, long int>;  //!< A typedef of CButton pointer to ID pair
-	using t_ButtonVector std::vector<t_ButtonIDPair>;  //!< A typedef of a vector of Button ID pairs
+	using t_ButtonIDPair = std::pair<CButton*, long int>;  //!< A typedef of CButton pointer to ID pair
+	using t_ButtonVector = std::vector<t_ButtonIDPair>;  //!< A typedef of a vector of Button ID pairs
 	t_ButtonVector m_vpButtons;  //!< A vector of pointers to the buttons and their IDs in the toolbar
 
 
