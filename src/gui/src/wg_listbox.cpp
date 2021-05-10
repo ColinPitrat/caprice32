@@ -79,7 +79,7 @@ unsigned int CListBox::AddItem(SListItem ListItem)
 {
 	m_Items.push_back(ListItem);
 	m_SelectedItems.push_back(false);
-	m_RenderedStrings.push_back(CRenderedString(m_pFontEngine, ListItem.sItemText, CRenderedString::VALIGN_TOP, CRenderedString::HALIGN_LEFT));
+	m_RenderedStrings.emplace_back(CRenderedString(m_pFontEngine, ListItem.sItemText, CRenderedString::VALIGN_TOP, CRenderedString::HALIGN_LEFT));
 	UpdateMaxLimit();
 	Draw();
 	return m_Items.size();

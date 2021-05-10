@@ -47,10 +47,10 @@ namespace stringutils
   void splitPath(const std::string& path, std::string& dirname, std::string& filename)
   {
     auto delimiter = path.rfind("/");
-    if(delimiter == path.npos) {
+    if(delimiter == std::string::npos) {
       delimiter = path.rfind("\\");
     }
-    if(delimiter != path.npos) {
+    if(delimiter != std::string::npos) {
       delimiter++;
       dirname = path.substr(0, delimiter);
       filename = path.substr(delimiter);

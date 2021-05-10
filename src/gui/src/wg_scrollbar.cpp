@@ -183,7 +183,7 @@ bool CScrollBar::OnMouseButtonDown(CPoint Point, unsigned int Button)
 		if (HandleMouseScroll(Button)) {
 			return true;
 		}
-		else if (Button == CMouseMessage::LEFT)
+		if (Button == CMouseMessage::LEFT)
 		{
 			switch (m_ThumbRect.HitTest(ViewToWindow(Point)))
 			{

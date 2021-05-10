@@ -36,7 +36,6 @@ namespace wGui
 {
 
 CWindow::CWindow(const CRect& WindowRect, CWindow* pParent) :
-	m_sWindowText(""),
 	m_WindowRect(WindowRect),
 	m_BackgroundColor(DEFAULT_BACKGROUND_COLOR),
 	m_ClientRect(WindowRect.SizeRect()),
@@ -59,7 +58,6 @@ CWindow::CWindow(const CRect& WindowRect, CWindow* pParent) :
 // judb constructor like above, but without specifying a CRect ;
 // In this case you need to call SetWindowRect() before using the CWindow!
 CWindow::CWindow(CWindow* pParent) :
-	m_sWindowText(""),
 	m_BackgroundColor(DEFAULT_BACKGROUND_COLOR),
 	m_pParentWindow(nullptr),
 	m_pSDLSurface(nullptr),
@@ -289,13 +287,7 @@ bool CWindow::HitTest(const CPoint& Point) const
 	if (m_WindowRect.SizeRect().HitTest(ViewToWindow(Point)) == CRect::RELPOS_INSIDE) {
     return true;
   };
-	for (const auto &child : m_ChildWindows)
-	{
-    if (child->HitTest(Point)) {
-      return true;
-    }
-	}
-	return false;
+  return std::any_of(m_ChildWindows.begin(), m_ChildWindows.end(), [&](const auto& child) { return child->HitTest(Point); });
 }
 
 

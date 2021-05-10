@@ -53,7 +53,7 @@ public:
 		sItemText(std::move(sItemText)), iItemId(iItemId), pPopup(pPopup), bSpacer(false) { }
 
 	//! Constructs a new Spacer Menu Item
-	SMenuItem() : sItemText(""), iItemId(0), pPopup(nullptr), bSpacer(true) { }
+	SMenuItem() : iItemId(0), pPopup(nullptr), bSpacer(true) { }
 
 	std::string sItemText;  //!< The caption to display for the menu item
 	long int iItemId;  //!< An identifier for the menu item, which gets returned in the CTRL_SINGLELCLICK message

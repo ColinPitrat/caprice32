@@ -108,7 +108,7 @@ void CFrame::Draw() const  // virtual
       CRect TextClipRect(m_TitleBarRect);
       TextClipRect.SetRight(TextClipRect.Right() - 16);
       TextClipRect.Grow(-1);
-      if (m_pRenderedString.get())
+      if (m_pRenderedString)
       {
         m_pRenderedString->Draw(m_pSDLSurface, TextClipRect, m_TitleBarRect.TopLeft() + CPoint(6, m_iTitleBarHeight / 2 - 1), m_TitleBarTextColor);
       }

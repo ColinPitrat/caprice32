@@ -107,7 +107,7 @@ void CTextBox::SetReadOnly(bool bReadOnly)  // virtual
 
 std::string CTextBox::GetSelText() const  // virtual
 {
-	std::string sSelText = "";
+	std::string sSelText;
 	if (m_SelLength != 0)
 	{
 			std::string::size_type SelStartNorm = 0;

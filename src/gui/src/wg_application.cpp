@@ -494,7 +494,7 @@ void CApplication::SetMouseCursor(CCursorResourceHandle* pCursorResourceHandle)
 	}
 	else
 	{
-		if( m_pCurrentCursorResourceHandle.get() )
+		if( m_pCurrentCursorResourceHandle )
 		{
 			m_pCurrentCursorResourceHandle.reset(nullptr);
 			SDL_SetCursor(m_pSystemDefaultCursor);

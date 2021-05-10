@@ -53,7 +53,7 @@ struct s_MessageClientActive
 };
 
 //! Multimap of message clients ordered by priority
-using t_MessageClientPriorityMap = std::multimap<unsigned char, s_MessageClientActive, std::greater<unsigned char> >;
+using t_MessageClientPriorityMap = std::multimap<unsigned char, s_MessageClientActive, std::greater<> >;
 
 //! Map of different message types
 using t_MessageClientMap = std::map<wGui::CMessage::EMessageType, t_MessageClientPriorityMap>;

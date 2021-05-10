@@ -276,7 +276,7 @@ void CEditBox::Draw() const
 			}
 		}
 
-		if (m_pRenderedString.get())
+		if (m_pRenderedString)
 		{
 			m_pRenderedString->Draw(m_pSDLSurface, SubRect,
 				CPoint(SubRect.Left() + m_ScrollOffset, SubRect.Bottom() - m_pRenderedString->GetMaxFontHeight() / 4), FontColor);

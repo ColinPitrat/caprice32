@@ -88,7 +88,7 @@ void CToolTip::Draw() const
 		Painter.DrawRect(m_WindowRect.SizeRect(), false);
 		CRect SubRect(m_WindowRect.SizeRect());
 		SubRect.Grow(-2);
-		if (m_pRenderedString.get())
+		if (m_pRenderedString)
 		{
 			m_pRenderedString->Draw(m_pSDLSurface, SubRect, SubRect.TopLeft(), m_FontColor);
 		}

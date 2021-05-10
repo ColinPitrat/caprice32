@@ -57,6 +57,17 @@ CRect& CRect::operator=(const CRect& r)
 }
 
 
+CRect& CRect::operator=(CRect&& r)
+{
+	m_Top = r.Top();
+	m_Left = r.Left();
+	m_Right = r.Right();
+	m_Bottom = r.Bottom();
+
+	return *this;
+}
+
+
 CRect& CRect::operator+=(const CPoint& p)
 {
   m_Left   += p.XPos();

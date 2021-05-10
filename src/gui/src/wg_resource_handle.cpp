@@ -119,7 +119,7 @@ CStringResourceHandle::~CStringResourceHandle()
 }
 
 
-const std::string CStringResourceHandle::String() const
+std::string CStringResourceHandle::String() const
 {
 	return (m_StringMap.find(m_ResourceId) != m_StringMap.end()) ? m_StringMap[m_ResourceId] : "";
 }

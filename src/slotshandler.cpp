@@ -140,11 +140,10 @@ void fillSlots (std::vector<std::string> slot_list, t_CPC& CPC)
            zip_info.extensions = ".dsk.sna.cdt.voc.cpr.ipf";
            if (zip::dir(&zip_info)) {
              continue; // error or nothing relevant found
-           } else {
-             std::string filename = zip_info.filesOffsets[0].first;
-             pos = filename.length() - 4;
-             extension = filename.substr(pos); // grab the extension
            }
+           std::string filename = zip_info.filesOffsets[0].first;
+           pos = filename.length() - 4;
+           extension = filename.substr(pos); // grab the extension
          }
 
          if (fillSlot(CPC.drvA_file, have_DSKA, fullpath, extension, ".dsk", "drive A disk"))
@@ -446,9 +445,7 @@ void dsk_eject (t_drive *drive)
 
    for (track = 0; track < DSK_TRACKMAX; track++) { // loop for all tracks
       for (side = 0; side < DSK_SIDEMAX; side++) { // loop for all sides
-         if (drive->track[track][side].data) { // track is formatted?
-             delete [] drive->track[track][side].data; // release memory allocated for this track
-         }
+        delete [] drive->track[track][side].data; // release memory allocated for this track
       }
    }
    dword dwTemp = drive->current_track; // save the drive head position

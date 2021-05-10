@@ -145,7 +145,7 @@ public:
 
 	//! Returns the string
 	//! \return A string
-	const std::string String() const;
+	std::string String() const;
 
 protected:
 	//! A map of strings that are used by the handles

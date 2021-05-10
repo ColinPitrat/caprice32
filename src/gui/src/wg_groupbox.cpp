@@ -72,7 +72,7 @@ void CGroupBox::Draw() const
 		Painter.DrawRect(CRect(CPoint(6, 0), CPoint(14, 0) + Dims),
 			true, m_BackgroundColor, m_BackgroundColor);
 
-		if (m_pRenderedString.get())
+		if (m_pRenderedString)
 		{
 			m_pRenderedString->Draw(m_pSDLSurface, m_WindowRect.SizeRect(), CPoint(10, 0), m_FontColor);
 		}

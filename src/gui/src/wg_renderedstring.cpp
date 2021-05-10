@@ -169,7 +169,7 @@ void CRenderedString::GetMetrics(CPoint* pBoundedDimensions, CPoint* pOriginOffs
 			}
 			iLength += (pMetrics->horiAdvance);
 			// The top and bottom values of the rect are not actually in rect coordinates at this point, since iMaxY and iMinY are not yet know
-			m_CachedCharacterRects.push_back(
+			m_CachedCharacterRects.emplace_back(
 				CRect((iLength - pMetrics->horiAdvance) >> 6, pMetrics->horiBearingY >> 6, iLength >> 6, pMetrics->height >> 6));
 		}
 
@@ -185,7 +185,7 @@ void CRenderedString::GetMetrics(CPoint* pBoundedDimensions, CPoint* pOriginOffs
 		}
 
 		// Tack an empty rect on the end
-		m_CachedCharacterRects.push_back(CRect(iLength, iMaxY, iLength, iMinY));
+		m_CachedCharacterRects.emplace_back(CRect(iLength, iMaxY, iLength, iMinY));
 
 		m_CachedBoundedDimensions = CPoint(iLength, iMaxY - iMinY);
 

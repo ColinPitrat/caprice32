@@ -104,7 +104,7 @@ std::string TrimString(const std::string& sString)
 {
 	std::string::size_type start = sString.find_first_not_of(" \t");
 	std::string::size_type end = sString.find_last_not_of(" \t");
-	std::string sResult = "";
+	std::string sResult;
 	if (start != std::string::npos)
 	{
 		sResult = sString.substr(start, end - start + 1);

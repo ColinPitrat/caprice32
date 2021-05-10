@@ -108,7 +108,7 @@ void CButton::Draw() const
     {
 			Painter.DrawRect(SubRect, false, COLOR_GRAY);
     }
-		if (m_pRenderedString.get())
+		if (m_pRenderedString)
 		{
 			m_pRenderedString->Draw(m_pSDLSurface, SubRect, FontCenterPoint, FontColor);
 		}
