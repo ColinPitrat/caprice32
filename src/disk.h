@@ -71,7 +71,7 @@ class t_sector {
 
    void setSizes(unsigned int size, unsigned int total_size);
 
-   unsigned int getTotalSize() {
+   unsigned int getTotalSize() const {
      return total_size_;
    }
 
