@@ -80,7 +80,7 @@ COMMON_CFLAGS += -DDESTDIR=\"$(DESTDIR)\"
 endif
 
 CLANG_FORMAT=clang-format
-CLANG_TIDY=clang-tidy-3.8
+CLANG_TIDY=clang-tidy
 CLANG_CHECKS=modernize-*,performance-*,misc-*,-misc-definitions-in-headers,readability-*,-readability-implicit-bool-cast,-readability-braces-around-statements,-readability-function-size
 
 SRCDIR:=src
