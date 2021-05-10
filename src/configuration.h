@@ -6,8 +6,8 @@
 
 namespace config
 {
-  typedef std::map<std::string, std::string> ConfigSection;
-  typedef std::map<std::string, ConfigSection> ConfigMap;
+  using ConfigSection = std::map<std::string, std::string>;
+  using ConfigMap = std::map<std::string, ConfigSection>;
 
   bool hasValue(const ConfigMap& configMap, const std::string& section, const std::string& key);
 

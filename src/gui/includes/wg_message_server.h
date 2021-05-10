@@ -53,10 +53,10 @@ struct s_MessageClientActive
 };
 
 //! Multimap of message clients ordered by priority
-typedef std::multimap<unsigned char, s_MessageClientActive, std::greater<unsigned char> > t_MessageClientPriorityMap;
+using t_MessageClientPriorityMap = std::multimap<unsigned char, s_MessageClientActive, std::greater<unsigned char> >;
 
 //! Map of different message types
-typedef std::map<wGui::CMessage::EMessageType, t_MessageClientPriorityMap> t_MessageClientMap;
+using t_MessageClientMap = std::map<wGui::CMessage::EMessageType, t_MessageClientPriorityMap>;
 
 
 //! A server which queues and dispatches messages

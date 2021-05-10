@@ -32,7 +32,7 @@
 namespace wGui
 {
 //! The resource ID type
-typedef long int TResourceId;
+using TResourceId = long int;
 
 const TResourceId AUTO_CREATE_RESOURCE_ID = -2;  //!< This is an internally used value for the Resource ID, that specifies that the next open resource ID should be used
 const TResourceId INVALID_RESOURCE_ID = -1;  //!< This is an internally used value for the resource ID that indicates an invalid resource

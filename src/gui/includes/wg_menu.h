@@ -145,7 +145,7 @@ protected:
 		CRenderedString RenderedString;  //!< A cached rendered string for the text of the menu item
 		CRect Rect;  //!< The bounds rect for the menu item		
 	};
-	typedef std::vector<s_MenuItemInfo> t_MenuItemVector;  //!< The type for menu items
+	using t_MenuItemVector std::vector<s_MenuItemInfo>;  //!< The type for menu items
 	mutable t_MenuItemVector m_MenuItems;  //!< The vector of menu items
 	const SMenuItem* m_pHighlightedItem;  //!< The item that should be highlighted
 	mutable bool m_bCachedRectsValid;  //!< True if the cached item rects are valid
