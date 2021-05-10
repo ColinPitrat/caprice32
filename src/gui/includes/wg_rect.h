@@ -161,7 +161,7 @@ public:
 	CRect& operator=(const CRect& r);  // assignment operator
 
 	//! Move assignment operator will copy the values of the other rect
-	CRect& operator=(CRect&& r);  // assignment operator
+	CRect& operator=(CRect&& r) noexcept;  // move assignment operator
 
 	//! Addition operator to add a CPoint, will offset the CRect
 	//! \param p A point to offset the CRect by

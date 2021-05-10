@@ -57,12 +57,12 @@ CRect& CRect::operator=(const CRect& r)
 }
 
 
-CRect& CRect::operator=(CRect&& r)
+CRect& CRect::operator=(CRect&& r) noexcept
 {
-	m_Top = r.Top();
-	m_Left = r.Left();
-	m_Right = r.Right();
-	m_Bottom = r.Bottom();
+	m_Top = r.m_Top;
+	m_Left = r.m_Left;
+	m_Right = r.m_Right;
+	m_Bottom = r.m_Bottom;
 
 	return *this;
 }
