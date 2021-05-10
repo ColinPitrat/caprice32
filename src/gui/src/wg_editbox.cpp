@@ -507,8 +507,8 @@ bool CEditBox::HandleMessage(CMessage* pMessage)
 						break;
 
 					case SDLK_LEFT:
-		 				if (pKeyboardMessage->Modifiers & KMOD_SHIFT) //Shift modifier
-		  			{
+						if (pKeyboardMessage->Modifiers & KMOD_SHIFT) //Shift modifier
+						{
 							if (m_SelStart > 0)
 							{
 								if ((m_SelLength > 0) || ((m_SelStart - abs(m_SelLength)) > 0))
@@ -531,7 +531,7 @@ bool CEditBox::HandleMessage(CMessage* pMessage)
 									}
 								}
 							}
-		  			}
+						}
 						else if (m_SelLength != 0)
 						{
 							if (m_SelLength < 0)
