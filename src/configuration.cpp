@@ -67,10 +67,10 @@ namespace config
 
   std::ostream& Config::toStream(std::ostream& out) const
   {
-    for(auto section : config_)
+    for(const auto& section : config_)
     {
       out << "[" << section.first << "]" << std::endl;
-      for(auto keyval : section.second)
+      for(const auto& keyval : section.second)
       {
         out << keyval.first << "=" << keyval.second << std::endl;
       }
