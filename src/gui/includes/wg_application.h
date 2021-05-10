@@ -210,8 +210,8 @@ protected:
 	CWindow* m_pKeyFocusWindow;  //!< A pointer to the window with keyboard focus
 	CWindow* m_pMouseFocusWindow;  //!< A pointer to the window with mouse focus
 
-	using t_FontEngineMapKey std::pair<std::string, unsigned char>;  //!< A typedef of font name and size pairs
-	using t_FontEngineMap std::map<t_FontEngineMapKey, CFontEngine*>;  //!< A typedef of a map of font engine pointers
+	using t_FontEngineMapKey = std::pair<std::string, unsigned char>;  //!< A typedef of font name and size pairs
+	using t_FontEngineMap = std::map<t_FontEngineMapKey, CFontEngine*>;  //!< A typedef of a map of font engine pointers
 	t_FontEngineMap m_FontEngines;  //!< A map of font engine pointers
 	CFontEngine* m_pDefaultFontEngine;  //!< A pointer to the default font engine
 
