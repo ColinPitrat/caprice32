@@ -13,8 +13,6 @@
 #include "video.h"
 #include "glfuncs.h"  // For HAVE_GL
 
-extern bool log_verbose;
-
 const struct option long_options[] =
 {
    {"autocmd",  required_argument, nullptr, 'a'},
@@ -27,10 +25,6 @@ const struct option long_options[] =
    {"verbose",  no_argument, nullptr, 'v'},
    {nullptr, 0, nullptr, 0},
 };
-
-CapriceArgs::CapriceArgs()
-{
-}
 
 void usage(std::ostream &os, char *progPath, int errcode)
 {

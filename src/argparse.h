@@ -8,7 +8,7 @@
 class CapriceArgs
 {
    public:
-      CapriceArgs();
+      CapriceArgs() = default;
       std::string autocmd;
       std::string cfgFilePath;
       std::string binFile;
