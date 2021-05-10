@@ -81,7 +81,7 @@ endif
 
 CLANG_FORMAT=clang-format
 CLANG_TIDY=clang-tidy
-CLANG_CHECKS=modernize-*,performance-*,misc-*,-misc-definitions-in-headers,readability-*,-readability-implicit-bool-cast,-readability-braces-around-statements,-readability-function-size,-readability-magic-numbers,modernize-avoid-c-arrays,misc-non-private-member-variables-in-classes,modernize-use-trailing-return-type,readability-implicit-bool-conversion,modernize-use-equals-delete,modernize-use-auto,readability-isolate-declaration,performance-unnecessary-value-param,readability-qualified-auto,readability-make-member-function-const,readability-avoid-const-params-in-decls,misc-no-recursion,modernize-deprecated-headers,performance-faster-string-find,readability-uppercase-literal-suffix,modernize-make-unique,modernize-use-default-member-init,modernize-use-using,
+CLANG_CHECKS=modernize-*,performance-*,misc-*,-misc-definitions-in-headers,readability-*,-readability-implicit-bool-cast,-readability-braces-around-statements,-readability-function-size,-readability-magic-numbers,-misc-non-private-member-variables-in-classes,-misc-no-recursion,-modernize-avoid-c-arrays,-modernize-deprecated-headers,-modernize-make-unique,-modernize-use-auto,-modernize-use-default-member-init,-modernize-use-equals-delete,-modernize-use-trailing-return-type,-modernize-use-using,-performance-faster-string-find,-performance-unnecessary-value-param,-readability-avoid-const-params-in-decls,-readability-implicit-bool-conversion,-readability-isolate-declaration,-readability-make-member-function-const,-readability-qualified-auto,-readability-uppercase-literal-suffix,-modernize-use-nodiscard
 
 SRCDIR:=src
 TSTDIR:=test
