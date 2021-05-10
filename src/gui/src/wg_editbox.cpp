@@ -515,7 +515,7 @@ bool CEditBox::HandleMessage(CMessage* pMessage)
 								{
 									if (pKeyboardMessage->Modifiers & KMOD_CTRL)
 									{
-										std::string::size_type pos = sBuffer.rfind(" ", (m_SelStart + m_SelLength) - 1);
+										std::string::size_type pos = sBuffer.rfind(' ', (m_SelStart + m_SelLength) - 1);
 										if (pos != std::string::npos)
 										{
 											m_SelLength = stdex::safe_static_cast<int>(pos) - stdex::safe_static_cast<int>(m_SelStart);
@@ -545,7 +545,7 @@ bool CEditBox::HandleMessage(CMessage* pMessage)
 						{
 							if (pKeyboardMessage->Modifiers & KMOD_CTRL)
 							{
-								std::string::size_type pos = sBuffer.rfind(" ", m_SelStart - 1);
+								std::string::size_type pos = sBuffer.rfind(' ', m_SelStart - 1);
 								if (pos != std::string::npos)
 								{
 									m_SelStart = pos;
@@ -569,7 +569,7 @@ bool CEditBox::HandleMessage(CMessage* pMessage)
 							{
 								if (pKeyboardMessage->Modifiers & KMOD_CTRL)
 								{
-									std::string::size_type pos = sBuffer.find(" ", m_SelStart + m_SelLength);
+									std::string::size_type pos = sBuffer.find(' ', m_SelStart + m_SelLength);
 									if (pos != std::string::npos)
 									{
 										m_SelLength = stdex::safe_static_cast<int>(pos) - stdex::safe_static_cast<int>(m_SelStart) + 1;
@@ -592,7 +592,7 @@ bool CEditBox::HandleMessage(CMessage* pMessage)
 								// If we don't have the ctrl modifier, then we just incriment the cursor position by one character
 								if (pKeyboardMessage->Modifiers & KMOD_CTRL)
 								{
-									std::string::size_type pos = sBuffer.find(" ", m_SelStart + 1);
+									std::string::size_type pos = sBuffer.find(' ', m_SelStart + 1);
 									if (pos != std::string::npos)
 									{
 										m_SelStart = pos + 1;

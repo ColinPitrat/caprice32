@@ -71,7 +71,7 @@ CRGBColor::CRGBColor(std::string s)
 	//It's possible that we have a string with arbitrary values
 	if (!bInitted && s.length() > 4 && s.length() < 12)
 	{
-		pos = s.find(",", 0);
+		pos = s.find(',', 0);
 		if (pos != std::string::npos)
 		{
 			std::string sub = s.substr(0, pos);
@@ -79,7 +79,7 @@ CRGBColor::CRGBColor(std::string s)
 			red = stdex::safe_static_cast<unsigned char>((stdex::atoi(sub)));
 
 			posOld = pos + 1;
-			pos = s.find(",", posOld);
+			pos = s.find(',', posOld);
 			if (pos != std::string::npos)
 			{
 				sub = s.substr(posOld, pos - posOld);

@@ -585,7 +585,7 @@ bool CTextBox::HandleMessage(CMessage* pMessage)  // virtual
 								{
 									if (pKeyboardMessage->Modifiers & KMOD_CTRL)
 									{
-										std::string::size_type pos = sBuffer.rfind(" ", (m_SelStart + m_SelLength) - 1);
+										std::string::size_type pos = sBuffer.rfind(' ', (m_SelStart + m_SelLength) - 1);
 										if (pos != std::string::npos)
 										{
 											m_SelLength = stdex::safe_static_cast<int>(pos) - stdex::safe_static_cast<int>(m_SelStart);
@@ -614,7 +614,7 @@ bool CTextBox::HandleMessage(CMessage* pMessage)  // virtual
 						{
 							if (pKeyboardMessage->Modifiers & KMOD_CTRL)
 							{
-								std::string::size_type pos = sBuffer.rfind(" ", m_SelStart - 1);
+								std::string::size_type pos = sBuffer.rfind(' ', m_SelStart - 1);
 								if (pos != std::string::npos)
 								{
 									m_SelStart = pos;
@@ -638,7 +638,7 @@ bool CTextBox::HandleMessage(CMessage* pMessage)  // virtual
 							{
 								if (pKeyboardMessage->Modifiers & KMOD_CTRL)
 								{
-									std::string::size_type pos = sBuffer.find(" ", m_SelStart + m_SelLength);
+									std::string::size_type pos = sBuffer.find(' ', m_SelStart + m_SelLength);
 									if (pos != std::string::npos)
 									{
 										m_SelLength = stdex::safe_static_cast<int>(pos) - stdex::safe_static_cast<int>(m_SelStart) + 1;
@@ -661,7 +661,7 @@ bool CTextBox::HandleMessage(CMessage* pMessage)  // virtual
 								// If we don't have the ctrl modifier, then we just incriment the cursor position by one character
 								if (pKeyboardMessage->Modifiers & KMOD_CTRL)
 								{
-									std::string::size_type pos = sBuffer.find(" ", m_SelStart + 1);
+									std::string::size_type pos = sBuffer.find(' ', m_SelStart + 1);
 									if (pos != std::string::npos)
 									{
 										m_SelStart = pos + 1;
@@ -860,7 +860,7 @@ void CTextBox::PrepareWindowText(const std::string& sText)
 	m_iMaxWidth = 0;
 	while (loc != std::string::npos)
 	{
-		loc = sText.find("\n", start);
+		loc = sText.find('\n', start);
 		m_vpRenderedString.push_back(new CRenderedString(
 			m_pFontEngine, sText.substr(start, loc - start), CRenderedString::VALIGN_TOP, CRenderedString::HALIGN_LEFT));
 		CPoint BoundingDimensions;
@@ -926,14 +926,14 @@ CPoint CTextBox::RowColFromIndex(std::string::size_type Index) const
 {
 	int iRow = 0;
 	int iCol = stdex::safe_static_cast<int>(Index);
-	std::string::size_type loc = m_sWindowText.find("\n");
+	std::string::size_type loc = m_sWindowText.find('\n');
 	std::string::size_type start = 0;
 	while (loc != std::string::npos && loc < Index)
 	{
 		++iRow;
 		iCol -= (stdex::safe_static_cast<int>(loc - start) + 1);
 		start = loc + 1;
-		loc = m_sWindowText.find("\n", start);
+		loc = m_sWindowText.find('\n', start);
 	}
 	return CPoint(iCol, iRow);
 }

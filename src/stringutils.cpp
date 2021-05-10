@@ -46,9 +46,9 @@ namespace stringutils
 
   void splitPath(const std::string& path, std::string& dirname, std::string& filename)
   {
-    auto delimiter = path.rfind("/");
+    auto delimiter = path.rfind('/');
     if(delimiter == std::string::npos) {
-      delimiter = path.rfind("\\");
+      delimiter = path.rfind('\\');
     }
     if(delimiter != std::string::npos) {
       delimiter++;
