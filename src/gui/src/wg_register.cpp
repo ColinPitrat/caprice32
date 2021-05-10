@@ -1,6 +1,7 @@
 #include "wg_register.h"
 #include <iomanip>
 #include <sstream>
+#include <string>
 
 namespace wGui
 {

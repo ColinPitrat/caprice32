@@ -7,6 +7,7 @@
 #ifndef _WG_REGISTER_H_
 #define _WG_REGISTER_H_
 
+#include <string>
 #include "wg_window.h"
 #include "wg_painter.h"
 #include "wg_label.h"
