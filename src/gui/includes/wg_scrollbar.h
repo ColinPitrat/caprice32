@@ -67,7 +67,7 @@ public:
 	//! Set the current value.
 	//! \param iValue The new value for the control
 	//! \param bRedraw indicates if the control should be redrawn (defaults to true)
-	void SetValue(int iValue, bool bRedraw = true) override;
+	void SetValue(int iValue, bool bRedraw = true, bool bNotify = true) override;
 
 	//! Set the lower limit for the control.
 	//! \param minLimit The lower limit of the control

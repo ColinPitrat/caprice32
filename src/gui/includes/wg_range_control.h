@@ -76,10 +76,13 @@ public:
 	//! Set the current value.
 	//! \param value The new value for the control
 	//! \param bRedraw indicates if the control should be redrawn (defaults to true)
-	virtual void SetValue(T value, bool bRedraw = true)
+	virtual void SetValue(T value, bool bRedraw = true, bool bNotify = true)
 	{
 		m_Value = ConstrainValue(value);
-		CMessageServer::Instance().QueueMessage(new CValueMessage<T>(CMessage::CTRL_VALUECHANGE, m_pParentWindow, this, m_Value));
+		if (bNotify)
+		{
+			CMessageServer::Instance().QueueMessage(new CValueMessage<T>(CMessage::CTRL_VALUECHANGE, m_pParentWindow, this, m_Value));
+		}
 
 		if (bRedraw)
 		{

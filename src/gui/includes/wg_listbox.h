@@ -84,6 +84,11 @@ public:
 	//! \return The index of the added item
 	unsigned int AddItem(SListItem ListItem);
 
+	//! Adds multiple items at once to the list
+	//! \param ListItems The items to add
+	//! \return The index of the last added item
+	unsigned int AddItems(std::vector<SListItem> ListItem);
+
 	//! Returns the desired item
 	//! \param iItemIndex The index of the item to check (will throw an exception if the index is out of range)
 	//! \return A reference to the SListItem struct

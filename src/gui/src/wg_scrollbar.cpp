@@ -78,9 +78,9 @@ CScrollBar::CScrollBar(const CRect& WindowRect, CWindow* pParent, EScrollBarType
 CScrollBar::~CScrollBar() = default;
 
 
-void CScrollBar::SetValue(int iValue, bool bRedraw)  // virtual
+void CScrollBar::SetValue(int iValue, bool bRedraw, bool bNotify)
 {
-	CRangeControl<int>::SetValue(iValue, false);
+	CRangeControl<int>::SetValue(iValue, false, bNotify);
 	RepositionThumb();
 	if (bRedraw)
 	{
