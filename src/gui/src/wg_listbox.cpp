@@ -79,10 +79,23 @@ unsigned int CListBox::AddItem(SListItem ListItem)
 {
 	m_Items.push_back(ListItem);
 	m_SelectedItems.push_back(false);
-	m_RenderedStrings.emplace_back(CRenderedString(m_pFontEngine, ListItem.sItemText, CRenderedString::VALIGN_TOP, CRenderedString::HALIGN_LEFT));
+	m_RenderedStrings.emplace_back(m_pFontEngine, ListItem.sItemText, CRenderedString::VALIGN_TOP, CRenderedString::HALIGN_LEFT);
 	UpdateMaxLimit();
 	Draw();
 	return m_Items.size();
+}
+
+
+unsigned int CListBox::AddItems(std::vector<SListItem> ListItems)
+{
+  m_Items.insert(m_Items.end(), ListItems.begin(), ListItems.end());
+  m_SelectedItems.resize(m_SelectedItems.size() + ListItems.size());
+  for (const auto& item : ListItems) {
+    m_RenderedStrings.emplace_back(m_pFontEngine, item.sItemText, CRenderedString::VALIGN_TOP, CRenderedString::HALIGN_LEFT);
+  }
+  UpdateMaxLimit();
+  Draw();
+  return m_Items.size();
 }
 
 
@@ -104,7 +117,7 @@ void CListBox::ClearItems()
 	m_SelectedItems.clear();
 	m_RenderedStrings.clear();
 	m_pVScrollbar->SetMaxLimit(0);
-	m_pVScrollbar->SetValue(0);
+	m_pVScrollbar->SetValue(0, false, false);
 	Draw();
 }
 
@@ -191,6 +204,10 @@ void CListBox::Draw() const
 				}
 				ItemRect.Grow(-1);
 				m_RenderedStrings.at(i).Draw(m_pSDLSurface, ItemRect, ItemRect.TopLeft() + CPoint(0, 1), m_Items[i].ItemColor);
+			}
+			else
+			{
+				break;
 			}
 		}
 	}
