@@ -73,7 +73,7 @@ void CNavigationBar::SetItemWidth(unsigned int iItemWidth) {
 
 unsigned int CNavigationBar::AddItem(SNavBarItem NavBarItem) {
 	m_Items.push_back(NavBarItem);
-	m_RenderedStrings.emplace_back(CRenderedString(m_pFontEngine, NavBarItem.sItemText, CRenderedString::VALIGN_BOTTOM, CRenderedString::HALIGN_CENTER));
+	m_RenderedStrings.emplace_back(m_pFontEngine, NavBarItem.sItemText, CRenderedString::VALIGN_BOTTOM, CRenderedString::HALIGN_CENTER);
     if (!NavBarItem.sPictureFilename.empty()) {
         m_Bitmaps.push_back(new CBitmapFileResourceHandle(NavBarItem.sPictureFilename));
         // Set transparency color to COLOR_WHITE:
