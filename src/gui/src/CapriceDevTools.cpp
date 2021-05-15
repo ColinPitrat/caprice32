@@ -101,6 +101,9 @@ CapriceDevTools::CapriceDevTools(const CRect& WindowRect, CWindow* pParent, CFon
     m_pZ80RegSP = new CRegister(CRect(CPoint(10, 330), 110, 20), m_pGroupBoxTabZ80, "SP");
     m_pZ80RegPC = new CRegister(CRect(CPoint(150, 330), 110, 20), m_pGroupBoxTabZ80, "PC");
 
+    m_pZ80StackLabel = new CLabel(CPoint(300, 10), m_pGroupBoxTabZ80, "Stack:");
+    m_pZ80Stack = new CListBox(CRect(CPoint(300, 10), 100, 200), m_pGroupBoxTabZ80);
+
     // ---------------- 'Assembly' screen ----------------
     m_pAssemblyCode = new CListBox(
         CRect(10, 10, 320, m_pGroupBoxTabAsm->GetClientRect().Height() - 20),
@@ -213,9 +216,9 @@ void CapriceDevTools::RefreshDisassembly()
     if (std::any_of(breakpoints.begin(), breakpoints.end(), [&](const auto& b) {
           return b.address == line.address_;
           })) {
-      items.push_back(SListItem(oss.str(), nullptr, COLOR_RED));
+      items.emplace_back(oss.str(), nullptr, COLOR_RED);
     } else {
-      items.push_back(SListItem(oss.str()));
+      items.emplace_back(oss.str());
     }
   }
   // TODO: Select the line correponding to PC
@@ -343,6 +346,15 @@ void CapriceDevTools::Update()
                m_pZ80RegIY->SetValue(z80.IY.w.l);
                m_pZ80RegSP->SetValue(z80.SP.w.l);
                m_pZ80RegPC->SetValue(z80.PC.w.l);
+
+               m_pZ80Stack->ClearItems();
+               for (word addr = z80.SP.w.l; addr < 0xC000; addr += 2) {
+                 std::ostringstream oss;
+                 word val = (z80_read_mem(addr+1) << 8) + z80_read_mem(addr);
+                 oss << std::hex << std::setw(4) << std::setfill('0') << val
+                     << " (" << std::dec << val << ")";
+                 m_pZ80Stack->AddItem(SListItem(oss.str()));
+               }
                break;
              }
     case 1 : { // 'Assembly'
@@ -356,7 +368,7 @@ void CapriceDevTools::Update()
                  for (const auto& line : m_Disassembled.lines) {
                    std::ostringstream oss;
                    oss << std::hex << std::setw(5) << line.address_ << ": " << std::setw(10) << line.opcode_ << "     " << line.instruction_;
-                   items.push_back(SListItem(oss.str()));
+                   items.emplace_back(SListItem(oss.str()));
                  }
                  m_pAssemblyCode->AddItems(items);
                }
@@ -444,7 +456,7 @@ bool CapriceDevTools::HandleMessage(CMessage* pMessage)
               // stol can throw on empty string or invalid value
               try
               {
-                breakpoints.push_back(Breakpoint(static_cast<word>(std::stol(m_pAssemblyNewBreakPoint->GetWindowText(), nullptr, 16))));
+                breakpoints.emplace_back(static_cast<word>(std::stol(m_pAssemblyNewBreakPoint->GetWindowText(), nullptr, 16)));
                 UpdateBreakPointsList();
               } catch(...) {}
               break;
@@ -516,7 +528,7 @@ bool CapriceDevTools::HandleMessage(CMessage* pMessage)
               // stol can throw on empty string or invalid value
               try
               {
-                watchpoints.push_back(Watchpoint(static_cast<word>(std::stol(m_pMemNewWatchPoint->GetWindowText(), nullptr, 16))));
+                watchpoints.emplace_back(static_cast<word>(std::stol(m_pMemNewWatchPoint->GetWindowText(), nullptr, 16)));
                 UpdateWatchPointsList();
               } catch(...) {}
               break;
