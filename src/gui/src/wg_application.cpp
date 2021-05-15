@@ -49,9 +49,8 @@ void CApplication::HandleSDLEvent(SDL_Event event)
 	{
   case SDL_WINDOWEVENT:
     CMessageServer::Instance().QueueMessage(new CMessage(CMessage::APP_PAINT, nullptr, this));
-    break;
-  case SDL_WINDOWEVENT_RESIZED:
-    if (event.window.event == SDL_WINDOWEVENT_SIZE_CHANGED) {
+    if (event.window.event == SDL_WINDOWEVENT_RESIZED ||
+        event.window.event == SDL_WINDOWEVENT_SIZE_CHANGED) {
       CMessageServer::Instance().QueueMessage(new TPointMessage(
             CMessage::CTRL_RESIZE, nullptr, this, CPoint(event.window.data1, event.window.data2)));
     }
@@ -295,7 +294,7 @@ void CApplication::Init()
 	CMessageServer::Instance().RegisterMessageClient(this, CMessage::APP_EXIT, CMessageServer::PRIORITY_LAST);
 
 	// judb removed references to wgui.conf; for caprice32 we may integrate these settings in cap32.cfg:
-	m_pDefaultFontEngine = GetFontEngine(CPC.resources_path + "/vera_sans.ttf", 8); // default size was 10
+	m_pDefaultFontEngine = GetFontEngine(CPC.resources_path + "/vera_sans.ttf", 10); // default size was 10
 	m_DefaultBackgroundColor = DEFAULT_BACKGROUND_COLOR;
 	m_DefaultForegroundColor = DEFAULT_FOREGROUND_COLOR;
 	m_DefaultSelectionColor  = DEFAULT_SELECTION_COLOR;
@@ -348,18 +347,12 @@ void CApplication::Exec()
 		m_AppLog.AddLogEntry("wGui Application entering Exec loop", APP_LOG_INFO);
 		while (m_bRunning)
 		{
-			while (SDL_PollEvent(&event))
-			{
-				HandleSDLEvent(event);
-			}
-			while (!CMessageServer::Instance().MessageAvailable())
-			{
-				while (SDL_PollEvent(&event))
-				{
-					HandleSDLEvent(event);
-				}
-				SDL_Delay(5);
-			}
+      do {
+        while (SDL_PollEvent(&event)) {
+          HandleSDLEvent(event);
+        }
+        SDL_Delay(5);
+      } while (!CMessageServer::Instance().MessageAvailable());
 			CMessageServer::Instance().DeliverMessage();
 		}
 	}
