@@ -196,7 +196,7 @@ void CListBox::Draw() const
 				{
 					Painter.DrawRect(ItemRect, true, CApplication::Instance()->GetDefaultSelectionColor(), CApplication::Instance()->GetDefaultSelectionColor());
 				}
-				if (i == m_iFocusedItem && HasFocus())
+				if (i == m_iFocusedItem && CApplication::Instance()->GetKeyFocus() == this)
 				{
 					ItemRect.Grow(1);
 					Painter.DrawRect(ItemRect, false, COLOR_DARKGRAY);
@@ -265,6 +265,10 @@ bool CListBox::OnMouseButtonDown(CPoint Point, unsigned int Button)
   if (m_pVScrollbar->HandleMouseScroll(Button)) {
     return true;
   }
+  if (Button == CMouseMessage::LEFT && CApplication::Instance()->GetKeyFocus() != this)
+  {
+    CApplication::Instance()->SetKeyFocus(this);
+  }
   if (Button == CMouseMessage::LEFT && !m_Items.empty()) {
     // Prep the new selection
     // judb m_iFocusedItem should be <= the number of items in the listbox (0-based, so m_Items.size() -1)
@@ -282,7 +286,7 @@ bool CListBox::OnMouseButtonUp(CPoint Point, unsigned int Button)
 	CPoint WindowPoint(ViewToWindow(Point));
 	if (!bResult && m_bVisible && (Button == CMouseMessage::LEFT) && (m_ClientRect.HitTest(WindowPoint) == CRect::RELPOS_INSIDE))
 	{
-        // judb m_iFocusedItem should be <= the number of items in the listbox (0-based, so m_Items.size() - 1)
+		// judb m_iFocusedItem should be <= the number of items in the listbox (0-based, so m_Items.size() - 1)
 		if (m_iFocusedItem == std::min(((WindowPoint.YPos() - m_ClientRect.Top()) / m_iItemHeight + m_pVScrollbar->GetValue()), stdex::safe_static_cast<unsigned int>(m_Items.size()) - 1))
 		{
 			SetSelection(m_iFocusedItem, !IsSelected(m_iFocusedItem));
