@@ -333,39 +333,47 @@ static byte cc_ex[256] = {
 
 extern byte *membank_read[4], *membank_write[4];
 
+inline byte read_mem_no_watchpoint(word addr) {
+  return (*(membank_read[addr >> 14] + (addr & 0x3fff))); // returns a byte from a 16KB memory bank
+}
+
 inline byte read_mem(word addr) {
-   if (!watchpoints.empty()) {
-     if (std::any_of(watchpoints.begin(), watchpoints.end(), [&](const auto& w) {
-           return w.address == addr;
-         })) {
-       z80.watchpoint_reached = 1;
-     }
-   }
-   return (*(membank_read[addr >> 14] + (addr & 0x3fff))); // returns a byte from a 16KB memory bank
+  if (!watchpoints.empty()) {
+    if (std::any_of(watchpoints.begin(), watchpoints.end(), [&](const auto& w) {
+          return w.address == addr;
+          })) {
+      z80.watchpoint_reached = 1;
+    }
+  }
+  return read_mem_no_watchpoint(addr);
+}
+
+inline void write_mem_no_watchpoint(word addr, byte val) {
+  *(membank_write[addr >> 14] + (addr & 0x3fff)) = val; // writes a byte to a 16KB memory bank
 }
 
 inline void write_mem(word addr, byte val) {
-   if (!watchpoints.empty()) {
-     if (std::any_of(watchpoints.begin(), watchpoints.end(), [&](const auto& w) {
-           return w.address == addr;
-         })) {
-       z80.watchpoint_reached = 1;
-     }
-   }
-   if (GateArray.registerPageOn) {
-     //LOG_DEBUG("Pass write to ASIC: " << static_cast<int>(val) << " at " << addr);
-      if(!asic_register_page_write(addr, val)) return;
-   }
-   //LOG_DEBUG("Write " << static_cast<int>(val) << " at " << addr);
-   *(membank_write[addr >> 14] + (addr & 0x3fff)) = val; // writes a byte to a 16KB memory bank
+  if (!watchpoints.empty()) {
+    if (std::any_of(watchpoints.begin(), watchpoints.end(), [&](const auto& w) {
+          return w.address == addr;
+          })) {
+      z80.watchpoint_reached = 1;
+    }
+  }
+  if (GateArray.registerPageOn) {
+    //LOG_DEBUG("Pass write to ASIC: " << static_cast<int>(val) << " at " << addr);
+    if(!asic_register_page_write(addr, val)) return;
+  }
+  //LOG_DEBUG("Write " << static_cast<int>(val) << " at " << addr);
+  write_mem_no_watchpoint(addr, val);
 }
 
 byte z80_read_mem(word addr) {
-  return read_mem(addr);
+  return read_mem_no_watchpoint(addr);
 }
 
 void z80_write_mem(word addr, byte val) {
-  write_mem(addr, val);
+  write_mem_no_watchpoint(addr, val);
 }
 
 

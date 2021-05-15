@@ -93,6 +93,9 @@ namespace wGui
         CRegister* m_pZ80RegSP;
         CRegister* m_pZ80RegPC;
         // TODO: Flags
+        // Stack
+        CLabel* m_pZ80StackLabel;
+        CListBox* m_pZ80Stack;
 
         // Assembly screen
         CListBox *m_pAssemblyCode;
