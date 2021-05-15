@@ -1,6 +1,9 @@
 #include "devtools.h"
+
 #include "video.h"
 
+// TODO: Have a single CapriceGui application for all UI. Initialize it once and never call Exec for any UI but pause emulation when some UI (which are on the main window) are on.
+// TODO: Allow to have multiple windows (e.g to allow to see z80 and memory at the same time)
 bool DevTools::Activate() {
   std::cout << "Activating dev tools" << std::endl;
   SDL_ShowCursor(SDL_ENABLE);
@@ -10,8 +13,8 @@ bool DevTools::Activate() {
     window = SDL_CreateWindow("Caprice32 - Developer's tools", 100, SDL_WINDOWPOS_CENTERED, DEVTOOLS_WIDTH, DEVTOOLS_HEIGHT, SDL_WINDOW_SHOWN);
     renderer = SDL_CreateRenderer(window, -1, 0);
     //SDL_CreateWindowAndRenderer(DEVTOOLS_WIDTH, DEVTOOLS_HEIGHT, SDL_WINDOW_SHOWN, &window, &renderer);
+    //SDL_SetWindowTitle(window, "Caprice32 - Developer's tools");
     // TODO: Better handling of error (free stuff, surface error ...)
-    SDL_SetWindowTitle(window, "Caprice32 - Developer's tools");
     if (!window || !renderer) return false;
     surface = SDL_CreateRGBSurface(0, DEVTOOLS_WIDTH, DEVTOOLS_HEIGHT, renderer_bpp(renderer), 0, 0, 0, 0);
     if (!surface) return false;
@@ -35,10 +38,10 @@ void DevTools::Deactivate() {
   capriceGui->ApplicationExit(0);
   devToolsView = nullptr;
   capriceGui = nullptr;
-  SDL_DestroyRenderer(renderer);
-  SDL_DestroyWindow(window);
   SDL_DestroyTexture(texture);
   SDL_FreeSurface(surface);
+  SDL_DestroyRenderer(renderer);
+  SDL_DestroyWindow(window);
   active = false;
 }
 
@@ -77,6 +80,10 @@ bool DevTools::PassEvent(SDL_Event& event) {
       break;
     case SDL_WINDOWEVENT:
       if (event.window.windowID == windowId) forMe = true;
+      if (forMe && event.window.event == SDL_WINDOWEVENT_CLOSE) {
+        devToolsView->Close();
+        return true;
+      }
       break;
   }
   if (!forMe) return false;

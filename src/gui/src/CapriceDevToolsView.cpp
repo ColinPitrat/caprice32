@@ -10,6 +10,8 @@ CapriceDevToolsView::CapriceDevToolsView(SDL_Surface* surface, SDL_Renderer* ren
   m_pDevToolsFrame = new CapriceDevTools(CRect(CPoint(0, 0), DEVTOOLS_WIDTH, DEVTOOLS_HEIGHT), this, nullptr, devtools);
 }
 
+CapriceDevToolsView::~CapriceDevToolsView() {}
+
 void CapriceDevToolsView::PaintToSurface(SDL_Surface& ScreenSurface, SDL_Surface& FloatingSurface, const CPoint& Offset) const
 {
   if (m_bVisible)
@@ -39,4 +41,9 @@ void CapriceDevToolsView::Flip() const
   SDL_RenderClear(m_pRenderer);
   SDL_RenderCopy(m_pRenderer, m_pTexture, nullptr, nullptr);
   SDL_RenderPresent(m_pRenderer);
+}
+
+void CapriceDevToolsView::Close()
+{
+  m_pDevToolsFrame->CloseFrame();
 }

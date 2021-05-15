@@ -3,12 +3,14 @@
 #ifndef _WG_CAPRICE32DEVTOOLS_H_
 #define _WG_CAPRICE32DEVTOOLS_H_
 
+#include "z80_disassembly.h"
+#include "cap32.h"
+#include "types.h"
 #include "wgui.h"
 #include "wg_frame.h"
 #include "wg_label.h"
 #include "wg_register.h"
 #include "wg_navigationbar.h"
-#include "cap32.h"
 #include <map>
 #include <string>
 
@@ -34,6 +36,13 @@ namespace wGui
         void CloseFrame() override;
 
       protected:
+        void RefreshDisassembly();
+        void UpdateDisassembly();
+        void UpdateEntryPointsList();
+        void UpdateBreakPointsList();
+        void UpdateWatchPointsList();
+        void UpdateTextMemory();
+
         CButton* m_pButtonPause;
         CButton* m_pButtonClose;
 
@@ -50,45 +59,91 @@ namespace wGui
 
         // Z80 screen
         // 8 bits registers
-        CRegister* m_pRegA;
-        CRegister* m_pRegAp;
-        CRegister* m_pRegB;
-        CRegister* m_pRegBp;
-        CRegister* m_pRegC;
-        CRegister* m_pRegCp;
-        CRegister* m_pRegD;
-        CRegister* m_pRegDp;
-        CRegister* m_pRegE;
-        CRegister* m_pRegEp;
-        CRegister* m_pRegH;
-        CRegister* m_pRegHp;
-        CRegister* m_pRegL;
-        CRegister* m_pRegLp;
-        CRegister* m_pRegI;
-        CRegister* m_pRegR;
-        CRegister* m_pRegIXH;
-        CRegister* m_pRegIXL;
-        CRegister* m_pRegIYH;
-        CRegister* m_pRegIYL;
+        CRegister* m_pZ80RegA;
+        CRegister* m_pZ80RegAp;
+        CRegister* m_pZ80RegB;
+        CRegister* m_pZ80RegBp;
+        CRegister* m_pZ80RegC;
+        CRegister* m_pZ80RegCp;
+        CRegister* m_pZ80RegD;
+        CRegister* m_pZ80RegDp;
+        CRegister* m_pZ80RegE;
+        CRegister* m_pZ80RegEp;
+        CRegister* m_pZ80RegH;
+        CRegister* m_pZ80RegHp;
+        CRegister* m_pZ80RegL;
+        CRegister* m_pZ80RegLp;
+        CRegister* m_pZ80RegI;
+        CRegister* m_pZ80RegR;
+        CRegister* m_pZ80RegIXH;
+        CRegister* m_pZ80RegIXL;
+        CRegister* m_pZ80RegIYH;
+        CRegister* m_pZ80RegIYL;
         // 16 bits registers
-        CRegister* m_pRegAF;
-        CRegister* m_pRegAFp;
-        CRegister* m_pRegBC;
-        CRegister* m_pRegBCp;
-        CRegister* m_pRegDE;
-        CRegister* m_pRegDEp;
-        CRegister* m_pRegHL;
-        CRegister* m_pRegHLp;
-        CRegister* m_pRegIX;
-        CRegister* m_pRegIY;
-        CRegister* m_pRegSP;
-        CRegister* m_pRegPC;
+        CRegister* m_pZ80RegAF;
+        CRegister* m_pZ80RegAFp;
+        CRegister* m_pZ80RegBC;
+        CRegister* m_pZ80RegBCp;
+        CRegister* m_pZ80RegDE;
+        CRegister* m_pZ80RegDEp;
+        CRegister* m_pZ80RegHL;
+        CRegister* m_pZ80RegHLp;
+        CRegister* m_pZ80RegIX;
+        CRegister* m_pZ80RegIY;
+        CRegister* m_pZ80RegSP;
+        CRegister* m_pZ80RegPC;
         // TODO: Flags
 
         // Assembly screen
-        CLabel* m_pAsmLabel;
+        CListBox *m_pAssemblyCode;
+        CButton *m_pAssemblyRefresh;
+        CLabel* m_pAssemblyStatusLabel;
+        CEditBox* m_pAssemblyStatus;
+
+        CGroupBox* m_pAssemblyEntryPointsGrp;
+        CListBox* m_pAssemblyEntryPoints;
+        CEditBox* m_pAssemblyNewEntryPoint;
+        CButton *m_pAssemblyAddPCEntryPoint;
+        CButton *m_pAssemblyAddEntryPoint;
+        CButton *m_pAssemblyRemoveEntryPoint;
+        std::vector<word> m_EntryPoints;
+
+        CGroupBox* m_pAssemblyBreakPointsGrp;
+        CListBox* m_pAssemblyBreakPoints;
+        CEditBox* m_pAssemblyNewBreakPoint;
+        CButton *m_pAssemblyAddBreakPoint;
+        CButton *m_pAssemblyRemoveBreakPoint;
+
+        DisassembledCode m_Disassembled;
+
         // Memory screen
-        CLabel* m_pMemLabel;
+        CLabel   *m_pMemPokeLabel;
+        CLabel   *m_pMemPokeAdressLabel;
+        CEditBox *m_pMemPokeAdress;
+        CLabel   *m_pMemPokeValueLabel;
+        CEditBox *m_pMemPokeValue;
+        CButton  *m_pMemButtonPoke;
+        CLabel   *m_pMemFilterLabel;
+        CEditBox *m_pMemFilterValue;
+        CButton  *m_pMemButtonFilter;
+        CLabel   *m_pMemAdressLabel;
+        CEditBox *m_pMemAdressValue;
+        CButton  *m_pMemButtonDisplay;
+        CButton  *m_pMemButtonCopy;
+        CLabel   *m_pMemBytesPerLineLbl;
+        CDropDown *m_pMemBytesPerLine;
+        CTextBox *m_pMemTextContent;
+
+        CGroupBox* m_pMemWatchPointsGrp;
+        CListBox* m_pMemWatchPoints;
+        CEditBox* m_pMemNewWatchPoint;
+        CButton *m_pMemAddWatchPoint;
+        CButton *m_pMemRemoveWatchPoint;
+
+        int m_MemFilterValue;
+        int m_MemDisplayValue;
+        unsigned int m_MemBytesPerLine;
+
         // Video screen
         CLabel* m_pVidLabel;
         // Audio screen

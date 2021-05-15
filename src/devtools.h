@@ -10,7 +10,7 @@ class DevTools {
     bool Activate();
     void Deactivate();
 
-    bool IsActive() { return active; };
+    bool IsActive() const { return active; };
 
     void Update();
 
