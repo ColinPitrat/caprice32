@@ -78,9 +78,9 @@ CScrollBar::CScrollBar(const CRect& WindowRect, CWindow* pParent, EScrollBarType
 CScrollBar::~CScrollBar() = default;
 
 
-void CScrollBar::SetValue(int iValue, bool bRedraw)  // virtual
+void CScrollBar::SetValue(int iValue, bool bRedraw, bool bNotify)
 {
-	CRangeControl<int>::SetValue(iValue, false);
+	CRangeControl<int>::SetValue(iValue, false, bNotify);
 	RepositionThumb();
 	if (bRedraw)
 	{
@@ -183,7 +183,7 @@ bool CScrollBar::OnMouseButtonDown(CPoint Point, unsigned int Button)
 		if (HandleMouseScroll(Button)) {
 			return true;
 		}
-		else if (Button == CMouseMessage::LEFT)
+		if (Button == CMouseMessage::LEFT)
 		{
 			switch (m_ThumbRect.HitTest(ViewToWindow(Point)))
 			{

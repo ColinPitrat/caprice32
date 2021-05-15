@@ -21,11 +21,13 @@
 #include <chrono>
 #include <string>
 #include <thread>
+#include <filesystem>
 
 #include "SDL.h"
 
 #include "cap32.h"
 #include "crtc.h"
+#include "devtools.h"
 #include "disk.h"
 #include "tape.h"
 #include "video.h"
@@ -79,9 +81,11 @@ extern t_disk_format disk_format[];
 
 extern byte* pbCartridgePages[];
 
+SDL_AudioDeviceID audio_device_id = 0;
 SDL_Surface *back_surface = nullptr;
 video_plugin* vid_plugin;
 SDL_Joystick* joysticks[MAX_NB_JOYSTICKS];
+DevTools devtools;
 
 dword dwTicks, dwTicksOffset, dwTicksTarget, dwTicksTargetFPS;
 dword dwFPS, dwFrameCount;
@@ -93,8 +97,8 @@ std::string osd_message;
 
 dword dwBreakPoint, dwTrace, dwMF2ExitAddr;
 dword dwMF2Flags = 0;
+std::unique_ptr<byte[]> pbSndBuffer;
 byte *pbGPBuffer = nullptr;
-byte *pbSndBuffer = nullptr;
 byte *pbSndBufferEnd = nullptr;
 byte *pbSndStream = nullptr;
 byte *membank_read[4], *membank_write[4], *memmap_ROM[256];
@@ -133,6 +137,11 @@ dword freq_table[MAX_FREQ_ENTRIES] = {
 };
 
 #include "font.h"
+
+void set_osd_message(const std::string& message) {
+   osd_timing = SDL_GetTicks() + 1000;
+   osd_message = " " + message;
+}
 
 double colours_rgb[32][3] = {
    { 0.5, 0.5, 0.5 }, { 0.5, 0.5, 0.5 },{ 0.0, 1.0, 0.5 }, { 1.0, 1.0, 0.5 },
@@ -193,6 +202,7 @@ byte bit_values[8] = {
 #include "rom_mods.h"
 
 char chAppPath[_MAX_PATH + 1];
+std::filesystem::path binPath; // Where the binary is
 char chROMSelected[_MAX_PATH + 1];
 std::string chROMFile[4] = {
    "cpc464.rom",
@@ -526,7 +536,7 @@ void z80_OUT_handler (reg_pair port, byte val)
                 fprintf(pfoDebug, "mem 0x%02x\r\n", val);
              }
              #endif
-             LOG_DEBUG("RAM config: " << static_cast<int>(val));
+             LOG_DEBUG("RAM config: " << std::hex << static_cast<int>(val) << std::dec);
              GateArray.RAM_config = val;
              ga_memory_manager();
              if (CPC.mf2) { // MF2 enabled?
@@ -709,6 +719,7 @@ void z80_OUT_handler (reg_pair port, byte val)
       if (pfoPrinter) {
          if (!(CPC.printer_port & 0x80)) { // only grab data bytes; ignore the strobe signal
             fputc(CPC.printer_port, pfoPrinter); // capture printer output to file
+            fflush(pfoPrinter);
          }
       }
    }
@@ -1256,7 +1267,7 @@ void printer_stop ()
 
 void audio_update (void *userdata __attribute__((unused)), byte *stream, int len)
 {
-   memcpy(stream, pbSndBuffer, len);
+   memcpy(stream, pbSndBuffer.get(), len);
    dwSndBufferCopied = 1;
 }
 
@@ -1293,21 +1304,21 @@ int audio_init ()
       LOG_VERBOSE("Audio: device " << i << ": " << SDL_GetAudioDeviceName(i, 0));
    }
 
-   auto device_id = SDL_OpenAudioDevice(nullptr, 0, &desired, &obtained, 0 /* no change allowed */);
-   if (device_id == 0) {
+   audio_device_id = SDL_OpenAudioDevice(nullptr, 0, &desired, &obtained, 0 /* no change allowed */);
+   if (audio_device_id == 0) {
       LOG_ERROR("Could not open audio: " << SDL_GetError());
       return 1;
    }
-   SDL_PauseAudioDevice(device_id, 0);
+   SDL_PauseAudioDevice(audio_device_id, 0);
 
    LOG_VERBOSE("Audio: Desired: Freq: " << desired.freq << ", Format: " << desired.format << ", Channels: " << desired.channels << ", Samples: " << desired.samples);
    LOG_VERBOSE("Audio: Obtained: Freq: " << obtained.freq << ", Format: " << obtained.format << ", Channels: " << obtained.channels << ", Samples: " << obtained.samples);
 
    CPC.snd_buffersize = obtained.size; // size is samples * channels * bytes per sample (1 or 2)
-   pbSndBuffer = static_cast<byte *>(malloc(CPC.snd_buffersize)); // allocate the sound data buffer
-   pbSndBufferEnd = pbSndBuffer + CPC.snd_buffersize;
-   memset(pbSndBuffer, 0, CPC.snd_buffersize);
-   CPC.snd_bufferptr = pbSndBuffer; // init write cursor
+   pbSndBuffer = std::make_unique<byte[]>(CPC.snd_buffersize); // allocate the sound data buffer
+   pbSndBufferEnd = pbSndBuffer.get() + CPC.snd_buffersize;
+   memset(pbSndBuffer.get(), 0, CPC.snd_buffersize);
+   CPC.snd_bufferptr = pbSndBuffer.get(); // init write cursor
 
    InitAY();
 
@@ -1322,10 +1333,8 @@ int audio_init ()
 
 void audio_shutdown ()
 {
-   SDL_CloseAudio();
-   if (pbSndBuffer) {
-      free(pbSndBuffer);
-   }
+   SDL_CloseAudioDevice(audio_device_id);
+   audio_device_id = 0;
 }
 
 
@@ -1641,6 +1650,7 @@ std::string getConfigurationFilename(bool forWrite)
     { getenv("HOME"), "/.config/cap32.cfg" },
     { getenv("HOME"), "/.cap32.cfg" },
     { DESTDIR, "/etc/cap32.cfg" },
+    { binPath.string().c_str(), "/../Resources/cap32.cfg" }, // To find the configuration from the bundle on MacOS
   };
 
   for(const auto& p: configPaths){
@@ -1649,6 +1659,11 @@ std::string getConfigurationFilename(bool forWrite)
     std::string s = std::string(p.first) + p.second;
     if (access(s.c_str(), mode) == 0) {
       std::cout << "Using configuration file" << (forWrite ? " to save" : "") << ": " << s << std::endl;
+      // Dirty hack for MacOS Bundle to work: change dir to the bin dir
+      // cap32.cfg is edited to have relative paths from the bin dir
+      if (p.second == "/../Resources/cap32.cfg") {
+              std::filesystem::current_path(binPath);
+      }
       return s;
     }
   }
@@ -1662,6 +1677,7 @@ void loadConfiguration (t_CPC &CPC, const std::string& configFilename)
 {
    config::Config conf;
    conf.parseFile(configFilename);
+   conf.setOverrides(args.cfgOverrides);
 
    std::string appPath = chAppPath;
    const char *chFileName = configFilename.c_str();
@@ -1700,7 +1716,7 @@ void loadConfiguration (t_CPC &CPC, const std::string& configFilename)
    CPC.scr_fs_height = conf.getIntValue("video", "scr_height", 600);
    CPC.scr_fs_bpp = conf.getIntValue("video", "scr_bpp", 8);
    CPC.scr_preserve_aspect_ratio = conf.getIntValue("video", "scr_preserve_aspect_ratio", 1);
-   CPC.scr_style = conf.getIntValue("video", "scr_style", 0);
+   CPC.scr_style = conf.getIntValue("video", "scr_style", 1);
    if (CPC.scr_style >= video_plugin_list.size()) {
       CPC.scr_style = DEFAULT_VIDEO_PLUGIN;
       LOG_ERROR("Unsupported video plugin specified - defaulting to plugin " << video_plugin_list[DEFAULT_VIDEO_PLUGIN].name);
@@ -1923,6 +1939,24 @@ void showGui()
       CapriceGuiView capriceGuiView(back_surface, guiBackSurface, CRect(0, 0, back_surface->w, back_surface->h));
       capriceGui.SetMouseVisibility(true);
       capriceGui.Exec();
+      /* TODO: Something like that to replace Exec and allow Menu to be
+       * displayed at the same time as DevTools
+      while (capriceGui.IsRunning()) {
+        SDL_Event event;
+        while (SDL_PollEvent(&event)) {
+          if (devtools.IsActive() &&
+              devtools.PassEvent(event)) {
+            continue;
+          }
+          capriceGui->ProcessEvent(event, &capriceGuiView);
+        }
+        if (devtools.IsActive()) {
+          devtools.Update();
+        }
+        capriceGui->Update(&capriceGuiView);
+        SDL_Delay(5);
+      }
+      */
    } catch(wGui::Wg_Ex_App& e) {
       // TODO: improve: this is pretty silent if people don't look at the console
       std::cout << "Failed displaying the GUI: " << e.what() << std::endl;
@@ -1930,9 +1964,24 @@ void showGui()
    cleanupShowUI(guiBackSurface);
 }
 
-void set_osd_message(const std::string& message) {
-   osd_timing = SDL_GetTicks() + 1000;
-   osd_message = " " + message;
+extern SDL_Window* window;
+
+void toggleDevTools()
+{
+  if (!devtools.IsActive()) {
+    Uint32 flags = SDL_GetWindowFlags(window);
+    // DevTools don't behave very well in fullscreen mode, so just disallow it
+    if ((flags & SDL_WINDOW_FULLSCREEN) ||
+        (flags & SDL_WINDOW_FULLSCREEN_DESKTOP)) {
+      set_osd_message("Dev tools not available in fullscreen");
+      return;
+    }
+    if (!devtools.Activate()) {
+      LOG_ERROR("Failed to activate developers tools");
+    }
+  } else {
+    devtools.Deactivate();
+  }
 }
 
 void dumpScreen() {
@@ -2512,6 +2561,13 @@ int cap32_main (int argc, char **argv)
    SDL_Event event;
    std::vector<std::string> slot_list;
 
+   try {
+     binPath = std::filesystem::absolute(std::filesystem::path(argv[0]).parent_path());
+   } catch(...) {
+     // Dirty fallback in case the executable is found in the path.
+     // binPath is only use for bundles anyway, where this is not the case.
+     binPath = std::filesystem::absolute(".");
+   }
    parseArguments(argc, argv, slot_list, args);
 
    if (SDL_Init(SDL_INIT_AUDIO | SDL_INIT_TIMER | SDL_INIT_NOPARACHUTE) < 0) { // initialize SDL
@@ -2621,7 +2677,13 @@ int cap32_main (int argc, char **argv)
          virtualKeyboardEvents.pop_front();
       }
       
+      if (devtools.IsActive()) {
+        devtools.Update();
+      }
       while (SDL_PollEvent(&event)) {
+         if (devtools.IsActive()) {
+            if (devtools.PassEvent(event)) continue;
+         }
          switch (event.type) {
             case SDL_KEYDOWN:
                {
@@ -2651,6 +2713,12 @@ int cap32_main (int argc, char **argv)
                         case CAP32_VKBD:
                           {
                             showVKeyboard();
+                            break;
+                          }
+
+                        case CAP32_DEVTOOLS:
+                          {
+                            toggleDevTools();
                             break;
                           }
 
@@ -2735,6 +2803,17 @@ int cap32_main (int argc, char **argv)
                            CPC.InputMapper->set_joystick_emulation();
                            set_osd_message(std::string("Joystick emulation: ") + (CPC.joystick_emulation ? "on" : "off"));
                            break;
+
+                        case CAP32_PASTE:
+                           set_osd_message("Pasting...");
+                           {
+                             auto content = std::string(SDL_GetClipboardText());
+                             LOG_VERBOSE("Pasting '" << content << "'");
+                             auto newEvents = CPC.InputMapper->StringToEvents(content);
+                             virtualKeyboardEvents.splice(virtualKeyboardEvents.end(), newEvents);
+                             nextVirtualEventFrameCount = dwFrameCountOverall;
+                             break;
+                           }
 
                         case CAP32_EXIT:
                            cleanExit (0);
@@ -2912,4 +2991,3 @@ int cap32_main (int argc, char **argv)
 
    return 0;
 }
-

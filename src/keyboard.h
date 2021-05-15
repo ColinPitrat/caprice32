@@ -22,7 +22,7 @@
 #define MOD_PC_NUM      (static_cast<PCKey>(KMOD_NUM) << BITSHIFT_MOD)
 #define MOD_PC_CAPS     (static_cast<PCKey>(KMOD_CAPS) << BITSHIFT_MOD)
 
-typedef qword PCKey;
+using PCKey = qword;
 
 typedef enum {
    CAP32_EXIT = MOD_EMU_KEY,
@@ -39,7 +39,9 @@ typedef enum {
    CAP32_DEBUG,
    CAP32_SNAPSHOT,
    CAP32_WAITBREAK,
-   CAP32_DELAY
+   CAP32_DELAY,
+   CAP32_PASTE,
+   CAP32_DEVTOOLS
 } CAP32_KEYS;
 
 typedef enum {

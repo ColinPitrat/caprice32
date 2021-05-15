@@ -1,3 +1,6 @@
+#ifndef CAPRICEGUIVIEW_H
+#define CAPRICEGUIVIEW_H
+
 #include "wgui.h"
 
 class CapriceGuiView : public wGui::CView
@@ -10,3 +13,5 @@ class CapriceGuiView : public wGui::CView
 
     void PaintToSurface(SDL_Surface& ScreenSurface, SDL_Surface& FloatingSurface, const wGui::CPoint& Offset) const override;
 };
+
+#endif

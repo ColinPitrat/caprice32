@@ -60,7 +60,7 @@ public:
 
 	//! Indicates if the timer is currently running
 	//! \return true is the timer is currently running
-	bool IsRunning() { return m_TimerID != 0; }
+	bool IsRunning() const { return m_TimerID != 0; }
 
 	//! Gets the number of times the timer has triggered since it was last reset
 	//! \return The count of times the timer has fired

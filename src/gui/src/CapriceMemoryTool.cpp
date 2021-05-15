@@ -35,11 +35,11 @@ CapriceMemoryTool::CapriceMemoryTool(const CRect& WindowRect, CWindow* pParent, 
     m_pAdressLabel     = new CLabel(        CPoint(15, 50),             this, "Adress: ");
     m_pAdressValue     = new CEditBox(CRect(CPoint(55, 45), 30, 20),    this);
     m_pAdressValue->SetIsFocusable(true);
-    m_pButtonDisplay   = new CButton( CRect(CPoint(95, 45), 40, 20),    this, "Display");
+    m_pButtonDisplay   = new CButton( CRect(CPoint(95, 45), 45, 20),    this, "Display");
     m_pButtonDisplay->SetIsFocusable(true);
 
     m_pBytesPerLineLbl = new CLabel(       CPoint(240, 35),             this, "Bytes per line:");
-    m_pBytesPerLine  = new CDropDown( CRect(CPoint(240, 45), 50, 20),   this, false, 14);
+    m_pBytesPerLine  = new CDropDown( CRect(CPoint(240, 45), 50, 20),   this, false);
     m_pBytesPerLine->AddItem(SListItem("1"));
     m_pBytesPerLine->AddItem(SListItem("4"));
     m_pBytesPerLine->AddItem(SListItem("8"));
@@ -54,9 +54,9 @@ CapriceMemoryTool::CapriceMemoryTool(const CRect& WindowRect, CWindow* pParent, 
     m_pFilterLabel     = new CLabel(        CPoint(15, 80),             this, "Byte: ");
     m_pFilterValue     = new CEditBox(CRect(CPoint(55, 75), 30, 20),    this);
     m_pFilterValue->SetIsFocusable(true);
-    m_pButtonFilter    = new CButton( CRect(CPoint(95, 75), 40, 20),    this, "Filter");
+    m_pButtonFilter    = new CButton( CRect(CPoint(95, 75), 45, 20),    this, "Filter");
     m_pButtonFilter->SetIsFocusable(true);
-    m_pButtonCopy      = new CButton( CRect(CPoint(240, 75), 75, 20),   this, "Dump to stdout");
+    m_pButtonCopy      = new CButton( CRect(CPoint(220, 75), 95, 20),   this, "Dump to stdout");
     m_pButtonCopy->SetIsFocusable(true);
 
     m_pTextMemContent  = new CTextBox(CRect(CPoint(15, 105), 300, 102), this, m_pMonoFontEngine);

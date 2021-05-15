@@ -57,6 +57,17 @@ CRect& CRect::operator=(const CRect& r)
 }
 
 
+CRect& CRect::operator=(CRect&& r) noexcept
+{
+	m_Top = r.m_Top;
+	m_Left = r.m_Left;
+	m_Right = r.m_Right;
+	m_Bottom = r.m_Bottom;
+
+	return *this;
+}
+
+
 CRect& CRect::operator+=(const CPoint& p)
 {
   m_Left   += p.XPos();

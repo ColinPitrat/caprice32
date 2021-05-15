@@ -140,11 +140,10 @@ void fillSlots (std::vector<std::string> slot_list, t_CPC& CPC)
            zip_info.extensions = ".dsk.sna.cdt.voc.cpr.ipf";
            if (zip::dir(&zip_info)) {
              continue; // error or nothing relevant found
-           } else {
-             std::string filename = zip_info.filesOffsets[0].first;
-             pos = filename.length() - 4;
-             extension = filename.substr(pos); // grab the extension
            }
+           std::string filename = zip_info.filesOffsets[0].first;
+           pos = filename.length() - 4;
+           extension = filename.substr(pos); // grab the extension
          }
 
          if (fillSlot(CPC.drvA_file, have_DSKA, fullpath, extension, ".dsk", "drive A disk"))
@@ -446,9 +445,7 @@ void dsk_eject (t_drive *drive)
 
    for (track = 0; track < DSK_TRACKMAX; track++) { // loop for all tracks
       for (side = 0; side < DSK_SIDEMAX; side++) { // loop for all sides
-         if (drive->track[track][side].data) { // track is formatted?
-            free(drive->track[track][side].data); // release memory allocated for this track
-         }
+        delete [] drive->track[track][side].data; // release memory allocated for this track
       }
    }
    dword dwTemp = drive->current_track; // save the drive head position
@@ -503,12 +500,7 @@ int dsk_load (FILE *pfile, t_drive *drive)
         }
         drive->track[track][side].sectors = dwSectors; // store sector count
         drive->track[track][side].size = dwTrackSize; // store track size
-        drive->track[track][side].data = static_cast<byte *>(malloc(dwTrackSize)); // attempt to allocate the required memory
-        if (drive->track[track][side].data == nullptr) { // abort if not enough
-          LOG_ERROR("Couldn't allocate " << dwTrackSize << " bytes to store track " << track << " side " << side);
-          dsk_eject(drive);
-          return ERR_OUT_OF_MEMORY;
-        }
+        drive->track[track][side].data = new byte[dwTrackSize]; // attempt to allocate the required memory
         pbDataPtr = drive->track[track][side].data; // pointer to start of memory buffer
         pbTempPtr = pbDataPtr; // keep a pointer to the beginning of the buffer for the current track
         for (sector = 0; sector < dwSectors; sector++) { // loop for all sectors
@@ -571,12 +563,7 @@ int dsk_load (FILE *pfile, t_drive *drive)
             }
             drive->track[track][side].sectors = dwSectors; // store sector count
             drive->track[track][side].size = dwTrackSize; // store track size
-            drive->track[track][side].data = static_cast<byte *>(malloc(dwTrackSize)); // attempt to allocate the required memory
-            if (drive->track[track][side].data == nullptr) { // abort if not enough
-              LOG_ERROR("Couldn't allocate " << dwTrackSize << " bytes to store track " << track << " side " << side);
-              dsk_eject(drive);
-              return ERR_OUT_OF_MEMORY;
-            }
+            drive->track[track][side].data = new byte[dwTrackSize]; // attempt to allocate the required memory
             pbDataPtr = drive->track[track][side].data; // pointer to start of memory buffer
             pbTempPtr = pbDataPtr; // keep a pointer to the beginning of the buffer for the current track
             pbPtr += 0x18;
@@ -719,11 +706,7 @@ int dsk_format (t_drive *drive, int iFormat)
          dword dwTrackSize = dwSectorSize * dwSectors; // determine track size in bytes, minus track header
          drive->track[track][side].sectors = dwSectors; // store sector count
          drive->track[track][side].size = dwTrackSize; // store track size
-         drive->track[track][side].data = static_cast<byte *>(malloc(dwTrackSize)); // attempt to allocate the required memory
-         if (drive->track[track][side].data == nullptr) { // abort if not enough
-            iRetCode = ERR_OUT_OF_MEMORY;
-            goto exit;
-         }
+         drive->track[track][side].data = new byte[dwTrackSize]; // attempt to allocate the required memory
          byte *pbDataPtr = drive->track[track][side].data; // pointer to start of memory buffer
          byte *pbTempPtr = pbDataPtr; // keep a pointer to the beginning of the buffer for the current track
          byte CHRN[4];
@@ -751,8 +734,7 @@ exit:
 
 void tape_eject ()
 {
-   free(pbTapeImage);
-   pbTapeImage = nullptr;
+   delete [] pbTapeImage;
 }
 
 int snapshot_load (FILE *pfile)
@@ -1024,7 +1006,7 @@ int tape_insert_cdt (FILE *pfile)
       LOG_DEBUG("Invalid CDT file size");
       return ERR_TAP_INVALID;
    }
-   pbTapeImage = static_cast<byte *>(malloc(lFileSize+6));
+   pbTapeImage = new byte[lFileSize+6];
    *pbTapeImage = 0x20; // start off with a pause block
    *reinterpret_cast<word *>(pbTapeImage+1) = 2000; // set the length to 2 seconds
    if(fread(pbTapeImage+3, lFileSize, 1, pfile) != 1) { // append the entire CDT file
@@ -1237,10 +1219,7 @@ int tape_insert_voc (FILE *pfile)
    if (dwCompressedSize > 0x00ffffff) { // we only support one direct recording block right now
       return ERR_TAP_BAD_VOC;
    }
-   pbTapeImage = static_cast<byte *>(malloc(dwCompressedSize+1+8+6));
-   if (pbTapeImage == nullptr) { // check if the memory allocation has failed
-      return ERR_OUT_OF_MEMORY;
-   }
+   pbTapeImage = new byte[dwCompressedSize+1+8+6];
    *pbTapeImage = 0x20; // start off with a pause block
    *reinterpret_cast<word *>(pbTapeImage+1) = 2000; // set the length to 2 seconds
 
@@ -1270,11 +1249,7 @@ int tape_insert_voc (FILE *pfile)
             }
             iBlockLength = (*reinterpret_cast<dword *>(pbPtr) & 0x00ffffff) + 4;
             lSampleLength = iBlockLength - 6;
-            pbVocDataBlock = static_cast<byte *>(malloc(lSampleLength));
-            if (pbVocDataBlock == nullptr) {
-               tape_eject();
-               return ERR_OUT_OF_MEMORY;
-            }
+            pbVocDataBlock = new byte[lSampleLength];
             if(fread(pbVocDataBlock, lSampleLength, 1, pfile) != 1) {
               return ERR_TAP_BAD_VOC;
             }
@@ -1291,7 +1266,7 @@ int tape_insert_voc (FILE *pfile)
                   bByte = 0;
                }
             }
-            free(pbVocDataBlock);
+            delete [] pbVocDataBlock;
             break;
          case 0x2: // sound continue
             if(fread(pbPtr, 3, 1, pfile) != 1) { // get block size
@@ -1299,7 +1274,7 @@ int tape_insert_voc (FILE *pfile)
             }
             iBlockLength = (*reinterpret_cast<dword *>(pbPtr) & 0x00ffffff) + 4;
             lSampleLength = iBlockLength - 4;
-            pbVocDataBlock = static_cast<byte *>(malloc(lSampleLength));
+            pbVocDataBlock = new byte[lSampleLength];
             if (pbVocDataBlock == nullptr) {
                tape_eject();
                return ERR_OUT_OF_MEMORY;
@@ -1320,7 +1295,7 @@ int tape_insert_voc (FILE *pfile)
                   bByte = 0;
                }
             }
-            free(pbVocDataBlock);
+	    delete [] pbVocDataBlock;
             break;
          case 0x3: // silence
             iBlockLength = 4;

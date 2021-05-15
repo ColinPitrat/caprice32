@@ -16,8 +16,9 @@
    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#ifdef HAVE_GL
 #include "glfuncs.h"
+
+#ifdef HAVE_GL
 
 #define GL_FUNC(ret,func,params) ptr##func e##func=nullptr;
 #define GL_FUNC_OPTIONAL(ret,func,params) ptr##func e##func=nullptr;

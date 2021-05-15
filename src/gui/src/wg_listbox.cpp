@@ -79,10 +79,23 @@ unsigned int CListBox::AddItem(SListItem ListItem)
 {
 	m_Items.push_back(ListItem);
 	m_SelectedItems.push_back(false);
-	m_RenderedStrings.push_back(CRenderedString(m_pFontEngine, ListItem.sItemText, CRenderedString::VALIGN_TOP, CRenderedString::HALIGN_LEFT));
+	m_RenderedStrings.emplace_back(m_pFontEngine, ListItem.sItemText, CRenderedString::VALIGN_TOP, CRenderedString::HALIGN_LEFT);
 	UpdateMaxLimit();
 	Draw();
 	return m_Items.size();
+}
+
+
+unsigned int CListBox::AddItems(std::vector<SListItem> ListItems)
+{
+  m_Items.insert(m_Items.end(), ListItems.begin(), ListItems.end());
+  m_SelectedItems.resize(m_SelectedItems.size() + ListItems.size());
+  for (const auto& item : ListItems) {
+    m_RenderedStrings.emplace_back(m_pFontEngine, item.sItemText, CRenderedString::VALIGN_TOP, CRenderedString::HALIGN_LEFT);
+  }
+  UpdateMaxLimit();
+  Draw();
+  return m_Items.size();
 }
 
 
@@ -104,7 +117,7 @@ void CListBox::ClearItems()
 	m_SelectedItems.clear();
 	m_RenderedStrings.clear();
 	m_pVScrollbar->SetMaxLimit(0);
-	m_pVScrollbar->SetValue(0);
+	m_pVScrollbar->SetValue(0, false, false);
 	Draw();
 }
 
@@ -183,7 +196,7 @@ void CListBox::Draw() const
 				{
 					Painter.DrawRect(ItemRect, true, CApplication::Instance()->GetDefaultSelectionColor(), CApplication::Instance()->GetDefaultSelectionColor());
 				}
-				if (i == m_iFocusedItem && HasFocus())
+				if (i == m_iFocusedItem && CApplication::Instance()->GetKeyFocus() == this)
 				{
 					ItemRect.Grow(1);
 					Painter.DrawRect(ItemRect, false, COLOR_DARKGRAY);
@@ -191,6 +204,10 @@ void CListBox::Draw() const
 				}
 				ItemRect.Grow(-1);
 				m_RenderedStrings.at(i).Draw(m_pSDLSurface, ItemRect, ItemRect.TopLeft() + CPoint(0, 1), m_Items[i].ItemColor);
+			}
+			else
+			{
+				break;
 			}
 		}
 	}
@@ -248,6 +265,10 @@ bool CListBox::OnMouseButtonDown(CPoint Point, unsigned int Button)
   if (m_pVScrollbar->HandleMouseScroll(Button)) {
     return true;
   }
+  if (Button == CMouseMessage::LEFT && CApplication::Instance()->GetKeyFocus() != this)
+  {
+    CApplication::Instance()->SetKeyFocus(this);
+  }
   if (Button == CMouseMessage::LEFT && !m_Items.empty()) {
     // Prep the new selection
     // judb m_iFocusedItem should be <= the number of items in the listbox (0-based, so m_Items.size() -1)
@@ -265,7 +286,7 @@ bool CListBox::OnMouseButtonUp(CPoint Point, unsigned int Button)
 	CPoint WindowPoint(ViewToWindow(Point));
 	if (!bResult && m_bVisible && (Button == CMouseMessage::LEFT) && (m_ClientRect.HitTest(WindowPoint) == CRect::RELPOS_INSIDE))
 	{
-        // judb m_iFocusedItem should be <= the number of items in the listbox (0-based, so m_Items.size() - 1)
+		// judb m_iFocusedItem should be <= the number of items in the listbox (0-based, so m_Items.size() - 1)
 		if (m_iFocusedItem == std::min(((WindowPoint.YPos() - m_ClientRect.Top()) / m_iItemHeight + m_pVScrollbar->GetValue()), stdex::safe_static_cast<unsigned int>(m_Items.size()) - 1))
 		{
 			SetSelection(m_iFocusedItem, !IsSelected(m_iFocusedItem));

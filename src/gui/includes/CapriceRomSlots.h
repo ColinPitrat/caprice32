@@ -22,7 +22,7 @@ namespace wGui
         // Returns a list with the available ROM files (filenames)
         std::vector<std::string> getAvailableRoms();
 
-        int getRomSlot() {return romSlot; } ;
+        int getRomSlot() const { return romSlot; };
         void setRomSlot(int newRomSlot) { romSlot = newRomSlot; } ;
 
       protected:

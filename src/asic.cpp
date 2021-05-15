@@ -50,8 +50,8 @@ void asic_reset() {
 }
 
 void asic_poke_lock_sequence(byte val) {
-   static const byte lockSeq[] = { 0x00, 0x00, 0xff, 0x77, 0xb3, 0x51, 0xa8, 0xd4, 0x62, 0x39, 0x9c, 0x46, 0x2b, 0x15, 0x8a, 0xcd };
-   static const int lockSeqLength = sizeof(lockSeq)/sizeof(lockSeq[0]);
+   static constexpr byte lockSeq[] = { 0x00, 0x00, 0xff, 0x77, 0xb3, 0x51, 0xa8, 0xd4, 0x62, 0x39, 0x9c, 0x46, 0x2b, 0x15, 0x8a, 0xcd };
+   static constexpr int lockSeqLength = sizeof(lockSeq)/sizeof(lockSeq[0]);
    LOG_DEBUG("ASIC poked with val=" << std::hex << static_cast<int>(val) << std::dec << " lockPos = " << asic.lockSeqPos);
    // Lock sequence can only start after a non zero value
    if (asic.lockSeqPos == 0) {

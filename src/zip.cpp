@@ -81,7 +81,7 @@ namespace zip
       while (*pchThisExtension != '\0') { // loop for all extensions to be checked
         if (strncasecmp(reinterpret_cast<char*>(pbPtr) + (wFilenameLength - 4), pchThisExtension, 4) == 0) {
           std::string filename(reinterpret_cast<char*>(pbPtr), wFilenameLength);
-          zi->filesOffsets.push_back({filename, dwOffset});
+          zi->filesOffsets.emplace_back(filename, dwOffset);
           zi->dwOffset = dwOffset;
           break;
         }

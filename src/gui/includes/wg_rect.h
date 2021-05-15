@@ -65,6 +65,10 @@ public:
 	//! \param r A CRect that thie new CRect will be copied from
 	CRect(const CRect& r) = default;
 
+	//! Move constructor
+	//! \param r A CRect that thie new CRect will be moved from
+	CRect(CRect&& r) = default;
+
 	//! Standard Destructor
 	virtual ~CRect() = default;
 
@@ -155,6 +159,9 @@ public:
 
 	//! Assignment operator will copy the values of the other rect
 	CRect& operator=(const CRect& r);  // assignment operator
+
+	//! Move assignment operator will copy the values of the other rect
+	CRect& operator=(CRect&& r) noexcept;  // move assignment operator
 
 	//! Addition operator to add a CPoint, will offset the CRect
 	//! \param p A point to offset the CRect by

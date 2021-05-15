@@ -117,9 +117,15 @@ public:
 	//! \return A pointer to the window with mouse focus ( grab )
 	virtual CWindow* GetMouseFocus() const { return m_pMouseFocusWindow; }
 
-	//! Init() must be called before Exec()
+	//! Init() must be called before Exec() or ProcessEvent()
 	//! Takes care of initializing SDL and other important stuff
 	virtual void Init();
+
+	//! A single step of the primary message loop. Useful to continue to update things outside of the application.
+	virtual void Update();
+
+	//! Processing one event. Useful when events can also affect things outside of the application.
+	virtual void ProcessEvent(SDL_Event& e);
 
 	//! The primary message loop
 	virtual void Exec();
@@ -204,8 +210,8 @@ protected:
 	CWindow* m_pKeyFocusWindow;  //!< A pointer to the window with keyboard focus
 	CWindow* m_pMouseFocusWindow;  //!< A pointer to the window with mouse focus
 
-	typedef std::pair<std::string, unsigned char> t_FontEngineMapKey;  //!< A typedef of font name and size pairs
-	typedef std::map<t_FontEngineMapKey, CFontEngine*> t_FontEngineMap;  //!< A typedef of a map of font engine pointers
+	using t_FontEngineMapKey = std::pair<std::string, unsigned char>;  //!< A typedef of font name and size pairs
+	using t_FontEngineMap = std::map<t_FontEngineMapKey, CFontEngine*>;  //!< A typedef of a map of font engine pointers
 	t_FontEngineMap m_FontEngines;  //!< A map of font engine pointers
 	CFontEngine* m_pDefaultFontEngine;  //!< A pointer to the default font engine
 

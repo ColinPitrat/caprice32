@@ -48,8 +48,8 @@ CFrame::CFrame(const CRect& WindowRect, CWindow* pParent, CFontEngine* pFontEngi
 	}
 
 	m_sWindowText = sTitle;
-	m_pFrameCloseButton = new CPictureButton(CRect(0, 0, 8, 8),
-			this, CwgBitmapResourceHandle(WGRES_X_BITMAP));
+  m_pFrameCloseButton = new CPictureButton(CRect(0, 0, 8, 8),
+      this, CwgBitmapResourceHandle(WGRES_X_BITMAP));
 
 	m_pRenderedString.reset(new CRenderedString(m_pFontEngine, m_sWindowText, CRenderedString::VALIGN_CENTER));
 
@@ -101,16 +101,18 @@ void CFrame::Draw() const  // virtual
 		CRect SubRect(m_WindowRect.SizeRect());
 		Painter.Draw3DRaisedRect(SubRect, DEFAULT_BACKGROUND_COLOR);
 		SubRect.Grow(-2);
-		Painter.DrawRect(m_TitleBarRect, true, m_TitleBarColor, m_TitleBarColor);
-		Painter.Draw3DLoweredRect(m_TitleBarRect, m_TitleBarColor);
+    if (m_iTitleBarHeight > 0) {
+      Painter.DrawRect(m_TitleBarRect, true, m_TitleBarColor, m_TitleBarColor);
+      Painter.Draw3DLoweredRect(m_TitleBarRect, m_TitleBarColor);
 
-		CRect TextClipRect(m_TitleBarRect);
-		TextClipRect.SetRight(TextClipRect.Right() - 16);
-		TextClipRect.Grow(-1);
-		if (m_pRenderedString.get())
-		{
-			m_pRenderedString->Draw(m_pSDLSurface, TextClipRect, m_TitleBarRect.TopLeft() + CPoint(6, m_iTitleBarHeight / 2 - 1), m_TitleBarTextColor);
-		}
+      CRect TextClipRect(m_TitleBarRect);
+      TextClipRect.SetRight(TextClipRect.Right() - 16);
+      TextClipRect.Grow(-1);
+      if (m_pRenderedString)
+      {
+        m_pRenderedString->Draw(m_pSDLSurface, TextClipRect, m_TitleBarRect.TopLeft() + CPoint(6, m_iTitleBarHeight / 2 - 1), m_TitleBarTextColor);
+      }
+    }
 	}
 }
 
@@ -162,6 +164,14 @@ void CFrame::PaintToSurface(SDL_Surface& ScreenSurface, SDL_Surface& FloatingSur
 void CFrame::SetTitleBarHeight(int iTitleBarHeight)
 {
 	m_iTitleBarHeight = iTitleBarHeight;
+  if (m_iTitleBarHeight > 0) {
+    delete m_pFrameCloseButton;
+    m_pFrameCloseButton = new CPictureButton(CRect(0, 0, 8, 8),
+        this, CwgBitmapResourceHandle(WGRES_X_BITMAP));
+  } else {
+    delete m_pFrameCloseButton;
+    m_pFrameCloseButton = nullptr;
+  }
 	SetWindowRect(m_WindowRect);
 }
 
@@ -187,7 +197,8 @@ void CFrame::AttachMenu(CMenu* pMenu)
 void CFrame::SetWindowRect(const CRect& WindowRect)  // virtual
 {
 	m_TitleBarRect = CRect(3, 2, WindowRect.Width() - 4, m_iTitleBarHeight);
-	m_pFrameCloseButton->SetWindowRect(CRect(CPoint(WindowRect.Width() - 15, (-m_iTitleBarHeight / 2) - 5), 9, 9));
+  if (m_pFrameCloseButton) 
+    m_pFrameCloseButton->SetWindowRect(CRect(CPoint(WindowRect.Width() - 15, (-m_iTitleBarHeight / 2) - 5), 9, 9));
 	m_ClientRect = CRect(2, m_iTitleBarHeight + 2, WindowRect.Width() - 1, WindowRect.Height() - 1);
 	// SetWindowRect() must be called last since it calls Draw(), and needs the titlebar rect and such to be set first
 	CWindow::SetWindowRect(WindowRect);

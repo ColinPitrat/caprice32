@@ -17,6 +17,7 @@
 #include "log.h"
 #include "slotshandler.h"
 #include <string>
+#include <memory>
 
 extern t_CPC CPC;
 
@@ -351,7 +352,8 @@ static void ReadTrack (t_track *pt_)
   if (!pt_->data)
   {
     // Allocate enough for the full decoded size, allowing for expanded overlapping sectors
-    memcpy(pt_->data = static_cast<byte*>(malloc(uDecoded)), abDecoded, pt_->size = uDecoded);
+    std::shared_ptr<byte[]> datamng = std::shared_ptr<byte[]>(new byte[uDecoded]);
+    memcpy(pt_->data = datamng.get(), abDecoded, pt_->size = uDecoded);
     auto offset = (pt_->data-abDecoded);
 
     // Set the sector data pointers for the new buffer

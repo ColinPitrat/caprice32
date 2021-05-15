@@ -62,7 +62,7 @@ CKeyboardMessage::CKeyboardMessage(const EMessageType MessageType, const CMessag
 CTextInputMessage::CTextInputMessage(const EMessageType MessageType, const CMessageClient* pDestination, const CMessageClient* pSource,
 		std::string Text) :
 	CMessage(MessageType, pDestination, pSource),
-	Text(Text)
+	Text(std::move(Text))
 {
 
 }

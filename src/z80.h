@@ -46,8 +46,26 @@ typedef union {
 typedef struct {
    reg_pair AF, BC, DE, HL, PC, SP, AFx, BCx, DEx, HLx, IX, IY;
    byte I, R, Rb7, IFF1, IFF2, IM, HALT, EI_issued, int_pending;
+   byte watchpoint_reached;
    dword break_point, trace;
 } t_z80regs;
+
+struct Breakpoint {
+  Breakpoint(word val) : address(val) {};
+  dword address;
+};
+
+enum WatchpointType {
+  READ = 1,
+  WRITE = 2,
+  READWRITE = 3,
+};
+
+struct Watchpoint {
+  Watchpoint(word val) : address(val) {};
+  dword address;
+  WatchpointType type;
+};
 
 
 #define EC_BREAKPOINT      10

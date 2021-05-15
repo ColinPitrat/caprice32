@@ -7,7 +7,7 @@ CapriceLeavingWithoutSavingView::CapriceLeavingWithoutSavingView(SDL_Surface* su
   m_pMessageBox->SetModal(true);
 }
 
-bool CapriceLeavingWithoutSavingView::Confirmed()
+bool CapriceLeavingWithoutSavingView::Confirmed() const
 {
   return confirmed;
 }

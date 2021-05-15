@@ -72,7 +72,7 @@ endif
 ifdef APP_PATH
 COMMON_CFLAGS += -DAPP_PATH=\"$(APP_PATH)\"
 else
-$(warning Notice: APP_PATH not specified.  Will look for cap32.cfg debug-style.  See `README.md` for details. )
+$(info Notice: APP_PATH not specified.  Will look for cap32.cfg debug-style.  See `README.md` for details. )
 endif
 
 ifdef DESTDIR
@@ -80,8 +80,8 @@ COMMON_CFLAGS += -DDESTDIR=\"$(DESTDIR)\"
 endif
 
 CLANG_FORMAT=clang-format
-CLANG_TIDY=clang-tidy-3.8
-CLANG_CHECKS=modernize-*,performance-*,misc-*,-misc-definitions-in-headers,readability-*,-readability-implicit-bool-cast,-readability-braces-around-statements,-readability-function-size
+CLANG_TIDY=clang-tidy
+CLANG_CHECKS=modernize-*,performance-*,misc-*,readability-*,-misc-definitions-in-headers,-misc-non-private-member-variables-in-classes,-misc-no-recursion,-modernize-avoid-c-arrays,-modernize-deprecated-headers,-modernize-make-unique,-modernize-use-auto,-modernize-use-default-member-init,-modernize-use-equals-delete,-modernize-use-nodiscard,-modernize-use-trailing-return-type,-modernize-use-using,-performance-unnecessary-value-param,-readability-avoid-const-params-in-decls,-readability-braces-around-statements,-readability-convert-member-functions-to-static,-readability-function-size,-readability-implicit-bool-cast,-readability-implicit-bool-conversion,-readability-isolate-declaration,-readability-magic-numbers,-readability-qualified-auto,-readability-uppercase-literal-suffix,-readability-use-anyofallof
 
 SRCDIR:=src
 TSTDIR:=test
@@ -103,7 +103,7 @@ TEST_HEADERS:=$(shell find $(TSTDIR) -name \*.h)
 TEST_DEPENDS:=$(foreach file,$(TEST_SOURCES:.cpp=.d),$(shell echo "$(OBJDIR)/$(file)"))
 TEST_OBJECTS:=$(TEST_DEPENDS:.d=.o)
 
-.PHONY: all check_deps clean deb_pkg debug debug_flag distrib doc unit_test install
+.PHONY: all check_deps clean deb_pkg debug debug_flag distrib doc unit_test install doxygen
 
 WARNINGS = -Wall -Wextra -Wzero-as-null-pointer-constant -Wformat=2 -Wold-style-cast -Wmissing-include-dirs -Wlogical-op -Woverloaded-virtual -Wpointer-arith -Wredundant-decls
 COMMON_CFLAGS += $(CFLAGS) -std=c++17 $(IPATHS)
@@ -130,7 +130,7 @@ endif
 endif
 
 ifndef WITHOUT_GL
-COMMON_CFLAGS += -DHAVE_GL
+COMMON_CFLAGS += -DWITH_GL
 endif
 
 ifdef DEBUG
@@ -287,7 +287,20 @@ deb_pkg: all
 	# Both changelog files need to be patched with the proper version !
 	sed -i "1s/(.*)/($(VERSION)-$(REVISION))/" debian/changelog
 	sed -i "1s/(.*)/($(VERSION)-$(REVISION))/" release/cap32-linux/caprice32-$(VERSION)/debian/changelog
-	cd release/cap32-linux/caprice32-$(VERSION)/debian && debuild -us -uc --lintian-opts --profile debian
+	cd release/cap32-linux/caprice32-$(VERSION)/debian && debuild -e CXX -us -uc --lintian-opts --profile debian
+
+BUNDLE_DIR=release/cap32-macos/Caprice32.app
+macos_bundle: all
+	rm -rf $(BUNDLE_DIR)
+	mkdir -p $(BUNDLE_DIR)/Contents/MacOS
+	mkdir -p $(BUNDLE_DIR)/Contents/Resources
+	install $(TARGET) $(BUNDLE_DIR)/Contents/MacOS/Caprice32
+	install resources/Info.plist $(BUNDLE_DIR)/Contents/
+	install -m664 cap32.cfg.tmpl $(BUNDLE_DIR)/Contents/Resources/cap32.cfg
+	gsed -i "s,__SHARE_PATH__,../Resources," $(BUNDLE_DIR)/Contents/Resources/cap32.cfg
+	cp -r resources rom $(BUNDLE_DIR)/Contents/Resources
+	# Retry hdiutil up to 3 times: it occasionally fails with "Resource Busy"
+	for i in 1 2 3; do hdiutil create -volname Caprice32-$(VERSION) -srcfolder $(BUNDLE_DIR) -ov -format UDZO release/cap32-macos/Caprice32.dmg && break || sleep 5; done
 
 clang-tidy:
 	if $(CLANG_TIDY) -checks=-*,$(CLANG_CHECKS) $(SOURCES) -header-filter=src/* -- $(COMMON_CFLAGS) | grep "."; then false; fi
@@ -299,8 +312,11 @@ clang-format:
 fix-clang-format:
 	$(CLANG_FORMAT) -style=Google -i $(SOURCES) $(TEST_SOURCES) $(HEADERS) $(TEST_HEADERS)
 
+doxygen:
+	doxygen doxygen.cfg
+
 clean:
-	rm -rf obj/ release/ .pc/
+	rm -rf obj/ release/ .pc/ doxygen/
 	rm -f test_runner test_runner.exe cap32 cap32.exe .debug tags
 
 -include $(DEPENDS) $(TEST_DEPENDS)

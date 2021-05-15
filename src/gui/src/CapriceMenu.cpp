@@ -36,7 +36,7 @@ CapriceMenu::CapriceMenu(const CRect& WindowRect, CWindow* pParent, SDL_Surface*
   for(auto& b : buttons) {
     CButton *button = new CButton(button_rect, this, b.second);
     button->SetIsFocusable(true);
-    m_buttons.push_back(CapriceGuiViewButton(b.first, button));
+    m_buttons.emplace_back(b.first, button);
     button_rect += button_space;
   }
 }
@@ -166,7 +166,7 @@ bool CapriceMenu::HandleMessage(CMessage* pMessage)
       }
     case MenuItem::ABOUT:
       {
-        /*CapriceAbout* pAboutBox = */new CapriceAbout(CRect(ViewToClient(CPoint(m_pScreenSurface->w /2 - 87, m_pScreenSurface->h /2 - 120)), 174, 270), this, nullptr);
+        /*CapriceAbout* pAboutBox = */new CapriceAbout(CRect(ViewToClient(CPoint(m_pScreenSurface->w /2 - 100, m_pScreenSurface->h /2 - 120)), 200, 270), this, nullptr);
         break;
       }
     case MenuItem::RESUME:

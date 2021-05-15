@@ -66,14 +66,14 @@ public:
 	//! \param iItemHeight The height of the items in the list, defaults to 15
 	//! \param pFontEngine A pointer to the font engine to use when drawing the control
 	//! If this is left out (or set to 0) it will use the default font engine specified by the CApplication (which must be set before instantiating this object)
-	CListBox(const CRect& WindowRect, CWindow* pParent, bool bSingleSelection = false, unsigned int iItemHeight = 12, CFontEngine* pFontEngine = nullptr);
+	CListBox(const CRect& WindowRect, CWindow* pParent, bool bSingleSelection = false, unsigned int iItemHeight = 15, CFontEngine* pFontEngine = nullptr);
 
 	//! Standard destructor
 	~CListBox() override;
 
 	//! Gets the height of the items
 	//! \return The height of the items in the listbox
-	unsigned int GetItemHeight() { return m_iItemHeight; }
+	unsigned int GetItemHeight() const { return m_iItemHeight; }
 
 	//! Sets the heigh of the items in the listbox
 	//! \param iItemHeight The height of the items in the listbox
@@ -83,6 +83,11 @@ public:
 	//! \param ListItem A SListItem structure with the data for the item
 	//! \return The index of the added item
 	unsigned int AddItem(SListItem ListItem);
+
+	//! Adds multiple items at once to the list
+	//! \param ListItems The items to add
+	//! \return The index of the last added item
+	unsigned int AddItems(std::vector<SListItem> ListItem);
 
 	//! Returns the desired item
 	//! \param iItemIndex The index of the item to check (will throw an exception if the index is out of range)

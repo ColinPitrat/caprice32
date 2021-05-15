@@ -1,6 +1,6 @@
 #include <cstdint>
 
-typedef uint8_t byte;
-typedef uint16_t word;
-typedef uint32_t dword;
-typedef uint64_t qword;
+using byte = uint8_t;
+using word = uint16_t;
+using dword = uint32_t;
+using qword = uint64_t;

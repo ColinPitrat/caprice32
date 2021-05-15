@@ -33,11 +33,12 @@
 #include "video.h"
 #include "cap32.h"
 #include "log.h"
+#include "glfuncs.h"
 #ifdef HAVE_GL
 #include "SDL_opengl.h"
-#include "glfuncs.h"
 #endif
 #include <math.h>
+#include <memory>
 #include <iostream>
 
 SDL_Window* window = nullptr;
@@ -381,7 +382,7 @@ void glscale_setpal(SDL_Color* c)
   SDL_SetPaletteColors(pub->format->palette, c, 0, 32);
   if (pub->format->palette)
   {
-    Uint8* pal=static_cast<Uint8*>(malloc(sizeof(Uint8)*256*3));
+    std::unique_ptr<Uint8[]> pal = std::make_unique<Uint8[]>(256*3);
     for(int i=0;i<256;i++)
     {
       pal[3*i  ] = pub->format->palette->colors[i].r;
@@ -389,8 +390,7 @@ void glscale_setpal(SDL_Color* c)
       pal[3*i+2] = pub->format->palette->colors[i].b;
     }
     eglBindTexture(GL_TEXTURE_2D,screen_texnum);
-    eglColorTableEXT(GL_TEXTURE_2D,GL_RGB8,256,GL_RGB,GL_UNSIGNED_BYTE,pal);
-    free(pal);
+    eglColorTableEXT(GL_TEXTURE_2D,GL_RGB8,256,GL_RGB,GL_UNSIGNED_BYTE,pal.get());
   }
 }
 
@@ -730,9 +730,9 @@ __inline__ Uint32 Q_INTERPOLATE (Uint32 A, Uint32 B, Uint32 C, Uint32 D)
 void filter_supereagle(Uint8 *srcPtr, Uint32 srcPitch, /* Uint8 *deltaPtr,  */
      Uint8 *dstPtr, Uint32 dstPitch, int width, int height)
 {
-    Uint8  *dP;
-    Uint16 *bP;
-    Uint32 inc_bP;
+  Uint8  *dP;
+  Uint16 *bP;
+  Uint32 inc_bP;
 
 
 
@@ -743,84 +743,84 @@ void filter_supereagle(Uint8 *srcPtr, Uint32 srcPitch, /* Uint8 *deltaPtr,  */
 
   for (; height ; height--)
   {
-      bP = reinterpret_cast<Uint16 *>(srcPtr);
-      dP = dstPtr;
-      for (finish = width; finish; finish -= inc_bP)
-      {
-    Uint32 color4, color5, color6;
-    Uint32 color1, color2, color3;
-    Uint32 colorA1, colorA2, colorB1, colorB2, colorS1, colorS2;
-    Uint32 product1a, product1b, product2a, product2b;
-    colorB1 = *(bP - Nextline);
-    colorB2 = *(bP - Nextline + 1);
-
-    color4 = *(bP - 1);
-    color5 = *(bP);
-    color6 = *(bP + 1);
-    colorS2 = *(bP + 2);
-
-    color1 = *(bP + Nextline - 1);
-    color2 = *(bP + Nextline);
-    color3 = *(bP + Nextline + 1);
-    colorS1 = *(bP + Nextline + 2);
-
-    colorA1 = *(bP + Nextline + Nextline);
-    colorA2 = *(bP + Nextline + Nextline + 1);
-    // --------------------------------------
-    if (color2 == color6 && color5 != color3)
+    bP = reinterpret_cast<Uint16 *>(srcPtr);
+    dP = dstPtr;
+    for (finish = width; finish; finish -= inc_bP)
     {
+      Uint32 color4, color5, color6;
+      Uint32 color1, color2, color3;
+      Uint32 colorA1, colorA2, colorB1, colorB2, colorS1, colorS2;
+      Uint32 product1a, product1b, product2a, product2b;
+      colorB1 = *(bP - Nextline);
+      colorB2 = *(bP - Nextline + 1);
+
+      color4 = *(bP - 1);
+      color5 = *(bP);
+      color6 = *(bP + 1);
+      colorS2 = *(bP + 2);
+
+      color1 = *(bP + Nextline - 1);
+      color2 = *(bP + Nextline);
+      color3 = *(bP + Nextline + 1);
+      colorS1 = *(bP + Nextline + 2);
+
+      colorA1 = *(bP + Nextline + Nextline);
+      colorA2 = *(bP + Nextline + Nextline + 1);
+      // --------------------------------------
+      if (color2 == color6 && color5 != color3)
+      {
         product1b = product2a = color2;
         if ((color1 == color2) || (color6 == colorB2))
         {
-      product1a = INTERPOLATE (color2, color5);
-      product1a = INTERPOLATE (color2, product1a);
-//                       product1a = color2;
+          product1a = INTERPOLATE (color2, color5);
+          product1a = INTERPOLATE (color2, product1a);
+          //                       product1a = color2;
         }
         else
         {
-      product1a = INTERPOLATE (color5, color6);
+          product1a = INTERPOLATE (color5, color6);
         }
 
         if ((color6 == colorS2) || (color2 == colorA1))
         {
-      product2b = INTERPOLATE (color2, color3);
-      product2b = INTERPOLATE (color2, product2b);
-//                       product2b = color2;
+          product2b = INTERPOLATE (color2, color3);
+          product2b = INTERPOLATE (color2, product2b);
+          //                       product2b = color2;
         }
         else
         {
-      product2b = INTERPOLATE (color2, color3);
+          product2b = INTERPOLATE (color2, color3);
         }
-    }
-    else if (color5 == color3 && color2 != color6)
-    {
+      }
+      else if (color5 == color3 && color2 != color6)
+      {
         product2b = product1a = color5;
 
         if ((colorB1 == color5) || (color3 == colorS1))
         {
-      product1b = INTERPOLATE (color5, color6);
-      product1b = INTERPOLATE (color5, product1b);
-//                       product1b = color5;
+          product1b = INTERPOLATE (color5, color6);
+          product1b = INTERPOLATE (color5, product1b);
+          //                       product1b = color5;
         }
         else
         {
-      product1b = INTERPOLATE (color5, color6);
+          product1b = INTERPOLATE (color5, color6);
         }
 
         if ((color3 == colorA2) || (color4 == color5))
         {
-      product2a = INTERPOLATE (color5, color2);
-      product2a = INTERPOLATE (color5, product2a);
-//                       product2a = color5;
+          product2a = INTERPOLATE (color5, color2);
+          product2a = INTERPOLATE (color5, product2a);
+          //                       product2a = color5;
         }
         else
         {
-      product2a = INTERPOLATE (color2, color3);
+          product2a = INTERPOLATE (color2, color3);
         }
 
-    }
-    else if (color5 == color3 && color2 == color6)
-    {
+      }
+      else if (color5 == color3 && color2 == color6)
+      {
         int r = 0;
 
         r += GetResult (color6, color5, color1, colorA1);
@@ -830,55 +830,55 @@ void filter_supereagle(Uint8 *srcPtr, Uint32 srcPitch, /* Uint8 *deltaPtr,  */
 
         if (r > 0)
         {
-      product1b = product2a = color2;
-      product1a = product2b = INTERPOLATE (color5, color6);
+          product1b = product2a = color2;
+          product1a = product2b = INTERPOLATE (color5, color6);
         }
         else if (r < 0)
         {
-      product2b = product1a = color5;
-      product1b = product2a = INTERPOLATE (color5, color6);
+          product2b = product1a = color5;
+          product1b = product2a = INTERPOLATE (color5, color6);
         }
         else
         {
-      product2b = product1a = color5;
-      product1b = product2a = color2;
+          product2b = product1a = color5;
+          product1b = product2a = color2;
         }
-    }
-    else
-    {
+      }
+      else
+      {
         product2b = product1a = INTERPOLATE (color2, color6);
         product2b =
-      Q_INTERPOLATE (color3, color3, color3, product2b);
+          Q_INTERPOLATE (color3, color3, color3, product2b);
         product1a =
-      Q_INTERPOLATE (color5, color5, color5, product1a);
+          Q_INTERPOLATE (color5, color5, color5, product1a);
 
         product2a = product1b = INTERPOLATE (color5, color3);
         product2a =
-      Q_INTERPOLATE (color2, color2, color2, product2a);
+          Q_INTERPOLATE (color2, color2, color2, product2a);
         product1b =
-      Q_INTERPOLATE (color6, color6, color6, product1b);
+          Q_INTERPOLATE (color6, color6, color6, product1b);
 
-//                    product1a = color5;
-//                    product1b = color6;
-//                    product2a = color2;
-//                    product2b = color3;
-    }
+        //                    product1a = color5;
+        //                    product1b = color6;
+        //                    product2a = color2;
+        //                    product2b = color3;
+      }
 #if SDL_BYTEORDER == SDL_LIL_ENDIAN
-    product1a = product1a | (product1b << 16);
-    product2a = product2a | (product2b << 16);
+      product1a = product1a | (product1b << 16);
+      product2a = product2a | (product2b << 16);
 #else
-    product1a = (product1a << 16) | product1b;
-    product2a = (product2a << 16) | product2b;
+      product1a = (product1a << 16) | product1b;
+      product2a = (product2a << 16) | product2b;
 #endif
 
-    *(reinterpret_cast<Uint32 *>(dP)) = product1a;
-    *(reinterpret_cast<Uint32 *>(dP + dstPitch)) = product2a;
+      *(reinterpret_cast<Uint32 *>(dP)) = product1a;
+      *(reinterpret_cast<Uint32 *>(dP + dstPitch)) = product2a;
 
-    bP += inc_bP;
-    dP += sizeof (Uint32);
-      }      // end of for ( finish= width etc..)
-      srcPtr += srcPitch;
-      dstPtr += dstPitch * 2;
+      bP += inc_bP;
+      dP += sizeof (Uint32);
+    }      // end of for ( finish= width etc..)
+    srcPtr += srcPitch;
+    dstPtr += dstPitch * 2;
   }      // endof: for (height; height; height--)
 }
 
@@ -948,190 +948,188 @@ void scale2x_flip(video_plugin* t __attribute__((unused)))
 void filter_ascale2x (Uint8 *srcPtr, Uint32 srcPitch,
        Uint8 *dstPtr, Uint32 dstPitch, int width, int height)
 {
-    Uint8  *dP;
-    Uint16 *bP;
-    Uint32 inc_bP;
-
+  Uint8  *dP;
+  Uint16 *bP;
+  Uint32 inc_bP;
 
   Uint32 finish;
   Uint32 Nextline = srcPitch >> 1;
   inc_bP = 1;
 
-
   for (; height; height--)
   {
-      bP = reinterpret_cast<Uint16 *>(srcPtr);
-      dP = dstPtr;
+    bP = reinterpret_cast<Uint16 *>(srcPtr);
+    dP = dstPtr;
 
-      for (finish = width; finish; finish -= inc_bP)
-      {
-
-    Uint32 colorA, colorB;
-    Uint32 colorC, colorD,
-        colorE, colorF, colorG, colorH,
-        colorI, colorJ, colorK, colorL,
-
-        colorM, colorN, colorO;
-    Uint32 product, product1, product2;
-
-//---------------------------------------
-// Map of the pixels:                    I|E F|J
-//                                       G|A B|K
-//                                       H|C D|L
-//                                       M|N O|P
-    colorI = *(bP - Nextline - 1);
-    colorE = *(bP - Nextline);
-    colorF = *(bP - Nextline + 1);
-    colorJ = *(bP - Nextline + 2);
-
-    colorG = *(bP - 1);
-    colorA = *(bP);
-    colorB = *(bP + 1);
-    colorK = *(bP + 2);
-
-    colorH = *(bP + Nextline - 1);
-    colorC = *(bP + Nextline);
-    colorD = *(bP + Nextline + 1);
-    colorL = *(bP + Nextline + 2);
-
-    colorM = *(bP + Nextline + Nextline - 1);
-    colorN = *(bP + Nextline + Nextline);
-    colorO = *(bP + Nextline + Nextline + 1);
-
-    if ((colorA == colorD) && (colorB != colorC))
+    for (finish = width; finish; finish -= inc_bP)
     {
+
+      Uint32 colorA, colorB;
+      Uint32 colorC, colorD,
+             colorE, colorF, colorG, colorH,
+             colorI, colorJ, colorK, colorL,
+
+             colorM, colorN, colorO;
+      Uint32 product, product1, product2;
+
+      //---------------------------------------
+      // Map of the pixels:                    I|E F|J
+      //                                       G|A B|K
+      //                                       H|C D|L
+      //                                       M|N O|P
+      colorI = *(bP - Nextline - 1);
+      colorE = *(bP - Nextline);
+      colorF = *(bP - Nextline + 1);
+      colorJ = *(bP - Nextline + 2);
+
+      colorG = *(bP - 1);
+      colorA = *(bP);
+      colorB = *(bP + 1);
+      colorK = *(bP + 2);
+
+      colorH = *(bP + Nextline - 1);
+      colorC = *(bP + Nextline);
+      colorD = *(bP + Nextline + 1);
+      colorL = *(bP + Nextline + 2);
+
+      colorM = *(bP + Nextline + Nextline - 1);
+      colorN = *(bP + Nextline + Nextline);
+      colorO = *(bP + Nextline + Nextline + 1);
+
+      if ((colorA == colorD) && (colorB != colorC))
+      {
         if (((colorA == colorE) && (colorB == colorL)) ||
-          ((colorA == colorC) && (colorA == colorF)
-           && (colorB != colorE) && (colorB == colorJ)))
+            ((colorA == colorC) && (colorA == colorF)
+             && (colorB != colorE) && (colorB == colorJ)))
         {
-      product = colorA;
+          product = colorA;
         }
         else
         {
-      product = INTERPOLATE (colorA, colorB);
+          product = INTERPOLATE (colorA, colorB);
         }
 
         if (((colorA == colorG) && (colorC == colorO)) ||
-          ((colorA == colorB) && (colorA == colorH)
-           && (colorG != colorC) && (colorC == colorM)))
+            ((colorA == colorB) && (colorA == colorH)
+             && (colorG != colorC) && (colorC == colorM)))
         {
-      product1 = colorA;
+          product1 = colorA;
         }
         else
         {
-      product1 = INTERPOLATE (colorA, colorC);
+          product1 = INTERPOLATE (colorA, colorC);
         }
         product2 = colorA;
-    }
-    else if ((colorB == colorC) && (colorA != colorD))
-    {
+      }
+      else if ((colorB == colorC) && (colorA != colorD))
+      {
         if (((colorB == colorF) && (colorA == colorH)) ||
-          ((colorB == colorE) && (colorB == colorD)
-           && (colorA != colorF) && (colorA == colorI)))
+            ((colorB == colorE) && (colorB == colorD)
+             && (colorA != colorF) && (colorA == colorI)))
         {
-      product = colorB;
+          product = colorB;
         }
         else
         {
-      product = INTERPOLATE (colorA, colorB);
+          product = INTERPOLATE (colorA, colorB);
         }
 
         if (((colorC == colorH) && (colorA == colorF)) ||
-          ((colorC == colorG) && (colorC == colorD)
-           && (colorA != colorH) && (colorA == colorI)))
+            ((colorC == colorG) && (colorC == colorD)
+             && (colorA != colorH) && (colorA == colorI)))
         {
-      product1 = colorC;
+          product1 = colorC;
         }
         else
         {
-      product1 = INTERPOLATE (colorA, colorC);
+          product1 = INTERPOLATE (colorA, colorC);
         }
         product2 = colorB;
-    }
-    else if ((colorA == colorD) && (colorB == colorC))
-    {
+      }
+      else if ((colorA == colorD) && (colorB == colorC))
+      {
         if (colorA == colorB)
         {
-      product = colorA;
-      product1 = colorA;
-      product2 = colorA;
+          product = colorA;
+          product1 = colorA;
+          product2 = colorA;
         }
         else
         {
-      int r = 0;
+          int r = 0;
 
-      product1 = INTERPOLATE (colorA, colorC);
-      product = INTERPOLATE (colorA, colorB);
+          product1 = INTERPOLATE (colorA, colorC);
+          product = INTERPOLATE (colorA, colorB);
 
-      r += GetResult1 (colorA, colorB, colorG, colorE);
-      r += GetResult2 (colorB, colorA, colorK, colorF);
-      r += GetResult2 (colorB, colorA, colorH, colorN);
-      r += GetResult1 (colorA, colorB, colorL, colorO);
+          r += GetResult1 (colorA, colorB, colorG, colorE);
+          r += GetResult2 (colorB, colorA, colorK, colorF);
+          r += GetResult2 (colorB, colorA, colorH, colorN);
+          r += GetResult1 (colorA, colorB, colorL, colorO);
 
-      if (r > 0)
-          product2 = colorA;
-      else if (r < 0)
-          product2 = colorB;
+          if (r > 0)
+            product2 = colorA;
+          else if (r < 0)
+            product2 = colorB;
+          else
+          {
+            product2 =
+              Q_INTERPOLATE (colorA, colorB, colorC,
+                  colorD);
+          }
+        }
+      }
       else
       {
-          product2 =
-        Q_INTERPOLATE (colorA, colorB, colorC,
-                 colorD);
-      }
-        }
-    }
-    else
-    {
         product2 = Q_INTERPOLATE (colorA, colorB, colorC, colorD);
 
         if ((colorA == colorC) && (colorA == colorF)
-          && (colorB != colorE) && (colorB == colorJ))
+            && (colorB != colorE) && (colorB == colorJ))
         {
-      product = colorA;
+          product = colorA;
         }
         else
-      if ((colorB == colorE) && (colorB == colorD)
-          && (colorA != colorF) && (colorA == colorI))
-        {
-      product = colorB;
-        }
-        else
-        {
-      product = INTERPOLATE (colorA, colorB);
-        }
+          if ((colorB == colorE) && (colorB == colorD)
+              && (colorA != colorF) && (colorA == colorI))
+          {
+            product = colorB;
+          }
+          else
+          {
+            product = INTERPOLATE (colorA, colorB);
+          }
 
         if ((colorA == colorB) && (colorA == colorH)
-          && (colorG != colorC) && (colorC == colorM))
+            && (colorG != colorC) && (colorC == colorM))
         {
-      product1 = colorA;
+          product1 = colorA;
         }
         else
-      if ((colorC == colorG) && (colorC == colorD)
-          && (colorA != colorH) && (colorA == colorI))
-        {
-      product1 = colorC;
-        }
-        else
-        {
-      product1 = INTERPOLATE (colorA, colorC);
-        }
-    }
+          if ((colorC == colorG) && (colorC == colorD)
+              && (colorA != colorH) && (colorA == colorI))
+          {
+            product1 = colorC;
+          }
+          else
+          {
+            product1 = INTERPOLATE (colorA, colorC);
+          }
+      }
 #if SDL_BYTEORDER == SDL_LIL_ENDIAN
-    product = colorA | (product << 16);
-    product1 = product1 | (product2 << 16);
+      product = colorA | (product << 16);
+      product1 = product1 | (product2 << 16);
 #else
-    product = (colorA << 16) | product;
-    product1 = (product1 << 16) | product2;
+      product = (colorA << 16) | product;
+      product1 = (product1 << 16) | product2;
 #endif
-    *(reinterpret_cast<Uint32 *>(dP)) = product;
-    *(reinterpret_cast<Uint32 *>(dP + dstPitch)) = product1;
+      *(reinterpret_cast<Uint32 *>(dP)) = product;
+      *(reinterpret_cast<Uint32 *>(dP + dstPitch)) = product1;
 
-    bP += inc_bP;
-    dP += sizeof (Uint32);
-      }      // end of for ( finish= width etc..)
+      bP += inc_bP;
+      dP += sizeof (Uint32);
+    }      // end of for ( finish= width etc..)
 
-      srcPtr += srcPitch;
-      dstPtr += dstPitch * 2;
+    srcPtr += srcPitch;
+    dstPtr += dstPitch * 2;
   }      // endof: for (height; height; height--)
 }
 
@@ -1145,7 +1143,7 @@ void ascale2x_flip(video_plugin* t __attribute__((unused)))
   SDL_Rect dst;
   compute_rects(&src,&dst);
   filter_ascale2x(static_cast<Uint8*>(pub->pixels) + (2*src.x+src.y*pub->pitch) + (pub->pitch), pub->pitch,
-     static_cast<Uint8*>(scaled->pixels) + (2*dst.x+dst.y*scaled->pitch), scaled->pitch, src.w, src.h);
+      static_cast<Uint8*>(scaled->pixels) + (2*dst.x+dst.y*scaled->pitch), scaled->pitch, src.w, src.h);
   if (SDL_MUSTLOCK(scaled))
     SDL_UnlockSurface(scaled);
   swscale_blit(t);
@@ -1192,7 +1190,7 @@ void tv2x_flip(video_plugin* t __attribute__((unused)))
   SDL_Rect dst;
   compute_rects(&src,&dst);
   filter_tv2x(static_cast<Uint8*>(pub->pixels) + (2*src.x+src.y*pub->pitch) + (pub->pitch), pub->pitch,
-     static_cast<Uint8*>(scaled->pixels) + (2*dst.x+dst.y*scaled->pitch), scaled->pitch, src.w, src.h);
+      static_cast<Uint8*>(scaled->pixels) + (2*dst.x+dst.y*scaled->pitch), scaled->pitch, src.w, src.h);
   if (SDL_MUSTLOCK(scaled))
     SDL_UnlockSurface(scaled);
   swscale_blit(t);
@@ -1235,7 +1233,7 @@ void swbilin_flip(video_plugin* t __attribute__((unused)))
   SDL_Rect dst;
   compute_rects(&src,&dst);
   filter_bilinear(static_cast<Uint8*>(pub->pixels) + (2*src.x+src.y*pub->pitch) + (pub->pitch), pub->pitch,
-     static_cast<Uint8*>(scaled->pixels) + (2*dst.x+dst.y*scaled->pitch), scaled->pitch, src.w, src.h);
+      static_cast<Uint8*>(scaled->pixels) + (2*dst.x+dst.y*scaled->pitch), scaled->pitch, src.w, src.h);
   if (SDL_MUSTLOCK(scaled))
     SDL_UnlockSurface(scaled);
   swscale_blit(t);
@@ -1260,9 +1258,9 @@ __inline__ static void MULT(Uint16 c, float* r, float* g, float* b, float alpha)
 
 __inline__ static Uint16 MAKE_RGB565(float r, float g, float b) {
   return 
-  (((static_cast<Uint8>(r)) << 11) & RED_MASK565  ) |
-  (((static_cast<Uint8>(g)) <<  5) & GREEN_MASK565) |
-  (((static_cast<Uint8>(b)) <<  0) & BLUE_MASK565 );
+    (((static_cast<Uint8>(r)) << 11) & RED_MASK565  ) |
+    (((static_cast<Uint8>(g)) <<  5) & GREEN_MASK565) |
+    (((static_cast<Uint8>(b)) <<  0) & BLUE_MASK565 );
 }
 
 __inline__ float CUBIC_WEIGHT(float x) {
@@ -1277,8 +1275,8 @@ __inline__ float CUBIC_WEIGHT(float x) {
 }
 
 void filter_bicubic(Uint8 *srcPtr, Uint32 srcPitch, 
-                    Uint8 *dstPtr, Uint32 dstPitch, 
-                    int width, int height)
+    Uint8 *dstPtr, Uint32 dstPitch, 
+    int width, int height)
 {
   unsigned int nextlineSrc = srcPitch / sizeof(Uint16);
   Uint16 *p = reinterpret_cast<Uint16 *>(srcPtr);
@@ -1325,7 +1323,7 @@ void swbicub_flip(video_plugin* t __attribute__((unused)))
   SDL_Rect dst;
   compute_rects(&src,&dst);
   filter_bicubic(static_cast<Uint8*>(pub->pixels) + (2*src.x+src.y*pub->pitch) + (pub->pitch), pub->pitch,
-     static_cast<Uint8*>(scaled->pixels) + (2*dst.x+dst.y*scaled->pitch), scaled->pitch, src.w, src.h);
+      static_cast<Uint8*>(scaled->pixels) + (2*dst.x+dst.y*scaled->pitch), scaled->pitch, src.w, src.h);
   if (SDL_MUSTLOCK(scaled))
     SDL_UnlockSurface(scaled);
   swscale_blit(t);
@@ -1335,7 +1333,7 @@ void swbicub_flip(video_plugin* t __attribute__((unused)))
 /* Dot matrix video plugin ------------------------------------------------------------ */
 /* ------------------------------------------------------------------------------------ */
 static Uint16 DOT_16(Uint16 c, int j, int i) {
-  static const Uint16 dotmatrix[16] = {
+  static constexpr Uint16 dotmatrix[16] = {
     0x01E0, 0x0007, 0x3800, 0x0000,
     0x39E7, 0x0000, 0x39E7, 0x0000,
     0x3800, 0x0000, 0x01E0, 0x0007,
@@ -1376,7 +1374,7 @@ void dotmat_flip(video_plugin* t __attribute__((unused)))
   SDL_Rect dst;
   compute_rects(&src,&dst);
   filter_dotmatrix(static_cast<Uint8*>(pub->pixels) + (2*src.x+src.y*pub->pitch) + (pub->pitch), pub->pitch,
-     static_cast<Uint8*>(scaled->pixels) + (2*dst.x+dst.y*scaled->pitch), scaled->pitch, src.w, src.h);
+      static_cast<Uint8*>(scaled->pixels) + (2*dst.x+dst.y*scaled->pitch), scaled->pitch, src.w, src.h);
   if (SDL_MUSTLOCK(scaled))
     SDL_UnlockSurface(scaled);
   swscale_blit(t);
@@ -1388,20 +1386,20 @@ void dotmat_flip(video_plugin* t __attribute__((unused)))
 
 std::vector<video_plugin> video_plugin_list =
 {
-// Hardware flip version are the same as software ones since switch to SDL2. Kept for compatibility of config, would be nice to not display them in the UI.
-/* Name                            Init func      Palette func     Flip func      Close func      Half size  X, Y offsets   X, Y scale  width, height */
-{"Half size with hardware flip",   half_init,     half_setpal,     half_flip,     half_close,     1,         0, 0,          0, 0, 0, 0 },
-{"Double size with hardware flip", double_init,   double_setpal,   double_flip,   double_close,   0,         0, 0,          0, 0, 0, 0 },
-{"Half size",                      half_init,     half_setpal,     half_flip,     half_close,     1,         0, 0,          0, 0, 0, 0 },
-{"Double size",                    double_init,   double_setpal,   double_flip,   double_close,   0,         0, 0,          0, 0, 0, 0 },
-{"Super eagle",                    swscale_init,  swscale_setpal,  seagle_flip,   swscale_close,  1,         0, 0,          0, 0, 0, 0 },
-{"Scale2x",                        swscale_init,  swscale_setpal,  scale2x_flip,  swscale_close,  1,         0, 0,          0, 0, 0, 0 },
-{"Advanced Scale2x",               swscale_init,  swscale_setpal,  ascale2x_flip, swscale_close,  1,         0, 0,          0, 0, 0, 0 },
-{"TV 2x",                          swscale_init,  swscale_setpal,  tv2x_flip,     swscale_close,  1,         0, 0,          0, 0, 0, 0 },
-{"Software bilinear",              swscale_init,  swscale_setpal,  swbilin_flip,  swscale_close,  1,         0, 0,          0, 0, 0, 0 },
-{"Software bicubic",               swscale_init,  swscale_setpal,  swbicub_flip,  swscale_close,  1,         0, 0,          0, 0, 0, 0 },
-{"Dot matrix",                     swscale_init,  swscale_setpal,  dotmat_flip,   swscale_close,  1,         0, 0,          0, 0, 0, 0 },
+  // Hardware flip version are the same as software ones since switch to SDL2. Kept for compatibility of config, would be nice to not display them in the UI.
+  /* Name                            Init func      Palette func     Flip func      Close func      Half size  X, Y offsets   X, Y scale  width, height */
+  {"Half size with hardware flip",   half_init,     half_setpal,     half_flip,     half_close,     1,         0, 0,          0, 0, 0, 0 },
+  {"Double size with hardware flip", double_init,   double_setpal,   double_flip,   double_close,   0,         0, 0,          0, 0, 0, 0 },
+  {"Half size",                      half_init,     half_setpal,     half_flip,     half_close,     1,         0, 0,          0, 0, 0, 0 },
+  {"Double size",                    double_init,   double_setpal,   double_flip,   double_close,   0,         0, 0,          0, 0, 0, 0 },
+  {"Super eagle",                    swscale_init,  swscale_setpal,  seagle_flip,   swscale_close,  1,         0, 0,          0, 0, 0, 0 },
+  {"Scale2x",                        swscale_init,  swscale_setpal,  scale2x_flip,  swscale_close,  1,         0, 0,          0, 0, 0, 0 },
+  {"Advanced Scale2x",               swscale_init,  swscale_setpal,  ascale2x_flip, swscale_close,  1,         0, 0,          0, 0, 0, 0 },
+  {"TV 2x",                          swscale_init,  swscale_setpal,  tv2x_flip,     swscale_close,  1,         0, 0,          0, 0, 0, 0 },
+  {"Software bilinear",              swscale_init,  swscale_setpal,  swbilin_flip,  swscale_close,  1,         0, 0,          0, 0, 0, 0 },
+  {"Software bicubic",               swscale_init,  swscale_setpal,  swbicub_flip,  swscale_close,  1,         0, 0,          0, 0, 0, 0 },
+  {"Dot matrix",                     swscale_init,  swscale_setpal,  dotmat_flip,   swscale_close,  1,         0, 0,          0, 0, 0, 0 },
 #ifdef HAVE_GL
-{"OpenGL scaling",                 glscale_init,  glscale_setpal,  glscale_flip,  glscale_close,  0,         0, 0,          0, 0, 0, 0 },
+  {"OpenGL scaling",                 glscale_init,  glscale_setpal,  glscale_flip,  glscale_close,  0,         0, 0,          0, 0, 0, 0 },
 #endif
 };

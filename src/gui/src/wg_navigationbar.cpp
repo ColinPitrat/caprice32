@@ -73,8 +73,8 @@ void CNavigationBar::SetItemWidth(unsigned int iItemWidth) {
 
 unsigned int CNavigationBar::AddItem(SNavBarItem NavBarItem) {
 	m_Items.push_back(NavBarItem);
-	m_RenderedStrings.push_back(CRenderedString(m_pFontEngine, NavBarItem.sItemText, CRenderedString::VALIGN_BOTTOM, CRenderedString::HALIGN_CENTER));
-    if (NavBarItem.sPictureFilename != "") {
+	m_RenderedStrings.emplace_back(m_pFontEngine, NavBarItem.sItemText, CRenderedString::VALIGN_BOTTOM, CRenderedString::HALIGN_CENTER);
+    if (!NavBarItem.sPictureFilename.empty()) {
         m_Bitmaps.push_back(new CBitmapFileResourceHandle(NavBarItem.sPictureFilename));
         // Set transparency color to COLOR_WHITE:
         SDL_SetColorKey(m_Bitmaps.at(m_Bitmaps.size() - 1)->Bitmap(), SDL_TRUE, COLOR_WHITE.SDLColor(m_pSDLSurface->format));
@@ -104,7 +104,7 @@ void CNavigationBar::ClearItems()
 }
 
 
-unsigned int CNavigationBar::getSelectedIndex() {
+unsigned int CNavigationBar::getSelectedIndex() const {
     return m_iSelectedItem;
 }
 
@@ -121,7 +121,7 @@ void CNavigationBar::SelectItem(unsigned int iItemIndex) {
 }
 
 
-unsigned int CNavigationBar::getFocusedIndex() {
+unsigned int CNavigationBar::getFocusedIndex() const {
     return m_iFocusedItem;
 }
 

@@ -50,7 +50,7 @@ public:
 		std::string m_sMessage;  //!< The actual text of the log entry
 	};
 
-	typedef std::list<SLogEntry> t_LogList;  //!< A typedef for a list of log entries
+	using t_LogList = std::list<SLogEntry>;  //!< A typedef for a list of log entries
 
 	//! Add a log entry
 	//! \param sMessage A text string with the log message

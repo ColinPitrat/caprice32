@@ -51,6 +51,28 @@ TEST(argParseTest, cfgFileArgsSwitch)
    ASSERT_EQ("/home/caprice32/cap32.cfg", args.cfgFilePath);
 }
 
+TEST(argParseTest, cfgOverrideValid)
+{
+   const char *argv[] = {"./caprice32", "--override=system.model=3", "--override=control.kbd_layout=keymap_us.map", "--override=no.value="};
+   CapriceArgs args;
+   std::vector<std::string> slot_list;
+
+   parseArguments(4, const_cast<char **>(argv), slot_list, args);
+   ASSERT_EQ("3", args.cfgOverrides["system"]["model"]);
+   ASSERT_EQ("keymap_us.map", args.cfgOverrides["control"]["kbd_layout"]);
+   ASSERT_EQ("", args.cfgOverrides["no"]["value"]);
+}
+
+TEST(argParseTest, cfgOverrideInvalid)
+{
+   const char *argv[] = {"./caprice32", "--override=no.value", "--override=nosection=3", "--override=emptyitem.=3", "--override=.emptysection=3", "--override==nokey"};
+   CapriceArgs args;
+   std::vector<std::string> slot_list;
+
+   parseArguments(6, const_cast<char **>(argv), slot_list, args);
+   ASSERT_TRUE(args.cfgOverrides.empty());
+}
+
 TEST(argParseTest, replaceCap32KeysNoKeyword)
 {
   std::string command = "print \"Hello, world !\"";

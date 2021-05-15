@@ -32,7 +32,7 @@
 namespace wGui
 {
 //! The resource ID type
-typedef long int TResourceId;
+using TResourceId = long int;
 
 const TResourceId AUTO_CREATE_RESOURCE_ID = -2;  //!< This is an internally used value for the Resource ID, that specifies that the next open resource ID should be used
 const TResourceId INVALID_RESOURCE_ID = -1;  //!< This is an internally used value for the resource ID that indicates an invalid resource
@@ -58,11 +58,11 @@ public:
 
 	//! Gets the resource ID of the handle
 	//! \return The resource ID of the handle
-	TResourceId GetResourceId() { return m_ResourceId; }
+	TResourceId GetResourceId() const { return m_ResourceId; }
 
 	//! Gets the handle's internal reference count
 	//! \return The reference count of the handle
-	unsigned int GetRefCount() { return m_RefCountMap[m_ResourceId]; }
+	unsigned int GetRefCount() const { return m_RefCountMap[m_ResourceId]; }
 
 protected:
 	//! The resource ID for the handle
@@ -145,7 +145,7 @@ public:
 
 	//! Returns the string
 	//! \return A string
-	const std::string String() const;
+	std::string String() const;
 
 protected:
 	//! A map of strings that are used by the handles

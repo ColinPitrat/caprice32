@@ -216,7 +216,7 @@ TEST_F(ConfigurationTest, loadConfigurationWithInvalidValues)
 
 TEST_F(ConfigurationTest, hasValueReturnsFalseOnNonExistingSystem)
 {
-  ASSERT_FALSE(configuration_.hasValue("system", "model"));
+  ASSERT_FALSE(config::hasValue(configuration_.getConfigMapForTests(), "system", "model"));
 }
 
 TEST_F(ConfigurationTest, hasValueReturnsFalseOnNonExistingKey)
@@ -224,7 +224,7 @@ TEST_F(ConfigurationTest, hasValueReturnsFalseOnNonExistingKey)
   std::string config = "[system]\nmodel=42";
   configuration_.parseString(config);
 
-  ASSERT_FALSE(configuration_.hasValue("system", "something"));
+  ASSERT_FALSE(config::hasValue(configuration_.getConfigMapForTests(), "system", "something"));
 }
 
 TEST_F(ConfigurationTest, hasValueReturnsTrueOnExistingKey)
@@ -232,7 +232,7 @@ TEST_F(ConfigurationTest, hasValueReturnsTrueOnExistingKey)
   std::string config = "[system]\nmodel=42";
   configuration_.parseString(config);
 
-  ASSERT_TRUE(configuration_.hasValue("system", "model"));
+  ASSERT_TRUE(config::hasValue(configuration_.getConfigMapForTests(), "system", "model"));
 }
 
 TEST_F(ConfigurationTest, getIntOnEmptyConfigReturnsDefault)

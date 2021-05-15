@@ -240,12 +240,12 @@ protected:
 
 //! Some predefined value messages
 
-typedef CValueMessage<int> TIntMessage;
-typedef CValueMessage<float> TFloatMessage;
-typedef CValueMessage<double> TDoubleMessage;
-typedef CValueMessage<std::string> TStringMessage;
-typedef CValueMessage<CPoint> TPointMessage;
-typedef CValueMessage<CRect> TRectMessage;
+using TIntMessage = CValueMessage<int>;
+using TFloatMessage = CValueMessage<float>;
+using TDoubleMessage = CValueMessage<double>;
+using TStringMessage = CValueMessage<std::string>;
+using TPointMessage = CValueMessage<CPoint>;
+using TRectMessage = CValueMessage<CRect>;
 
 }
 

@@ -5,6 +5,11 @@ OUTPUT_DIR="output"
 LOGFILE="test.log"
 CAP32DIR="${TSTDIR}/../../../"
 
+if [ -z "$DIFF" ]
+then
+  DIFF=diff
+fi
+
 rm -rv ${OUTPUT_DIR}
 mkdir -p ${OUTPUT_DIR}
 echo "" > "${LOGFILE}"

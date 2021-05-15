@@ -49,7 +49,7 @@ CTextBox::CTextBox(const CRect& WindowRect, CWindow* pParent, CFontEngine* pFont
 	m_iMaxWidth(0),
 	m_bDrawCursor(true),
 	m_bScrollToCursor(false)
- {
+{
 	m_BackgroundColor = COLOR_WHITE;
 	m_ClientRect = CRect(3, 3, m_WindowRect.Width() - 17, m_WindowRect.Height() - 17);
 	if (pFontEngine)
@@ -107,7 +107,7 @@ void CTextBox::SetReadOnly(bool bReadOnly)  // virtual
 
 std::string CTextBox::GetSelText() const  // virtual
 {
-	std::string sSelText = "";
+	std::string sSelText;
 	if (m_SelLength != 0)
 	{
 			std::string::size_type SelStartNorm = 0;
@@ -184,7 +184,7 @@ void CTextBox::Draw() const  // virtual
 			std::vector<CPoint> vBoundingDimensions;
 			std::vector<std::vector<CRect> > vCharRects;
 			int iIndex = 0;
-      for(const auto *str : m_vpRenderedString)
+			for(const auto *str : m_vpRenderedString)
 			{
 				CPoint BoundingDimensions;
 				CPoint Offset;
@@ -193,7 +193,7 @@ void CTextBox::Draw() const  // virtual
 				vBoundingDimensions.push_back(BoundingDimensions);
 				vOffsets.push_back(Offset);
 				vCharRects.push_back(CharRects);
-        ++iIndex;
+				++iIndex;
 			}
 
 			// move the cursor into view by scrolling if necessary
@@ -291,8 +291,8 @@ bool CTextBox::OnMouseButtonDown(CPoint Point, unsigned int Button)  // virtual
 	bool bResult = CWindow::OnMouseButtonDown(Point, Button);
 
 	CPoint WindowPoint(ViewToWindow(Point));
- 	if (!bResult && m_bVisible && (m_ClientRect.HitTest(WindowPoint) == CRect::RELPOS_INSIDE))
- 	{
+	if (!bResult && m_bVisible && (m_ClientRect.HitTest(WindowPoint) == CRect::RELPOS_INSIDE))
+	{
 		if (Button == CMouseMessage::LEFT && !m_bReadOnly)
 		{
 			bool fSkipCursorPositioning = false;
@@ -320,14 +320,14 @@ bool CTextBox::OnMouseButtonDown(CPoint Point, unsigned int Button)  // virtual
 				std::vector<std::vector<CRect> > vCharRects;
 				int iIndex = 0;
 				// get the dimensions of all the characters
-        for(const auto *str : m_vpRenderedString)
+				for(const auto *str : m_vpRenderedString)
 				{
 					CPoint Offset;
 					std::vector<CRect> CharRects;
 					str->GetMetrics(nullptr, &Offset, &CharRects);
 					vOffsets.push_back(Offset);
 					vCharRects.push_back(CharRects);
-          ++iIndex;
+					++iIndex;
 				}
 
 				// figure out which line was clicked on
@@ -429,14 +429,14 @@ bool CTextBox::HandleMessage(CMessage* pMessage)  // virtual
 					std::vector<CPoint> vOffsets;
 					std::vector<std::vector<CRect> > vCharRects;
 					int iIndex = 0;
-          for(const auto *str : m_vpRenderedString)
+					for(const auto *str : m_vpRenderedString)
 					{
 						CPoint Offset;
 						std::vector<CRect> CharRects;
 						str->GetMetrics(nullptr, &Offset, &CharRects);
 						vOffsets.push_back(Offset);
 						vCharRects.push_back(CharRects);
-            ++iIndex;
+						++iIndex;
 					}
 
 					// figure out which line was clicked on
@@ -505,7 +505,7 @@ bool CTextBox::HandleMessage(CMessage* pMessage)  // virtual
 				m_bDrawCursor = true;
 				Draw();
 				bHandled = true;
-        SDL_StartTextInput();
+				SDL_StartTextInput();
 			}
 			break;
 		case CMessage::CTRL_LOSINGKEYFOCUS:
@@ -514,30 +514,30 @@ bool CTextBox::HandleMessage(CMessage* pMessage)  // virtual
 				m_pCursorTimer->StopTimer();
 				Draw();
 				bHandled = true;
-        SDL_StopTextInput();
+				SDL_StopTextInput();
 			}
 			break;
-    case CMessage::TEXTINPUT:
+		case CMessage::TEXTINPUT:
 			if (pMessage->Destination() == this)
-      {
-        CTextInputMessage* pTextInputMessage = dynamic_cast<CTextInputMessage*>(pMessage);
-        if (pTextInputMessage && !m_bReadOnly)
-        {
-          std::string sBuffer = m_sWindowText;
-          sBuffer.insert(m_SelStart, pTextInputMessage->Text);
-          m_SelStart += pTextInputMessage->Text.length();
-          if (m_sWindowText != sBuffer)
-          {
-            CMessageServer::Instance().QueueMessage(new TStringMessage(CMessage::CTRL_VALUECHANGE, m_pParentWindow, this, sBuffer));
-            m_sWindowText = sBuffer;
-            PrepareWindowText(sBuffer);
-          }
-          m_bDrawCursor = true;
-          m_bScrollToCursor = true;  // a key was pressed, so we need to make sure that the cursor is visible
-          Draw();
-        }
-      }
-      break;
+			{
+				CTextInputMessage* pTextInputMessage = dynamic_cast<CTextInputMessage*>(pMessage);
+				if (pTextInputMessage && !m_bReadOnly)
+				{
+					std::string sBuffer = m_sWindowText;
+					sBuffer.insert(m_SelStart, pTextInputMessage->Text);
+					m_SelStart += pTextInputMessage->Text.length();
+					if (m_sWindowText != sBuffer)
+					{
+						CMessageServer::Instance().QueueMessage(new TStringMessage(CMessage::CTRL_VALUECHANGE, m_pParentWindow, this, sBuffer));
+						m_sWindowText = sBuffer;
+						PrepareWindowText(sBuffer);
+					}
+					m_bDrawCursor = true;
+					m_bScrollToCursor = true;  // a key was pressed, so we need to make sure that the cursor is visible
+					Draw();
+				}
+			}
+			break;
 		case CMessage::KEYBOARD_KEYDOWN:
 			if (m_bVisible)
 			{
@@ -577,15 +577,15 @@ bool CTextBox::HandleMessage(CMessage* pMessage)  // virtual
 						break;
 
 					case SDLK_LEFT:
-		 				if (pKeyboardMessage->Modifiers & KMOD_SHIFT) //Shift modifier
-			  			{
+						if (pKeyboardMessage->Modifiers & KMOD_SHIFT) //Shift modifier
+						{
 							if (m_SelStart > 0)
 							{
 								if ((m_SelLength > 0) || ((m_SelStart - abs(m_SelLength)) > 0))
 								{
 									if (pKeyboardMessage->Modifiers & KMOD_CTRL)
 									{
-										std::string::size_type pos = sBuffer.rfind(" ", (m_SelStart + m_SelLength) - 1);
+										std::string::size_type pos = sBuffer.rfind(' ', (m_SelStart + m_SelLength) - 1);
 										if (pos != std::string::npos)
 										{
 											m_SelLength = stdex::safe_static_cast<int>(pos) - stdex::safe_static_cast<int>(m_SelStart);
@@ -601,7 +601,7 @@ bool CTextBox::HandleMessage(CMessage* pMessage)  // virtual
 									}
 								}
 							}
-			  			}
+						}
 						else if (m_SelLength != 0)
 						{
 							if (m_SelLength < 0)
@@ -614,7 +614,7 @@ bool CTextBox::HandleMessage(CMessage* pMessage)  // virtual
 						{
 							if (pKeyboardMessage->Modifiers & KMOD_CTRL)
 							{
-								std::string::size_type pos = sBuffer.rfind(" ", m_SelStart - 1);
+								std::string::size_type pos = sBuffer.rfind(' ', m_SelStart - 1);
 								if (pos != std::string::npos)
 								{
 									m_SelStart = pos;
@@ -638,7 +638,7 @@ bool CTextBox::HandleMessage(CMessage* pMessage)  // virtual
 							{
 								if (pKeyboardMessage->Modifiers & KMOD_CTRL)
 								{
-									std::string::size_type pos = sBuffer.find(" ", m_SelStart + m_SelLength);
+									std::string::size_type pos = sBuffer.find(' ', m_SelStart + m_SelLength);
 									if (pos != std::string::npos)
 									{
 										m_SelLength = stdex::safe_static_cast<int>(pos) - stdex::safe_static_cast<int>(m_SelStart) + 1;
@@ -661,7 +661,7 @@ bool CTextBox::HandleMessage(CMessage* pMessage)  // virtual
 								// If we don't have the ctrl modifier, then we just incriment the cursor position by one character
 								if (pKeyboardMessage->Modifiers & KMOD_CTRL)
 								{
-									std::string::size_type pos = sBuffer.find(" ", m_SelStart + 1);
+									std::string::size_type pos = sBuffer.find(' ', m_SelStart + 1);
 									if (pos != std::string::npos)
 									{
 										m_SelStart = pos + 1;
@@ -692,15 +692,15 @@ bool CTextBox::HandleMessage(CMessage* pMessage)  // virtual
 							if (pKeyboardMessage->Modifiers & KMOD_SHIFT)
 							{
 								CPoint CursorPoint(RowColFromIndex(m_SelStart + m_SelLength));
- 								if (CursorPoint.YPos() == stdex::safe_static_cast<int>(m_iLineCount - 1))
+								if (CursorPoint.YPos() == stdex::safe_static_cast<int>(m_iLineCount - 1))
 								{
 									m_SelLength = stdex::safe_static_cast<int>(m_sWindowText.size() - m_SelStart);
- 								}
+								}
 								else
 								{
 									m_SelLength = stdex::safe_static_cast<int>(IndexFromRowCol(CursorPoint.YPos() + 1, CursorPoint.XPos()))
 										- stdex::safe_static_cast<int>(m_SelStart);
- 								}
+								}
 							}
 							else if(m_SelLength == 0)
 							{
@@ -730,7 +730,7 @@ bool CTextBox::HandleMessage(CMessage* pMessage)  // virtual
 							if (pKeyboardMessage->Modifiers & KMOD_SHIFT)
 							{
 								CPoint CursorPoint(RowColFromIndex(m_SelStart + m_SelLength));
- 								if (CursorPoint.YPos() == 0)
+								if (CursorPoint.YPos() == 0)
 								{
 									m_SelLength = -stdex::safe_static_cast<int>(m_SelStart);
 								}
@@ -860,7 +860,7 @@ void CTextBox::PrepareWindowText(const std::string& sText)
 	m_iMaxWidth = 0;
 	while (loc != std::string::npos)
 	{
-		loc = sText.find("\n", start);
+		loc = sText.find('\n', start);
 		m_vpRenderedString.push_back(new CRenderedString(
 			m_pFontEngine, sText.substr(start, loc - start), CRenderedString::VALIGN_TOP, CRenderedString::HALIGN_LEFT));
 		CPoint BoundingDimensions;
@@ -926,14 +926,14 @@ CPoint CTextBox::RowColFromIndex(std::string::size_type Index) const
 {
 	int iRow = 0;
 	int iCol = stdex::safe_static_cast<int>(Index);
-	std::string::size_type loc = m_sWindowText.find("\n");
+	std::string::size_type loc = m_sWindowText.find('\n');
 	std::string::size_type start = 0;
 	while (loc != std::string::npos && loc < Index)
 	{
 		++iRow;
 		iCol -= (stdex::safe_static_cast<int>(loc - start) + 1);
 		start = loc + 1;
-		loc = m_sWindowText.find("\n", start);
+		loc = m_sWindowText.find('\n', start);
 	}
 	return CPoint(iCol, iRow);
 }

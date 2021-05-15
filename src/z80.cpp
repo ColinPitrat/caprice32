@@ -31,6 +31,9 @@
 #include "z80.h"
 #include "asic.h"
 #include "log.h"
+#include <algorithm>
+#include <vector>
+#include <iomanip>
 
 #include "z80_macros.h"
 
@@ -158,6 +161,8 @@ enum EDcodes {
 
 
 t_z80regs z80;
+std::vector<Breakpoint> breakpoints;
+std::vector<Watchpoint> watchpoints;
 int iCycleCount, iWSAdjust;
 static byte SZ[256]; // zero and sign flags
 static byte SZ_BIT[256]; // zero, sign and parity/overflow (=zero) flags for BIT opcode
@@ -329,10 +334,24 @@ static byte cc_ex[256] = {
 extern byte *membank_read[4], *membank_write[4];
 
 inline byte read_mem(word addr) {
+   if (!watchpoints.empty()) {
+     if (std::any_of(watchpoints.begin(), watchpoints.end(), [&](const auto& w) {
+           return w.address == addr;
+         })) {
+       z80.watchpoint_reached = 1;
+     }
+   }
    return (*(membank_read[addr >> 14] + (addr & 0x3fff))); // returns a byte from a 16KB memory bank
 }
 
 inline void write_mem(word addr, byte val) {
+   if (!watchpoints.empty()) {
+     if (std::any_of(watchpoints.begin(), watchpoints.end(), [&](const auto& w) {
+           return w.address == addr;
+         })) {
+       z80.watchpoint_reached = 1;
+     }
+   }
    if (GateArray.registerPageOn) {
      //LOG_DEBUG("Pass write to ASIC: " << static_cast<int>(val) << " at " << addr);
       if(!asic_register_page_write(addr, val)) return;
@@ -997,6 +1016,7 @@ void z80_mf2stop()
 
 int z80_execute()
 {
+   z80.watchpoint_reached = 0;
    while (_PCdword != z80.break_point) { // loop until break point
 
       #ifdef DEBUG_Z80
@@ -1049,6 +1069,15 @@ int z80_execute()
          CPC.cycle_count += CYCLE_COUNT_INIT;
          return EC_CYCLE_COUNT; // exit emulation loop
       }
+
+      // TODO: Measure impact. If important, create templated version of
+      // z80_execute, read_mem, write_mem ...
+      if (!breakpoints.empty()) {
+        if (std::any_of(breakpoints.begin(), breakpoints.end(), [&](const auto& b) {
+              return b.address == _PC;
+          })) break;
+      }
+      if (z80.watchpoint_reached) break;
    }
    return EC_BREAKPOINT;
 }

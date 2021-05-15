@@ -514,7 +514,7 @@ void fdc_write_data(byte val)
                   byte *pbPtr, *pbDataPtr;
 
                   if (active_track->sectors != 0) { // track is formatted?
-                     free(active_track->data); // dealloc memory for old track data
+                     delete [] active_track->data; // dealloc memory for old track data
                   }
                   sector_size = 128 << FDC.command[CMD_C]; // determine number of bytes from N value
                   if (((sector_size + 62 + FDC.command[CMD_R]) * FDC.command[CMD_H]) > CPC.max_tracksize) { // track size exceeds maximum?
@@ -525,7 +525,7 @@ void fdc_write_data(byte val)
 
                      track_size = sector_size * FDC.command[CMD_H];
                      active_track->sectors = FDC.command[CMD_H];
-                     active_track->data = static_cast<byte *>(malloc(track_size)); // attempt to allocate the required memory
+                     active_track->data = new byte[track_size]; // attempt to allocate the required memory
                      pbDataPtr = active_track->data;
                      pbPtr = pbGPBuffer;
                      for (sector = 0; sector < FDC.command[CMD_H]; sector++) {

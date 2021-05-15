@@ -70,7 +70,7 @@ std::vector<std::string> listDirectoryExt(std::string &directory, const std::str
   std::string extension;
 
   for (const auto& fileName : allFiles) {
-    extension = fileName.substr(fileName.find_last_of(".") + 1);
+    extension = fileName.substr(fileName.find_last_of('.') + 1);
     if (ext == extension) {
       matchingFiles.push_back(fileName);
     }
