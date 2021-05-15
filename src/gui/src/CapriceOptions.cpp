@@ -55,7 +55,7 @@ CapriceOptions::CapriceOptions(const CRect& WindowRect, CWindow* pParent, CFontE
 
     // ---------------- 'General' Options ----------------
     m_pLabelCPCModel    = new CLabel(CPoint(10, 3), m_pGroupBoxTabGeneral, "CPC Model");
-    m_pDropDownCPCModel = new CDropDown(CRect(CPoint(80, 0), 80, 16), m_pGroupBoxTabGeneral, false, 14);
+    m_pDropDownCPCModel = new CDropDown(CRect(CPoint(80, 0), 80, 16), m_pGroupBoxTabGeneral, false);
     m_pDropDownCPCModel->AddItem(SListItem("CPC 464"));
     m_pDropDownCPCModel->AddItem(SListItem("CPC 664"));
     m_pDropDownCPCModel->AddItem(SListItem("CPC 6128"));
@@ -116,7 +116,7 @@ CapriceOptions::CapriceOptions(const CRect& WindowRect, CWindow* pParent, CFontE
     }
 
     // ---------------- 'Video' options ----------------
-    m_pDropDownVideoPlugin = new CDropDown(CRect(CPoint(100,0),140,16), m_pGroupBoxTabVideo, false, 14); // Select video plugin
+    m_pDropDownVideoPlugin = new CDropDown(CRect(CPoint(100,0),140,16), m_pGroupBoxTabVideo, false); // Select video plugin
     for(const auto& plugin : video_plugin_list)
     {
       m_pDropDownVideoPlugin->AddItem(SListItem(plugin.name));
@@ -180,7 +180,7 @@ CapriceOptions::CapriceOptions(const CRect& WindowRect, CWindow* pParent, CFontE
     m_pCheckBoxEnableSound->SetIsFocusable(true);
     m_pLabelEnableSound    = new CLabel(CPoint(28, 1), m_pGroupBoxTabAudio, "Enable Sound Emulation");
 
-    m_pDropDownSamplingRate = new CDropDown(CRect(CPoint(100,25),100,16), m_pGroupBoxTabAudio, false, 14); // Select audio sampling rate
+    m_pDropDownSamplingRate = new CDropDown(CRect(CPoint(100,25),100,16), m_pGroupBoxTabAudio, false); // Select audio sampling rate
     m_pDropDownSamplingRate->AddItem(SListItem("11025 Hz"));
     m_pDropDownSamplingRate->AddItem(SListItem("22050 Hz"));
     m_pDropDownSamplingRate->AddItem(SListItem("44100 Hz"));
@@ -230,14 +230,14 @@ CapriceOptions::CapriceOptions(const CRect& WindowRect, CWindow* pParent, CFontE
     m_pGroupBoxDriveA  = new CGroupBox(CRect(CPoint(10, 0), 280, 45), m_pGroupBoxTabDisk, "CPC Drive A");
     m_pGroupBoxDriveB  = new CGroupBox(CRect(CPoint(10, 50), 280, 45), m_pGroupBoxTabDisk, "CPC Drive B");
     m_pLabelDriveAFormat    = new CLabel(CPoint(10,3), m_pGroupBoxDriveA, "Insert blank disks as");
-    m_pDropDownDriveAFormat = new CDropDown(CRect(CPoint(130,1),140,16), m_pGroupBoxDriveA, false, 14);
+    m_pDropDownDriveAFormat = new CDropDown(CRect(CPoint(130,1),140,16), m_pGroupBoxDriveA, false);
     m_pDropDownDriveAFormat->AddItem(SListItem("178K Data Format"));
     m_pDropDownDriveAFormat->AddItem(SListItem("169K Vendor Format"));
     m_pDropDownDriveAFormat->SetListboxHeight(2);
     m_pDropDownDriveAFormat->SelectItem(CPC.drvA_format == 0 ? 0 : 1);
     m_pDropDownDriveAFormat->SetIsFocusable(true);
     m_pLabelDriveBFormat    = new CLabel(CPoint(10,3), m_pGroupBoxDriveB, "Insert blank disks as");;
-    m_pDropDownDriveBFormat = new CDropDown(CRect(CPoint(130,1),140,16), m_pGroupBoxDriveB, false, 14);
+    m_pDropDownDriveBFormat = new CDropDown(CRect(CPoint(130,1),140,16), m_pGroupBoxDriveB, false);
     m_pDropDownDriveBFormat->AddItem(SListItem("178K Data Format"));
     m_pDropDownDriveBFormat->AddItem(SListItem("169K Vendor Format"));
     m_pDropDownDriveBFormat->SetListboxHeight(2);
@@ -247,7 +247,7 @@ CapriceOptions::CapriceOptions(const CRect& WindowRect, CWindow* pParent, CFontE
     // ---------------- 'Input' Options ----------------
     // option 'keyboard' which is the CPC language
     m_pLabelCPCLanguage    = new CLabel(CPoint(10,3), m_pGroupBoxTabInput, "CPC language");;
-    m_pDropDownCPCLanguage = new CDropDown(CRect(CPoint(130,1),140,16), m_pGroupBoxTabInput, false, 14);
+    m_pDropDownCPCLanguage = new CDropDown(CRect(CPoint(130,1),140,16), m_pGroupBoxTabInput, false);
     m_pDropDownCPCLanguage->AddItem(SListItem("English CPC"));
     m_pDropDownCPCLanguage->AddItem(SListItem("French CPC"));
     m_pDropDownCPCLanguage->AddItem(SListItem("Spanish CPC"));
@@ -256,7 +256,7 @@ CapriceOptions::CapriceOptions(const CRect& WindowRect, CWindow* pParent, CFontE
     m_pDropDownCPCLanguage->SetIsFocusable(true);
     // option 'kbd_layout' which is the platform keyboard layout (i.e. the PC keyboard layout)
     m_pLabelPCLanguage    = new CLabel(CPoint(10,33), m_pGroupBoxTabInput, "PC Keyboard layout");;
-    m_pDropDownPCLanguage = new CDropDown(CRect(CPoint(130,31),140,16), m_pGroupBoxTabInput, false, 14);
+    m_pDropDownPCLanguage = new CDropDown(CRect(CPoint(130,31),140,16), m_pGroupBoxTabInput, false);
 
     mapFileList = listDirectoryExt(CPC.resources_path, "map");
     unsigned int currentMapIndex = 0;

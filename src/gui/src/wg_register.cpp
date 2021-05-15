@@ -18,9 +18,9 @@ CRegister::CRegister(const CRect& WindowRect, CWindow* pParent, std::string name
 		m_pFontEngine = CApplication::Instance()->GetDefaultFontEngine();
 	}
   m_pLabel = new CLabel(CPoint(0, 7), this, name);
-  m_pHexValue = new CEditBox(CRect(CPoint(15, 0), 30, 20), this);
-  m_pDecValue = new CEditBox(CRect(CPoint(50, 0), 30, 20), this);
-  m_pCharValue = new CEditBox(CRect(CPoint(85, 0), 30, 20), this);
+  m_pHexValue = new CEditBox(CRect(CPoint(20, 0), 30, 20), this);
+  m_pDecValue = new CEditBox(CRect(CPoint(55, 0), 40, 20), this);
+  m_pCharValue = new CEditBox(CRect(CPoint(100, 0), 25, 20), this);
 
 	Draw();
 }

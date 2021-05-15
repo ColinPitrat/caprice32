@@ -71,7 +71,7 @@ CapriceLoadSave::CapriceLoadSave(const CRect& WindowRect, CWindow* pParent, CFon
   m_pDirectoryValue->SetReadOnly(true);
 
   // File list
-  m_pFilesList = new CListBox(CRect(CPoint(80, 115), 150, 80), this, true, 12);
+  m_pFilesList = new CListBox(CRect(CPoint(80, 115), 150, 80), this, true);
   m_pFilesList->SetIsFocusable(true);
   UpdateFilesList();
 
