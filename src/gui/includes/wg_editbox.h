@@ -57,7 +57,7 @@ public:
   enum EContentType {
     ANY, //!< Any char allowed
     NUMBER, //!< Only numbers
-    HEXNUMBER, //!< Numbers and char [A-Z]
+    HEXNUMBER, //!< Numbers and char [A-F]
     ALPHA, //!< Only letters
     ALPHANUM //!< Letters and digits
   };
