@@ -139,7 +139,7 @@ dword freq_table[MAX_FREQ_ENTRIES] = {
 #include "font.h"
 
 void set_osd_message(const std::string& message) {
-   osd_timing = SDL_GetTicks() + 10000;
+   osd_timing = SDL_GetTicks() + 1000;
    osd_message = " " + message;
 }
 
@@ -1939,6 +1939,24 @@ void showGui()
       CapriceGuiView capriceGuiView(back_surface, guiBackSurface, CRect(0, 0, back_surface->w, back_surface->h));
       capriceGui.SetMouseVisibility(true);
       capriceGui.Exec();
+      /* TODO: Something like that to replace Exec and allow Menu to be
+       * displayed at the same time as DevTools
+      while (capriceGui.IsRunning()) {
+        SDL_Event event;
+        while (SDL_PollEvent(&event)) {
+          if (devtools.IsActive() &&
+              devtools.PassEvent(event)) {
+            continue;
+          }
+          capriceGui->ProcessEvent(event, &capriceGuiView);
+        }
+        if (devtools.IsActive()) {
+          devtools.Update();
+        }
+        capriceGui->Update(&capriceGuiView);
+        SDL_Delay(5);
+      }
+      */
    } catch(wGui::Wg_Ex_App& e) {
       // TODO: improve: this is pretty silent if people don't look at the console
       std::cout << "Failed displaying the GUI: " << e.what() << std::endl;
@@ -1946,9 +1964,18 @@ void showGui()
    cleanupShowUI(guiBackSurface);
 }
 
+extern SDL_Window* window;
+
 void toggleDevTools()
 {
   if (!devtools.IsActive()) {
+    Uint32 flags = SDL_GetWindowFlags(window);
+    // DevTools don't behave very well in fullscreen mode, so just disallow it
+    if ((flags & SDL_WINDOW_FULLSCREEN) ||
+        (flags & SDL_WINDOW_FULLSCREEN_DESKTOP)) {
+      set_osd_message("Dev tools not available in fullscreen");
+      return;
+    }
     if (!devtools.Activate()) {
       LOG_ERROR("Failed to activate developers tools");
     }
@@ -2964,4 +2991,3 @@ int cap32_main (int argc, char **argv)
 
    return 0;
 }
-
