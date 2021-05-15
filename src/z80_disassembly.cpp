@@ -18,7 +18,7 @@ OpCode::OpCode(int value, int length, int argsize, std::string instruction) :
 uint64_t DisassembledCode::hash() const {
   uint64_t h = 0;
   int i = 0;
-  for (const auto line : lines) {
+  for (const auto& line : lines) {
     h += i * (line.address_ + line.opcode_);
     i += 1;
   }
