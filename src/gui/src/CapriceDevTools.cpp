@@ -33,7 +33,6 @@ CapriceDevTools::CapriceDevTools(const CRect& WindowRect, CWindow* pParent, CFon
 
     // Navigation bar
     m_pNavigationBar = new CNavigationBar(this, CPoint(10, 5), 6, 50, 50);
-    // TODO: Better icon for chars, memory and z80
     m_pNavigationBar->AddItem(SNavBarItem("z80",    CPC.resources_path + "/rom.bmp"));
     m_pNavigationBar->AddItem(SNavBarItem("Asm", CPC.resources_path + "/asm.bmp"));
     m_pNavigationBar->AddItem(SNavBarItem("Memory", CPC.resources_path + "/memory.bmp"));
@@ -61,7 +60,7 @@ CapriceDevTools::CapriceDevTools(const CRect& WindowRect, CWindow* pParent, CFon
 
     EnableTab("z80");
 
-    m_pButtonPause   = new CButton(CRect(CPoint(m_ClientRect.Width() - 70, 10), 50, 15), this, "Pause");
+    m_pButtonPause   = new CButton(CRect(CPoint(m_ClientRect.Width() - 70, 10), 50, 15), this, (CPC.paused ? "Resume" : "Pause"));
     m_pButtonPause->SetIsFocusable(true);
     m_pButtonClose   = new CButton(CRect(CPoint(m_ClientRect.Width() - 70, 35), 50, 15), this, "Close");
     m_pButtonClose->SetIsFocusable(true);
@@ -102,7 +101,23 @@ CapriceDevTools::CapriceDevTools(const CRect& WindowRect, CWindow* pParent, CFon
     m_pZ80RegPC = new CRegister(CRect(CPoint(150, 330), 110, 20), m_pGroupBoxTabZ80, "PC");
 
     m_pZ80StackLabel = new CLabel(CPoint(300, 10), m_pGroupBoxTabZ80, "Stack:");
-    m_pZ80Stack = new CListBox(CRect(CPoint(300, 10), 100, 200), m_pGroupBoxTabZ80);
+    m_pZ80Stack = new CListBox(CRect(CPoint(300, 20), 100, 190), m_pGroupBoxTabZ80);
+
+    m_pZ80RegF = new CRegister(CRect(CPoint(300, 230), 110, 20), m_pGroupBoxTabZ80, "F");
+    m_pZ80RegFp = new CRegister(CRect(CPoint(440, 230), 110, 20), m_pGroupBoxTabZ80, "F'");
+    m_pZ80FlagsLabel = new CLabel(CPoint(300, 260), m_pGroupBoxTabZ80, "Flags:");
+    m_pZ80FlagSLbl = new CLabel(CPoint(300, 281), m_pGroupBoxTabZ80, "S");
+    m_pZ80FlagS = new CEditBox(CRect(CPoint(310, 275), 20, 20), m_pGroupBoxTabZ80);
+    m_pZ80FlagZLbl = new CLabel(CPoint(335, 281), m_pGroupBoxTabZ80, "Z");
+    m_pZ80FlagZ = new CEditBox(CRect(CPoint(345, 275), 20, 20), m_pGroupBoxTabZ80);
+    m_pZ80FlagHLbl = new CLabel(CPoint(370, 281), m_pGroupBoxTabZ80, "H");
+    m_pZ80FlagH = new CEditBox(CRect(CPoint(380, 275), 20, 20), m_pGroupBoxTabZ80);
+    m_pZ80FlagPVLbl = new CLabel(CPoint(405, 281), m_pGroupBoxTabZ80, "PV");
+    m_pZ80FlagPV = new CEditBox(CRect(CPoint(420, 275), 20, 20), m_pGroupBoxTabZ80);
+    m_pZ80FlagNLbl = new CLabel(CPoint(445, 281), m_pGroupBoxTabZ80, "N");
+    m_pZ80FlagN = new CEditBox(CRect(CPoint(455, 275), 20, 20), m_pGroupBoxTabZ80);
+    m_pZ80FlagCLbl = new CLabel(CPoint(480, 281), m_pGroupBoxTabZ80, "C");
+    m_pZ80FlagC = new CEditBox(CRect(CPoint(490, 275), 20, 20), m_pGroupBoxTabZ80);
 
     // ---------------- 'Assembly' screen ----------------
     m_pAssemblyCode = new CListBox(
@@ -128,8 +143,6 @@ CapriceDevTools::CapriceDevTools(const CRect& WindowRect, CWindow* pParent, CFon
     m_pAssemblyNewBreakPoint = new CEditBox(CRect(CPoint(80, 30), 50, 20), m_pAssemblyBreakPointsGrp);
     m_pAssemblyNewBreakPoint->SetContentType(CEditBox::HEXNUMBER);
     m_pAssemblyAddBreakPoint = new CButton(CRect(CPoint(140, 30), 50, 20), m_pAssemblyBreakPointsGrp, "Add");
-
-    UpdateBreakPointsList();
 
     // ---------------- 'Memory' screen ----------------
     m_pMemPokeAdressLabel = new CLabel(        CPoint(15, 18),             m_pGroupBoxTabMemory, "Adress: ");
@@ -179,8 +192,6 @@ CapriceDevTools::CapriceDevTools(const CRect& WindowRect, CWindow* pParent, CFon
     m_MemFilterValue = -1;
     m_MemDisplayValue = -1;
 
-    UpdateTextMemory();
-
     // TODO: Support read, write and R/W watch points
     m_pMemWatchPointsGrp = new CGroupBox(CRect(CPoint(380, 13), 200, 120), m_pGroupBoxTabMemory, "Watch points");
     m_pMemWatchPoints = new CListBox(CRect(CPoint(10, 5), 50, 80), m_pMemWatchPointsGrp);
@@ -189,8 +200,6 @@ CapriceDevTools::CapriceDevTools(const CRect& WindowRect, CWindow* pParent, CFon
     m_pMemNewWatchPoint->SetContentType(CEditBox::HEXNUMBER);
     m_pMemAddWatchPoint = new CButton(CRect(CPoint(140, 30), 50, 20), m_pMemWatchPointsGrp, "Add");
 
-    UpdateWatchPointsList();
-
     // ---------------- 'Video' screen ----------------
     m_pVidLabel = new CLabel(CPoint(10, 10), m_pGroupBoxTabVideo, "Work in progress ... Nothing to see here yet, but come back later for video (CRTC & PSG info).");
     // ---------------- 'Audio' screen ----------------
@@ -198,10 +207,28 @@ CapriceDevTools::CapriceDevTools(const CRect& WindowRect, CWindow* pParent, CFon
     // ---------------- 'Characters' screen ----------------
     m_pChrLabel = new CLabel(CPoint(10, 10), m_pGroupBoxTabChar, "Work in progress ... Nothing to see here yet, but come back later for charmap.");
 
-    Update();
+    UpdateAll();
 }
 
 CapriceDevTools::~CapriceDevTools() = default;
+
+void CapriceDevTools::UpdateDisassemblyPos()
+{
+  auto lines = m_pAssemblyCode->GetAllItems();
+  SListItem toFind("ignored", reinterpret_cast<void*>(_PC));
+  auto curpos = std::lower_bound(lines.begin(), lines.end(), toFind, [](auto x, auto y) {
+    return x.pItemData < y.pItemData;
+  });
+  int idx = std::distance(lines.begin(), curpos);
+  m_pAssemblyCode->SetPosition(idx, CListBox::CENTER);
+  if (curpos != lines.begin()) {
+    // TODO: Do not allow to select another line
+    m_pAssemblyCode->SetSelection(idx, /*bSelected=*/true, /*bNotify=*/false);
+  } else {
+    m_pAssemblyCode->SetAllSelections(false);
+    m_pAssemblyCode->Draw();
+  }
+}
 
 void CapriceDevTools::RefreshDisassembly()
 {
@@ -216,14 +243,13 @@ void CapriceDevTools::RefreshDisassembly()
     if (std::any_of(breakpoints.begin(), breakpoints.end(), [&](const auto& b) {
           return b.address == line.address_;
           })) {
-      items.emplace_back(oss.str(), nullptr, COLOR_RED);
+      items.emplace_back(oss.str(), reinterpret_cast<void*>(line.address_), COLOR_RED);
     } else {
-      items.emplace_back(oss.str());
+      items.emplace_back(oss.str(), reinterpret_cast<void*>(line.address_));
     }
   }
-  // TODO: Select the line correponding to PC
-  // TODO: Do not allow to select another line
   m_pAssemblyCode->AddItems(items);
+  UpdateDisassemblyPos();
 }
 
 void CapriceDevTools::UpdateDisassembly()
@@ -231,12 +257,66 @@ void CapriceDevTools::UpdateDisassembly()
   // TODO: Disassemble in a thread
   m_pAssemblyStatus->SetWindowText("Disassembling...");
   // We need to force the repaint for the status to be displayed.
-  // TODO: Why doesn't it work when switching to the tab?!
   m_pParentWindow->HandleMessage(new CMessage(CMessage::APP_PAINT, GetAncestor(ROOT), this));
   m_Disassembled = disassemble(m_EntryPoints);
   RefreshDisassembly();
   // TODO: Report inconsistent disassembling
   m_pAssemblyStatus->SetWindowText("SUCCESS");
+}
+
+void CapriceDevTools::UpdateZ80()
+{
+  m_pZ80RegA->SetValue(z80.AF.b.h);
+  m_pZ80RegAp->SetValue(z80.AFx.b.h);
+  m_pZ80RegF->SetValue(z80.AF.b.l);
+  m_pZ80RegFp->SetValue(z80.AFx.b.l);
+  m_pZ80RegB->SetValue(z80.BC.b.h);
+  m_pZ80RegBp->SetValue(z80.BCx.b.h);
+  m_pZ80RegC->SetValue(z80.BC.b.l);
+  m_pZ80RegCp->SetValue(z80.BCx.b.l);
+  m_pZ80RegD->SetValue(z80.DE.b.h);
+  m_pZ80RegDp->SetValue(z80.DEx.b.h);
+  m_pZ80RegE->SetValue(z80.DE.b.l);
+  m_pZ80RegEp->SetValue(z80.DEx.b.l);
+  m_pZ80RegH->SetValue(z80.HL.b.h);
+  m_pZ80RegHp->SetValue(z80.HLx.b.h);
+  m_pZ80RegL->SetValue(z80.HL.b.l);
+  m_pZ80RegLp->SetValue(z80.HLx.b.l);
+  m_pZ80RegI->SetValue(z80.I);
+  m_pZ80RegR->SetValue(z80.R);
+  m_pZ80RegIXH->SetValue(z80.IX.b.h);
+  m_pZ80RegIXL->SetValue(z80.IX.b.l);
+  m_pZ80RegIYH->SetValue(z80.IY.b.h);
+  m_pZ80RegIYL->SetValue(z80.IY.b.l);
+
+  m_pZ80RegAF->SetValue(z80.AF.w.l);
+  m_pZ80RegAFp->SetValue(z80.AFx.w.l);
+  m_pZ80RegBC->SetValue(z80.BC.w.l);
+  m_pZ80RegBCp->SetValue(z80.BCx.w.l);
+  m_pZ80RegDE->SetValue(z80.DE.w.l);
+  m_pZ80RegDEp->SetValue(z80.DEx.w.l);
+  m_pZ80RegHL->SetValue(z80.HL.w.l);
+  m_pZ80RegHLp->SetValue(z80.HLx.w.l);
+  m_pZ80RegIX->SetValue(z80.IX.w.l);
+  m_pZ80RegIY->SetValue(z80.IY.w.l);
+  m_pZ80RegSP->SetValue(z80.SP.w.l);
+  m_pZ80RegPC->SetValue(z80.PC.w.l);
+
+  m_pZ80FlagS->SetWindowText((z80.AF.b.l & Sflag) ? "1" : "0");
+  m_pZ80FlagZ->SetWindowText((z80.AF.b.l & Zflag) ? "1" : "0");
+  m_pZ80FlagH->SetWindowText((z80.AF.b.l & Hflag) ? "1" : "0");
+  m_pZ80FlagPV->SetWindowText((z80.AF.b.l & Pflag) ? "1" : "0");
+  m_pZ80FlagN->SetWindowText((z80.AF.b.l & Nflag) ? "1" : "0");
+  m_pZ80FlagC->SetWindowText((z80.AF.b.l & Cflag) ? "1" : "0");
+
+  m_pZ80Stack->ClearItems();
+  for (word addr = z80.SP.w.l; addr < 0xC000; addr += 2) {
+    std::ostringstream oss;
+    word val = (z80_read_mem(addr+1) << 8) + z80_read_mem(addr);
+    oss << std::hex << std::setw(4) << std::setfill('0') << val
+      << " (" << std::dec << val << ")";
+    m_pZ80Stack->AddItem(SListItem(oss.str()));
+  }
 }
 
 void CapriceDevTools::UpdateEntryPointsList()
@@ -299,95 +379,64 @@ void CapriceDevTools::UpdateTextMemory() {
   m_pMemTextContent->SetWindowText(memText.str().substr(0, memText.str().size()-1));
 }
 
+void CapriceDevTools::PauseExecution()
+{
+  CPC.paused = true;
+  m_pButtonPause->SetWindowText("Resume");
+}
+
+void CapriceDevTools::ResumeExecution()
+{
+  CPC.paused = false;
+  m_pButtonPause->SetWindowText("Pause");
+}
+
 void CapriceDevTools::Update()
 {
+  if (!CPC.paused) {
+    switch (m_pNavigationBar->getSelectedIndex()) {
+      case 0 : { // 'z80'
+                 UpdateZ80();
+                 break;
+               }
+      case 1 : { // 'Assembly'
+                 UpdateDisassemblyPos();
+                 break;
+               }
+      case 2 : { // 'Memory'
+                 break;
+               }
+      case 3 : { // 'Video'
+                 break;
+               }
+      case 4 : { // 'Audio'
+                 break;
+               }
+      case 5 : { // 'Characters'
+                 break;
+               }
+    }
+  }
+  // Pause on breakpoints and watchpoints. After update of screens as we don't
+  // update them again after.
   if (!breakpoints.empty() || !watchpoints.empty()) {
     if (z80.watchpoint_reached ||
         std::any_of(breakpoints.begin(), breakpoints.end(), [&](const auto& b) {
           return b.address == _PC;
           })) {
-      CPC.paused = true;
-      // TODO: Move the change of the button text to a single place?
-      m_pButtonPause->SetWindowText("Resume");
+      PauseExecution();
     };
   }
-  switch (m_pNavigationBar->getSelectedIndex()) {
-    case 0 : { // 'z80'
-               m_pZ80RegA->SetValue(z80.AF.b.h);
-               m_pZ80RegAp->SetValue(z80.AFx.b.h);
-               m_pZ80RegB->SetValue(z80.BC.b.h);
-               m_pZ80RegBp->SetValue(z80.BCx.b.h);
-               m_pZ80RegC->SetValue(z80.BC.b.l);
-               m_pZ80RegCp->SetValue(z80.BCx.b.l);
-               m_pZ80RegD->SetValue(z80.DE.b.h);
-               m_pZ80RegDp->SetValue(z80.DEx.b.h);
-               m_pZ80RegE->SetValue(z80.DE.b.l);
-               m_pZ80RegEp->SetValue(z80.DEx.b.l);
-               m_pZ80RegH->SetValue(z80.HL.b.h);
-               m_pZ80RegHp->SetValue(z80.HLx.b.h);
-               m_pZ80RegL->SetValue(z80.HL.b.l);
-               m_pZ80RegLp->SetValue(z80.HLx.b.l);
-               m_pZ80RegI->SetValue(z80.I);
-               m_pZ80RegR->SetValue(z80.R);
-               m_pZ80RegIXH->SetValue(z80.IX.b.h);
-               m_pZ80RegIXL->SetValue(z80.IX.b.l);
-               m_pZ80RegIYH->SetValue(z80.IY.b.h);
-               m_pZ80RegIYL->SetValue(z80.IY.b.l);
+}
 
-               m_pZ80RegAF->SetValue(z80.AF.w.l);
-               m_pZ80RegAFp->SetValue(z80.AFx.w.l);
-               m_pZ80RegBC->SetValue(z80.BC.w.l);
-               m_pZ80RegBCp->SetValue(z80.BCx.w.l);
-               m_pZ80RegDE->SetValue(z80.DE.w.l);
-               m_pZ80RegDEp->SetValue(z80.DEx.w.l);
-               m_pZ80RegHL->SetValue(z80.HL.w.l);
-               m_pZ80RegHLp->SetValue(z80.HLx.w.l);
-               m_pZ80RegIX->SetValue(z80.IX.w.l);
-               m_pZ80RegIY->SetValue(z80.IY.w.l);
-               m_pZ80RegSP->SetValue(z80.SP.w.l);
-               m_pZ80RegPC->SetValue(z80.PC.w.l);
-
-               m_pZ80Stack->ClearItems();
-               for (word addr = z80.SP.w.l; addr < 0xC000; addr += 2) {
-                 std::ostringstream oss;
-                 word val = (z80_read_mem(addr+1) << 8) + z80_read_mem(addr);
-                 oss << std::hex << std::setw(4) << std::setfill('0') << val
-                     << " (" << std::dec << val << ")";
-                 m_pZ80Stack->AddItem(SListItem(oss.str()));
-               }
-               break;
-             }
-    case 1 : { // 'Assembly'
-               // For now, only disassemble once when showing the tab for the first time
-               /* TODO: Auto-refresh of assembly ? This is very slow
-               auto disassembled = disassemble(m_EntryPoints);
-               if (disassembled.hash() != m_Disassembled.hash()) {
-                 m_Disassembled = disassembled;
-                 m_pAssemblyCode->ClearItems();
-                 std::vector<SListItem> items;
-                 for (const auto& line : m_Disassembled.lines) {
-                   std::ostringstream oss;
-                   oss << std::hex << std::setw(5) << line.address_ << ": " << std::setw(10) << line.opcode_ << "     " << line.instruction_;
-                   items.emplace_back(SListItem(oss.str()));
-                 }
-                 m_pAssemblyCode->AddItems(items);
-               }
-               */
-               break;
-             }
-    case 2 : { // 'Memory'
-               break;
-             }
-    case 3 : { // 'Video'
-               break;
-             }
-    case 4 : { // 'Audio'
-               break;
-             }
-    case 5 : { // 'Characters'
-               break;
-             }
-  }
+void CapriceDevTools::UpdateAll()
+{
+    UpdateZ80();
+    UpdateBreakPointsList();
+    //UpdateDisassembly();
+    UpdateDisassemblyPos();
+    UpdateTextMemory();
+    UpdateWatchPointsList();
 }
 
 bool CapriceDevTools::HandleMessage(CMessage* pMessage)
@@ -403,20 +452,17 @@ bool CapriceDevTools::HandleMessage(CMessage* pMessage)
           if (pMessage->Destination() == this)
           {
             if (pMessage->Source() == m_pButtonClose) {
-              std::cout << "cpitrat: Closing frame" << std::endl;
+              // TODO: Unpause on closing, but only for the last window (so not here ...)
               CloseFrame();
               bHandled = true;
               break;
             }
             if (pMessage->Source() == m_pButtonPause) {
               if (CPC.paused) {
-                std::cout << "cpitrat: Unpausing emulation" << std::endl;
-                m_pButtonPause->SetWindowText("Pause");
+                ResumeExecution();
               } else {
-                std::cout << "cpitrat: Pausing emulation" << std::endl;
-                m_pButtonPause->SetWindowText("Resume");
+                PauseExecution();
               }
-              CPC.paused = !CPC.paused;
               break;
             }
           }
@@ -552,14 +598,18 @@ bool CapriceDevTools::HandleMessage(CMessage* pMessage)
             switch (m_pNavigationBar->getSelectedIndex()) {
               case 0 : { // 'z80'
                          EnableTab("z80");
+                         UpdateZ80();
                          break;
                        }
               case 1 : { // 'Assembly'
                          EnableTab("asm");
+                         UpdateDisassemblyPos();
                          break;
                        }
               case 2 : { // 'Memory'
                          EnableTab("memory");
+                         UpdateTextMemory();
+                         UpdateWatchPointsList();
                          break;
                        }
               case 3 : { // 'Video'

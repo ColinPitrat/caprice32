@@ -36,8 +36,13 @@ namespace wGui
         void CloseFrame() override;
 
       protected:
+        void PauseExecution();
+        void ResumeExecution();
         void RefreshDisassembly();
+        void UpdateAll();
+        void UpdateZ80();
         void UpdateDisassembly();
+        void UpdateDisassemblyPos();
         void UpdateEntryPointsList();
         void UpdateBreakPointsList();
         void UpdateWatchPointsList();
@@ -92,7 +97,22 @@ namespace wGui
         CRegister* m_pZ80RegIY;
         CRegister* m_pZ80RegSP;
         CRegister* m_pZ80RegPC;
-        // TODO: Flags
+        // Flags
+        CRegister* m_pZ80RegF;
+        CRegister* m_pZ80RegFp;
+        CLabel* m_pZ80FlagsLabel;
+        CLabel* m_pZ80FlagSLbl;
+        CEditBox* m_pZ80FlagS;
+        CLabel* m_pZ80FlagZLbl;
+        CEditBox* m_pZ80FlagZ;
+        CLabel* m_pZ80FlagHLbl;
+        CEditBox* m_pZ80FlagH;
+        CLabel* m_pZ80FlagPVLbl;
+        CEditBox* m_pZ80FlagPV;
+        CLabel* m_pZ80FlagNLbl;
+        CEditBox* m_pZ80FlagN;
+        CLabel* m_pZ80FlagCLbl;
+        CEditBox* m_pZ80FlagC;
         // Stack
         CLabel* m_pZ80StackLabel;
         CListBox* m_pZ80Stack;

@@ -94,6 +94,10 @@ public:
 	//! \return A reference to the SListItem struct
 	SListItem& GetItem(unsigned int iItemIndex) { return m_Items.at(iItemIndex); }
 
+  //! Returns the list of all items
+  //! \return A reference on the vector of SListItem struct
+  const std::vector<SListItem>& GetAllItems() const { return m_Items; }
+
 	//! Remove an item from the list
 	//! \param iItemIndex The index of the item to remove
 	void RemoveItem(unsigned int iItemIndex);
@@ -112,6 +116,17 @@ public:
 
 	// Returns the index of the first selected item; returns -1 if there is no selection.
 	int getFirstSelectedIndex();
+
+  enum EPosition {
+    UP,
+    CENTER,
+    DOWN
+  };
+
+	//! Move to the position where a given item would be at the given spot.
+	//! \param iItemIndex The index of the item to position
+	//! \param ePosition Where the item should be in the box
+  void SetPosition(int iItemIndex, EPosition ePosition);
 
 	//! Set an item as selected
 	//! \param iItemIndex The index of the item to change

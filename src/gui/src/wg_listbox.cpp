@@ -130,6 +130,30 @@ int CListBox::getFirstSelectedIndex() {
     return -1;
 }
 
+void CListBox::SetPosition(int iItemIndex, EPosition ePosition)
+{
+  switch (ePosition) {
+    case UP:
+      m_pVScrollbar->SetValue(iItemIndex, /*bRedraw=*/false, /*bNotify=*/false);
+      break;
+    case CENTER:
+      {
+        int boxsize = m_ClientRect.Height() / m_iItemHeight;
+        m_pVScrollbar->SetValue(iItemIndex-boxsize/2, /*bRedraw=*/false, /*bNotify=*/false);
+        break;
+      }
+      break;
+    case DOWN:
+      {
+        int boxsize = m_ClientRect.Height() / m_iItemHeight;
+        m_pVScrollbar->SetValue(iItemIndex-boxsize+1, /*bRedraw=*/false, /*bNotify=*/false);
+        break;
+      }
+    default:
+      throw Wg_Ex_App("Unrecognized ListBox position.", "CListBox::SetPosition");
+  }
+}
+
 void CListBox::SetSelection(unsigned int iItemIndex, bool bSelected, bool bNotify)
 {
 	if (iItemIndex < m_SelectedItems.size())
