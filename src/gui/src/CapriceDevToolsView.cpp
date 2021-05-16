@@ -1,4 +1,4 @@
-// Developer's tools for Caprice32
+// Developers' tools for Caprice32
 #include "CapriceDevToolsView.h"
 #include "CapriceDevTools.h"
 
