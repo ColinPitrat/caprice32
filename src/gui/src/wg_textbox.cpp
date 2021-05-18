@@ -72,16 +72,16 @@ CTextBox::CTextBox(const CRect& WindowRect, CWindow* pParent, CFontEngine* pFont
 	m_ScrollBarVisibilityMap[CScrollBar::HORIZONTAL] = SCROLLBAR_VIS_AUTO;
 	PrepareWindowText("");
 
-	CMessageServer::Instance().RegisterMessageClient(this, CMessage::KEYBOARD_KEYDOWN);
-	CMessageServer::Instance().RegisterMessageClient(this, CMessage::MOUSE_BUTTONUP);
-	CMessageServer::Instance().RegisterMessageClient(this, CMessage::MOUSE_MOVE);
-	CMessageServer::Instance().RegisterMessageClient(this, CMessage::CTRL_VALUECHANGE);
-	CMessageServer::Instance().RegisterMessageClient(this, CMessage::CTRL_VALUECHANGING);
-	CMessageServer::Instance().RegisterMessageClient(this, CMessage::CTRL_DOUBLELCLICK);
-	CMessageServer::Instance().RegisterMessageClient(this, CMessage::CTRL_TIMER);
-	CMessageServer::Instance().RegisterMessageClient(this, CMessage::CTRL_GAININGKEYFOCUS);
-	CMessageServer::Instance().RegisterMessageClient(this, CMessage::CTRL_LOSINGKEYFOCUS);
-	CMessageServer::Instance().RegisterMessageClient(this, CMessage::TEXTINPUT);
+	CApplication::Instance()->MessageServer()->RegisterMessageClient(this, CMessage::KEYBOARD_KEYDOWN);
+	CApplication::Instance()->MessageServer()->RegisterMessageClient(this, CMessage::MOUSE_BUTTONUP);
+	CApplication::Instance()->MessageServer()->RegisterMessageClient(this, CMessage::MOUSE_MOVE);
+	CApplication::Instance()->MessageServer()->RegisterMessageClient(this, CMessage::CTRL_VALUECHANGE);
+	CApplication::Instance()->MessageServer()->RegisterMessageClient(this, CMessage::CTRL_VALUECHANGING);
+	CApplication::Instance()->MessageServer()->RegisterMessageClient(this, CMessage::CTRL_DOUBLELCLICK);
+	CApplication::Instance()->MessageServer()->RegisterMessageClient(this, CMessage::CTRL_TIMER);
+	CApplication::Instance()->MessageServer()->RegisterMessageClient(this, CMessage::CTRL_GAININGKEYFOCUS);
+	CApplication::Instance()->MessageServer()->RegisterMessageClient(this, CMessage::CTRL_LOSINGKEYFOCUS);
+	CApplication::Instance()->MessageServer()->RegisterMessageClient(this, CMessage::TEXTINPUT);
 	Draw();
 }
 
@@ -304,7 +304,7 @@ bool CTextBox::OnMouseButtonDown(CPoint Point, unsigned int Button)  // virtual
 			else
 			{
 				// Raise double click event
-				CMessageServer::Instance().QueueMessage(new TIntMessage(CMessage::CTRL_DOUBLELCLICK, this, this, 0));
+				CApplication::Instance()->MessageServer()->QueueMessage(new TIntMessage(CMessage::CTRL_DOUBLELCLICK, this, this, 0));
 				fSkipCursorPositioning = true;
 			}
 
@@ -528,7 +528,7 @@ bool CTextBox::HandleMessage(CMessage* pMessage)  // virtual
 					m_SelStart += pTextInputMessage->Text.length();
 					if (m_sWindowText != sBuffer)
 					{
-						CMessageServer::Instance().QueueMessage(new TStringMessage(CMessage::CTRL_VALUECHANGE, m_pParentWindow, this, sBuffer));
+						CApplication::Instance()->MessageServer()->QueueMessage(new TStringMessage(CMessage::CTRL_VALUECHANGE, m_pParentWindow, this, sBuffer));
 						m_sWindowText = sBuffer;
 						PrepareWindowText(sBuffer);
 					}
@@ -795,7 +795,7 @@ bool CTextBox::HandleMessage(CMessage* pMessage)  // virtual
 
 					if (m_sWindowText != sBuffer)
 					{
-						CMessageServer::Instance().QueueMessage(new TStringMessage(CMessage::CTRL_VALUECHANGE, m_pParentWindow, this, sBuffer));
+						CApplication::Instance()->MessageServer()->QueueMessage(new TStringMessage(CMessage::CTRL_VALUECHANGE, m_pParentWindow, this, sBuffer));
 						m_sWindowText = sBuffer;
 						PrepareWindowText(sBuffer);
 					}

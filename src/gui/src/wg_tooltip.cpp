@@ -52,8 +52,8 @@ CToolTip::CToolTip(CWindow* pToolWindow, std::string sText, CRGBColor& FontColor
 	m_BoundingRect = CRect(CPoint(0, 0), Dims + CPoint(4, 4));
 
 	m_BackgroundColor = BackgroundColor;
-	CMessageServer::Instance().RegisterMessageClient(this, CMessage::MOUSE_MOVE);
-	CMessageServer::Instance().RegisterMessageClient(this, CMessage::CTRL_TIMER);
+	CApplication::Instance()->MessageServer()->RegisterMessageClient(this, CMessage::MOUSE_MOVE);
+	CApplication::Instance()->MessageServer()->RegisterMessageClient(this, CMessage::CTRL_TIMER);
 }
 
 
@@ -74,7 +74,7 @@ void CToolTip::ShowTip(const CPoint& DrawPoint)
 void CToolTip::HideTip()
 {
 	SetVisible(false);
-	CMessageServer::Instance().QueueMessage(new CMessage(CMessage::APP_PAINT, nullptr, this));
+	CApplication::Instance()->MessageServer()->QueueMessage(new CMessage(CMessage::APP_PAINT, nullptr, this));
 }
 
 

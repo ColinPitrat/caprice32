@@ -56,11 +56,11 @@ CListBox::CListBox(const CRect& WindowRect, CWindow* pParent, bool bSingleSelect
 	m_pVScrollbar->SetMaxLimit(0);
 	m_ClientRect = CRect(2, 2, m_WindowRect.Width() - 16, m_WindowRect.Height() - 2);
 	m_BackgroundColor = COLOR_WHITE;
-	CMessageServer::Instance().RegisterMessageClient(this, CMessage::KEYBOARD_KEYDOWN);
-	CMessageServer::Instance().RegisterMessageClient(this, CMessage::CTRL_VALUECHANGE);
-	CMessageServer::Instance().RegisterMessageClient(this, CMessage::CTRL_VALUECHANGING);
-	CMessageServer::Instance().RegisterMessageClient(this, CMessage::CTRL_GAININGKEYFOCUS);
-	CMessageServer::Instance().RegisterMessageClient(this, CMessage::CTRL_LOSINGKEYFOCUS);
+	CApplication::Instance()->MessageServer()->RegisterMessageClient(this, CMessage::KEYBOARD_KEYDOWN);
+	CApplication::Instance()->MessageServer()->RegisterMessageClient(this, CMessage::CTRL_VALUECHANGE);
+	CApplication::Instance()->MessageServer()->RegisterMessageClient(this, CMessage::CTRL_VALUECHANGING);
+	CApplication::Instance()->MessageServer()->RegisterMessageClient(this, CMessage::CTRL_GAININGKEYFOCUS);
+	CApplication::Instance()->MessageServer()->RegisterMessageClient(this, CMessage::CTRL_LOSINGKEYFOCUS);
 	Draw();
 }
 
@@ -170,7 +170,7 @@ void CListBox::SetSelection(unsigned int iItemIndex, bool bSelected, bool bNotif
     }
     if (bNotify)
     {
-      CMessageServer::Instance().QueueMessage(new TIntMessage(CMessage::CTRL_VALUECHANGE, pDestination, this, m_iFocusedItem));
+      CApplication::Instance()->MessageServer()->QueueMessage(new TIntMessage(CMessage::CTRL_VALUECHANGE, pDestination, this, m_iFocusedItem));
     }
     Draw();
   }
@@ -418,7 +418,7 @@ bool CListBox::HandleMessage(CMessage* pMessage)
 					default:
 					{
             // Not for us - let parent handle it
-            CMessageServer::Instance().QueueMessage(new CKeyboardMessage(CMessage::KEYBOARD_KEYDOWN, m_pParentWindow, this,
+            CApplication::Instance()->MessageServer()->QueueMessage(new CKeyboardMessage(CMessage::KEYBOARD_KEYDOWN, m_pParentWindow, this,
                   pKeyMsg->ScanCode, pKeyMsg->Modifiers, pKeyMsg->Key));
 						bHandled=false;
 						break;

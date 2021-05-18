@@ -189,6 +189,7 @@ public:
 	//! \return A reference to the application log, which gets any wGui log messages
 	virtual wUtil::CLog& GetApplicationLog() { return m_AppLog; }
 
+  CMessageServer* MessageServer() { return m_pMessageServer.get(); }
 
 	// CMessageClient overrides
 	//! CApplication will handle the APP_EXIT message, and will close the application on it's receipt
@@ -203,6 +204,7 @@ protected:
 	virtual void HandleSDLEvent(SDL_Event event);
 
 	static CApplication* m_pInstance;  //!< A pointer to the one valid instance of the application
+  std::unique_ptr<CMessageServer> m_pMessageServer;
 	std::string m_sFontFileName;  //!< The font to use for all controls
 	int m_iExitCode;  //!< The exit code to be returned when the app exits
 	bool m_bRunning;  //!< Indicates if the app is currently spinning in the message loop

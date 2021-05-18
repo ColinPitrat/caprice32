@@ -48,7 +48,7 @@ CGroupBox::CGroupBox(const CRect& WindowRect, CWindow* pParent, std::string sTex
 	m_pRenderedString.reset(new CRenderedString(
 		m_pFontEngine, sText, CRenderedString::VALIGN_TOP, CRenderedString::HALIGN_LEFT));
 	m_BackgroundColor = CApplication::Instance()->GetDefaultBackgroundColor();
-	CMessageServer::Instance().RegisterMessageClient(this, CMessage::KEYBOARD_KEYDOWN);
+	CApplication::Instance()->MessageServer()->RegisterMessageClient(this, CMessage::KEYBOARD_KEYDOWN);
 	Draw();
 }
 
@@ -110,7 +110,7 @@ bool CGroupBox::HandleMessage(CMessage* pMessage)
       if (pKeyboardMessage && pMessage->Destination() == this)
       {
         // Forward all key downs to parent
-        CMessageServer::Instance().QueueMessage(new CKeyboardMessage(CMessage::KEYBOARD_KEYDOWN, m_pParentWindow, this,
+        CApplication::Instance()->MessageServer()->QueueMessage(new CKeyboardMessage(CMessage::KEYBOARD_KEYDOWN, m_pParentWindow, this,
               pKeyboardMessage->ScanCode, pKeyboardMessage->Modifiers, pKeyboardMessage->Key));
       }
       break;

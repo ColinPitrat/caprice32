@@ -67,15 +67,13 @@ using t_MessageClientMap = std::map<wGui::CMessage::EMessageType, t_MessageClien
 
 class CMessageServer
 {
-protected:
-	//! The CMessageServer class cannot be directly instantiated, it must be access through Instance()
+public:
+	//! The CMessageServer class shouldn't be directly instantiated, but accessed through the CApplication
 	CMessageServer();
 
 	//! Standard constructor
 	virtual ~CMessageServer();
 
-
-public:
 	//! Used for marking the priority of registered message clients, where the higher priority clients will get messages first
 	enum EClientPriority
 	{
@@ -85,10 +83,6 @@ public:
 		PRIORITY_HIGH = 150,  //!< High priority
 		PRIORITY_FIRST = 255  //!< The absolute highest priority available
 	};
-
-	//! Gets the single instance of the message server
-	//! \return The single valid instance of the message server, or create one if it doesn't already exist
-	static CMessageServer& Instance();
 
 	//! Register a client to recieve messages
 	//! \param pClient A pointer to the client which should recieve the messages
@@ -125,7 +119,6 @@ public:
 
 
 protected:
-	static CMessageServer* m_pInstance;  //!< A pointer to the single instande of the message server
 	std::deque<CMessage*> m_MessageQueue;  //!< The message queue
 	t_MessageClientMap m_MessageClients;  //!< A map of all the registered clients
 	SDL_sem* m_pSemaphore;  //!< A semaphore indicating how many messages are in the queue

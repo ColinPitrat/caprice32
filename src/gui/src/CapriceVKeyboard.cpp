@@ -93,7 +93,7 @@ namespace wGui {
 
   void CapriceVKeyboard::CloseFrame() {
     // Exit gui
-    CMessageServer::Instance().QueueMessage(new CMessage(CMessage::APP_EXIT, nullptr, this));
+    CApplication::Instance()->MessageServer()->QueueMessage(new CMessage(CMessage::APP_EXIT, nullptr, this));
   }
 
   std::list<SDL_Event> CapriceVKeyboard::GetEvents() {

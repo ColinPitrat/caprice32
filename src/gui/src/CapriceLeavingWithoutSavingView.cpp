@@ -2,7 +2,7 @@
 
 CapriceLeavingWithoutSavingView::CapriceLeavingWithoutSavingView(SDL_Surface* surface, SDL_Surface* backSurface, const CRect& WindowRect) : CView(surface, backSurface, WindowRect)
 {
-  CMessageServer::Instance().RegisterMessageClient(this, CMessage::CTRL_MESSAGEBOXRETURN);
+  CApplication::Instance()->MessageServer()->RegisterMessageClient(this, CMessage::CTRL_MESSAGEBOXRETURN);
   m_pMessageBox = new wGui::CMessageBox(CRect(CPoint(m_ClientRect.Width() /2 - 125, m_ClientRect.Height() /2 - 40), 250, 80), this, nullptr, "Quit without saving?", "Unsaved changes. Do you really want to quit?", CMessageBox::BUTTON_YES | CMessageBox::BUTTON_NO);
   m_pMessageBox->SetModal(true);
 }
@@ -41,7 +41,7 @@ bool CapriceLeavingWithoutSavingView::HandleMessage(CMessage* pMessage)
       case CMessage::APP_DESTROY_FRAME:
         {
           // Exit gui
-          CMessageServer::Instance().QueueMessage(new CMessage(CMessage::APP_EXIT, nullptr, this));
+          CApplication::Instance()->MessageServer()->QueueMessage(new CMessage(CMessage::APP_EXIT, nullptr, this));
           break;
         }
 
@@ -53,7 +53,7 @@ bool CapriceLeavingWithoutSavingView::HandleMessage(CMessage* pMessage)
             confirmed = true;
           }
           // Exit gui
-          CMessageServer::Instance().QueueMessage(new CMessage(CMessage::APP_EXIT, nullptr, this));
+          CApplication::Instance()->MessageServer()->QueueMessage(new CMessage(CMessage::APP_EXIT, nullptr, this));
           break;
         }
 

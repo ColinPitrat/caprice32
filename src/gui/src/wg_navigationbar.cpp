@@ -45,9 +45,9 @@ CNavigationBar::CNavigationBar(CWindow* pParent, const CPoint& UpperLeft, unsign
     // we added + 4 to the width (in the CWindow constructor above)
 	m_ClientRect = CRect(2, 2, m_WindowRect.Width() - 2, m_WindowRect.Height() - 2);
 	m_BackgroundColor = COLOR_WHITE;
-	CMessageServer::Instance().RegisterMessageClient(this, CMessage::KEYBOARD_KEYDOWN);
-	CMessageServer::Instance().RegisterMessageClient(this, CMessage::CTRL_VALUECHANGE);
-	CMessageServer::Instance().RegisterMessageClient(this, CMessage::CTRL_VALUECHANGING);
+	CApplication::Instance()->MessageServer()->RegisterMessageClient(this, CMessage::KEYBOARD_KEYDOWN);
+	CApplication::Instance()->MessageServer()->RegisterMessageClient(this, CMessage::CTRL_VALUECHANGE);
+	CApplication::Instance()->MessageServer()->RegisterMessageClient(this, CMessage::CTRL_VALUECHANGING);
 	Draw();
 }
 
@@ -115,7 +115,7 @@ void CNavigationBar::SelectItem(unsigned int iItemIndex) {
         m_iFocusedItem = iItemIndex;
         CWindow* pDestination = m_pParentWindow;
         // could be optimized : keep 'previous' selection and only send the message if new m_iFocusedItem != previous focused item.
-        CMessageServer::Instance().QueueMessage(new TIntMessage(CMessage::CTRL_VALUECHANGE, pDestination, this, m_iFocusedItem));
+        CApplication::Instance()->MessageServer()->QueueMessage(new TIntMessage(CMessage::CTRL_VALUECHANGE, pDestination, this, m_iFocusedItem));
         Draw();
     }
 }
@@ -231,7 +231,7 @@ bool CNavigationBar::HandleMessage(CMessage* pMessage) {
             break;
 					default:
             // Let the parent handle it
-            CMessageServer::Instance().QueueMessage(new CKeyboardMessage(CMessage::KEYBOARD_KEYDOWN, m_pParentWindow, this,
+            CApplication::Instance()->MessageServer()->QueueMessage(new CKeyboardMessage(CMessage::KEYBOARD_KEYDOWN, m_pParentWindow, this,
                   pKeyMsg->ScanCode, pKeyMsg->Modifiers, pKeyMsg->Key));
             break;
 						bHandled = false;

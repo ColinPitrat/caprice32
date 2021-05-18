@@ -48,38 +48,38 @@ void CApplication::HandleSDLEvent(SDL_Event event)
 	switch (event.type)
 	{
   case SDL_WINDOWEVENT:
-    CMessageServer::Instance().QueueMessage(new CMessage(CMessage::APP_PAINT, nullptr, this));
+    CApplication::Instance()->MessageServer()->QueueMessage(new CMessage(CMessage::APP_PAINT, nullptr, this));
     if (event.window.event == SDL_WINDOWEVENT_RESIZED ||
         event.window.event == SDL_WINDOWEVENT_SIZE_CHANGED) {
-      CMessageServer::Instance().QueueMessage(new TPointMessage(
+      CApplication::Instance()->MessageServer()->QueueMessage(new TPointMessage(
             CMessage::CTRL_RESIZE, nullptr, this, CPoint(event.window.data1, event.window.data2)));
     }
 		break;
   case SDL_TEXTINPUT:
-    CMessageServer::Instance().QueueMessage(new CTextInputMessage(
+    CApplication::Instance()->MessageServer()->QueueMessage(new CTextInputMessage(
           CMessage::TEXTINPUT, CApplication::Instance()->GetKeyFocus(), this,
           std::string(event.text.text)));
     break;
 	case SDL_KEYDOWN:
-		CMessageServer::Instance().QueueMessage(new CKeyboardMessage(
+		CApplication::Instance()->MessageServer()->QueueMessage(new CKeyboardMessage(
 			CMessage::KEYBOARD_KEYDOWN, CApplication::Instance()->GetKeyFocus(), this,
 			event.key.keysym.scancode, static_cast<SDL_Keymod>(event.key.keysym.mod),
 			event.key.keysym.sym));
 		break;
 	case SDL_KEYUP:
-		CMessageServer::Instance().QueueMessage(new CKeyboardMessage(
+		CApplication::Instance()->MessageServer()->QueueMessage(new CKeyboardMessage(
 			CMessage::KEYBOARD_KEYUP, CApplication::Instance()->GetKeyFocus(), this,
 			event.key.keysym.scancode, static_cast<SDL_Keymod>(event.key.keysym.mod),
 			event.key.keysym.sym));
 		break;
 	case SDL_MOUSEBUTTONDOWN:
-		CMessageServer::Instance().QueueMessage(new CMouseMessage(
+		CApplication::Instance()->MessageServer()->QueueMessage(new CMouseMessage(
 			CMessage::MOUSE_BUTTONDOWN, CApplication::Instance()->GetMouseFocus(), this,
 			CPoint(static_cast<int>((event.button.x-vid_plugin->x_offset)*vid_plugin->x_scale), static_cast<int>((event.button.y-vid_plugin->y_offset)*vid_plugin->y_scale)), CPoint(),
 			CMouseMessage::TranslateSDLButton(event.button.button)));
 		break;
 	case SDL_MOUSEBUTTONUP:
-		CMessageServer::Instance().QueueMessage(new CMouseMessage(
+		CApplication::Instance()->MessageServer()->QueueMessage(new CMouseMessage(
 			CMessage::MOUSE_BUTTONUP, CApplication::Instance()->GetMouseFocus(), this,
 			CPoint(static_cast<int>((event.button.x-vid_plugin->x_offset)*vid_plugin->x_scale), static_cast<int>((event.button.y-vid_plugin->y_offset)*vid_plugin->y_scale)), CPoint(),
 			CMouseMessage::TranslateSDLButton(event.button.button)));
@@ -94,14 +94,14 @@ void CApplication::HandleSDLEvent(SDL_Event event)
       }
       int x, y;
       SDL_GetMouseState(&x, &y);
-      CMessageServer::Instance().QueueMessage(new CMouseMessage(
+      CApplication::Instance()->MessageServer()->QueueMessage(new CMouseMessage(
             CMessage::MOUSE_BUTTONDOWN, CApplication::Instance()->GetMouseFocus(), this,
             CPoint(static_cast<int>((x-vid_plugin->x_offset)*vid_plugin->x_scale), static_cast<int>((y-vid_plugin->y_offset)*vid_plugin->y_scale)), CPoint(),
             wheeldirection));
       break;
     }
 	case SDL_MOUSEMOTION:
-		CMessageServer::Instance().QueueMessage(new CMouseMessage(
+		CApplication::Instance()->MessageServer()->QueueMessage(new CMouseMessage(
 			CMessage::MOUSE_MOVE, CApplication::Instance()->GetMouseFocus(), this,
 			CPoint(static_cast<int>((event.button.x-vid_plugin->x_offset)*vid_plugin->x_scale), static_cast<int>((event.button.y-vid_plugin->y_offset)*vid_plugin->y_scale)), CPoint(),
 			CMouseMessage::TranslateSDLButtonState(event.motion.state)));
@@ -130,10 +130,10 @@ void CApplication::HandleSDLEvent(SDL_Event event)
           break;
       }
       if (key != SDLK_UNKNOWN) {
-        CMessageServer::Instance().QueueMessage(new CKeyboardMessage(
+        CApplication::Instance()->MessageServer()->QueueMessage(new CKeyboardMessage(
               CMessage::KEYBOARD_KEYDOWN, CApplication::Instance()->GetKeyFocus(), this,
               0, KMOD_NONE, key));
-        CMessageServer::Instance().QueueMessage(new CKeyboardMessage(
+        CApplication::Instance()->MessageServer()->QueueMessage(new CKeyboardMessage(
               CMessage::KEYBOARD_KEYUP, CApplication::Instance()->GetKeyFocus(), this,
               0, KMOD_NONE, key));
       }
@@ -171,7 +171,7 @@ void CApplication::HandleSDLEvent(SDL_Event event)
           break;
       }
       if (!ignore_event) {
-        CMessageServer::Instance().QueueMessage(new CKeyboardMessage(
+        CApplication::Instance()->MessageServer()->QueueMessage(new CKeyboardMessage(
               type, CApplication::Instance()->GetKeyFocus(), this,
               0, mod, key));
       }
@@ -179,11 +179,11 @@ void CApplication::HandleSDLEvent(SDL_Event event)
     }
 
 	case SDL_QUIT:
-//		CMessageServer::Instance().QueueMessage(new CMessage(CMessage::APP_EXIT, nullptr, this));
+//		CApplication::Instance()->MessageServer()->QueueMessage(new CMessage(CMessage::APP_EXIT, nullptr, this));
     exit(0);
 		break;
 	default:
-		CMessageServer::Instance().QueueMessage(new CSDLMessage(CMessage::SDL, nullptr, this, event));
+		CApplication::Instance()->MessageServer()->QueueMessage(new CSDLMessage(CMessage::SDL, nullptr, this, event));
 		break;
 	}
 }
@@ -212,6 +212,7 @@ CApplication::CApplication(std::string sFontFileName, bool bHandleExceptionsInte
 	}
 
 	m_pInstance = this;
+  m_pMessageServer = std::make_unique<CMessageServer>();
 
 	// judb
   //if(SDL_Init(SDL_INIT_TIMER | SDL_INIT_VIDEO | SDL_INIT_NOPARACHUTE ) == -1)
@@ -233,6 +234,7 @@ CApplication::CApplication(std::string sFontFileName, bool bHandleExceptionsInte
 
 CApplication::~CApplication()
 {
+  m_pMessageServer = nullptr;
 	if (m_pInstance == this)
 	{
 		m_pInstance = nullptr;
@@ -246,8 +248,6 @@ CApplication::~CApplication()
 
 	m_AppLog.AddLogEntry("wGui Application closing", APP_LOG_INFO);
 	m_AppLog.WriteToFile("wGui.log", false, "wGui Application Log (version " + std::string(VERSION_STRING) + ")\nSeverity Levels : [1] Critical, [3] Error, [5] Warning, [8] Info");
-
-  CMessageServer::Instance().PurgeQueuedMessages();
 }
 
 
@@ -260,10 +260,10 @@ void CApplication::SetKeyFocus(CWindow* pWindow)
       // notify the window that's losing focus to repaint itself
       if (m_pKeyFocusWindow)
       {
-        CMessageServer::Instance().QueueMessage(new CMessage(CMessage::CTRL_LOSINGKEYFOCUS, m_pKeyFocusWindow, this));
+        CApplication::Instance()->MessageServer()->QueueMessage(new CMessage(CMessage::CTRL_LOSINGKEYFOCUS, m_pKeyFocusWindow, this));
       }
       m_pKeyFocusWindow = pWindow;
-      CMessageServer::Instance().QueueMessage(new CMessage(CMessage::CTRL_GAININGKEYFOCUS, m_pKeyFocusWindow, this));
+      CApplication::Instance()->MessageServer()->QueueMessage(new CMessage(CMessage::CTRL_GAININGKEYFOCUS, m_pKeyFocusWindow, this));
     }
     else
     {
@@ -280,10 +280,10 @@ void CApplication::SetMouseFocus(CWindow* pWindow)
 		// notify the window that's losing focus to repaint itself
 		if (m_pMouseFocusWindow)
 		{
-			CMessageServer::Instance().QueueMessage(new CMessage(CMessage::CTRL_LOSINGMOUSEFOCUS, m_pMouseFocusWindow, this));
+			CApplication::Instance()->MessageServer()->QueueMessage(new CMessage(CMessage::CTRL_LOSINGMOUSEFOCUS, m_pMouseFocusWindow, this));
 		}
 		m_pMouseFocusWindow = pWindow;
-		CMessageServer::Instance().QueueMessage(new CMessage(CMessage::CTRL_GAININGMOUSEFOCUS, m_pMouseFocusWindow, this));
+		CApplication::Instance()->MessageServer()->QueueMessage(new CMessage(CMessage::CTRL_GAININGMOUSEFOCUS, m_pMouseFocusWindow, this));
 	}
 }
 
@@ -291,7 +291,7 @@ void CApplication::SetMouseFocus(CWindow* pWindow)
 
 void CApplication::Init()
 {
-	CMessageServer::Instance().RegisterMessageClient(this, CMessage::APP_EXIT, CMessageServer::PRIORITY_LAST);
+	CApplication::Instance()->MessageServer()->RegisterMessageClient(this, CMessage::APP_EXIT, CMessageServer::PRIORITY_LAST);
 
 	// judb removed references to wgui.conf; for caprice32 we may integrate these settings in cap32.cfg:
 	m_pDefaultFontEngine = GetFontEngine(CPC.resources_path + "/vera_sans.ttf", 10); // default size was 10
@@ -310,10 +310,10 @@ void CApplication::ProcessEvent(SDL_Event& event)
   }
 
   m_bRunning = true;
-  CMessageServer::Instance().IgnoreAllNewMessages(false);
-  CMessageServer::Instance().QueueMessage(new CMessage(CMessage::APP_PAINT, nullptr, this));
+  CApplication::Instance()->MessageServer()->IgnoreAllNewMessages(false);
+  CApplication::Instance()->MessageServer()->QueueMessage(new CMessage(CMessage::APP_PAINT, nullptr, this));
   HandleSDLEvent(event);
-  CMessageServer::Instance().DeliverMessage();
+  CApplication::Instance()->MessageServer()->DeliverMessage();
 }
 
 
@@ -325,9 +325,9 @@ void CApplication::Update()
   }
 
   m_bRunning = true;
-  CMessageServer::Instance().IgnoreAllNewMessages(false);
-  CMessageServer::Instance().QueueMessage(new CMessage(CMessage::APP_PAINT, nullptr, this));
-  CMessageServer::Instance().DeliverMessage();
+  CApplication::Instance()->MessageServer()->IgnoreAllNewMessages(false);
+  CApplication::Instance()->MessageServer()->QueueMessage(new CMessage(CMessage::APP_PAINT, nullptr, this));
+  CApplication::Instance()->MessageServer()->DeliverMessage();
 }
 
 
@@ -342,8 +342,8 @@ void CApplication::Exec()
 
 		m_bRunning = true;
 		SDL_Event event;
-		CMessageServer::Instance().IgnoreAllNewMessages(false);
-		CMessageServer::Instance().QueueMessage(new CMessage(CMessage::APP_PAINT, nullptr, this));
+		CApplication::Instance()->MessageServer()->IgnoreAllNewMessages(false);
+		CApplication::Instance()->MessageServer()->QueueMessage(new CMessage(CMessage::APP_PAINT, nullptr, this));
 		m_AppLog.AddLogEntry("wGui Application entering Exec loop", APP_LOG_INFO);
 		while (m_bRunning)
 		{
@@ -352,8 +352,8 @@ void CApplication::Exec()
           HandleSDLEvent(event);
         }
         SDL_Delay(5);
-      } while (!CMessageServer::Instance().MessageAvailable());
-			CMessageServer::Instance().DeliverMessage();
+      } while (!CApplication::Instance()->MessageServer()->MessageAvailable());
+			CApplication::Instance()->MessageServer()->DeliverMessage();
 		}
 	}
 	catch (Wg_Ex_Base& e)

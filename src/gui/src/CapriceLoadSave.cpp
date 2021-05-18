@@ -34,8 +34,8 @@ CapriceLoadSave::CapriceLoadSave(const CRect& WindowRect, CWindow* pParent, CFon
 {
   SetModal(true);
   // Make this window listen to incoming CTRL_VALUECHANGE messages (used for updating drop down values)
-  CMessageServer::Instance().RegisterMessageClient(this, CMessage::CTRL_VALUECHANGE);
-  CMessageServer::Instance().RegisterMessageClient(this, CMessage::CTRL_VALUECHANGING);
+  CApplication::Instance()->MessageServer()->RegisterMessageClient(this, CMessage::CTRL_VALUECHANGE);
+  CApplication::Instance()->MessageServer()->RegisterMessageClient(this, CMessage::CTRL_VALUECHANGING);
 
   // File type (.SNA, .DSK, .TAP, .VOC)
   m_pTypeLabel = new CLabel(          CPoint(15, 25),             this, "File type: ");

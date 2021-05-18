@@ -19,7 +19,7 @@ namespace wGui {
 CapriceMenu::CapriceMenu(const CRect& WindowRect, CWindow* pParent, SDL_Surface* screen, CFontEngine* pFontEngine) :
   CFrame(WindowRect, pParent, pFontEngine, "Caprice32 - Menu", false), m_pScreenSurface(screen)
 {
-  CMessageServer::Instance().RegisterMessageClient(this, CMessage::CTRL_MESSAGEBOXRETURN);
+  CApplication::Instance()->MessageServer()->RegisterMessageClient(this, CMessage::CTRL_MESSAGEBOXRETURN);
   SetModal(true);
   std::map<MenuItem, std::string> buttons = {
     { MenuItem::OPTIONS, "Options" },
@@ -45,7 +45,7 @@ CapriceMenu::~CapriceMenu() = default;
 
 void CapriceMenu::CloseFrame() {
   // Exit gui
-  CMessageServer::Instance().QueueMessage(new CMessage(CMessage::APP_EXIT, nullptr, this));
+  CApplication::Instance()->MessageServer()->QueueMessage(new CMessage(CMessage::APP_EXIT, nullptr, this));
 }
 
 bool CapriceMenu::HandleMessage(CMessage* pMessage)
@@ -161,7 +161,7 @@ bool CapriceMenu::HandleMessage(CMessage* pMessage)
       {
         emulator_reset();
         // Exit gui
-        CMessageServer::Instance().QueueMessage(new CMessage(CMessage::APP_EXIT, nullptr, this));
+        CApplication::Instance()->MessageServer()->QueueMessage(new CMessage(CMessage::APP_EXIT, nullptr, this));
         break;
       }
     case MenuItem::ABOUT:
@@ -172,7 +172,7 @@ bool CapriceMenu::HandleMessage(CMessage* pMessage)
     case MenuItem::RESUME:
       {
         // Exit gui
-        CMessageServer::Instance().QueueMessage(new CMessage(CMessage::APP_EXIT, nullptr, this));
+        CApplication::Instance()->MessageServer()->QueueMessage(new CMessage(CMessage::APP_EXIT, nullptr, this));
         break;
       }
     case MenuItem::QUIT:

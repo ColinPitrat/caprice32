@@ -62,14 +62,14 @@ CEditBox::CEditBox(const CRect& WindowRect, CWindow* pParent, CFontEngine* pFont
 	m_pCursorTimer = new CTimer(this);
 	m_pRenderedString.reset(new CRenderedString(
 		m_pFontEngine, "", CRenderedString::VALIGN_NORMAL, CRenderedString::HALIGN_LEFT));
-	CMessageServer::Instance().RegisterMessageClient(this, CMessage::KEYBOARD_KEYDOWN);
-	CMessageServer::Instance().RegisterMessageClient(this, CMessage::MOUSE_BUTTONUP);
-	CMessageServer::Instance().RegisterMessageClient(this, CMessage::MOUSE_MOVE);
-	CMessageServer::Instance().RegisterMessageClient(this, CMessage::CTRL_DOUBLELCLICK);
-	CMessageServer::Instance().RegisterMessageClient(this, CMessage::CTRL_TIMER);
-	CMessageServer::Instance().RegisterMessageClient(this, CMessage::CTRL_GAININGKEYFOCUS);
-	CMessageServer::Instance().RegisterMessageClient(this, CMessage::CTRL_LOSINGKEYFOCUS);
-	CMessageServer::Instance().RegisterMessageClient(this, CMessage::TEXTINPUT);
+	CApplication::Instance()->MessageServer()->RegisterMessageClient(this, CMessage::KEYBOARD_KEYDOWN);
+	CApplication::Instance()->MessageServer()->RegisterMessageClient(this, CMessage::MOUSE_BUTTONUP);
+	CApplication::Instance()->MessageServer()->RegisterMessageClient(this, CMessage::MOUSE_MOVE);
+	CApplication::Instance()->MessageServer()->RegisterMessageClient(this, CMessage::CTRL_DOUBLELCLICK);
+	CApplication::Instance()->MessageServer()->RegisterMessageClient(this, CMessage::CTRL_TIMER);
+	CApplication::Instance()->MessageServer()->RegisterMessageClient(this, CMessage::CTRL_GAININGKEYFOCUS);
+	CApplication::Instance()->MessageServer()->RegisterMessageClient(this, CMessage::CTRL_LOSINGKEYFOCUS);
+	CApplication::Instance()->MessageServer()->RegisterMessageClient(this, CMessage::TEXTINPUT);
 
 	Draw();
 }
@@ -313,7 +313,7 @@ bool CEditBox::OnMouseButtonDown(CPoint Point, unsigned int Button)
 		{
 			//Raise double click event
 			//This message is being dispatched, but to where?
-			CMessageServer::Instance().QueueMessage(new TIntMessage(CMessage::CTRL_DOUBLELCLICK, this, this, 0));
+			CApplication::Instance()->MessageServer()->QueueMessage(new TIntMessage(CMessage::CTRL_DOUBLELCLICK, this, this, 0));
 			m_pDblClickTimer->StopTimer();
 			fSkipCursorPositioning = true;
 		}
@@ -457,7 +457,7 @@ bool CEditBox::HandleMessage(CMessage* pMessage)
           }
           if (m_sWindowText != sBuffer)
           {
-            CMessageServer::Instance().QueueMessage(new TStringMessage(CMessage::CTRL_VALUECHANGE, m_pParentWindow, this, sBuffer));
+            CApplication::Instance()->MessageServer()->QueueMessage(new TStringMessage(CMessage::CTRL_VALUECHANGE, m_pParentWindow, this, sBuffer));
           }
           m_sWindowText = sBuffer;
           CWindow::SetWindowText(sBuffer);
@@ -643,7 +643,7 @@ bool CEditBox::HandleMessage(CMessage* pMessage)
           case SDLK_ESCAPE:  // intentional fall through
           case SDLK_TAB:
             // Not for us - let parent handle it
-            CMessageServer::Instance().QueueMessage(new CKeyboardMessage(CMessage::KEYBOARD_KEYDOWN, m_pParentWindow, this,
+            CApplication::Instance()->MessageServer()->QueueMessage(new CKeyboardMessage(CMessage::KEYBOARD_KEYDOWN, m_pParentWindow, this,
                   pKeyboardMessage->ScanCode, pKeyboardMessage->Modifiers, pKeyboardMessage->Key));
             break;
 					default:
@@ -652,7 +652,7 @@ bool CEditBox::HandleMessage(CMessage* pMessage)
 
 					if (m_sWindowText != sBuffer)
 					{
-						CMessageServer::Instance().QueueMessage(new TStringMessage(CMessage::CTRL_VALUECHANGE, m_pParentWindow, this, sBuffer));
+						CApplication::Instance()->MessageServer()->QueueMessage(new TStringMessage(CMessage::CTRL_VALUECHANGE, m_pParentWindow, this, sBuffer));
 					}
 					m_sWindowText = sBuffer;
 					CWindow::SetWindowText(sBuffer);

@@ -67,10 +67,10 @@ CScrollBar::CScrollBar(const CRect& WindowRect, CWindow* pParent, EScrollBarType
 	}
 	m_ThumbRect = m_ClientRect;
 	RepositionThumb();
-	CMessageServer::Instance().RegisterMessageClient(this, CMessage::KEYBOARD_KEYDOWN);
-	CMessageServer::Instance().RegisterMessageClient(this, CMessage::MOUSE_BUTTONUP);
-	CMessageServer::Instance().RegisterMessageClient(this, CMessage::MOUSE_MOVE);
-	CMessageServer::Instance().RegisterMessageClient(this, CMessage::CTRL_SINGLELCLICK);
+	CApplication::Instance()->MessageServer()->RegisterMessageClient(this, CMessage::KEYBOARD_KEYDOWN);
+	CApplication::Instance()->MessageServer()->RegisterMessageClient(this, CMessage::MOUSE_BUTTONUP);
+	CApplication::Instance()->MessageServer()->RegisterMessageClient(this, CMessage::MOUSE_MOVE);
+	CApplication::Instance()->MessageServer()->RegisterMessageClient(this, CMessage::CTRL_SINGLELCLICK);
 	Draw();
 }
 
@@ -228,7 +228,7 @@ bool CScrollBar::HandleMessage(CMessage* pMessage)
       if (pKeyboardMessage && pMessage->Destination() == this)
       {
         // Forward all key downs to parent
-        CMessageServer::Instance().QueueMessage(new CKeyboardMessage(CMessage::KEYBOARD_KEYDOWN, m_pParentWindow, this,
+        CApplication::Instance()->MessageServer()->QueueMessage(new CKeyboardMessage(CMessage::KEYBOARD_KEYDOWN, m_pParentWindow, this,
               pKeyboardMessage->ScanCode, pKeyboardMessage->Modifiers, pKeyboardMessage->Key));
       }
       break;
@@ -239,7 +239,7 @@ bool CScrollBar::HandleMessage(CMessage* pMessage)
 			if (pMouseMessage && m_bDragging && pMouseMessage->Button == CMouseMessage::LEFT)
 			{
 				m_bDragging = false;
-				CMessageServer::Instance().QueueMessage(new TIntMessage(CMessage::CTRL_VALUECHANGE, m_pParentWindow, this, m_Value));
+				CApplication::Instance()->MessageServer()->QueueMessage(new TIntMessage(CMessage::CTRL_VALUECHANGE, m_pParentWindow, this, m_Value));
 				bHandled = true;
 			}
 			break;
@@ -267,7 +267,7 @@ bool CScrollBar::HandleMessage(CMessage* pMessage)
 					}
 					if (iOldPosition != m_Value)
 					{
-						CMessageServer::Instance().QueueMessage(new TIntMessage(CMessage::CTRL_VALUECHANGING, m_pParentWindow, this, m_Value));
+						CApplication::Instance()->MessageServer()->QueueMessage(new TIntMessage(CMessage::CTRL_VALUECHANGING, m_pParentWindow, this, m_Value));
 						RepositionThumb();
 						Draw();
 					}

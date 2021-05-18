@@ -83,7 +83,7 @@ bool CMessageBox::HandleMessage(CMessage* pMessage)
 				{
 					if (pMessage->Source() == button.second)
 					{
-						CMessageServer::Instance().QueueMessage(new CValueMessage<CMessageBox::EButton>(CMessage::CTRL_MESSAGEBOXRETURN, m_pParentWindow, nullptr, button.first));
+						CApplication::Instance()->MessageServer()->QueueMessage(new CValueMessage<CMessageBox::EButton>(CMessage::CTRL_MESSAGEBOXRETURN, m_pParentWindow, nullptr, button.first));
 						CloseFrame();
             bHandled = true;
 						break;

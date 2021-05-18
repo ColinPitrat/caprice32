@@ -28,8 +28,8 @@ CapriceDevTools::CapriceDevTools(const CRect& WindowRect, CWindow* pParent, CFon
     SetTitleBarHeight(0);
     SetModal(true);
     // Make this window listen to incoming CTRL_VALUECHANGE messages (used for updating scrollbar values)
-    CMessageServer::Instance().RegisterMessageClient(this, CMessage::CTRL_VALUECHANGE);
-    CMessageServer::Instance().RegisterMessageClient(this, CMessage::CTRL_VALUECHANGING);
+    CApplication::Instance()->MessageServer()->RegisterMessageClient(this, CMessage::CTRL_VALUECHANGE);
+    CApplication::Instance()->MessageServer()->RegisterMessageClient(this, CMessage::CTRL_VALUECHANGING);
 
     // Navigation bar
     m_pNavigationBar = new CNavigationBar(this, CPoint(10, 5), 6, 50, 50);
@@ -393,7 +393,10 @@ void CapriceDevTools::ResumeExecution()
 
 void CapriceDevTools::Update()
 {
-  if (!CPC.paused) {
+  if (CPC.paused) {
+    m_pButtonPause->SetWindowText("Resume");
+  } else {
+    m_pButtonPause->SetWindowText("Pause");
     switch (m_pNavigationBar->getSelectedIndex()) {
       case 0 : { // 'z80'
                  UpdateZ80();
@@ -679,7 +682,7 @@ void CapriceDevTools::EnableTab(std::string sTabName) {
 
 void CapriceDevTools::CloseFrame() {
   // Exit gui
-  CMessageServer::Instance().QueueMessage(new CMessage(CMessage::APP_EXIT, GetAncestor(ROOT), this));
+  CApplication::Instance()->MessageServer()->QueueMessage(new CMessage(CMessage::APP_EXIT, GetAncestor(ROOT), this));
   m_pDevTools->Deactivate();
 }
 

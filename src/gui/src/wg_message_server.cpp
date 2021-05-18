@@ -36,9 +36,6 @@
 namespace wGui
 {
 
-CMessageServer* CMessageServer::m_pInstance = nullptr;
-
-
 CMessageServer::CMessageServer() : m_bIgnoreAllNewMessages(true)
 {
 	m_pSemaphore = SDL_CreateSemaphore(0);
@@ -46,21 +43,6 @@ CMessageServer::CMessageServer() : m_bIgnoreAllNewMessages(true)
 
 
 CMessageServer::~CMessageServer() = default;
-
-
-CMessageServer& CMessageServer::Instance()
-{
-	if (!m_pInstance)
-	{
-		m_pInstance = new CMessageServer;
-		if (!m_pInstance)
-		{
-			throw(Wg_Ex_App("Unable to instantiate Message Server!", "CMessageServer::Instance"));
-		}
-	}
-
-	return *m_pInstance;
-}
 
 
 void CMessageServer::RegisterMessageClient(CMessageClient* pClient, CMessage::EMessageType eMessageType, unsigned char Priority)

@@ -23,7 +23,7 @@
 
 
 #include "wg_toolbar.h"
-#include "wg_message_server.h"
+#include "wg_application.h"
 #include "wutil_debug.h"
 
 
@@ -34,7 +34,7 @@ CToolBar::CToolBar(const CRect& WindowRect, CWindow* pParent) :
 	CWindow(WindowRect, pParent)
 {
 	m_BackgroundColor = COLOR_LIGHTGRAY;
-	CMessageServer::Instance().RegisterMessageClient(this, CMessage::CTRL_SINGLELCLICK);
+	CApplication::Instance()->MessageServer()->RegisterMessageClient(this, CMessage::CTRL_SINGLELCLICK);
 	Draw();
 }
 
@@ -151,7 +151,7 @@ bool CToolBar::HandleMessage(CMessage* pMessage)
 						iButtonID = button.second;
 					}
 				}
-				CMessageServer::Instance().QueueMessage(new TIntMessage(CMessage::CTRL_SINGLELCLICK, m_pParentWindow, this, iButtonID));
+				CApplication::Instance()->MessageServer()->QueueMessage(new TIntMessage(CMessage::CTRL_SINGLELCLICK, m_pParentWindow, this, iButtonID));
 				bHandled = true;
 			}
 			break;

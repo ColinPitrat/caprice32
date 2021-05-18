@@ -23,7 +23,7 @@
 
 
 #include "wg_message_client.h"
-#include "wg_message_server.h"
+#include "wg_application.h"
 #include "wg_error.h"
 
 
@@ -35,7 +35,11 @@ CMessageClient::CMessageClient() = default;
 
 CMessageClient::~CMessageClient()  // virtual
 {
-	wGui::CMessageServer::Instance().DeregisterMessageClient(this);
+  auto app = wGui::CApplication::Instance();
+  if (app == nullptr) return;
+	auto message_server = app->MessageServer();
+  if (message_server == nullptr) return;
+  message_server->DeregisterMessageClient(this);
 }
 
 

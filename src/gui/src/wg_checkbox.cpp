@@ -23,7 +23,7 @@
 
 
 #include "wg_checkbox.h"
-#include "wg_message_server.h"
+#include "wg_application.h"
 
 
 namespace wGui
@@ -37,9 +37,9 @@ CCheckBox::CCheckBox(const CRect& WindowRect, CWindow* pParent) :
 
 {
 	m_BackgroundColor = DEFAULT_CHECKBOX_BACK_COLOR;
-	CMessageServer::Instance().RegisterMessageClient(this, CMessage::KEYBOARD_KEYDOWN);
-	CMessageServer::Instance().RegisterMessageClient(this, CMessage::MOUSE_BUTTONUP);
-	CMessageServer::Instance().RegisterMessageClient(this, CMessage::CTRL_SINGLELCLICK);
+	CApplication::Instance()->MessageServer()->RegisterMessageClient(this, CMessage::KEYBOARD_KEYDOWN);
+	CApplication::Instance()->MessageServer()->RegisterMessageClient(this, CMessage::MOUSE_BUTTONUP);
+	CApplication::Instance()->MessageServer()->RegisterMessageClient(this, CMessage::CTRL_SINGLELCLICK);
 	Draw();
 }
 
@@ -63,11 +63,11 @@ void CCheckBox::ToggleCheckBoxState()
   {
     case UNCHECKED:
       SetCheckBoxState(CHECKED);
-      CMessageServer::Instance().QueueMessage(new TIntMessage(CMessage::CTRL_VALUECHANGE, m_pParentWindow, this, 1));
+      CApplication::Instance()->MessageServer()->QueueMessage(new TIntMessage(CMessage::CTRL_VALUECHANGE, m_pParentWindow, this, 1));
       break;
     case CHECKED:
       SetCheckBoxState(UNCHECKED);
-      CMessageServer::Instance().QueueMessage(new TIntMessage(CMessage::CTRL_VALUECHANGE, m_pParentWindow, this, 0));
+      CApplication::Instance()->MessageServer()->QueueMessage(new TIntMessage(CMessage::CTRL_VALUECHANGE, m_pParentWindow, this, 0));
       break;
     default:
       break;
@@ -143,7 +143,7 @@ bool CCheckBox::OnMouseButtonUp(CPoint Point, unsigned int Button)
 			MessageType = CMessage::CTRL_SINGLEMCLICK;
 			break;
 		}
-		CMessageServer::Instance().QueueMessage(new TIntMessage(MessageType, this, this, 0));
+		CApplication::Instance()->MessageServer()->QueueMessage(new TIntMessage(MessageType, this, this, 0));
 		bResult = true;
 	}
 
@@ -172,7 +172,7 @@ bool CCheckBox::HandleMessage(CMessage* pMessage)
             break;
           default:
             // Forward all key downs to parent
-            CMessageServer::Instance().QueueMessage(new CKeyboardMessage(CMessage::KEYBOARD_KEYDOWN, m_pParentWindow, this,
+            CApplication::Instance()->MessageServer()->QueueMessage(new CKeyboardMessage(CMessage::KEYBOARD_KEYDOWN, m_pParentWindow, this,
                   pKeyboardMessage->ScanCode, pKeyboardMessage->Modifiers, pKeyboardMessage->Key));
             break;
         }

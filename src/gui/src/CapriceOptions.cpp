@@ -20,8 +20,8 @@ CapriceOptions::CapriceOptions(const CRect& WindowRect, CWindow* pParent, CFontE
 {
     SetModal(true);
     // Make this window listen to incoming CTRL_VALUECHANGE messages (used for updating scrollbar values)
-    CMessageServer::Instance().RegisterMessageClient(this, CMessage::CTRL_VALUECHANGE);
-    CMessageServer::Instance().RegisterMessageClient(this, CMessage::CTRL_VALUECHANGING);
+    CApplication::Instance()->MessageServer()->RegisterMessageClient(this, CMessage::CTRL_VALUECHANGE);
+    CApplication::Instance()->MessageServer()->RegisterMessageClient(this, CMessage::CTRL_VALUECHANGING);
 
     // remember the current CPC configuration.
     m_oldCPCsettings = CPC;
@@ -557,7 +557,7 @@ bool CapriceOptions::ProcessOptionChanges(t_CPC& CPC, bool saveChanges) {
         }
         audio_resume();
 
-        CMessageServer::Instance().QueueMessage(new CMessage(CMessage::APP_EXIT, nullptr, this));
+        CApplication::Instance()->MessageServer()->QueueMessage(new CMessage(CMessage::APP_EXIT, nullptr, this));
     }
 
     // Activate/deactivate joystick emulation

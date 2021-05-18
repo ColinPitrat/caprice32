@@ -26,7 +26,7 @@
 #define _WG_RANGE_CONTROL_H_
 
 #include "wg_window.h"
-#include "wg_message_server.h"
+#include "wg_application.h"
 
 
 namespace wGui
@@ -81,7 +81,7 @@ public:
 		m_Value = ConstrainValue(value);
 		if (bNotify)
 		{
-			CMessageServer::Instance().QueueMessage(new CValueMessage<T>(CMessage::CTRL_VALUECHANGE, m_pParentWindow, this, m_Value));
+			CApplication::Instance()->MessageServer()->QueueMessage(new CValueMessage<T>(CMessage::CTRL_VALUECHANGE, m_pParentWindow, this, m_Value));
 		}
 
 		if (bRedraw)

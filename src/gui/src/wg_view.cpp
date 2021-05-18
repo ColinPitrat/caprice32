@@ -55,11 +55,11 @@ CView::CView(SDL_Surface* surface, SDL_Surface* backSurface, const CRect& Window
 	}
 	m_pInstance = this;
 
-	CMessageServer::Instance().RegisterMessageClient(this, CMessage::APP_PAINT);
-	CMessageServer::Instance().RegisterMessageClient(this, CMessage::APP_DESTROY_FRAME, CMessageServer::PRIORITY_FIRST);
-	CMessageServer::Instance().RegisterMessageClient(this, CMessage::CTRL_RESIZE);
-	CMessageServer::Instance().RegisterMessageClient(this, CMessage::MOUSE_BUTTONDOWN, CMessageServer::PRIORITY_FIRST);
-	CMessageServer::Instance().RegisterMessageClient(this, CMessage::MOUSE_BUTTONUP, CMessageServer::PRIORITY_FIRST);
+	CApplication::Instance()->MessageServer()->RegisterMessageClient(this, CMessage::APP_PAINT);
+	CApplication::Instance()->MessageServer()->RegisterMessageClient(this, CMessage::APP_DESTROY_FRAME, CMessageServer::PRIORITY_FIRST);
+	CApplication::Instance()->MessageServer()->RegisterMessageClient(this, CMessage::CTRL_RESIZE);
+	CApplication::Instance()->MessageServer()->RegisterMessageClient(this, CMessage::MOUSE_BUTTONDOWN, CMessageServer::PRIORITY_FIRST);
+	CApplication::Instance()->MessageServer()->RegisterMessageClient(this, CMessage::MOUSE_BUTTONUP, CMessageServer::PRIORITY_FIRST);
 
 	// judb this works, but better rewrite this to make things clearer !
 	CWindow::SetWindowRect(WindowRect);
@@ -156,7 +156,7 @@ bool CView::HandleMessage(CMessage* pMessage)
 				{
 					pFrame->SetModal(false);
           pFrame->SetNewParent(nullptr);
-					CMessageServer::Instance().QueueMessage(new CMessage(CMessage::APP_PAINT, nullptr, this));
+					CApplication::Instance()->MessageServer()->QueueMessage(new CMessage(CMessage::APP_PAINT, nullptr, this));
 					delete pFrame;
 				}
 				bHandled = true;

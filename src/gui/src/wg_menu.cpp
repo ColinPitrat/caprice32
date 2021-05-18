@@ -56,9 +56,9 @@ CMenuBase::CMenuBase(const CRect& WindowRect, CWindow* pParent, CFontEngine* pFo
 
 	m_HighlightColor = CApplication::Instance()->GetDefaultSelectionColor();
 
-	CMessageServer::Instance().RegisterMessageClient(this, CMessage::MOUSE_MOVE);
-	CMessageServer::Instance().RegisterMessageClient(this, CMessage::CTRL_SINGLELCLICK);
-	CMessageServer::Instance().RegisterMessageClient(this, CMessage::CTRL_TIMER);
+	CApplication::Instance()->MessageServer()->RegisterMessageClient(this, CMessage::MOUSE_MOVE);
+	CApplication::Instance()->MessageServer()->RegisterMessageClient(this, CMessage::CTRL_SINGLELCLICK);
+	CApplication::Instance()->MessageServer()->RegisterMessageClient(this, CMessage::CTRL_TIMER);
 
 	m_pPopupTimer = new CTimer(this);
 }
@@ -172,7 +172,7 @@ bool CMenuBase::HandleMessage(CMessage* pMessage)
 				{
 					if (pCtrlMessage->Source() == item.MenuItem.pPopup)
 					{
-						CMessageServer::Instance().QueueMessage(new TIntMessage(CMessage::CTRL_SINGLELCLICK, m_pParentWindow,
+						CApplication::Instance()->MessageServer()->QueueMessage(new TIntMessage(CMessage::CTRL_SINGLELCLICK, m_pParentWindow,
 							this, pCtrlMessage->Value()));
 						bHandled = true;
 						break;
@@ -204,7 +204,7 @@ bool CMenuBase::HandleMessage(CMessage* pMessage)
 CMenu::CMenu(const CRect& WindowRect, CWindow* pParent, CFontEngine* pFontEngine) :
 	CMenuBase(WindowRect, pParent, pFontEngine)
 {
-	CMessageServer::Instance().RegisterMessageClient(this, CMessage::MOUSE_MOVE);
+	CApplication::Instance()->MessageServer()->RegisterMessageClient(this, CMessage::MOUSE_MOVE);
 	Draw();
 }
 
@@ -277,7 +277,7 @@ bool CMenu::OnMouseButtonDown(CPoint Point, unsigned int Button)
 				}
 				else
 				{
-					CMessageServer::Instance().QueueMessage(new TIntMessage(CMessage::CTRL_SINGLELCLICK, m_pParentWindow, this, item.MenuItem.iItemId));
+					CApplication::Instance()->MessageServer()->QueueMessage(new TIntMessage(CMessage::CTRL_SINGLELCLICK, m_pParentWindow, this, item.MenuItem.iItemId));
 				}
 				break;
 			}
@@ -400,7 +400,7 @@ CPopupMenu::CPopupMenu(const CRect& WindowRect, CWindow* pParent, CFontEngine* p
 	m_pParentMenu(nullptr)
 {
 	m_bVisible = false;
-	CMessageServer::Instance().RegisterMessageClient(this, CMessage::MOUSE_BUTTONDOWN);
+	CApplication::Instance()->MessageServer()->RegisterMessageClient(this, CMessage::MOUSE_BUTTONDOWN);
 	Draw();
 }
 
@@ -472,7 +472,7 @@ void CPopupMenu::Hide()
 	{
 		pView->SetFloatingWindow(nullptr);
 	}
-	CMessageServer::Instance().QueueMessage(new CMessage(CMessage::APP_PAINT, nullptr, this));
+	CApplication::Instance()->MessageServer()->QueueMessage(new CMessage(CMessage::APP_PAINT, nullptr, this));
 	m_pHighlightedItem = nullptr;
 	Draw();
 }
@@ -598,7 +598,7 @@ bool CPopupMenu::OnMouseButtonDown(CPoint Point, unsigned int Button)
 					{
 						pDestination = m_pParentMenu;
 					}
-					CMessageServer::Instance().QueueMessage(new TIntMessage(CMessage::CTRL_SINGLELCLICK, pDestination, this, item.MenuItem.iItemId));
+					CApplication::Instance()->MessageServer()->QueueMessage(new TIntMessage(CMessage::CTRL_SINGLELCLICK, pDestination, this, item.MenuItem.iItemId));
 					HideAll();
 				}
 				else

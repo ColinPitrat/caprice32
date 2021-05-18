@@ -76,7 +76,7 @@ CWindow::CWindow(CWindow* pParent) :
 CWindow::~CWindow()
 {
 	// Each child window is deleted, and should in their destructors call back to this object to Deregister themselves
-	CMessageServer::Instance().DeregisterMessageClient(this);
+	CApplication::Instance()->MessageServer()->DeregisterMessageClient(this);
 
 	if (m_pSDLSurface)
 		SDL_FreeSurface(m_pSDLSurface);
@@ -111,7 +111,7 @@ void CWindow::SetWindowRect(const CRect& WindowRect)
 void CWindow::MoveWindow(const CPoint& MoveDistance)
 {
 	m_WindowRect = m_WindowRect + MoveDistance;
-	CMessageServer::Instance().QueueMessage(new CMessage(CMessage::APP_PAINT, nullptr, this));
+	CApplication::Instance()->MessageServer()->QueueMessage(new CMessage(CMessage::APP_PAINT, nullptr, this));
 }
 
 
@@ -181,7 +181,7 @@ void CWindow::SetVisible(bool bVisible)
 				CApplication::Instance()->SetKeyFocus(m_pParentWindow);
 			}
 		}
-		CMessageServer::Instance().QueueMessage(new CMessage(CMessage::APP_PAINT, nullptr, this));
+		CApplication::Instance()->MessageServer()->QueueMessage(new CMessage(CMessage::APP_PAINT, nullptr, this));
 	}
 }
 
@@ -297,7 +297,7 @@ void CWindow::Draw() const
 
 		CPainter Painter(m_pSDLSurface, CPainter::PAINT_REPLACE);
 		Painter.DrawRect(m_WindowRect.SizeRect(), true, m_BackgroundColor, m_BackgroundColor);
-		CMessageServer::Instance().QueueMessage(new CMessage(CMessage::APP_PAINT, nullptr, this));
+		CApplication::Instance()->MessageServer()->QueueMessage(new CMessage(CMessage::APP_PAINT, nullptr, this));
 	}
 }
 

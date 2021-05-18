@@ -55,10 +55,10 @@ CFrame::CFrame(const CRect& WindowRect, CWindow* pParent, CFontEngine* pFontEngi
 
 	SetWindowRect(WindowRect);  // must be done after the buttons are created, and after the CRenderedString is created
 
-	CMessageServer::Instance().RegisterMessageClient(this, CMessage::MOUSE_BUTTONUP);
-	CMessageServer::Instance().RegisterMessageClient(this, CMessage::MOUSE_MOVE);
-	CMessageServer::Instance().RegisterMessageClient(this, CMessage::CTRL_SINGLELCLICK);
-  CMessageServer::Instance().RegisterMessageClient(this, CMessage::KEYBOARD_KEYDOWN);
+	CApplication::Instance()->MessageServer()->RegisterMessageClient(this, CMessage::MOUSE_BUTTONUP);
+	CApplication::Instance()->MessageServer()->RegisterMessageClient(this, CMessage::MOUSE_MOVE);
+	CApplication::Instance()->MessageServer()->RegisterMessageClient(this, CMessage::CTRL_SINGLELCLICK);
+  CApplication::Instance()->MessageServer()->RegisterMessageClient(this, CMessage::KEYBOARD_KEYDOWN);
 }
 
 
@@ -73,7 +73,7 @@ CFrame::~CFrame()  // virtual
 
 void CFrame::CloseFrame()
 {
-	CMessageServer::Instance().QueueMessage(new CMessage(CMessage::APP_DESTROY_FRAME, nullptr, this));
+	CApplication::Instance()->MessageServer()->QueueMessage(new CMessage(CMessage::APP_DESTROY_FRAME, nullptr, this));
 }
 
 
@@ -223,7 +223,7 @@ bool CFrame::OnMouseButtonDown(CPoint Point, unsigned int Button)  // virtual
 			m_bDragMode = true;
 			m_DragPointerStart = Point;
 			m_FrameGhostRect = m_WindowRect;
-			CMessageServer::Instance().QueueMessage(new CMessage(CMessage::APP_PAINT, nullptr, this));
+			CApplication::Instance()->MessageServer()->QueueMessage(new CMessage(CMessage::APP_PAINT, nullptr, this));
 		}
 		SetNewParent(m_pParentWindow);	// This moves the window to the top
 		bResult = true;
@@ -276,7 +276,7 @@ bool CFrame::HandleMessage(CMessage* pMessage)  // virtual
           {
             m_FrameGhostRect = MovedRect;
           }
-          CMessageServer::Instance().QueueMessage(new CMessage(CMessage::APP_PAINT, nullptr, this));
+          CApplication::Instance()->MessageServer()->QueueMessage(new CMessage(CMessage::APP_PAINT, nullptr, this));
         }
         break;
       }
@@ -316,7 +316,7 @@ bool CFrame::HandleMessage(CMessage* pMessage)  // virtual
                   CWindow *target = GetFocused();
                   if (target) {
                     bHandled = true;
-                    CMessageServer::Instance().QueueMessage(new TIntMessage(
+                    CApplication::Instance()->MessageServer()->QueueMessage(new TIntMessage(
                           CMessage::CTRL_SINGLELCLICK, target->GetAncestor(PARENT), target,
                           0));
                   }

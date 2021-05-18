@@ -23,7 +23,7 @@
 
 
 #include "wg_timer.h"
-#include "wg_message_server.h"
+#include "wg_application.h"
 
 
 namespace wGui
@@ -73,7 +73,7 @@ void CTimer::StopTimer()
 Uint32 CTimer::TimerHit(Uint32 Interval)
 {
 	m_iCounter++;
-	CMessageServer::Instance().QueueMessage(new TIntMessage(CMessage::CTRL_TIMER, m_pOwner, this, m_iCounter));
+	CApplication::Instance()->MessageServer()->QueueMessage(new TIntMessage(CMessage::CTRL_TIMER, m_pOwner, this, m_iCounter));
 	if (!m_bAutoRestart)
 	{
 		StopTimer();
