@@ -9,7 +9,7 @@ extern t_CPC CPC;
 
 TEST(CApplicationTest, InitThrowExceptionWhenFailToFindResources)
 {
-  wGui::CApplication app;
+  wGui::CApplication app(/*pWindow=*/nullptr);
   CPC.resources_path = "does_not_exist";
 
   try {

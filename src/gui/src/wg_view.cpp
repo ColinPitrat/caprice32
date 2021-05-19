@@ -46,6 +46,7 @@ CView::CView(CApplication& application, SDL_Surface* surface, SDL_Surface* backS
 	m_pFloatingWindow(nullptr),
 	m_pScreenSurface(nullptr)
 {
+  Application().RegisterView(this);
 	Application().MessageServer()->RegisterMessageClient(this, CMessage::APP_PAINT);
 	Application().MessageServer()->RegisterMessageClient(this, CMessage::APP_DESTROY_FRAME, CMessageServer::PRIORITY_FIRST);
 	Application().MessageServer()->RegisterMessageClient(this, CMessage::CTRL_RESIZE);

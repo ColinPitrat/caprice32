@@ -90,6 +90,9 @@ public:
   //! Display the view on the screen surface
   virtual void Flip() const;
 
+  //! Callback to close this view when the application exit
+  virtual void Close() {};
+
 protected:
 	CMenu* m_pMenu;  //!< A pointer to the view's menu
 	CWindow* m_pFloatingWindow;  //!< A pointer to the current floating window.  This will be drawn overtop of everything else.

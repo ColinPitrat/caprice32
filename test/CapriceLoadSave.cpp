@@ -12,6 +12,8 @@ using namespace wGui;
 
 class CapriceLoadSaveTest : public testing::Test {
   public:
+    CapriceLoadSaveTest() : app(/*pWindow=*/nullptr) {}
+
     void SetUp() {
       CPC.resources_path = "resources";
       app.Init();

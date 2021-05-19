@@ -41,7 +41,7 @@
 #include <memory>
 #include <iostream>
 
-SDL_Window* window = nullptr;
+SDL_Window* mainSDLWindow = nullptr;
 SDL_Renderer* renderer = nullptr;
 SDL_Texture* texture = nullptr;
 SDL_GLContext glcontext;
@@ -95,7 +95,7 @@ int renderer_bpp(SDL_Renderer *sdl_renderer)
 void compute_scale(video_plugin* t, int w, int h, float sw_scaling)
 {
   int win_width, win_height;
-  SDL_GetWindowSize(window, &win_width, &win_height);
+  SDL_GetWindowSize(mainSDLWindow, &win_width, &win_height);
   if (CPC.scr_preserve_aspect_ratio != 0) {
     float win_x_scale, win_y_scale;
     win_x_scale = w/static_cast<float>(win_width);
@@ -122,9 +122,9 @@ void compute_scale(video_plugin* t, int w, int h, float sw_scaling)
 // Common init code for direct access to the rendering surface (no specific processing done by video plugin)
 SDL_Surface* direct_init(video_plugin* t, int w, int h, bool fs)
 {
-  SDL_CreateWindowAndRenderer(w, h, (fs?SDL_WINDOW_FULLSCREEN_DESKTOP:SDL_WINDOW_SHOWN), &window, &renderer);
-  if (!window || !renderer) return nullptr;
-  SDL_SetWindowTitle(window, "Caprice32 " VERSION_STRING);
+  SDL_CreateWindowAndRenderer(w, h, (fs?SDL_WINDOW_FULLSCREEN_DESKTOP:SDL_WINDOW_SHOWN), &mainSDLWindow, &renderer);
+  if (!mainSDLWindow || !renderer) return nullptr;
+  SDL_SetWindowTitle(mainSDLWindow, "Caprice32 " VERSION_STRING);
   vid = SDL_CreateRGBSurface(0, w, h, renderer_bpp(renderer), 0, 0, 0, 0);
   if (!vid) return nullptr;
   texture = SDL_CreateTextureFromSurface(renderer, vid);
@@ -221,8 +221,8 @@ SDL_Surface* glscale_init(video_plugin* t, int w __attribute__((unused)), int h 
 
   int width = CPC_VISIBLE_SCR_WIDTH*2;
   int height = CPC_VISIBLE_SCR_HEIGHT*2;
-  SDL_CreateWindowAndRenderer(width, height, (fs?SDL_WINDOW_FULLSCREEN_DESKTOP:SDL_WINDOW_SHOWN) | SDL_WINDOW_OPENGL, &window, &renderer);
-  if (!window || !renderer) return nullptr;
+  SDL_CreateWindowAndRenderer(width, height, (fs?SDL_WINDOW_FULLSCREEN_DESKTOP:SDL_WINDOW_SHOWN) | SDL_WINDOW_OPENGL, &mainSDLWindow, &renderer);
+  if (!mainSDLWindow || !renderer) return nullptr;
   if (fs) {
     SDL_DisplayMode display;
     SDL_GetCurrentDisplayMode(0, &display);
@@ -231,7 +231,7 @@ SDL_Surface* glscale_init(video_plugin* t, int w __attribute__((unused)), int h 
   }
   vid = SDL_CreateRGBSurface(0, width, height, renderer_bpp(renderer), 0, 0, 0, 0);
   if (!vid) return nullptr;
-  glcontext = SDL_GL_CreateContext(window);
+  glcontext = SDL_GL_CreateContext(mainSDLWindow);
   if (init_glfuncs()!=0)
   {
     fprintf(stderr, "Cannot init OpenGL functions: %s\n", SDL_GetError());
@@ -493,7 +493,7 @@ void glscale_flip(video_plugin* t __attribute__((unused)))
   eglVertex2i(vid->w, 0);
   eglEnd();
 
-  SDL_GL_SwapWindow(window);
+  SDL_GL_SwapWindow(mainSDLWindow);
 }
 
 void glscale_close()
@@ -575,9 +575,9 @@ void compute_rects_for_tests(SDL_Rect* src, SDL_Rect* dst)
 
 SDL_Surface* swscale_init(video_plugin* t, int w __attribute__((unused)), int h __attribute__((unused)), int bpp __attribute__((unused)), bool fs)
 {
-  SDL_CreateWindowAndRenderer(CPC_VISIBLE_SCR_WIDTH*2, CPC_VISIBLE_SCR_HEIGHT*2, (fs?SDL_WINDOW_FULLSCREEN_DESKTOP:SDL_WINDOW_SHOWN), &window, &renderer);
-  if (!window || !renderer) return nullptr;
-  SDL_SetWindowTitle(window, "Caprice32 " VERSION_STRING);
+  SDL_CreateWindowAndRenderer(CPC_VISIBLE_SCR_WIDTH*2, CPC_VISIBLE_SCR_HEIGHT*2, (fs?SDL_WINDOW_FULLSCREEN_DESKTOP:SDL_WINDOW_SHOWN), &mainSDLWindow, &renderer);
+  if (!mainSDLWindow || !renderer) return nullptr;
+  SDL_SetWindowTitle(mainSDLWindow, "Caprice32 " VERSION_STRING);
   vid = SDL_CreateRGBSurface(0, CPC_VISIBLE_SCR_WIDTH*2, CPC_VISIBLE_SCR_HEIGHT*2, renderer_bpp(renderer), 0, 0, 0, 0);
   if (!vid) return nullptr;
   texture = SDL_CreateTextureFromSurface(renderer, vid);

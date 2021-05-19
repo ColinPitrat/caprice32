@@ -81,6 +81,8 @@ extern t_disk_format disk_format[];
 
 extern byte* pbCartridgePages[];
 
+extern SDL_Window* mainSDLWindow;
+
 SDL_AudioDeviceID audio_device_id = 0;
 SDL_Surface *back_surface = nullptr;
 video_plugin* vid_plugin;
@@ -1889,7 +1891,6 @@ void ShowCursor(bool show)
 }
 
 
-
 SDL_Surface* prepareShowUI()
 {
    audio_pause();
@@ -1917,7 +1918,7 @@ bool userConfirmsQuitWithoutSaving()
    bool confirmed = false;
    // Show warning
    try {
-      CapriceGui capriceGui;
+      CapriceGui capriceGui(mainSDLWindow);
       capriceGui.Init();
       CapriceLeavingWithoutSavingView capriceLeavingWarning(capriceGui, back_surface, guiBackSurface, CRect(0, 0, back_surface->w, back_surface->h));
       capriceGui.Exec();
@@ -1935,7 +1936,7 @@ void showVKeyboard()
    auto guiBackSurface = prepareShowUI();
    // Activate virtual keyboard
    try {
-      CapriceGui capriceGui;
+      CapriceGui capriceGui(mainSDLWindow);
       capriceGui.Init();
       CapriceVKeyboardView capriceVKeyboardView(capriceGui, back_surface, guiBackSurface, CRect(0, 0, back_surface->w, back_surface->h));
       capriceGui.Exec();
@@ -1953,12 +1954,13 @@ void showGui()
 {
    auto guiBackSurface = prepareShowUI();
    try {
-      CapriceGui capriceGui;
+      CapriceGui capriceGui(mainSDLWindow);
       capriceGui.Init();
       CapriceGuiView capriceGuiView(capriceGui, back_surface, guiBackSurface, CRect(0, 0, back_surface->w, back_surface->h));
       capriceGui.Exec();
-      /* TODO: Something like that to replace Exec and allow Menu to be
-       * displayed at the same time as DevTools
+      // TODO: Something like that to replace Exec and allow DevTools to be used
+      // while Menu is displayed.
+      /*
       while (capriceGui.IsRunning()) {
         SDL_Event event;
         while (SDL_PollEvent(&event)) {
@@ -1982,12 +1984,10 @@ void showGui()
    cleanupShowUI(guiBackSurface);
 }
 
-extern SDL_Window* window;
-
 void toggleDevTools()
 {
   if (!devtools.IsActive()) {
-    Uint32 flags = SDL_GetWindowFlags(window);
+    Uint32 flags = SDL_GetWindowFlags(mainSDLWindow);
     // DevTools don't behave very well in fullscreen mode, so just disallow it
     if ((flags & SDL_WINDOW_FULLSCREEN) ||
         (flags & SDL_WINDOW_FULLSCREEN_DESKTOP)) {
@@ -2067,6 +2067,9 @@ void cleanExit(int returnCode, bool askIfUnsaved)
 {
    if (askIfUnsaved && driveAltered() && !userConfirmsQuitWithoutSaving()) {
      return;
+   }
+   if (devtools.IsActive()) {
+     devtools.Deactivate();
    }
    doCleanUp();
    exit(returnCode);

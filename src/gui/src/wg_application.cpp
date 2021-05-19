@@ -23,6 +23,7 @@
 
 #include "wg_application.h"
 #include "wg_error.h"
+#include "wg_view.h"
 #include "wutil_debug.h"
 #include "video.h"
 #include <iostream>
@@ -39,8 +40,49 @@ extern video_plugin* vid_plugin;
 namespace wGui
 {
 
-void CApplication::HandleSDLEvent(SDL_Event event)
+bool CApplication::HandleSDLEvent(SDL_Event event)
 {
+  auto windowId = SDL_GetWindowID(m_pSDLWindow);
+  bool forMe = m_Focused;
+  switch (event.type) {
+    case SDL_KEYDOWN:
+    case SDL_KEYUP:
+      if (event.key.windowID == windowId) forMe = true; 
+      break;
+    case SDL_MOUSEBUTTONDOWN:
+    case SDL_MOUSEBUTTONUP:
+      if (event.button.windowID == windowId) forMe = true;
+      break;
+    case SDL_TEXTEDITING:
+      if (event.edit.windowID == windowId) forMe = true;
+      break;
+    case SDL_MOUSEMOTION:
+      if (event.motion.windowID == windowId) forMe = true;
+      break;
+    case SDL_TEXTINPUT:
+      if (event.text.windowID == windowId) forMe = true;
+      break;
+    case SDL_MOUSEWHEEL:
+      if (event.wheel.windowID == windowId) forMe = true;
+      break;
+    case SDL_WINDOWEVENT:
+      if (event.window.windowID == windowId) forMe = true;
+      if (forMe && event.window.event == SDL_WINDOWEVENT_FOCUS_GAINED) {
+        m_Focused = true;
+        return true;
+      }
+      if (forMe && event.window.event == SDL_WINDOWEVENT_FOCUS_LOST) {
+        m_Focused = false;
+        return true;
+      }
+      if (forMe && event.window.event == SDL_WINDOWEVENT_CLOSE) {
+        MessageServer()->QueueMessage(new CMessage(CMessage::APP_EXIT, nullptr, this));
+        return true;
+      }
+      break;
+  }
+  if (!forMe) return false;
+
 	// this will turn an SDL event into a wGui message
 	switch (event.type)
 	{
@@ -183,11 +225,14 @@ void CApplication::HandleSDLEvent(SDL_Event event)
 		MessageServer()->QueueMessage(new CSDLMessage(CMessage::SDL, nullptr, this, event));
 		break;
 	}
+  return true;
 }
 
 
-CApplication::CApplication(std::string sFontFileName, bool bHandleExceptionsInternally) :
+CApplication::CApplication(SDL_Window* pWindow, std::string sFontFileName, bool bHandleExceptionsInternally) :
   CMessageClient(*this),
+  m_pSDLWindow(pWindow),
+  m_pMainView(nullptr),
 	m_sFontFileName(std::move(sFontFileName)),
 	m_iExitCode(EXIT_FAILURE),
 	m_bRunning(false),
@@ -285,7 +330,7 @@ void CApplication::Init()
 }
 
 
-void CApplication::ProcessEvent(SDL_Event& event)
+bool CApplication::ProcessEvent(SDL_Event& event)
 {
   if (!m_bInited)
   {
@@ -295,8 +340,9 @@ void CApplication::ProcessEvent(SDL_Event& event)
   m_bRunning = true;
   MessageServer()->IgnoreAllNewMessages(false);
   MessageServer()->QueueMessage(new CMessage(CMessage::APP_PAINT, nullptr, this));
-  HandleSDLEvent(event);
+  auto result = HandleSDLEvent(event);
   MessageServer()->DeliverMessage();
+  return result;
 }
 
 
@@ -386,6 +432,7 @@ void CApplication::ApplicationExit(int iExitCode)
 	wUtil::TraceIf(iResult == -1, "CApplication::ApplicationExit - Unable to push SDL user_event.");
 	m_iExitCode = iExitCode;
 	m_bRunning = false;
+  if (m_pMainView) m_pMainView->Close();
 }
 
 

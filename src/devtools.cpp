@@ -21,7 +21,7 @@ bool DevTools::Activate() {
     texture = SDL_CreateTextureFromSurface(renderer, surface);
     if (!texture) return false;
     SDL_FillRect(surface, nullptr, SDL_MapRGB(surface->format, 0, 0, 0));
-    capriceGui = std::make_unique<CapriceGui>();
+    capriceGui = std::make_unique<CapriceGui>(window);
     capriceGui->Init();
     devToolsView = std::make_unique<CapriceDevToolsView>(*capriceGui, surface, renderer, texture, wGui::CRect(0, 0, DEVTOOLS_WIDTH, DEVTOOLS_HEIGHT), this);
   } catch(wGui::Wg_Ex_App& e) {
@@ -34,7 +34,6 @@ bool DevTools::Activate() {
 
 void DevTools::Deactivate() {
   ShowCursor(false);
-  capriceGui->ApplicationExit(0);
   devToolsView = nullptr;
   capriceGui = nullptr;
   SDL_DestroyTexture(texture);
@@ -86,6 +85,5 @@ bool DevTools::PassEvent(SDL_Event& event) {
       break;
   }
   if (!forMe) return false;
-  capriceGui->ProcessEvent(event);
-  return true;
+  return capriceGui->ProcessEvent(event);
 }

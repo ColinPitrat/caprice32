@@ -27,7 +27,7 @@ class CapriceDevToolsView : public wGui::CView
 
     void Flip() const override;
 
-    void Close();
+    void Close() override;
 };
 
 #endif

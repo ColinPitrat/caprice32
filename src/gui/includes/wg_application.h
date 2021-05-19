@@ -53,12 +53,17 @@ class CApplication : public CMessageClient
 {
 public:
 	//! Standard constructor
+	//! \param pWindow The SDL window this application runs in.
 	//! \param sFontFileName The font to use for controls, defaults to Arial
 	//! \param bHandleExceptionsInternally If this is true, wGui will handle most exceptions itself, if false, all exceptions will be returned to the user (defaults to true)
-	CApplication(std::string sFontFileName = "resource/vera_sans.ttf", bool bHandleExceptionsInternally = true);
+	explicit CApplication(SDL_Window* pWindow, std::string sFontFileName = "resource/vera_sans.ttf", bool bHandleExceptionsInternally = true);
 
 	//! Standard destructor
 	~CApplication() override;
+
+  //! Register the view for this application
+	//! \param The view to register
+  virtual void RegisterView(CView* pView) { m_pMainView = pView; }
 
 	//! Gets the default font file name
 	//! \return The default font
@@ -106,7 +111,7 @@ public:
 	virtual void Update();
 
 	//! Processing one event. Useful when events can also affect things outside of the application.
-	virtual void ProcessEvent(SDL_Event& e);
+	virtual bool ProcessEvent(SDL_Event& e);
 
 	//! The primary message loop
 	virtual void Exec();
@@ -174,8 +179,11 @@ protected:
 	//! For internal use only
 	//! \internal converts SDL events into wGui messages
 	//! \param event An SDL Event structure
-	virtual void HandleSDLEvent(SDL_Event event);
+	virtual bool HandleSDLEvent(SDL_Event event);
 
+  SDL_Window* m_pSDLWindow;
+  CView* m_pMainView;
+  bool m_Focused = true;
   mutable std::unique_ptr<CMessageServer> m_pMessageServer;
 	std::string m_sFontFileName;  //!< The font to use for all controls
 	int m_iExitCode;  //!< The exit code to be returned when the app exits
