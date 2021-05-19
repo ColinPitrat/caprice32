@@ -38,7 +38,7 @@ CScrollBar::CScrollBar(const CRect& WindowRect, CWindow* pParent, EScrollBarType
 	m_iJumpAmount(5),
 	m_bDragging(false)
 {
-	m_BackgroundColor = CApplication::Instance()->GetDefaultForegroundColor();
+	m_BackgroundColor = Application().GetDefaultForegroundColor();
 	switch (m_ScrollBarType)
 	{
 	case VERTICAL:
@@ -46,20 +46,20 @@ CScrollBar::CScrollBar(const CRect& WindowRect, CWindow* pParent, EScrollBarType
 		// The height of the button is the width of the bar (they are square).
 		m_ClientRect = CRect(0, m_WindowRect.Width(), m_WindowRect.Width() - 1, m_WindowRect.Height() - m_WindowRect.Width() - 1);
 		m_pBtnUpLeft = new CPictureButton(CRect(0, -m_ClientRect.Width(), m_ClientRect.Width() - 1, -1),
-			this, CwgBitmapResourceHandle(WGRES_UP_ARROW_BITMAP));
+			this, CwgBitmapResourceHandle(Application(), WGRES_UP_ARROW_BITMAP));
 		m_pBtnDownRight = new CPictureButton(
 			CRect(0, m_ClientRect.Height() + 1, m_ClientRect.Width() - 1, m_ClientRect.Height() + m_ClientRect.Width()),
-			this, CwgBitmapResourceHandle(WGRES_DOWN_ARROW_BITMAP));
+			this, CwgBitmapResourceHandle(Application(), WGRES_DOWN_ARROW_BITMAP));
 		break;
 	case HORIZONTAL:
 		// m_ClientRect is the area that doesn't contain the buttons.
 		// The width of the button is the height of the bar (they are square).
 		m_ClientRect = CRect(m_WindowRect.Height(), 0, m_WindowRect.Width() - m_WindowRect.Height() - 1, m_WindowRect.Height() - 1);
 		m_pBtnUpLeft = new CPictureButton(CRect(-m_ClientRect.Height(), 0, -1, m_ClientRect.Height() - 1),
-			this, CwgBitmapResourceHandle(WGRES_LEFT_ARROW_BITMAP));
+			this, CwgBitmapResourceHandle(Application(), WGRES_LEFT_ARROW_BITMAP));
 		m_pBtnDownRight = new CPictureButton(
 			CRect(m_ClientRect.Width() + 1, 0, m_ClientRect.Width() + m_ClientRect.Height(), m_ClientRect.Height() - 1),
-			this, CwgBitmapResourceHandle(WGRES_RIGHT_ARROW_BITMAP));
+			this, CwgBitmapResourceHandle(Application(), WGRES_RIGHT_ARROW_BITMAP));
 		break;
 	default:
 		throw(Wg_Ex_App("Unrecognized ScrollBar Type.", "CScrollBar::CScrollBar"));
@@ -67,10 +67,10 @@ CScrollBar::CScrollBar(const CRect& WindowRect, CWindow* pParent, EScrollBarType
 	}
 	m_ThumbRect = m_ClientRect;
 	RepositionThumb();
-	CApplication::Instance()->MessageServer()->RegisterMessageClient(this, CMessage::KEYBOARD_KEYDOWN);
-	CApplication::Instance()->MessageServer()->RegisterMessageClient(this, CMessage::MOUSE_BUTTONUP);
-	CApplication::Instance()->MessageServer()->RegisterMessageClient(this, CMessage::MOUSE_MOVE);
-	CApplication::Instance()->MessageServer()->RegisterMessageClient(this, CMessage::CTRL_SINGLELCLICK);
+	Application().MessageServer()->RegisterMessageClient(this, CMessage::KEYBOARD_KEYDOWN);
+	Application().MessageServer()->RegisterMessageClient(this, CMessage::MOUSE_BUTTONUP);
+	Application().MessageServer()->RegisterMessageClient(this, CMessage::MOUSE_MOVE);
+	Application().MessageServer()->RegisterMessageClient(this, CMessage::CTRL_SINGLELCLICK);
 	Draw();
 }
 
@@ -228,7 +228,7 @@ bool CScrollBar::HandleMessage(CMessage* pMessage)
       if (pKeyboardMessage && pMessage->Destination() == this)
       {
         // Forward all key downs to parent
-        CApplication::Instance()->MessageServer()->QueueMessage(new CKeyboardMessage(CMessage::KEYBOARD_KEYDOWN, m_pParentWindow, this,
+        Application().MessageServer()->QueueMessage(new CKeyboardMessage(CMessage::KEYBOARD_KEYDOWN, m_pParentWindow, this,
               pKeyboardMessage->ScanCode, pKeyboardMessage->Modifiers, pKeyboardMessage->Key));
       }
       break;
@@ -239,7 +239,7 @@ bool CScrollBar::HandleMessage(CMessage* pMessage)
 			if (pMouseMessage && m_bDragging && pMouseMessage->Button == CMouseMessage::LEFT)
 			{
 				m_bDragging = false;
-				CApplication::Instance()->MessageServer()->QueueMessage(new TIntMessage(CMessage::CTRL_VALUECHANGE, m_pParentWindow, this, m_Value));
+				Application().MessageServer()->QueueMessage(new TIntMessage(CMessage::CTRL_VALUECHANGE, m_pParentWindow, this, m_Value));
 				bHandled = true;
 			}
 			break;
@@ -267,7 +267,7 @@ bool CScrollBar::HandleMessage(CMessage* pMessage)
 					}
 					if (iOldPosition != m_Value)
 					{
-						CApplication::Instance()->MessageServer()->QueueMessage(new TIntMessage(CMessage::CTRL_VALUECHANGING, m_pParentWindow, this, m_Value));
+						Application().MessageServer()->QueueMessage(new TIntMessage(CMessage::CTRL_VALUECHANGING, m_pParentWindow, this, m_Value));
 						RepositionThumb();
 						Draw();
 					}

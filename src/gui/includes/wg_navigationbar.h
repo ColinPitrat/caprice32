@@ -54,7 +54,7 @@ class CNavigationBar : public CWindow
 public:
 	//! Constructs a new navigation bar
 	//! \param pParent A pointer to the parent window
-    //! \param UpperLeft a CPoint that is the upper-left corner of the navigation bar.
+	//! \param UpperLeft a CPoint that is the upper-left corner of the navigation bar.
 	//! \param iMaxItems The (maximum) number of items that will fit in the navigation bar.
 	//! \param iItemWidth The width of one item in the navigation bar. Default is 50.
 	//! \param iItemHeight The height of one item in the navigation bar. Default is 50.

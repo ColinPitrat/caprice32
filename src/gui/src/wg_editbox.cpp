@@ -56,20 +56,20 @@ CEditBox::CEditBox(const CRect& WindowRect, CWindow* pParent, CFontEngine* pFont
 	}
 	else
 	{
-		m_pFontEngine = CApplication::Instance()->GetDefaultFontEngine();
+		m_pFontEngine = Application().GetDefaultFontEngine();
 	}
-	m_pDblClickTimer = new CTimer();
-	m_pCursorTimer = new CTimer(this);
+	m_pDblClickTimer = new CTimer(pParent->Application());
+	m_pCursorTimer = new CTimer(pParent->Application(), this);
 	m_pRenderedString.reset(new CRenderedString(
 		m_pFontEngine, "", CRenderedString::VALIGN_NORMAL, CRenderedString::HALIGN_LEFT));
-	CApplication::Instance()->MessageServer()->RegisterMessageClient(this, CMessage::KEYBOARD_KEYDOWN);
-	CApplication::Instance()->MessageServer()->RegisterMessageClient(this, CMessage::MOUSE_BUTTONUP);
-	CApplication::Instance()->MessageServer()->RegisterMessageClient(this, CMessage::MOUSE_MOVE);
-	CApplication::Instance()->MessageServer()->RegisterMessageClient(this, CMessage::CTRL_DOUBLELCLICK);
-	CApplication::Instance()->MessageServer()->RegisterMessageClient(this, CMessage::CTRL_TIMER);
-	CApplication::Instance()->MessageServer()->RegisterMessageClient(this, CMessage::CTRL_GAININGKEYFOCUS);
-	CApplication::Instance()->MessageServer()->RegisterMessageClient(this, CMessage::CTRL_LOSINGKEYFOCUS);
-	CApplication::Instance()->MessageServer()->RegisterMessageClient(this, CMessage::TEXTINPUT);
+	Application().MessageServer()->RegisterMessageClient(this, CMessage::KEYBOARD_KEYDOWN);
+	Application().MessageServer()->RegisterMessageClient(this, CMessage::MOUSE_BUTTONUP);
+	Application().MessageServer()->RegisterMessageClient(this, CMessage::MOUSE_MOVE);
+	Application().MessageServer()->RegisterMessageClient(this, CMessage::CTRL_DOUBLELCLICK);
+	Application().MessageServer()->RegisterMessageClient(this, CMessage::CTRL_TIMER);
+	Application().MessageServer()->RegisterMessageClient(this, CMessage::CTRL_GAININGKEYFOCUS);
+	Application().MessageServer()->RegisterMessageClient(this, CMessage::CTRL_LOSINGKEYFOCUS);
+	Application().MessageServer()->RegisterMessageClient(this, CMessage::TEXTINPUT);
 
 	Draw();
 }
@@ -189,7 +189,7 @@ void CEditBox::Draw() const
 		}
 
 		CRGBColor FontColor = m_bReadOnly ? DEFAULT_DISABLED_LINE_COLOR : COLOR_BLACK;
-		if (CApplication::Instance()->GetKeyFocus() == dynamic_cast<const CWindow*>(this) && !m_bReadOnly)
+		if (Application().GetKeyFocus() == dynamic_cast<const CWindow*>(this) && !m_bReadOnly)
 		{
 			CPoint BoundedDims;
 			CPoint Offset;
@@ -255,7 +255,7 @@ void CEditBox::Draw() const
 				SelRect.SetLeft(CharRects.at(SelStartNorm).Left() + Offset.XPos() + SubRect.Left() + m_ScrollOffset);
 				SelRect.SetRight(CharRects.at(SelLenNorm + SelStartNorm - 1).Right() + Offset.XPos() + SubRect.Left() + m_ScrollOffset);
 				SelRect.ClipTo(SubRect);
-				Painter.DrawRect(SelRect, true, CApplication::Instance()->GetDefaultSelectionColor(), CApplication::Instance()->GetDefaultSelectionColor());
+				Painter.DrawRect(SelRect, true, Application().GetDefaultSelectionColor(), Application().GetDefaultSelectionColor());
 			}
 			else if (m_bDrawCursor)
 			{
@@ -313,13 +313,13 @@ bool CEditBox::OnMouseButtonDown(CPoint Point, unsigned int Button)
 		{
 			//Raise double click event
 			//This message is being dispatched, but to where?
-			CApplication::Instance()->MessageServer()->QueueMessage(new TIntMessage(CMessage::CTRL_DOUBLELCLICK, this, this, 0));
+			Application().MessageServer()->QueueMessage(new TIntMessage(CMessage::CTRL_DOUBLELCLICK, this, this, 0));
 			m_pDblClickTimer->StopTimer();
 			fSkipCursorPositioning = true;
 		}
-		if (CApplication::Instance()->GetKeyFocus() != this)
+		if (Application().GetKeyFocus() != this)
 		{
-			CApplication::Instance()->SetKeyFocus(this);
+			Application().SetKeyFocus(this);
 		}
 
 		if (!fSkipCursorPositioning)
@@ -375,13 +375,13 @@ bool CEditBox::HandleMessage(CMessage* pMessage)
 				if (m_ClientRect.HitTest(WindowPoint) == CRect::RELPOS_INSIDE && !bHitFloating && !m_bLastMouseMoveInside)
 				{
 					m_bLastMouseMoveInside = true;
-					CwgCursorResourceHandle IBeamHandle(WGRES_IBEAM_CURSOR);
-					CApplication::Instance()->SetMouseCursor(&IBeamHandle);
+					CwgCursorResourceHandle IBeamHandle(Application(), WGRES_IBEAM_CURSOR);
+					Application().SetMouseCursor(&IBeamHandle);
 				}
 				else if ((m_ClientRect.HitTest(WindowPoint) != CRect::RELPOS_INSIDE || bHitFloating) && m_bLastMouseMoveInside)
 				{
 					m_bLastMouseMoveInside= false;
-					CApplication::Instance()->SetMouseCursor();
+					Application().SetMouseCursor();
 				}
 
 				if (m_bMouseDown)
@@ -457,7 +457,7 @@ bool CEditBox::HandleMessage(CMessage* pMessage)
           }
           if (m_sWindowText != sBuffer)
           {
-            CApplication::Instance()->MessageServer()->QueueMessage(new TStringMessage(CMessage::CTRL_VALUECHANGE, m_pParentWindow, this, sBuffer));
+            Application().MessageServer()->QueueMessage(new TStringMessage(CMessage::CTRL_VALUECHANGE, m_pParentWindow, this, sBuffer));
           }
           m_sWindowText = sBuffer;
           CWindow::SetWindowText(sBuffer);
@@ -643,7 +643,7 @@ bool CEditBox::HandleMessage(CMessage* pMessage)
           case SDLK_ESCAPE:  // intentional fall through
           case SDLK_TAB:
             // Not for us - let parent handle it
-            CApplication::Instance()->MessageServer()->QueueMessage(new CKeyboardMessage(CMessage::KEYBOARD_KEYDOWN, m_pParentWindow, this,
+            Application().MessageServer()->QueueMessage(new CKeyboardMessage(CMessage::KEYBOARD_KEYDOWN, m_pParentWindow, this,
                   pKeyboardMessage->ScanCode, pKeyboardMessage->Modifiers, pKeyboardMessage->Key));
             break;
 					default:
@@ -652,7 +652,7 @@ bool CEditBox::HandleMessage(CMessage* pMessage)
 
 					if (m_sWindowText != sBuffer)
 					{
-						CApplication::Instance()->MessageServer()->QueueMessage(new TStringMessage(CMessage::CTRL_VALUECHANGE, m_pParentWindow, this, sBuffer));
+						Application().MessageServer()->QueueMessage(new TStringMessage(CMessage::CTRL_VALUECHANGE, m_pParentWindow, this, sBuffer));
 					}
 					m_sWindowText = sBuffer;
 					CWindow::SetWindowText(sBuffer);

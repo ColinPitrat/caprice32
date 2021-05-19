@@ -24,24 +24,22 @@
 
 #include "wg_message_client.h"
 #include "wg_application.h"
-#include "wg_error.h"
-
 
 namespace wGui
 {
 
-CMessageClient::CMessageClient() = default;
-
+CMessageClient::CMessageClient(CApplication& pApplication) :
+  m_pApplication(pApplication) {}
+  
 
 CMessageClient::~CMessageClient()  // virtual
 {
-  auto app = wGui::CApplication::Instance();
-  if (app == nullptr) return;
-	auto message_server = app->MessageServer();
+  auto message_server = Application().MessageServer();
+  // Exceptionnally, MessageServer() can return null because we may be in the
+  // destructor of the parent CMessageClient of CApplication
   if (message_server == nullptr) return;
   message_server->DeregisterMessageClient(this);
 }
-
 
 }
 

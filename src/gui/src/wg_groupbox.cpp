@@ -41,14 +41,14 @@ CGroupBox::CGroupBox(const CRect& WindowRect, CWindow* pParent, std::string sTex
 	}
 	else
 	{
-		m_pFontEngine = CApplication::Instance()->GetDefaultFontEngine();
+		m_pFontEngine = Application().GetDefaultFontEngine();
 	}
 	m_ClientRect.Grow(-2);
 	m_ClientRect.SetTop(15);
 	m_pRenderedString.reset(new CRenderedString(
 		m_pFontEngine, sText, CRenderedString::VALIGN_TOP, CRenderedString::HALIGN_LEFT));
-	m_BackgroundColor = CApplication::Instance()->GetDefaultBackgroundColor();
-	CApplication::Instance()->MessageServer()->RegisterMessageClient(this, CMessage::KEYBOARD_KEYDOWN);
+	m_BackgroundColor = Application().GetDefaultBackgroundColor();
+	Application().MessageServer()->RegisterMessageClient(this, CMessage::KEYBOARD_KEYDOWN);
 	Draw();
 }
 
@@ -110,7 +110,7 @@ bool CGroupBox::HandleMessage(CMessage* pMessage)
       if (pKeyboardMessage && pMessage->Destination() == this)
       {
         // Forward all key downs to parent
-        CApplication::Instance()->MessageServer()->QueueMessage(new CKeyboardMessage(CMessage::KEYBOARD_KEYDOWN, m_pParentWindow, this,
+        Application().MessageServer()->QueueMessage(new CKeyboardMessage(CMessage::KEYBOARD_KEYDOWN, m_pParentWindow, this,
               pKeyboardMessage->ScanCode, pKeyboardMessage->Modifiers, pKeyboardMessage->Key));
       }
       break;

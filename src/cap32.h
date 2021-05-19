@@ -409,6 +409,8 @@ std::string getConfigurationFilename(bool forWrite = false);
 void loadConfiguration (t_CPC &CPC, const std::string& configFilename);
 bool saveConfiguration (t_CPC &CPC, const std::string& configFilename);
 
+void ShowCursor(bool show);
+
 int cap32_main(int argc, char **argv);
 
 // fdc.c

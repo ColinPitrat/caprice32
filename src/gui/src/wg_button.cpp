@@ -47,14 +47,14 @@ CButton::CButton(const CRect& WindowRect, CWindow* pParent, std::string sText, C
 	}
 	else
 	{
-		m_pFontEngine = CApplication::Instance()->GetDefaultFontEngine();
+		m_pFontEngine = Application().GetDefaultFontEngine();
 	}
 	m_pRenderedString.reset(new CRenderedString(
 		m_pFontEngine, sText, CRenderedString::VALIGN_CENTER, CRenderedString::HALIGN_CENTER));
-//	m_BackgroundColor = CApplication::Instance()->GetDefaultForegroundColor();
+//	m_BackgroundColor = Application().GetDefaultForegroundColor();
   m_BackgroundColor = DEFAULT_BUTTON_COLOR;
-	CApplication::Instance()->MessageServer()->RegisterMessageClient(this, CMessage::KEYBOARD_KEYDOWN);
-	CApplication::Instance()->MessageServer()->RegisterMessageClient(this, CMessage::MOUSE_BUTTONUP);
+	Application().MessageServer()->RegisterMessageClient(this, CMessage::KEYBOARD_KEYDOWN);
+	Application().MessageServer()->RegisterMessageClient(this, CMessage::MOUSE_BUTTONUP);
 	Draw();
 }
 
@@ -161,7 +161,7 @@ bool CButton::OnMouseButtonUp(CPoint Point, unsigned int Button)
 			MessageType = CMessage::CTRL_SINGLEMCLICK;
 			break;
 		}
-		CApplication::Instance()->MessageServer()->QueueMessage(new TIntMessage(MessageType, m_pParentWindow, this, 0));
+		Application().MessageServer()->QueueMessage(new TIntMessage(MessageType, m_pParentWindow, this, 0));
 		bResult = true;
 	}
 
@@ -183,7 +183,7 @@ bool CButton::HandleMessage(CMessage* pMessage)
       if (pKeyboardMessage && pMessage->Destination() == this)
       {
         // Forward all key downs to parent
-        CApplication::Instance()->MessageServer()->QueueMessage(new CKeyboardMessage(CMessage::KEYBOARD_KEYDOWN, m_pParentWindow, this,
+        Application().MessageServer()->QueueMessage(new CKeyboardMessage(CMessage::KEYBOARD_KEYDOWN, m_pParentWindow, this,
               pKeyboardMessage->ScanCode, pKeyboardMessage->Modifiers, pKeyboardMessage->Key));
       }
       break;

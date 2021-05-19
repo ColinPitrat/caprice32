@@ -52,12 +52,18 @@ class CWindow : public CMessageClient
 public:
 	//! The constructor will automatically register the new window with the specified parent as a child (if a parent is given)
 	//! The parent is then responsible for destroying the window
-  	//! \param WindowRect A CRect that defines the outer limits of the control
+	//! \param WindowRect A CRect that defines the outer limits of the control
 	//! \param pParent A pointer to the parent window
 	CWindow(const CRect& WindowRect, CWindow* pParent);
 
-    // judb constructor without CRect; don't forget to call SetWindowRect before using the CWindow!
-	CWindow(CWindow* pParent);
+	//! The constructor is for creating a window without a parent.
+	//! In this case, an application must be provided.
+	//! \param pApplication A pointer to the CApplication
+	//! \param WindowRect A CRect that defines the outer limits of the control
+	CWindow(CApplication& application, const CRect& WindowRect);
+
+	// judb constructor without CRect; don't forget to call SetWindowRect before using the CWindow!
+	explicit CWindow(CWindow* pParent);
 
 	//! The CWindow destructor will automatically deregister itself with it's parent (if it had one)
 	~CWindow() override;

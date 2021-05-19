@@ -27,9 +27,10 @@
 
 #include "wg_message.h"
 
-
 namespace wGui
 {
+
+class CApplication;
 
 //! An Abstract class for handling wGui messages
 //! \sa CMessage CMessageServer
@@ -37,19 +38,22 @@ namespace wGui
 class CMessageClient
 {
 public:
-	//! Standard constructor
-	CMessageClient();
+  //! Standard constructor
+  explicit CMessageClient(CApplication& application);
 
-	//! Standard destructor
-	virtual ~CMessageClient();
+  //! Standard destructor
+  virtual ~CMessageClient();
 
-	//! This is the callback used by the Message Server to distribute messages
-	//! The client must first register with the server and indicate any messages it wishes to recieve
-	//! \sa CMessageServer::RegisterMessageClient()
-	virtual bool HandleMessage(CMessage* pMessage) = 0;
+  //! This is the callback used by the Message Server to distribute messages
+  //! The client must first register with the server and indicate any messages it wishes to recieve
+  //! \sa CMessageServer::RegisterMessageClient()
+  virtual bool HandleMessage(CMessage* pMessage) = 0;
 
+  CApplication& Application() { return m_pApplication; };
+  const CApplication& Application() const { return m_pApplication; };
 
 protected:
+  CApplication& m_pApplication;
 };
 
 }

@@ -28,6 +28,7 @@
 #include "SDL.h"
 #include "wg_resource_handle.h"
 #include "wg_color.h"
+#include "wg_application.h"
 
 
 namespace wGui
@@ -56,19 +57,15 @@ enum EwgResourceId {
 };
 
 
-// Since the internal resources will probably be used fairly frequently,
-// we cheat a little and keep a clone of any that have been instantiated for the lifetime for the program
-//static std::set<CResourceHandle> wgInternalResourcePool;
-
-
 //! Resource handle class for the internal wGui bitmap resources
 
 class CwgBitmapResourceHandle : public CBitmapResourceHandle
 {
 public:
 	//! CwgBitmapResourceHandles must be instantiated with a valid resource ID
+	//! \param application The application using the resource and that will own the handle
 	//! \param resId The ID of the resource which the handle will represent
-	CwgBitmapResourceHandle(EwgResourceId resId);
+	CwgBitmapResourceHandle(CApplication& application, EwgResourceId resId);
 
 private:
 	SDL_Surface* DrawBitmap(CRGBColor Data[], int iDataLength, int iWidth, int iHeight) const;
@@ -81,8 +78,9 @@ class CwgStringResourceHandle : public CStringResourceHandle
 {
 public:
 	//! CwgStringResourceHandles must be instantiated with a valid resource ID
+	//! \param application The application using the resource and that will own the handle
 	//! \param resId The ID of the resource which the handle will represent
-	CwgStringResourceHandle(EwgResourceId resId);
+	CwgStringResourceHandle(CApplication& application, EwgResourceId resId);
 };
 
 
@@ -92,8 +90,9 @@ class CwgCursorResourceHandle : public CCursorResourceHandle
 {
 public:
 	//! CwgCursorResourceHandle must be instantiated with a valid resource ID
+	//! \param application The application using the resource and that will own the handle
 	//! \param resId The ID of the resource which the handle will represent
-	CwgCursorResourceHandle(EwgResourceId resId);
+	CwgCursorResourceHandle(CApplication& application, EwgResourceId resId);
 
 private:
 	enum ECursorDataMask {

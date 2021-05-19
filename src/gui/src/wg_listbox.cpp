@@ -45,7 +45,7 @@ CListBox::CListBox(const CRect& WindowRect, CWindow* pParent, bool bSingleSelect
 	}
 	else
 	{
-		m_pFontEngine = CApplication::Instance()->GetDefaultFontEngine();
+		m_pFontEngine = Application().GetDefaultFontEngine();
 	}
 	CRect ScrollbarRect(m_WindowRect.SizeRect());
 	ScrollbarRect.Grow(-1);
@@ -56,11 +56,11 @@ CListBox::CListBox(const CRect& WindowRect, CWindow* pParent, bool bSingleSelect
 	m_pVScrollbar->SetMaxLimit(0);
 	m_ClientRect = CRect(2, 2, m_WindowRect.Width() - 16, m_WindowRect.Height() - 2);
 	m_BackgroundColor = COLOR_WHITE;
-	CApplication::Instance()->MessageServer()->RegisterMessageClient(this, CMessage::KEYBOARD_KEYDOWN);
-	CApplication::Instance()->MessageServer()->RegisterMessageClient(this, CMessage::CTRL_VALUECHANGE);
-	CApplication::Instance()->MessageServer()->RegisterMessageClient(this, CMessage::CTRL_VALUECHANGING);
-	CApplication::Instance()->MessageServer()->RegisterMessageClient(this, CMessage::CTRL_GAININGKEYFOCUS);
-	CApplication::Instance()->MessageServer()->RegisterMessageClient(this, CMessage::CTRL_LOSINGKEYFOCUS);
+	Application().MessageServer()->RegisterMessageClient(this, CMessage::KEYBOARD_KEYDOWN);
+	Application().MessageServer()->RegisterMessageClient(this, CMessage::CTRL_VALUECHANGE);
+	Application().MessageServer()->RegisterMessageClient(this, CMessage::CTRL_VALUECHANGING);
+	Application().MessageServer()->RegisterMessageClient(this, CMessage::CTRL_GAININGKEYFOCUS);
+	Application().MessageServer()->RegisterMessageClient(this, CMessage::CTRL_LOSINGKEYFOCUS);
 	Draw();
 }
 
@@ -170,7 +170,7 @@ void CListBox::SetSelection(unsigned int iItemIndex, bool bSelected, bool bNotif
     }
     if (bNotify)
     {
-      CApplication::Instance()->MessageServer()->QueueMessage(new TIntMessage(CMessage::CTRL_VALUECHANGE, pDestination, this, m_iFocusedItem));
+      Application().MessageServer()->QueueMessage(new TIntMessage(CMessage::CTRL_VALUECHANGE, pDestination, this, m_iFocusedItem));
     }
     Draw();
   }
@@ -218,9 +218,9 @@ void CListBox::Draw() const
 				ItemRect.SetBottom(ItemRect.Bottom() - 1);
 				if (m_SelectedItems.at(i))
 				{
-					Painter.DrawRect(ItemRect, true, CApplication::Instance()->GetDefaultSelectionColor(), CApplication::Instance()->GetDefaultSelectionColor());
+					Painter.DrawRect(ItemRect, true, Application().GetDefaultSelectionColor(), Application().GetDefaultSelectionColor());
 				}
-				if (i == m_iFocusedItem && CApplication::Instance()->GetKeyFocus() == this)
+				if (i == m_iFocusedItem && Application().GetKeyFocus() == this)
 				{
 					ItemRect.Grow(1);
 					Painter.DrawRect(ItemRect, false, COLOR_DARKGRAY);
@@ -289,9 +289,9 @@ bool CListBox::OnMouseButtonDown(CPoint Point, unsigned int Button)
   if (m_pVScrollbar->HandleMouseScroll(Button)) {
     return true;
   }
-  if (Button == CMouseMessage::LEFT && CApplication::Instance()->GetKeyFocus() != this)
+  if (Button == CMouseMessage::LEFT && Application().GetKeyFocus() != this)
   {
-    CApplication::Instance()->SetKeyFocus(this);
+    Application().SetKeyFocus(this);
   }
   if (Button == CMouseMessage::LEFT && !m_Items.empty()) {
     // Prep the new selection
@@ -418,7 +418,7 @@ bool CListBox::HandleMessage(CMessage* pMessage)
 					default:
 					{
             // Not for us - let parent handle it
-            CApplication::Instance()->MessageServer()->QueueMessage(new CKeyboardMessage(CMessage::KEYBOARD_KEYDOWN, m_pParentWindow, this,
+            Application().MessageServer()->QueueMessage(new CKeyboardMessage(CMessage::KEYBOARD_KEYDOWN, m_pParentWindow, this,
                   pKeyMsg->ScanCode, pKeyMsg->Modifiers, pKeyMsg->Key));
 						bHandled=false;
 						break;

@@ -31,6 +31,7 @@
 #include <sstream>
 #include <algorithm>
 #include <functional>
+#include "log.h"
 
 
 namespace wGui
@@ -49,8 +50,7 @@ void CMessageServer::RegisterMessageClient(CMessageClient* pClient, CMessage::EM
 {
 	if (!pClient)
 	{
-		CApplication::Instance()->GetApplicationLog().AddLogEntry(
-			"CMessageServer::RegisterMessageClient : Attempting to register a non-existent message client.", APP_LOG_ERROR);
+		LOG_ERROR("CMessageServer::RegisterMessageClient : Attempting to register a non-existent message client.");
 	}
 	else
 	{

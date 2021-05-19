@@ -1,5 +1,7 @@
 #include <gtest/gtest.h>
 
+#include "SDL.h"
+#include "CapriceGuiView.h"
 #include "CapriceLoadSave.h"
 #include "cap32.h"
 #include <string>
@@ -13,11 +15,13 @@ class CapriceLoadSaveTest : public testing::Test {
     void SetUp() {
       CPC.resources_path = "resources";
       app.Init();
-      cls = new CapriceLoadSave(CRect(), nullptr, nullptr);
+      CRect rect;
+      view = new CapriceGuiView(app, &surface, &surface, rect);
+      cls = new CapriceLoadSave(CRect(), /*pParent=*/view, /*pFontEngine=*/nullptr);
     }
 
     void TearDown() {
-      delete cls;
+      delete view;
     }
 
     void SetFileSpec(const std::list<std::string> &fileSpec) {
@@ -27,6 +31,8 @@ class CapriceLoadSaveTest : public testing::Test {
   protected:
     CApplication app;
     CapriceLoadSave *cls;
+    CapriceGuiView *view;
+    SDL_Surface surface;
 };
 
 TEST_F(CapriceLoadSaveTest, MatchCurrentFileSpecReturnsFalseIfExtensionListIsEmpty)

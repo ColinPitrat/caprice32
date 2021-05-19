@@ -1,6 +1,6 @@
 #include "CapriceVKeyboardView.h"
 
-CapriceVKeyboardView::CapriceVKeyboardView(SDL_Surface* surface, SDL_Surface* backSurface, const CRect& WindowRect) : CView(surface, backSurface, WindowRect)
+CapriceVKeyboardView::CapriceVKeyboardView(CApplication& application, SDL_Surface* surface, SDL_Surface* backSurface, const CRect& WindowRect) : CView(application, surface, backSurface, WindowRect)
 {
   m_kbdFrame = new CapriceVKeyboard(CRect(CPoint(0, 0), 384, 270), this, nullptr);
 }

@@ -81,7 +81,7 @@ public:
 		m_Value = ConstrainValue(value);
 		if (bNotify)
 		{
-			CApplication::Instance()->MessageServer()->QueueMessage(new CValueMessage<T>(CMessage::CTRL_VALUECHANGE, m_pParentWindow, this, m_Value));
+			Application().MessageServer()->QueueMessage(new CValueMessage<T>(CMessage::CTRL_VALUECHANGE, m_pParentWindow, this, m_Value));
 		}
 
 		if (bRedraw)

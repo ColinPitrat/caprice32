@@ -6,7 +6,7 @@
 // TODO: Allow to have multiple windows (e.g to allow to see z80 and memory at the same time)
 bool DevTools::Activate() {
   std::cout << "Activating dev tools" << std::endl;
-  SDL_ShowCursor(SDL_ENABLE);
+  ShowCursor(true);
   try {
     // TODO: This position only makes sense for me. Ideally we would probably want to find where current window is, find display size and place
     // the window where there's the most space available. On the other hand, getting display size is not very reliable on multi-screen setups under linux ...
@@ -23,8 +23,7 @@ bool DevTools::Activate() {
     SDL_FillRect(surface, nullptr, SDL_MapRGB(surface->format, 0, 0, 0));
     capriceGui = std::make_unique<CapriceGui>();
     capriceGui->Init();
-    devToolsView = std::make_unique<CapriceDevToolsView>(surface, renderer, texture, wGui::CRect(0, 0, DEVTOOLS_WIDTH, DEVTOOLS_HEIGHT), this);
-    capriceGui->SetMouseVisibility(true);
+    devToolsView = std::make_unique<CapriceDevToolsView>(*capriceGui, surface, renderer, texture, wGui::CRect(0, 0, DEVTOOLS_WIDTH, DEVTOOLS_HEIGHT), this);
   } catch(wGui::Wg_Ex_App& e) {
       // TODO: improve: this is pretty silent if people don't look at the console
       std::cout << "Failed displaying developer's tools: " << e.what() << std::endl;
@@ -34,7 +33,7 @@ bool DevTools::Activate() {
 }
 
 void DevTools::Deactivate() {
-  SDL_ShowCursor(SDL_DISABLE);
+  ShowCursor(false);
   capriceGui->ApplicationExit(0);
   devToolsView = nullptr;
   capriceGui = nullptr;

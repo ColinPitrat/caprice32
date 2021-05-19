@@ -34,7 +34,7 @@ namespace wGui
 {
 
 
-CwgBitmapResourceHandle::CwgBitmapResourceHandle(EwgResourceId resId) :
+CwgBitmapResourceHandle::CwgBitmapResourceHandle(CApplication& application, EwgResourceId resId) :
 	CBitmapResourceHandle(resId)
 {
 	if (m_BitmapMap.find(m_ResourceId) == m_BitmapMap.end())
@@ -179,7 +179,7 @@ CwgBitmapResourceHandle::CwgBitmapResourceHandle(EwgResourceId resId) :
 				break;
 		}
 		CResourceHandle TempHandle(m_ResourceId);
-		CApplication::Instance()->AddToResourcePool(TempHandle);
+		application.AddToResourcePool(TempHandle);
 	}
 }
 
@@ -187,7 +187,7 @@ CwgBitmapResourceHandle::CwgBitmapResourceHandle(EwgResourceId resId) :
 SDL_Surface* CwgBitmapResourceHandle::DrawBitmap(CRGBColor Data[], int iDataLength, int iWidth, int iHeight) const
 {
 	SDL_Surface* pBitmap = SDL_CreateRGBSurface(0, iWidth, iHeight, 
-		CApplication::Instance()->GetBitsPerPixel(), 0x000000FF, 0x0000FF00, 0x00FF0000, 0xFF000000);
+      DEFAULT_BPP, 0x000000FF, 0x0000FF00, 0x00FF0000, 0xFF000000);
 	CPainter Painter(pBitmap, CPainter::PAINT_REPLACE);
 	for (int iRow = 0; iRow < iHeight; ++iRow)
 	{
@@ -205,7 +205,7 @@ SDL_Surface* CwgBitmapResourceHandle::DrawBitmap(CRGBColor Data[], int iDataLeng
 }
 
 
-CwgStringResourceHandle::CwgStringResourceHandle(EwgResourceId resId) :
+CwgStringResourceHandle::CwgStringResourceHandle(CApplication& application, EwgResourceId resId) :
 	CStringResourceHandle(resId)
 {
 	if (m_StringMap.find(m_ResourceId) == m_StringMap.end())
@@ -222,12 +222,12 @@ CwgStringResourceHandle::CwgStringResourceHandle(EwgResourceId resId) :
 				break;
 		}
 		CResourceHandle TempHandle(m_ResourceId);
-		CApplication::Instance()->AddToResourcePool(TempHandle);
+		application.AddToResourcePool(TempHandle);
 	}
 }
 
 
-CwgCursorResourceHandle::CwgCursorResourceHandle(EwgResourceId resId) :
+CwgCursorResourceHandle::CwgCursorResourceHandle(CApplication& application, EwgResourceId resId) :
 	CCursorResourceHandle(resId)
 {
 	if (m_SDLCursorMap.find(m_ResourceId) == m_SDLCursorMap.end())
@@ -432,7 +432,7 @@ CwgCursorResourceHandle::CwgCursorResourceHandle(EwgResourceId resId) :
 				break;
 		}
 		CResourceHandle TempHandle(m_ResourceId);
-		CApplication::Instance()->AddToResourcePool(TempHandle);
+		application.AddToResourcePool(TempHandle);
 	}
 }
 

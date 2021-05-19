@@ -12,7 +12,7 @@ class CapriceVKeyboardView : public CView
     CapriceVKeyboard* m_kbdFrame;
 
   public:
-    CapriceVKeyboardView(SDL_Surface* surface, SDL_Surface* backSurface, const CRect& WindowRect);
+    CapriceVKeyboardView(CApplication& application, SDL_Surface* surface, SDL_Surface* backSurface, const CRect& WindowRect);
 
     std::list<SDL_Event> GetEvents();
 

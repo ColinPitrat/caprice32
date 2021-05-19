@@ -38,16 +38,16 @@ CNavigationBar::CNavigationBar(CWindow* pParent, const CPoint& UpperLeft, unsign
 	if (pFontEngine) {
         m_pFontEngine = pFontEngine;
 	} else {
-        m_pFontEngine = CApplication::Instance()->GetDefaultFontEngine();
+        m_pFontEngine = Application().GetDefaultFontEngine();
 	}
     // Make space for a 3D border and a focus rectangle around each item.
     // To make it all match (and avoid that the last item gets clipped at the right side),
     // we added + 4 to the width (in the CWindow constructor above)
 	m_ClientRect = CRect(2, 2, m_WindowRect.Width() - 2, m_WindowRect.Height() - 2);
 	m_BackgroundColor = COLOR_WHITE;
-	CApplication::Instance()->MessageServer()->RegisterMessageClient(this, CMessage::KEYBOARD_KEYDOWN);
-	CApplication::Instance()->MessageServer()->RegisterMessageClient(this, CMessage::CTRL_VALUECHANGE);
-	CApplication::Instance()->MessageServer()->RegisterMessageClient(this, CMessage::CTRL_VALUECHANGING);
+	Application().MessageServer()->RegisterMessageClient(this, CMessage::KEYBOARD_KEYDOWN);
+	Application().MessageServer()->RegisterMessageClient(this, CMessage::CTRL_VALUECHANGE);
+	Application().MessageServer()->RegisterMessageClient(this, CMessage::CTRL_VALUECHANGING);
 	Draw();
 }
 
@@ -115,7 +115,7 @@ void CNavigationBar::SelectItem(unsigned int iItemIndex) {
         m_iFocusedItem = iItemIndex;
         CWindow* pDestination = m_pParentWindow;
         // could be optimized : keep 'previous' selection and only send the message if new m_iFocusedItem != previous focused item.
-        CApplication::Instance()->MessageServer()->QueueMessage(new TIntMessage(CMessage::CTRL_VALUECHANGE, pDestination, this, m_iFocusedItem));
+        Application().MessageServer()->QueueMessage(new TIntMessage(CMessage::CTRL_VALUECHANGE, pDestination, this, m_iFocusedItem));
         Draw();
     }
 }
@@ -152,12 +152,12 @@ void CNavigationBar::Draw() const {
 				ItemRect.SetRight(ItemRect.Right() - 1);
 				if (i == m_iSelectedItem)
 				{
-					Painter.DrawRect(ItemRect, true, CApplication::Instance()->GetDefaultSelectionColor(), CApplication::Instance()->GetDefaultSelectionColor());
+					Painter.DrawRect(ItemRect, true, Application().GetDefaultSelectionColor(), Application().GetDefaultSelectionColor());
 				}
 				if (i == m_iFocusedItem && HasFocus())
 				{
 					ItemRect.Grow(1);
-					Painter.DrawRect(ItemRect, false, CApplication::Instance()->GetDefaultSelectionColor() * 0.7);
+					Painter.DrawRect(ItemRect, false, Application().GetDefaultSelectionColor() * 0.7);
 					ItemRect.Grow(-1);
 				}
 				ItemRect.Grow(-1);
@@ -231,7 +231,7 @@ bool CNavigationBar::HandleMessage(CMessage* pMessage) {
             break;
 					default:
             // Let the parent handle it
-            CApplication::Instance()->MessageServer()->QueueMessage(new CKeyboardMessage(CMessage::KEYBOARD_KEYDOWN, m_pParentWindow, this,
+            Application().MessageServer()->QueueMessage(new CKeyboardMessage(CMessage::KEYBOARD_KEYDOWN, m_pParentWindow, this,
                   pKeyMsg->ScanCode, pKeyMsg->Modifiers, pKeyMsg->Key));
             break;
 						bHandled = false;

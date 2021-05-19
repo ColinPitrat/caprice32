@@ -45,7 +45,7 @@ class CTimer : public CMessageClient
 public:
 	//! Standard constructor
 	//! \param pOwner A pointer to the timer 'owner'.  This is what the timer will set as the destination for it's messages.  Use 0 to broadcast the message.
-	CTimer(CMessageClient* pOwner = nullptr);
+	explicit CTimer(CApplication& application, CMessageClient* pOwner = nullptr);
 
 	//! Standard destructor
 	~CTimer() override;

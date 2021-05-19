@@ -53,8 +53,6 @@ CFontEngine::CFontEngine(const std::string& sFontFileName, unsigned char FontSiz
 	{
 		throw(Wg_Ex_FreeType("Unable to set character size.", "CFontEngine::CFontEngine"));
 	}
-	CApplication::Instance()->GetApplicationLog().
-		AddLogEntry("CFontEngine - Loaded new font : " + stdex::itoa(FontSize) + " point, " + sFontFileName, APP_LOG_INFO);
 }
 
 

@@ -13,7 +13,7 @@ class CapriceLeavingWithoutSavingView : public CView
     bool confirmed = false;
 
   public:
-    CapriceLeavingWithoutSavingView(SDL_Surface* surface, SDL_Surface* backSurface, const CRect& WindowRect);
+    CapriceLeavingWithoutSavingView(CApplication& application, SDL_Surface* surface, SDL_Surface* backSurface, const CRect& WindowRect);
 
     bool Confirmed() const;
 

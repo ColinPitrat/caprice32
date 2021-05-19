@@ -35,28 +35,13 @@
 #include "wg_message_client.h"
 #include "wg_fontengine.h"
 #include "wg_resources.h"
-#include "wutil_log.h"
 #include "std_ex.h"
-
-
-namespace
-{
-const int DEFAULT_BPP = 32;
-}
 
 
 namespace wGui
 {
 
-//! The various severity levels used in the application log
-enum EAppLogSeverity
-{
-	APP_LOG_CRITICAL = 1, //!< Very, very bad stuff
-	APP_LOG_ERROR    = 3, //!< Something went wrong and needs to be fixed
-	APP_LOG_WARNING  = 5, //!< Something suspicious is up, and should be looked at
-	APP_LOG_INFO     = 8  //!< Informational, doesn't indicate any problems
-};
-
+const int DEFAULT_BPP = 32;
 
 //! A class for encapsulating an application
 
@@ -74,10 +59,6 @@ public:
 
 	//! Standard destructor
 	~CApplication() override;
-
-	//! Gets the single instance of the CApplication object
-	//! \return A pointer to the one instance of the Application
-	static CApplication* Instance() { return m_pInstance; }
 
 	//! Gets the default font file name
 	//! \return The default font
@@ -151,7 +132,7 @@ public:
 
 	//! Gets the color depth (in bits per pixel) of the app
 	//! \return The color depth of the view
-	virtual int GetBitsPerPixel() const { return m_iBitsPerPixel; }
+	virtual int GetBitsPerPixel() const { return DEFAULT_BPP; }
 
 	//! Gets the default background color
 	//! \return Default background color
@@ -181,15 +162,7 @@ public:
 	//! \param pCursorResourceHandle A pointer to the cursor resource handle, if no cursor is specified, the cursor will revert to the system default
 	virtual void SetMouseCursor(CCursorResourceHandle* pCursorResourceHandle = nullptr);
 
-	//! Changes the visibility of the mouse
-	//! \param bVisible if the mouse has to be drawn or not
-	virtual void SetMouseVisibility( bool bVisible ) { SDL_ShowCursor(bVisible); }
-
-	//!Returns the application log, which is output to wGui.log on application exit
-	//! \return A reference to the application log, which gets any wGui log messages
-	virtual wUtil::CLog& GetApplicationLog() { return m_AppLog; }
-
-  CMessageServer* MessageServer() { return m_pMessageServer.get(); }
+  CMessageServer* MessageServer() const { return m_pMessageServer.get(); }
 
 	// CMessageClient overrides
 	//! CApplication will handle the APP_EXIT message, and will close the application on it's receipt
@@ -203,8 +176,7 @@ protected:
 	//! \param event An SDL Event structure
 	virtual void HandleSDLEvent(SDL_Event event);
 
-	static CApplication* m_pInstance;  //!< A pointer to the one valid instance of the application
-  std::unique_ptr<CMessageServer> m_pMessageServer;
+  mutable std::unique_ptr<CMessageServer> m_pMessageServer;
 	std::string m_sFontFileName;  //!< The font to use for all controls
 	int m_iExitCode;  //!< The exit code to be returned when the app exits
 	bool m_bRunning;  //!< Indicates if the app is currently spinning in the message loop
@@ -217,7 +189,6 @@ protected:
 	t_FontEngineMap m_FontEngines;  //!< A map of font engine pointers
 	CFontEngine* m_pDefaultFontEngine;  //!< A pointer to the default font engine
 
-	int m_iBitsPerPixel;  //!< The color depth the app will be using
 	CRGBColor m_DefaultBackgroundColor; //!< Default background color
 	CRGBColor m_DefaultForegroundColor; //!< Default foreground color
 	CRGBColor m_DefaultSelectionColor; //!< Default selection color
@@ -227,7 +198,6 @@ protected:
 	std::list<CResourceHandle> m_ResourceHandlePool;  //!< The resource handle pool which keeps commonly used resources alive
 	std::unique_ptr<CCursorResourceHandle> m_pCurrentCursorResourceHandle;  //!< An autopointer to the handle for the current mouse cursor
 	SDL_Cursor* m_pSystemDefaultCursor;  //!< A pointer to the default system cursor
-	wUtil::CLog m_AppLog;  //!< A log for wGui stuff
 };
 
 

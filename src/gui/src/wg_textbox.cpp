@@ -58,11 +58,11 @@ CTextBox::CTextBox(const CRect& WindowRect, CWindow* pParent, CFontEngine* pFont
 	}
 	else
 	{
-		m_pFontEngine = CApplication::Instance()->GetDefaultFontEngine();
+		m_pFontEngine = Application().GetDefaultFontEngine();
 	}
 
-	m_pDblClickTimer = new CTimer();
-	m_pCursorTimer = new CTimer(this);
+	m_pDblClickTimer = new CTimer(pParent->Application());
+	m_pCursorTimer = new CTimer(pParent->Application(), this);
 	m_ClientRect.Grow(-3);
 	m_pVerticalScrollBar = new CScrollBar(
 		CRect(m_WindowRect.Width() - 12, 1, m_WindowRect.Width(), m_WindowRect.Height() - 12)  - m_ClientRect.TopLeft(), this, CScrollBar::VERTICAL);
@@ -72,16 +72,16 @@ CTextBox::CTextBox(const CRect& WindowRect, CWindow* pParent, CFontEngine* pFont
 	m_ScrollBarVisibilityMap[CScrollBar::HORIZONTAL] = SCROLLBAR_VIS_AUTO;
 	PrepareWindowText("");
 
-	CApplication::Instance()->MessageServer()->RegisterMessageClient(this, CMessage::KEYBOARD_KEYDOWN);
-	CApplication::Instance()->MessageServer()->RegisterMessageClient(this, CMessage::MOUSE_BUTTONUP);
-	CApplication::Instance()->MessageServer()->RegisterMessageClient(this, CMessage::MOUSE_MOVE);
-	CApplication::Instance()->MessageServer()->RegisterMessageClient(this, CMessage::CTRL_VALUECHANGE);
-	CApplication::Instance()->MessageServer()->RegisterMessageClient(this, CMessage::CTRL_VALUECHANGING);
-	CApplication::Instance()->MessageServer()->RegisterMessageClient(this, CMessage::CTRL_DOUBLELCLICK);
-	CApplication::Instance()->MessageServer()->RegisterMessageClient(this, CMessage::CTRL_TIMER);
-	CApplication::Instance()->MessageServer()->RegisterMessageClient(this, CMessage::CTRL_GAININGKEYFOCUS);
-	CApplication::Instance()->MessageServer()->RegisterMessageClient(this, CMessage::CTRL_LOSINGKEYFOCUS);
-	CApplication::Instance()->MessageServer()->RegisterMessageClient(this, CMessage::TEXTINPUT);
+	Application().MessageServer()->RegisterMessageClient(this, CMessage::KEYBOARD_KEYDOWN);
+	Application().MessageServer()->RegisterMessageClient(this, CMessage::MOUSE_BUTTONUP);
+	Application().MessageServer()->RegisterMessageClient(this, CMessage::MOUSE_MOVE);
+	Application().MessageServer()->RegisterMessageClient(this, CMessage::CTRL_VALUECHANGE);
+	Application().MessageServer()->RegisterMessageClient(this, CMessage::CTRL_VALUECHANGING);
+	Application().MessageServer()->RegisterMessageClient(this, CMessage::CTRL_DOUBLELCLICK);
+	Application().MessageServer()->RegisterMessageClient(this, CMessage::CTRL_TIMER);
+	Application().MessageServer()->RegisterMessageClient(this, CMessage::CTRL_GAININGKEYFOCUS);
+	Application().MessageServer()->RegisterMessageClient(this, CMessage::CTRL_LOSINGKEYFOCUS);
+	Application().MessageServer()->RegisterMessageClient(this, CMessage::TEXTINPUT);
 	Draw();
 }
 
@@ -152,7 +152,7 @@ void CTextBox::SetScrollBarVisibility(CScrollBar::EScrollBarType ScrollBarType, 
 }
 
 
-void CTextBox::Draw() const  // virtual
+void CTextBox::Draw() const
 {
 	CWindow::Draw();
 
@@ -163,7 +163,7 @@ void CTextBox::Draw() const  // virtual
 		CPoint FontCenterPoint = m_WindowRect.Center();
 
 		CRGBColor FontColor = m_bReadOnly ? DEFAULT_DISABLED_LINE_COLOR : DEFAULT_LINE_COLOR;
-		if (CApplication::Instance()->GetKeyFocus() == dynamic_cast<const CWindow*>(this) && !m_bReadOnly)
+		if (Application().GetKeyFocus() == dynamic_cast<const CWindow*>(this) && !m_bReadOnly)
 		{
 			// first normalize the selection
 			std::string::size_type SelStartNorm = 0;
@@ -242,7 +242,7 @@ void CTextBox::Draw() const  // virtual
 							vOffsets.at(CurLine).XPos() + m_ClientRect.Left() - m_pHorizontalScrollBar->GetValue() * 10);
 					}
 					SelRect.ClipTo(m_ClientRect);
-					Painter.DrawRect(SelRect, true, CApplication::Instance()->GetDefaultSelectionColor(), CApplication::Instance()->GetDefaultSelectionColor());
+					Painter.DrawRect(SelRect, true, Application().GetDefaultSelectionColor(), Application().GetDefaultSelectionColor());
 				}
 			}
 
@@ -304,13 +304,13 @@ bool CTextBox::OnMouseButtonDown(CPoint Point, unsigned int Button)  // virtual
 			else
 			{
 				// Raise double click event
-				CApplication::Instance()->MessageServer()->QueueMessage(new TIntMessage(CMessage::CTRL_DOUBLELCLICK, this, this, 0));
+				Application().MessageServer()->QueueMessage(new TIntMessage(CMessage::CTRL_DOUBLELCLICK, this, this, 0));
 				fSkipCursorPositioning = true;
 			}
 
-			if (CApplication::Instance()->GetKeyFocus() != this)
+			if (Application().GetKeyFocus() != this)
 			{
-				CApplication::Instance()->SetKeyFocus(this);
+				Application().SetKeyFocus(this);
 			}
 
 			if (!fSkipCursorPositioning)
@@ -414,13 +414,13 @@ bool CTextBox::HandleMessage(CMessage* pMessage)  // virtual
 				if (m_ClientRect.HitTest(WindowPoint) == CRect::RELPOS_INSIDE && !bHitFloating && !m_bLastMouseMoveInside)
 				{
 					m_bLastMouseMoveInside = true;
-					CwgCursorResourceHandle IBeamHandle(WGRES_IBEAM_CURSOR);
-					CApplication::Instance()->SetMouseCursor(&IBeamHandle);
+					CwgCursorResourceHandle IBeamHandle(Application(), WGRES_IBEAM_CURSOR);
+					Application().SetMouseCursor(&IBeamHandle);
 				}
 				else if ((m_ClientRect.HitTest(WindowPoint) != CRect::RELPOS_INSIDE || bHitFloating) && m_bLastMouseMoveInside)
 				{
 					m_bLastMouseMoveInside= false;
-					CApplication::Instance()->SetMouseCursor();
+					Application().SetMouseCursor();
 				}
 
 				if (m_bMouseDown)
@@ -528,7 +528,7 @@ bool CTextBox::HandleMessage(CMessage* pMessage)  // virtual
 					m_SelStart += pTextInputMessage->Text.length();
 					if (m_sWindowText != sBuffer)
 					{
-						CApplication::Instance()->MessageServer()->QueueMessage(new TStringMessage(CMessage::CTRL_VALUECHANGE, m_pParentWindow, this, sBuffer));
+						Application().MessageServer()->QueueMessage(new TStringMessage(CMessage::CTRL_VALUECHANGE, m_pParentWindow, this, sBuffer));
 						m_sWindowText = sBuffer;
 						PrepareWindowText(sBuffer);
 					}
@@ -795,7 +795,7 @@ bool CTextBox::HandleMessage(CMessage* pMessage)  // virtual
 
 					if (m_sWindowText != sBuffer)
 					{
-						CApplication::Instance()->MessageServer()->QueueMessage(new TStringMessage(CMessage::CTRL_VALUECHANGE, m_pParentWindow, this, sBuffer));
+						Application().MessageServer()->QueueMessage(new TStringMessage(CMessage::CTRL_VALUECHANGE, m_pParentWindow, this, sBuffer));
 						m_sWindowText = sBuffer;
 						PrepareWindowText(sBuffer);
 					}

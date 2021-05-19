@@ -27,12 +27,12 @@ CRadioButton::CRadioButton(const CPoint& p, int size, CWindow* pParent) :
 	CWindow(CRect(p, size, size), pParent),
 	m_eRadioButtonState(UNCHECKED),
 	m_MouseButton(0),
-    m_hBitmapRadioButton(CwgBitmapResourceHandle(WGRES_RADIOBUTTON_BITMAP))
+  m_hBitmapRadioButton(CwgBitmapResourceHandle(Application(), WGRES_RADIOBUTTON_BITMAP))
 {
 	m_BackgroundColor = DEFAULT_CHECKBOX_BACK_COLOR;
-	CApplication::Instance()->MessageServer()->RegisterMessageClient(this, CMessage::KEYBOARD_KEYDOWN);
-	CApplication::Instance()->MessageServer()->RegisterMessageClient(this, CMessage::MOUSE_BUTTONUP);
-	CApplication::Instance()->MessageServer()->RegisterMessageClient(this, CMessage::CTRL_SINGLELCLICK);
+	Application().MessageServer()->RegisterMessageClient(this, CMessage::KEYBOARD_KEYDOWN);
+	Application().MessageServer()->RegisterMessageClient(this, CMessage::MOUSE_BUTTONUP);
+	Application().MessageServer()->RegisterMessageClient(this, CMessage::CTRL_SINGLELCLICK);
 	Draw();
 }
 
@@ -66,7 +66,7 @@ void CRadioButton::Select()
         dynamic_cast<CRadioButton*>(child)->SetState(UNCHECKED);
       }
     }
-    CApplication::Instance()->MessageServer()->QueueMessage(new TIntMessage(CMessage::CTRL_VALUECHANGE, m_pParentWindow, this, 1));
+    Application().MessageServer()->QueueMessage(new TIntMessage(CMessage::CTRL_VALUECHANGE, m_pParentWindow, this, 1));
   }
 }
 
@@ -140,7 +140,7 @@ bool CRadioButton::OnMouseButtonUp(CPoint Point, unsigned int Button)
 			MessageType = CMessage::CTRL_SINGLEMCLICK;
 			break;
 		}
-		CApplication::Instance()->MessageServer()->QueueMessage(new TIntMessage(MessageType, this, this, 0));
+		Application().MessageServer()->QueueMessage(new TIntMessage(MessageType, this, this, 0));
 		bResult = true;
 	}
 
@@ -169,7 +169,7 @@ bool CRadioButton::HandleMessage(CMessage* pMessage)
             break;
           default:
             // Forward all key downs to parent
-            CApplication::Instance()->MessageServer()->QueueMessage(new CKeyboardMessage(CMessage::KEYBOARD_KEYDOWN, m_pParentWindow, this,
+            Application().MessageServer()->QueueMessage(new CKeyboardMessage(CMessage::KEYBOARD_KEYDOWN, m_pParentWindow, this,
                   pKeyboardMessage->ScanCode, pKeyboardMessage->Modifiers, pKeyboardMessage->Key));
             break;
         }

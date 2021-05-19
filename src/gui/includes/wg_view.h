@@ -50,7 +50,7 @@ class CView : public CWindow
 {
 public:
 	// judb; surface is an existing SDL surface, WindowRect is the area in which we want to draw the gui:
-	CView(SDL_Surface* surface, SDL_Surface* backSurface, const CRect& WindowRect);
+	CView(CApplication& application, SDL_Surface* surface, SDL_Surface* backSurface, const CRect& WindowRect);
 
 	//! Standard Destructor
 	~CView() override;
@@ -100,8 +100,6 @@ protected:
 	                              // so we can draw the gui on top of it.
 
 private:
-	//! A pointer to the one allowed view, this is due to the SDL limitation of having only one window
-	static CView* m_pInstance;
   CView(const CView&) = delete;
 	CView& operator=(const CView&) = delete;
 };

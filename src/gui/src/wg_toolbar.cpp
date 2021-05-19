@@ -34,7 +34,7 @@ CToolBar::CToolBar(const CRect& WindowRect, CWindow* pParent) :
 	CWindow(WindowRect, pParent)
 {
 	m_BackgroundColor = COLOR_LIGHTGRAY;
-	CApplication::Instance()->MessageServer()->RegisterMessageClient(this, CMessage::CTRL_SINGLELCLICK);
+	Application().MessageServer()->RegisterMessageClient(this, CMessage::CTRL_SINGLELCLICK);
 	Draw();
 }
 
@@ -151,7 +151,7 @@ bool CToolBar::HandleMessage(CMessage* pMessage)
 						iButtonID = button.second;
 					}
 				}
-				CApplication::Instance()->MessageServer()->QueueMessage(new TIntMessage(CMessage::CTRL_SINGLELCLICK, m_pParentWindow, this, iButtonID));
+				Application().MessageServer()->QueueMessage(new TIntMessage(CMessage::CTRL_SINGLELCLICK, m_pParentWindow, this, iButtonID));
 				bHandled = true;
 			}
 			break;

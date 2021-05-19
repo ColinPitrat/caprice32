@@ -4,9 +4,9 @@
 
 using namespace wGui;
 
-CapriceDevToolsView::CapriceDevToolsView(SDL_Surface* surface, SDL_Renderer* renderer, SDL_Texture* texture, const CRect& WindowRect, DevTools* devtools) : CView(surface, nullptr, WindowRect), m_pRenderer(renderer), m_pTexture(texture)
+CapriceDevToolsView::CapriceDevToolsView(CApplication& application, SDL_Surface* surface, SDL_Renderer* renderer, SDL_Texture* texture, const CRect& WindowRect, DevTools* devtools) : CView(application, surface, nullptr, WindowRect), m_pRenderer(renderer), m_pTexture(texture)
 {
-  CApplication::Instance()->MessageServer()->RegisterMessageClient(this, CMessage::CTRL_MESSAGEBOXRETURN);
+  Application().MessageServer()->RegisterMessageClient(this, CMessage::CTRL_MESSAGEBOXRETURN);
   m_pDevToolsFrame = new CapriceDevTools(CRect(CPoint(0, 0), DEVTOOLS_WIDTH, DEVTOOLS_HEIGHT), this, nullptr, devtools);
 }
 

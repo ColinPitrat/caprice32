@@ -35,7 +35,8 @@ Uint32 TimerCallback(Uint32 Interval, void* param)
 }
 
 
-CTimer::CTimer(CMessageClient* pOwner) :
+CTimer::CTimer(CApplication& application, CMessageClient* pOwner) :
+  CMessageClient(application),
 	m_TimerID(0),
 	m_bAutoRestart(false),
 	m_iCounter(0),
@@ -73,7 +74,7 @@ void CTimer::StopTimer()
 Uint32 CTimer::TimerHit(Uint32 Interval)
 {
 	m_iCounter++;
-	CApplication::Instance()->MessageServer()->QueueMessage(new TIntMessage(CMessage::CTRL_TIMER, m_pOwner, this, m_iCounter));
+	Application().MessageServer()->QueueMessage(new TIntMessage(CMessage::CTRL_TIMER, m_pOwner, this, m_iCounter));
 	if (!m_bAutoRestart)
 	{
 		StopTimer();

@@ -28,8 +28,8 @@ CapriceDevTools::CapriceDevTools(const CRect& WindowRect, CWindow* pParent, CFon
     SetTitleBarHeight(0);
     SetModal(true);
     // Make this window listen to incoming CTRL_VALUECHANGE messages (used for updating scrollbar values)
-    CApplication::Instance()->MessageServer()->RegisterMessageClient(this, CMessage::CTRL_VALUECHANGE);
-    CApplication::Instance()->MessageServer()->RegisterMessageClient(this, CMessage::CTRL_VALUECHANGING);
+    Application().MessageServer()->RegisterMessageClient(this, CMessage::CTRL_VALUECHANGE);
+    Application().MessageServer()->RegisterMessageClient(this, CMessage::CTRL_VALUECHANGING);
 
     // Navigation bar
     m_pNavigationBar = new CNavigationBar(this, CPoint(10, 5), 6, 50, 50);
@@ -65,7 +65,7 @@ CapriceDevTools::CapriceDevTools(const CRect& WindowRect, CWindow* pParent, CFon
     m_pButtonClose   = new CButton(CRect(CPoint(m_ClientRect.Width() - 70, 35), 50, 15), this, "Close");
     m_pButtonClose->SetIsFocusable(true);
 
-    auto monoFontEngine = CApplication::Instance()->GetFontEngine(CPC.resources_path + "/vera_mono.ttf", 10);
+    auto monoFontEngine = Application().GetFontEngine(CPC.resources_path + "/vera_mono.ttf", 10);
     // ---------------- 'z80' screen ----------------
     m_pZ80RegA = new CRegister(CRect(CPoint(10, 10), 110, 20), m_pGroupBoxTabZ80, "A");
     m_pZ80RegAp = new CRegister(CRect(CPoint(150, 10), 110, 20), m_pGroupBoxTabZ80, "A'");
@@ -682,7 +682,7 @@ void CapriceDevTools::EnableTab(std::string sTabName) {
 
 void CapriceDevTools::CloseFrame() {
   // Exit gui
-  CApplication::Instance()->MessageServer()->QueueMessage(new CMessage(CMessage::APP_EXIT, GetAncestor(ROOT), this));
+  Application().MessageServer()->QueueMessage(new CMessage(CMessage::APP_EXIT, GetAncestor(ROOT), this));
   m_pDevTools->Deactivate();
 }
 

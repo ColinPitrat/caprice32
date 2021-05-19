@@ -1534,7 +1534,7 @@ int video_init ()
    CPC.scr_base = static_cast<byte *>(back_surface->pixels); // memory address of back buffer
    CPC.scr_gui_is_currently_on = false;
 
-   SDL_ShowCursor(SDL_DISABLE); // hide the mouse cursor
+   ShowCursor(false); // hide the mouse cursor
 
    crtc_init();
 
@@ -1869,11 +1869,32 @@ bool saveConfiguration (t_CPC &CPC, const std::string& configFilename)
 
 
 
+// As long as a GUI is enabled, we must show the cursor.
+// Because we can activate multiple GUIs at a time, we need to keep track of how
+// many times we've been asked to show or hide cursor.
+void ShowCursor(bool show)
+{
+  static int shows_count = 1;
+  if (show) {
+    shows_count++;
+  } else {
+    shows_count--;
+  }
+  if (shows_count < 0) shows_count = 0;
+  if (shows_count > 0) {
+    SDL_ShowCursor(SDL_ENABLE);
+  } else {
+    SDL_ShowCursor(SDL_DISABLE);
+  }
+}
+
+
+
 SDL_Surface* prepareShowUI()
 {
    audio_pause();
    CPC.scr_gui_is_currently_on = true;
-   SDL_ShowCursor(SDL_ENABLE);
+   ShowCursor(true);
    // guiBackSurface will allow the GUI to capture the current frame
    SDL_Surface* guiBackSurface(SDL_CreateRGBSurface(0, back_surface->w, back_surface->h, 32, 0x000000FF, 0x0000FF00, 0x00FF0000, 0x00000000));
    SDL_BlitSurface(back_surface, nullptr, guiBackSurface, nullptr);
@@ -1885,7 +1906,7 @@ void cleanupShowUI(SDL_Surface* guiBackSurface)
    SDL_FreeSurface(guiBackSurface);
    // Clear SDL surface:
    SDL_FillRect(back_surface, nullptr, SDL_MapRGB(back_surface->format, 0, 0, 0));
-   SDL_ShowCursor(SDL_DISABLE);
+   ShowCursor(false);
    CPC.scr_gui_is_currently_on = false;
    audio_resume();
 }
@@ -1898,8 +1919,7 @@ bool userConfirmsQuitWithoutSaving()
    try {
       CapriceGui capriceGui;
       capriceGui.Init();
-      CapriceLeavingWithoutSavingView capriceLeavingWarning(back_surface, guiBackSurface, CRect(0, 0, back_surface->w, back_surface->h));
-      capriceGui.SetMouseVisibility(true);
+      CapriceLeavingWithoutSavingView capriceLeavingWarning(capriceGui, back_surface, guiBackSurface, CRect(0, 0, back_surface->w, back_surface->h));
       capriceGui.Exec();
       confirmed = capriceLeavingWarning.Confirmed();
    } catch(wGui::Wg_Ex_App& e) {
@@ -1917,8 +1937,7 @@ void showVKeyboard()
    try {
       CapriceGui capriceGui;
       capriceGui.Init();
-      CapriceVKeyboardView capriceVKeyboardView(back_surface, guiBackSurface, CRect(0, 0, back_surface->w, back_surface->h));
-      capriceGui.SetMouseVisibility(true);
+      CapriceVKeyboardView capriceVKeyboardView(capriceGui, back_surface, guiBackSurface, CRect(0, 0, back_surface->w, back_surface->h));
       capriceGui.Exec();
       auto newEvents = capriceVKeyboardView.GetEvents();
       virtualKeyboardEvents.splice(virtualKeyboardEvents.end(), newEvents);
@@ -1936,8 +1955,7 @@ void showGui()
    try {
       CapriceGui capriceGui;
       capriceGui.Init();
-      CapriceGuiView capriceGuiView(back_surface, guiBackSurface, CRect(0, 0, back_surface->w, back_surface->h));
-      capriceGui.SetMouseVisibility(true);
+      CapriceGuiView capriceGuiView(capriceGui, back_surface, guiBackSurface, CRect(0, 0, back_surface->w, back_surface->h));
       capriceGui.Exec();
       /* TODO: Something like that to replace Exec and allow Menu to be
        * displayed at the same time as DevTools

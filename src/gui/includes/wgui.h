@@ -29,7 +29,6 @@
 
 #include "std_ex.h"
 #include "wutil_debug.h"
-#include "wutil_log.h"
 #include "wg_error.h"
 #include "wg_message.h"
 #include "wg_message_client.h"

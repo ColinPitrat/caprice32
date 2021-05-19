@@ -40,26 +40,17 @@ extern video_plugin* vid_plugin;
 namespace wGui
 {
 
-CView* CView::m_pInstance = nullptr;
-
-
-CView::CView(SDL_Surface* surface, SDL_Surface* backSurface, const CRect& WindowRect) :
-	CWindow(CRect(0, 0, surface->w, surface->h), nullptr),
+CView::CView(CApplication& application, SDL_Surface* surface, SDL_Surface* backSurface, const CRect& WindowRect) :
+	CWindow(application, CRect(0, 0, surface->w, surface->h)),
 	m_pMenu(nullptr),
 	m_pFloatingWindow(nullptr),
 	m_pScreenSurface(nullptr)
 {
-	if (m_pInstance)
-	{
-		throw(Wg_Ex_App("Cannot have more than one view at a time!", "CView::CView"));
-	}
-	m_pInstance = this;
-
-	CApplication::Instance()->MessageServer()->RegisterMessageClient(this, CMessage::APP_PAINT);
-	CApplication::Instance()->MessageServer()->RegisterMessageClient(this, CMessage::APP_DESTROY_FRAME, CMessageServer::PRIORITY_FIRST);
-	CApplication::Instance()->MessageServer()->RegisterMessageClient(this, CMessage::CTRL_RESIZE);
-	CApplication::Instance()->MessageServer()->RegisterMessageClient(this, CMessage::MOUSE_BUTTONDOWN, CMessageServer::PRIORITY_FIRST);
-	CApplication::Instance()->MessageServer()->RegisterMessageClient(this, CMessage::MOUSE_BUTTONUP, CMessageServer::PRIORITY_FIRST);
+	Application().MessageServer()->RegisterMessageClient(this, CMessage::APP_PAINT);
+	Application().MessageServer()->RegisterMessageClient(this, CMessage::APP_DESTROY_FRAME, CMessageServer::PRIORITY_FIRST);
+	Application().MessageServer()->RegisterMessageClient(this, CMessage::CTRL_RESIZE);
+	Application().MessageServer()->RegisterMessageClient(this, CMessage::MOUSE_BUTTONDOWN, CMessageServer::PRIORITY_FIRST);
+	Application().MessageServer()->RegisterMessageClient(this, CMessage::MOUSE_BUTTONUP, CMessageServer::PRIORITY_FIRST);
 
 	// judb this works, but better rewrite this to make things clearer !
 	CWindow::SetWindowRect(WindowRect);
@@ -75,7 +66,6 @@ CView::CView(SDL_Surface* surface, SDL_Surface* backSurface, const CRect& Window
 	if (m_pScreenSurface == nullptr)
 		throw( Wg_Ex_SDL(std::string("Surface not created? : ") + SDL_GetError(), "CView::CView"));
 
-	CApplication::Instance()->GetApplicationLog().AddLogEntry("Created new CView ", APP_LOG_INFO);
 	Draw();
 }
 
@@ -83,10 +73,6 @@ CView::CView(SDL_Surface* surface, SDL_Surface* backSurface, const CRect& Window
 CView::~CView()
 {
 	delete m_pMenu;
-	if (m_pInstance == this)
-	{
-		m_pInstance = nullptr;
-	}
 }
 
 
@@ -132,7 +118,7 @@ bool CView::HandleMessage(CMessage* pMessage)
 		case CMessage::APP_PAINT :
 			if (pMessage->Destination() == this || pMessage->Destination() == nullptr)
 			{
-				SDL_Surface* pFloatingSurface = SDL_CreateRGBSurface(0, m_pScreenSurface->w, m_pScreenSurface->h, CApplication::Instance()->GetBitsPerPixel(), 0x000000FF, 0x0000FF00, 0x00FF0000, 0xFF000000);
+				SDL_Surface* pFloatingSurface = SDL_CreateRGBSurface(0, m_pScreenSurface->w, m_pScreenSurface->h, Application().GetBitsPerPixel(), 0x000000FF, 0x0000FF00, 0x00FF0000, 0xFF000000);
 				PaintToSurface(*m_pScreenSurface, *pFloatingSurface, CPoint(0, 0));
 				// judb use entire application SDL surface (otherwise strange clipping effects occur
 				// when moving frames, also clipping of listboxes.)
@@ -156,7 +142,7 @@ bool CView::HandleMessage(CMessage* pMessage)
 				{
 					pFrame->SetModal(false);
           pFrame->SetNewParent(nullptr);
-					CApplication::Instance()->MessageServer()->QueueMessage(new CMessage(CMessage::APP_PAINT, nullptr, this));
+					Application().MessageServer()->QueueMessage(new CMessage(CMessage::APP_PAINT, nullptr, this));
 					delete pFrame;
 				}
 				bHandled = true;
@@ -165,7 +151,7 @@ bool CView::HandleMessage(CMessage* pMessage)
 		case CMessage::CTRL_RESIZE:
 		{
 			TPointMessage* pResizeMessage = dynamic_cast<TPointMessage*>(pMessage);
-			if (pResizeMessage && pResizeMessage->Source() == CApplication::Instance())
+			if (pResizeMessage && pResizeMessage->Source() == &Application())
 			{
         LOG_ERROR("CView::HandleMessage called received a CTRL_RESIZE message - not migrated to SDL2");
         /*

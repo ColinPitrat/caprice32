@@ -40,11 +40,11 @@ CLabel::CLabel(const CRect& WindowRect, CWindow* pParent, std::string sText, CRG
 	}
 	else
 	{
-		m_pFontEngine = CApplication::Instance()->GetDefaultFontEngine();
+		m_pFontEngine = Application().GetDefaultFontEngine();
 	}
 	m_pRenderedString.reset(new CRenderedString(
 		m_pFontEngine, sText, CRenderedString::VALIGN_CENTER, CRenderedString::HALIGN_LEFT));
-	m_BackgroundColor = CApplication::Instance()->GetDefaultBackgroundColor();
+	m_BackgroundColor = Application().GetDefaultBackgroundColor();
 	Draw();
 }
 
@@ -61,10 +61,10 @@ CLabel::CLabel(const CPoint& point, CWindow* pParent, std::string sText, CRGBCol
 	}
 	else
 	{
-		m_pFontEngine = CApplication::Instance()->GetDefaultFontEngine();
+		m_pFontEngine = Application().GetDefaultFontEngine();
 	}
 	m_pRenderedString.reset(new CRenderedString(m_pFontEngine, sText, CRenderedString::VALIGN_TOP, CRenderedString::HALIGN_LEFT));
-	m_BackgroundColor = CApplication::Instance()->GetDefaultBackgroundColor();
+	m_BackgroundColor = Application().GetDefaultBackgroundColor();
   // set width and height of the label's rectangle:
   CWindow::SetWindowRect(CRect(point, m_pRenderedString->GetWidth(sText), m_pRenderedString->GetMaxFontHeight()));
 	Draw();

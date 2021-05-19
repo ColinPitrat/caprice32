@@ -31,11 +31,13 @@
 #include "wg_view.h"
 #include <algorithm>
 #include <string>
+#include "log.h"
 
 namespace wGui
 {
 
 CWindow::CWindow(const CRect& WindowRect, CWindow* pParent) :
+	CMessageClient(pParent->Application()),
 	m_WindowRect(WindowRect),
 	m_BackgroundColor(DEFAULT_BACKGROUND_COLOR),
 	m_ClientRect(WindowRect.SizeRect()),
@@ -45,30 +47,37 @@ CWindow::CWindow(const CRect& WindowRect, CWindow* pParent) :
   m_bHasFocus(false),
   m_bIsFocusable(false)
 {
-	if (!CApplication::Instance())
-	{
-		throw(Wg_Ex_App("No Application instance!", "CWindow::CWindow"));
-	}
-
 	SetWindowRect(WindowRect);
-	m_BackgroundColor = CApplication::Instance()->GetDefaultBackgroundColor();
+	m_BackgroundColor = Application().GetDefaultBackgroundColor();
 	SetNewParent(pParent);
+}
+
+CWindow::CWindow(CApplication& application, const CRect& WindowRect) :
+	CMessageClient(application),
+	m_WindowRect(WindowRect),
+	m_BackgroundColor(DEFAULT_BACKGROUND_COLOR),
+	m_ClientRect(WindowRect.SizeRect()),
+	m_pParentWindow(nullptr),
+	m_pSDLSurface(nullptr),
+	m_bVisible(true),
+  m_bHasFocus(false),
+  m_bIsFocusable(false)
+{
+	SetWindowRect(WindowRect);
+	m_BackgroundColor = Application().GetDefaultBackgroundColor();
 }
 
 // judb constructor like above, but without specifying a CRect ;
 // In this case you need to call SetWindowRect() before using the CWindow!
 CWindow::CWindow(CWindow* pParent) :
+	CMessageClient(pParent->Application()),
 	m_BackgroundColor(DEFAULT_BACKGROUND_COLOR),
 	m_pParentWindow(nullptr),
 	m_pSDLSurface(nullptr),
 	m_bVisible(true),
   m_bHasFocus(false)
 {
-	if (!CApplication::Instance())
-	{
-		throw(Wg_Ex_App("No Application instance!", "CWindow::CWindow"));
-	}
-	m_BackgroundColor = CApplication::Instance()->GetDefaultBackgroundColor();
+	m_BackgroundColor = Application().GetDefaultBackgroundColor();
 	SetNewParent(pParent);
 }
 
@@ -76,7 +85,7 @@ CWindow::CWindow(CWindow* pParent) :
 CWindow::~CWindow()
 {
 	// Each child window is deleted, and should in their destructors call back to this object to Deregister themselves
-	CApplication::Instance()->MessageServer()->DeregisterMessageClient(this);
+	Application().MessageServer()->DeregisterMessageClient(this);
 
 	if (m_pSDLSurface)
 		SDL_FreeSurface(m_pSDLSurface);
@@ -97,10 +106,10 @@ void CWindow::SetWindowRect(const CRect& WindowRect)
 	if (m_pSDLSurface)
 		SDL_FreeSurface(m_pSDLSurface);
 	m_pSDLSurface = SDL_CreateRGBSurface(0, m_WindowRect.Width(), m_WindowRect.Height(),
-		CApplication::Instance()->GetBitsPerPixel(), 0x000000FF, 0x0000FF00, 0x00FF0000, /*0xFF000000*/ 0);
+		Application().GetBitsPerPixel(), 0x000000FF, 0x0000FF00, 0x00FF0000, /*0xFF000000*/ 0);
 	if (!m_pSDLSurface)
 	{
-		CApplication::Instance()->GetApplicationLog().AddLogEntry(std::string("SDL Unable To Create Surface: ") + SDL_GetError(), APP_LOG_ERROR);
+    LOG_ERROR("CWindow::SetWindowRect: Unable to Create SDL Surface: " << SDL_GetError());
 	}
 	m_ClientRect = CRect(stdex::safe_static_cast<int>(m_ClientRect.Left() * dHorizontalScale), stdex::safe_static_cast<int>(m_ClientRect.Top() * dVerticalScale),
 		stdex::safe_static_cast<int>(m_ClientRect.Right() * dHorizontalScale), stdex::safe_static_cast<int>(m_ClientRect.Bottom() * dVerticalScale));
@@ -111,7 +120,7 @@ void CWindow::SetWindowRect(const CRect& WindowRect)
 void CWindow::MoveWindow(const CPoint& MoveDistance)
 {
 	m_WindowRect = m_WindowRect + MoveDistance;
-	CApplication::Instance()->MessageServer()->QueueMessage(new CMessage(CMessage::APP_PAINT, nullptr, this));
+	Application().MessageServer()->QueueMessage(new CMessage(CMessage::APP_PAINT, nullptr, this));
 }
 
 
@@ -176,12 +185,12 @@ void CWindow::SetVisible(bool bVisible)
 		for (std::list<CWindow*>::const_iterator iter = m_ChildWindows.begin(); iter != m_ChildWindows.end(); ++iter)
 		{
 			(*iter)->SetVisible(bVisible);
-			if (!bVisible && (*iter) == CApplication::Instance()->GetKeyFocus())
+			if (!bVisible && (*iter) == Application().GetKeyFocus())
 			{
-				CApplication::Instance()->SetKeyFocus(m_pParentWindow);
+				Application().SetKeyFocus(m_pParentWindow);
 			}
 		}
-		CApplication::Instance()->MessageServer()->QueueMessage(new CMessage(CMessage::APP_PAINT, nullptr, this));
+		Application().MessageServer()->QueueMessage(new CMessage(CMessage::APP_PAINT, nullptr, this));
 	}
 }
 
@@ -189,9 +198,9 @@ void CWindow::SetVisible(bool bVisible)
 void CWindow::SetHasFocus(bool bHasFocus)
 {
   if (bHasFocus) {
-    CApplication::Instance()->SetKeyFocus(this);
+    Application().SetKeyFocus(this);
   } else {
-    CApplication::Instance()->SetKeyFocus(m_pParentWindow);
+    Application().SetKeyFocus(m_pParentWindow);
   }
   m_bHasFocus = bHasFocus;
   Draw();
@@ -297,7 +306,7 @@ void CWindow::Draw() const
 
 		CPainter Painter(m_pSDLSurface, CPainter::PAINT_REPLACE);
 		Painter.DrawRect(m_WindowRect.SizeRect(), true, m_BackgroundColor, m_BackgroundColor);
-		CApplication::Instance()->MessageServer()->QueueMessage(new CMessage(CMessage::APP_PAINT, nullptr, this));
+		Application().MessageServer()->QueueMessage(new CMessage(CMessage::APP_PAINT, nullptr, this));
 	}
 }
 
@@ -380,8 +389,7 @@ void CWindow::RegisterChildWindow(CWindow* pWindow)
 	if (!pWindow)
 	{
 		// anything that gets registered should be a valid CWindow
-		CApplication::Instance()->GetApplicationLog().AddLogEntry(
-			"CWindow::RegisterChildWindow : Attempting to register a non-existent child window.", APP_LOG_ERROR);
+    LOG_ERROR("CWindow::RegisterChildWindow: Attempting to register a non-existent child window.");
 	}
 	else
 	{

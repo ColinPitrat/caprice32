@@ -15,7 +15,7 @@ CRegister::CRegister(const CRect& WindowRect, CWindow* pParent, std::string name
 	}
 	else
 	{
-		m_pFontEngine = CApplication::Instance()->GetDefaultFontEngine();
+		m_pFontEngine = Application().GetDefaultFontEngine();
 	}
   m_pLabel = new CLabel(CPoint(0, 7), this, name);
   m_pHexValue = new CEditBox(CRect(CPoint(20, 0), 30, 20), this);

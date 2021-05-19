@@ -30,7 +30,6 @@
 #include <exception>
 #include <string>
 
-
 namespace wGui
 {
 

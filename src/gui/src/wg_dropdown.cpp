@@ -53,11 +53,11 @@ CDropDown::CDropDown(const CRect& WindowRect, CWindow* pParent, bool bAllowEdit,
 
   m_pDropButton = new CPictureButton(
       CRect(m_WindowRect.Width() - m_WindowRect.Height() + 1, 0, m_WindowRect.Width(), m_WindowRect.Height()),
-      this, CwgBitmapResourceHandle(WGRES_DOWN_ARROW_BITMAP));
-  CApplication::Instance()->MessageServer()->RegisterMessageClient(this, CMessage::KEYBOARD_KEYDOWN);
-  CApplication::Instance()->MessageServer()->RegisterMessageClient(this, CMessage::MOUSE_BUTTONDOWN);
-  CApplication::Instance()->MessageServer()->RegisterMessageClient(this, CMessage::CTRL_SINGLELCLICK);
-  CApplication::Instance()->MessageServer()->RegisterMessageClient(this, CMessage::CTRL_VALUECHANGE);
+      this, CwgBitmapResourceHandle(Application(), WGRES_DOWN_ARROW_BITMAP));
+  Application().MessageServer()->RegisterMessageClient(this, CMessage::KEYBOARD_KEYDOWN);
+  Application().MessageServer()->RegisterMessageClient(this, CMessage::MOUSE_BUTTONDOWN);
+  Application().MessageServer()->RegisterMessageClient(this, CMessage::CTRL_SINGLELCLICK);
+  Application().MessageServer()->RegisterMessageClient(this, CMessage::CTRL_VALUECHANGE);
   Draw();
 }
 
@@ -154,7 +154,7 @@ bool CDropDown::HandleMessage(CMessage* pMessage)
 #endif
               default:
                 // Forward all key downs to parent
-                CApplication::Instance()->MessageServer()->QueueMessage(
+                Application().MessageServer()->QueueMessage(
                     new CKeyboardMessage(CMessage::KEYBOARD_KEYDOWN, m_pParentWindow, this,
                                          pKeyboardMessage->ScanCode, pKeyboardMessage->Modifiers,
                                          pKeyboardMessage->Key));
@@ -206,14 +206,14 @@ bool CDropDown::HandleMessage(CMessage* pMessage)
               const SListItem& ListItem = m_pListBox->GetItem(pCtrlMessage->Value());
               SetWindowText(ListItem.sItemText);
               HideListBox();
-              CApplication::Instance()->MessageServer()->QueueMessage(new TIntMessage(CMessage::CTRL_VALUECHANGE, m_pParentWindow, this, 0));
+              Application().MessageServer()->QueueMessage(new TIntMessage(CMessage::CTRL_VALUECHANGE, m_pParentWindow, this, 0));
               bHandled = true;
             }
             else if (pCtrlMessage->Source() == m_pEditBox)
             {
               m_pListBox->SetAllSelections(false);
               HideListBox();
-              CApplication::Instance()->MessageServer()->QueueMessage(new TIntMessage(CMessage::CTRL_VALUECHANGE, m_pParentWindow, this, 0));
+              Application().MessageServer()->QueueMessage(new TIntMessage(CMessage::CTRL_VALUECHANGE, m_pParentWindow, this, 0));
               bHandled = true;
             }
           }
@@ -243,7 +243,7 @@ void CDropDown::SelectItem(unsigned int iItemIndex) {
     }
     m_pListBox->SetSelection(iItemIndex, true, false);
     SetWindowText(m_pListBox->GetItem(iItemIndex).sItemText);
-    CApplication::Instance()->MessageServer()->QueueMessage(new TIntMessage(CMessage::CTRL_VALUECHANGE, this, this, 0));
+    Application().MessageServer()->QueueMessage(new TIntMessage(CMessage::CTRL_VALUECHANGE, this, this, 0));
     Draw();
 }
 

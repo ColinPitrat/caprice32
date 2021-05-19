@@ -39,12 +39,12 @@ CToolTip::CToolTip(CWindow* pToolWindow, std::string sText, CRGBColor& FontColor
 	}
 	else
 	{
-		m_pFontEngine = CApplication::Instance()->GetDefaultFontEngine();
+		m_pFontEngine = Application().GetDefaultFontEngine();
 	}
 	m_pRenderedString.reset(new CRenderedString(
 		m_pFontEngine, sText, CRenderedString::VALIGN_TOP, CRenderedString::HALIGN_LEFT));
 
-	m_pTimer = new CTimer(this);
+	m_pTimer = new CTimer(pToolWindow->Application(), this);
 
 	//Now resize the window so that it fits the Tooltip text
 	CPoint Dims;
@@ -52,8 +52,8 @@ CToolTip::CToolTip(CWindow* pToolWindow, std::string sText, CRGBColor& FontColor
 	m_BoundingRect = CRect(CPoint(0, 0), Dims + CPoint(4, 4));
 
 	m_BackgroundColor = BackgroundColor;
-	CApplication::Instance()->MessageServer()->RegisterMessageClient(this, CMessage::MOUSE_MOVE);
-	CApplication::Instance()->MessageServer()->RegisterMessageClient(this, CMessage::CTRL_TIMER);
+	Application().MessageServer()->RegisterMessageClient(this, CMessage::MOUSE_MOVE);
+	Application().MessageServer()->RegisterMessageClient(this, CMessage::CTRL_TIMER);
 }
 
 
@@ -74,7 +74,7 @@ void CToolTip::ShowTip(const CPoint& DrawPoint)
 void CToolTip::HideTip()
 {
 	SetVisible(false);
-	CApplication::Instance()->MessageServer()->QueueMessage(new CMessage(CMessage::APP_PAINT, nullptr, this));
+	Application().MessageServer()->QueueMessage(new CMessage(CMessage::APP_PAINT, nullptr, this));
 }
 
 

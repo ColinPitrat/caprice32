@@ -17,11 +17,11 @@ CapriceMemoryTool::CapriceMemoryTool(const CRect& WindowRect, CWindow* pParent, 
 	CFrame(WindowRect, pParent, pFontEngine, "Memory Tool", false)
 {
     SetModal(true);
-    m_pMonoFontEngine = CApplication::Instance()->GetFontEngine(CPC.resources_path + "/vera_mono.ttf", 8);
+    m_pMonoFontEngine = Application().GetFontEngine(CPC.resources_path + "/vera_mono.ttf", 8);
 
     // Make this window listen to incoming CTRL_VALUECHANGING messages for dropdown list update
-    CApplication::Instance()->MessageServer()->RegisterMessageClient(this, CMessage::CTRL_VALUECHANGE);
-    CApplication::Instance()->MessageServer()->RegisterMessageClient(this, CMessage::CTRL_VALUECHANGING);
+    Application().MessageServer()->RegisterMessageClient(this, CMessage::CTRL_VALUECHANGE);
+    Application().MessageServer()->RegisterMessageClient(this, CMessage::CTRL_VALUECHANGING);
 
     m_pPokeAdressLabel = new CLabel(        CPoint(15, 18),             this, "Adress: ");
     m_pPokeAdress      = new CEditBox(CRect(CPoint(55, 13),  30, 20),   this);

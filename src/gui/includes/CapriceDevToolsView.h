@@ -18,7 +18,7 @@ class CapriceDevToolsView : public wGui::CView
     SDL_Texture *m_pTexture;
 
   public:
-    CapriceDevToolsView(SDL_Surface* surface, SDL_Renderer* renderer, SDL_Texture* texture, const wGui::CRect& WindowRect, DevTools* devtools);
+    CapriceDevToolsView(wGui::CApplication& application, SDL_Surface* surface, SDL_Renderer* renderer, SDL_Texture* texture, const wGui::CRect& WindowRect, DevTools* devtools);
     ~CapriceDevToolsView() final = default;
 
     void PaintToSurface(SDL_Surface& ScreenSurface, SDL_Surface& FloatingSurface, const wGui::CPoint& Offset) const override;
