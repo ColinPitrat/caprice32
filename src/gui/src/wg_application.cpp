@@ -47,7 +47,7 @@ bool CApplication::HandleSDLEvent(SDL_Event event)
   switch (event.type) {
     case SDL_KEYDOWN:
     case SDL_KEYUP:
-      if (event.key.windowID == windowId) forMe = true; 
+      if (event.key.windowID == windowId) forMe = true;
       break;
     case SDL_MOUSEBUTTONDOWN:
     case SDL_MOUSEBUTTONUP:
@@ -276,6 +276,16 @@ CApplication::~CApplication()
 		delete fontEngine.second;
 		fontEngine.second = nullptr;
 	}
+}
+
+
+void CApplication::RegisterView(CView* pView)
+{
+  if (m_pMainView != nullptr)
+  {
+    throw(Wg_Ex_App("This application already has a view registered.", "CApplication::RegisterView"));
+  }
+  m_pMainView = pView;
 }
 
 

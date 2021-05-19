@@ -63,7 +63,7 @@ public:
 
   //! Register the view for this application
 	//! \param The view to register
-  virtual void RegisterView(CView* pView) { m_pMainView = pView; }
+  virtual void RegisterView(CView* pView);
 
 	//! Gets the default font file name
 	//! \return The default font
