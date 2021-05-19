@@ -87,7 +87,7 @@ SDL_AudioDeviceID audio_device_id = 0;
 SDL_Surface *back_surface = nullptr;
 video_plugin* vid_plugin;
 SDL_Joystick* joysticks[MAX_NB_JOYSTICKS];
-DevTools devtools;
+std::list<DevTools> devtools;
 
 dword dwTicks, dwTicksOffset, dwTicksTarget, dwTicksTargetFPS;
 dword dwFPS, dwFrameCount;
@@ -1986,19 +1986,16 @@ void showGui()
 
 void toggleDevTools()
 {
-  if (!devtools.IsActive()) {
-    Uint32 flags = SDL_GetWindowFlags(mainSDLWindow);
-    // DevTools don't behave very well in fullscreen mode, so just disallow it
-    if ((flags & SDL_WINDOW_FULLSCREEN) ||
-        (flags & SDL_WINDOW_FULLSCREEN_DESKTOP)) {
-      set_osd_message("Dev tools not available in fullscreen");
-      return;
-    }
-    if (!devtools.Activate()) {
-      LOG_ERROR("Failed to activate developers tools");
-    }
-  } else {
-    devtools.Deactivate();
+  Uint32 flags = SDL_GetWindowFlags(mainSDLWindow);
+  // DevTools don't behave very well in fullscreen mode, so just disallow it
+  if ((flags & SDL_WINDOW_FULLSCREEN) ||
+      (flags & SDL_WINDOW_FULLSCREEN_DESKTOP)) {
+    set_osd_message("Dev tools not available in fullscreen");
+    return;
+  }
+  devtools.emplace_back();
+  if (!devtools.back().Activate()) {
+    LOG_ERROR("Failed to activate developers tools");
   }
 }
 
@@ -2068,8 +2065,8 @@ void cleanExit(int returnCode, bool askIfUnsaved)
    if (askIfUnsaved && driveAltered() && !userConfirmsQuitWithoutSaving()) {
      return;
    }
-   if (devtools.IsActive()) {
-     devtools.Deactivate();
+   for (auto& devtool : devtools) {
+     devtool.Deactivate();
    }
    doCleanUp();
    exit(returnCode);
@@ -2698,13 +2695,19 @@ int cap32_main (int argc, char **argv)
          virtualKeyboardEvents.pop_front();
       }
       
-      if (devtools.IsActive()) {
-        devtools.Update();
+      devtools.remove_if([](DevTools& d) { return !d.IsActive(); });
+      for (auto& devtool : devtools) {
+        devtool.Update();
       }
       while (SDL_PollEvent(&event)) {
-         if (devtools.IsActive()) {
-            if (devtools.PassEvent(event)) continue;
+         bool processed = false;
+         for (auto& devtool : devtools) {
+           if (devtool.PassEvent(event)) {
+             processed = true;
+             break;
+           }
          }
+         if (processed) continue;
          switch (event.type) {
             case SDL_KEYDOWN:
                {

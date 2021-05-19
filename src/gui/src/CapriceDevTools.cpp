@@ -310,7 +310,13 @@ void CapriceDevTools::UpdateZ80()
   m_pZ80FlagC->SetWindowText((z80.AF.b.l & Cflag) ? "1" : "0");
 
   m_pZ80Stack->ClearItems();
-  for (word addr = z80.SP.w.l; addr < 0xC000; addr += 2) {
+  // Don't show more than 50 values in the stack if not paused as this slows
+  // down everything.
+  auto last_address = 0xC000;
+  if (!CPC.paused) {
+    last_address = std::min(0xC000, z80.SP.w.l + 100);
+  }
+  for (word addr = z80.SP.w.l; addr < last_address; addr += 2) {
     std::ostringstream oss;
     word val = (z80_read_mem(addr+1) << 8) + z80_read_mem(addr);
     oss << std::hex << std::setw(4) << std::setfill('0') << val
@@ -393,10 +399,24 @@ void CapriceDevTools::ResumeExecution()
 
 void CapriceDevTools::Update()
 {
+  bool wasRunning = !CPC.paused;
+  // Pause on breakpoints and watchpoints.
+  // Before updating display so that we can update differently: faster if not
+  // paused, more details if paused.
+  if (!breakpoints.empty() || !watchpoints.empty()) {
+    if (z80.watchpoint_reached ||
+        std::any_of(breakpoints.begin(), breakpoints.end(), [&](const auto& b) {
+          return b.address == _PC;
+          })) {
+      PauseExecution();
+    };
+  }
   if (CPC.paused) {
     m_pButtonPause->SetWindowText("Resume");
   } else {
     m_pButtonPause->SetWindowText("Pause");
+  }
+  if (wasRunning) {
     switch (m_pNavigationBar->getSelectedIndex()) {
       case 0 : { // 'z80'
                  UpdateZ80();
@@ -419,16 +439,6 @@ void CapriceDevTools::Update()
                  break;
                }
     }
-  }
-  // Pause on breakpoints and watchpoints. After update of screens as we don't
-  // update them again after.
-  if (!breakpoints.empty() || !watchpoints.empty()) {
-    if (z80.watchpoint_reached ||
-        std::any_of(breakpoints.begin(), breakpoints.end(), [&](const auto& b) {
-          return b.address == _PC;
-          })) {
-      PauseExecution();
-    };
   }
 }
 
