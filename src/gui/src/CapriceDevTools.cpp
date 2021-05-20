@@ -146,7 +146,7 @@ CapriceDevTools::CapriceDevTools(const CRect& WindowRect, CWindow* pParent, CFon
 
     // ---------------- 'Memory' screen ----------------
     m_pMemPokeAdressLabel = new CLabel(        CPoint(15, 18),             m_pGroupBoxTabMemory, "Adress: ");
-    m_pMemPokeAdress      = new CEditBox(CRect(CPoint(55, 13),  30, 20),   m_pGroupBoxTabMemory);
+    m_pMemPokeAdress      = new CEditBox(CRect(CPoint(55, 13),  35, 20),   m_pGroupBoxTabMemory);
     m_pMemPokeAdress->SetIsFocusable(true);
     m_pMemPokeValueLabel  = new CLabel(        CPoint(95, 18),             m_pGroupBoxTabMemory, "Value: ");
     m_pMemPokeValue       = new CEditBox(CRect(CPoint(130, 13), 30, 20),   m_pGroupBoxTabMemory);
@@ -155,13 +155,13 @@ CapriceDevTools::CapriceDevTools(const CRect& WindowRect, CWindow* pParent, CFon
     m_pMemButtonPoke->SetIsFocusable(true);
 
     m_pMemAdressLabel     = new CLabel(        CPoint(15, 50),             m_pGroupBoxTabMemory, "Adress: ");
-    m_pMemAdressValue     = new CEditBox(CRect(CPoint(55, 45), 30, 20),    m_pGroupBoxTabMemory);
+    m_pMemAdressValue     = new CEditBox(CRect(CPoint(55, 45), 35, 20),    m_pGroupBoxTabMemory);
     m_pMemAdressValue->SetIsFocusable(true);
     m_pMemButtonDisplay   = new CButton( CRect(CPoint(95, 45), 45, 20),    m_pGroupBoxTabMemory, "Display");
     m_pMemButtonDisplay->SetIsFocusable(true);
 
-    m_pMemBytesPerLineLbl = new CLabel(       CPoint(290, 35),             m_pGroupBoxTabMemory, "Bytes per line:");
-    m_pMemBytesPerLine  = new CDropDown( CRect(CPoint(290, 45), 50, 20),   m_pGroupBoxTabMemory, false);
+    m_pMemBytesPerLineLbl = new CLabel(       CPoint(235, 18),             m_pGroupBoxTabMemory, "Bytes per line:");
+    m_pMemBytesPerLine  = new CDropDown( CRect(CPoint(315, 13), 50, 20),   m_pGroupBoxTabMemory, false);
     m_pMemBytesPerLine->AddItem(SListItem("1"));
     m_pMemBytesPerLine->AddItem(SListItem("4"));
     m_pMemBytesPerLine->AddItem(SListItem("8"));
@@ -178,7 +178,11 @@ CapriceDevTools::CapriceDevTools(const CRect& WindowRect, CWindow* pParent, CFon
     m_pMemFilterValue->SetIsFocusable(true);
     m_pMemButtonFilter    = new CButton( CRect(CPoint(95, 75), 45, 20),    m_pGroupBoxTabMemory, "Filter");
     m_pMemButtonFilter->SetIsFocusable(true);
-    m_pMemButtonCopy      = new CButton( CRect(CPoint(270, 75), 95, 20),   m_pGroupBoxTabMemory, "Dump to stdout");
+    m_pMemButtonSaveFilter    = new CButton( CRect(CPoint(150, 75), 90, 20),    m_pGroupBoxTabMemory, "Save Filter");
+    m_pMemButtonSaveFilter->SetIsFocusable(true);
+    m_pMemButtonApplyFilter    = new CButton( CRect(CPoint(250, 75), 90, 20),    m_pGroupBoxTabMemory, "Apply saved");
+    m_pMemButtonApplyFilter->SetIsFocusable(true);
+    m_pMemButtonCopy      = new CButton( CRect(CPoint(380, 150), 95, 20),   m_pGroupBoxTabMemory, "Dump to stdout");
     m_pMemButtonCopy->SetIsFocusable(true);
 
     m_pMemTextContent  = new CTextBox(CRect(CPoint(15, 105), 350, 240), m_pGroupBoxTabMemory, monoFontEngine);
@@ -359,8 +363,13 @@ void CapriceDevTools::UpdateWatchPointsList()
 }
 
 void CapriceDevTools::UpdateTextMemory() {
+  m_currentlyDisplayed.clear();
   std::ostringstream memText;
   for(unsigned int i = 0; i < 65536/m_MemBytesPerLine; i++) {
+    if (!m_currentlyFiltered.empty() &&
+        !std::binary_search(m_currentlyFiltered.begin(), m_currentlyFiltered.end(), i)) {
+        continue;
+    }
     std::ostringstream memLine;
     memLine << std::uppercase << std::setfill('0') << std::setw(4) << std::hex << i*m_MemBytesPerLine << " : ";
     bool displayLine = false;
@@ -377,6 +386,9 @@ void CapriceDevTools::UpdateTextMemory() {
       if(filterAdress && (i*m_MemBytesPerLine+j == static_cast<unsigned int>(m_MemDisplayValue))) {
         displayLine = true;
       }
+    }
+    if(displayLine) {
+      m_currentlyDisplayed.push_back(i);
     }
     if(displayLine) {
       memText << memLine.str() << "\n";
@@ -561,6 +573,7 @@ bool CapriceDevTools::HandleMessage(CMessage* pMessage)
               break;
             }
             if (pMessage->Source() == m_pMemButtonFilter) {
+              m_currentlyFiltered.clear();
               m_MemDisplayValue = -1;
               std::string filter = m_pMemFilterValue->GetWindowText();
               if(filter.empty()) {
@@ -569,6 +582,17 @@ bool CapriceDevTools::HandleMessage(CMessage* pMessage)
                 m_MemFilterValue = strtol(filter.c_str(), nullptr, 16);
               }
               std::cout << "Filtering value " << m_MemFilterValue << " in memory." << std::endl;
+              UpdateTextMemory();
+              bHandled = true;
+              break;
+            }
+            if (pMessage->Source() == m_pMemButtonSaveFilter) {
+              m_savedFilter = m_currentlyDisplayed;
+              bHandled = true;
+              break;
+            }
+            if (pMessage->Source() == m_pMemButtonApplyFilter) {
+              m_currentlyFiltered = m_savedFilter;
               UpdateTextMemory();
               bHandled = true;
               break;
@@ -661,6 +685,11 @@ bool CapriceDevTools::HandleMessage(CMessage* pMessage)
               m_MemBytesPerLine = 64;
               break;
           }
+          // Note: Any saved filter doesn't make sense anymore but we keep it
+          // just in case the user wants to come back to the previous
+          // BytesPerLine.
+          // It would be nice to have a mechanism to warn the user if the
+          // filter is not aligned with the BytesPerLine setting.
           UpdateTextMemory();
         }
 #if __GNUC__ >= 7

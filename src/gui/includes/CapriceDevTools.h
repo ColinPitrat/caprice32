@@ -152,6 +152,8 @@ namespace wGui
         CLabel   *m_pMemFilterLabel;
         CEditBox *m_pMemFilterValue;
         CButton  *m_pMemButtonFilter;
+        CButton  *m_pMemButtonSaveFilter;
+        CButton  *m_pMemButtonApplyFilter;
         CLabel   *m_pMemAdressLabel;
         CEditBox *m_pMemAdressValue;
         CButton  *m_pMemButtonDisplay;
@@ -165,6 +167,14 @@ namespace wGui
         CEditBox* m_pMemNewWatchPoint;
         CButton *m_pMemAddWatchPoint;
         CButton *m_pMemRemoveWatchPoint;
+
+        // Variables for saved filters.
+        // Lines currently displayed
+        std::vector<word> m_currentlyDisplayed;
+        // Lines to filter in (if empty, do not apply saved filter)
+        std::vector<word> m_currentlyFiltered;
+        // Saved filter (only applied when its content is copied in m_currentlyFiltered)
+        std::vector<word> m_savedFilter;
 
         int m_MemFilterValue;
         int m_MemDisplayValue;
