@@ -228,7 +228,7 @@ bool CApplication::HandleSDLEvent(SDL_Event event)
 }
 
 
-CApplication::CApplication(SDL_Window* pWindow, std::string sFontFileName, bool bHandleExceptionsInternally) :
+CApplication::CApplication(SDL_Window* pWindow, std::string sFontFileName) :
   CMessageClient(*this),
   m_pSDLWindow(pWindow),
   m_pMainView(nullptr),
@@ -242,7 +242,6 @@ CApplication::CApplication(SDL_Window* pWindow, std::string sFontFileName, bool 
 	m_DefaultBackgroundColor(DEFAULT_BACKGROUND_COLOR),
 	m_DefaultForegroundColor(DEFAULT_FOREGROUND_COLOR),
 	m_DefaultSelectionColor(DEFAULT_BACKGROUND_COLOR),
-	m_bHandleExceptionsInternally(bHandleExceptionsInternally),
 	m_bResourcePoolEnabled(true),
 	m_pCurrentCursorResourceHandle(nullptr),
 	m_pSystemDefaultCursor(nullptr)
@@ -396,30 +395,14 @@ void CApplication::Exec()
 	catch (Wg_Ex_Base& e)
 	{
 		LOG_ERROR("Exception (wGui) : " << e.std_what() << " - SDL Last Error: " << SDL_GetError());
-    // TODO: Get rid of m_bHandleExceptionsInternally
-		if (!m_bHandleExceptionsInternally)
-		{
-			throw;
-		}
-		LOG_ERROR("Unhandled wGui exception : " + e.std_what());
 	}
 	catch (std::exception& e)
 	{
 		LOG_ERROR("Exception (std) : " << std::string(e.what()) << " - SDL Last Error: " << SDL_GetError());
-		if (!m_bHandleExceptionsInternally)
-		{
-			throw;
-		}
-		LOG_ERROR("Unhandled std exception : " + std::string(e.what()));
 	}
 	catch (...)
 	{
 		LOG_ERROR("Exception (non std) - SDL Last Error: " << SDL_GetError());
-		if (!m_bHandleExceptionsInternally)
-		{
-			throw;
-		}
-		LOG_ERROR("Unhandled exception");
 	}
 }
 
@@ -473,10 +456,6 @@ CFontEngine* CApplication::GetFontEngine(std::string sFontFileName, unsigned cha
 		catch (Wg_Ex_FreeType& e)
 		{
 			LOG_ERROR("CApplication::GetFontEngine - Exception thrown while creating Font Engine : " + e.std_what());
-			if (!m_bHandleExceptionsInternally)
-			{
-				throw;
-			}
 		}
 	}
 	else

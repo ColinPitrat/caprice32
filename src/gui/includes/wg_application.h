@@ -55,8 +55,7 @@ public:
 	//! Standard constructor
 	//! \param pWindow The SDL window this application runs in.
 	//! \param sFontFileName The font to use for controls, defaults to Arial
-	//! \param bHandleExceptionsInternally If this is true, wGui will handle most exceptions itself, if false, all exceptions will be returned to the user (defaults to true)
-	explicit CApplication(SDL_Window* pWindow, std::string sFontFileName = "resource/vera_sans.ttf", bool bHandleExceptionsInternally = true);
+	explicit CApplication(SDL_Window* pWindow, std::string sFontFileName = "resource/vera_sans.ttf");
 
 	//! Standard destructor
 	~CApplication() override;
@@ -76,10 +75,6 @@ public:
 	//! Indicates if the application is currently "running" or not
 	//! \return true while the application is in it's message loop
 	virtual bool IsRunning() const { return m_bRunning; }
-
-	//! Indicates if the application will be attempting to handle it's own exceptions (set in the CApplication constructor)
-	//! \return true if wGui should handle it's own exceptions
-	virtual bool HandleExceptions() const { return m_bHandleExceptionsInternally; }
 
 	//! Indicates if the CApplication object has been properly initialized
 	//! \return true if Init() has been called
@@ -201,7 +196,6 @@ protected:
 	CRGBColor m_DefaultForegroundColor; //!< Default foreground color
 	CRGBColor m_DefaultSelectionColor; //!< Default selection color
 
-	bool m_bHandleExceptionsInternally;  //!< If true, wGui will handle most exceptions itself
 	bool m_bResourcePoolEnabled;  //!< If true, wGui provided resources will be added to the resource pool as they are created, defaults to true
 	std::list<CResourceHandle> m_ResourceHandlePool;  //!< The resource handle pool which keeps commonly used resources alive
 	std::unique_ptr<CCursorResourceHandle> m_pCurrentCursorResourceHandle;  //!< An autopointer to the handle for the current mouse cursor
