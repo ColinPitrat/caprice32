@@ -3,7 +3,11 @@
 #ifndef _WG_CAPRICE32LOADSAVE_H_
 #define _WG_CAPRICE32LOADSAVE_H_
 
-#include "wgui.h"
+#include "wg_button.h"
+#include "wg_dropdown.h"
+#include "wg_editbox.h"
+#include "wg_label.h"
+#include "wg_listbox.h"
 #include "wg_frame.h"
 #include "wg_navigationbar.h"
 #include <string>

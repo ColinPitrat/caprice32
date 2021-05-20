@@ -4,9 +4,10 @@
 #ifndef _WG_CAPRICE32ROMSLOTS_H_
 #define _WG_CAPRICE32ROMSLOTS_H_
 
-#include "wgui.h"
+#include "wg_button.h"
 #include "wg_frame.h"
 #include "wg_label.h"
+#include "wg_listbox.h"
 #include <string>
 
 namespace wGui

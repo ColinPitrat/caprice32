@@ -4,13 +4,13 @@
 #ifndef _WG_CAPRICE32OPTIONS_H_
 #define _WG_CAPRICE32OPTIONS_H_
 
-#include "wgui.h"
-#include "wg_frame.h"
-#include "wg_label.h"
 #include "wg_checkbox.h"
+#include "wg_dropdown.h"
+#include "wg_frame.h"
+#include "wg_groupbox.h"
+#include "wg_label.h"
 #include "wg_navigationbar.h"
 #include "wg_radiobutton.h"
-#include "wg_groupbox.h"
 #include "wg_scrollbar.h"
 #include "CapriceRomSlots.h"
 #include "cap32.h"

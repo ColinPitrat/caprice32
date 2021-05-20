@@ -4,7 +4,6 @@
 #ifndef _WG_CAPRICE32MENU_H_
 #define _WG_CAPRICE32MENU_H_
 
-#include "wgui.h"
 #include "wg_frame.h"
 #include "wg_button.h"
 

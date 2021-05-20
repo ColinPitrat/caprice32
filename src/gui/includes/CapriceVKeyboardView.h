@@ -1,7 +1,7 @@
 #ifndef _WG_CAPRICEVKEYBOARDVIEW_H_
 #define _WG_CAPRICEVKEYBOARDVIEW_H_
 
-#include "wgui.h"
+#include "wg_view.h"
 #include "CapriceVKeyboard.h"
 
 using namespace wGui;

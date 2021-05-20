@@ -6,10 +6,13 @@
 #include "z80_disassembly.h"
 #include "cap32.h"
 #include "types.h"
-#include "wgui.h"
+#include "wg_dropdown.h"
 #include "wg_frame.h"
+#include "wg_groupbox.h"
 #include "wg_label.h"
+#include "wg_listbox.h"
 #include "wg_register.h"
+#include "wg_textbox.h"
 #include "wg_navigationbar.h"
 #include <map>
 #include <string>

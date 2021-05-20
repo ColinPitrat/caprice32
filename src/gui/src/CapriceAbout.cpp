@@ -4,6 +4,8 @@
 #include "CapriceAbout.h"
 #include "cap32.h"
 #include <string>
+#include "log.h"
+#include "wg_error.h"
 
 // CPC emulation properties, defined in cap32.h:
 extern t_CPC CPC;
@@ -39,7 +41,7 @@ CapriceAbout::CapriceAbout(const CRect& WindowRect, CWindow* pParent, CFontEngin
 	    m_pPicture = new CPicture(CRect(CPoint(18, 5), 162, 62), this, CPC.resources_path + "/cap32logo.bmp", true);
 	} catch (Wg_Ex_App &e) {
 		// we don't want to stop the program if we can't load the picture, so just print the error and keep going
-		wUtil::Trace(e.std_what());
+    LOG_ERROR("CapriceAbout::CapriceAbout: Couldn't load cap32logo.bmp: " << e.std_what());
 	}
 }
 

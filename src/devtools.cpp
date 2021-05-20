@@ -1,11 +1,12 @@
 #include "devtools.h"
 
+#include "log.h"
 #include "video.h"
+#include "wg_error.h"
 
 // TODO: Have a single CapriceGui application for all UI. Initialize it once and never call Exec for any UI but pause emulation when some UI (which are on the main window) are on.
 // TODO: Allow to have multiple windows (e.g to allow to see z80 and memory at the same time)
 bool DevTools::Activate() {
-  std::cout << "Activating dev tools" << std::endl;
   ShowCursor(true);
   try {
     // TODO: This position only makes sense for me. Ideally we would probably want to find where current window is, find display size and place
@@ -26,7 +27,7 @@ bool DevTools::Activate() {
     devToolsView = std::make_unique<CapriceDevToolsView>(*capriceGui, surface, renderer, texture, wGui::CRect(0, 0, DEVTOOLS_WIDTH, DEVTOOLS_HEIGHT), this);
   } catch(wGui::Wg_Ex_App& e) {
       // TODO: improve: this is pretty silent if people don't look at the console
-      std::cout << "Failed displaying developer's tools: " << e.what() << std::endl;
+      LOG_ERROR("Failed displaying developer's tools: " << e.what());
   }
   active = true;
   return true;

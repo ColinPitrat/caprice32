@@ -1,7 +1,7 @@
 #ifndef _WG_CAPRICELEAVINGWITHOUTSAVINGVIEW_H_
 #define _WG_CAPRICELEAVINGWITHOUTSAVINGVIEW_H_
 
-#include "wgui.h"
+#include "wg_view.h"
 #include "wg_messagebox.h"
 
 using namespace wGui;

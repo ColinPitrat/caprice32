@@ -1,7 +1,8 @@
 #ifndef CAPRICEGUIVIEW_H
 #define CAPRICEGUIVIEW_H
 
-#include "wgui.h"
+#include "wg_view.h"
+#include "wg_frame.h"
 
 class CapriceGuiView : public wGui::CView
 {

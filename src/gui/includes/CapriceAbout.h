@@ -5,7 +5,6 @@
 #ifndef _WG_CAPRICE32ABOUT_H_
 #define _WG_CAPRICE32ABOUT_H_
 
-#include "wgui.h"
 #include "wg_messagebox.h"
 #include "wg_label.h"
 

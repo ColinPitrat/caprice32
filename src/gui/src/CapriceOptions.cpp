@@ -8,6 +8,7 @@
 #include "cap32.h"
 #include "keyboard.h"
 #include "fileutils.h"
+#include "wg_messagebox.h"
 
 // CPC emulation properties, defined in cap32.h:
 extern t_CPC CPC;

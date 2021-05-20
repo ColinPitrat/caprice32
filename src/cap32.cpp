@@ -45,6 +45,7 @@
 #include <errno.h>
 #include <cstring>
 
+#include "wg_error.h"
 #include "CapriceGui.h"
 #include "CapriceGuiView.h"
 #include "CapriceVKeyboardView.h"

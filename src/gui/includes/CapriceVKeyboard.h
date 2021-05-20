@@ -1,9 +1,9 @@
 #ifndef _WG_CAPRICEVKEYBOARD_H_
 #define _WG_CAPRICEVKEYBOARD_H_
 
-#include "wgui.h"
-#include "wg_frame.h"
 #include "wg_button.h"
+#include "wg_editbox.h"
+#include "wg_frame.h"
 #include <string>
 
 namespace wGui

@@ -7,6 +7,7 @@
 #include "cartridge.h"
 #include "stringutils.h"
 #include "log.h"
+#include "wg_messagebox.h"
 
 #include <iostream>
 #include <sys/types.h>

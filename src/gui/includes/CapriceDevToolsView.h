@@ -2,7 +2,9 @@
 #ifndef _WG_CAPRICEDEVTOOLSVIEW_H
 #define _WG_CAPRICEDEVTOOLSVIEW_H
 
-#include "wgui.h"
+#include "wg_point.h"
+#include "wg_rect.h"
+#include "wg_view.h"
 #include "CapriceDevTools.h"
 
 class DevTools;
