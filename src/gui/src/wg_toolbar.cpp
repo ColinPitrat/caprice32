@@ -24,7 +24,6 @@
 
 #include "wg_toolbar.h"
 #include "wg_application.h"
-#include "wutil_debug.h"
 
 
 namespace wGui

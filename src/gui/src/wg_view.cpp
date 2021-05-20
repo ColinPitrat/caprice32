@@ -21,7 +21,6 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 //
 
-#include "wutil_debug.h"
 #include "wg_view.h"
 #include "wg_error.h"
 #include "wg_painter.h"

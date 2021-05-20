@@ -23,7 +23,6 @@
 
 #include "wg_resource_handle.h"
 #include "wg_error.h"
-#include "wutil_debug.h"
 #include "wg_application.h"
 #include <map>
 #include <string>

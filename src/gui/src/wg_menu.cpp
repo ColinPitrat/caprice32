@@ -27,7 +27,6 @@
 #include "wg_application.h"
 #include "wg_message_server.h"
 #include "wg_view.h"
-#include "wutil_debug.h"
 #include "wg_error.h"
 
 

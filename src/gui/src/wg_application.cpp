@@ -24,7 +24,6 @@
 #include "wg_application.h"
 #include "wg_error.h"
 #include "wg_view.h"
-#include "wutil_debug.h"
 #include "video.h"
 #include <iostream>
 #include <fstream>
@@ -402,9 +401,7 @@ void CApplication::Exec()
 		{
 			throw;
 		}
-		// We are supposed to handle all exceptions internally, but something hasn't been handled at this point, so we need to exit gracefully
-    // TODO: Get rid of Trace
-		wUtil::Trace("Unhandled wGui exception : " + e.std_what());
+		LOG_ERROR("Unhandled wGui exception : " + e.std_what());
 	}
 	catch (std::exception& e)
 	{
@@ -413,8 +410,7 @@ void CApplication::Exec()
 		{
 			throw;
 		}
-		// We are supposed to handle all exceptions internally, but something hasn't been handled at this point, so we need to exit gracefully
-		wUtil::Trace("Unhandled std exception : " + std::string(e.what()));
+		LOG_ERROR("Unhandled std exception : " + std::string(e.what()));
 	}
 	catch (...)
 	{
@@ -423,8 +419,7 @@ void CApplication::Exec()
 		{
 			throw;
 		}
-		// We are supposed to handle all exceptions internally, but something hasn't been handled at this point, so we need to exit gracefully
-		wUtil::Trace("Unhandled exception");
+		LOG_ERROR("Unhandled exception");
 	}
 }
 
@@ -439,7 +434,9 @@ void CApplication::ApplicationExit(int iExitCode)
 	user_event.user.data1=nullptr;
 	user_event.user.data2=nullptr;
 	int iResult = SDL_PushEvent(&user_event);
-	wUtil::TraceIf(iResult == -1, "CApplication::ApplicationExit - Unable to push SDL user_event.");
+  if (iResult == -1) {
+    LOG_ERROR("CApplication::ApplicationExit - Unable to push SDL user_event: " << SDL_GetError());
+  }
 	m_iExitCode = iExitCode;
 	m_bRunning = false;
   if (m_pMainView) m_pMainView->Close();

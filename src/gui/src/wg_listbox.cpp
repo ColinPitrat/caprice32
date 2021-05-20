@@ -26,7 +26,6 @@
 #include "wg_application.h"
 #include "wg_message_server.h"
 #include "wg_error.h"
-#include "wutil_debug.h"
 #include "std_ex.h"
 
 namespace wGui

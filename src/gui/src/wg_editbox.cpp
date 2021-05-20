@@ -28,7 +28,6 @@
 #include "wg_timer.h"
 #include "wg_error.h"
 #include "wg_view.h"
-#include "wutil_debug.h"
 #include "std_ex.h"
 #include <string>
 
@@ -349,7 +348,6 @@ bool CEditBox::HandleMessage(CMessage* pMessage)
 		case CMessage::CTRL_DOUBLELCLICK:
 			if (pMessage->Destination() == this)
 			{
-				//wUtil::Trace("Got the double click message!");
 				m_SelStart = 0;
 				m_SelLength = stdex::safe_static_cast<int>(m_sWindowText.length());
 				Draw();

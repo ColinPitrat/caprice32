@@ -25,7 +25,6 @@
 #include "wg_resources.h"
 #include "wg_error.h"
 #include "wg_painter.h"
-#include "wutil_debug.h"
 #include "wg_application.h"
 #include <list>
 

@@ -23,8 +23,8 @@
 
 
 #include "wg_message.h"
-#include "wutil_debug.h"
 #include "std_ex.h"
+#include "log.h"
 #include <string>
 
 
@@ -94,7 +94,7 @@ unsigned int CMouseMessage::TranslateSDLButton(Uint8 SDLButton)
 		Button = MIDDLE;
 		break;
 	default:
-		wUtil::Trace("Untranslated SDL Button # " + stdex::itoa(SDLButton));
+		LOG_ERROR("Untranslated SDL Button # " + stdex::itoa(SDLButton));
 		break;
 	}
 
