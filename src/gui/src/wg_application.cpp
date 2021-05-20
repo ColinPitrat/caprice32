@@ -242,7 +242,6 @@ CApplication::CApplication(SDL_Window* pWindow, std::string sFontFileName) :
 	m_DefaultBackgroundColor(DEFAULT_BACKGROUND_COLOR),
 	m_DefaultForegroundColor(DEFAULT_FOREGROUND_COLOR),
 	m_DefaultSelectionColor(DEFAULT_BACKGROUND_COLOR),
-	m_bResourcePoolEnabled(true),
 	m_pCurrentCursorResourceHandle(nullptr),
 	m_pSystemDefaultCursor(nullptr)
 {
@@ -467,27 +466,10 @@ CFontEngine* CApplication::GetFontEngine(std::string sFontFileName, unsigned cha
 }
 
 
-void CApplication::EnableResourcePool(bool bEnable)
-{
-	m_bResourcePoolEnabled = bEnable;
-	if (!bEnable)
-	{
-		m_ResourceHandlePool.clear();
-	}
-}
-
-
 bool CApplication::AddToResourcePool(CResourceHandle& ResourceHandle)
 {
-	bool bSuccess = false;
-
-	if (m_bResourcePoolEnabled)
-	{
-		m_ResourceHandlePool.push_back(ResourceHandle);
-		bSuccess = true;
-	}
-
-	return bSuccess;
+  m_ResourceHandlePool.push_back(ResourceHandle);
+	return true;
 }
 
 

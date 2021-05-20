@@ -146,14 +146,8 @@ public:
 	//! \return Default selection color
 	virtual CRGBColor GetDefaultSelectionColor() const { return m_DefaultSelectionColor; }
 
-	//! The resource pool is used to keep wGui provided resources around even when there are no other handles begin kept by the user
-	//! The internal wGui resources are automatically added to the pool if this is enabled when they are created
-	//! The pool is enabled by default
-	//! \param bEnable If set to false, it will clear any current resource handles from the pool, and will disable the pool
-	virtual void EnableResourcePool(bool bEnable);
-
 	//! Adds a resource handle to the resource pool if the pool is enabled
-	//! Once a resource is added, the only way to remove it, is to disabled the resource pool (via EnableResourcePool() ) which will empty the pool of all resources
+	//! Once a resource is added, it cannot be removed.
 	//! \param ResourceHandle The resource handle to copy into the pool
 	//! \return false if the resource pool is disabled
 	virtual bool AddToResourcePool(CResourceHandle& ResourceHandle);
@@ -196,7 +190,6 @@ protected:
 	CRGBColor m_DefaultForegroundColor; //!< Default foreground color
 	CRGBColor m_DefaultSelectionColor; //!< Default selection color
 
-	bool m_bResourcePoolEnabled;  //!< If true, wGui provided resources will be added to the resource pool as they are created, defaults to true
 	std::list<CResourceHandle> m_ResourceHandlePool;  //!< The resource handle pool which keeps commonly used resources alive
 	std::unique_ptr<CCursorResourceHandle> m_pCurrentCursorResourceHandle;  //!< An autopointer to the handle for the current mouse cursor
 	SDL_Cursor* m_pSystemDefaultCursor;  //!< A pointer to the default system cursor
