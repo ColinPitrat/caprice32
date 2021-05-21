@@ -1161,7 +1161,8 @@ void crtc_cycle(int repeat_count)
             RendPos = RendStart;
             HorzChar--;
          } else {
-            RendPos = reinterpret_cast<dword *>(&RendBuff[val]);
+            // Ensure offset is a multiple of 4
+            RendPos = reinterpret_cast<dword *>(&RendBuff[val & 0xFFFFFFFC]);
             int tmp = reinterpret_cast<byte *>(RendStart) - reinterpret_cast<byte *>(RendPos);
             HorzPix[48] = static_cast<byte>(tmp);
             HorzPix[0] = HorzPix[1] - static_cast<byte>(tmp);

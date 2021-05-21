@@ -45,10 +45,10 @@ namespace zip
       }
       pbPtr = pbGPBuffer + (256 - 22); // pointer to end of central directory (under ideal conditions)
       while (pbPtr != static_cast<byte *>(pbGPBuffer)) {
-        if (*reinterpret_cast<dword *>(pbPtr) == 0x06054b50) { // check for end of central directory signature
-          wCentralDirEntries = *reinterpret_cast<word *>(pbPtr + 10);
-          wCentralDirSize = *reinterpret_cast<word *>(pbPtr + 12);
-          dwCentralDirPosition = *reinterpret_cast<dword *>(pbPtr + 16);
+        if (*pbPtr == 0x50 && *(pbPtr+1) == 0x4b && *(pbPtr+2) == 0x05 && *(pbPtr+3) == 0x06) { // check for end of central directory signature
+          wCentralDirEntries = (*(pbPtr+11) << 8) + *(pbPtr+10);
+          wCentralDirSize = (*(pbPtr+13) << 8) + *(pbPtr+12);
+          dwCentralDirPosition = (*(pbPtr+19) << 24) + (*(pbPtr+18) << 16) + (*(pbPtr+17) << 8) + *(pbPtr+16);
           break;
         }
         pbPtr--; // move backwards through buffer
@@ -73,9 +73,9 @@ namespace zip
     pbPtr = pbGPBuffer;
 
     for (n = wCentralDirEntries; n; n--) {
-      wFilenameLength = *reinterpret_cast<word *>(pbPtr + 28);
-      dwOffset = *reinterpret_cast<dword *>(pbPtr + 42);
-      dwNextEntry = wFilenameLength + *reinterpret_cast<word *>(pbPtr + 30) + *reinterpret_cast<word *>(pbPtr + 32);
+      wFilenameLength = (*(pbPtr+29) << 8) + *(pbPtr+28);
+      dwOffset = (*(pbPtr+45) << 24) + (*(pbPtr+44) << 16) + (*(pbPtr+43) << 8) + *(pbPtr+42);
+      dwNextEntry = wFilenameLength + (*(pbPtr+31) << 8) + *(pbPtr+30) + (*(pbPtr + 33) << 8) + *(pbPtr + 32);
       pbPtr += 46;
       const char *pchThisExtension = zi->extensions.c_str();
       while (*pchThisExtension != '\0') { // loop for all extensions to be checked
@@ -146,8 +146,8 @@ namespace zip
       fclose(*pfileOut);
       return ERR_FILE_UNZIP_FAILED;
     }
-    dwSize = *reinterpret_cast<dword *>(pbGPBuffer + 18); // length of compressed data
-    dwOffset += 30 + *reinterpret_cast<word *>(pbGPBuffer + 26) + *reinterpret_cast<word *>(pbGPBuffer + 28);
+    dwSize = (*(pbGPBuffer + 21) << 24) + (*(pbGPBuffer + 20) << 16) + (*(pbGPBuffer + 19) << 8) + *(pbGPBuffer + 18);
+    dwOffset += 30 + (*(pbGPBuffer + 27) << 8) + *(pbGPBuffer + 26) + (*(pbGPBuffer + 29) << 8) + *(pbGPBuffer + 28);
     if (fseek(pfileIn, dwOffset, SEEK_SET) != 0) {  // move file pointer to start of compressed data
       LOG_ERROR("Couldn't read zip file: " << zi.filename);
       fclose(pfileIn);

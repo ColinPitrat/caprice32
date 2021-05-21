@@ -1,4 +1,7 @@
 language: cpp
+arch:
+  - amd64
+  - s390x  # Big endian arch
 # Do not build latest as this is just a tag on the latest successful release by appveyor
 branches:
   except:
@@ -6,6 +9,7 @@ branches:
 #To uncomment in case a core occurs:
 #sudo: required
 # xenial & xvfb to support integrated tests with SDL2 (https://stackoverflow.com/questions/60677892/failed-to-connect-to-mir-on-travis-server)
+# package xvfb below is also needed for it to work on s390x
 dist: xenial
 services:
  - xvfb
@@ -15,6 +19,7 @@ addons:
     - ubuntu-toolchain-r-test
     #- llvm-toolchain-precise-5.0
   packages:
+    - xvfb
     - libsdl2-dev
     - libfreetype6-dev
     - zlib1g-dev
@@ -37,6 +42,7 @@ before_script:
     - wget http://softpres.org/_media/files:ipflib42_linux-x86_64.tar.gz -O /tmp/ipflib42_linux-x86_64.tar.gz
     - tar -xf /tmp/ipflib42_linux-x86_64.tar.gz 2>&1 >/dev/null
     - sudo cp -r x86_64-linux-gnu-capsimage/include/caps /usr/include
+    - /usr/bin/Xvfb :99 -screen 0 1024x768x24& true
 
 # Build and test both in release and debug to ensure both works fine
 script: 

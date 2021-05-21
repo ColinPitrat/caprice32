@@ -28,6 +28,7 @@
 #include <unistd.h>
 #include <string>
 #include <vector>
+#include "SDL_endian.h"
 
 class InputMapper;
 //#define DEBUG
@@ -39,6 +40,12 @@ class InputMapper;
 //#define DEBUG_Z80
 
 #define VERSION_STRING "v4.6.0"
+
+#ifdef WINDOWS
+#define PACKED __attribute__((packed,gcc_struct))
+#else
+#define PACKED __attribute__((packed))
+#endif
 
 #ifndef _MAX_PATH
  #ifdef _POSIX_PATH_MAX
@@ -212,8 +219,13 @@ typedef struct {
    unsigned char *snd_bufferptr;
    union {
       struct {
+#if SDL_BYTEORDER == SDL_LIL_ENDIAN
          unsigned int low;
          unsigned int high;
+#else
+         unsigned int high;
+         unsigned int low;
+#endif
       };
       int64_t both;
    } snd_cycle_count_init;
@@ -338,8 +350,13 @@ typedef struct {
 typedef struct {
    union {
       struct {
+#if SDL_BYTEORDER == SDL_LIL_ENDIAN
          unsigned int low;
          unsigned int high;
+#else
+         unsigned int high;
+         unsigned int low;
+#endif
       };
       int64_t both;
    } cycle_count;
@@ -349,13 +366,23 @@ typedef struct {
    union {
       unsigned char Index[16];
       struct {
+#if SDL_BYTEORDER == SDL_LIL_ENDIAN
          unsigned char TonALo, TonAHi;
          unsigned char TonBLo, TonBHi;
          unsigned char TonCLo, TonCHi;
+#else
+         unsigned char TonAHi, TonALo;
+         unsigned char TonBHi, TonBLo;
+         unsigned char TonCHi, TonCLo;
+#endif
          unsigned char Noise;
          unsigned char Mixer;
          unsigned char AmplitudeA, AmplitudeB, AmplitudeC;
+#if SDL_BYTEORDER == SDL_LIL_ENDIAN
          unsigned char EnvelopeLo, EnvelopeHi;
+#else
+         unsigned char EnvelopeHi, EnvelopeLo;
+#endif
          unsigned char EnvType;
          unsigned char PortA;
          unsigned char PortB;
@@ -367,7 +394,7 @@ typedef struct {
          unsigned char _noise, _mixer, _ampa, _ampb, _ampc;
          unsigned short Envelope;
          unsigned char _envtype, _porta, portb;
-      } __attribute__((packed, gcc_struct));
+      } PACKED;
    } RegisterAY;
    int AmplitudeEnv;
    bool FirstPeriod;
