@@ -2697,8 +2697,9 @@ int cap32_main (int argc, char **argv)
       }
       
       devtools.remove_if([](DevTools& d) { return !d.IsActive(); });
-      for (auto& devtool : devtools) {
-        devtool.Update();
+      if (!devtools.empty()) {
+        for (auto& devtool : devtools) devtool.PreUpdate();
+        for (auto& devtool : devtools) devtool.PostUpdate();
       }
       while (SDL_PollEvent(&event)) {
          bool processed = false;

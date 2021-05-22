@@ -12,7 +12,8 @@ class DevTools {
 
     bool IsActive() const { return active; };
 
-    void Update();
+    void PreUpdate();
+    void PostUpdate();
 
     // Return true if the event was processed
     // (i.e destined to this window)

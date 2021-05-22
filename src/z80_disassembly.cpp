@@ -48,11 +48,12 @@ std::map<int, OpCode> load_opcodes_table()
   return opcode_to_instruction;
 }
 
-void add_if_new(word address, const DisassembledCode& result, std::vector<dword>& to_disassemble_from)
+void add_if_new(word address, const DisassembledCode& result, std::vector<dword>& to_disassemble_from, const std::string& why, word from)
 {
   DisassembledLine fakeLine(address, 0, "");
   if (result.lines.count(fakeLine) == 0) {
     to_disassemble_from.push_back(address);
+    //std::cout << "Adding " << std::hex << address << " from " << why << " at " << from << std::endl;
   }
 }
 
@@ -60,6 +61,7 @@ void add_if_new(word address, const DisassembledCode& result, std::vector<dword>
 void disassemble_from(dword pos, DisassembledCode& result, std::vector<dword>& to_disassemble_from)
 {
   static auto opcode_to_instructions = load_opcodes_table();
+  word original_start = pos;
   while (pos <= 0xFFFF) {
     uint64_t opcode = 0;
     word start_address = pos;
@@ -79,7 +81,7 @@ void disassemble_from(dword pos, DisassembledCode& result, std::vector<dword>& t
           instruction.replace(instruction.find("**"), 2, oss.str());
           if (instruction.rfind("call", 0) == 0 ||
               instruction.rfind("jp", 0) == 0) {
-            add_if_new(op, result, to_disassemble_from);
+            add_if_new(op, result, to_disassemble_from, instruction, start_address);
           }
         }
         while (instruction.find('*') != std::string::npos) {
@@ -90,14 +92,14 @@ void disassemble_from(dword pos, DisassembledCode& result, std::vector<dword>& t
           instruction.replace(instruction.find('*'), 1, oss.str());
           if (instruction.rfind("jr", 0) == 0 ||
               instruction.rfind("djnz", 0) == 0) {
-            word address = start_address + static_cast<int8_t>(op);
-            add_if_new(address, result, to_disassemble_from);
+            word address = pos + static_cast<int8_t>(op);
+            add_if_new(address, result, to_disassemble_from, instruction, start_address);
           }
           if (instruction.rfind("rst", 0) == 0) {
             // RST instruction is of the form rst xxh where xx can be 00, 08,
             // 10, 18, 20, 28, 30 or 38
             word address = std::stol(instruction.substr(4,2), nullptr, 16);
-            add_if_new(address, result, to_disassemble_from);
+            add_if_new(address, result, to_disassemble_from, instruction, start_address);
           }
         }
         // TODO: Detect inconsistencies. This requires checking the instructions
@@ -110,7 +112,7 @@ void disassemble_from(dword pos, DisassembledCode& result, std::vector<dword>& t
     }
     if (!found) {
       // TODO(ColinPitrat): Handle inconsistency
-      std::cout << "No opcode found at " << std::hex << start_address << " for " << opcode << std::endl;
+      //std::cout << "No opcode found at " << std::hex << start_address << " for " << opcode << " from " << original_start << std::endl;
       uint64_t value = z80_read_mem(start_address);
       std::ostringstream oss;
       oss << "db $" << std::hex << value;

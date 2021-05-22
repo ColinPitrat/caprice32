@@ -1025,6 +1025,7 @@ void z80_mf2stop()
 int z80_execute()
 {
    z80.watchpoint_reached = 0;
+   z80.breakpoint_reached = 0;
    while (_PCdword != z80.break_point) { // loop until break point
 
       #ifdef DEBUG_Z80
@@ -1061,10 +1062,6 @@ int z80_execute()
       }
       iWSAdjust = 0;
 
-      if (z80.trace) { // tracing instructions?
-         z80.trace = 0; // reset trace condition
-         return EC_TRACE; // exit emulation loop
-      }
       if (VDU.frame_completed) { // video emulation finished building frame?
          VDU.frame_completed = 0;
          return EC_FRAME_COMPLETE; // exit emulation loop
@@ -1081,11 +1078,15 @@ int z80_execute()
       // TODO: Measure impact. If important, create templated version of
       // z80_execute, read_mem, write_mem ...
       if (!breakpoints.empty()) {
-        if (std::any_of(breakpoints.begin(), breakpoints.end(), [&](const auto& b) {
-              return b.address == _PC;
-          })) break;
+        if ((z80.breakpoint_reached = std::any_of(breakpoints.begin(), breakpoints.end(), [&](const auto& b) { return b.address == _PC; }))) break;
       }
       if (z80.watchpoint_reached) break;
+      if (z80.step_in) { z80.step_in++; break; }
+
+      if (z80.trace) { // tracing instructions?
+         z80.trace = 0; // reset trace condition
+         return EC_TRACE; // exit emulation loop
+      }
    }
    return EC_BREAKPOINT;
 }

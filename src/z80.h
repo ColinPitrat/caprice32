@@ -43,16 +43,15 @@ typedef union {
 #define Cflag  0x01 // carry flag
 #define Xflags 0x28 // bit 5 & 3 flags
 
-typedef struct {
-   reg_pair AF, BC, DE, HL, PC, SP, AFx, BCx, DEx, HLx, IX, IY;
-   byte I, R, Rb7, IFF1, IFF2, IM, HALT, EI_issued, int_pending;
-   byte watchpoint_reached;
-   dword break_point, trace;
-} t_z80regs;
+enum BreakpointSource {
+  USER = 1,
+  STEP = 2,
+};
 
 struct Breakpoint {
   Breakpoint(word val) : address(val) {};
   dword address;
+  BreakpointSource source;
 };
 
 enum WatchpointType {
@@ -66,6 +65,15 @@ struct Watchpoint {
   dword address;
   WatchpointType type;
 };
+
+typedef struct {
+   reg_pair AF, BC, DE, HL, PC, SP, AFx, BCx, DEx, HLx, IX, IY;
+   byte I, R, Rb7, IFF1, IFF2, IM, HALT, EI_issued, int_pending;
+   byte watchpoint_reached;
+   byte breakpoint_reached;
+   byte step_in;
+   dword break_point, trace;
+} t_z80regs;
 
 
 #define EC_BREAKPOINT      10

@@ -29,7 +29,11 @@ namespace wGui
         CapriceDevTools(const CRect& WindowRect, CWindow* pParent, CFontEngine* pFontEngine, DevTools* devtools);
         ~CapriceDevTools() override;
 
-        void Update();
+        //! Prepare the update by saving the CPC state and updating this devtool's state.
+        //! This is separated from Step2 to allow having multiple devtools.
+        void PreUpdate();
+        //! The part of the update that modifies the CPC state.
+        void PostUpdate();
 
         bool HandleMessage(CMessage* pMessage) override;
 
@@ -51,6 +55,8 @@ namespace wGui
         void UpdateWatchPointsList();
         void UpdateTextMemory();
 
+        CButton* m_pButtonStepIn;
+        CButton* m_pButtonStepOver;
         CButton* m_pButtonPause;
         CButton* m_pButtonClose;
 

@@ -28,9 +28,14 @@ void CapriceDevToolsView::PaintToSurface(SDL_Surface& ScreenSurface, SDL_Surface
   }
 }
 
-void CapriceDevToolsView::Update()
+void CapriceDevToolsView::PreUpdate()
 {
-  m_pDevToolsFrame->Update();
+  m_pDevToolsFrame->PreUpdate();
+}
+
+void CapriceDevToolsView::PostUpdate()
+{
+  m_pDevToolsFrame->PostUpdate();
 }
 
 void CapriceDevToolsView::Flip() const

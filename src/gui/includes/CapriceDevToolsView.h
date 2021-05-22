@@ -25,7 +25,8 @@ class CapriceDevToolsView : public wGui::CView
 
     void PaintToSurface(SDL_Surface& ScreenSurface, SDL_Surface& FloatingSurface, const wGui::CPoint& Offset) const override;
 
-    void Update();
+    void PreUpdate();
+    void PostUpdate();
 
     void Flip() const override;
 

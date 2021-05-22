@@ -60,6 +60,8 @@ CapriceDevTools::CapriceDevTools(const CRect& WindowRect, CWindow* pParent, CFon
 
     EnableTab("z80");
 
+    m_pButtonStepIn   = new CButton(CRect(CPoint(m_ClientRect.Width() - 150, 10), 70, 15), this, "Step in");
+    m_pButtonStepIn->SetIsFocusable(true);
     m_pButtonPause   = new CButton(CRect(CPoint(m_ClientRect.Width() - 70, 10), 50, 15), this, (CPC.paused ? "Resume" : "Pause"));
     m_pButtonPause->SetIsFocusable(true);
     m_pButtonClose   = new CButton(CRect(CPoint(m_ClientRect.Width() - 70, 35), 50, 15), this, "Close");
@@ -225,7 +227,7 @@ void CapriceDevTools::UpdateDisassemblyPos()
   });
   int idx = std::distance(lines.begin(), curpos);
   m_pAssemblyCode->SetPosition(idx, CListBox::CENTER);
-  if (curpos != lines.begin()) {
+  if (curpos != lines.begin() || (!lines.empty() && lines.begin()->pItemData == toFind.pItemData)) {
     // TODO: Do not allow to select another line
     m_pAssemblyCode->SetSelection(idx, /*bSelected=*/true, /*bNotify=*/false);
   } else {
@@ -245,7 +247,7 @@ void CapriceDevTools::RefreshDisassembly()
     //   - labels, jumps & calls, ...
     //   - source of disassembling (from PC, from one entry point or another ...)
     if (std::any_of(breakpoints.begin(), breakpoints.end(), [&](const auto& b) {
-          return b.address == line.address_;
+          return (b.address == line.address_ && b.source == USER);
           })) {
       items.emplace_back(oss.str(), reinterpret_cast<void*>(line.address_), COLOR_RED);
     } else {
@@ -344,9 +346,12 @@ void CapriceDevTools::UpdateBreakPointsList()
 {
   m_pAssemblyBreakPoints->ClearItems();
   for(const auto& bp : breakpoints) {
-    std::ostringstream oss;
-    oss << std::hex << std::setw(4) << std::setfill('0') << bp.address;
-    m_pAssemblyBreakPoints->AddItem(SListItem(oss.str()));
+    if (bp.source == USER)
+    {
+      std::ostringstream oss;
+      oss << std::hex << std::setw(4) << std::setfill('0') << bp.address;
+      m_pAssemblyBreakPoints->AddItem(SListItem(oss.str()));
+    }
   }
   // Ensure the lines corresponding to the breakpoints are colored
   RefreshDisassembly();
@@ -409,17 +414,14 @@ void CapriceDevTools::ResumeExecution()
   m_pButtonPause->SetWindowText("Pause");
 }
 
-void CapriceDevTools::Update()
+void CapriceDevTools::PreUpdate()
 {
   bool wasRunning = !CPC.paused;
   // Pause on breakpoints and watchpoints.
   // Before updating display so that we can update differently: faster if not
   // paused, more details if paused.
   if (!breakpoints.empty() || !watchpoints.empty()) {
-    if (z80.watchpoint_reached ||
-        std::any_of(breakpoints.begin(), breakpoints.end(), [&](const auto& b) {
-          return b.address == _PC;
-          })) {
+    if (z80.watchpoint_reached || z80.breakpoint_reached) {
       PauseExecution();
     };
   }
@@ -451,6 +453,14 @@ void CapriceDevTools::Update()
                  break;
                }
     }
+  }
+}
+
+void CapriceDevTools::PostUpdate()
+{
+  if (z80.step_in > 1) {
+    PauseExecution();
+    z80.step_in = 0;
   }
 }
 
@@ -488,6 +498,11 @@ bool CapriceDevTools::HandleMessage(CMessage* pMessage)
               } else {
                 PauseExecution();
               }
+              break;
+            }
+            if (pMessage->Source() == m_pButtonStepIn) {
+              z80.step_in = 1;
+              ResumeExecution();
               break;
             }
           }

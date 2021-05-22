@@ -44,8 +44,12 @@ void DevTools::Deactivate() {
   active = false;
 }
 
-void DevTools::Update() {
-  devToolsView->Update();
+void DevTools::PreUpdate() {
+  devToolsView->PreUpdate();
+}
+
+void DevTools::PostUpdate() {
+  devToolsView->PostUpdate();
   capriceGui->Update();
 }
 
