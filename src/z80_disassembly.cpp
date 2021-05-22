@@ -7,6 +7,7 @@
 #include <string>
 #include "z80.h"
 #include "cap32.h"
+#include "log.h"
 
 extern t_z80regs z80;
 #include "z80_macros.h"
@@ -53,7 +54,7 @@ void add_if_new(word address, const DisassembledCode& result, std::vector<dword>
   DisassembledLine fakeLine(address, 0, "");
   if (result.lines.count(fakeLine) == 0) {
     to_disassemble_from.push_back(address);
-    //std::cout << "Adding " << std::hex << address << " from " << why << " at " << from << std::endl;
+    LOG_DEBUG("Adding " << std::hex << address << " from " << why << " at " << from);
   }
 }
 
@@ -112,7 +113,7 @@ void disassemble_from(dword pos, DisassembledCode& result, std::vector<dword>& t
     }
     if (!found) {
       // TODO(ColinPitrat): Handle inconsistency
-      //std::cout << "No opcode found at " << std::hex << start_address << " for " << opcode << " from " << original_start << std::endl;
+      LOG_DEBUG("No opcode found at " << std::hex << start_address << " for " << opcode << " from " << original_start);
       uint64_t value = z80_read_mem(start_address);
       std::ostringstream oss;
       oss << "db $" << std::hex << value;
