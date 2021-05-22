@@ -54,7 +54,7 @@ void add_if_new(word address, const DisassembledCode& result, std::vector<dword>
   DisassembledLine fakeLine(address, 0, "");
   if (result.lines.count(fakeLine) == 0) {
     to_disassemble_from.push_back(address);
-    LOG_DEBUG("Adding " << std::hex << address << " from " << why << " at " << from);
+    LOG_VERBOSE("Adding " << std::hex << address << " from " << why << " at " << from);
   }
 }
 
@@ -113,7 +113,7 @@ void disassemble_from(dword pos, DisassembledCode& result, std::vector<dword>& t
     }
     if (!found) {
       // TODO(ColinPitrat): Handle inconsistency
-      LOG_DEBUG("No opcode found at " << std::hex << start_address << " for " << opcode << " from " << original_start);
+      LOG_VERBOSE("No opcode found at " << std::hex << start_address << " for " << opcode << " from " << original_start);
       uint64_t value = z80_read_mem(start_address);
       std::ostringstream oss;
       oss << "db $" << std::hex << value;
