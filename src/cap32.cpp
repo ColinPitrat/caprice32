@@ -98,6 +98,8 @@ dword dwSndBufferCopied;
 dword osd_timing;
 std::string osd_message;
 
+std::string lastSavedSnapshot;
+
 dword dwBreakPoint, dwTrace, dwMF2ExitAddr;
 dword dwMF2Flags = 0;
 std::unique_ptr<byte[]> pbSndBuffer;
@@ -790,7 +792,7 @@ void z80_OUT_handler (reg_pair port, byte val)
             break;
       }
    }
-// ----------------------------------------------------------------------------
+// FDC ------------------------------------------------------------------------
    if ((port.b.h == 0xfa) && (!(port.b.l & 0x80))) { // floppy motor control?
       LOG_DEBUG("FDC motor control access: " << static_cast<int>(port.b.l) << " - " << static_cast<int>(val));
       FDC.motor = val & 0x01;
@@ -802,6 +804,7 @@ void z80_OUT_handler (reg_pair port, byte val)
    else if ((port.b.h == 0xfb) && (!(port.b.l & 0x80))) { // FDC data register?
       fdc_write_data(val);
    }
+// MF2 ------------------------------------------------------------------------
    else if ((CPC.mf2) && (port.b.h == 0xfe)) { // Multiface 2?
       if ((port.b.l == 0xe8) && (!(dwMF2Flags & MF2_INVISIBLE))) { // page in MF2 ROM?
          dwMF2Flags |= MF2_ACTIVE;
@@ -2033,6 +2036,18 @@ void dumpSnapshot() {
    else {
      set_osd_message("Captured machine snapshot to " + dumpFile);
    }
+   lastSavedSnapshot = dumpPath;
+}
+
+void loadSnapshot() {
+   if (lastSavedSnapshot.empty()) return;
+   LOG_INFO("Loading snapshot from " + lastSavedSnapshot);
+   if (snapshot_load(lastSavedSnapshot)) {
+     LOG_ERROR("Could not load machine snapshot from " + lastSavedSnapshot);
+   }
+   else {
+     set_osd_message("Restored machine snapshot from " + lastSavedSnapshot);
+   }
 }
 
 bool driveAltered() {
@@ -2781,6 +2796,10 @@ int cap32_main (int argc, char **argv)
 
                         case CAP32_SNAPSHOT:
                            dumpSnapshot();
+                           break;
+
+                        case CAP32_LD_SNAP:
+                           loadSnapshot();
                            break;
 
                         case CAP32_TAPEPLAY:
