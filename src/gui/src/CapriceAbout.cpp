@@ -36,7 +36,8 @@ CapriceAbout::CapriceAbout(const CRect& WindowRect, CWindow* pParent, CFontEngin
 	m_pMessageLabel = new CLabel(CPoint(5, y+=10), this, "F10 - Quit");
 	m_pMessageLabel = new CLabel(CPoint(5, y+=10), this, "Shift + F1 - Virtual keyboard");
 	m_pMessageLabel = new CLabel(CPoint(5, y+=10), this, "Shift + F2 - Developers' tools");
-	m_pMessageLabel = new CLabel(CPoint(5, y+=10), this, "Shift + F3 - save machine snapshot");
+	m_pMessageLabel = new CLabel(CPoint(5, y+=10), this, "Shift + F3 - Save machine snapshot");
+	m_pMessageLabel = new CLabel(CPoint(5, y+=10), this, "Shift + F4 - Load last snapshot");
 	try	{
 	    m_pPicture = new CPicture(CRect(CPoint(18, 5), 162, 62), this, CPC.resources_path + "/cap32logo.bmp", true);
 	} catch (Wg_Ex_App &e) {
