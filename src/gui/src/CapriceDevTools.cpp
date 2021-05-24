@@ -327,7 +327,7 @@ void CapriceDevTools::UpdateDisassemblyPos()
   });
   int idx = std::distance(lines.begin(), curpos);
   m_pAssemblyCode->SetPosition(idx, CListBox::CENTER);
-  if (curpos != lines.begin() || (!lines.empty() && lines.begin()->pItemData == toFind.pItemData)) {
+  if (!lines.empty() && curpos->pItemData == toFind.pItemData) {
     // TODO: Do not allow to select another line
     m_pAssemblyCode->SetSelection(idx, /*bSelected=*/true, /*bNotify=*/false);
   } else {
