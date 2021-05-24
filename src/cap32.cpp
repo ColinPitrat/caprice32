@@ -122,7 +122,7 @@ std::list<SDL_Event> virtualKeyboardEvents;
 dword nextVirtualEventFrameCount, dwFrameCountOverall = 0;
 dword breakPointsToSkipBeforeProceedingWithVirtualEvents = 0;
 
-byte *membank_config[8][4];
+t_MemBankConfig membank_config;
 
 FILE *pfileObject;
 FILE *pfoPrinter;
@@ -249,7 +249,7 @@ enum ApplicationWindowState
 
 CapriceArgs args;
 
-void ga_init_banking ()
+void ga_init_banking (t_MemBankConfig& membank_config, unsigned char RAM_bank)
 {
    byte *romb0, *romb1, *romb2, *romb3, *romb4, *romb5, *romb6, *romb7;
    byte *pbRAMbank;
@@ -259,7 +259,7 @@ void ga_init_banking ()
    romb2 = pbRAM + 2*16384;
    romb3 = pbRAM + 3*16384;
 
-   pbRAMbank = pbRAM + ((GateArray.RAM_bank + 1) * 65536);
+   pbRAMbank = pbRAM + ((RAM_bank + 1) * 65536);
    romb4 = pbRAMbank;
    romb5 = pbRAMbank + 1*16384;
    romb6 = pbRAMbank + 2*16384;
@@ -322,7 +322,7 @@ void ga_memory_manager ()
    }
    if (mem_bank != GateArray.RAM_bank) { // requested bank is different from the active one?
       GateArray.RAM_bank = mem_bank;
-      ga_init_banking();
+      ga_init_banking(membank_config, GateArray.RAM_bank);
    }
    for (int n = 0; n < 4; n++) { // remap active memory banks
       membank_read[n] = membank_config[GateArray.RAM_config & 7][n];
@@ -1044,7 +1044,7 @@ void emulator_reset ()
    GateArray.requested_scr_mode = 1; // set to mode 1
    GateArray.registerPageOn = false;
    GateArray.lower_ROM_bank = 0;
-   ga_init_banking();
+   ga_init_banking(membank_config, GateArray.RAM_bank);
 
 // PPI
    memset(&PPI, 0, sizeof(PPI)); // clear PPI data structure
@@ -1107,7 +1107,7 @@ int emulator_init ()
    pbROMhi =
    pbExpansionROM = pbROM + 16384;
    memset(memmap_ROM, 0, sizeof(memmap_ROM[0]) * 256); // clear the expansion ROM map
-   ga_init_banking(); // init the CPC memory banking map
+   ga_init_banking(membank_config, GateArray.RAM_bank); // init the CPC memory banking map
    if ((iErr = emulator_patch_ROM())) {
       LOG_ERROR("Failed patching the ROM");
       return iErr;

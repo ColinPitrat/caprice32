@@ -16,11 +16,53 @@
 
 extern t_z80regs z80;
 extern t_CPC CPC;
-extern byte *pbRAM;
+extern t_GateArray GateArray;
 extern std::vector<Breakpoint> breakpoints;
 extern std::vector<Watchpoint> watchpoints;
+extern byte* pbROMlo;
+extern byte* pbExpansionROM;
+t_MemBankConfig memtool_membank_config;
 
 namespace wGui {
+
+std::string RAMConfig::RAMConfigText(int i)
+{
+  switch (i) {
+    case 0:
+      return "0 [0123]";
+    case 1:
+      return "1 [0127]";
+    case 2:
+      return "2 [4567]";
+    case 3:
+      return "3 [0327]";
+    case 4:
+      return "4 [0423]";
+    case 5:
+      return "5 [0523]";
+    case 6:
+      return "6 [0623]";
+    case 7:
+      return "7 [0723]";
+    default:
+      return "N/A";
+  }
+}
+
+std::string RAMConfig::RAMConfigText()
+{
+  return RAMConfigText(RAMCfg);
+}
+
+RAMConfig RAMConfig::CurrentConfig()
+{
+  RAMConfig result;
+  result.LoROMEnabled = GateArray.ROM_config & 4;
+  result.HiROMEnabled = GateArray.ROM_config & 8;
+  result.RAMBank = (GateArray.RAM_config & 0x38) >> 3;
+  result.RAMCfg = GateArray.RAM_config & 0x7;
+  return result;
+}
 
 CapriceDevTools::CapriceDevTools(const CRect& WindowRect, CWindow* pParent, CFontEngine* pFontEngine, DevTools* devtools) :
   CFrame(WindowRect, pParent, pFontEngine, "DevTools", false), m_pDevTools(devtools)
@@ -139,12 +181,40 @@ CapriceDevTools::CapriceDevTools(const CRect& WindowRect, CWindow* pParent, CFon
     m_pAssemblyNewEntryPoint->SetContentType(CEditBox::HEXNUMBER);
     m_pAssemblyAddEntryPoint = new CButton(CRect(CPoint(140, 55), 50, 20), m_pAssemblyEntryPointsGrp, "Add");
 
-    m_pAssemblyBreakPointsGrp = new CGroupBox(CRect(CPoint(340, 180), 200, 120), m_pGroupBoxTabAsm, "Break points");
-    m_pAssemblyBreakPoints = new CListBox(CRect(CPoint(10, 5), 50, 80), m_pAssemblyBreakPointsGrp);
+    m_pAssemblyBreakPointsGrp = new CGroupBox(CRect(CPoint(340, 170), 200, 90), m_pGroupBoxTabAsm, "Break points");
+    m_pAssemblyBreakPoints = new CListBox(CRect(CPoint(10, 5), 50, 50), m_pAssemblyBreakPointsGrp);
     m_pAssemblyRemoveBreakPoint = new CButton(CRect(CPoint(80, 5), 100, 20), m_pAssemblyBreakPointsGrp, "Remove selected");
     m_pAssemblyNewBreakPoint = new CEditBox(CRect(CPoint(80, 30), 50, 20), m_pAssemblyBreakPointsGrp);
     m_pAssemblyNewBreakPoint->SetContentType(CEditBox::HEXNUMBER);
     m_pAssemblyAddBreakPoint = new CButton(CRect(CPoint(140, 30), 50, 20), m_pAssemblyBreakPointsGrp, "Add");
+
+    m_pAssemblyMemConfigGrp = new CGroupBox(CRect(CPoint(340, 270), 260, 100), m_pGroupBoxTabAsm, "RAM config");
+    m_pAssemblyMemConfigAsmLbl = new CLabel(CPoint(10, 30), m_pAssemblyMemConfigGrp, "Asm:");
+    m_pAssemblyMemConfigCurLbl = new CLabel(CPoint(10, 55), m_pAssemblyMemConfigGrp, "Cur:");
+    m_pAssemblyMemConfigROMLbl = new CLabel(CPoint(70, 0), m_pAssemblyMemConfigGrp, "ROM");
+    m_pAssemblyMemConfigLoLbl = new CLabel(CPoint(60, 10), m_pAssemblyMemConfigGrp, "Lo");
+    m_pAssemblyMemConfigHiLbl = new CLabel(CPoint(90, 10), m_pAssemblyMemConfigGrp, "Hi");
+    m_pAssemblyMemConfigRAMLbl = new CLabel(CPoint(170, 0), m_pAssemblyMemConfigGrp, "RAM");
+    m_pAssemblyMemConfigBankLbl = new CLabel(CPoint(140, 10), m_pAssemblyMemConfigGrp, "Bank");
+    m_pAssemblyMemConfigConfigLbl = new CLabel(CPoint(180, 10), m_pAssemblyMemConfigGrp, "Config");
+
+    m_pAssemblyMemConfigAsmLoROM = new CCheckBox(CRect(CPoint(60, 30), 10, 10), m_pAssemblyMemConfigGrp);
+    m_pAssemblyMemConfigAsmLoROM->SetReadOnly(true);
+    m_pAssemblyMemConfigAsmHiROM = new CCheckBox(CRect(CPoint(90, 30), 10, 10), m_pAssemblyMemConfigGrp);
+    m_pAssemblyMemConfigAsmHiROM->SetReadOnly(true);
+    m_pAssemblyMemConfigAsmRAMBank = new CEditBox(CRect(CPoint(140, 25), 30, 20), m_pAssemblyMemConfigGrp);
+    m_pAssemblyMemConfigAsmRAMBank->SetReadOnly(true);
+    m_pAssemblyMemConfigAsmRAMConfig = new CEditBox(CRect(CPoint(180, 25), 60, 20), m_pAssemblyMemConfigGrp);
+    m_pAssemblyMemConfigAsmRAMConfig->SetReadOnly(true);
+
+    m_pAssemblyMemConfigCurLoROM = new CCheckBox(CRect(CPoint(60, 55), 10, 10), m_pAssemblyMemConfigGrp);
+    m_pAssemblyMemConfigCurLoROM->SetReadOnly(true);
+    m_pAssemblyMemConfigCurHiROM = new CCheckBox(CRect(CPoint(90, 55), 10, 10), m_pAssemblyMemConfigGrp);
+    m_pAssemblyMemConfigCurHiROM->SetReadOnly(true);
+    m_pAssemblyMemConfigCurRAMBank = new CEditBox(CRect(CPoint(140, 50), 30, 20), m_pAssemblyMemConfigGrp);
+    m_pAssemblyMemConfigCurRAMBank->SetReadOnly(true);
+    m_pAssemblyMemConfigCurRAMConfig = new CEditBox(CRect(CPoint(180, 50), 60, 20), m_pAssemblyMemConfigGrp);
+    m_pAssemblyMemConfigCurRAMConfig->SetReadOnly(true);
 
     // ---------------- 'Memory' screen ----------------
     m_pMemPokeAdressLabel = new CLabel(        CPoint(15, 18),             m_pGroupBoxTabMemory, "Adress: ");
@@ -184,7 +254,7 @@ CapriceDevTools::CapriceDevTools(const CRect& WindowRect, CWindow* pParent, CFon
     m_pMemButtonSaveFilter->SetIsFocusable(true);
     m_pMemButtonApplyFilter    = new CButton( CRect(CPoint(250, 75), 90, 20),    m_pGroupBoxTabMemory, "Apply saved");
     m_pMemButtonApplyFilter->SetIsFocusable(true);
-    m_pMemButtonCopy      = new CButton( CRect(CPoint(380, 150), 95, 20),   m_pGroupBoxTabMemory, "Dump to stdout");
+    m_pMemButtonCopy      = new CButton( CRect(CPoint(380, 325), 95, 20),   m_pGroupBoxTabMemory, "Dump to stdout");
     m_pMemButtonCopy->SetIsFocusable(true);
 
     m_pMemTextContent  = new CTextBox(CRect(CPoint(15, 105), 350, 240), m_pGroupBoxTabMemory, monoFontEngine);
@@ -205,6 +275,36 @@ CapriceDevTools::CapriceDevTools(const CRect& WindowRect, CWindow* pParent, CFon
     m_pMemNewWatchPoint = new CEditBox(CRect(CPoint(80, 30), 50, 20), m_pMemWatchPointsGrp);
     m_pMemNewWatchPoint->SetContentType(CEditBox::HEXNUMBER);
     m_pMemAddWatchPoint = new CButton(CRect(CPoint(140, 30), 50, 20), m_pMemWatchPointsGrp, "Add");
+
+    m_pMemConfigGrp = new CGroupBox(CRect(CPoint(380, 143), 240, 100), m_pGroupBoxTabMemory, "RAM config");
+    m_pMemConfigMemLbl = new CLabel(CPoint(10, 30), m_pMemConfigGrp, "Mem:");
+    m_pMemConfigCurLbl = new CLabel(CPoint(10, 55), m_pMemConfigGrp, "Cur:");
+    m_pMemConfigROMLbl = new CLabel(CPoint(60, 0), m_pMemConfigGrp, "ROM");
+    m_pMemConfigLoLbl = new CLabel(CPoint(50, 10), m_pMemConfigGrp, "Lo");
+    m_pMemConfigHiLbl = new CLabel(CPoint(80, 10), m_pMemConfigGrp, "Hi");
+    m_pMemConfigRAMLbl = new CLabel(CPoint(150, 0), m_pMemConfigGrp, "RAM");
+    m_pMemConfigBankLbl = new CLabel(CPoint(120, 10), m_pMemConfigGrp, "Bank");
+    m_pMemConfigConfigLbl = new CLabel(CPoint(160, 10), m_pMemConfigGrp, "Config");
+
+    m_pMemConfigMemLoROM = new CCheckBox(CRect(CPoint(50, 30), 10, 10), m_pMemConfigGrp);
+    m_pMemConfigMemHiROM = new CCheckBox(CRect(CPoint(80, 30), 10, 10), m_pMemConfigGrp);
+    m_pMemConfigMemRAMBank = new CDropDown(CRect(CPoint(110, 25), 40, 20), m_pMemConfigGrp);
+    int nb_banks = (CPC.ram_size == 64) ? 1 : ((CPC.ram_size / 64)-1);
+    for (int i = 0; i < nb_banks; i++) m_pMemConfigMemRAMBank->AddItem(SListItem(std::to_string(i)));
+    m_pMemConfigMemRAMBank->SelectItem(0);
+    m_pMemConfigMemRAMConfig = new CDropDown(CRect(CPoint(160, 25), 70, 20), m_pMemConfigGrp);
+    int nb_configs = (CPC.ram_size == 64) ? 1 : 8;
+    for (int i = 0; i < nb_configs; i++) m_pMemConfigMemRAMConfig->AddItem(SListItem(RAMConfig::RAMConfigText(i)));
+    m_pMemConfigMemRAMConfig->SelectItem(0);
+
+    m_pMemConfigCurLoROM = new CCheckBox(CRect(CPoint(50, 55), 10, 10), m_pMemConfigGrp);
+    m_pMemConfigCurLoROM->SetReadOnly(true);
+    m_pMemConfigCurHiROM = new CCheckBox(CRect(CPoint(80, 55), 10, 10), m_pMemConfigGrp);
+    m_pMemConfigCurHiROM->SetReadOnly(true);
+    m_pMemConfigCurRAMBank = new CEditBox(CRect(CPoint(110, 50), 40, 20), m_pMemConfigGrp);
+    m_pMemConfigCurRAMBank->SetReadOnly(true);
+    m_pMemConfigCurRAMConfig = new CEditBox(CRect(CPoint(160, 50), 70, 20), m_pMemConfigGrp);
+    m_pMemConfigCurRAMConfig->SetReadOnly(true);
 
     // ---------------- 'Video' screen ----------------
     m_pVidLabel = new CLabel(CPoint(10, 10), m_pGroupBoxTabVideo, "Work in progress ... Nothing to see here yet, but come back later for video (CRTC & PSG info).");
@@ -234,6 +334,17 @@ void CapriceDevTools::UpdateDisassemblyPos()
     m_pAssemblyCode->SetAllSelections(false);
     m_pAssemblyCode->Draw();
   }
+
+  m_pAssemblyMemConfigAsmLoROM->SetCheckBoxState(m_AsmRAMConfig.LoROMEnabled ? CCheckBox::CHECKED : CCheckBox::UNCHECKED);
+  m_pAssemblyMemConfigAsmHiROM->SetCheckBoxState(m_AsmRAMConfig.HiROMEnabled ? CCheckBox::CHECKED : CCheckBox::UNCHECKED);
+  m_pAssemblyMemConfigAsmRAMBank->SetWindowText(std::to_string(m_AsmRAMConfig.RAMBank));
+  m_pAssemblyMemConfigAsmRAMConfig->SetWindowText(m_AsmRAMConfig.RAMConfigText());
+
+  RAMConfig CurConfig = RAMConfig::CurrentConfig();
+  m_pAssemblyMemConfigCurLoROM->SetCheckBoxState(CurConfig.LoROMEnabled ? CCheckBox::CHECKED : CCheckBox::UNCHECKED);
+  m_pAssemblyMemConfigCurHiROM->SetCheckBoxState(CurConfig.HiROMEnabled ? CCheckBox::CHECKED : CCheckBox::UNCHECKED);
+  m_pAssemblyMemConfigCurRAMBank->SetWindowText(std::to_string(CurConfig.RAMBank));
+  m_pAssemblyMemConfigCurRAMConfig->SetWindowText(CurConfig.RAMConfigText());
 }
 
 void CapriceDevTools::RefreshDisassembly()
@@ -242,18 +353,31 @@ void CapriceDevTools::RefreshDisassembly()
   std::vector<SListItem> items;
   for (const auto& line : m_Disassembled.lines) {
     std::ostringstream oss;
-    oss << std::hex << std::setw(5) << line.address_ << ": " << std::setw(10) << line.opcode_ << "     " << line.instruction_;
+    oss << std::hex << std::setw(5) << line.address_ << ": ";
+    if (line.opcode_ <= 0xFF) {
+      oss << "        " << std::setw(2) << std::setfill('0') << line.opcode_;
+    } else if (line.opcode_ <= 0xFFFF) {
+      oss << "      " << std::setw(4) << std::setfill('0') << line.opcode_;
+    } else if (line.opcode_ <= 0xFFFFFF) {
+      oss << "    " << std::setw(6) << std::setfill('0') << line.opcode_;
+    } else if (line.opcode_ <= 0xFFFFFFFF) {
+      oss << "  " << std::setw(8) << std::setfill('0') << line.opcode_;
+    } else {
+      oss << std::setw(10) << std::setfill('0') << line.opcode_;
+    }
+    oss << "     " << line.instruction_;
     // TODO: smart use of colors. Ideas:
     //   - labels, jumps & calls, ...
     //   - source of disassembling (from PC, from one entry point or another ...)
     if (std::any_of(breakpoints.begin(), breakpoints.end(), [&](const auto& b) {
-          return (b.address == line.address_ && b.source == USER);
+          return (b.address == line.address_);
           })) {
       items.emplace_back(oss.str(), reinterpret_cast<void*>(line.address_), COLOR_RED);
     } else {
       items.emplace_back(oss.str(), reinterpret_cast<void*>(line.address_));
     }
   }
+
   m_pAssemblyCode->AddItems(items);
   UpdateDisassemblyPos();
 }
@@ -265,6 +389,7 @@ void CapriceDevTools::UpdateDisassembly()
   // We need to force the repaint for the status to be displayed.
   m_pParentWindow->HandleMessage(new CMessage(CMessage::APP_PAINT, GetAncestor(ROOT), this));
   m_Disassembled = disassemble(m_EntryPoints);
+  m_AsmRAMConfig = RAMConfig::CurrentConfig();
   RefreshDisassembly();
   // TODO: Report inconsistent disassembling
   m_pAssemblyStatus->SetWindowText("SUCCESS");
@@ -346,12 +471,9 @@ void CapriceDevTools::UpdateBreakPointsList()
 {
   m_pAssemblyBreakPoints->ClearItems();
   for(const auto& bp : breakpoints) {
-    if (bp.source == USER)
-    {
-      std::ostringstream oss;
-      oss << std::hex << std::setw(4) << std::setfill('0') << bp.address;
-      m_pAssemblyBreakPoints->AddItem(SListItem(oss.str()));
-    }
+    std::ostringstream oss;
+    oss << std::hex << std::setw(4) << std::setfill('0') << bp.address;
+    m_pAssemblyBreakPoints->AddItem(SListItem(oss.str()));
   }
   // Ensure the lines corresponding to the breakpoints are colored
   RefreshDisassembly();
@@ -367,7 +489,40 @@ void CapriceDevTools::UpdateWatchPointsList()
   }
 }
 
-void CapriceDevTools::UpdateTextMemory() {
+void CapriceDevTools::UpdateMemConfig()
+{
+  RAMConfig CurConfig = RAMConfig::CurrentConfig();
+  m_pMemConfigCurLoROM->SetCheckBoxState(CurConfig.LoROMEnabled ? CCheckBox::CHECKED : CCheckBox::UNCHECKED);
+  m_pMemConfigCurHiROM->SetCheckBoxState(CurConfig.HiROMEnabled ? CCheckBox::CHECKED : CCheckBox::UNCHECKED);
+  m_pMemConfigCurRAMBank->SetWindowText(std::to_string(CurConfig.RAMBank));
+  m_pMemConfigCurRAMConfig->SetWindowText(CurConfig.RAMConfigText());
+}
+
+void CapriceDevTools::PrepareMemBankConfig()
+{
+  ga_init_banking(memtool_membank_config, m_pMemConfigMemRAMBank->GetSelectedIndex());
+  if (m_pMemConfigMemLoROM->GetCheckBoxState() == CCheckBox::CHECKED) {
+    for (int i = 0; i < 8; i++) memtool_membank_config[i][GateArray.lower_ROM_bank] = pbROMlo;
+  }
+  // TODO: Provide option to have register page on if on the CPC+
+  if (m_pMemConfigMemHiROM->GetCheckBoxState() == CCheckBox::CHECKED) {
+    for (int i = 0; i < 8; i++) memtool_membank_config[i][3] = pbExpansionROM;
+  }
+}
+
+byte CapriceDevTools::ReadMem(word address)
+{
+  return memtool_membank_config[m_pMemConfigMemRAMConfig->GetSelectedIndex()][address >> 14][address & 0x3fff];
+}
+
+void CapriceDevTools::WriteMem(word address, byte value)
+{
+  memtool_membank_config[m_pMemConfigMemRAMConfig->GetSelectedIndex()][address >> 14][address & 0x3fff] = value;
+}
+
+void CapriceDevTools::UpdateTextMemory()
+{
+  PrepareMemBankConfig();
   m_currentlyDisplayed.clear();
   std::ostringstream memText;
   for(unsigned int i = 0; i < 65536/m_MemBytesPerLine; i++) {
@@ -381,11 +536,12 @@ void CapriceDevTools::UpdateTextMemory() {
     bool filterAdress = (m_MemDisplayValue >= 0 && m_MemDisplayValue <= 65535);
     bool filterValue = (m_MemFilterValue >= 0 && m_MemFilterValue <= 255);
     for(unsigned int j = 0; j < m_MemBytesPerLine; j++) {
-      memLine << std::setw(2) << static_cast<unsigned int>(pbRAM[i*m_MemBytesPerLine+j]) << " ";
+      unsigned int val = ReadMem(i*m_MemBytesPerLine+j);
+      memLine << std::setw(2) << val << " ";
       if(!filterAdress && !filterValue) {
         displayLine = true;
       }
-      if(filterValue && static_cast<int>(pbRAM[i*m_MemBytesPerLine+j]) == m_MemFilterValue) {
+      if(filterValue && static_cast<int>(val) == m_MemFilterValue) {
         displayLine = true;
       }
       if(filterAdress && (i*m_MemBytesPerLine+j == static_cast<unsigned int>(m_MemDisplayValue))) {
@@ -441,6 +597,7 @@ void CapriceDevTools::PreUpdate()
                  break;
                }
       case 2 : { // 'Memory'
+                 UpdateMemConfig();
                  break;
                }
       case 3 : { // 'Video'
@@ -560,13 +717,14 @@ bool CapriceDevTools::HandleMessage(CMessage* pMessage)
           if (pMessage->Destination() == m_pGroupBoxTabMemory)
           {
             if (pMessage->Source() == m_pMemButtonPoke) {
+              PrepareMemBankConfig();
               std::string adress = m_pMemPokeAdress->GetWindowText();
               std::string value  = m_pMemPokeValue->GetWindowText();
               unsigned int pokeAdress = strtol(adress.c_str(), nullptr, 16);
               int pokeValue           = strtol(value.c_str(),  nullptr, 16);
               if(!adress.empty() && !value.empty() && pokeAdress < 65536 && pokeValue >= -128 && pokeValue <= 255) {
                 std::cout << "Poking " << pokeAdress << " with " << pokeValue << std::endl;
-                pbRAM[pokeAdress] = pokeValue;
+                WriteMem(pokeAdress, pokeValue);
                 UpdateTextMemory();
               } else {
                 std::cout << "Cannot poke " << adress << "(" << pokeAdress << ") with " << value << "(" << pokeValue << ")" << std::endl;

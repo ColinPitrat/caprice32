@@ -6,6 +6,7 @@
 #include "z80_disassembly.h"
 #include "cap32.h"
 #include "types.h"
+#include "wg_checkbox.h"
 #include "wg_dropdown.h"
 #include "wg_frame.h"
 #include "wg_groupbox.h"
@@ -21,6 +22,19 @@ class DevTools;
 
 namespace wGui
 {
+
+    class RAMConfig {
+      public:
+        std::string RAMConfigText();
+        static std::string RAMConfigText(int i);
+        static RAMConfig CurrentConfig();
+
+        bool LoROMEnabled;
+        bool HiROMEnabled;
+        int RAMBank = 0;
+        int RAMCfg = 0;
+    };
+
     class CapriceDevTools : public CFrame {
       public:
         //! \param pParent A pointer to the parent view
@@ -45,6 +59,11 @@ namespace wGui
       protected:
         void PauseExecution();
         void ResumeExecution();
+
+        byte ReadMem(word address);
+        void WriteMem(word address, byte value);
+        void PrepareMemBankConfig();
+
         void RefreshDisassembly();
         void UpdateAll();
         void UpdateZ80();
@@ -53,6 +72,7 @@ namespace wGui
         void UpdateEntryPointsList();
         void UpdateBreakPointsList();
         void UpdateWatchPointsList();
+        void UpdateMemConfig();
         void UpdateTextMemory();
 
         CButton* m_pButtonStepIn;
@@ -146,7 +166,27 @@ namespace wGui
         CButton *m_pAssemblyAddBreakPoint;
         CButton *m_pAssemblyRemoveBreakPoint;
 
+        CGroupBox* m_pAssemblyMemConfigGrp;
+        CLabel* m_pAssemblyMemConfigAsmLbl;
+        CLabel* m_pAssemblyMemConfigCurLbl;
+        CLabel* m_pAssemblyMemConfigROMLbl;
+        CLabel* m_pAssemblyMemConfigLoLbl;
+        CLabel* m_pAssemblyMemConfigHiLbl;
+        CLabel* m_pAssemblyMemConfigRAMLbl;
+        CLabel* m_pAssemblyMemConfigBankLbl;
+        CLabel* m_pAssemblyMemConfigConfigLbl;
+
+        CCheckBox* m_pAssemblyMemConfigAsmLoROM;
+        CCheckBox* m_pAssemblyMemConfigAsmHiROM;
+        CEditBox* m_pAssemblyMemConfigAsmRAMBank;
+        CEditBox* m_pAssemblyMemConfigAsmRAMConfig;
+        CCheckBox* m_pAssemblyMemConfigCurLoROM;
+        CCheckBox* m_pAssemblyMemConfigCurHiROM;
+        CEditBox* m_pAssemblyMemConfigCurRAMBank;
+        CEditBox* m_pAssemblyMemConfigCurRAMConfig;
+
         DisassembledCode m_Disassembled;
+        RAMConfig m_AsmRAMConfig;
 
         // Memory screen
         CLabel   *m_pMemPokeLabel;
@@ -173,6 +213,27 @@ namespace wGui
         CEditBox* m_pMemNewWatchPoint;
         CButton *m_pMemAddWatchPoint;
         CButton *m_pMemRemoveWatchPoint;
+
+        CGroupBox* m_pMemConfigGrp;
+        CLabel* m_pMemConfigMemLbl;
+        CLabel* m_pMemConfigCurLbl;
+        CLabel* m_pMemConfigROMLbl;
+        CLabel* m_pMemConfigLoLbl;
+        CLabel* m_pMemConfigHiLbl;
+        CLabel* m_pMemConfigRAMLbl;
+        CLabel* m_pMemConfigBankLbl;
+        CLabel* m_pMemConfigConfigLbl;
+
+        CCheckBox* m_pMemConfigMemLoROM;
+        CCheckBox* m_pMemConfigMemHiROM;
+        CDropDown* m_pMemConfigMemRAMBank;
+        CDropDown* m_pMemConfigMemRAMConfig;
+        CCheckBox* m_pMemConfigCurLoROM;
+        CCheckBox* m_pMemConfigCurHiROM;
+        CEditBox* m_pMemConfigCurRAMBank;
+        CEditBox* m_pMemConfigCurRAMConfig;
+
+        RAMConfig m_MemRAMConfig;
 
         // Variables for saved filters.
         // Lines currently displayed

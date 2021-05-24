@@ -43,15 +43,9 @@ typedef union {
 #define Cflag  0x01 // carry flag
 #define Xflags 0x28 // bit 5 & 3 flags
 
-enum BreakpointSource {
-  USER = 1,
-  STEP = 2,
-};
-
 struct Breakpoint {
   Breakpoint(word val) : address(val) {};
   dword address;
-  BreakpointSource source;
 };
 
 enum WatchpointType {

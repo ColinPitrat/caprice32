@@ -19,6 +19,7 @@
 #ifndef CAP32_H
 #define CAP32_H
 
+#include <array>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -28,6 +29,7 @@
 #include <unistd.h>
 #include <string>
 #include <vector>
+#include "types.h"
 
 class InputMapper;
 //#define DEBUG
@@ -381,7 +383,10 @@ typedef struct {
    unsigned int frame_completed;
 } t_VDU;
 
+using t_MemBankConfig = std::array<std::array<byte*, 4>, 8>;
+
 // cap32.cpp
+void ga_init_banking(t_MemBankConfig& membank_config, unsigned char RAM_bank);
 bool driveAltered();
 void emulator_reset();
 int  emulator_init();

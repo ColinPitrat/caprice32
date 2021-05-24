@@ -1,4 +1,3 @@
-// wg_checkbox.h
 //
 // CCheckBox interface
 //
@@ -50,6 +49,14 @@ public:
 	//! Standard destructor
 	~CCheckBox() override;
 
+	//! Set the Read-only state of the control
+	//! \param bReadOnly  If set to true, the control will not take any input
+	void SetReadOnly(bool bReadOnly);
+
+	//! Indicates if the check box is operating in read-only mode
+	//! \return true if the control is read-only
+	bool IsReadOnly() const { return m_bReadOnly; }
+
 	//! The checkbox state
 	enum EState {
 		UNCHECKED,  //!< The checkbox is unchecked
@@ -95,6 +102,7 @@ public:
 
 protected:
 	EState m_eCheckBoxState;  //!< The checkbox's state
+	bool m_bReadOnly;  //!< If true, the value of the control cannot be changed by the user
 	unsigned int m_MouseButton;  //!< The last mouse button to be pushed over the control, it's used internally
   CBitmapResourceHandle m_hBitmapCheck; // CheckMark defined as a bitmap resource.
 

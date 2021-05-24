@@ -47,6 +47,15 @@ CCheckBox::CCheckBox(const CRect& WindowRect, CWindow* pParent) :
 CCheckBox::~CCheckBox() = default;
 
 
+void CCheckBox::SetReadOnly(bool bReadOnly)
+{
+	m_BackgroundColor = bReadOnly ? COLOR_LIGHTGRAY : COLOR_WHITE;
+	m_bReadOnly = bReadOnly;
+  SetIsFocusable(!bReadOnly);
+	Draw();
+}
+
+
 void CCheckBox::SetCheckBoxState(EState eState)
 {
 	if (m_eCheckBoxState != eState)
@@ -59,6 +68,7 @@ void CCheckBox::SetCheckBoxState(EState eState)
 
 void CCheckBox::ToggleCheckBoxState()
 {
+  if (m_bReadOnly) return;
   switch (m_eCheckBoxState)
   {
     case UNCHECKED:
@@ -112,7 +122,7 @@ bool CCheckBox::OnMouseButtonDown(CPoint Point, unsigned int Button)
 {
 	bool bResult = CWindow::OnMouseButtonDown(Point, Button);
 
- 	if (!bResult && m_bVisible && (m_eCheckBoxState != DISABLED) &&
+ 	if (!bResult && m_bVisible && !m_bReadOnly && (m_eCheckBoxState != DISABLED) &&
 		(m_ClientRect.HitTest(ViewToWindow(Point)) == CRect::RELPOS_INSIDE))
 	{
 		m_MouseButton = Button;
@@ -127,8 +137,9 @@ bool CCheckBox::OnMouseButtonUp(CPoint Point, unsigned int Button)
 {
 	bool bResult = CWindow::OnMouseButtonUp(Point, Button);
 
-	if (!bResult && m_bVisible && (m_eCheckBoxState != DISABLED) && (m_MouseButton == Button) &&
-		(m_ClientRect.HitTest(ViewToWindow(Point)) == CRect::RELPOS_INSIDE))
+	if (!bResult && m_bVisible && !m_bReadOnly && (m_eCheckBoxState != DISABLED) &&
+      (m_MouseButton == Button) &&
+      (m_ClientRect.HitTest(ViewToWindow(Point)) == CRect::RELPOS_INSIDE))
 	{
 		CMessage::EMessageType MessageType =  CMessage::UNKNOWN;
 		switch (m_MouseButton)
