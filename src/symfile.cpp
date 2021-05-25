@@ -23,7 +23,7 @@ Symfile::Symfile(const std::string& filename)
       word addr = std::stol(elems[1].substr(1), nullptr, 16);
       addSymbol(addr, elems[2].substr(1));
     }
-    if (elems[0] == "b") {
+    if (elems[0] == "b" or elems[0] == "break") {
       if (elems.size() < 2 || elems[1][0] != '$') {
         LOG_ERROR("Invalid `al` entry in " << filename << ": " << line);
         continue;

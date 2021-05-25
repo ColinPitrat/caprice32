@@ -329,6 +329,8 @@ void CapriceDevTools::UpdateDisassemblyPos()
   int idx = std::distance(lines.begin(), curpos);
   m_pAssemblyCode->SetPosition(idx, CListBox::CENTER);
   if (!lines.empty() && curpos->pItemData == toFind.pItemData) {
+    // Skip over address labels
+    while ((curpos = std::next(curpos))->pItemData == toFind.pItemData) idx++;
     // TODO: Do not allow to select another line
     m_pAssemblyCode->SetSelection(idx, /*bSelected=*/true, /*bNotify=*/false);
   } else {
@@ -362,7 +364,7 @@ void CapriceDevTools::RefreshDisassembly()
   std::map<word, std::string> symbols = m_Symfile.Symbols();
   std::map<word, std::string>::iterator symbols_it = symbols.begin();
   for (const auto& line : m_Disassembled.lines) {
-    if (symbols_it != symbols.end() && symbols_it->first <= line.address_) {
+    while (symbols_it != symbols.end() && symbols_it->first <= line.address_) {
       items.emplace_back(FormatSymbol(symbols_it), reinterpret_cast<void*>(symbols_it->first), COLOR_BLUE);
       symbols_it++;
     }
