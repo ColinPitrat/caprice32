@@ -2712,8 +2712,10 @@ int cap32_main (int argc, char **argv)
          virtualKeyboardEvents.pop_front();
       }
       
-      devtools.remove_if([](DevTools& d) { return !d.IsActive(); });
       if (!devtools.empty()) {
+        devtools.remove_if([](DevTools& d) { return !d.IsActive(); });
+        // Ensure execution is resumed when all devtools are closed
+        if (devtools.empty()) CPC.paused = false;
         for (auto& devtool : devtools) devtool.PreUpdate();
         for (auto& devtool : devtools) devtool.PostUpdate();
       }
