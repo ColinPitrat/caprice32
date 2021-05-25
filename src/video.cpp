@@ -134,6 +134,14 @@ SDL_Surface* direct_init(video_plugin* t, int w, int h, bool fs)
   return vid;
 }
 
+void direct_close()
+{
+  if (texture) SDL_DestroyTexture(texture);
+  if (vid) SDL_FreeSurface(vid);
+  if (renderer) SDL_DestroyRenderer(renderer);
+  if (mainSDLWindow) SDL_DestroyWindow(mainSDLWindow);
+}
+
 /* ------------------------------------------------------------------------------------ */
 /* Half size video plugin ------------------------------------------------------------- */
 /* ------------------------------------------------------------------------------------ */
@@ -162,6 +170,7 @@ void half_flip(video_plugin* t)
 
 void half_close()
 {
+  direct_close();
 }
 
 /* ------------------------------------------------------------------------------------ */
@@ -192,6 +201,7 @@ void double_flip(video_plugin* t __attribute__((unused)))
 
 void double_close()
 {
+  direct_close();
 }
 
 #ifdef HAVE_GL
@@ -498,6 +508,7 @@ void glscale_flip(video_plugin* t __attribute__((unused)))
 
 void glscale_close()
 {
+  direct_close();
   SDL_FreeSurface(pub);
   pub = nullptr;
 }
@@ -626,6 +637,7 @@ void swscale_setpal(SDL_Color* c)
 
 void swscale_close()
 {
+  direct_close();
   SDL_FreeSurface(pub);
   pub = nullptr;
 }

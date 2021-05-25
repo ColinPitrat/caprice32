@@ -1512,13 +1512,8 @@ void video_set_style ()
 }
 
 
-int video_init ()
+int video_init (bool first_call)
 {
-   if (SDL_InitSubSystem(SDL_INIT_VIDEO) < 0) { // initialize the video subsystem
-      LOG_ERROR("Init of video subsystem failed: " << SDL_GetError());
-      return ERR_VIDEO_INIT;
-   }
-
    vid_plugin=&video_plugin_list[CPC.scr_style];
 
    back_surface=vid_plugin->init(vid_plugin, CPC.scr_fs_width, CPC.scr_fs_height, CPC.scr_fs_bpp, CPC.scr_window==0);
@@ -1542,7 +1537,7 @@ int video_init ()
    CPC.scr_base = static_cast<byte *>(back_surface->pixels); // memory address of back buffer
    CPC.scr_gui_is_currently_on = false;
 
-   ShowCursor(false); // hide the mouse cursor
+   if (first_call) ShowCursor(false); // hide the mouse cursor
 
    crtc_init();
 
@@ -1554,7 +1549,6 @@ int video_init ()
 void video_shutdown ()
 {
    vid_plugin->close();
-   SDL_QuitSubSystem(SDL_INIT_VIDEO);
 }
 
 
@@ -2621,7 +2615,7 @@ int cap32_main (int argc, char **argv)
    }
    parseArguments(argc, argv, slot_list, args);
 
-   if (SDL_Init(SDL_INIT_AUDIO | SDL_INIT_TIMER | SDL_INIT_NOPARACHUTE) < 0) { // initialize SDL
+   if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_TIMER | SDL_INIT_NOPARACHUTE) < 0) { // initialize SDL
       fprintf(stderr, "SDL_Init() failed: %s\n", SDL_GetError());
       exit(-1);
    }
@@ -2644,7 +2638,7 @@ int cap32_main (int argc, char **argv)
 
    z80_init_tables(); // init Z80 emulation
 
-   if (video_init()) {
+   if (video_init(/*first_call=*/true)) {
       fprintf(stderr, "video_init() failed. Aborting.\n");
       cleanExit(-1);
    }
@@ -2789,7 +2783,7 @@ int cap32_main (int argc, char **argv)
                            SDL_Delay(20);
                            video_shutdown();
                            CPC.scr_window = CPC.scr_window ? 0 : 1;
-                           if (video_init()) {
+                           if (video_init(/*first_call=*/false)) {
                               fprintf(stderr, "video_init() failed. Aborting.\n");
                               cleanExit(-1);
                            }

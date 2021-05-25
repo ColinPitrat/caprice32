@@ -550,11 +550,11 @@ bool CapriceOptions::ProcessOptionChanges(t_CPC& CPC, bool saveChanges) {
         audio_pause();
         SDL_Delay(20);
         video_shutdown();
-        if (video_init())
+        if (video_init(/*first_call=*/false))
         {
           // we failed video init, restore previous plugin
           CPC.scr_style = m_oldCPCsettings.scr_style;
-          video_init();
+          video_init(/*first_call=*/false);
         }
         audio_resume();
 

@@ -399,7 +399,7 @@ int audio_init ();
 void audio_shutdown ();
 void audio_pause ();
 void audio_resume ();
-int video_init ();
+int video_init (bool first_call);
 void video_shutdown ();
 void cleanExit(int returnCode, bool askIfUnsaved = true);
 
