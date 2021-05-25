@@ -687,7 +687,6 @@ bool CapriceDevTools::HandleMessage(CMessage* pMessage)
           if (pMessage->Destination() == this)
           {
             if (pMessage->Source() == m_pButtonClose) {
-              // TODO: Unpause on closing, but only for the last window (so not here ...)
               CloseFrame();
               bHandled = true;
               break;

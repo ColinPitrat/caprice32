@@ -4,8 +4,6 @@
 #include "video.h"
 #include "wg_error.h"
 
-// TODO: Have a single CapriceGui application for all UI. Initialize it once and never call Exec for any UI but pause emulation when some UI (which are on the main window) are on.
-// TODO: Allow to have multiple windows (e.g to allow to see z80 and memory at the same time)
 bool DevTools::Activate() {
   ShowCursor(true);
   try {
@@ -58,41 +56,5 @@ void DevTools::PostUpdate() {
 }
 
 bool DevTools::PassEvent(SDL_Event& event) {
-  auto windowId = SDL_GetWindowID(window);
-  bool forMe = false;
-  // TODO: For events that don't have a windowId (e.g joystick, ...), it would
-  // make sense to check if the window has focus.
-  // This can be done with SDL_GetWindowFlags, checking for
-  // SDL_WINDOW_INPUT_FOCUS and/or SDL_WINDOW_MOUSE_FOCUS
-  switch (event.type) {
-    case SDL_KEYDOWN:
-    case SDL_KEYUP:
-      if (event.key.windowID == windowId) forMe = true; 
-      break;
-    case SDL_MOUSEBUTTONDOWN:
-    case SDL_MOUSEBUTTONUP:
-      if (event.button.windowID == windowId) forMe = true;
-      break;
-    case SDL_TEXTEDITING:
-      if (event.edit.windowID == windowId) forMe = true;
-      break;
-    case SDL_MOUSEMOTION:
-      if (event.motion.windowID == windowId) forMe = true;
-      break;
-    case SDL_TEXTINPUT:
-      if (event.text.windowID == windowId) forMe = true;
-      break;
-    case SDL_MOUSEWHEEL:
-      if (event.wheel.windowID == windowId) forMe = true;
-      break;
-    case SDL_WINDOWEVENT:
-      if (event.window.windowID == windowId) forMe = true;
-      if (forMe && event.window.event == SDL_WINDOWEVENT_CLOSE) {
-        devToolsView->Close();
-        return true;
-      }
-      break;
-  }
-  if (!forMe) return false;
   return capriceGui->ProcessEvent(event);
 }

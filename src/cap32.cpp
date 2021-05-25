@@ -2736,10 +2736,15 @@ int cap32_main (int argc, char **argv)
       }
       while (SDL_PollEvent(&event)) {
          bool processed = false;
-         for (auto& devtool : devtools) {
-           if (devtool.PassEvent(event)) {
-             processed = true;
-             break;
+         if (!devtools.empty()) {
+           devtools.remove_if([](DevTools& d) { return !d.IsActive(); });
+           // Ensure execution is resumed when all devtools are closed
+           if (devtools.empty()) CPC.paused = false;
+           for (auto& devtool : devtools) {
+             if (devtool.PassEvent(event)) {
+               processed = true;
+               break;
+             }
            }
          }
          if (processed) continue;
