@@ -16,6 +16,7 @@
    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#include <algorithm>
 #include <iostream>
 #include <sstream>
 #include <chrono>
@@ -72,6 +73,7 @@
 
 extern byte bTapeLevel;
 extern t_z80regs z80;
+extern std::vector<Breakpoint> breakpoints;
 
 extern dword *ScanPos;
 extern dword *ScanStart;
@@ -1988,6 +1990,19 @@ void showGui()
    cleanupShowUI(guiBackSurface);
 }
 
+// TODO: Dedupe with the version in CapriceDevTools
+// TODO: Support watchpoints too
+void loadBreakpoints()
+{
+  if (args.symFilePath.empty()) return;
+  Symfile symfile(args.symFilePath);
+  for (auto breakpoint : symfile.Breakpoints()) {
+    if (std::find_if(breakpoints.begin(), breakpoints.end(),
+          [&](const auto& bp) { return bp.address == breakpoint; } ) != breakpoints.end()) continue;
+    breakpoints.push_back(breakpoint);
+  }
+}
+
 void showDevTools()
 {
   Uint32 flags = SDL_GetWindowFlags(mainSDLWindow);
@@ -2676,6 +2691,8 @@ int cap32_main (int argc, char **argv)
    update_timings();
    audio_resume();
 
+   loadBreakpoints();
+
    iExitCondition = EC_FRAME_COMPLETE;
 
    while (true) {
@@ -2999,13 +3016,22 @@ int cap32_main (int argc, char **argv)
          iExitCondition = z80_execute(); // run the emulation until an exit condition is met
          
          if (iExitCondition == EC_BREAKPOINT) {
-            // We have to clear breakpoint to let the z80 emulator move on.
-            z80.break_point = 0xffffffff; // clear break point
-            z80.trace = 1; // make sure we'll be here to rearm break point at the next z80 instruction.
+            if (z80.breakpoint_reached || z80.watchpoint_reached) {
+              // This is a breakpoint from DevTools or symbol file
+              if (devtools.empty()) {
+                CPC.paused = true;
+                showDevTools();
+              }
+            } else {
+              // This is an old flavour breakpoint
+              // We have to clear breakpoint to let the z80 emulator move on.
+              z80.break_point = 0xffffffff; // clear break point
+              z80.trace = 1; // make sure we'll be here to rearm break point at the next z80 instruction.
 
-            if (breakPointsToSkipBeforeProceedingWithVirtualEvents>0) {
-               breakPointsToSkipBeforeProceedingWithVirtualEvents--;
-               LOG_DEBUG("Decremented breakpoint skip counter to " << breakPointsToSkipBeforeProceedingWithVirtualEvents);
+              if (breakPointsToSkipBeforeProceedingWithVirtualEvents>0) {
+                breakPointsToSkipBeforeProceedingWithVirtualEvents--;
+                LOG_DEBUG("Decremented breakpoint skip counter to " << breakPointsToSkipBeforeProceedingWithVirtualEvents);
+              }
             }
          } else {
             if (z80.break_point == 0xffffffff) { // TODO(cpcitor) clean up 0xffffffff into a value like Z80_BREAKPOINT_NONE
