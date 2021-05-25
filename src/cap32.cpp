@@ -2003,20 +2003,21 @@ void loadBreakpoints()
   }
 }
 
-void showDevTools()
+bool showDevTools()
 {
   Uint32 flags = SDL_GetWindowFlags(mainSDLWindow);
   // DevTools don't behave very well in fullscreen mode, so just disallow it
   if ((flags & SDL_WINDOW_FULLSCREEN) ||
       (flags & SDL_WINDOW_FULLSCREEN_DESKTOP)) {
     set_osd_message("Dev tools not available in fullscreen");
-    return;
+    return false;
   }
   devtools.emplace_back();
   if (!devtools.back().Activate()) {
     LOG_ERROR("Failed to activate developers tools");
   }
   if (!args.symFilePath.empty()) devtools.back().LoadSymbols(args.symFilePath);
+  return true;
 }
 
 void dumpScreen() {
@@ -3019,8 +3020,7 @@ int cap32_main (int argc, char **argv)
             if (z80.breakpoint_reached || z80.watchpoint_reached) {
               // This is a breakpoint from DevTools or symbol file
               if (devtools.empty()) {
-                CPC.paused = true;
-                showDevTools();
+                if (showDevTools()) CPC.paused = true;
               }
             } else {
               // This is an old flavour breakpoint
