@@ -10,6 +10,7 @@
 #include "devtools.h"
 #include "cap32.h"
 #include "log.h"
+#include "stringutils.h"
 #include "z80.h"
 #include "z80_macros.h"
 #include "z80_disassembly.h"
@@ -347,13 +348,26 @@ void CapriceDevTools::UpdateDisassemblyPos()
   m_pAssemblyMemConfigCurRAMConfig->SetWindowText(CurConfig.RAMConfigText());
 }
 
+std::string FormatSymbol(const std::map<word, std::string>::iterator& symbol_it)
+{
+  std::ostringstream oss;
+  oss << symbol_it->second << ": [" << std::hex << std::setw(4) << std::setfill('0') << symbol_it->first << "]";
+  return oss.str();
+}
+
 void CapriceDevTools::RefreshDisassembly()
 {
   m_pAssemblyCode->ClearItems();
   std::vector<SListItem> items;
+  std::map<word, std::string> symbols = m_Symfile.Symbols();
+  std::map<word, std::string>::iterator symbols_it = symbols.begin();
   for (const auto& line : m_Disassembled.lines) {
+    if (symbols_it != symbols.end() && symbols_it->first <= line.address_) {
+      items.emplace_back(FormatSymbol(symbols_it), reinterpret_cast<void*>(symbols_it->first), COLOR_BLUE);
+      symbols_it++;
+    }
     std::ostringstream oss;
-    oss << std::hex << std::setw(5) << line.address_ << ": ";
+    oss << std::hex << " " << std::setw(4) << std::setfill('0') << line.address_ << ": ";
     if (line.opcode_ <= 0xFF) {
       oss << "        " << std::setw(2) << std::setfill('0') << line.opcode_;
     } else if (line.opcode_ <= 0xFFFF) {
@@ -366,16 +380,26 @@ void CapriceDevTools::RefreshDisassembly()
       oss << std::setw(10) << std::setfill('0') << line.opcode_;
     }
     oss << "     " << line.instruction_;
+    std::string instruction = oss.str();
+    std::map<word, std::string>::iterator it;
+    if (!line.ref_address_string_.empty() &&
+        ((it = symbols.find(line.ref_address_)) != symbols.end())) {
+      instruction = stringutils::replace(instruction, line.ref_address_string_, it->second);
+    }
     // TODO: smart use of colors. Ideas:
     //   - labels, jumps & calls, ...
     //   - source of disassembling (from PC, from one entry point or another ...)
+    auto color = COLOR_BLACK;
     if (std::any_of(breakpoints.begin(), breakpoints.end(), [&](const auto& b) {
           return (b.address == line.address_);
           })) {
-      items.emplace_back(oss.str(), reinterpret_cast<void*>(line.address_), COLOR_RED);
-    } else {
-      items.emplace_back(oss.str(), reinterpret_cast<void*>(line.address_));
-    }
+      color = COLOR_RED;
+    } else if (line.instruction_ == "ret") {
+      color = COLOR_BLUE;
+    }/* else if (!line.ref_address_string_.empty()) {
+      color = COLOR_DARKGREEN;
+    }*/
+    items.emplace_back(instruction, reinterpret_cast<void*>(line.address_), color);
   }
 
   m_pAssemblyCode->AddItems(items);
@@ -568,6 +592,23 @@ void CapriceDevTools::ResumeExecution()
 {
   CPC.paused = false;
   m_pButtonPause->SetWindowText("Pause");
+}
+
+void CapriceDevTools::LoadSymbols(const std::string& filename)
+{
+  m_Symfile = Symfile(filename);
+  for (auto breakpoint : m_Symfile.Breakpoints()) {
+    if (std::find_if(breakpoints.begin(), breakpoints.end(),
+          [&](const auto& bp) { return bp.address == breakpoint; } ) != breakpoints.end()) continue;
+    breakpoints.push_back(breakpoint);
+  }
+  for (auto entrypoint : m_Symfile.Entrypoints()) {
+    if (std::find(m_EntryPoints.begin(), m_EntryPoints.end(), entrypoint) != m_EntryPoints.end()) continue;
+    m_EntryPoints.push_back(entrypoint);
+  }
+  UpdateEntryPointsList();
+  UpdateBreakPointsList();
+  RefreshDisassembly();
 }
 
 void CapriceDevTools::PreUpdate()

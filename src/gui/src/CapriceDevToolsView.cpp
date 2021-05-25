@@ -10,6 +10,11 @@ CapriceDevToolsView::CapriceDevToolsView(CApplication& application, SDL_Surface*
   m_pDevToolsFrame = new CapriceDevTools(CRect(CPoint(0, 0), DEVTOOLS_WIDTH, DEVTOOLS_HEIGHT), this, nullptr, devtools);
 }
 
+void CapriceDevToolsView::LoadSymbols(const std::string& filename)
+{
+  m_pDevToolsFrame->LoadSymbols(filename);
+}
+
 void CapriceDevToolsView::PaintToSurface(SDL_Surface& ScreenSurface, SDL_Surface& FloatingSurface, const CPoint& Offset) const
 {
   if (m_bVisible)

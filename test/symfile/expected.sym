@@ -1,0 +1,9 @@
+; labels
+al  $3456 .foobar
+al  $3457 .foobaz
+; breakpoints
+b  $1234
+b  $1235
+; entrypoints
+d  $2345
+d  $2346

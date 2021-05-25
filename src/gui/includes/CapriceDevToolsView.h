@@ -23,6 +23,8 @@ class CapriceDevToolsView : public wGui::CView
     CapriceDevToolsView(wGui::CApplication& application, SDL_Surface* surface, SDL_Renderer* renderer, SDL_Texture* texture, const wGui::CRect& WindowRect, DevTools* devtools);
     ~CapriceDevToolsView() final = default;
 
+    void LoadSymbols(const std::string& filename);
+
     void PaintToSurface(SDL_Surface& ScreenSurface, SDL_Surface& FloatingSurface, const wGui::CPoint& Offset) const override;
 
     void PreUpdate();

@@ -133,12 +133,15 @@ extern CRGBColor COLOR_GRAY;
 extern CRGBColor COLOR_DARKGRAY;
 extern CRGBColor COLOR_BLACK;
 extern CRGBColor COLOR_BLUE;
+extern CRGBColor COLOR_DARKBLUE;
 extern CRGBColor COLOR_BLUE_1;
 extern CRGBColor COLOR_RED;
 extern CRGBColor COLOR_GREEN;
+extern CRGBColor COLOR_DARKGREEN;
 extern CRGBColor COLOR_YELLOW;
 extern CRGBColor COLOR_CYAN;
 extern CRGBColor COLOR_MAGENTA;
+extern CRGBColor COLOR_DARKMAGENTA;
 
 }
 

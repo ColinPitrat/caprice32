@@ -5,6 +5,7 @@
 
 #include "z80_disassembly.h"
 #include "cap32.h"
+#include "symfile.h"
 #include "types.h"
 #include "wg_checkbox.h"
 #include "wg_dropdown.h"
@@ -42,6 +43,8 @@ namespace wGui
         //! If this is set to 0 it will use the default font engine specified by the CApplication (which must be set before instantiating this object)
         CapriceDevTools(const CRect& WindowRect, CWindow* pParent, CFontEngine* pFontEngine, DevTools* devtools);
         ~CapriceDevTools() override;
+
+        void LoadSymbols(const std::string& filename);
 
         //! Prepare the update by saving the CPC state and updating this devtool's state.
         //! This is separated from Step2 to allow having multiple devtools.
@@ -186,6 +189,7 @@ namespace wGui
         CEditBox* m_pAssemblyMemConfigCurRAMConfig;
 
         DisassembledCode m_Disassembled;
+        Symfile m_Symfile;
         RAMConfig m_AsmRAMConfig;
 
         // Memory screen

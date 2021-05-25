@@ -20,14 +20,17 @@ class OpCode {
 
 class DisassembledLine {
   public:
-    DisassembledLine(word address, uint64_t opcode, std::string&& instruction) :
-      address_(address), opcode_(opcode), instruction_(instruction) {};
+    DisassembledLine(word address, uint64_t opcode, std::string&& instruction, int64_t ref_address = -1);
+
+    void AddRefAddress(word address);
 
     friend bool operator<(const DisassembledLine& l, const DisassembledLine& r);
 
     word address_;
     uint64_t opcode_;
     std::string instruction_;
+    word ref_address_ = 0;
+    std::string ref_address_string_;
 };
 
 class DisassembledCode {

@@ -47,6 +47,29 @@ TEST(StringUtils, SplitOnColon)
   ASSERT_EQ("v5", result[4]);
 }
 
+TEST(StringUtils, SplitWithEmpty)
+{
+  std::string toSplit = "value1,,value3";
+
+  std::vector<std::string> result = stringutils::split(toSplit, ',');
+
+  ASSERT_EQ(3, result.size());
+  ASSERT_EQ("value1", result[0]);
+  ASSERT_EQ("", result[1]);
+  ASSERT_EQ("value3", result[2]);
+}
+
+TEST(StringUtils, SplitWithEmptyIgnore)
+{
+  std::string toSplit = "value1,,value3";
+
+  std::vector<std::string> result = stringutils::split(toSplit, ',', /*ignore_empty=*/true);
+
+  ASSERT_EQ(2, result.size());
+  ASSERT_EQ("value1", result[0]);
+  ASSERT_EQ("value3", result[1]);
+}
+
 TEST(StringUtils, TrimCharNotPresentInString)
 {
   std::string toTrim = "a test string";
@@ -171,6 +194,16 @@ TEST(StringUtils, UpperOnLowerCaseString)
   auto result = stringutils::upper(toUpper);
 
   ASSERT_EQ("GHIJKL", result);
+}
+
+TEST(StringUtils, Replace)
+{
+  ASSERT_EQ("NothingToReplace", stringutils::replace("NothingToReplace", "NotFound", "Something"));
+  ASSERT_EQ("SomethingToReplace", stringutils::replace("SomethingFoo", "Foo", "ToReplace"));
+  ASSERT_EQ("ReplaceOnlyOnce", stringutils::replace("ReplaceOnceOnce", "Once", "Only"));
+  ASSERT_EQ("EmptySearch", stringutils::replace("Search", "", "Empty"));
+  ASSERT_EQ("EmptyReplace", stringutils::replace("EmptyReplaceWorks", "Works", ""));
+  ASSERT_EQ("", stringutils::replace("", "EmptyString", "Nothing"));
 }
 
 TEST(StringUtils, SplitPathOnUnix)

@@ -12,6 +12,8 @@ class DevTools {
 
     bool IsActive() const { return active; };
 
+    void LoadSymbols(const std::string& filename);
+
     void PreUpdate();
     void PostUpdate();
 

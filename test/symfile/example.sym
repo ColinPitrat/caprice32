@@ -1,0 +1,7 @@
+; labels
+al  $4005 .hello_world
+al  $4012 .foo_bar
+; breakpoints
+b  $4042
+; entrypoints
+d  $1729

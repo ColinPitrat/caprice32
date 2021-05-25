@@ -1988,7 +1988,7 @@ void showGui()
    cleanupShowUI(guiBackSurface);
 }
 
-void toggleDevTools()
+void showDevTools()
 {
   Uint32 flags = SDL_GetWindowFlags(mainSDLWindow);
   // DevTools don't behave very well in fullscreen mode, so just disallow it
@@ -2001,6 +2001,7 @@ void toggleDevTools()
   if (!devtools.back().Activate()) {
     LOG_ERROR("Failed to activate developers tools");
   }
+  if (!args.symFilePath.empty()) devtools.back().LoadSymbols(args.symFilePath);
 }
 
 void dumpScreen() {
@@ -2759,7 +2760,7 @@ int cap32_main (int argc, char **argv)
 
                         case CAP32_DEVTOOLS:
                           {
-                            toggleDevTools();
+                            showDevTools();
                             break;
                           }
 

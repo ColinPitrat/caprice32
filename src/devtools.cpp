@@ -44,6 +44,10 @@ void DevTools::Deactivate() {
   active = false;
 }
 
+void DevTools::LoadSymbols(const std::string& filename) {
+  devToolsView->LoadSymbols(filename);
+}
+
 void DevTools::PreUpdate() {
   devToolsView->PreUpdate();
 }
