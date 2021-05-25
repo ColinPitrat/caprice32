@@ -1918,7 +1918,7 @@ bool userConfirmsQuitWithoutSaving()
    bool confirmed = false;
    // Show warning
    try {
-      CapriceGui capriceGui(mainSDLWindow);
+      CapriceGui capriceGui(mainSDLWindow, /*bInMainView=*/true);
       capriceGui.Init();
       CapriceLeavingWithoutSavingView capriceLeavingWarning(capriceGui, back_surface, guiBackSurface, CRect(0, 0, back_surface->w, back_surface->h));
       capriceGui.Exec();
@@ -1936,7 +1936,7 @@ void showVKeyboard()
    auto guiBackSurface = prepareShowUI();
    // Activate virtual keyboard
    try {
-      CapriceGui capriceGui(mainSDLWindow);
+      CapriceGui capriceGui(mainSDLWindow, /*bInMainView=*/true);
       capriceGui.Init();
       CapriceVKeyboardView capriceVKeyboardView(capriceGui, back_surface, guiBackSurface, CRect(0, 0, back_surface->w, back_surface->h));
       capriceGui.Exec();
@@ -1954,7 +1954,7 @@ void showGui()
 {
    auto guiBackSurface = prepareShowUI();
    try {
-      CapriceGui capriceGui(mainSDLWindow);
+      CapriceGui capriceGui(mainSDLWindow, /*bInMainView=*/true);
       capriceGui.Init();
       CapriceGuiView capriceGuiView(capriceGui, back_surface, guiBackSurface, CRect(0, 0, back_surface->w, back_surface->h));
       capriceGui.Exec();
@@ -2001,6 +2001,9 @@ bool showDevTools()
 {
   Uint32 flags = SDL_GetWindowFlags(mainSDLWindow);
   // DevTools don't behave very well in fullscreen mode, so just disallow it
+  // It's still possible to use it in fullscreen with multiscreen by starting it
+  // when in windowed mode, moving the window on a different screen and
+  // switching to fullscreen after.
   if ((flags & SDL_WINDOW_FULLSCREEN) ||
       (flags & SDL_WINDOW_FULLSCREEN_DESKTOP)) {
     set_osd_message("Dev tools not available in fullscreen");

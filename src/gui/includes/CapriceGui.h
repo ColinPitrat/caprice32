@@ -7,9 +7,11 @@
 
 class CapriceGui : public wGui::CApplication
 {
-	public:
-		CapriceGui(SDL_Window* pWindow) : wGui::CApplication(pWindow) {};
-		void Init() override;
+  public:
+    CapriceGui(SDL_Window* pWindow, bool bInMainView) : wGui::CApplication(pWindow) {
+      m_bInMainView = bInMainView;
+    };
+    void Init() override;
 };
 
 #endif

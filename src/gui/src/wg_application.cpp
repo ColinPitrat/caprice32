@@ -111,17 +111,29 @@ bool CApplication::HandleSDLEvent(SDL_Event event)
 			event.key.keysym.sym));
 		break;
 	case SDL_MOUSEBUTTONDOWN:
-		MessageServer()->QueueMessage(new CMouseMessage(
-			CMessage::MOUSE_BUTTONDOWN, GetMouseFocus(), this,
-			CPoint(static_cast<int>((event.button.x-vid_plugin->x_offset)*vid_plugin->x_scale), static_cast<int>((event.button.y-vid_plugin->y_offset)*vid_plugin->y_scale)), CPoint(),
-			CMouseMessage::TranslateSDLButton(event.button.button)));
-		break;
+    {
+      int x(event.button.x), y(event.button.y);
+      if (m_bInMainView) {
+        x = (event.button.x-vid_plugin->x_offset)*vid_plugin->x_scale;
+        y = (event.button.y-vid_plugin->y_offset)*vid_plugin->y_scale;
+      }
+      MessageServer()->QueueMessage(new CMouseMessage(
+            CMessage::MOUSE_BUTTONDOWN, GetMouseFocus(), this, CPoint(x, y), CPoint(),
+            CMouseMessage::TranslateSDLButton(event.button.button)));
+      break;
+    }
 	case SDL_MOUSEBUTTONUP:
-		MessageServer()->QueueMessage(new CMouseMessage(
-			CMessage::MOUSE_BUTTONUP, GetMouseFocus(), this,
-			CPoint(static_cast<int>((event.button.x-vid_plugin->x_offset)*vid_plugin->x_scale), static_cast<int>((event.button.y-vid_plugin->y_offset)*vid_plugin->y_scale)), CPoint(),
-			CMouseMessage::TranslateSDLButton(event.button.button)));
-		break;
+    {
+      int x(event.button.x), y(event.button.y);
+      if (m_bInMainView) {
+        x = (event.button.x-vid_plugin->x_offset)*vid_plugin->x_scale;
+        y = (event.button.y-vid_plugin->y_offset)*vid_plugin->y_scale;
+      }
+      MessageServer()->QueueMessage(new CMouseMessage(
+            CMessage::MOUSE_BUTTONUP, GetMouseFocus(), this, CPoint(x, y), CPoint(),
+            CMouseMessage::TranslateSDLButton(event.button.button)));
+      break;
+    }
   case SDL_MOUSEWHEEL:
     {
       unsigned int wheeldirection = CMouseMessage::NONE;
@@ -132,18 +144,27 @@ bool CApplication::HandleSDLEvent(SDL_Event event)
       }
       int x, y;
       SDL_GetMouseState(&x, &y);
+      if (m_bInMainView) {
+        x = (x-vid_plugin->x_offset)*vid_plugin->x_scale;
+        y = (y-vid_plugin->y_offset)*vid_plugin->y_scale;
+      }
       MessageServer()->QueueMessage(new CMouseMessage(
-            CMessage::MOUSE_BUTTONDOWN, GetMouseFocus(), this,
-            CPoint(static_cast<int>((x-vid_plugin->x_offset)*vid_plugin->x_scale), static_cast<int>((y-vid_plugin->y_offset)*vid_plugin->y_scale)), CPoint(),
+            CMessage::MOUSE_BUTTONDOWN, GetMouseFocus(), this, CPoint(x, y), CPoint(),
             wheeldirection));
       break;
     }
 	case SDL_MOUSEMOTION:
-		MessageServer()->QueueMessage(new CMouseMessage(
-			CMessage::MOUSE_MOVE, GetMouseFocus(), this,
-			CPoint(static_cast<int>((event.button.x-vid_plugin->x_offset)*vid_plugin->x_scale), static_cast<int>((event.button.y-vid_plugin->y_offset)*vid_plugin->y_scale)), CPoint(),
-			CMouseMessage::TranslateSDLButtonState(event.motion.state)));
-		break;
+    {
+      int x(event.motion.x), y(event.motion.y);
+      if (m_bInMainView) {
+        x = (event.motion.x-vid_plugin->x_offset)*vid_plugin->x_scale;
+        y = (event.motion.y-vid_plugin->y_offset)*vid_plugin->y_scale;
+      }
+      MessageServer()->QueueMessage(new CMouseMessage(
+            CMessage::MOUSE_MOVE, GetMouseFocus(), this, CPoint(x, y), CPoint(),
+            CMouseMessage::TranslateSDLButtonState(event.motion.state)));
+      break;
+    }
   case SDL_JOYAXISMOTION:
     {
       SDL_Keycode key(SDLK_UNKNOWN);

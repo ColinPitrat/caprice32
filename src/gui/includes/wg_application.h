@@ -171,6 +171,7 @@ protected:
 	virtual bool HandleSDLEvent(SDL_Event event);
 
   SDL_Window* m_pSDLWindow;
+  bool m_bInMainView = true;  //!< Whether the GUI is displayed through Caprice main view (i.e going through video_plugin)
   CView* m_pMainView;
   bool m_Focused = true;
   mutable std::unique_ptr<CMessageServer> m_pMessageServer;
