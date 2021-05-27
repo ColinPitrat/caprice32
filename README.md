@@ -3,7 +3,7 @@
 
 (c) Copyright 1997-2015 Ulrich Doewich
 
-(c) Copyright 2016-2019 Colin Pitrat
+(c) Copyright 2016-2021 Colin Pitrat
 
 https://github.com/ColinPitrat/caprice32
 
@@ -28,11 +28,10 @@ Caprice32 provides:
   * DSK and [IPF](http://softpres.org/glossary:ipf) files for disks - VOC and CDT files for tapes - CPR files for cartridge
   * Snapshots (SNA files)
   * Direct load of ZIP files
+  * Developers' tools with debugger, memory editor, disassembler...
   * Custom disk formats
   * Printer support
-  * Memory tool to inspect and modify memory (peek and poke)
   * Experimental support of Multiface 2 (you should prefer using memory tool)
-  * Text mode graphics (using [aalib](http://aa-project.sourceforge.net/aalib/) or [libcaca](http://caca.zoy.org/wiki/libcaca))
 
 You see something missing ? Do not hesitate to open an issue to suggest it.
 
