@@ -623,7 +623,7 @@ void CapriceDevTools::LoadSymbols(const std::string& filename)
   for (auto breakpoint : m_Symfile.Breakpoints()) {
     if (std::find_if(breakpoints.begin(), breakpoints.end(),
           [&](const auto& bp) { return bp.address == breakpoint; } ) != breakpoints.end()) continue;
-    breakpoints.push_back(breakpoint);
+    breakpoints.emplace_back(breakpoint);
   }
   for (auto entrypoint : m_Symfile.Entrypoints()) {
     if (std::find(m_EntryPoints.begin(), m_EntryPoints.end(), entrypoint) != m_EntryPoints.end()) continue;

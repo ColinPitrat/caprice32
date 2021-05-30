@@ -1993,7 +1993,7 @@ void loadBreakpoints()
   for (auto breakpoint : symfile.Breakpoints()) {
     if (std::find_if(breakpoints.begin(), breakpoints.end(),
           [&](const auto& bp) { return bp.address == breakpoint; } ) != breakpoints.end()) continue;
-    breakpoints.push_back(breakpoint);
+    breakpoints.emplace_back(breakpoint);
   }
 }
 
