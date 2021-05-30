@@ -34,11 +34,12 @@ class SymfileTest : public testing::Test
       is.seekg(0, is.end);
       int length = is.tellg();
       is.seekg(0, is.beg);
-      char * buffer = new char [length];
+      char * buffer = new char [length+1];
       is.read(buffer, length);
       if (is.bad()) return "**bad stream after read**";
       // For some reason, the stream from the tmp file is failed after read on Windows
       //if (is.fail()) return "**fail stream after read**";
+      buffer[length] = 0;
       is.close();
       return std::string(buffer, length);
     }
@@ -76,5 +77,8 @@ TEST_F(SymfileTest, saveSymfile)
   ASSERT_FALSE(filename.empty());
   symfile.SaveTo(filename);
 
-  ASSERT_EQ(readWholeFile(filename), readWholeFile("test/symfile/expected.sym"));
+  auto got = readWholeFile(filename);
+  auto want = readWholeFile("test/symfile/expected.sym");
+  ASSERT_EQ(got.size(), want.size());
+  ASSERT_EQ(got, want);
 }
