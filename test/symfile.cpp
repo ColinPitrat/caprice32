@@ -39,9 +39,8 @@ class SymfileTest : public testing::Test
       is.read(buffer, length);
       if (is.bad()) return "**bad stream after read**";
       // For some reason, the stream from the tmp file is failed after read on Windows
-      //if (is.fail()) return "**fail stream after read**";
-      std::cout << "Fail? " << is.fail() << std::endl;
-      std::cout << "gcount? " << is.gcount() << std::endl;
+      // It seems that length has an invalid value.
+      if (is.fail()) length = is.gcount();
       buffer[length] = 0;
       is.close();
       return std::string(buffer, length);
@@ -82,8 +81,5 @@ TEST_F(SymfileTest, saveSymfile)
 
   auto got = readWholeFile(filename);
   auto want = readWholeFile("test/symfile/expected.sym");
-  // TODO: Understand why on windows, a bunch of 0 char are read at the end of the file ...
-  //ASSERT_EQ(got.size(), want.size());
-  //ASSERT_EQ(got, want);
-  ASSERT_EQ(0, strcmp(got.c_str(), want.c_str()));
+  ASSERT_EQ(got, want);
 }
