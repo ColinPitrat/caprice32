@@ -82,5 +82,5 @@ TEST_F(SymfileTest, saveSymfile)
   // TODO: Understand why on windows, a bunch of 0 char are read at the end of the file ...
   //ASSERT_EQ(got.size(), want.size());
   //ASSERT_EQ(got, want);
-  ASSERT_EQ(got.c_str(), want.c_str());
+  ASSERT_EQ(0, strcmp(got.c_str(), want.c_str()));
 }
