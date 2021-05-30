@@ -2,6 +2,7 @@
 #include "symfile.h"
 
 #include <fstream>
+#include <iostream>
 #include <map>
 #include <string>
 
@@ -39,6 +40,8 @@ class SymfileTest : public testing::Test
       if (is.bad()) return "**bad stream after read**";
       // For some reason, the stream from the tmp file is failed after read on Windows
       //if (is.fail()) return "**fail stream after read**";
+      std::cout << "Fail? " << is.fail() << std::endl;
+      std::cout << "gcount? " << is.gcount() << std::endl;
       buffer[length] = 0;
       is.close();
       return std::string(buffer, length);
