@@ -55,7 +55,7 @@ enum WatchpointType {
 };
 
 struct Watchpoint {
-  Watchpoint(word val) : address(val) {};
+  Watchpoint(word val, WatchpointType t) : address(val), type(t) {};
   dword address;
   WatchpointType type;
 };

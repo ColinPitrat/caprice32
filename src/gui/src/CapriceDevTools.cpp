@@ -164,6 +164,8 @@ CapriceDevTools::CapriceDevTools(const CRect& WindowRect, CWindow* pParent, CFon
     m_pZ80FlagCLbl = new CLabel(CPoint(480, 281), m_pGroupBoxTabZ80, "C");
     m_pZ80FlagC = new CEditBox(CRect(CPoint(490, 275), 20, 20), m_pGroupBoxTabZ80);
 
+    // TODO: Add information about interrupts (mode, IFF1, IFF2)
+
     // ---------------- 'Assembly' screen ----------------
     m_pAssemblyCode = new CListBox(
         CRect(10, 10, 320, m_pGroupBoxTabAsm->GetClientRect().Height() - 20),
@@ -270,12 +272,18 @@ CapriceDevTools::CapriceDevTools(const CRect& WindowRect, CWindow* pParent, CFon
     m_MemDisplayValue = -1;
 
     // TODO: Support read, write and R/W watch points
-    m_pMemWatchPointsGrp = new CGroupBox(CRect(CPoint(380, 13), 200, 120), m_pGroupBoxTabMemory, "Watch points");
-    m_pMemWatchPoints = new CListBox(CRect(CPoint(10, 5), 50, 80), m_pMemWatchPointsGrp);
-    m_pMemRemoveWatchPoint = new CButton(CRect(CPoint(80, 5), 100, 20), m_pMemWatchPointsGrp, "Remove selected");
-    m_pMemNewWatchPoint = new CEditBox(CRect(CPoint(80, 30), 50, 20), m_pMemWatchPointsGrp);
+    m_pMemWatchPointsGrp = new CGroupBox(CRect(CPoint(380, 13), 240, 120), m_pGroupBoxTabMemory, "Watch points");
+    m_pMemWatchPoints = new CListBox(CRect(CPoint(10, 5), 80, 80), m_pMemWatchPointsGrp,
+        /*bSingleSelection=*/false, /*iItemHeight=*/15, monoFontEngine);
+    m_pMemRemoveWatchPoint = new CButton(CRect(CPoint(110, 5), 100, 20), m_pMemWatchPointsGrp, "Remove selected");
+    m_pMemNewWatchPoint = new CEditBox(CRect(CPoint(110, 40), 50, 20), m_pMemWatchPointsGrp);
     m_pMemNewWatchPoint->SetContentType(CEditBox::HEXNUMBER);
-    m_pMemAddWatchPoint = new CButton(CRect(CPoint(140, 30), 50, 20), m_pMemWatchPointsGrp, "Add");
+    m_pMemWatchPointType = new CDropDown(CRect(CPoint(170, 40), 50, 20), m_pMemWatchPointsGrp);
+    m_pMemWatchPointType->AddItem(SListItem("R"));
+    m_pMemWatchPointType->AddItem(SListItem("W"));
+    m_pMemWatchPointType->AddItem(SListItem("RW"));
+    m_pMemWatchPointType->SelectItem(2);
+    m_pMemAddWatchPoint = new CButton(CRect(CPoint(110, 65), 50, 20), m_pMemWatchPointsGrp, "Add");
 
     m_pMemConfigGrp = new CGroupBox(CRect(CPoint(380, 143), 240, 100), m_pGroupBoxTabMemory, "RAM config");
     m_pMemConfigMemLbl = new CLabel(CPoint(10, 30), m_pMemConfigGrp, "Mem:");
@@ -286,6 +294,9 @@ CapriceDevTools::CapriceDevTools(const CRect& WindowRect, CWindow* pParent, CFon
     m_pMemConfigRAMLbl = new CLabel(CPoint(150, 0), m_pMemConfigGrp, "RAM");
     m_pMemConfigBankLbl = new CLabel(CPoint(120, 10), m_pMemConfigGrp, "Bank");
     m_pMemConfigConfigLbl = new CLabel(CPoint(160, 10), m_pMemConfigGrp, "Config");
+
+    // TODO: Distinct button to dump to stdout and copy to clipboard
+    // TODO: Save memory dump to a file (same as dump to stdout but with a messagebox asking for a filename)
 
     m_pMemConfigMemLoROM = new CCheckBox(CRect(CPoint(50, 30), 10, 10), m_pMemConfigGrp);
     m_pMemConfigMemHiROM = new CCheckBox(CRect(CPoint(80, 30), 10, 10), m_pMemConfigGrp);
@@ -311,8 +322,10 @@ CapriceDevTools::CapriceDevTools(const CRect& WindowRect, CWindow* pParent, CFon
     m_pVidLabel = new CLabel(CPoint(10, 10), m_pGroupBoxTabVideo, "Work in progress ... Nothing to see here yet, but come back later for video (CRTC & PSG info).");
     // ---------------- 'Audio' screen ----------------
     m_pAudLabel = new CLabel(CPoint(10, 10), m_pGroupBoxTabAudio, "Work in progress ... Nothing to see here yet, but come back later for sound (tone and volume envelopes, etc ...).");
+    // TODO: PSG registers, envelopes, noise, channel curve? ...
     // ---------------- 'Characters' screen ----------------
     m_pChrLabel = new CLabel(CPoint(10, 10), m_pGroupBoxTabChar, "Work in progress ... Nothing to see here yet, but come back later for charmap.");
+    // TODO: A 'Graphics' screen displaying memory as graphics (sprites) with choice of mode (0, 1 or 2), width and start address.
 
     UpdateAll();
 }
@@ -327,6 +340,12 @@ void CapriceDevTools::UpdateDisassemblyPos()
     return x.pItemData < y.pItemData;
   });
   int idx = std::distance(lines.begin(), curpos);
+  // TODO: Provide a way to jump to an address. Main problem is finding some space for the editbox and button
+  // One option: Move "Disassembling / SUCCESS" down as some status bar (below the main group box).
+  // TODO: Think about providing a way to trace execution (have all addresses through which the execution went).
+  // Maybe only record call / jps / jrs / rst / ret destinations?
+  // TODO: Would be nice to have a list of labels and be able to jump to code using them
+  // TODO: Would be nice to be able to add / edit labels
   m_pAssemblyCode->SetPosition(idx, CListBox::CENTER);
   if (!lines.empty() && curpos->pItemData == toFind.pItemData) {
     // Skip over address labels
@@ -510,7 +529,9 @@ void CapriceDevTools::UpdateWatchPointsList()
   m_pMemWatchPoints->ClearItems();
   for(const auto& bp : watchpoints) {
     std::ostringstream oss;
-    oss << std::hex << std::setw(4) << std::setfill('0') << bp.address;
+    oss << std::hex << std::setw(4) << std::setfill('0') << bp.address << "  "
+      << ((bp.type & READ) ? "R" : "")
+      << ((bp.type & WRITE) ? "W" : "");
     m_pMemWatchPoints->AddItem(SListItem(oss.str()));
   }
 }
@@ -826,7 +847,8 @@ bool CapriceDevTools::HandleMessage(CMessage* pMessage)
               // stol can throw on empty string or invalid value
               try
               {
-                watchpoints.emplace_back(static_cast<word>(std::stol(m_pMemNewWatchPoint->GetWindowText(), nullptr, 16)));
+                WatchpointType type = WatchpointType(m_pMemWatchPointType->GetSelectedIndex() + 1);
+                watchpoints.emplace_back(static_cast<word>(std::stol(m_pMemNewWatchPoint->GetWindowText(), nullptr, 16)), type);
                 UpdateWatchPointsList();
               } catch(...) {}
               break;

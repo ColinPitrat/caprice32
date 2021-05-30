@@ -217,6 +217,7 @@ namespace wGui
         CEditBox* m_pMemNewWatchPoint;
         CButton *m_pMemAddWatchPoint;
         CButton *m_pMemRemoveWatchPoint;
+        CDropDown* m_pMemWatchPointType;
 
         CGroupBox* m_pMemConfigGrp;
         CLabel* m_pMemConfigMemLbl;

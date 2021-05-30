@@ -340,7 +340,7 @@ inline byte read_mem_no_watchpoint(word addr) {
 inline byte read_mem(word addr) {
   if (!watchpoints.empty()) {
     if (std::any_of(watchpoints.begin(), watchpoints.end(), [&](const auto& w) {
-          return w.address == addr;
+          return w.address == addr && (w.type & READ);
           })) {
       z80.watchpoint_reached = 1;
     }
@@ -355,7 +355,7 @@ inline void write_mem_no_watchpoint(word addr, byte val) {
 inline void write_mem(word addr, byte val) {
   if (!watchpoints.empty()) {
     if (std::any_of(watchpoints.begin(), watchpoints.end(), [&](const auto& w) {
-          return w.address == addr;
+          return w.address == addr && (w.type & WRITE);
           })) {
       z80.watchpoint_reached = 1;
     }
