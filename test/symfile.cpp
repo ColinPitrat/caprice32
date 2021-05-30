@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 #include "symfile.h"
 
+#include <iostream>
 #include <fstream>
 
 class SymfileTest : public testing::Test
@@ -26,14 +27,18 @@ class SymfileTest : public testing::Test
 
     std::string readWholeFile(const std::string& filename)
     {
+      std::cout << "Reading " << filename << std::endl;
       std::ifstream is(filename);
-      if (!is) return "";
+      if (is.bad()) return "**bad stream after open**";
+      if (is.fail()) return "**fail stream after open**";
       is.seekg(0, is.end);
       int length = is.tellg();
       is.seekg(0, is.beg);
       char * buffer = new char [length];
-      is.read(buffer,length);
-      if (!is) return "";
+      is.read(buffer, length);
+      std::cout << "Read " << is.gcount() << " characters." << std::endl;
+      if (is.bad()) return "**bad stream after read**";
+      if (is.fail()) return "**fail stream after read**";
       is.close();
       return std::string(buffer, length);
     }
