@@ -46,7 +46,7 @@ Symfile::Symfile(const std::string& filename)
 bool Symfile::SaveTo(const std::string& filename)
 {
   std::ofstream outfile;
-  outfile.open(filename);
+  outfile.open(filename, std::ios_base::trunc);
   outfile << "; labels" << std::endl;
   for (const auto& [addr, sym] : symbols)
   {
