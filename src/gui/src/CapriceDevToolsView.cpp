@@ -1,6 +1,7 @@
 // Developers' tools for Caprice32
 #include "CapriceDevToolsView.h"
 #include "CapriceDevTools.h"
+#include <string>
 
 using namespace wGui;
 

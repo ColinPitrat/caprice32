@@ -2,6 +2,8 @@
 #include "symfile.h"
 
 #include <fstream>
+#include <map>
+#include <string>
 
 class SymfileTest : public testing::Test
 {

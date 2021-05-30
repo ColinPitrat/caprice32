@@ -1,6 +1,7 @@
 #ifndef DEVTOOLS_H
 #define DEVTOOLS_H
 
+#include <string>
 #include "SDL.h"
 #include "CapriceGui.h"
 #include "CapriceDevToolsView.h"

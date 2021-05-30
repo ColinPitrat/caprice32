@@ -1,5 +1,6 @@
 #include "devtools.h"
 
+#include <string>
 #include "log.h"
 #include "video.h"
 #include "wg_error.h"
