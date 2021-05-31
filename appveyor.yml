@@ -58,7 +58,7 @@ build_script:
 # ===================================
 # = 1- Build and test in DEBUG mode =
 # ===================================
-- msys64\usr\bin\bash -lc "cd c:/projects/caprice32 && PATH=$PATH:%MINGW_DIR%/bin /usr/bin/make -j 2 ARCH=%WINARCH% MINGW_PATH=\"%MINGW_DIR%\" WINE=\"\" debug"
+- msys64\usr\bin\bash -lc "cd c:/projects/caprice32 && PATH=$PATH:%MINGW_DIR%/bin /usr/bin/make ARCH=%WINARCH% MINGW_PATH=\"%MINGW_DIR%\" WINE=\"\" debug"
 # ===================================
 # 2- Build and test in RELEASE mode =
 # ===================================
