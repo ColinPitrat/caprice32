@@ -233,12 +233,12 @@ endif
 googletest:
 	@[ -d googletest ] || git clone https://github.com/google/googletest.git
 
-$(GTEST_DIR)/src/gtest-all.cc: googletest
-$(GTEST_DIR)/src/gmock-all.cc: googletest
-
 TEST_CFLAGS = $(COMMON_CFLAGS) -I$(GTEST_DIR)/include -I$(GTEST_DIR) -I$(GMOCK_DIR)/include -I$(GMOCK_DIR)
 GTEST_DIR = googletest/googletest/
 GMOCK_DIR = googletest/googlemock/
+
+$(GTEST_DIR)/src/gtest-all.cc: googletest
+$(GTEST_DIR)/src/gmock-all.cc: googletest
 
 $(TEST_DEPENDS): $(OBJDIR)/%.d: %.cpp
 	@echo Computing dependencies for $<
