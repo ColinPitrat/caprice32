@@ -62,9 +62,9 @@ build_script:
 # ===================================
 # 2- Build and test in RELEASE mode =
 # ===================================
-- msys64\usr\bin\bash -lc "cd c:/projects/caprice32 && PATH=$PATH:%MINGW_DIR%/bin /usr/bin/make -j 2 ARCH=%WINARCh% clean"
+- msys64\usr\bin\bash -lc "cd c:/projects/caprice32 && PATH=$PATH:%MINGW_DIR%/bin /usr/bin/make ARCH=%WINARCh% clean"
 - msys64\usr\bin\bash -lc "cd c:/projects/caprice32 && PATH=$PATH:%MINGW_DIR%/bin /usr/bin/make -j 2 ARCH=%WINARCH% MINGW_PATH=\"%MINGW_DIR%\""
-- msys64\usr\bin\bash -lc "cd c:/projects/caprice32 && PATH=$PATH:%MINGW_DIR%/bin /usr/bin/make -j 2 ARCH=%WINARCH% MINGW_PATH=\"%MINGW_DIR%\" WINE=\"\" unit_test"
+- msys64\usr\bin\bash -lc "cd c:/projects/caprice32 && PATH=$PATH:%MINGW_DIR%/bin /usr/bin/make ARCH=%WINARCH% MINGW_PATH=\"%MINGW_DIR%\" WINE=\"\" unit_test"
 # =============================
 # = 3- Build with IPF support =
 # =============================
@@ -72,10 +72,10 @@ build_script:
 - msys64\usr\bin\bash -lc "cd c:/projects/caprice32 && wget \"%IPF_LINUX_URL%\" -O ipflib42_linux-i686.tar.gz && 7z x ipflib42_linux-i686.tar.gz && 7z x ipflib42_linux-i686.tar && cd i686-linux-gnu-capsimage/ && ln -s libcapsimage.so.4.2 libcapsimage.so.4 && ln -s libcapsimage.so.4.2 libcapsimage.so"
 # Install IPF lib for windows
 - msys64\usr\bin\bash -lc "wget \"%IPF_WIN_URL%\" && 7z x *ipflib*zip && cp %IPF_DLL_SRC% %MINGW_DIR%/bin/ && cp %IPF_LICENCE_SRC% c:/projects/caprice32/licenses/CAPSImg\ license.txt"
-- msys64\usr\bin\bash -lc "cd c:/projects/caprice32 && PATH=$PATH:%MINGW_DIR%/bin /usr/bin/make -j 2 ARCH=%WINARCh% clean"
+- msys64\usr\bin\bash -lc "cd c:/projects/caprice32 && PATH=$PATH:%MINGW_DIR%/bin /usr/bin/make ARCH=%WINARCh% clean"
 - msys64\usr\bin\bash -lc "cd c:/projects/caprice32 && PATH=$PATH:%MINGW_DIR%/bin /usr/bin/make -j 2 ARCH=%WINARCH% MINGW_PATH=\"%MINGW_DIR%\" WITH_IPF=true CFLAGS=-Ii686-linux-gnu-capsimage/include"
-- msys64\usr\bin\bash -lc "cd c:/projects/caprice32 && PATH=$PATH:%MINGW_DIR%/bin /usr/bin/make -j 2 ARCH=%WINARCH% MINGW_PATH=\"%MINGW_DIR%\" WINE=\"\" WITH_IPF=true CFLAGS=-Ii686-linux-gnu-capsimage/include unit_test"
-- msys64\usr\bin\bash -lc "[ \"%RUN_E2E%\" == \"false\" ] || (cd c:/projects/caprice32 && PATH=$PATH:%MINGW_DIR%/bin /usr/bin/make -j 2 ARCH=%WINARCH% MINGW_PATH=\"%MINGW_DIR%\" WINE=\"\" WITH_IPF=true CFLAGS=-Ii686-linux-gnu-capsimage/include e2e_test)"
+- msys64\usr\bin\bash -lc "cd c:/projects/caprice32 && PATH=$PATH:%MINGW_DIR%/bin /usr/bin/make ARCH=%WINARCH% MINGW_PATH=\"%MINGW_DIR%\" WINE=\"\" WITH_IPF=true CFLAGS=-Ii686-linux-gnu-capsimage/include unit_test"
+- msys64\usr\bin\bash -lc "[ \"%RUN_E2E%\" == \"false\" ] || (cd c:/projects/caprice32 && PATH=$PATH:%MINGW_DIR%/bin /usr/bin/make ARCH=%WINARCH% MINGW_PATH=\"%MINGW_DIR%\" WINE=\"\" WITH_IPF=true CFLAGS=-Ii686-linux-gnu-capsimage/include e2e_test)"
 - msys64\usr\bin\bash -lc "cd c:/projects/caprice32 && PATH=$PATH:%MINGW_DIR%/bin ./test/integrated/test_win_package.sh %WINARCH%"
 - msys64\usr\bin\bash -lc "cd c:/projects/caprice32 && PATH=$PATH:%MINGW_DIR%/bin ./test/integrated/test_win_deps.sh %WINARCH%"
 
