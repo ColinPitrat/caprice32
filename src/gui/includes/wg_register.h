@@ -27,7 +27,7 @@ public:
 	//! \param name The name of the register (will constitute the label). 
 	//! \param pFontEngine A pointer to the font engine to use when drawing the control
 	//! If this is left out (or set to 0) it will use the default font engine specified by the CApplication (which must be set before instantiating this object)
-	CRegister(const CRect& WindowRect, CWindow* pParent, std::string name, CFontEngine* pFontEngine = nullptr);
+	CRegister(const CRect& WindowRect, CWindow* pParent, const std::string& name, CFontEngine* pFontEngine = nullptr);
 
 	//! Standard destructor
 	~CRegister() override;

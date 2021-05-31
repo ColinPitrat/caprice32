@@ -6,7 +6,7 @@
 namespace wGui
 {
 
-CRegister::CRegister(const CRect& WindowRect, CWindow* pParent, std::string name, CFontEngine* pFontEngine) :
+CRegister::CRegister(const CRect& WindowRect, CWindow* pParent, const std::string& name, CFontEngine* pFontEngine) :
 	CWindow(WindowRect, pParent)
 {
 	if (pFontEngine)
