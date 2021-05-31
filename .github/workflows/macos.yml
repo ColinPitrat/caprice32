@@ -12,10 +12,10 @@ jobs:
       - uses: actions/setup-node@v1
       - run: brew update
       - run: brew install sdl2 freetype zlib libpng gnu-sed
-      - run: make -j 2
-      - run: make unit_test
-      - run: alias sed=gsed && make e2e_test
-      - run: make macos_bundle
+      - run: make -j 3
+      - run: make -j 3 unit_test
+      - run: alias sed=gsed && make -j 3 e2e_test
+      - run: make -j 3 macos_bundle
 
       # Only upload asset to a release when pushing a tag
       - uses: jonfriesen/get-release-by-tag@v0.0.11
