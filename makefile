@@ -238,7 +238,7 @@ GTEST_DIR = googletest/googletest/
 GMOCK_DIR = googletest/googlemock/
 
 $(GTEST_DIR)/src/gtest-all.cc: googletest
-$(GTEST_DIR)/src/gmock-all.cc: googletest
+$(GMOCK_DIR)/src/gmock-all.cc: googletest
 
 $(TEST_DEPENDS): $(OBJDIR)/%.d: %.cpp
 	@echo Computing dependencies for $<
