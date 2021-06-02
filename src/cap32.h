@@ -87,6 +87,13 @@ class InputMapper;
 
 #define DEFAULT_VIDEO_PLUGIN 0
 
+#ifdef _WIN32
+// As opposed to ms_struct, needs to be explicit on Windows
+#define ATTR_PACKED __attribute__((packed, gcc_struct))
+#else
+#define ATTR_PACKED __attribute__((packed))
+#endif
+
 typedef struct {
    char id[8];
    char unused1[8];
@@ -369,7 +376,7 @@ typedef struct {
          unsigned char _noise, _mixer, _ampa, _ampb, _ampc;
          unsigned short Envelope;
          unsigned char _envtype, _porta, portb;
-      } __attribute__((packed, gcc_struct));
+      } ATTR_PACKED;
    } RegisterAY;
    int AmplitudeEnv;
    bool FirstPeriod;
