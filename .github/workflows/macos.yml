@@ -31,8 +31,9 @@ jobs:
         with:
           token: ${{ github.token }}
           tag: ${{ github.ref }}
-          assets: Caprice32.dmg
-          assets: cap32-macos.zip
+          assets: |
+            Caprice32.dmg
+            cap32-macos.zip
           fail-if-no-assets: false
           fail-if-no-release: false
       - uses: actions/upload-release-asset@v1.0.1
