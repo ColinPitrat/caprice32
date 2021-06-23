@@ -207,10 +207,23 @@ install: $(TARGET)
 
 else
 
-SRC_PACKAGE_DIR=$(ARCHIVE)/caprice32-$(VERSION)
-
 $(TARGET): $(OBJECTS) $(MAIN) cap32.cfg
 	$(CXX) $(LDFLAGS) -o $(TARGET) $(OBJECTS) $(MAIN) $(LIBS)
+
+ifeq ($(ARCH),macos)
+
+# Create a zip with a cap32 binary that should work launched locally
+distrib: $(TARGET)
+	mkdir -p $(ARCHIVE)
+	rm -f $(ARCHIVE).zip
+	cp $(TARGET) $(ARCHIVE)/
+	cp -r rom resources doc licenses $(ARCHIVE)
+	cp cap32.cfg README.md COPYING.txt $(ARCHIVE)
+	zip -r $(ARCHIVE).zip $(ARCHIVE)
+
+else
+
+SRC_PACKAGE_DIR=$(ARCHIVE)/caprice32-$(VERSION)
 
 # Create a debian source package
 distrib: $(TARGET)
@@ -221,6 +234,8 @@ distrib: $(TARGET)
 	tar jcf $(SRC_PACKAGE_DIR).tar.bz2 -C $(ARCHIVE) caprice32-$(VERSION)
 	ln -s caprice32-$(VERSION).tar.bz2 $(ARCHIVE)/caprice32_$(VERSION).orig.tar.bz2 || true
 
+endif  # ARCH =? macos
+
 install: $(TARGET)
 	install -D $(TARGET) $(DESTDIR)$(prefix)/bin/$(TARGET)
 	install -D $(GROFF_DOC) $(DESTDIR)$(prefix)/share/man/man6/cap32.6
@@ -228,6 +243,7 @@ install: $(TARGET)
 	sed -i "s,__SHARE_PATH__,$(DESTDIR)$(prefix)/share/caprice32," $(DESTDIR)/etc/cap32.cfg
 	mkdir -p $(DESTDIR)$(prefix)/share/caprice32
 	cp -r resources rom $(DESTDIR)$(prefix)/share/caprice32
+
 endif
 
 ####################################
