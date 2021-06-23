@@ -7,7 +7,7 @@
 #  - distrib
 #  - doc
 # Supported variables:
-#  - ARCH = (linux|win32|win64)
+#  - ARCH = (linux|win32|win64|macos)
 #  - CXX (default = g++)
 #  - CFLAGS
 #  - LDFLAGS
@@ -33,6 +33,9 @@ TRIPLE = i686-w64-mingw32
 PLATFORM=windows
 CAPSIPFDLL=CAPSImg.dll
 else ifeq ($(ARCH),linux)
+PLATFORM=linux
+else ifeq ($(ARCH),macos)
+# Yes that's weird, but the build on macos work the same way as on linux
 PLATFORM=linux
 else
 $(error Unknown ARCH. Supported ones are linux, win32 and win64.)
@@ -279,10 +282,10 @@ endif
 deb_pkg: all
 	# Both changelog files need to be patched with the proper version !
 	sed -i "1s/(.*)/($(VERSION)-$(REVISION))/" debian/changelog
-	sed -i "1s/(.*)/($(VERSION)-$(REVISION))/" release/cap32-linux/caprice32-$(VERSION)/debian/changelog
-	cd release/cap32-linux/caprice32-$(VERSION)/debian && debuild -e CXX -us -uc --lintian-opts --profile debian
+	sed -i "1s/(.*)/($(VERSION)-$(REVISION))/" $(ARCHIVE)/caprice32-$(VERSION)/debian/changelog
+	cd $(ARCHIVE)/caprice32-$(VERSION)/debian && debuild -e CXX -us -uc --lintian-opts --profile debian
 
-BUNDLE_DIR=release/cap32-macos/Caprice32.app
+BUNDLE_DIR=release/cap32-macos-bundle/Caprice32.app
 macos_bundle: all
 	rm -rf $(BUNDLE_DIR)
 	mkdir -p $(BUNDLE_DIR)/Contents/MacOS
@@ -293,7 +296,7 @@ macos_bundle: all
 	gsed -i "s,__SHARE_PATH__,../Resources," $(BUNDLE_DIR)/Contents/Resources/cap32.cfg
 	cp -r resources rom $(BUNDLE_DIR)/Contents/Resources
 	# Retry hdiutil up to 3 times: it occasionally fails with "Resource Busy"
-	for i in 1 2 3; do hdiutil create -volname Caprice32-$(VERSION) -srcfolder $(BUNDLE_DIR) -ov -format UDZO release/cap32-macos/Caprice32.dmg && break || sleep 5; done
+	for i in 1 2 3; do hdiutil create -volname Caprice32-$(VERSION) -srcfolder $(BUNDLE_DIR) -ov -format UDZO release/cap32-macos-bundle/Caprice32.dmg && break || sleep 5; done
 
 clang-tidy:
 	if $(CLANG_TIDY) -checks=-*,$(CLANG_CHECKS) $(SOURCES) -header-filter=src/* -- $(COMMON_CFLAGS) | grep "."; then false; fi
