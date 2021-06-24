@@ -313,7 +313,7 @@ macos_bundle: all
 	gsed -i "s,__SHARE_PATH__,../Resources," $(BUNDLE_DIR)/Contents/Resources/cap32.cfg
 	cp -r resources rom $(BUNDLE_DIR)/Contents/Resources
 	mkdir -p $(BUNDLE_DIR)/Contents/Frameworks
-	for lib in `otool -L $(BUNDLE_DIR)/Contents/MacOS/Caprice32; do cp $$lib $(BUNDLE_DIR)/Contents/Frameworks/; done
+	for lib in `otool -L $(BUNDLE_DIR)/Contents/MacOS/Caprice32`; do cp $$lib $(BUNDLE_DIR)/Contents/Frameworks/; done
 	# Retry hdiutil up to 3 times: it occasionally fails with "Resource Busy"
 	for i in 1 2 3; do hdiutil create -volname Caprice32-$(VERSION) -srcfolder $(BUNDLE_DIR) -ov -format UDZO release/cap32-macos-bundle/Caprice32.dmg && break || sleep 5; done
 
