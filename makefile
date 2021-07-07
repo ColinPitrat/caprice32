@@ -35,7 +35,7 @@ CAPSIPFDLL=CAPSImg.dll
 else ifeq ($(ARCH),linux)
 PLATFORM=linux
 else ifeq ($(ARCH),macos)
-# Yes that's weird, but the build on macos work the same way as on linux
+# Yes that's weird, but the build on macos works the same way as on linux
 PLATFORM=linux
 else
 $(error Unknown ARCH. Supported ones are linux, win32 and win64.)
@@ -63,7 +63,9 @@ LIBS += -ldl
 endif
 endif
 
+ifneq (,$(findstring g++,$(CXX)))
 LIBS += -lstdc++fs
+endif
 
 ifdef WITH_IPF
 COMMON_CFLAGS += -DWITH_IPF
