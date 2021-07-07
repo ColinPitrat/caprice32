@@ -63,6 +63,8 @@ LIBS += -ldl
 endif
 endif
 
+LIBS += -lstdc++fs
+
 ifdef WITH_IPF
 COMMON_CFLAGS += -DWITH_IPF
 endif
