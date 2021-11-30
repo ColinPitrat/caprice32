@@ -323,7 +323,8 @@ macos_bundle: all
 	gsed -i "s,__SHARE_PATH__,../Resources," $(BUNDLE_DIR)/Contents/Resources/cap32.cfg
 	cp -r resources rom $(BUNDLE_DIR)/Contents/Resources
 	mkdir -p $(BUNDLE_DIR)/Contents/Frameworks
-	for lib in `otool -L $(BUNDLE_DIR)/Contents/MacOS/Caprice32 | grep ".dylib" | awk '{ print $$1 }'`; do echo "Copying '$$lib'"; cp "$$lib" $(BUNDLE_DIR)/Contents/Frameworks/; done
+	# Copy shared libs. For some reason, it can happen that some are not found. Not sure why, let's just ignore it.
+	for lib in `otool -L $(BUNDLE_DIR)/Contents/MacOS/Caprice32 | grep ".dylib" | awk '{ print $$1 }'`; do echo "Copying '$$lib'"; cp "$$lib" $(BUNDLE_DIR)/Contents/Frameworks/; done || true
 	# Retry hdiutil up to 3 times: it occasionally fails with "Resource Busy"
 	for i in 1 2 3; do hdiutil create -volname Caprice32-$(VERSION) -srcfolder $(BUNDLE_DIR) -ov -format UDZO release/cap32-macos-bundle/Caprice32.dmg && break || sleep 5; done
 
