@@ -1373,7 +1373,7 @@ int file_load(const std::string& filepath, const DRIVE drive)
 
     std::string filename = zip_info.filesOffsets[0].first;
     pos = filename.length() - 4;
-    extension = filename.substr(pos); // grab the extension
+    extension = stringutils::lower(filename.substr(pos)); // grab the extension in lowercases
     LOG_DEBUG("Extracting " << filepath << ", " << filename << ", " << extension);
     file = extractFile(filepath, filename, extension);
   }
