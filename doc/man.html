@@ -190,13 +190,17 @@ default to a standard US keyboard map.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>-a</b>,
-<b>--autocmd</b>=<i>COMMAND</i></p>
+<b>--autocmd</b>=<i>COMMAND</i> | <i>@FILENAME</i></p>
 
 <p style="margin-left:22%;">pass command to execute to the
 emulator. The option can be repeated to pass multiple
 commands. For example: cap32 -a &rsquo;print
 &quot;Hello&quot;&rsquo; -a &rsquo;print
 &quot;World&quot;&rsquo;</p>
+
+<p style="margin-left:22%;">with prefix &quot;@&quot;, a 
+filename is specified. All commands in the file are passed.
+For example: cap32 -a &rsquo;@/tmp/cmd.txt&rsquo;</p>
 
 <p style="margin-left:11%;"><b>-c</b>,
 <b>--cfg_file</b>=<i>FILE</i></p>
