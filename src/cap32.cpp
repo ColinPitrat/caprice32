@@ -537,20 +537,30 @@ void z80_OUT_handler (reg_pair port, byte val)
                }
             }
             break;
-         case 3: // set memory configuration
-             #ifdef DEBUG_GA
-             if (dwDebugFlag) {
-                fprintf(pfoDebug, "mem 0x%02x\r\n", val);
-             }
-             #endif
-             LOG_DEBUG("RAM config: " << std::hex << static_cast<int>(val) << std::dec);
-             GateArray.RAM_config = val;
-             ga_memory_manager();
-             if (CPC.mf2) { // MF2 enabled?
-                *(pbMF2ROM + 0x03fff) = val;
-             }
+         case 3:
+            // Reading https://www.cpcwiki.eu/index.php/Gate_Array
+            // suggests this should set memory configuration but actually this is contradicted by:
+            //  - http://cpctech.cpc-live.com/docs/rampage.html
+            //  - https://www.cpcwiki.eu/index.php/I/O_Port_Summary
+            //  - https://www.cpcwiki.eu/index.php/Default_I/O_Port_Summary
+            // which tell that this is controlled by address at %0xxxxxxx xxxxxxxx
+            // so this is handled separately below
             break;
       }
+   }
+// Memory configuration -------------------------------------------------------
+   if (!(port.b.h & 0x80) && (val & 0xc0) == 0xc0) {
+     #ifdef DEBUG_GA
+     if (dwDebugFlag) {
+        fprintf(pfoDebug, "mem 0x%02x\r\n", val);
+     }
+     #endif
+     LOG_DEBUG("RAM config: " << std::hex << static_cast<int>(val) << std::dec);
+     GateArray.RAM_config = val;
+     ga_memory_manager();
+     if (CPC.mf2) { // MF2 enabled?
+        *(pbMF2ROM + 0x03fff) = val;
+     }
    }
 // CRTC -----------------------------------------------------------------------
    if (!(port.b.h & 0x40)) { // CRTC chip select?
