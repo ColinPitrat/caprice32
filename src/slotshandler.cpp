@@ -735,6 +735,7 @@ exit:
 void tape_eject ()
 {
    delete [] pbTapeImage;
+   pbTapeImage = nullptr;
 }
 
 int snapshot_load (FILE *pfile)
