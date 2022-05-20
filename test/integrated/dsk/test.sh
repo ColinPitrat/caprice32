@@ -10,7 +10,7 @@ then
   DIFF=diff
 fi
 
-rm -rv ${OUTPUT_DIR}
+rm -rvf ${OUTPUT_DIR}
 mkdir -p ${OUTPUT_DIR}
 echo "" > "${LOGFILE}"
 
