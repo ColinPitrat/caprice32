@@ -2719,7 +2719,8 @@ int cap32_main (int argc, char **argv)
          SDL_PushEvent(nextVirtualEvent);
          
          auto keysym = nextVirtualEvent->key.keysym;
-         LOG_DEBUG("Inserted virtual event keysym=" << int(keysym.sym));
+         auto evtype = nextVirtualEvent->key.type;
+         LOG_DEBUG("Inserted virtual event keysym=" << int(keysym.sym) << " (" << evtype << ")");
          
          dword cpc_key = CPC.InputMapper->CPCkeyFromKeysym(keysym);
          if (!(cpc_key & MOD_EMU_KEY)) {
@@ -2728,7 +2729,7 @@ int cap32_main (int argc, char **argv)
             // immediately break the loop enclosing this code and wait
             // at least one frame.
             nextVirtualEventFrameCount = dwFrameCountOverall
-               + ((event.type == SDL_KEYDOWN)?1:0);
+               + ((evtype == SDL_KEYDOWN || evtype == SDL_KEYUP)?1:0);
             // The extra delay in case of SDL_KEYDOWN is to keep the
             // key pressed long enough.  If we don't do this, the CPC
             // firmware debouncer eats repeated characters.
