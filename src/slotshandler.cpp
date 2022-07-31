@@ -762,15 +762,11 @@ int snapshot_load (FILE *pfile)
     byte *pbTemp;
 
     pbTemp = new byte [dwSnapSize*1024 + 1];
-    if (pbTemp) {
-      delete [] pbRAMbuffer;
-      CPC.ram_size = dwSnapSize;
-      pbRAMbuffer = pbTemp;
-      // Ensure 1 byte is available before pbRAM as prerender_normal*_plus can read it
-      pbRAM = pbRAMbuffer + 1;
-    } else {
-      return ERR_OUT_OF_MEMORY;
-    }
+    delete [] pbRAMbuffer;
+    CPC.ram_size = dwSnapSize;
+    pbRAMbuffer = pbTemp;
+    // Ensure 1 byte is available before pbRAM as prerender_normal*_plus can read it
+    pbRAM = pbRAMbuffer + 1;
   }
   emulator_reset();
   n = fread(pbRAM, dwSnapSize*1024, 1, pfile); // read memory dump into CPC RAM
@@ -1276,10 +1272,6 @@ int tape_insert_voc (FILE *pfile)
             iBlockLength = (*reinterpret_cast<dword *>(pbPtr) & 0x00ffffff) + 4;
             lSampleLength = iBlockLength - 4;
             pbVocDataBlock = new byte[lSampleLength];
-            if (pbVocDataBlock == nullptr) {
-               tape_eject();
-               return ERR_OUT_OF_MEMORY;
-            }
             if(fread(pbVocDataBlock, lSampleLength, 1, pfile) != 1) {
               return ERR_TAP_BAD_VOC;
             }
