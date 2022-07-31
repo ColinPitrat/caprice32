@@ -9,8 +9,6 @@
 #define ERR_VIDEO_COLOUR_DEPTH   6
 #define ERR_AUDIO_INIT           7
 #define ERR_AUDIO_RATE           8
-// TODO: Progressively get rid of ERR_OUT_OF_MEMORY as we replace malloc with new
-#define ERR_OUT_OF_MEMORY        9
 #define ERR_CPC_ROM_MISSING      10
 #define ERR_NOT_A_CPC_ROM        11
 #define ERR_ROM_NOT_FOUND        12
