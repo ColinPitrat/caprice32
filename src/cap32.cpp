@@ -1235,14 +1235,17 @@ void bin_load (const std::string& filename, const size_t offset)
   size_t read = fread(&pbRAM[offset], 1, max_size, file);
   if (!feof(file)) {
     LOG_ERROR("Bin file too big to fit in memory");
+    fclose(file);
     return;
   }
   if (ferror(file)) {
     LOG_ERROR("Error reading the bin file: " << ferror(file));
+    fclose(file);
     return;
   }
   if (read == 0) {
     LOG_ERROR("Empty bin file");
+    fclose(file);
     return;
   }
   // Jump at the beginning of the program
