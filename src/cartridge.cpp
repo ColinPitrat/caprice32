@@ -13,14 +13,13 @@ const uint32_t CARTRIDGE_NB_PAGES = 32;
 const uint32_t CARTRIDGE_PAGE_SIZE = 16*1024;
 const uint32_t CARTRIDGE_MAX_SIZE = CARTRIDGE_NB_PAGES*CARTRIDGE_PAGE_SIZE;
 
-byte *pbCartridgeImage = nullptr;
+std::unique_ptr<byte[]> pbCartridgeImage = nullptr;
 byte *pbCartridgePages[CARTRIDGE_NB_PAGES] = { nullptr };
 
 extern byte* pbROMlo;
 
 void cpr_eject ()
 {
-   delete[] pbCartridgeImage;
    pbCartridgeImage = nullptr;
    for(auto &page : pbCartridgePages) {
       page = nullptr;
@@ -29,7 +28,7 @@ void cpr_eject ()
 
 int cartridge_init()
 {
-   pbCartridgeImage = new byte [CARTRIDGE_MAX_SIZE]; // attempt to allocate the general purpose buffer
+   pbCartridgeImage.reset(new byte [CARTRIDGE_MAX_SIZE]); // attempt to allocate the general purpose buffer
    for(uint32_t i = 0; i < CARTRIDGE_NB_PAGES; ++i) {
       pbCartridgePages[i] = &pbCartridgeImage[i*CARTRIDGE_PAGE_SIZE];
    }
