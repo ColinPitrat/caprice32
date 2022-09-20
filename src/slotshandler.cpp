@@ -199,7 +199,7 @@ FILE *extractFile(const std::string& zipfile, const std::string& filename, const
 
 t_disk_format parseDiskFormat(const std::string& format)
 {
-  t_disk_format result = {0};
+  t_disk_format result;
   dword dwVal;
   std::vector<std::string> tokens = stringutils::split(format, ',');
   if (tokens.size() < 7) { // Minimum number of values required

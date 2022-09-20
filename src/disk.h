@@ -106,15 +106,15 @@ struct t_drive {
    t_track track[DSK_TRACKMAX][DSK_SIDEMAX]; // array of track information structures
 };
 
-typedef struct {
+struct t_disk_format {
    std::string label; // label to display in options dialog
-   unsigned int tracks; // number of tracks
-   unsigned int sides; // number of sides
-   unsigned int sectors; // sectors per track
-   unsigned int sector_size; // sector size as N value
-   unsigned int gap3_length; // GAP#3 size
-   unsigned char filler_byte; // default byte to use
-   unsigned char sector_ids[2][16]; // sector IDs - indices: side, sector
-} t_disk_format;
+   unsigned int tracks{0}; // number of tracks
+   unsigned int sides{0}; // number of sides
+   unsigned int sectors{0}; // sectors per track
+   unsigned int sector_size{0}; // sector size as N value
+   unsigned int gap3_length{0}; // GAP#3 size
+   unsigned char filler_byte{0}; // default byte to use
+   unsigned char sector_ids[2][16]{0}; // sector IDs - indices: side, sector
+};
 
 #endif
