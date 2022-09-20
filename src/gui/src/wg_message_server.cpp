@@ -139,7 +139,7 @@ void CMessageServer::DeliverMessage()
 
 //! A functor for finding duplicate APP_PAINT messages
 
-struct Duplicate_APP_PAINT : public std::unary_function<CMessage*, bool>
+struct Duplicate_APP_PAINT
 {
 public:
 	//! The functor constructor
