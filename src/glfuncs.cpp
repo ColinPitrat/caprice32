@@ -17,6 +17,7 @@
 */
 
 #include "glfuncs.h"
+#include <cstdio>
 
 #ifdef HAVE_GL
 
