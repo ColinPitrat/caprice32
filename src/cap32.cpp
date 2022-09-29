@@ -461,6 +461,14 @@ byte z80_IN_handler (reg_pair port)
 void z80_OUT_handler (reg_pair port, byte val)
 {
    LOG_DEBUG("port.b.h3=" << std::hex << static_cast<int>(port.b.h3) << ", port.b.h2=" << static_cast<int>(port.b.h2) << ", port.b.h=" << std::hex << static_cast<int>(port.b.h) << ", port.b.l=" << static_cast<int>(port.b.l) << ", val=" << static_cast<int>(val) << std::dec);
+// Amstrad Magnum Phazer 
+   if ((port.b.h == 0xfb) && (port.b.l == 0xfe)) {
+     // When the phazer is not pressed, the CRTC is constantly refreshing R16 & R17:
+     // https://www.cpcwiki.eu/index.php/Amstrad_Magnum_Phaser
+     if (!CPC.phazer_pressed) CRTC.registers[17] += 1;
+     //std::cout << "port.b.h3=" << std::hex << static_cast<int>(port.b.h3) << ", port.b.h2=" << static_cast<int>(port.b.h2) << ", port.b.h=" << std::hex << static_cast<int>(port.b.h) << ", port.b.l=" << static_cast<int>(port.b.l) << ", val=" << static_cast<int>(val) << std::dec << std::endl;
+     //phazer = true;
+   }
 // Gate Array -----------------------------------------------------------------
    if ((port.b.h & 0xc0) == 0x40) { // GA chip select?
       switch (val >> 6) {
@@ -1525,7 +1533,14 @@ void video_set_style ()
 }
 
 
-int video_init (bool first_call)
+void mouse_init ()
+{
+  // hide the mouse cursor unless we emulate phazer
+  ShowCursor(CPC.phazer_emulation);
+}
+
+
+int video_init ()
 {
    vid_plugin=&video_plugin_list[CPC.scr_style];
 
@@ -1549,8 +1564,6 @@ int video_init (bool first_call)
    CPC.scr_pos =
    CPC.scr_base = static_cast<byte *>(back_surface->pixels); // memory address of back buffer
    CPC.scr_gui_is_currently_on = false;
-
-   if (first_call) ShowCursor(false); // hide the mouse cursor
 
    crtc_init();
 
@@ -2654,10 +2667,11 @@ int cap32_main (int argc, char **argv)
 
    z80_init_tables(); // init Z80 emulation
 
-   if (video_init(/*first_call=*/true)) {
+   if (video_init()) {
       fprintf(stderr, "video_init() failed. Aborting.\n");
       cleanExit(-1);
    }
+   mouse_init();
 
    if (audio_init()) {
       fprintf(stderr, "audio_init() failed. Disabling sound.\n");
@@ -2805,7 +2819,7 @@ int cap32_main (int argc, char **argv)
                            SDL_Delay(20);
                            video_shutdown();
                            CPC.scr_window = CPC.scr_window ? 0 : 1;
-                           if (video_init(/*first_call=*/false)) {
+                           if (video_init()) {
                               fprintf(stderr, "video_init() failed. Aborting.\n");
                               cleanExit(-1);
                            }
@@ -2886,6 +2900,13 @@ int cap32_main (int argc, char **argv)
                            set_osd_message(std::string("Joystick emulation: ") + (CPC.joystick_emulation ? "on" : "off"));
                            break;
 
+                        case CAP32_PHAZER:
+                           CPC.phazer_emulation = !CPC.phazer_emulation;
+                           if (!CPC.phazer_emulation) CPC.phazer_pressed = false;
+                           mouse_init();
+                           set_osd_message(std::string("Phazer emulation: ") + (CPC.phazer_emulation ? "on" : "off"));
+                           break;
+
                         case CAP32_PASTE:
                            set_osd_message("Pasting...");
                            {
@@ -2962,6 +2983,29 @@ int cap32_main (int argc, char **argv)
               applyKeypress(cpc_key[0], keyboard_matrix, !release);
               if (release && cpc_key[0] != 0xff) {
                  applyKeypress(cpc_key[1], keyboard_matrix, !release);
+              }
+            }
+            break;
+
+            case SDL_MOUSEMOTION:
+            {
+              CPC.phazer_x = event.motion.x;
+              CPC.phazer_y = event.motion.y;
+            }
+            break;
+
+            case SDL_MOUSEBUTTONDOWN:
+            {
+              if (CPC.phazer_emulation) {
+                CPC.phazer_pressed = true;
+              }
+            }
+            break;
+
+            case SDL_MOUSEBUTTONUP:
+            {
+              if (CPC.phazer_emulation) {
+                CPC.phazer_pressed = false;
               }
             }
             break;

@@ -181,6 +181,11 @@ typedef struct {
    unsigned int joysticks;
    unsigned int joystick_menu_button;
    unsigned int joystick_vkeyboard_button;
+   // TODO: Support different kinds of phazers
+   bool phazer_emulation;
+   bool phazer_pressed;
+   unsigned int phazer_x;
+   unsigned int phazer_y;
    int cycle_count;
    std::string resources_path;
 
@@ -196,14 +201,14 @@ typedef struct {
    unsigned int scr_intensity;
    unsigned int scr_remanency;
    unsigned int scr_window;
-   unsigned int scr_bpp;
+   unsigned int scr_bpp;        // bits per pixel of the SDL back_surface
    unsigned int scr_preserve_aspect_ratio;
-   unsigned int scr_bps;
-   unsigned int scr_line_offs;
+   unsigned int scr_bps;        // bytes per line in the SDL back_surface
+   unsigned int scr_line_offs;  // bytes per CPC line in the SDL back_surface (2*scr_bps if doubling Y)
    unsigned int scr_green_mode;
    unsigned int scr_green_blue_percent;
-   unsigned char *scr_base;
-   unsigned char *scr_pos;
+   unsigned char *scr_base;     // begining of current line in the SDL back_surface
+   unsigned char *scr_pos;      // current position in the SDL back_surface
    void (*scr_render)();
    void (*scr_prerendernorm)();
    void (*scr_prerenderbord)();
@@ -406,7 +411,8 @@ int audio_init ();
 void audio_shutdown ();
 void audio_pause ();
 void audio_resume ();
-int video_init (bool first_call);
+void mouse_init ();
+int video_init ();
 void video_shutdown ();
 void cleanExit(int returnCode, bool askIfUnsaved = true);
 
