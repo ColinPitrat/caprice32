@@ -69,6 +69,7 @@ std::string replaceCap32Keys(std::string command)
     { "CAP32_GUI", cap32_keystroke(CAP32_GUI) },
     { "CAP32_VKBD", cap32_keystroke(CAP32_VKBD) },
     { "CAP32_JOY", cap32_keystroke(CAP32_JOY) },
+    { "CAP32_PHAZER", cap32_keystroke(CAP32_PHAZER) },
     { "CAP32_MF2STOP", cap32_keystroke(CAP32_MF2STOP) },
     { "CAP32_RESET", cap32_keystroke(CAP32_RESET) },
     { "CAP32_SCRNSHOT", cap32_keystroke(CAP32_SCRNSHOT) },
