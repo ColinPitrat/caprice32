@@ -89,6 +89,10 @@ public:
 	//! \return The message type of the message
 	EMessageType MessageType() { return m_MessageType; }
 
+  //! Return the string representation of a message type.
+  //! \return The string corresponding to the enum name.
+  static std::string ToString(EMessageType message_type);
+
 	//! Gets the intended destination for the message
 	//! \return A pointer to the destination of the message (0 for no specific destination, or to broadcast to all)
 	const CMessageClient* Destination() { return m_pDestination; }

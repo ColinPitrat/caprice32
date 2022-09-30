@@ -40,6 +40,40 @@ CMessage::CMessage(const EMessageType MessageType, const CMessageClient* pDestin
 }
 
 
+std::string CMessage::ToString(EMessageType message_type) {
+  switch (message_type) {
+    case UNKNOWN: return "UNKNOWN";
+    case APP_DESTROY_FRAME: return "APP_DESTROY_FRAME";
+    case APP_EXIT: return "APP_EXIT";
+    case APP_PAINT: return "APP_PAINT";
+    case CTRL_DOUBLELCLICK: return "CTRL_DOUBLELCLICK";
+    case CTRL_DOUBLEMCLICK: return "CTRL_DOUBLEMCLICK";
+    case CTRL_DOUBLERCLICK: return "CTRL_DOUBLERCLICK";
+    case CTRL_GAININGKEYFOCUS: return "CTRL_GAININGKEYFOCUS";
+    case CTRL_GAININGMOUSEFOCUS: return "CTRL_GAININGMOUSEFOCUS";
+    case CTRL_LOSINGKEYFOCUS: return "CTRL_LOSINGKEYFOCUS";
+    case CTRL_LOSINGMOUSEFOCUS: return "CTRL_LOSINGMOUSEFOCUS";
+    case CTRL_MESSAGEBOXRETURN: return "CTRL_MESSAGEBOXRETURN";
+    case CTRL_RESIZE: return "CTRL_RESIZE";
+    case CTRL_SINGLELCLICK: return "CTRL_SINGLELCLICK";
+    case CTRL_SINGLEMCLICK: return "CTRL_SINGLEMCLICK";
+    case CTRL_SINGLERCLICK: return "CTRL_SINGLERCLICK";
+    case CTRL_TIMER: return "CTRL_TIMER";
+    case CTRL_VALUECHANGE: return "CTRL_VALUECHANGE";
+    case CTRL_VALUECHANGING: return "CTRL_VALUECHANGING";
+    case KEYBOARD_KEYDOWN: return "KEYBOARD_KEYDOWN";
+    case KEYBOARD_KEYUP: return "KEYBOARD_KEYUP";
+    case TEXTINPUT: return "TEXTINPUT";
+    case MOUSE_BUTTONDOWN: return "MOUSE_BUTTONDOWN";
+    case MOUSE_BUTTONUP: return "MOUSE_BUTTONUP";
+    case MOUSE_MOVE: return "MOUSE_MOVE";
+    case SDL: return "SDL";
+    case USER: return "USER";
+  }
+  return " ** Unimplemented **";
+}
+
+
 CSDLMessage::CSDLMessage(const EMessageType MessageType, const CMessageClient* pDestination, const CMessageClient* pSource, SDL_Event SDLEvent) : // NOLINT(modernize-pass-by-value): if we pass by value and move SDLEvent, clang produce another warning (misc-move-const-arg) about moving a trivially-copyable type
 	CMessage(MessageType, pDestination, pSource),
 	SDLEvent(SDLEvent)
