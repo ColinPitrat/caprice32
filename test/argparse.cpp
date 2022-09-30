@@ -82,8 +82,12 @@ TEST(argParseTest, replaceCap32KeysNoKeyword)
 
 TEST(argParseTest, replaceCap32KeysKeywords)
 {
+  // expected
+  //   Which is: "print \"Hello, world !\"\f\b\f\0"
+  // replaceCap32Keys(command)
+  //   Which is: "print \"Hello, world !\"\f\t\f\0"
   std::string command = "print \"Hello, world !\"CAP32_SCRNSHOTCAP32_EXIT";
-  std::string expected = "print \"Hello, world !\"\f\x8\f";
+  std::string expected = "print \"Hello, world !\"\f\x9\f";
   expected += '\0';
 
   ASSERT_EQ(expected, replaceCap32Keys(command));
@@ -92,7 +96,7 @@ TEST(argParseTest, replaceCap32KeysKeywords)
 TEST(argParseTest, replaceCap32KeysRepeatedKeywords)
 {
   std::string command = "print \"Hello\"CAP32_SCRNSHOT ; print \",\" ; CAP32_SCRNSHOT ; print \"world !\" ; CAP32_SCRNSHOT";
-  std::string expected = "print \"Hello\"\f\x8 ; print \",\" ; \f\x8 ; print \"world !\" ; \f\x8";
+  std::string expected = "print \"Hello\"\f\x9 ; print \",\" ; \f\x9 ; print \"world !\" ; \f\x9";
 
   ASSERT_EQ(expected, replaceCap32Keys(command));
 }
