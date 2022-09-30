@@ -133,7 +133,6 @@ protected:
 
 	CFontEngine* m_pFontEngine; //!< A pointer to the font engine to use to render the text
 	std::unique_ptr<CRenderedString> m_pRenderedString; //!< An autopointer to the rendered version of the string
-	unsigned char m_FontSize;  //!< The font size (in points)
 	std::string::size_type m_SelStart;  //!< Selection start point, in characters
 	int m_SelLength;  //!< Selection length, in characters
 	std::string::size_type m_DragStart;  //!< The position where the draw started
