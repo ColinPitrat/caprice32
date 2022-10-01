@@ -71,7 +71,7 @@ void CCheckBox::SetCheckBoxState(EState eState)
 void CCheckBox::ToggleCheckBoxState()
 {
   if (m_bReadOnly) {
-    LOG_DEBUG("CCheckBox::ToggleCheckBoxState ignored, control is read-only")
+    LOG_VERBOSE("CCheckBox::ToggleCheckBoxState ignored, control is read-only");
     return;
   }
   switch (m_eCheckBoxState)
@@ -142,12 +142,12 @@ bool CCheckBox::OnMouseButtonUp(CPoint Point, unsigned int Button)
 {
   bool bResult = CWindow::OnMouseButtonUp(Point, Button);
 
-  LOG_VERBOSE("CCheckBox::OnMouseButtonUp called");
+  LOG_DEBUG("CCheckBox::OnMouseButtonUp called");
   if (!bResult && m_bVisible && !m_bReadOnly && (m_eCheckBoxState != DISABLED) &&
       (m_MouseButton == Button) &&
       (m_ClientRect.HitTest(ViewToWindow(Point)) == CRect::RELPOS_INSIDE))
   {
-    LOG_VERBOSE("CCheckBox::OnMouseButtonUp taken into account");
+    LOG_DEBUG("CCheckBox::OnMouseButtonUp taken into account");
     CMessage::EMessageType MessageType =  CMessage::UNKNOWN;
     switch (m_MouseButton)
     {
@@ -175,7 +175,7 @@ bool CCheckBox::HandleMessage(CMessage* pMessage)
 
   if (pMessage)
   {
-    LOG_VERBOSE("CCheckBox::HandleMessage for " << CMessage::ToString(pMessage->MessageType()));
+    LOG_DEBUG("CCheckBox::HandleMessage for " << CMessage::ToString(pMessage->MessageType()));
     switch(pMessage->MessageType())
     {
       case CMessage::KEYBOARD_KEYDOWN:
@@ -212,13 +212,13 @@ bool CCheckBox::HandleMessage(CMessage* pMessage)
       case CMessage::CTRL_SINGLELCLICK:
         if (pMessage->Destination() == this)
         {
-          LOG_VERBOSE("CCheckBox::HandleMessage received " << CMessage::ToString(pMessage->MessageType()) << " -> Toggling state");
+          LOG_DEBUG("CCheckBox::HandleMessage received " << CMessage::ToString(pMessage->MessageType()) << " -> Toggling state");
           ToggleCheckBoxState();
           bHandled = true;
         }
         break;
       default :
-        LOG_VERBOSE("CCheckBox::HandleMessage forwarding " << CMessage::ToString(pMessage->MessageType()) << " to CWindow");
+        LOG_DEBUG("CCheckBox::HandleMessage forwarding " << CMessage::ToString(pMessage->MessageType()) << " to CWindow");
         bHandled = CWindow::HandleMessage(pMessage);
         break;
     }
