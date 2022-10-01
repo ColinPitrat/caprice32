@@ -100,10 +100,12 @@ void parseArguments(int argc, char **argv, std::vector<std::string>& slot_list, 
    int option_index = 0;
    int c;
 
+   LOG_DEBUG("Parsing options with getopt");
    optind = 0; // To please test framework, when this function is called multiple times !
    while(true) {
       c = getopt_long (argc, argv, "a:c:hi:o:O:s:vV",
                        long_options, &option_index);
+      LOG_DEBUG("Next option: " << c << "(" << reinterpret_cast<char>(c) << ")");
 
       /* Detect the end of the options. */
       if (c == -1)
@@ -206,6 +208,8 @@ void parseArguments(int argc, char **argv, std::vector<std::string>& slot_list, 
    }
 
    /* All remaining command line arguments will go to the slot content list */
+   LOG_DEBUG("Finished with options, " << argc-optind << " remaining arguments")
    slot_list.assign(argv+optind, argv+argc);
+   LOG_DEBUG("slot_list: " << stringutils::join(slot_list, ","))
 }
 

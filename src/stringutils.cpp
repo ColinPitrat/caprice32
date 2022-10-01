@@ -20,6 +20,17 @@ namespace stringutils
       return elems;
   }
 
+  std::string join(const std::vector<std::string>& v, const std::string& delim)
+  {
+    std::string result;
+    for(auto it = v.begin(); it != v.end(); ++it)
+    {
+      result += *it;
+      if (it != v.end() - 1) result += delim;
+    }
+    return result;
+  }
+
   std::string trim(const std::string& s, char c)
   {
     auto b = s.begin();

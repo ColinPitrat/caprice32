@@ -7,6 +7,7 @@
 namespace stringutils
 {
   std::vector<std::string> split(const std::string& s, char delim, bool ignore_empty=false);
+  std::string join(const std::vector<std::string>& v, const std::string& delim);
   std::string trim(const std::string& s, char c);
   std::string lower(const std::string& s);
   std::string upper(const std::string& s);
