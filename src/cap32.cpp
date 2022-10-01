@@ -1462,6 +1462,7 @@ void video_set_style ()
       dwXScale = 2;
       dwYScale = 2;
    }
+   CPC.dwYScale = dwYScale;
    switch (dwXScale) {
       case 1:
          if (CPC.model > 2) {
@@ -2989,8 +2990,8 @@ int cap32_main (int argc, char **argv)
 
             case SDL_MOUSEMOTION:
             {
-              CPC.phazer_x = event.motion.x;
-              CPC.phazer_y = event.motion.y;
+              CPC.phazer_x = (event.motion.x-vid_plugin->x_offset) * vid_plugin->x_scale;
+              CPC.phazer_y = (event.motion.y-vid_plugin->y_offset) * vid_plugin->y_scale;
             }
             break;
 

@@ -203,6 +203,7 @@ typedef struct {
    unsigned int scr_window;
    unsigned int scr_bpp;        // bits per pixel of the SDL back_surface
    unsigned int scr_preserve_aspect_ratio;
+   dword dwYScale;              // Y scale (i.e. number of lines in SDL back_surface per CPC line)
    unsigned int scr_bps;        // bytes per line in the SDL back_surface
    unsigned int scr_line_offs;  // bytes per CPC line in the SDL back_surface (2*scr_bps if doubling Y)
    unsigned int scr_green_mode;

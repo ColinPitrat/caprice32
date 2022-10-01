@@ -1067,6 +1067,22 @@ void crtc_cycle(int repeat_count)
             CPC.scr_render(); // render to the video surface at the current bit depth
          }
       }
+      // https://www.cpcwiki.eu/index.php/Amstrad_Magnum_Phaser#Technical
+      // If the trigger of the phazer is released, the CRTC continuously updates R16 and R17 (handled in OUT handler).
+      // If the trigger is pressed, it only updates it when the phazer receives light from the screen.
+      if (CPC.phazer_pressed) {
+        unsigned int x = ((CPC.scr_pos - CPC.scr_base) * 8) / CPC.scr_bpp;
+        unsigned int y = VDU.scrln*CPC.dwYScale;
+        auto screen_address =  (CRTC.registers[12] << 8) + CRTC.registers[13];
+        // Why the +4? I have absolutely no idea, but this works. Without it, the position is shifted
+        // slightly to the left.
+        auto address = CRTC.addr + CRTC.char_count + 4;
+        if (CPC.phazer_x >= x && CPC.phazer_x < x + 16 &&
+            CPC.phazer_y >= y && CPC.phazer_y < y + 2) {
+          CRTC.registers[16] = address >> 8;
+          CRTC.registers[17] = address & 0xFF;
+        }
+      }
       CRTC.next_address = MAXlate[(CRTC.addr + CRTC.char_count) & 0x73ff] | CRTC.scr_base; // next address for PreRender
       flags1.dt.combined = new_dt.combined; // update the DISPTMG flags
 
