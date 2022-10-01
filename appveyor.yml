@@ -59,6 +59,7 @@ build_script:
 # = 1- Build and test in DEBUG mode =
 # ===================================
 - msys64\usr\bin\bash -lc "cd c:/projects/caprice32 && PATH=$PATH:%MINGW_DIR%/bin /usr/bin/make -j %NUMBER_OF_PROCESSORS% ARCH=%WINARCH% MINGW_PATH=\"%MINGW_DIR%\" WINE=\"\" debug"
+- msys64\usr\bin\bash -lc "[ \"%RUN_E2E%\" == \"false\" ] || (cd c:/projects/caprice32 && PATH=$PATH:%MINGW_DIR%/bin /usr/bin/make -j %NUMBER_OF_PROCESSORS% ARCH=%WINARCH% MINGW_PATH=\"%MINGW_DIR%\" WINE=\"\" e2e_test)"
 # ===================================
 # 2- Build and test in RELEASE mode =
 # ===================================
