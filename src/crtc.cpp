@@ -1073,7 +1073,6 @@ void crtc_cycle(int repeat_count)
       if (CPC.phazer_pressed) {
         unsigned int x = ((CPC.scr_pos - CPC.scr_base) * 8) / CPC.scr_bpp;
         unsigned int y = VDU.scrln*CPC.dwYScale;
-        auto screen_address =  (CRTC.registers[12] << 8) + CRTC.registers[13];
         // Why the +4? I have absolutely no idea, but this works. Without it, the position is shifted
         // slightly to the left.
         auto address = CRTC.addr + CRTC.char_count + 4;
