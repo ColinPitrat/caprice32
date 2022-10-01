@@ -92,7 +92,8 @@ int renderer_bpp(SDL_Renderer *sdl_renderer)
   return SDL_BITSPERPIXEL(infos.texture_formats[0]);
 }
 
-void compute_scale(video_plugin* t, int w, int h, float sw_scaling)
+// TODO: Cleanup sw_scaling if really not needed
+void compute_scale(video_plugin* t, int w, int h, __attribute__((unused)) float sw_scaling)
 {
   int win_width, win_height;
   SDL_GetWindowSize(mainSDLWindow, &win_width, &win_height);
@@ -101,9 +102,7 @@ void compute_scale(video_plugin* t, int w, int h, float sw_scaling)
     win_x_scale = w/static_cast<float>(win_width);
     win_y_scale = h/static_cast<float>(win_height);
     float scale = max(win_x_scale, win_y_scale);
-    t->width=w/scale*sw_scaling;
     t->width=w/scale;
-    t->height=h/scale*sw_scaling;
     t->height=h/scale;
     float x_offset = 0.5*(win_width-t->width);
     float y_offset = 0.5*(win_height-t->height);
@@ -116,6 +115,8 @@ void compute_scale(video_plugin* t, int w, int h, float sw_scaling)
     t->y_offset=0;
     t->x_scale=w/static_cast<float>(win_width);
     t->y_scale=h/static_cast<float>(win_height);
+    t->width = win_width;
+    t->height = win_height;
   }
 }
 

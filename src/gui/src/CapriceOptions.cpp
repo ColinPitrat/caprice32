@@ -3,6 +3,7 @@
 
 #include <map>
 #include <string>
+#include "log.h"
 #include "std_ex.h"
 #include "CapriceOptions.h"
 #include "cap32.h"
@@ -39,12 +40,12 @@ CapriceOptions::CapriceOptions(const CRect& WindowRect, CWindow* pParent, CFontE
     m_pNavigationBar->SetIsFocusable(true);
 
     // Groupboxes containing controls for each 'tab' (easier to make a 'tab page' visible or invisible)
-    m_pGroupBoxTabGeneral = new CGroupBox(CRect(CPoint(5, 60), m_ClientRect.Width() - 12, m_ClientRect.Height() - 80), this, "");
+    m_pGroupBoxTabGeneral   = new CGroupBox(CRect(CPoint(5, 60), m_ClientRect.Width() - 12, m_ClientRect.Height() - 80), this, "");
     m_pGroupBoxTabExpansion = new CGroupBox(CRect(CPoint(5, 60), m_ClientRect.Width() - 12, m_ClientRect.Height() - 80), this, "ROM slots");
-    m_pGroupBoxTabVideo   = new CGroupBox(CRect(CPoint(5, 60), m_ClientRect.Width() - 12, m_ClientRect.Height() - 80), this, "");
-    m_pGroupBoxTabAudio   = new CGroupBox(CRect(CPoint(5, 60), m_ClientRect.Width() - 12, m_ClientRect.Height() - 80), this, "");
-    m_pGroupBoxTabDisk   = new CGroupBox(CRect(CPoint(5, 60), m_ClientRect.Width() - 12, m_ClientRect.Height() - 80), this, "");
-    m_pGroupBoxTabInput   = new CGroupBox(CRect(CPoint(5, 60), m_ClientRect.Width() - 12, m_ClientRect.Height() - 80), this, "");
+    m_pGroupBoxTabVideo     = new CGroupBox(CRect(CPoint(5, 60), m_ClientRect.Width() - 12, m_ClientRect.Height() - 80), this, "");
+    m_pGroupBoxTabAudio     = new CGroupBox(CRect(CPoint(5, 60), m_ClientRect.Width() - 12, m_ClientRect.Height() - 80), this, "");
+    m_pGroupBoxTabDisk      = new CGroupBox(CRect(CPoint(5, 60), m_ClientRect.Width() - 12, m_ClientRect.Height() - 80), this, "");
+    m_pGroupBoxTabInput     = new CGroupBox(CRect(CPoint(5, 60), m_ClientRect.Width() - 12, m_ClientRect.Height() - 80), this, "");
 
     // Store associations, see EnableTab method:
     TabMap["general"] = m_pGroupBoxTabGeneral;
@@ -304,6 +305,7 @@ bool CapriceOptions::HandleMessage(CMessage* pMessage)
 
   if (pMessage)
   {
+    LOG_DEBUG("CapriceOptions::HandleMessage for " << CMessage::ToString(pMessage->MessageType()))
     switch(pMessage->MessageType())
     {
       case CMessage::CTRL_SINGLELCLICK:
@@ -469,6 +471,7 @@ bool CapriceOptions::HandleMessage(CMessage* pMessage)
     }
   }
   if (!bHandled) {
+    LOG_DEBUG("CapriceOptions::HandleMessage forwarding " << CMessage::ToString(pMessage->MessageType()) << " to CFrame")
     bHandled = CFrame::HandleMessage(pMessage);
   }
   return bHandled;

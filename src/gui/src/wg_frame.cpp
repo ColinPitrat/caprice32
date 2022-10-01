@@ -24,6 +24,7 @@
 
 #include "wg_frame.h"
 #include "wg_application.h"
+#include "log.h"
 #include <algorithm>
 #include <iostream>
 #include <string>
@@ -235,20 +236,21 @@ bool CFrame::OnMouseButtonDown(CPoint Point, unsigned int Button)  // virtual
 
 bool CFrame::HandleMessage(CMessage* pMessage)  // virtual
 {
-	bool bHandled = false;
+  bool bHandled = false;
 
-	if (pMessage)
-	{
-		switch(pMessage->MessageType())
-		{
+  if (pMessage)
+  {
+    LOG_DEBUG("CFrame::HandleMessage for " << CMessage::ToString(pMessage->MessageType()));
+    switch(pMessage->MessageType())
+    {
       case CMessage::MOUSE_MOVE:  // intentional fall through
       case CMessage::MOUSE_BUTTONUP:
-      {
-        CMouseMessage* pMouseMessage = dynamic_cast<CMouseMessage*>(pMessage);
-        if (pMouseMessage && m_bDragMode)
         {
-          CRect MovedRect = m_WindowRect + (pMouseMessage->Point - m_DragPointerStart);
-          CRect Bounds = m_pParentWindow->GetClientRect().SizeRect();
+          CMouseMessage* pMouseMessage = dynamic_cast<CMouseMessage*>(pMessage);
+          if (pMouseMessage && m_bDragMode)
+          {
+            CRect MovedRect = m_WindowRect + (pMouseMessage->Point - m_DragPointerStart);
+            CRect Bounds = m_pParentWindow->GetClientRect().SizeRect();
 
   //        if (MovedRect.Right() > Bounds.Right())
   //				{
@@ -266,76 +268,77 @@ bool CFrame::HandleMessage(CMessage* pMessage)  // virtual
   //				{
   //					MovedRect.Move(0, Bounds.Top() - MovedRect.Top());
   //				}
-          if (pMessage->MessageType() == CMessage::MOUSE_BUTTONUP)
-          {
-            m_WindowRect = MovedRect;
-            m_bDragMode = false;
-            bHandled = true;
+            if (pMessage->MessageType() == CMessage::MOUSE_BUTTONUP)
+            {
+              m_WindowRect = MovedRect;
+              m_bDragMode = false;
+              bHandled = true;
+            }
+            else
+            {
+              m_FrameGhostRect = MovedRect;
+            }
+            Application().MessageServer()->QueueMessage(new CMessage(CMessage::APP_PAINT, nullptr, this));
           }
-          else
-          {
-            m_FrameGhostRect = MovedRect;
-          }
-          Application().MessageServer()->QueueMessage(new CMessage(CMessage::APP_PAINT, nullptr, this));
+          break;
         }
-        break;
-      }
       case CMessage::CTRL_SINGLELCLICK:
-      {
-        if (pMessage->Destination() == this)
         {
-          if (pMessage->Source() == m_pFrameCloseButton)
+          if (pMessage->Destination() == this)
           {
-            CloseFrame();
-            bHandled = true;
-          }
-        }
-        break;
-      }
-      case CMessage::KEYBOARD_KEYDOWN:
-      {
-        if (m_bVisible && pMessage->Destination() == this) {
-          CKeyboardMessage* pKeyboardMessage = dynamic_cast<CKeyboardMessage*>(pMessage);
-          if (pKeyboardMessage) {
-            switch (pKeyboardMessage->Key) {
-              case SDLK_ESCAPE:
-                CloseFrame();
-                bHandled = true;
-                break;
-              case SDLK_TAB:
-                bHandled = true;
-                if(pKeyboardMessage->Modifiers & KMOD_SHIFT) {
-                  CFrame::FocusNext(EFocusDirection::BACKWARD);
-                } else {
-                  CFrame::FocusNext(EFocusDirection::FORWARD);
-                }
-                break;
-              case SDLK_SPACE:
-              case SDLK_RETURN:
-                {
-                  CWindow *target = GetFocused();
-                  if (target) {
-                    bHandled = true;
-                    Application().MessageServer()->QueueMessage(new TIntMessage(
-                          CMessage::CTRL_SINGLELCLICK, target->GetAncestor(PARENT), target,
-                          0));
-                  }
-                  break;
-                }
-              default:
-                break;
+            if (pMessage->Source() == m_pFrameCloseButton)
+            {
+              CloseFrame();
+              bHandled = true;
             }
           }
-        }      
-        break;
-      }
+          break;
+        }
+      case CMessage::KEYBOARD_KEYDOWN:
+        {
+          if (m_bVisible && pMessage->Destination() == this) {
+            CKeyboardMessage* pKeyboardMessage = dynamic_cast<CKeyboardMessage*>(pMessage);
+            if (pKeyboardMessage) {
+              switch (pKeyboardMessage->Key) {
+                case SDLK_ESCAPE:
+                  CloseFrame();
+                  bHandled = true;
+                  break;
+                case SDLK_TAB:
+                  bHandled = true;
+                  if(pKeyboardMessage->Modifiers & KMOD_SHIFT) {
+                    CFrame::FocusNext(EFocusDirection::BACKWARD);
+                  } else {
+                    CFrame::FocusNext(EFocusDirection::FORWARD);
+                  }
+                  break;
+                case SDLK_SPACE:
+                case SDLK_RETURN:
+                  {
+                    CWindow *target = GetFocused();
+                    if (target) {
+                      bHandled = true;
+                      Application().MessageServer()->QueueMessage(new TIntMessage(
+                            CMessage::CTRL_SINGLELCLICK, target->GetAncestor(PARENT), target,
+                            0));
+                    }
+                    break;
+                  }
+                default:
+                  break;
+              }
+            }
+          }      
+          break;
+        }
       default :
+        LOG_DEBUG("CFrame::HandleMessage forwarding " << CMessage::ToString(pMessage->MessageType()) << " to CWindow");
         bHandled = CWindow::HandleMessage(pMessage);
         break;
-		}
-	}
+    }
+  }
 
-	return bHandled;
+  return bHandled;
 }
 
 void CFrame::AddFocusableWidget(CWindow *pWidget)
