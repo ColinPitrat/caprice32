@@ -105,7 +105,7 @@ void parseArguments(int argc, char **argv, std::vector<std::string>& slot_list, 
    while(true) {
       c = getopt_long (argc, argv, "a:c:hi:o:O:s:vV",
                        long_options, &option_index);
-      LOG_DEBUG("Next option: " << c << "(" << reinterpret_cast<char>(c) << ")");
+      LOG_DEBUG("Next option: " << c << "(" << static_cast<char>(c) << ")");
 
       /* Detect the end of the options. */
       if (c == -1)
