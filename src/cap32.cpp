@@ -2660,6 +2660,7 @@ int cap32_main (int argc, char **argv)
    #endif
 
    loadConfiguration(CPC, getConfigurationFilename()); // retrieve the emulator configuration
+   LOG_DEBUG("Configuration loaded")
    if (CPC.printer) {
       if (!printer_start()) { // start capturing printer output, if enabled
          CPC.printer = 0;
@@ -2667,12 +2668,15 @@ int cap32_main (int argc, char **argv)
    }
 
    z80_init_tables(); // init Z80 emulation
+   LOG_DEBUG("z80 table initialized")
 
    if (video_init()) {
       fprintf(stderr, "video_init() failed. Aborting.\n");
       cleanExit(-1);
    }
+   LOG_DEBUG("video initialized")
    mouse_init();
+   LOG_DEBUG("mouse initialized")
 
    if (audio_init()) {
       fprintf(stderr, "audio_init() failed. Disabling sound.\n");
@@ -2682,10 +2686,12 @@ int cap32_main (int argc, char **argv)
       // To test it, set SDL_AUDIODRIVER=dsp or some other unsupported value.
       CPC.snd_enabled = 0; // disable sound emulation
    }
+   LOG_DEBUG("audio initialized")
 
    if (joysticks_init()) {
       fprintf(stderr, "joysticks_init() failed. Joysticks won't work.\n");
    }
+   LOG_DEBUG("joysticks initialized")
 
 #ifdef DEBUG
    pfoDebug = fopen("./debug.txt", "wt");
@@ -2693,6 +2699,7 @@ int cap32_main (int argc, char **argv)
 
    // Extract files to be loaded from the command line args
    fillSlots(slot_list, CPC);
+   LOG_DEBUG("Slots filled")
 
    // Must be done before emulator_init()
    CPC.InputMapper = new InputMapper(&CPC);
