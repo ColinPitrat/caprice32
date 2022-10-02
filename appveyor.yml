@@ -88,7 +88,9 @@ build_script:
     if ($env:APPVEYOR_REPO_TAG -eq "false") {
       try {
         git config --global credential.helper store
-        Add-Content "$HOME\.git-credentials" "https://$($env:access_token):x-oauth-basic@github.com`n"
+        Set-Content -Path "$HOME\.git-credentials" -Value "https://$($env:access_token):x-oauth-basic@github.com`n" -NoNewline
+        git config --global user.email "colin.pitrat@gmail.com"
+        git config --global user.name "Colin Pitrat (AppVeyor)"
         git tag -d latest
         git tag latest HEAD
         git push -q -f origin latest
