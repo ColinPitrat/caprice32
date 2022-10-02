@@ -30,6 +30,7 @@
 #include <string>
 #include <vector>
 #include "types.h"
+#include "phazer.h"
 
 class InputMapper;
 //#define DEBUG
@@ -181,8 +182,7 @@ typedef struct {
    unsigned int joysticks;
    unsigned int joystick_menu_button;
    unsigned int joystick_vkeyboard_button;
-   // TODO: Support different kinds of phazers
-   bool phazer_emulation;
+   PhazerType phazer_emulation;
    bool phazer_pressed;
    unsigned int phazer_x;
    unsigned int phazer_y;

@@ -461,13 +461,12 @@ byte z80_IN_handler (reg_pair port)
 void z80_OUT_handler (reg_pair port, byte val)
 {
    LOG_DEBUG("port.b.h3=" << std::hex << static_cast<int>(port.b.h3) << ", port.b.h2=" << static_cast<int>(port.b.h2) << ", port.b.h=" << std::hex << static_cast<int>(port.b.h) << ", port.b.l=" << static_cast<int>(port.b.l) << ", val=" << static_cast<int>(val) << std::dec);
-// Amstrad Magnum Phazer 
+   // Amstrad Magnum Phazer
    if ((port.b.h == 0xfb) && (port.b.l == 0xfe)) {
      // When the phazer is not pressed, the CRTC is constantly refreshing R16 & R17:
      // https://www.cpcwiki.eu/index.php/Amstrad_Magnum_Phaser
      if (!CPC.phazer_pressed) CRTC.registers[17] += 1;
      //std::cout << "port.b.h3=" << std::hex << static_cast<int>(port.b.h3) << ", port.b.h2=" << static_cast<int>(port.b.h2) << ", port.b.h=" << std::hex << static_cast<int>(port.b.h) << ", port.b.l=" << static_cast<int>(port.b.l) << ", val=" << static_cast<int>(val) << std::dec << std::endl;
-     //phazer = true;
    }
 // Gate Array -----------------------------------------------------------------
    if ((port.b.h & 0xc0) == 0x40) { // GA chip select?
@@ -2903,10 +2902,10 @@ int cap32_main (int argc, char **argv)
                            break;
 
                         case CAP32_PHAZER:
-                           CPC.phazer_emulation = !CPC.phazer_emulation;
+                           CPC.phazer_emulation = CPC.phazer_emulation.Next();
                            if (!CPC.phazer_emulation) CPC.phazer_pressed = false;
                            mouse_init();
-                           set_osd_message(std::string("Phazer emulation: ") + (CPC.phazer_emulation ? "on" : "off"));
+                           set_osd_message(std::string("Phazer emulation: ") + CPC.phazer_emulation.ToString());
                            break;
 
                         case CAP32_PASTE:
@@ -2956,7 +2955,7 @@ int cap32_main (int argc, char **argv)
             case SDL_JOYBUTTONDOWN:
             {
                 dword cpc_key = CPC.InputMapper->CPCkeyFromJoystickButton(event.jbutton);
-                                if (cpc_key == 0xff) {
+                if (cpc_key == 0xff) {
                   if (event.jbutton.button == CPC.joystick_menu_button)
                   {
                     showGui();
@@ -2999,6 +2998,12 @@ int cap32_main (int argc, char **argv)
             case SDL_MOUSEBUTTONDOWN:
             {
               if (CPC.phazer_emulation) {
+                // Trojan Light Phazer uses Joystick Fire for the trigger button:
+                // https://www.cpcwiki.eu/index.php/Trojan_Light_Phazer
+                if (CPC.phazer_emulation == PhazerType::TrojanLightPhazer) {
+                auto cpc_key = CPC.InputMapper->CPCkeycodeFromCPCkey(CPC_J0_FIRE1);
+                  applyKeypress(cpc_key, keyboard_matrix, true);
+                }
                 CPC.phazer_pressed = true;
               }
             }
@@ -3007,6 +3012,10 @@ int cap32_main (int argc, char **argv)
             case SDL_MOUSEBUTTONUP:
             {
               if (CPC.phazer_emulation) {
+                if (CPC.phazer_emulation == PhazerType::TrojanLightPhazer) {
+                  auto cpc_key = CPC.InputMapper->CPCkeycodeFromCPCkey(CPC_J0_FIRE1);
+                  applyKeypress(cpc_key, keyboard_matrix, false);
+                }
                 CPC.phazer_pressed = false;
               }
             }
