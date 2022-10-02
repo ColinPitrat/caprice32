@@ -1544,7 +1544,7 @@ void mouse_init ()
 int video_init ()
 {
    vid_plugin=&video_plugin_list[CPC.scr_style];
-   LOG_DEBUG("video_init: vid_plugin = " << static_cast<void*>(vid_plugin))
+   LOG_DEBUG("video_init: vid_plugin = " << vid_plugin->name)
 
    back_surface=vid_plugin->init(vid_plugin, CPC.scr_fs_width, CPC.scr_fs_height, CPC.scr_fs_bpp, CPC.scr_window==0);
    LOG_DEBUG("video_init: back_surface = " << static_cast<void*>(back_surface))
