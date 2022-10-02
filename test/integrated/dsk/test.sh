@@ -16,7 +16,7 @@ echo "" > "${LOGFILE}"
 
 cd "$TSTDIR"
 
-$CAP32DIR/cap32 -v -c cap32.cfg -a "run\"hello" -a "call 0" -a CAP32_WAITBREAK -a CAP32_EXIT hello.zip >> "${LOGFILE}" 2>&1
+$CAP32DIR/cap32 -c cap32.cfg -a "run\"hello" -a "call 0" -a CAP32_WAITBREAK -a CAP32_EXIT hello.zip >> "${LOGFILE}" 2>&1
 
 if $DIFF output/printer.dat expected.dat >> "${LOGFILE}"
 then
