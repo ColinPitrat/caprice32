@@ -96,16 +96,16 @@ int renderer_bpp(SDL_Renderer *sdl_renderer)
 void compute_scale(video_plugin* t, int w, int h, __attribute__((unused)) float sw_scaling)
 {
   int win_width, win_height;
-  LOG_DEBUG("compute_scale: GetWindowSize")
+  LOG_DEBUG("compute_scale: GetWindowSize");
   SDL_GetWindowSize(mainSDLWindow, &win_width, &win_height);
-  LOG_DEBUG("compute_scale: window size = " << win_width << "x" << win_height)
+  LOG_DEBUG("compute_scale: window size = " << win_width << "x" << win_height);
   if (CPC.scr_preserve_aspect_ratio != 0) {
-    LOG_DEBUG("compute_scale: preserve aspect ratio")
+    LOG_DEBUG("compute_scale: preserve aspect ratio");
     float win_x_scale, win_y_scale;
     win_x_scale = w/static_cast<float>(win_width);
     win_y_scale = h/static_cast<float>(win_height);
     float scale = max(win_x_scale, win_y_scale);
-    LOG_DEBUG("compute_scale: scale = " << scale)
+    LOG_DEBUG("compute_scale: scale = " << scale);
     t->width=w/scale;
     t->height=h/scale;
     float x_offset = 0.5*(win_width-t->width);
@@ -115,7 +115,7 @@ void compute_scale(video_plugin* t, int w, int h, __attribute__((unused)) float 
     t->x_scale=scale;
     t->y_scale=scale;
   } else {
-    LOG_DEBUG("compute_scale: do not preserve aspect ratio")
+    LOG_DEBUG("compute_scale: do not preserve aspect ratio");
     t->x_offset=0;
     t->y_offset=0;
     t->x_scale=w/static_cast<float>(win_width);
@@ -128,22 +128,23 @@ void compute_scale(video_plugin* t, int w, int h, __attribute__((unused)) float 
 // Common init code for direct access to the rendering surface (no specific processing done by video plugin)
 SDL_Surface* direct_init(video_plugin* t, int w, int h, bool fs)
 {
-  LOG_DEBUG("direct_init: w = " << w << ", h = " << h << ", fs = " << fs)
+  LOG_DEBUG("direct_init: SDL_CreateWindowAndRenderer(" << w << "," << h << "," << (fs?SDL_WINDOW_FULLSCREEN_DESKTOP:SDL_WINDOW_SHOWN) << "," << static_cast<void*>(&mainSDLWindow) << "," << static_cast<void*>(&renderer) << ")");
   SDL_CreateWindowAndRenderer(w, h, (fs?SDL_WINDOW_FULLSCREEN_DESKTOP:SDL_WINDOW_SHOWN), &mainSDLWindow, &renderer);
+  LOG_DEBUG("direct_init: mainSDLWindow = " << static_cast<void*>(mainSDLWindow) << ", renderer = " << static_cast<void*>(renderer));
   if (!mainSDLWindow || !renderer) return nullptr;
-  LOG_DEBUG("direct_init: set window title")
+  LOG_DEBUG("direct_init: set window title");
   SDL_SetWindowTitle(mainSDLWindow, "Caprice32 " VERSION_STRING);
-  LOG_DEBUG("direct_init: create RGB surface")
+  LOG_DEBUG("direct_init: create RGB surface");
   vid = SDL_CreateRGBSurface(0, w, h, renderer_bpp(renderer), 0, 0, 0, 0);
   if (!vid) return nullptr;
-  LOG_DEBUG("direct_init: create texture from surface")
+  LOG_DEBUG("direct_init: create texture from surface");
   texture = SDL_CreateTextureFromSurface(renderer, vid);
   if (!texture) return nullptr;
-  LOG_DEBUG("direct_init: fill rect")
+  LOG_DEBUG("direct_init: fill rect");
   SDL_FillRect(vid, nullptr, SDL_MapRGB(vid->format,0,0,0));
-  LOG_DEBUG("direct_init: compute scale")
+  LOG_DEBUG("direct_init: compute scale");
   compute_scale(t, w, h, 1.0);
-  LOG_DEBUG("direct_init: returning")
+  LOG_DEBUG("direct_init: returning");
   return vid;
 }
 
