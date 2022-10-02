@@ -25,7 +25,7 @@ libgraphite2.dll
 libharfbuzz-0.dll
 libiconv-2.dll
 libintl-8.dll
-libpcre-1.dll
+libpcre2-8-0.dll
 libpng16-16.dll
 libstdc++-6.dll
 libwinpthread-1.dll

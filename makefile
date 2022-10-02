@@ -194,7 +194,7 @@ cap32.cfg: cap32.cfg.tmpl
 ifeq ($(PLATFORM),windows)
 DLLS = SDL2.dll libbz2-1.dll libfreetype-6.dll libpng16-16.dll libstdc++-6.dll \
        libwinpthread-1.dll zlib1.dll libglib-2.0-0.dll libgraphite2.dll \
-       libharfbuzz-0.dll libiconv-2.dll libintl-8.dll libpcre-1.dll \
+       libharfbuzz-0.dll libiconv-2.dll libintl-8.dll libpcre2-8-0.dll \
 			 libbrotlidec.dll libbrotlicommon.dll
 
 $(TARGET): $(OBJECTS) $(MAIN) cap32.cfg
