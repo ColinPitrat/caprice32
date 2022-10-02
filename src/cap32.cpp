@@ -1544,8 +1544,10 @@ void mouse_init ()
 int video_init ()
 {
    vid_plugin=&video_plugin_list[CPC.scr_style];
+   LOG_DEBUG("video_init: vid_plugin = " << static_cast<void*>(vid_plugin))
 
    back_surface=vid_plugin->init(vid_plugin, CPC.scr_fs_width, CPC.scr_fs_height, CPC.scr_fs_bpp, CPC.scr_window==0);
+   LOG_DEBUG("video_init: back_surface = " << static_cast<void*>(back_surface))
 
    if (!back_surface) { // attempt to set the required video mode
       LOG_ERROR("Could not set requested video mode: " << SDL_GetError());
@@ -1553,7 +1555,9 @@ int video_init ()
    }
 
    CPC.scr_bpp = back_surface->format->BitsPerPixel; // bit depth of the surface
+   LOG_DEBUG("video_init: scr_bpp = " << CPC.scr_bpp)
    video_set_style(); // select rendering style
+   LOG_DEBUG("video_init: After video_set_style")
 
    int iErrCode = video_set_palette(); // init CPC colours
    if (iErrCode) {
@@ -1566,8 +1570,10 @@ int video_init ()
    CPC.scr_base = static_cast<byte *>(back_surface->pixels); // memory address of back buffer
    CPC.scr_gui_is_currently_on = false;
 
+   LOG_DEBUG("video_init: Before crtc_init")
    crtc_init();
 
+   LOG_DEBUG("video_init: returning")
    return 0;
 }
 
