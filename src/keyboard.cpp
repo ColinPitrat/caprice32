@@ -1453,6 +1453,10 @@ void InputMapper::init()
   }
 }
 
+dword InputMapper::CPCkeycodeFromCPCkey(CPC_KEYS cpc_key) {
+  return cpc_kbd[CPC->keyboard][cpc_key];
+}
+
 dword InputMapper::CPCkeyFromKeysym(SDL_Keysym keysym) {
     PCKey sdl_key = keysym.sym;
 
