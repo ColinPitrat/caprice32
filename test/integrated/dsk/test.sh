@@ -15,7 +15,6 @@ mkdir -p ${OUTPUT_DIR}
 echo "" > "${LOGFILE}"
 
 cd "$TSTDIR"
-export SDL_VIDEODRIVER=dummy
 
 $CAP32DIR/cap32 -v -c cap32.cfg -a "run\"hello" -a "call 0" -a CAP32_WAITBREAK -a CAP32_EXIT hello.zip >> "${LOGFILE}" 2>&1
 
