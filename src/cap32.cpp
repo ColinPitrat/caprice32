@@ -59,10 +59,6 @@
 
 #define MAX_LINE_LEN 256
 
-#define MIN_SPEED_SETTING 2
-#define MAX_SPEED_SETTING 32
-#define DEF_SPEED_SETTING 4
-
 #define MAX_NB_JOYSTICKS 2
 
 #define POLL_INTERVAL_MS 1
@@ -452,7 +448,7 @@ byte z80_IN_handler (reg_pair port)
          }
       }
    }
-   LOG_DEBUG("port.b.h3=" << std::hex << static_cast<int>(port.b.h3) << ", port.b.h2=" << static_cast<int>(port.b.h2) << ", port.b.h=" << std::hex << static_cast<int>(port.b.h) << ", port.b.l=" << static_cast<int>(port.b.l) << ", ret_val=" << static_cast<int>(ret_val) << std::dec);
+   LOG_DEBUG("IN on port " << std::hex << static_cast<int>(port.w.l) << ", ret_val=" << static_cast<int>(ret_val) << std::dec);
    return ret_val;
 }
 
@@ -460,13 +456,12 @@ byte z80_IN_handler (reg_pair port)
 
 void z80_OUT_handler (reg_pair port, byte val)
 {
-   LOG_DEBUG("port.b.h3=" << std::hex << static_cast<int>(port.b.h3) << ", port.b.h2=" << static_cast<int>(port.b.h2) << ", port.b.h=" << std::hex << static_cast<int>(port.b.h) << ", port.b.l=" << static_cast<int>(port.b.l) << ", val=" << static_cast<int>(val) << std::dec);
+   LOG_DEBUG("OUT on port " << std::hex << static_cast<int>(port.w.l) << ", val=" << static_cast<int>(val) << std::dec);
    // Amstrad Magnum Phazer
    if ((port.b.h == 0xfb) && (port.b.l == 0xfe)) {
      // When the phazer is not pressed, the CRTC is constantly refreshing R16 & R17:
      // https://www.cpcwiki.eu/index.php/Amstrad_Magnum_Phaser
      if (!CPC.phazer_pressed) CRTC.registers[17] += 1;
-     //std::cout << "port.b.h3=" << std::hex << static_cast<int>(port.b.h3) << ", port.b.h2=" << static_cast<int>(port.b.h2) << ", port.b.h=" << std::hex << static_cast<int>(port.b.h) << ", port.b.l=" << static_cast<int>(port.b.l) << ", val=" << static_cast<int>(val) << std::dec << std::endl;
    }
 // Gate Array -----------------------------------------------------------------
    if ((port.b.h & 0xc0) == 0x40) { // GA chip select?

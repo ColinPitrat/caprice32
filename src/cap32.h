@@ -60,6 +60,11 @@ class InputMapper;
 #define CPC_VISIBLE_SCR_WIDTH 384 // visible width: 4+40+4 * 8
 #define CPC_VISIBLE_SCR_HEIGHT 270
 
+// Emulation speed range
+#define MIN_SPEED_SETTING 1
+#define MAX_SPEED_SETTING 32
+#define DEF_SPEED_SETTING 4
+
 #define ICN_DISK_WIDTH 14
 #define ICN_DISK_HEIGHT 16
 #define ICN_TAPE_WIDTH 18

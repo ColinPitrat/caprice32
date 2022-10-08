@@ -23,6 +23,13 @@
 #include "types.h"
 #include "crtc.h"
 
+// A pair of register really only needs a word (16 bits).
+// So in practice, b.h2, b.h3 and w.h should never be used (there's an
+// exception in psg.cpp which uses the same structure for other purposes).
+// However, using 32 bits allow to easily implement addition: we can just do the
+// addition and handle the overflow after. It also allow for magic values
+// outside of the 16 bits range (e.g. deactivating z80.break_point with an
+// unreachable address).
 typedef union {
 #if SDL_BYTEORDER == SDL_LIL_ENDIAN
    struct { byte l, h, h2, h3; } b;

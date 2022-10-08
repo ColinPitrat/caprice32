@@ -88,8 +88,8 @@ CapriceOptions::CapriceOptions(const CRect& WindowRect, CWindow* pParent, CFontE
     m_pLabelCPCSpeed  = new CLabel(CPoint(10, 71), m_pGroupBoxTabGeneral, "CPC Speed");;
     m_pScrollBarCPCSpeed  = new CScrollBar(CRect(CPoint(78, 68), 120, 12), m_pGroupBoxTabGeneral,
                                                                              CScrollBar::HORIZONTAL);
-    m_pScrollBarCPCSpeed->SetMinLimit(2);
-    m_pScrollBarCPCSpeed->SetMaxLimit(32);
+    m_pScrollBarCPCSpeed->SetMinLimit(MIN_SPEED_SETTING);
+    m_pScrollBarCPCSpeed->SetMaxLimit(MAX_SPEED_SETTING);
     m_pScrollBarCPCSpeed->SetStepSize(1);
     m_pScrollBarCPCSpeed->SetValue(CPC.speed);
     m_pScrollBarCPCSpeed->SetIsFocusable(true);
