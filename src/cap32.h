@@ -194,10 +194,8 @@ typedef struct {
    int cycle_count;
    std::string resources_path;
 
-   unsigned int scr_fs_width;
-   unsigned int scr_fs_height;
-   unsigned int scr_fs_bpp;
    unsigned int scr_style;
+   unsigned int scr_scale;
    unsigned int scr_oglfilter;
    unsigned int scr_oglscanlines;
    unsigned int scr_led;

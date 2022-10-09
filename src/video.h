@@ -26,8 +26,10 @@ typedef struct video_plugin
 {
   /* the user-displayed name of this plugin */
   const char* name;
+  /* whether the plugin should be hidden from UI (i.e. is deprecated) */
+  bool hidden;
   /* initializes the video plugin ; returns the surface that you must draw into, nullptr in the (unlikely ;) event of a failure */
-  SDL_Surface* (*init)(video_plugin* t,int w,int h,int bpp,bool fs);
+  SDL_Surface* (*init)(video_plugin* t, int scale, bool fs);
 
   void (*set_palette)(SDL_Color* c);
   /* "flips" the video surface. Note that this might not always do a real flip */

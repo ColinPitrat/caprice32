@@ -1548,7 +1548,7 @@ int video_init ()
    vid_plugin=&video_plugin_list[CPC.scr_style];
    LOG_DEBUG("video_init: vid_plugin = " << vid_plugin->name)
 
-   back_surface=vid_plugin->init(vid_plugin, CPC.scr_fs_width, CPC.scr_fs_height, CPC.scr_fs_bpp, CPC.scr_window==0);
+   back_surface=vid_plugin->init(vid_plugin, CPC.scr_scale, CPC.scr_window==0);
 
    if (!back_surface) { // attempt to set the required video mode
       LOG_ERROR("Could not set requested video mode: " << SDL_GetError());
@@ -1743,9 +1743,7 @@ void loadConfiguration (t_CPC &CPC, const std::string& configFilename)
    CPC.joystick_vkeyboard_button = conf.getIntValue("system", "joystick_vkeyboard_button", 10) - 1;
    CPC.resources_path = conf.getStringValue("system", "resources_path", appPath + "/resources");
 
-   CPC.scr_fs_width = conf.getIntValue("video", "scr_width", 800);
-   CPC.scr_fs_height = conf.getIntValue("video", "scr_height", 600);
-   CPC.scr_fs_bpp = conf.getIntValue("video", "scr_bpp", 8);
+   CPC.scr_scale = conf.getIntValue("video", "scr_scale", 2);
    CPC.scr_preserve_aspect_ratio = conf.getIntValue("video", "scr_preserve_aspect_ratio", 1);
    CPC.scr_style = conf.getIntValue("video", "scr_style", 1);
    if (CPC.scr_style >= video_plugin_list.size()) {
@@ -1842,9 +1840,7 @@ bool saveConfiguration (t_CPC &CPC, const std::string& configFilename)
    conf.setIntValue("system", "joystick_vkeyboard_button", CPC.joystick_vkeyboard_button + 1);
    conf.setStringValue("system", "resources_path", CPC.resources_path);
 
-   conf.setIntValue("video", "scr_width", CPC.scr_fs_width);
-   conf.setIntValue("video", "scr_height", CPC.scr_fs_height);
-   conf.setIntValue("video", "scr_bpp", CPC.scr_fs_bpp);
+   conf.setIntValue("video", "scr_scale", CPC.scr_scale);
    conf.setIntValue("video", "scr_preserve_aspect_ratio", CPC.scr_preserve_aspect_ratio);
    conf.setIntValue("video", "scr_style", CPC.scr_style);
    conf.setIntValue("video", "scr_oglfilter", CPC.scr_oglfilter);

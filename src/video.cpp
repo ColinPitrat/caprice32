@@ -93,7 +93,7 @@ int renderer_bpp(SDL_Renderer *sdl_renderer)
 }
 
 // TODO: Cleanup sw_scaling if really not needed
-void compute_scale(video_plugin* t, int w, int h, __attribute__((unused)) float sw_scaling)
+void compute_scale(video_plugin* t, int w, int h)
 {
   int win_width, win_height;
   SDL_GetWindowSize(mainSDLWindow, &win_width, &win_height);
@@ -120,19 +120,39 @@ void compute_scale(video_plugin* t, int w, int h, __attribute__((unused)) float 
   }
 }
 
-// Common init code for direct access to the rendering surface (no specific processing done by video plugin)
-SDL_Surface* direct_init(video_plugin* t, int w, int h, bool fs)
+/* ------------------------------------------------------------------------------------ */
+/* Half size video plugin ------------------------------------------------------------- */
+/* ------------------------------------------------------------------------------------ */
+SDL_Surface* direct_init(video_plugin* t, int scale, bool fs)
 {
-  SDL_CreateWindowAndRenderer(w, h, (fs?SDL_WINDOW_FULLSCREEN_DESKTOP:SDL_WINDOW_SHOWN), &mainSDLWindow, &renderer);
+  SDL_CreateWindowAndRenderer(CPC_VISIBLE_SCR_WIDTH*scale, CPC_VISIBLE_SCR_HEIGHT*scale, (fs?SDL_WINDOW_FULLSCREEN_DESKTOP:SDL_WINDOW_SHOWN), &mainSDLWindow, &renderer);
   if (!mainSDLWindow || !renderer) return nullptr;
   SDL_SetWindowTitle(mainSDLWindow, "Caprice32 " VERSION_STRING);
-  vid = SDL_CreateRGBSurface(0, w, h, renderer_bpp(renderer), 0, 0, 0, 0);
+  vid = SDL_CreateRGBSurface(0, CPC_VISIBLE_SCR_WIDTH, CPC_VISIBLE_SCR_HEIGHT, renderer_bpp(renderer), 0, 0, 0, 0);
   if (!vid) return nullptr;
   texture = SDL_CreateTextureFromSurface(renderer, vid);
   if (!texture) return nullptr;
   SDL_FillRect(vid, nullptr, SDL_MapRGB(vid->format,0,0,0));
-  compute_scale(t, w, h, 1.0);
+  compute_scale(t, CPC_VISIBLE_SCR_WIDTH, CPC_VISIBLE_SCR_HEIGHT);
   return vid;
+}
+
+void direct_setpal(SDL_Color* c)
+{
+  SDL_SetPaletteColors(vid->format->palette, c, 0, 32);
+}
+
+void direct_flip(video_plugin* t)
+{
+  SDL_UpdateTexture(texture, nullptr, vid->pixels, vid->pitch);
+  SDL_RenderClear(renderer);
+  if (CPC.scr_preserve_aspect_ratio != 0) {
+    SDL_Rect dest_rect = { t->x_offset, t->y_offset, t->width, t->height };
+    SDL_RenderCopy(renderer, texture, nullptr, &dest_rect);
+  } else {
+    SDL_RenderCopy(renderer, texture, nullptr, nullptr);
+  }
+  SDL_RenderPresent(renderer);
 }
 
 void direct_close()
@@ -143,67 +163,6 @@ void direct_close()
   if (mainSDLWindow) SDL_DestroyWindow(mainSDLWindow);
 }
 
-/* ------------------------------------------------------------------------------------ */
-/* Half size video plugin ------------------------------------------------------------- */
-/* ------------------------------------------------------------------------------------ */
-SDL_Surface* half_init(video_plugin* t, int w __attribute__((unused)), int h __attribute__((unused)), int bpp __attribute__((unused)), bool fs)
-{
-  return direct_init(t, CPC_VISIBLE_SCR_WIDTH, CPC_VISIBLE_SCR_HEIGHT, fs);
-}
-
-void half_setpal(SDL_Color* c)
-{
-  SDL_SetPaletteColors(vid->format->palette, c, 0, 32);
-}
-
-void half_flip(video_plugin* t)
-{
-  SDL_UpdateTexture(texture, nullptr, vid->pixels, vid->pitch);
-  SDL_RenderClear(renderer);
-  if (CPC.scr_preserve_aspect_ratio != 0) {
-    SDL_Rect dest_rect = { t->x_offset, t->y_offset, t->width, t->height };
-    SDL_RenderCopy(renderer, texture, nullptr, &dest_rect);
-  } else {
-    SDL_RenderCopy(renderer, texture, nullptr, nullptr);
-  }
-  SDL_RenderPresent(renderer);
-}
-
-void half_close()
-{
-  direct_close();
-}
-
-/* ------------------------------------------------------------------------------------ */
-/* Double size video plugin ----------------------------------------------------------- */
-/* ------------------------------------------------------------------------------------ */
-SDL_Surface* double_init(video_plugin* t, int w __attribute__((unused)), int h __attribute__((unused)), int bpp __attribute__((unused)), bool fs)
-{
-  return direct_init(t, CPC_VISIBLE_SCR_WIDTH*2, CPC_VISIBLE_SCR_HEIGHT*2, fs);
-}
-
-void double_setpal(SDL_Color* c)
-{
-  SDL_SetPaletteColors(vid->format->palette, c, 0, 32);
-}
-
-void double_flip(video_plugin* t __attribute__((unused)))
-{
-  SDL_UpdateTexture(texture, nullptr, vid->pixels, vid->pitch);
-  SDL_RenderClear(renderer);
-  if (CPC.scr_preserve_aspect_ratio != 0) {
-    SDL_Rect dest_rect = { t->x_offset, t->y_offset, t->width, t->height };
-    SDL_RenderCopy(renderer, texture, nullptr, &dest_rect);
-  } else {
-    SDL_RenderCopy(renderer, texture, nullptr, nullptr);
-  }
-  SDL_RenderPresent(renderer);
-}
-
-void double_close()
-{
-  direct_close();
-}
 
 #ifdef HAVE_GL
 /* ------------------------------------------------------------------------------------ */
@@ -213,7 +172,7 @@ static int tex_x,tex_y;
 static GLuint screen_texnum,modulate_texnum;
 static int gl_scanlines;
 
-SDL_Surface* glscale_init(video_plugin* t, int w __attribute__((unused)), int h __attribute__((unused)), int bpp, bool fs)
+SDL_Surface* glscale_init(video_plugin* t, int scale, bool fs)
 {
 #ifdef _WIN32
   const char *gl_library = "OpenGL32.DLL";
@@ -230,8 +189,8 @@ SDL_Surface* glscale_init(video_plugin* t, int w __attribute__((unused)), int h 
     return nullptr;
   }
 
-  int width = CPC_VISIBLE_SCR_WIDTH*2;
-  int height = CPC_VISIBLE_SCR_HEIGHT*2;
+  int width = CPC_VISIBLE_SCR_WIDTH*scale;
+  int height = CPC_VISIBLE_SCR_HEIGHT*scale;
   SDL_CreateWindowAndRenderer(width, height, (fs?SDL_WINDOW_FULLSCREEN_DESKTOP:SDL_WINDOW_SHOWN) | SDL_WINDOW_OPENGL, &mainSDLWindow, &renderer);
   if (!mainSDLWindow || !renderer) return nullptr;
   if (fs) {
@@ -279,14 +238,14 @@ SDL_Surface* glscale_init(video_plugin* t, int w __attribute__((unused)), int h 
       original_height = CPC_VISIBLE_SCR_HEIGHT * 2;
    }
 
-  compute_scale(t, original_width, original_height, 1.0);
+  compute_scale(t, original_width, original_height);
 
   // We have to react differently to the bpp parameter than with software rendering
   // Here are the rules :
   // for 8bpp OpenGL, we need the GL_EXT_paletted_texture extension
   // for 16bpp OpenGL, we need OpenGL 1.2+
   // for 24bpp reversed OpenGL, we need OpenGL 1.2+
-  std::vector<int> candidates_bpp{bpp, 24, 16, 8};
+  std::vector<int> candidates_bpp{32, 24, 16, 8};
   int surface_bpp = 0;
   for (int try_bpp : candidates_bpp) {
     switch(try_bpp)
@@ -307,10 +266,6 @@ SDL_Surface* glscale_init(video_plugin* t, int w __attribute__((unused)), int h 
     if (surface_bpp == 0) {
       fprintf(stderr, "Your OpenGL implementation doesn't support %dbpp textures\n", try_bpp);
     } else {
-      if (bpp != try_bpp) {
-        fprintf(stderr, "Switching to %dbpp instead of %dbpp as the latter is not supported.\n", try_bpp, bpp);
-        bpp = try_bpp;
-      }
       break;
     }
   }
@@ -585,9 +540,9 @@ void compute_rects_for_tests(SDL_Rect* src, SDL_Rect* dst)
   compute_rects(src, dst);
 }
 
-SDL_Surface* swscale_init(video_plugin* t, int w __attribute__((unused)), int h __attribute__((unused)), int bpp __attribute__((unused)), bool fs)
+SDL_Surface* swscale_init(video_plugin* t, int scale, bool fs)
 {
-  SDL_CreateWindowAndRenderer(CPC_VISIBLE_SCR_WIDTH*2, CPC_VISIBLE_SCR_HEIGHT*2, (fs?SDL_WINDOW_FULLSCREEN_DESKTOP:SDL_WINDOW_SHOWN), &mainSDLWindow, &renderer);
+  SDL_CreateWindowAndRenderer(CPC_VISIBLE_SCR_WIDTH*scale, CPC_VISIBLE_SCR_HEIGHT*scale, (fs?SDL_WINDOW_FULLSCREEN_DESKTOP:SDL_WINDOW_SHOWN), &mainSDLWindow, &renderer);
   if (!mainSDLWindow || !renderer) return nullptr;
   SDL_SetWindowTitle(mainSDLWindow, "Caprice32 " VERSION_STRING);
   vid = SDL_CreateRGBSurface(0, CPC_VISIBLE_SCR_WIDTH*2, CPC_VISIBLE_SCR_HEIGHT*2, renderer_bpp(renderer), 0, 0, 0, 0);
@@ -603,7 +558,7 @@ SDL_Surface* swscale_init(video_plugin* t, int w __attribute__((unused)), int h 
     return nullptr;
   }
   SDL_FillRect(vid, nullptr, SDL_MapRGB(vid->format,0,0,0));
-  compute_scale(t, CPC_VISIBLE_SCR_WIDTH, CPC_VISIBLE_SCR_HEIGHT, 2.0);
+  compute_scale(t, CPC_VISIBLE_SCR_WIDTH, CPC_VISIBLE_SCR_HEIGHT);
   pub = SDL_CreateRGBSurface(0, CPC_VISIBLE_SCR_WIDTH, CPC_VISIBLE_SCR_HEIGHT, 16, 0, 0, 0, 0);
   if (pub->format->BitsPerPixel!=16)
   {
@@ -1400,19 +1355,19 @@ void dotmat_flip(video_plugin* t __attribute__((unused)))
 std::vector<video_plugin> video_plugin_list =
 {
   // Hardware flip version are the same as software ones since switch to SDL2. Kept for compatibility of config, would be nice to not display them in the UI.
-  /* Name                            Init func      Palette func     Flip func      Close func      Half size  X, Y offsets   X, Y scale  width, height */
-  {"Half size with hardware flip",   half_init,     half_setpal,     half_flip,     half_close,     1,         0, 0,          0, 0, 0, 0 },
-  {"Double size with hardware flip", double_init,   double_setpal,   double_flip,   double_close,   0,         0, 0,          0, 0, 0, 0 },
-  {"Half size",                      half_init,     half_setpal,     half_flip,     half_close,     1,         0, 0,          0, 0, 0, 0 },
-  {"Double size",                    double_init,   double_setpal,   double_flip,   double_close,   0,         0, 0,          0, 0, 0, 0 },
-  {"Super eagle",                    swscale_init,  swscale_setpal,  seagle_flip,   swscale_close,  1,         0, 0,          0, 0, 0, 0 },
-  {"Scale2x",                        swscale_init,  swscale_setpal,  scale2x_flip,  swscale_close,  1,         0, 0,          0, 0, 0, 0 },
-  {"Advanced Scale2x",               swscale_init,  swscale_setpal,  ascale2x_flip, swscale_close,  1,         0, 0,          0, 0, 0, 0 },
-  {"TV 2x",                          swscale_init,  swscale_setpal,  tv2x_flip,     swscale_close,  1,         0, 0,          0, 0, 0, 0 },
-  {"Software bilinear",              swscale_init,  swscale_setpal,  swbilin_flip,  swscale_close,  1,         0, 0,          0, 0, 0, 0 },
-  {"Software bicubic",               swscale_init,  swscale_setpal,  swbicub_flip,  swscale_close,  1,         0, 0,          0, 0, 0, 0 },
-  {"Dot matrix",                     swscale_init,  swscale_setpal,  dotmat_flip,   swscale_close,  1,         0, 0,          0, 0, 0, 0 },
+  /* Name                     Hidden Init func      Palette func     Flip func      Close func      Half size  X, Y offsets   X, Y scale  width, height */
+  {"Direct",                  false, direct_init,   direct_setpal,   direct_flip,   direct_close,   1,         0, 0,          0, 0, 0, 0 },
+  {"Direct double size",      true,  direct_init,   direct_setpal,   direct_flip,   direct_close,   1,         0, 0,          0, 0, 0, 0 },
+  {"Half size",               true,  direct_init,   direct_setpal,   direct_flip,   direct_close,   1,         0, 0,          0, 0, 0, 0 },
+  {"Double size",             true,  direct_init,   direct_setpal,   direct_flip,   direct_close,   1,         0, 0,          0, 0, 0, 0 },
+  {"Super eagle",             false, swscale_init,  swscale_setpal,  seagle_flip,   swscale_close,  1,         0, 0,          0, 0, 0, 0 },
+  {"Scale2x",                 false, swscale_init,  swscale_setpal,  scale2x_flip,  swscale_close,  1,         0, 0,          0, 0, 0, 0 },
+  {"Advanced Scale2x",        false, swscale_init,  swscale_setpal,  ascale2x_flip, swscale_close,  1,         0, 0,          0, 0, 0, 0 },
+  {"TV 2x",                   false, swscale_init,  swscale_setpal,  tv2x_flip,     swscale_close,  1,         0, 0,          0, 0, 0, 0 },
+  {"Software bilinear",       false, swscale_init,  swscale_setpal,  swbilin_flip,  swscale_close,  1,         0, 0,          0, 0, 0, 0 },
+  {"Software bicubic",        false, swscale_init,  swscale_setpal,  swbicub_flip,  swscale_close,  1,         0, 0,          0, 0, 0, 0 },
+  {"Dot matrix",              false, swscale_init,  swscale_setpal,  dotmat_flip,   swscale_close,  1,         0, 0,          0, 0, 0, 0 },
 #ifdef HAVE_GL
-  {"OpenGL scaling",                 glscale_init,  glscale_setpal,  glscale_flip,  glscale_close,  0,         0, 0,          0, 0, 0, 0 },
+  {"OpenGL scaling",          false, glscale_init,  glscale_setpal,  glscale_flip,  glscale_close,  0,         0, 0,          0, 0, 0, 0 },
 #endif
 };

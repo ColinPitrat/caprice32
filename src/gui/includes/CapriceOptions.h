@@ -90,6 +90,8 @@ namespace wGui
       CLabel* m_pLabelIntensityValue;
       CDropDown* m_pDropDownVideoPlugin; // Select video plugin
       CLabel* m_pLabelVideoPlugin;
+      CDropDown* m_pDropDownVideoScale;  // Select video scale factor
+      CLabel* m_pLabelVideoScale;
 
       // Audio options
       CCheckBox* m_pCheckBoxEnableSound;    // Show emulation speed

@@ -118,16 +118,34 @@ CapriceOptions::CapriceOptions(const CRect& WindowRect, CWindow* pParent, CFontE
     }
 
     // ---------------- 'Video' options ----------------
-    m_pDropDownVideoPlugin = new CDropDown(CRect(CPoint(100,0),140,16), m_pGroupBoxTabVideo, false); // Select video plugin
+    m_pDropDownVideoPlugin = new CDropDown(CRect(CPoint(50,0),120,16), m_pGroupBoxTabVideo, false); // Select video plugin
+    unsigned int i = 0;
     for(const auto& plugin : video_plugin_list)
     {
-      m_pDropDownVideoPlugin->AddItem(SListItem(plugin.name));
+      if (!plugin.hidden) {
+        m_pDropDownVideoPlugin->AddItem(SListItem(plugin.name, reinterpret_cast<void*>(i)));
+      }
+      if (i == CPC.scr_style) {
+        m_pDropDownVideoPlugin->SelectItem(m_pDropDownVideoPlugin->Size()-1);
+      }
+      i++;
     }
     m_pDropDownVideoPlugin->SetListboxHeight(5);
-    m_pDropDownVideoPlugin->SelectItem(CPC.scr_style);
     m_pDropDownVideoPlugin->SetIsFocusable(true);
 
-    m_pLabelVideoPlugin = new CLabel(CPoint(10, 2), m_pGroupBoxTabVideo, "Video plugin");
+    m_pLabelVideoPlugin = new CLabel(CPoint(10, 2), m_pGroupBoxTabVideo, "Plugin");
+
+    m_pDropDownVideoScale = new CDropDown(CRect(CPoint(220, 0),50,16), m_pGroupBoxTabVideo, false);
+    for(int scale = 1; scale <= 8; scale++)
+    {
+      std::string scale_str = std::to_string(scale) + "x";
+      m_pDropDownVideoScale->AddItem(SListItem(scale_str));
+    }
+    m_pDropDownVideoScale->SelectItem(CPC.scr_scale-1);
+    m_pDropDownVideoScale->SetListboxHeight(5);
+    m_pDropDownVideoScale->SetIsFocusable(true);
+
+    m_pLabelVideoScale = new CLabel(CPoint(180, 2), m_pGroupBoxTabVideo, "Scale");
 
     m_pGroupBoxMonitor   = new CGroupBox(CRect(CPoint(10, 30), 280, 55), m_pGroupBoxTabVideo, "Monitor");
     m_pRadioButtonColour = new CRadioButton(CPoint(10, 1), 10, m_pGroupBoxMonitor); // Colour or monochrome monitor
@@ -343,7 +361,8 @@ bool CapriceOptions::HandleMessage(CMessage* pMessage)
               CPC.scr_preserve_aspect_ratio = (m_pCheckBoxAspectRatio->GetCheckBoxState() == CCheckBox::CHECKED)?1:0;
               CPC.scr_tube = (m_pRadioButtonMonochrome->GetState() == CRadioButton::CHECKED)?1:0;
               CPC.scr_intensity = m_pScrollBarIntensity->GetValue();
-              CPC.scr_style = m_pDropDownVideoPlugin->GetSelectedIndex();
+              CPC.scr_style = reinterpret_cast<intptr_t>(m_pDropDownVideoPlugin->GetItem(m_pDropDownVideoPlugin->GetSelectedIndex()).pItemData);
+              CPC.scr_scale = m_pDropDownVideoScale->GetSelectedIndex()+1;
               // 'Audio' settings
               CPC.snd_enabled = (m_pCheckBoxEnableSound->GetCheckBoxState() == CCheckBox::CHECKED)?1:0;
               // index in listbox = index in array defining sample rate (maybe rewrite this so
@@ -548,15 +567,17 @@ bool CapriceOptions::ProcessOptionChanges(t_CPC& CPC, bool saveChanges) {
     }
 
     // Restart video subsystem
-    if (CPC.model != m_oldCPCsettings.model || CPC.scr_window != m_oldCPCsettings.scr_window || CPC.scr_style != m_oldCPCsettings.scr_style || CPC.scr_preserve_aspect_ratio != m_oldCPCsettings.scr_preserve_aspect_ratio)
+    if (CPC.model != m_oldCPCsettings.model || CPC.scr_window != m_oldCPCsettings.scr_window || CPC.scr_style != m_oldCPCsettings.scr_style || CPC.scr_scale != m_oldCPCsettings.scr_scale || CPC.scr_preserve_aspect_ratio != m_oldCPCsettings.scr_preserve_aspect_ratio)
     {
         audio_pause();
         SDL_Delay(20);
         video_shutdown();
         if (video_init())
         {
+          LOG_ERROR("Couldn't apply new video settings, reverting to old ones");
           // we failed video init, restore previous plugin
           CPC.scr_style = m_oldCPCsettings.scr_style;
+          CPC.scr_scale = m_oldCPCsettings.scr_scale;
           video_init();
         }
         audio_resume();
