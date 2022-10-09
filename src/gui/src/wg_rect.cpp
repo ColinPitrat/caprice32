@@ -180,10 +180,10 @@ unsigned int CRect::HitTest(const CPoint& p) const
 
 	eRelPos |= (p.XPos() < m_Left) ? RELPOS_LEFT : 0;
 	eRelPos |= (p.YPos() < m_Top) ? RELPOS_ABOVE: 0;
-	eRelPos |= (p.XPos() > m_Right) ? RELPOS_RIGHT : 0;
-	eRelPos |= (p.YPos() > m_Bottom) ? RELPOS_BELOW: 0;
-	eRelPos |= (p.XPos() >= m_Left && p.XPos() <= m_Right &&
-		p.YPos() >= m_Top && p.YPos() <= m_Bottom) ? RELPOS_INSIDE : 0;
+	eRelPos |= (p.XPos() >= m_Right) ? RELPOS_RIGHT : 0;
+	eRelPos |= (p.YPos() >= m_Bottom) ? RELPOS_BELOW: 0;
+	eRelPos |= (p.XPos() >= m_Left && p.XPos() < m_Right &&
+		p.YPos() >= m_Top && p.YPos() < m_Bottom) ? RELPOS_INSIDE : 0;
 
 	return eRelPos;
 }
