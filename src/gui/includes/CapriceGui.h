@@ -8,8 +8,9 @@
 class CapriceGui : public wGui::CApplication
 {
   public:
-    CapriceGui(SDL_Window* pWindow, bool bInMainView) : wGui::CApplication(pWindow) {
+    CapriceGui(SDL_Window* pWindow, bool bInMainView, int scale=1) : wGui::CApplication(pWindow) {
       m_bInMainView = bInMainView;
+      m_iScale = scale;
     };
     void Init() override;
 };

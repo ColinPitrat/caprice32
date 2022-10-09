@@ -172,6 +172,7 @@ protected:
 
   SDL_Window* m_pSDLWindow;
   bool m_bInMainView = true;  //!< Whether the GUI is displayed through Caprice main view (i.e going through video_plugin)
+  int m_iScale = 1;   //!< The scaling of the UI (necessary on high-DPI screens)
   CView* m_pMainView;
   bool m_Focused = true;
   mutable std::unique_ptr<CMessageServer> m_pMessageServer;

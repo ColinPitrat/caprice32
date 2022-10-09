@@ -220,6 +220,8 @@ typedef struct {
    bool scr_is_ogl;
    bool scr_gui_is_currently_on;
 
+   int devtools_scale;
+
    unsigned int snd_enabled;
    unsigned int snd_playback_rate;
    unsigned int snd_bits;

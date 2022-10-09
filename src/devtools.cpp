@@ -5,15 +5,13 @@
 #include "video.h"
 #include "wg_error.h"
 
-bool DevTools::Activate() {
+bool DevTools::Activate(int scale) {
   ShowCursor(true);
   try {
     // TODO: This position only makes sense for me. Ideally we would probably want to find where current window is, find display size and place
     // the window where there's the most space available. On the other hand, getting display size is not very reliable on multi-screen setups under linux ...
-    window = SDL_CreateWindow("Caprice32 - Developers' tools", 100, SDL_WINDOWPOS_CENTERED, DEVTOOLS_WIDTH, DEVTOOLS_HEIGHT, SDL_WINDOW_SHOWN);
+    window = SDL_CreateWindow("Caprice32 - Developers' tools", 100, SDL_WINDOWPOS_CENTERED, DEVTOOLS_WIDTH*scale, DEVTOOLS_HEIGHT*scale, SDL_WINDOW_SHOWN);
     renderer = SDL_CreateRenderer(window, -1, 0);
-    //SDL_CreateWindowAndRenderer(DEVTOOLS_WIDTH, DEVTOOLS_HEIGHT, SDL_WINDOW_SHOWN, &window, &renderer);
-    //SDL_SetWindowTitle(window, "Caprice32 - Developers' tools");
     // TODO: Better handling of error (free stuff, surface error ...)
     if (!window || !renderer) return false;
     surface = SDL_CreateRGBSurface(0, DEVTOOLS_WIDTH, DEVTOOLS_HEIGHT, renderer_bpp(renderer), 0, 0, 0, 0);
@@ -21,7 +19,7 @@ bool DevTools::Activate() {
     texture = SDL_CreateTextureFromSurface(renderer, surface);
     if (!texture) return false;
     SDL_FillRect(surface, nullptr, SDL_MapRGB(surface->format, 0, 0, 0));
-    capriceGui = std::make_unique<CapriceGui>(window, /*bInMainView=*/false);
+    capriceGui = std::make_unique<CapriceGui>(window, /*bInMainView=*/false, scale);
     capriceGui->Init();
     devToolsView = std::make_unique<CapriceDevToolsView>(*capriceGui, surface, renderer, texture, wGui::CRect(0, 0, DEVTOOLS_WIDTH, DEVTOOLS_HEIGHT), this);
   } catch(wGui::Wg_Ex_App& e) {

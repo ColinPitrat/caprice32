@@ -1743,6 +1743,8 @@ void loadConfiguration (t_CPC &CPC, const std::string& configFilename)
    CPC.joystick_vkeyboard_button = conf.getIntValue("system", "joystick_vkeyboard_button", 10) - 1;
    CPC.resources_path = conf.getStringValue("system", "resources_path", appPath + "/resources");
 
+   CPC.devtools_scale = conf.getIntValue("devtools", "scale", 1);
+
    CPC.scr_scale = conf.getIntValue("video", "scr_scale", 2);
    CPC.scr_preserve_aspect_ratio = conf.getIntValue("video", "scr_preserve_aspect_ratio", 1);
    CPC.scr_style = conf.getIntValue("video", "scr_style", 1);
@@ -1851,6 +1853,8 @@ bool saveConfiguration (t_CPC &CPC, const std::string& configFilename)
    conf.setIntValue("video", "scr_intensity", CPC.scr_intensity);
    conf.setIntValue("video", "scr_remanency", CPC.scr_remanency);
    conf.setIntValue("video", "scr_window", CPC.scr_window);
+
+   conf.setIntValue("devtools", "scale", CPC.devtools_scale);
 
    conf.setIntValue("video", "scr_green_mode", CPC.scr_green_mode);
    conf.setIntValue("video", "scr_green_blue_percent", CPC.scr_green_blue_percent);
@@ -2030,7 +2034,7 @@ bool showDevTools()
     return false;
   }
   devtools.emplace_back();
-  if (!devtools.back().Activate()) {
+  if (!devtools.back().Activate(CPC.devtools_scale)) {
     LOG_ERROR("Failed to activate developers tools");
   }
   if (!args.symFilePath.empty()) devtools.back().LoadSymbols(args.symFilePath);

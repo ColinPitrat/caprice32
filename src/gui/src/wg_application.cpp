@@ -116,6 +116,9 @@ bool CApplication::HandleSDLEvent(SDL_Event event)
       if (m_bInMainView) {
         x = (event.button.x-vid_plugin->x_offset)*vid_plugin->x_scale;
         y = (event.button.y-vid_plugin->y_offset)*vid_plugin->y_scale;
+      } else {
+        x = event.button.x/m_iScale;
+        y = event.button.y/m_iScale;
       }
       MessageServer()->QueueMessage(new CMouseMessage(
             CMessage::MOUSE_BUTTONDOWN, GetMouseFocus(), this, CPoint(x, y), CPoint(),
@@ -128,6 +131,9 @@ bool CApplication::HandleSDLEvent(SDL_Event event)
       if (m_bInMainView) {
         x = (event.button.x-vid_plugin->x_offset)*vid_plugin->x_scale;
         y = (event.button.y-vid_plugin->y_offset)*vid_plugin->y_scale;
+      } else {
+        x = event.button.x/m_iScale;
+        y = event.button.y/m_iScale;
       }
       MessageServer()->QueueMessage(new CMouseMessage(
             CMessage::MOUSE_BUTTONUP, GetMouseFocus(), this, CPoint(x, y), CPoint(),
@@ -147,6 +153,9 @@ bool CApplication::HandleSDLEvent(SDL_Event event)
       if (m_bInMainView) {
         x = (x-vid_plugin->x_offset)*vid_plugin->x_scale;
         y = (y-vid_plugin->y_offset)*vid_plugin->y_scale;
+      } else {
+        x = event.button.x/m_iScale;
+        y = event.button.y/m_iScale;
       }
       MessageServer()->QueueMessage(new CMouseMessage(
             CMessage::MOUSE_BUTTONDOWN, GetMouseFocus(), this, CPoint(x, y), CPoint(),
@@ -159,6 +168,9 @@ bool CApplication::HandleSDLEvent(SDL_Event event)
       if (m_bInMainView) {
         x = (event.motion.x-vid_plugin->x_offset)*vid_plugin->x_scale;
         y = (event.motion.y-vid_plugin->y_offset)*vid_plugin->y_scale;
+      } else {
+        x = event.button.x/m_iScale;
+        y = event.button.y/m_iScale;
       }
       MessageServer()->QueueMessage(new CMouseMessage(
             CMessage::MOUSE_MOVE, GetMouseFocus(), this, CPoint(x, y), CPoint(),

@@ -8,7 +8,7 @@
 
 class DevTools {
   public:
-    bool Activate();
+    bool Activate(int scale);
     void Deactivate();
 
     bool IsActive() const { return active; };
@@ -30,6 +30,7 @@ class DevTools {
     SDL_Renderer* renderer = nullptr;
     SDL_Texture* texture = nullptr;
     SDL_Surface* surface = nullptr;
+    int scale = 0;
 };
 
 #endif
