@@ -2050,7 +2050,7 @@ void dumpScreen() {
      LOG_ERROR("Could not write screenshot file to " + dumpPath);
    }
    else {
-     set_osd_message("Captured screenshot to " + dumpFile);
+     set_osd_message("Captured " + dumpFile);
    }
 }
 
@@ -2068,7 +2068,7 @@ void dumpSnapshot() {
      LOG_ERROR("Could not write machine snapshot to " + dumpPath);
    }
    else {
-     set_osd_message("Captured machine snapshot to " + dumpFile);
+     set_osd_message("Snapshotted " + dumpFile);
    }
    lastSavedSnapshot = dumpPath;
 }
