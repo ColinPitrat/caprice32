@@ -1129,9 +1129,17 @@ int emulator_init ()
 
    for (iRomNum = 0; iRomNum < 16; iRomNum++) { // loop for ROMs 0-15
       if (!CPC.rom_file[iRomNum].empty()) { // is a ROM image specified for this slot?
+         std::string rom_file = CPC.rom_file[iRomNum];
+         if (rom_file == "DEFAULT") {
+           // On 464, there's no AMSDOS by default.
+           // We still allow users to override this if they want.
+           // More details: https://github.com/ColinPitrat/caprice32/issues/227
+           if (CPC.model == 0) continue;
+           rom_file = "amsdos.rom";
+         }
          pchRomData = new byte [16384]; // allocate 16K
          memset(pchRomData, 0, 16384); // clear memory
-         std::string romFilename = CPC.rom_path + "/" + CPC.rom_file[iRomNum];
+         std::string romFilename = CPC.rom_path + "/" + rom_file;
          if ((pfileObject = fopen(romFilename.c_str(), "rb")) != nullptr) { // attempt to open the ROM image
             if(fread(pchRomData, 128, 1, pfileObject) != 1) { // read 128 bytes of ROM data
               fclose(pfileObject);
@@ -1154,13 +1162,13 @@ int emulator_init ()
                }
                memmap_ROM[iRomNum] = pchRomData; // update the ROM map
             } else { // not a valid ROM file
-               fprintf(stderr, "ERROR: %s is not a CPC ROM file - clearing ROM slot %d.\n", CPC.rom_file[iRomNum].c_str(), iRomNum);
+               fprintf(stderr, "ERROR: %s is not a CPC ROM file - clearing ROM slot %d.\n", rom_file.c_str(), iRomNum);
                delete [] pchRomData; // free memory on error
                CPC.rom_file[iRomNum] = "";
             }
             fclose(pfileObject);
          } else { // file not found
-            fprintf(stderr, "ERROR: The %s file is missing - clearing ROM slot %d.\n", CPC.rom_file[iRomNum].c_str(), iRomNum);
+            fprintf(stderr, "ERROR: The %s file is missing - clearing ROM slot %d.\n", rom_file.c_str(), iRomNum);
             delete [] pchRomData; // free memory on error
             CPC.rom_file[iRomNum] = "";
          }
@@ -1704,7 +1712,6 @@ void loadConfiguration (t_CPC &CPC, const std::string& configFilename)
    conf.setOverrides(args.cfgOverrides);
 
    std::string appPath = chAppPath;
-   const char *chFileName = configFilename.c_str();
 
    CPC.model = conf.getIntValue("system", "model", 2); // CPC 6128
    if (CPC.model > 3) {
@@ -1806,11 +1813,6 @@ void loadConfiguration (t_CPC &CPC, const std::string& configFilename)
       char chRomId[14];
       sprintf(chRomId, "slot%02d", iRomNum); // build ROM ID
       CPC.rom_file[iRomNum] = conf.getStringValue("rom", chRomId, "");
-   }
-   if ((pfileObject = fopen(chFileName, "rt")) == nullptr) {
-      CPC.rom_file[7] = "amsdos.rom"; // insert AMSDOS in slot 7 if the config file does not exist yet
-   } else {
-      fclose(pfileObject);
    }
    CPC.rom_mf2 = conf.getStringValue("rom", "rom_mf2", "");
 

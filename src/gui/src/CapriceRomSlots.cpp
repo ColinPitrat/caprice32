@@ -22,6 +22,9 @@ CapriceRomSlots::CapriceRomSlots(const CRect& WindowRect, CWindow* pParent, CFon
 
 	m_pListBoxRoms = new CListBox(CRect(CPoint(10, 10), m_ClientRect.Width() - 25, 140), this, true);
 
+  if (romSlot == 7) {
+    m_pListBoxRoms->AddItem(SListItem("DEFAULT"));
+  }
   std::vector<std::string> romFiles = getAvailableRoms();
   for (unsigned int i = 0; i < romFiles.size(); i ++) {
     m_pListBoxRoms->AddItem(SListItem(romFiles.at(i)));
