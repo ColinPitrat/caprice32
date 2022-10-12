@@ -167,10 +167,11 @@ protected:
 	unsigned int m_iLineCount;  //!< The number of lines of the window text
 	unsigned int m_iRowHeight;  //!< The row height
 	unsigned int m_iMaxWidth;  //!< The width of the longest line (in pixels)
+	unsigned int m_iVisibleLines; //!< The number of lines visible in the window
 
 
 private:
-  CTextBox(const CTextBox&) = delete;
+	CTextBox(const CTextBox&) = delete;
 	CTextBox& operator=(const CTextBox&) = delete;
 	bool m_bDrawCursor;  //!< Used to indicate if the cursor should be drawn on the next draw pass (used for the cursor blinking)
 	mutable bool m_bScrollToCursor;  //!< Will force the text area to scroll so the cursor is visible on the next draw pass

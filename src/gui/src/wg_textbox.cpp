@@ -879,23 +879,23 @@ void CTextBox::PrepareWindowText(const std::string& sText)
 void CTextBox::UpdateScrollBars()
 {
 	m_ClientRect = CRect(3, 3, m_WindowRect.Width() - 5, m_WindowRect.Height() - 5);
-	bool bVertVisible = m_ScrollBarVisibilityMap[CScrollBar::VERTICAL] == SCROLLBAR_VIS_ALWAYS ||
-		(m_ScrollBarVisibilityMap[CScrollBar::VERTICAL] == SCROLLBAR_VIS_AUTO && m_iLineCount > (m_ClientRect.Height() - 12) / m_iRowHeight);
 	bool bHorzVisible = m_ScrollBarVisibilityMap[CScrollBar::HORIZONTAL] == SCROLLBAR_VIS_ALWAYS ||
-		(m_ScrollBarVisibilityMap[CScrollBar::HORIZONTAL] == SCROLLBAR_VIS_AUTO && stdex::safe_static_cast<int>(m_iMaxWidth) > (m_ClientRect.Width() - 12));
-	int iMaxHorzLimit = (stdex::safe_static_cast<int>(m_iMaxWidth) - (m_ClientRect.Width() - 12)) / 10;
+		(m_ScrollBarVisibilityMap[CScrollBar::HORIZONTAL] == SCROLLBAR_VIS_AUTO && stdex::safe_static_cast<int>(m_iMaxWidth) > (m_ClientRect.Width() - m_pVerticalScrollBar->GetClientRect().Width()));
+	int iMaxHorzLimit = (stdex::safe_static_cast<int>(m_iMaxWidth) - (m_ClientRect.Width() - m_pVerticalScrollBar->GetClientRect().Width())) / 10 + 1;
 	if (iMaxHorzLimit < 0)
 	{
 		iMaxHorzLimit = 0;
 	}
 
+	m_iVisibleLines = (m_ClientRect.Height() - (bHorzVisible ? 12 : 0)) / m_iRowHeight;
+	unsigned int iLastLine = std::max(0, static_cast<int>(m_iLineCount) - static_cast<int>(m_iVisibleLines));
+
+	bool bVertVisible = m_ScrollBarVisibilityMap[CScrollBar::VERTICAL] == SCROLLBAR_VIS_ALWAYS ||
+		(m_ScrollBarVisibilityMap[CScrollBar::VERTICAL] == SCROLLBAR_VIS_AUTO && m_iLineCount > (m_ClientRect.Height() - (bHorzVisible ? m_pVerticalScrollBar->GetClientRect().Height() : 0)) / m_iRowHeight);
+
 	m_pVerticalScrollBar->SetVisible(bVertVisible);
 	m_pHorizontalScrollBar->SetVisible(bHorzVisible);
-	int iLastLine = m_iLineCount - 1;
-	if (iLastLine < 0)
-	{
-		iLastLine = 0;
-	}
+
 	if (bVertVisible)
 	{
 		m_ClientRect.SetRight(m_WindowRect.Width() - 17);
@@ -906,7 +906,7 @@ void CTextBox::UpdateScrollBars()
 	}
 
 	m_pVerticalScrollBar->SetMaxLimit(iLastLine);
-	if (m_pVerticalScrollBar->GetValue() > iLastLine)
+	if (m_pVerticalScrollBar->GetValue() > static_cast<int>(iLastLine))
 	{
 		m_pVerticalScrollBar->SetValue(iLastLine);
 	}
