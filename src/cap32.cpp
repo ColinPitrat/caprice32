@@ -2084,7 +2084,9 @@ void loadSnapshot() {
      LOG_ERROR("Could not load machine snapshot from " + lastSavedSnapshot);
    }
    else {
-     set_osd_message("Restored machine snapshot from " + lastSavedSnapshot);
+     std::string dirname, filename;
+     stringutils::splitPath(lastSavedSnapshot, dirname, filename);
+     set_osd_message("Restored " + filename);
    }
 }
 
