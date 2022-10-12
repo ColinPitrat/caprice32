@@ -66,7 +66,7 @@ CLabel::CLabel(const CPoint& point, CWindow* pParent, std::string sText, CRGBCol
 	m_pRenderedString.reset(new CRenderedString(m_pFontEngine, sText, CRenderedString::VALIGN_TOP, CRenderedString::HALIGN_LEFT));
 	m_BackgroundColor = Application().GetDefaultBackgroundColor();
   // set width and height of the label's rectangle:
-  CWindow::SetWindowRect(CRect(point, m_pRenderedString->GetWidth(sText), m_pRenderedString->GetMaxFontHeight()));
+  CWindow::SetWindowRect(CRect(point, m_pRenderedString->GetWidth(sText) + 1, m_pRenderedString->GetMaxFontHeight() + 1));
 	Draw();
 }
 
