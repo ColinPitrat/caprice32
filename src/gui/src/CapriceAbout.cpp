@@ -12,10 +12,25 @@ extern t_CPC CPC;
 
 namespace wGui {
 
+static const std::string shortcuts = R"(F1 - Menu / Pause
+F2 - Fullscreen
+F3 - Save screenshot
+F4 - Tape play
+F5 - Reset
+F6 - Multiface II Stop
+F7 - Joystick emulation
+F8 - Display FPS
+F9 - Limit speed
+F10 - Quit
+Shift + F1 - Virtual keyboard
+Shift + F2 - Developers' tools
+Shift + F3 - Save machine snapshot youhou
+Shift + F4 - Load last snapshot
+Shift + F7 - Activate phazer)";
+
 CapriceAbout::CapriceAbout(const CRect& WindowRect, CWindow* pParent, CFontEngine* pFontEngine) :
 	CMessageBox(WindowRect, pParent, pFontEngine, "About Caprice32", "", CMessageBox::BUTTON_OK)
 {
-    int y=80;
     SetModal(true);
 	// Override here: specify position of label ourselves:
 #ifdef HASH
@@ -24,20 +39,9 @@ CapriceAbout::CapriceAbout(const CRect& WindowRect, CWindow* pParent, CFontEngin
 	std::string commit_hash;
 #endif
 	m_pMessageLabel = new CLabel(CPoint(5, 70), this, VERSION_STRING + (commit_hash.empty()?"":"-"+commit_hash.substr(0, 16)));
-	m_pMessageLabel = new CLabel(CPoint(5, y+=10), this, "F1 - Menu / Pause");
-	m_pMessageLabel = new CLabel(CPoint(5, y+=10), this, "F2 - Fullscreen");
-	m_pMessageLabel = new CLabel(CPoint(5, y+=10), this, "F3 - Save screenshot");
-	m_pMessageLabel = new CLabel(CPoint(5, y+=10), this, "F4 - Tape play");
-	m_pMessageLabel = new CLabel(CPoint(5, y+=10), this, "F5 - Reset");
-	m_pMessageLabel = new CLabel(CPoint(5, y+=10), this, "F6 - Multiface II Stop");
-	m_pMessageLabel = new CLabel(CPoint(5, y+=10), this, "F7 - Joystick emulation");
-	m_pMessageLabel = new CLabel(CPoint(5, y+=10), this, "F8 - Display FPS");
-	m_pMessageLabel = new CLabel(CPoint(5, y+=10), this, "F9 - Limit speed");
-	m_pMessageLabel = new CLabel(CPoint(5, y+=10), this, "F10 - Quit");
-	m_pMessageLabel = new CLabel(CPoint(5, y+=10), this, "Shift + F1 - Virtual keyboard");
-	m_pMessageLabel = new CLabel(CPoint(5, y+=10), this, "Shift + F2 - Developers' tools");
-	m_pMessageLabel = new CLabel(CPoint(5, y+=10), this, "Shift + F3 - Save machine snapshot");
-	m_pMessageLabel = new CLabel(CPoint(5, y+=10), this, "Shift + F4 - Load last snapshot");
+  m_pTextBox = new CTextBox(CRect(10, 90, 210, 200), this);
+  m_pTextBox->SetWindowText(shortcuts);
+  m_pTextBox->SetReadOnly(true);
 	try	{
 	    m_pPicture = new CPicture(CRect(CPoint(18, 5), 162, 62), this, CPC.resources_path + "/cap32logo.bmp", true);
 	} catch (Wg_Ex_App &e) {

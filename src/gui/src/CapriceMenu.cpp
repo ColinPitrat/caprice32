@@ -166,7 +166,8 @@ bool CapriceMenu::HandleMessage(CMessage* pMessage)
       }
     case MenuItem::ABOUT:
       {
-        /*CapriceAbout* pAboutBox = */new CapriceAbout(CRect(ViewToClient(CPoint(m_pScreenSurface->w /2 - 100, m_pScreenSurface->h /2 - 150)), 200, 300), this, nullptr);
+        int about_width(220), about_height(260);
+        /*CapriceAbout* pAboutBox = */new CapriceAbout(CRect(ViewToClient(CPoint((m_pScreenSurface->w - about_width)/2, (m_pScreenSurface->h - about_height)/2)), about_width, about_height), this, nullptr);
         break;
       }
     case MenuItem::RESUME:

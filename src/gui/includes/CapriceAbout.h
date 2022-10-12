@@ -7,6 +7,7 @@
 
 #include "wg_messagebox.h"
 #include "wg_label.h"
+#include "wg_textbox.h"
 
 namespace wGui
 {
@@ -20,6 +21,8 @@ namespace wGui
       private:
         CapriceAbout(const CapriceAbout&) = delete;
         CapriceAbout& operator=(const CapriceAbout&) = delete;
+
+        CTextBox* m_pTextBox;
     };
 }
 
