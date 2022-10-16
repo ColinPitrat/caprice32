@@ -2780,7 +2780,7 @@ int cap32_main (int argc, char **argv)
             case SDL_KEYDOWN:
                {
                   CPCScancode scancode = CPC.InputMapper->CPCscancodeFromKeysym(event.key.keysym);
-                  LOG_VERBOSE("Keyboard: pressed: " << SDL_GetKeyName(event.key.keysym.sym) << " - keycode: " << keycode_names[event.key.keysym.sym] << " (" << event.key.keysym.sym << ") - scancode: " << scancode_names[event.key.keysym.scancode] << " (" << event.key.keysym.scancode << ")");
+                  LOG_VERBOSE("Keyboard: pressed: " << SDL_GetKeyName(event.key.keysym.sym) << " - keycode: " << keycode_names[event.key.keysym.sym] << " (" << event.key.keysym.sym << ") - scancode: " << scancode_names[event.key.keysym.scancode] << " (" << event.key.keysym.scancode << ") - CPC key: " << CPC.InputMapper->CPCkeyToString(CPC.InputMapper->CPCkeyFromKeysym(event.key.keysym)) << " - CPC scancode: " << scancode);
                   if (!(scancode & MOD_EMU_KEY)) {
                      applyKeypress(scancode, keyboard_matrix, true);
                   }

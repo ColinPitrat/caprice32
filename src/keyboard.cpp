@@ -111,6 +111,10 @@ const CPCScancode InputMapper::cpc_kbd[CPC_KEYBOARD_NUM][CPC_KEY_NUM] = {
     0x51 | MOD_CPC_CTRL,    // CPC_CTRL_7
     0x50 | MOD_CPC_CTRL,    // CPC_CTRL_8
     0x41 | MOD_CPC_CTRL,    // CPC_CTRL_9
+    0x00 | MOD_CPC_CTRL,    // CPC_CTRL_UP
+    0x02 | MOD_CPC_CTRL,    // CPC_CTRL_DOWN
+    0x10 | MOD_CPC_CTRL,    // CPC_CTRL_LEFT
+    0x01 | MOD_CPC_CTRL,    // CPC_CTRL_RIGHT
     0x60 | MOD_CPC_SHIFT,   // CPC_AMPERSAND
     0x35 | MOD_CPC_SHIFT,   // CPC_ASTERISK
     0x32,                   // CPC_AT
@@ -318,6 +322,10 @@ const CPCScancode InputMapper::cpc_kbd[CPC_KEYBOARD_NUM][CPC_KEY_NUM] = {
     0x51 | MOD_CPC_CTRL,    // CPC_CTRL_7
     0x50 | MOD_CPC_CTRL,    // CPC_CTRL_8
     0x41 | MOD_CPC_CTRL,    // CPC_CTRL_9
+    0x00 | MOD_CPC_CTRL,    // CPC_CTRL_UP
+    0x02 | MOD_CPC_CTRL,    // CPC_CTRL_DOWN
+    0x10 | MOD_CPC_CTRL,    // CPC_CTRL_LEFT
+    0x01 | MOD_CPC_CTRL,    // CPC_CTRL_RIGHT
     0x80,                   // CPC_AMPERSAND
     0x21,                   // CPC_ASTERISK
     0x26 | MOD_CPC_SHIFT,   // CPC_AT
@@ -525,6 +533,10 @@ const CPCScancode InputMapper::cpc_kbd[CPC_KEYBOARD_NUM][CPC_KEY_NUM] = {
     0x51 | MOD_CPC_CTRL,    // CPC_CTRL_7
     0x50 | MOD_CPC_CTRL,    // CPC_CTRL_8
     0x41 | MOD_CPC_CTRL,    // CPC_CTRL_9
+    0x00 | MOD_CPC_CTRL,    // CPC_CTRL_UP
+    0x02 | MOD_CPC_CTRL,    // CPC_CTRL_DOWN
+    0x10 | MOD_CPC_CTRL,    // CPC_CTRL_LEFT
+    0x01 | MOD_CPC_CTRL,    // CPC_CTRL_RIGHT
     0x60 | MOD_CPC_SHIFT,   // CPC_AMPERSAND
     0x21 | MOD_CPC_SHIFT,   // CPC_ASTERISK
     0x32,                   // CPC_AT
@@ -830,15 +842,19 @@ std::map<CapriceKey, PCKey> InputMapper::SDLkeysymFromCPCkeys_us = {
   { CPC_CTRL_y,      SDLK_y | MOD_PC_CTRL },
   { CPC_CTRL_z,      SDLK_z | MOD_PC_CTRL },
   { CPC_CTRL_0,      SDLK_0 | MOD_PC_CTRL },
-  { CPC_CTRL_1,      SDLK_0 | MOD_PC_CTRL },
-  { CPC_CTRL_2,      SDLK_0 | MOD_PC_CTRL },
-  { CPC_CTRL_3,      SDLK_0 | MOD_PC_CTRL },
-  { CPC_CTRL_4,      SDLK_0 | MOD_PC_CTRL },
-  { CPC_CTRL_5,      SDLK_0 | MOD_PC_CTRL },
-  { CPC_CTRL_6,      SDLK_0 | MOD_PC_CTRL },
-  { CPC_CTRL_7,      SDLK_0 | MOD_PC_CTRL },
-  { CPC_CTRL_8,      SDLK_0 | MOD_PC_CTRL },
-  { CPC_CTRL_9,      SDLK_0 | MOD_PC_CTRL },
+  { CPC_CTRL_1,      SDLK_1 | MOD_PC_CTRL },
+  { CPC_CTRL_2,      SDLK_2 | MOD_PC_CTRL },
+  { CPC_CTRL_3,      SDLK_3 | MOD_PC_CTRL },
+  { CPC_CTRL_4,      SDLK_4 | MOD_PC_CTRL },
+  { CPC_CTRL_5,      SDLK_5 | MOD_PC_CTRL },
+  { CPC_CTRL_6,      SDLK_6 | MOD_PC_CTRL },
+  { CPC_CTRL_7,      SDLK_7 | MOD_PC_CTRL },
+  { CPC_CTRL_8,      SDLK_8 | MOD_PC_CTRL },
+  { CPC_CTRL_9,      SDLK_9 | MOD_PC_CTRL },
+  { CPC_CTRL_UP,     SDLK_UP | MOD_PC_CTRL },
+  { CPC_CTRL_DOWN,   SDLK_DOWN | MOD_PC_CTRL },
+  { CPC_CTRL_LEFT,   SDLK_LEFT | MOD_PC_CTRL },
+  { CPC_CTRL_RIGHT,  SDLK_RIGHT | MOD_PC_CTRL },
   { CPC_AMPERSAND,   SDLK_7 | MOD_PC_SHIFT },
   { CPC_ASTERISK,    SDLK_8 | MOD_PC_SHIFT },
   { CPC_AT,          SDLK_2 | MOD_PC_SHIFT },
@@ -1046,6 +1062,10 @@ const std::map<const std::string, const CapriceKey> InputMapper::CPCkeysFromStri
    {"CPC_CTRL_7",      CPC_CTRL_7},
    {"CPC_CTRL_8",      CPC_CTRL_8},
    {"CPC_CTRL_9",      CPC_CTRL_9},
+   {"CPC_CTRL_UP",     CPC_CTRL_UP},
+   {"CPC_CTRL_DOWN",   CPC_CTRL_DOWN},
+   {"CPC_CTRL_LEFT",   CPC_CTRL_LEFT},
+   {"CPC_CTRL_RIGHT",  CPC_CTRL_RIGHT},
    {"CPC_AMPERSAND",   CPC_AMPERSAND},
    {"CPC_ASTERISK",    CPC_ASTERISK},
    {"CPC_AT",          CPC_AT},
@@ -1474,6 +1494,33 @@ CPCScancode InputMapper::CPCscancodeFromKeysym(SDL_Keysym keysym) {
     if (cpc_key->second & MOD_EMU_KEY)
         return cpc_key->second;
     return cpc_kbd[CPC->keyboard][cpc_key->second];
+}
+
+CapriceKey InputMapper::CPCkeyFromKeysym(SDL_Keysym keysym) {
+    PCKey sdl_key = keysym.sym;
+
+    if (keysym.mod & KMOD_SHIFT)                sdl_key |= MOD_PC_SHIFT;
+    if (keysym.mod & KMOD_CTRL)                 sdl_key |= MOD_PC_CTRL;
+    // Map right alt to Mode (AltGr). Not clear what determines whether SDL2 uses one or the other and if both can happen together.
+    if (keysym.mod & (KMOD_MODE | KMOD_RALT))   sdl_key |= MOD_PC_MODE;
+    // Not mapping KMOD_LALT, the key itself is mapped to CPC_COPY.
+    // Ignore sticky modifiers (MOD_PC_NUM and MOD_PC_CAPS)
+
+    auto cpc_key = CPCkeysFromSDLkeysym.find(sdl_key);
+    // TODO(sebhz) magic numbers are bad. Get rid of the 0xff.
+    if (cpc_key == CPCkeysFromSDLkeysym.end()) return 0xff;
+
+    return cpc_key->second;
+}
+
+std::string InputMapper::CPCkeyToString(const CapriceKey cpc_key) {
+    if (cpc_key == 0xff) return "UNKNOWN";
+    for (const auto &[str, keycode] : CPCkeysFromStrings) {
+      if (cpc_key == keycode) {
+        return str;
+      }
+    }
+    return "UNMAPPED(" + std::to_string(cpc_key) + ")";
 }
 
 std::list<SDL_Event> InputMapper::StringToEvents(std::string toTranslate) {

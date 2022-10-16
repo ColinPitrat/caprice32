@@ -143,6 +143,10 @@ typedef enum {
    CPC_CTRL_7,
    CPC_CTRL_8,
    CPC_CTRL_9,
+   CPC_CTRL_UP,
+   CPC_CTRL_DOWN,
+   CPC_CTRL_LEFT,
+   CPC_CTRL_RIGHT,
    CPC_AMPERSAND,
    CPC_ASTERISK,
    CPC_AT,
@@ -252,7 +256,7 @@ typedef enum {
    CPC_FR_uGRAVE
 } CPC_KEYS;
 
-#define CPC_KEY_NUM 205    // Number of different keys on a CPC keyboard
+#define CPC_KEY_NUM 209    // Number of different keys on a CPC keyboard
 #define CPC_KEYBOARD_NUM 3 // Number of different keyboards supported.
 
 // PCKey represents a key combination pressed on the host keyboard.
@@ -279,6 +283,10 @@ class LineParsingResult {
     std::string sdl_key_name;
 };
 
+// CPCScancode is a hardware scancode.
+// cf. https://www.cpcwiki.eu/index.php/Programming:Keyboard_scanning#Hardware_scancode_table
+using CPCScancode = dword;
+
 class InputMapper {
   private:
     static const CPCScancode cpc_kbd[CPC_KEYBOARD_NUM][CPC_KEY_NUM];
@@ -299,6 +307,8 @@ class InputMapper {
     void init();
     CPCScancode CPCscancodeFromCPCkey(CPC_KEYS cpc_key);
     CPCScancode CPCscancodeFromKeysym(SDL_Keysym keysym);
+    CapriceKey CPCkeyFromKeysym(SDL_Keysym keysym);
+    std::string CPCkeyToString(const CapriceKey cpc_key);
     CPCScancode CPCscancodeFromJoystickButton(SDL_JoyButtonEvent jbutton);
     void CPCscancodeFromJoystickAxis(SDL_JoyAxisEvent jaxis, CPCScancode *cpc_key, bool &release);
     std::list<SDL_Event> StringToEvents(std::string toTranslate);
