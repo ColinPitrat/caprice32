@@ -11,7 +11,7 @@
 extern byte bit_values[8];
 extern t_CPC CPC;
 
-const dword InputMapper::cpc_kbd[CPC_KEYBOARD_NUM][CPC_KEY_NUM] = {
+const CPCScancode InputMapper::cpc_kbd[CPC_KEYBOARD_NUM][CPC_KEY_NUM] = {
   { // original CPC keyboard
     0x40,                   // CPC_0
     0x80,                   // CPC_1
@@ -740,7 +740,7 @@ const std::map<const char, const CPC_KEYS> InputMapper::CPCkeysFromChars = {
     //{ '~', {0, KMOD_NONE} } // should be pound but it's not part of base ascii (it's in extended ASCII)
 };
 
-std::map<unsigned int, PCKey> InputMapper::SDLkeysymFromCPCkeys_us = {
+std::map<CapriceKey, PCKey> InputMapper::SDLkeysymFromCPCkeys_us = {
   { CPC_0,           SDLK_0 },
   { CPC_1,           SDLK_1 },
   { CPC_2,           SDLK_2 },
@@ -947,7 +947,7 @@ std::map<unsigned int, PCKey> InputMapper::SDLkeysymFromCPCkeys_us = {
   { CAP32_WAITBREAK, SDLK_PAUSE | MOD_PC_SHIFT }
 };
 
-const std::map<const std::string, const unsigned int> InputMapper::CPCkeysFromStrings = {
+const std::map<const std::string, const CapriceKey> InputMapper::CPCkeysFromStrings = {
    {"CPC_0",           CPC_0},
    {"CPC_1",           CPC_1},
    {"CPC_2",           CPC_2},
@@ -1401,7 +1401,7 @@ bool InputMapper::load_layout(const std::string& filename)
   }
   else {
     std::istream is(&fb);
-    std::set<unsigned int> mapped_cpc_keys;
+    std::set<CapriceKey> mapped_cpc_keys;
     std::set<PCKey> mapped_sdl_keys;
     while (is.good()) {
       is.getline(line, MAX_LINE_LENGTH);
@@ -1453,11 +1453,11 @@ void InputMapper::init()
   }
 }
 
-dword InputMapper::CPCkeycodeFromCPCkey(CPC_KEYS cpc_key) {
+CPCScancode InputMapper::CPCscancodeFromCPCkey(CPC_KEYS cpc_key) {
   return cpc_kbd[CPC->keyboard][cpc_key];
 }
 
-dword InputMapper::CPCkeyFromKeysym(SDL_Keysym keysym) {
+CPCScancode InputMapper::CPCscancodeFromKeysym(SDL_Keysym keysym) {
     PCKey sdl_key = keysym.sym;
 
     if (keysym.mod & KMOD_SHIFT)                sdl_key |= MOD_PC_SHIFT;
@@ -1480,7 +1480,7 @@ std::list<SDL_Event> InputMapper::StringToEvents(std::string toTranslate) {
     std::list<SDL_Event> result;
     bool escaped = false;
     bool cap32_cmd = false;
-    std::map<unsigned int, PCKey>::iterator sdl_keysym;
+    std::map<CapriceKey, PCKey>::iterator sdl_keysym;
 
     for (auto c : toTranslate) {
       if (c == '\a') {
@@ -1542,7 +1542,7 @@ void InputMapper::set_joystick_emulation()
     { CPC_J1_FIRE2,   0 }
   };
 
-  for (dword n = 0; n < 6; n++) {
+  for (int n = 0; n < 6; n++) {
     int cpc_idx = joy_layout[n][1]; // get the CPC key to change the assignment for
     if (cpc_idx) {
       PCKey pc_idx = SDLkeysymFromCPCkeys[cpc_idx]; // SDL key corresponding to the CPC key to remap
@@ -1556,9 +1556,9 @@ void InputMapper::set_joystick_emulation()
   }
 }
 
-dword InputMapper::CPCkeyFromJoystickButton(SDL_JoyButtonEvent jbutton)
+CPCScancode InputMapper::CPCscancodeFromJoystickButton(SDL_JoyButtonEvent jbutton)
 {
-    dword cpc_key(0xff);
+    CPCScancode cpc_key(0xff);
     switch(jbutton.button) {
         case 0:
             switch(jbutton.which) {
@@ -1586,7 +1586,7 @@ dword InputMapper::CPCkeyFromJoystickButton(SDL_JoyButtonEvent jbutton)
     return cpc_key;
 }
 
-void InputMapper::CPCkeyFromJoystickAxis(SDL_JoyAxisEvent jaxis, dword *cpc_key, bool &release)
+void InputMapper::CPCscancodeFromJoystickAxis(SDL_JoyAxisEvent jaxis, CPCScancode *cpc_key, bool &release)
 {
    switch(jaxis.axis) {
      case 0:
@@ -1652,7 +1652,7 @@ void InputMapper::CPCkeyFromJoystickAxis(SDL_JoyAxisEvent jaxis, dword *cpc_key,
 
 InputMapper::InputMapper(t_CPC *CPC): CPC(CPC) { }
 
-void applyKeypress(dword cpc_key, byte keyboard_matrix[], bool pressed) {
+void applyKeypress(CPCScancode cpc_key, byte keyboard_matrix[], bool pressed) {
     if ((!CPC.paused) && (static_cast<byte>(cpc_key) != 0xff)) {
         if (pressed) {
             keyboard_matrix[static_cast<byte>(cpc_key) >> 4] &= ~bit_values[static_cast<byte>(cpc_key) & 7]; // key is being held down

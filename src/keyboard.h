@@ -22,8 +22,6 @@
 #define MOD_PC_NUM      (static_cast<PCKey>(KMOD_NUM) << BITSHIFT_MOD)
 #define MOD_PC_CAPS     (static_cast<PCKey>(KMOD_CAPS) << BITSHIFT_MOD)
 
-using PCKey = qword;
-
 typedef enum {
    CAP32_EXIT = MOD_EMU_KEY,
    CAP32_FPS,
@@ -257,13 +255,25 @@ typedef enum {
 #define CPC_KEY_NUM 205    // Number of different keys on a CPC keyboard
 #define CPC_KEYBOARD_NUM 3 // Number of different keyboards supported.
 
-void applyKeypress(dword cpc_key, byte keyboard_matrix[], bool pressed);
+// PCKey represents a key combination pressed on the host keyboard.
+// This is a modifier (high dword) and a pressed key (low dword).
+using PCKey = qword;
+
+// CapriceKey represents a host-agnostic representation of a keyboard event.
+// This can be either a CPC key combination (CPC_KEYS) or an emulator command (CAP32_KEYS).
+using CapriceKey = unsigned int;
+
+// CPCScancode is a hardware scancode.
+// cf. https://www.cpcwiki.eu/index.php/Programming:Keyboard_scanning#Hardware_scancode_table
+using CPCScancode = dword;
+
+void applyKeypress(CPCScancode cpc_key, byte keyboard_matrix[], bool pressed);
 
 class LineParsingResult {
   public:
     bool valid = true;
     bool contains_mapping = false;
-    unsigned int cpc_key = 0;
+    CapriceKey cpc_key = 0;
     PCKey sdl_key = 0;
     std::string cpc_key_name;
     std::string sdl_key_name;
@@ -271,14 +281,14 @@ class LineParsingResult {
 
 class InputMapper {
   private:
-    static const dword cpc_kbd[CPC_KEYBOARD_NUM][CPC_KEY_NUM];
-    static const std::map<const std::string, const unsigned int> CPCkeysFromStrings;
+    static const CPCScancode cpc_kbd[CPC_KEYBOARD_NUM][CPC_KEY_NUM];
+    static const std::map<const std::string, const CapriceKey> CPCkeysFromStrings;
     static const std::map<const std::string, const PCKey> SDLkeysFromStrings;
     static const std::map<const char, const CPC_KEYS> CPCkeysFromChars;
     std::map<char, std::pair<SDL_Keycode, SDL_Keymod>> SDLkeysFromChars;
-    static std::map<unsigned int, PCKey> SDLkeysymFromCPCkeys_us;
-    std::map<PCKey, unsigned int> CPCkeysFromSDLkeysym;
-    std::map<unsigned int, PCKey> SDLkeysymFromCPCkeys;
+    static std::map<CapriceKey, PCKey> SDLkeysymFromCPCkeys_us;
+    std::map<PCKey, CapriceKey> CPCkeysFromSDLkeysym;
+    std::map<CapriceKey, PCKey> SDLkeysymFromCPCkeys;
     t_CPC *CPC;
 
     LineParsingResult process_cfg_line(char *line);
@@ -287,10 +297,10 @@ class InputMapper {
     InputMapper(t_CPC *CPC);
     bool load_layout(const std::string& filename);
     void init();
-    dword CPCkeycodeFromCPCkey(CPC_KEYS cpc_key);
-    dword CPCkeyFromKeysym(SDL_Keysym keysym);
-    dword CPCkeyFromJoystickButton(SDL_JoyButtonEvent jbutton);
-    void CPCkeyFromJoystickAxis(SDL_JoyAxisEvent jaxis, dword *cpc_key, bool &release);
+    CPCScancode CPCscancodeFromCPCkey(CPC_KEYS cpc_key);
+    CPCScancode CPCscancodeFromKeysym(SDL_Keysym keysym);
+    CPCScancode CPCscancodeFromJoystickButton(SDL_JoyButtonEvent jbutton);
+    void CPCscancodeFromJoystickAxis(SDL_JoyAxisEvent jaxis, CPCScancode *cpc_key, bool &release);
     std::list<SDL_Event> StringToEvents(std::string toTranslate);
     void set_joystick_emulation();
 };

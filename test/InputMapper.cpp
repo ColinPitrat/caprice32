@@ -106,7 +106,7 @@ TEST_F(InputMapperTest, Keymapping)
   // Exclaim
   keysym.sym = SDLK_1;
   keysym.mod = KMOD_LSHIFT;
-  ASSERT_EQ(0x80 | MOD_CPC_SHIFT, CPC.InputMapper->CPCkeyFromKeysym(keysym));
+  ASSERT_EQ(0x80 | MOD_CPC_SHIFT, CPC.InputMapper->CPCscancodeFromKeysym(keysym));
 
   CPC.kbd_layout ="keymap_uk_linux.map";
   CPC.keyboard = 0;
@@ -114,7 +114,7 @@ TEST_F(InputMapperTest, Keymapping)
   // Pound
   keysym.sym = SDLK_3;
   keysym.mod = KMOD_RSHIFT;
-  ASSERT_EQ(0x30 | MOD_CPC_SHIFT, CPC.InputMapper->CPCkeyFromKeysym(keysym));
+  ASSERT_EQ(0x30 | MOD_CPC_SHIFT, CPC.InputMapper->CPCscancodeFromKeysym(keysym));
 
   CPC.kbd_layout ="keymap_fr_win.map";
   CPC.keyboard = 1;
@@ -122,7 +122,7 @@ TEST_F(InputMapperTest, Keymapping)
   // E acute
   keysym.sym = SDLK_2;
   keysym.mod = KMOD_NONE;
-  ASSERT_EQ(0x81, CPC.InputMapper->CPCkeyFromKeysym(keysym));
+  ASSERT_EQ(0x81, CPC.InputMapper->CPCscancodeFromKeysym(keysym));
 
   CPC.kbd_layout ="keymap_es_linux.map";
   CPC.keyboard = 2;
@@ -130,7 +130,7 @@ TEST_F(InputMapperTest, Keymapping)
   // N Tilde
   keysym.sym = 241; // Magic value for the non-existent SDLK_nTILDE
   keysym.mod = KMOD_LSHIFT;
-  ASSERT_EQ(0x35 | MOD_CPC_SHIFT, CPC.InputMapper->CPCkeyFromKeysym(keysym));
+  ASSERT_EQ(0x35 | MOD_CPC_SHIFT, CPC.InputMapper->CPCscancodeFromKeysym(keysym));
 
 
 }

@@ -2739,8 +2739,8 @@ int cap32_main (int argc, char **argv)
          auto evtype = nextVirtualEvent->key.type;
          LOG_DEBUG("Inserted virtual event keysym=" << int(keysym.sym) << " (" << evtype << ")");
          
-         dword cpc_key = CPC.InputMapper->CPCkeyFromKeysym(keysym);
-         if (!(cpc_key & MOD_EMU_KEY)) {
+         CPCScancode scancode = CPC.InputMapper->CPCscancodeFromKeysym(keysym);
+         if (!(scancode & MOD_EMU_KEY)) {
             LOG_DEBUG("The virtual event is a keypress (not a command), so introduce a pause.");
             // Setting nextVirtualEventFrameCount below guarantees to
             // immediately break the loop enclosing this code and wait
@@ -2779,23 +2779,22 @@ int cap32_main (int argc, char **argv)
          switch (event.type) {
             case SDL_KEYDOWN:
                {
+                  CPCScancode scancode = CPC.InputMapper->CPCscancodeFromKeysym(event.key.keysym);
                   LOG_VERBOSE("Keyboard: pressed: " << SDL_GetKeyName(event.key.keysym.sym) << " - keycode: " << keycode_names[event.key.keysym.sym] << " (" << event.key.keysym.sym << ") - scancode: " << scancode_names[event.key.keysym.scancode] << " (" << event.key.keysym.scancode << ")");
-                  dword cpc_key = CPC.InputMapper->CPCkeyFromKeysym(event.key.keysym);
-                  if (!(cpc_key & MOD_EMU_KEY)) {
-                     applyKeypress(cpc_key, keyboard_matrix, true);
+                  if (!(scancode & MOD_EMU_KEY)) {
+                     applyKeypress(scancode, keyboard_matrix, true);
                   }
                }
                break;
 
             case SDL_KEYUP:
                {
-                  dword cpc_key = CPC.InputMapper->CPCkeyFromKeysym(event.key.keysym);
-                  if (!(cpc_key & MOD_EMU_KEY)) {
-                     applyKeypress(cpc_key, keyboard_matrix, false);
+                  CPCScancode scancode = CPC.InputMapper->CPCscancodeFromKeysym(event.key.keysym);
+                  if (!(scancode & MOD_EMU_KEY)) {
+                     applyKeypress(scancode, keyboard_matrix, false);
                   }
                   else { // process emulator specific keys
-                     switch (cpc_key) {
-
+                     switch (scancode) {
                         case CAP32_GUI:
                           {
                             showGui();
@@ -2953,8 +2952,8 @@ int cap32_main (int argc, char **argv)
 
             case SDL_JOYBUTTONDOWN:
             {
-                dword cpc_key = CPC.InputMapper->CPCkeyFromJoystickButton(event.jbutton);
-                if (cpc_key == 0xff) {
+                CPCScancode scancode = CPC.InputMapper->CPCscancodeFromJoystickButton(event.jbutton);
+                if (scancode == 0xff) {
                   if (event.jbutton.button == CPC.joystick_menu_button)
                   {
                     showGui();
@@ -2964,25 +2963,25 @@ int cap32_main (int argc, char **argv)
                     showVKeyboard();
                   }
                 }
-                applyKeypress(cpc_key, keyboard_matrix, true);
+                applyKeypress(scancode, keyboard_matrix, true);
             }
             break;
 
             case SDL_JOYBUTTONUP:
             {
-              dword cpc_key = CPC.InputMapper->CPCkeyFromJoystickButton(event.jbutton);
-              applyKeypress(cpc_key, keyboard_matrix, false);
+              CPCScancode scancode = CPC.InputMapper->CPCscancodeFromJoystickButton(event.jbutton);
+              applyKeypress(scancode, keyboard_matrix, false);
             }
             break;
 
             case SDL_JOYAXISMOTION:
             {
-              dword cpc_key[2] = {0xff, 0xff};
+              CPCScancode scancodes[2] = {0xff, 0xff};
               bool release = false;
-              CPC.InputMapper->CPCkeyFromJoystickAxis(event.jaxis, cpc_key, release);
-              applyKeypress(cpc_key[0], keyboard_matrix, !release);
-              if (release && cpc_key[0] != 0xff) {
-                 applyKeypress(cpc_key[1], keyboard_matrix, !release);
+              CPC.InputMapper->CPCscancodeFromJoystickAxis(event.jaxis, scancodes, release);
+              applyKeypress(scancodes[0], keyboard_matrix, !release);
+              if (release && scancodes[0] != 0xff) {
+                 applyKeypress(scancodes[1], keyboard_matrix, !release);
               }
             }
             break;
@@ -3000,8 +2999,8 @@ int cap32_main (int argc, char **argv)
                 // Trojan Light Phazer uses Joystick Fire for the trigger button:
                 // https://www.cpcwiki.eu/index.php/Trojan_Light_Phazer
                 if (CPC.phazer_emulation == PhazerType::TrojanLightPhazer) {
-                auto cpc_key = CPC.InputMapper->CPCkeycodeFromCPCkey(CPC_J0_FIRE1);
-                  applyKeypress(cpc_key, keyboard_matrix, true);
+                auto scancode = CPC.InputMapper->CPCscancodeFromCPCkey(CPC_J0_FIRE1);
+                  applyKeypress(scancode, keyboard_matrix, true);
                 }
                 CPC.phazer_pressed = true;
               }
@@ -3012,8 +3011,8 @@ int cap32_main (int argc, char **argv)
             {
               if (CPC.phazer_emulation) {
                 if (CPC.phazer_emulation == PhazerType::TrojanLightPhazer) {
-                  auto cpc_key = CPC.InputMapper->CPCkeycodeFromCPCkey(CPC_J0_FIRE1);
-                  applyKeypress(cpc_key, keyboard_matrix, false);
+                  auto scancode = CPC.InputMapper->CPCscancodeFromCPCkey(CPC_J0_FIRE1);
+                  applyKeypress(scancode, keyboard_matrix, false);
                 }
                 CPC.phazer_pressed = false;
               }
