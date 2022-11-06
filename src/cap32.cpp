@@ -3035,6 +3035,7 @@ int cap32_main (int argc, char **argv)
                 break;
               case SDL_WINDOWEVENT_FOCUS_LOST:
               case SDL_WINDOWEVENT_LEAVE:
+              case SDL_WINDOWEVENT_MINIMIZED:
                 if (CPC.auto_pause) {
                   cpc_pause();
                 }
