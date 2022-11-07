@@ -128,12 +128,19 @@ SDL_Surface* direct_init(video_plugin* t, int scale, bool fs)
   SDL_CreateWindowAndRenderer(CPC_VISIBLE_SCR_WIDTH*scale, CPC_VISIBLE_SCR_HEIGHT*scale, (fs?SDL_WINDOW_FULLSCREEN_DESKTOP:SDL_WINDOW_SHOWN), &mainSDLWindow, &renderer);
   if (!mainSDLWindow || !renderer) return nullptr;
   SDL_SetWindowTitle(mainSDLWindow, "Caprice32 " VERSION_STRING);
-  vid = SDL_CreateRGBSurface(0, CPC_VISIBLE_SCR_WIDTH, CPC_VISIBLE_SCR_HEIGHT, renderer_bpp(renderer), 0, 0, 0, 0);
+  int surface_width = CPC_VISIBLE_SCR_WIDTH;
+  int surface_height = CPC_VISIBLE_SCR_HEIGHT;
+  if (scale > 1) {
+    t->half_pixels = 0;
+    surface_width = CPC_VISIBLE_SCR_WIDTH * 2;
+    surface_height = CPC_VISIBLE_SCR_HEIGHT * 2;
+  }
+  vid = SDL_CreateRGBSurface(0, surface_width, surface_height, renderer_bpp(renderer), 0, 0, 0, 0);
   if (!vid) return nullptr;
   texture = SDL_CreateTextureFromSurface(renderer, vid);
   if (!texture) return nullptr;
   SDL_FillRect(vid, nullptr, SDL_MapRGB(vid->format,0,0,0));
-  compute_scale(t, CPC_VISIBLE_SCR_WIDTH, CPC_VISIBLE_SCR_HEIGHT);
+  compute_scale(t, surface_width, surface_height);
   return vid;
 }
 
@@ -484,16 +491,22 @@ void glscale_close()
  *
  * Only exposed for testing purposes. Shouldn't be used outside of video.cpp
  */
-static void compute_rects(SDL_Rect* src, SDL_Rect* dst)
+static void compute_rects(SDL_Rect* src, SDL_Rect* dst, Uint8 half_pixels)
 {
+  int surface_width = CPC_VISIBLE_SCR_WIDTH*4;
+  int surface_height = CPC_VISIBLE_SCR_HEIGHT*4;
+  if (half_pixels) {
+    surface_width = CPC_VISIBLE_SCR_WIDTH*2;
+    surface_height = CPC_VISIBLE_SCR_HEIGHT*2;
+  }
   /* initialise the source rect to full source */
   src->x=0;
   src->y=0;
   src->w=pub->w;
   src->h=pub->h;
   
-  dst->x=(scaled->w-CPC_VISIBLE_SCR_WIDTH*2)/2,
-  dst->y=(scaled->h-CPC_VISIBLE_SCR_HEIGHT*2)/2;
+  dst->x=(scaled->w-surface_width)/2,
+  dst->y=(scaled->h-surface_height)/2;
   dst->w=scaled->w;
   dst->h=scaled->h;
   
@@ -511,7 +524,7 @@ static void compute_rects(SDL_Rect* src, SDL_Rect* dst)
   }
   else
   {
-    dst->w=CPC_VISIBLE_SCR_WIDTH*2;
+    dst->w=surface_width;
   }
   int dh=src->h*2-dst->h;
   /* the src height is too big */
@@ -531,13 +544,13 @@ static void compute_rects(SDL_Rect* src, SDL_Rect* dst)
     // With this, they are black instead which is slightly better.
     // Investigating where this comes from and how to avoid it would be nice!
     src->h-=2*2;
-    dst->h=CPC_VISIBLE_SCR_HEIGHT*2;
+    dst->h=surface_height;
   }
 }
 
-void compute_rects_for_tests(SDL_Rect* src, SDL_Rect* dst)
+void compute_rects_for_tests(SDL_Rect* src, SDL_Rect* dst, Uint8 half_pixels)
 {
-  compute_rects(src, dst);
+  compute_rects(src, dst, half_pixels);
 }
 
 SDL_Surface* swscale_init(video_plugin* t, int scale, bool fs)
@@ -545,12 +558,22 @@ SDL_Surface* swscale_init(video_plugin* t, int scale, bool fs)
   SDL_CreateWindowAndRenderer(CPC_VISIBLE_SCR_WIDTH*scale, CPC_VISIBLE_SCR_HEIGHT*scale, (fs?SDL_WINDOW_FULLSCREEN_DESKTOP:SDL_WINDOW_SHOWN), &mainSDLWindow, &renderer);
   if (!mainSDLWindow || !renderer) return nullptr;
   SDL_SetWindowTitle(mainSDLWindow, "Caprice32 " VERSION_STRING);
-  vid = SDL_CreateRGBSurface(0, CPC_VISIBLE_SCR_WIDTH*2, CPC_VISIBLE_SCR_HEIGHT*2, renderer_bpp(renderer), 0, 0, 0, 0);
+  int surface_width, surface_height;
+  if (scale < 4) {
+    t->half_pixels = 1;
+    surface_width = CPC_VISIBLE_SCR_WIDTH;
+    surface_height = CPC_VISIBLE_SCR_HEIGHT;
+  } else {
+    t->half_pixels = 0;
+    surface_width = CPC_VISIBLE_SCR_WIDTH * 2;
+    surface_height = CPC_VISIBLE_SCR_HEIGHT * 2;
+  }
+  vid = SDL_CreateRGBSurface(0, surface_width*2, surface_height*2, renderer_bpp(renderer), 0, 0, 0, 0);
   if (!vid) return nullptr;
   texture = SDL_CreateTextureFromSurface(renderer, vid);
   if (!texture) return nullptr;
 
-  scaled = SDL_CreateRGBSurface(0, CPC_VISIBLE_SCR_WIDTH*2, CPC_VISIBLE_SCR_HEIGHT*2, 16, 0, 0, 0, 0);
+  scaled = SDL_CreateRGBSurface(0, surface_width*2, surface_height*2, 16, 0, 0, 0, 0);
   if (!scaled) return nullptr;
   if (scaled->format->BitsPerPixel!=16)
   {
@@ -558,8 +581,8 @@ SDL_Surface* swscale_init(video_plugin* t, int scale, bool fs)
     return nullptr;
   }
   SDL_FillRect(vid, nullptr, SDL_MapRGB(vid->format,0,0,0));
-  compute_scale(t, CPC_VISIBLE_SCR_WIDTH, CPC_VISIBLE_SCR_HEIGHT);
-  pub = SDL_CreateRGBSurface(0, CPC_VISIBLE_SCR_WIDTH, CPC_VISIBLE_SCR_HEIGHT, 16, 0, 0, 0, 0);
+  compute_scale(t, surface_width, surface_height);
+  pub = SDL_CreateRGBSurface(0, surface_width, surface_height, 16, 0, 0, 0, 0);
   if (pub->format->BitsPerPixel!=16)
   {
     LOG_ERROR(t->name << ": SDL didn't return a 16 bpp surface but a " << static_cast<int>(pub->format->BitsPerPixel) << " bpp one.");
@@ -856,7 +879,7 @@ void seagle_flip(video_plugin* t)
     SDL_LockSurface(scaled);
   SDL_Rect src;
   SDL_Rect dst;
-  compute_rects(&src,&dst);
+  compute_rects(&src,&dst,t->half_pixels);
   filter_supereagle(static_cast<Uint8*>(pub->pixels) + (2*src.x+src.y*pub->pitch) + (pub->pitch), pub->pitch,
      static_cast<Uint8*>(scaled->pixels) + (2*dst.x+dst.y*scaled->pitch), scaled->pitch, src.w, src.h);
   if (SDL_MUSTLOCK(scaled))
@@ -902,7 +925,7 @@ void scale2x_flip(video_plugin* t __attribute__((unused)))
     SDL_LockSurface(scaled);
   SDL_Rect src;
   SDL_Rect dst;
-  compute_rects(&src,&dst);
+  compute_rects(&src,&dst,t->half_pixels);
   filter_scale2x(static_cast<Uint8*>(pub->pixels) + (2*src.x+src.y*pub->pitch) + (pub->pitch), pub->pitch,
      static_cast<Uint8*>(scaled->pixels) + (2*dst.x+dst.y*scaled->pitch), scaled->pitch, src.w, src.h);
   if (SDL_MUSTLOCK(scaled))
@@ -1109,7 +1132,7 @@ void ascale2x_flip(video_plugin* t __attribute__((unused)))
     SDL_LockSurface(scaled);
   SDL_Rect src;
   SDL_Rect dst;
-  compute_rects(&src,&dst);
+  compute_rects(&src,&dst,t->half_pixels);
   filter_ascale2x(static_cast<Uint8*>(pub->pixels) + (2*src.x+src.y*pub->pitch) + (pub->pitch), pub->pitch,
       static_cast<Uint8*>(scaled->pixels) + (2*dst.x+dst.y*scaled->pitch), scaled->pitch, src.w, src.h);
   if (SDL_MUSTLOCK(scaled))
@@ -1156,7 +1179,7 @@ void tv2x_flip(video_plugin* t __attribute__((unused)))
     SDL_LockSurface(scaled);
   SDL_Rect src;
   SDL_Rect dst;
-  compute_rects(&src,&dst);
+  compute_rects(&src,&dst,t->half_pixels);
   filter_tv2x(static_cast<Uint8*>(pub->pixels) + (2*src.x+src.y*pub->pitch) + (pub->pitch), pub->pitch,
       static_cast<Uint8*>(scaled->pixels) + (2*dst.x+dst.y*scaled->pitch), scaled->pitch, src.w, src.h);
   if (SDL_MUSTLOCK(scaled))
@@ -1199,7 +1222,7 @@ void swbilin_flip(video_plugin* t __attribute__((unused)))
     SDL_LockSurface(scaled);
   SDL_Rect src;
   SDL_Rect dst;
-  compute_rects(&src,&dst);
+  compute_rects(&src,&dst,t->half_pixels);
   filter_bilinear(static_cast<Uint8*>(pub->pixels) + (2*src.x+src.y*pub->pitch) + (pub->pitch), pub->pitch,
       static_cast<Uint8*>(scaled->pixels) + (2*dst.x+dst.y*scaled->pitch), scaled->pitch, src.w, src.h);
   if (SDL_MUSTLOCK(scaled))
@@ -1289,7 +1312,7 @@ void swbicub_flip(video_plugin* t __attribute__((unused)))
     SDL_LockSurface(scaled);
   SDL_Rect src;
   SDL_Rect dst;
-  compute_rects(&src,&dst);
+  compute_rects(&src,&dst,t->half_pixels);
   filter_bicubic(static_cast<Uint8*>(pub->pixels) + (2*src.x+src.y*pub->pitch) + (pub->pitch), pub->pitch,
       static_cast<Uint8*>(scaled->pixels) + (2*dst.x+dst.y*scaled->pitch), scaled->pitch, src.w, src.h);
   if (SDL_MUSTLOCK(scaled))
@@ -1340,7 +1363,7 @@ void dotmat_flip(video_plugin* t __attribute__((unused)))
     SDL_LockSurface(scaled);
   SDL_Rect src;
   SDL_Rect dst;
-  compute_rects(&src,&dst);
+  compute_rects(&src,&dst,t->half_pixels);
   filter_dotmatrix(static_cast<Uint8*>(pub->pixels) + (2*src.x+src.y*pub->pitch) + (pub->pitch), pub->pitch,
       static_cast<Uint8*>(scaled->pixels) + (2*dst.x+dst.y*scaled->pitch), scaled->pitch, src.w, src.h);
   if (SDL_MUSTLOCK(scaled))
@@ -1356,10 +1379,10 @@ std::vector<video_plugin> video_plugin_list =
 {
   // Hardware flip version are the same as software ones since switch to SDL2. Kept for compatibility of config, would be nice to not display them in the UI.
   /* Name                     Hidden Init func      Palette func     Flip func      Close func      Half size  X, Y offsets   X, Y scale  width, height */
-  {"Direct",                  false, direct_init,   direct_setpal,   direct_flip,   direct_close,   1,         0, 0,          0, 0, 0, 0 },
-  {"Direct double size",      true,  direct_init,   direct_setpal,   direct_flip,   direct_close,   1,         0, 0,          0, 0, 0, 0 },
+  {"Direct half",             false, direct_init,   direct_setpal,   direct_flip,   direct_close,   1,         0, 0,          0, 0, 0, 0 },
+  {"Direct",                  true,  direct_init,   direct_setpal,   direct_flip,   direct_close,   0,         0, 0,          0, 0, 0, 0 },
   {"Half size",               true,  direct_init,   direct_setpal,   direct_flip,   direct_close,   1,         0, 0,          0, 0, 0, 0 },
-  {"Double size",             true,  direct_init,   direct_setpal,   direct_flip,   direct_close,   1,         0, 0,          0, 0, 0, 0 },
+  {"Double size",             true,  direct_init,   direct_setpal,   direct_flip,   direct_close,   0,         0, 0,          0, 0, 0, 0 },
   {"Super eagle",             false, swscale_init,  swscale_setpal,  seagle_flip,   swscale_close,  1,         0, 0,          0, 0, 0, 0 },
   {"Scale2x",                 false, swscale_init,  swscale_setpal,  scale2x_flip,  swscale_close,  1,         0, 0,          0, 0, 0, 0 },
   {"Advanced Scale2x",        false, swscale_init,  swscale_setpal,  ascale2x_flip, swscale_close,  1,         0, 0,          0, 0, 0, 0 },
