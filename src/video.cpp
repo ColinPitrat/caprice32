@@ -128,12 +128,15 @@ SDL_Surface* direct_init(video_plugin* t, int scale, bool fs)
   SDL_CreateWindowAndRenderer(CPC_VISIBLE_SCR_WIDTH*scale, CPC_VISIBLE_SCR_HEIGHT*scale, (fs?SDL_WINDOW_FULLSCREEN_DESKTOP:SDL_WINDOW_SHOWN), &mainSDLWindow, &renderer);
   if (!mainSDLWindow || !renderer) return nullptr;
   SDL_SetWindowTitle(mainSDLWindow, "Caprice32 " VERSION_STRING);
-  int surface_width = CPC_VISIBLE_SCR_WIDTH;
-  int surface_height = CPC_VISIBLE_SCR_HEIGHT;
+  int surface_width, surface_height;
   if (scale > 1) {
     t->half_pixels = 0;
     surface_width = CPC_VISIBLE_SCR_WIDTH * 2;
     surface_height = CPC_VISIBLE_SCR_HEIGHT * 2;
+  } else {
+    t->half_pixels = 1;
+    surface_width = CPC_VISIBLE_SCR_WIDTH;
+    surface_height = CPC_VISIBLE_SCR_HEIGHT;
   }
   vid = SDL_CreateRGBSurface(0, surface_width, surface_height, renderer_bpp(renderer), 0, 0, 0, 0);
   if (!vid) return nullptr;
@@ -1380,7 +1383,7 @@ std::vector<video_plugin> video_plugin_list =
   // Hardware flip version are the same as software ones since switch to SDL2. Kept for compatibility of config, would be nice to not display them in the UI.
   /* Name                     Hidden Init func      Palette func     Flip func      Close func      Half size  X, Y offsets   X, Y scale  width, height */
   {"Direct half",             false, direct_init,   direct_setpal,   direct_flip,   direct_close,   1,         0, 0,          0, 0, 0, 0 },
-  {"Direct",                  false, direct_init,   direct_setpal,   direct_flip,   direct_close,   0,         0, 0,          0, 0, 0, 0 },
+  {"Direct double",           true,  direct_init,   direct_setpal,   direct_flip,   direct_close,   0,         0, 0,          0, 0, 0, 0 },
   {"Half size",               true,  direct_init,   direct_setpal,   direct_flip,   direct_close,   1,         0, 0,          0, 0, 0, 0 },
   {"Double size",             true,  direct_init,   direct_setpal,   direct_flip,   direct_close,   0,         0, 0,          0, 0, 0, 0 },
   {"Super eagle",             false, swscale_init,  swscale_setpal,  seagle_flip,   swscale_close,  1,         0, 0,          0, 0, 0, 0 },
