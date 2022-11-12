@@ -249,8 +249,10 @@ endif  # ARCH =? macos
 install: $(TARGET)
 	install -D $(TARGET) $(DESTDIR)$(prefix)/bin/$(TARGET)
 	install -D $(GROFF_DOC) $(DESTDIR)$(prefix)/share/man/man6/cap32.6
-	install -D -m664 cap32.cfg.tmpl $(DESTDIR)/etc/cap32.cfg
-	sed -i "s,__SHARE_PATH__,$(DESTDIR)$(prefix)/share/caprice32," $(DESTDIR)/etc/cap32.cfg
+	if [ ! -f $(DESTDIR)/etc/cap32.cfg ]; then \
+    install -D -m664 cap32.cfg.tmpl $(DESTDIR)/etc/cap32.cfg; \
+    sed -i "s,__SHARE_PATH__,$(DESTDIR)$(prefix)/share/caprice32," $(DESTDIR)/etc/cap32.cfg \
+  fi
 	mkdir -p $(DESTDIR)$(prefix)/share/caprice32
 	cp -r resources rom $(DESTDIR)$(prefix)/share/caprice32
 
