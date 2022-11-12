@@ -58,8 +58,8 @@ std::string RAMConfig::RAMConfigText()
 RAMConfig RAMConfig::CurrentConfig()
 {
   RAMConfig result;
-  result.LoROMEnabled = GateArray.ROM_config & 4;
-  result.HiROMEnabled = GateArray.ROM_config & 8;
+  result.LoROMEnabled = !(GateArray.ROM_config & 4);
+  result.HiROMEnabled = !(GateArray.ROM_config & 8);
   result.RAMBank = (GateArray.RAM_config & 0x38) >> 3;
   result.RAMCfg = GateArray.RAM_config & 0x7;
   return result;
@@ -303,6 +303,7 @@ CapriceDevTools::CapriceDevTools(const CRect& WindowRect, CWindow* pParent, CFon
     m_pMemConfigMemRAMBank = new CDropDown(CRect(CPoint(110, 25), 40, 20), m_pMemConfigGrp);
     int nb_banks = (CPC.ram_size == 64) ? 1 : ((CPC.ram_size / 64)-1);
     for (int i = 0; i < nb_banks; i++) m_pMemConfigMemRAMBank->AddItem(SListItem(std::to_string(i)));
+    // TODO: Default to RAMBank & RAMConfig that are currently used
     m_pMemConfigMemRAMBank->SelectItem(0);
     m_pMemConfigMemRAMConfig = new CDropDown(CRect(CPoint(160, 25), 70, 20), m_pMemConfigGrp);
     int nb_configs = (CPC.ram_size == 64) ? 1 : 8;
