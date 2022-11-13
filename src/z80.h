@@ -49,6 +49,8 @@ typedef union {
 #define Nflag  0x02 // negative flag
 #define Cflag  0x01 // carry flag
 #define Xflags 0x28 // bit 5 & 3 flags
+#define X1flag 0x20 // bit 5 - unused flag
+#define X2flag 0x28 // bit 3 - unused flag
 
 struct Breakpoint {
   Breakpoint(word val) : address(val) {};

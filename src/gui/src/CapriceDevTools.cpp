@@ -148,21 +148,18 @@ CapriceDevTools::CapriceDevTools(const CRect& WindowRect, CWindow* pParent, CFon
     m_pZ80StackLabel = new CLabel(CPoint(300, 10), m_pGroupBoxTabZ80, "Stack:");
     m_pZ80Stack = new CListBox(CRect(CPoint(300, 20), 100, 190), m_pGroupBoxTabZ80);
 
-    m_pZ80RegF = new CRegister(CRect(CPoint(300, 230), 110, 20), m_pGroupBoxTabZ80, "F");
-    m_pZ80RegFp = new CRegister(CRect(CPoint(440, 230), 110, 20), m_pGroupBoxTabZ80, "F'");
-    m_pZ80FlagsLabel = new CLabel(CPoint(300, 260), m_pGroupBoxTabZ80, "Flags:");
-    m_pZ80FlagSLbl = new CLabel(CPoint(300, 281), m_pGroupBoxTabZ80, "S");
-    m_pZ80FlagS = new CEditBox(CRect(CPoint(310, 275), 20, 20), m_pGroupBoxTabZ80);
-    m_pZ80FlagZLbl = new CLabel(CPoint(335, 281), m_pGroupBoxTabZ80, "Z");
-    m_pZ80FlagZ = new CEditBox(CRect(CPoint(345, 275), 20, 20), m_pGroupBoxTabZ80);
-    m_pZ80FlagHLbl = new CLabel(CPoint(370, 281), m_pGroupBoxTabZ80, "H");
-    m_pZ80FlagH = new CEditBox(CRect(CPoint(380, 275), 20, 20), m_pGroupBoxTabZ80);
-    m_pZ80FlagPVLbl = new CLabel(CPoint(405, 281), m_pGroupBoxTabZ80, "PV");
-    m_pZ80FlagPV = new CEditBox(CRect(CPoint(420, 275), 20, 20), m_pGroupBoxTabZ80);
-    m_pZ80FlagNLbl = new CLabel(CPoint(445, 281), m_pGroupBoxTabZ80, "N");
-    m_pZ80FlagN = new CEditBox(CRect(CPoint(455, 275), 20, 20), m_pGroupBoxTabZ80);
-    m_pZ80FlagCLbl = new CLabel(CPoint(480, 281), m_pGroupBoxTabZ80, "C");
-    m_pZ80FlagC = new CEditBox(CRect(CPoint(490, 275), 20, 20), m_pGroupBoxTabZ80);
+    m_pZ80FlagsLabel = new CLabel(CPoint(290, 222), m_pGroupBoxTabZ80, "Flags:");
+    m_pZ80RegF = new CRegister(CRect(CPoint(290, 235), 110, 20), m_pGroupBoxTabZ80, "F");
+    m_pZ80RegFp = new CRegister(CRect(CPoint(290, 255), 110, 20), m_pGroupBoxTabZ80, "F'");
+
+    m_pZ80FlagS  = new CFlag(CRect(CPoint(290, 280), 35, 20), m_pGroupBoxTabZ80, "S",  "Sign flag");
+    m_pZ80FlagZ  = new CFlag(CRect(CPoint(290, 300), 35, 20), m_pGroupBoxTabZ80, "Z",  "Zero flag");
+    m_pZ80FlagX1 = new CFlag(CRect(CPoint(290, 320), 35, 20), m_pGroupBoxTabZ80, "NU", "Unused flag");
+    m_pZ80FlagH  = new CFlag(CRect(CPoint(290, 340), 35, 20), m_pGroupBoxTabZ80, "H",  "Half carry flag");
+    m_pZ80FlagX2 = new CFlag(CRect(CPoint(340, 280), 35, 20), m_pGroupBoxTabZ80, "NU", "Unused flag");
+    m_pZ80FlagPV = new CFlag(CRect(CPoint(340, 300), 35, 20), m_pGroupBoxTabZ80, "PV", "Parity/overflow flag");
+    m_pZ80FlagN  = new CFlag(CRect(CPoint(340, 320), 35, 20), m_pGroupBoxTabZ80, "N",  "Add/substract flag");
+    m_pZ80FlagC  = new CFlag(CRect(CPoint(340, 340), 35, 20), m_pGroupBoxTabZ80, "C",  "Carry flag");
 
     // TODO: Add information about interrupts (mode, IFF1, IFF2)
 
@@ -479,12 +476,14 @@ void CapriceDevTools::UpdateZ80()
   m_pZ80RegSP->SetValue(z80.SP.w.l);
   m_pZ80RegPC->SetValue(z80.PC.w.l);
 
-  m_pZ80FlagS->SetWindowText((z80.AF.b.l & Sflag) ? "1" : "0");
-  m_pZ80FlagZ->SetWindowText((z80.AF.b.l & Zflag) ? "1" : "0");
-  m_pZ80FlagH->SetWindowText((z80.AF.b.l & Hflag) ? "1" : "0");
-  m_pZ80FlagPV->SetWindowText((z80.AF.b.l & Pflag) ? "1" : "0");
-  m_pZ80FlagN->SetWindowText((z80.AF.b.l & Nflag) ? "1" : "0");
-  m_pZ80FlagC->SetWindowText((z80.AF.b.l & Cflag) ? "1" : "0");
+  m_pZ80FlagS->SetValue((z80.AF.b.l & Sflag) ? "1" : "0");
+  m_pZ80FlagZ->SetValue((z80.AF.b.l & Zflag) ? "1" : "0");
+  m_pZ80FlagX1->SetValue((z80.AF.b.l & X1flag) ? "1" : "0");
+  m_pZ80FlagH->SetValue((z80.AF.b.l & Hflag) ? "1" : "0");
+  m_pZ80FlagX2->SetValue((z80.AF.b.l & X2flag) ? "1" : "0");
+  m_pZ80FlagPV->SetValue((z80.AF.b.l & Pflag) ? "1" : "0");
+  m_pZ80FlagN->SetValue((z80.AF.b.l & Nflag) ? "1" : "0");
+  m_pZ80FlagC->SetValue((z80.AF.b.l & Cflag) ? "1" : "0");
 
   m_pZ80Stack->ClearItems();
   // Don't show more than 50 values in the stack if not paused as this slows
