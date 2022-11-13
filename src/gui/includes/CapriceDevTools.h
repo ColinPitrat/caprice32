@@ -25,6 +25,20 @@ class DevTools;
 
 namespace wGui
 {
+    enum class Format {
+      Hex,
+      Char,
+      U8,
+      U16,
+      U32,
+      I8,
+      I16,
+      I32
+    };
+
+    int FormatSize(Format f);
+    std::ostream& operator<<(std::ostream& os, const Format& f);
+    std::ostream& operator<<(std::ostream& os, const std::vector<Format>& f);
 
     class RAMConfig {
       public:
@@ -209,6 +223,8 @@ namespace wGui
         CButton  *m_pMemButtonCopy;
         CLabel   *m_pMemBytesPerLineLbl;
         CDropDown *m_pMemBytesPerLine;
+        CLabel   *m_pMemFormatLbl;
+        CDropDown *m_pMemFormat;
         CTextBox *m_pMemTextContent;
 
         CGroupBox* m_pMemWatchPointsGrp;
@@ -250,6 +266,7 @@ namespace wGui
         int m_MemFilterValue;
         int m_MemDisplayValue;
         unsigned int m_MemBytesPerLine;
+        std::vector<Format> m_MemFormat;
 
         // Video screen
         CLabel* m_pVidLabel;

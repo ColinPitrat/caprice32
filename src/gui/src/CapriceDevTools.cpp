@@ -26,6 +26,75 @@ t_MemBankConfig memtool_membank_config;
 
 namespace wGui {
 
+int FormatSize(Format f)
+{
+  switch(f)
+  {
+    case Format::Hex:
+    case Format::Char:
+    case Format::U8:
+    case Format::I8:
+      return 1;
+    case Format::U16:
+    case Format::I16:
+      return 2;
+    case Format::U32:
+    case Format::I32:
+      return 4;
+  };
+  LOG_ERROR("Missing FormatSize for " << f);
+  return 1;
+}
+
+std::ostream& operator<<(std::ostream& os, const Format& f)
+{
+  switch(f)
+  {
+    case Format::Hex:
+      os << "hex";
+      break;
+    case Format::Char:
+      os << "char";
+      break;
+    case Format::U8:
+      os << "u8";
+      break;
+    case Format::U16:
+      os << "u16";
+      break;
+    case Format::U32:
+      os << "u32";
+      break;
+    case Format::I8:
+      os << "i8";
+      break;
+    case Format::I16:
+      os << "i16";
+      break;
+    case Format::I32:
+      os << "i32";
+      break;
+    default:
+      os << "!Unsupported!";
+      break;
+  }
+  return os;
+}
+
+std::ostream& operator<<(std::ostream& os, const std::vector<Format>& fs)
+{
+  os << "[";
+  bool first = true;
+  for (auto f : fs)
+  {
+    if (!first) os << ",";
+    first = false;
+    os << f;
+  }
+  os << "]";
+  return os;
+}
+
 std::string RAMConfig::RAMConfigText(int i)
 {
   switch (i) {
@@ -246,6 +315,21 @@ CapriceDevTools::CapriceDevTools(const CRect& WindowRect, CWindow* pParent, CFon
     m_pMemBytesPerLine->SelectItem(4);
     m_pMemBytesPerLine->SetIsFocusable(true);
 
+    m_pMemFormatLbl      = new CLabel(       CPoint(235, 38),             m_pGroupBoxTabMemory, "Format:");
+    m_pMemFormat        = new CDropDown( CRect(CPoint(280, 33), 85, 20),   m_pGroupBoxTabMemory, true);
+    m_pMemFormat->AddItem(SListItem("Hex"));
+    m_pMemFormat->AddItem(SListItem("Hex & char"));
+    m_pMemFormat->AddItem(SListItem("Hex & u8"));
+    m_pMemFormat->AddItem(SListItem("Hex & u16"));
+    m_pMemFormat->AddItem(SListItem("Hex & u32"));
+    m_pMemFormat->AddItem(SListItem("Hex & i8"));
+    m_pMemFormat->AddItem(SListItem("Hex & i16"));
+    m_pMemFormat->AddItem(SListItem("Hex & i32"));
+    m_pMemFormat->SetListboxHeight(4);
+    m_MemFormat = {Format::Hex};
+    m_pMemFormat->SelectItem(0);
+    m_pMemFormat->SetIsFocusable(true);
+
     m_pMemFilterLabel     = new CLabel(        CPoint(15, 80),             m_pGroupBoxTabMemory, "Byte: ");
     m_pMemFilterValue     = new CEditBox(CRect(CPoint(55, 75), 30, 20),    m_pGroupBoxTabMemory);
     m_pMemFilterValue->SetIsFocusable(true);
@@ -318,7 +402,7 @@ CapriceDevTools::CapriceDevTools(const CRect& WindowRect, CWindow* pParent, CFon
     m_pMemConfigCurRAMConfig->SetReadOnly(true);
 
     // ---------------- 'Video' screen ----------------
-    m_pVidLabel = new CLabel(CPoint(10, 10), m_pGroupBoxTabVideo, "Work in progress ... Nothing to see here yet, but come back later for video (CRTC & PSG info).");
+    m_pVidLabel = new CLabel(CPoint(10, 10), m_pGroupBoxTabVideo, "Work in progress ... Nothing to see here yet, but come back later for video (CRTC & GateArray info).");
     // ---------------- 'Audio' screen ----------------
     m_pAudLabel = new CLabel(CPoint(10, 10), m_pGroupBoxTabAudio, "Work in progress ... Nothing to see here yet, but come back later for sound (tone and volume envelopes, etc ...).");
     // TODO: PSG registers, envelopes, noise, channel curve? ...
@@ -583,17 +667,88 @@ void CapriceDevTools::UpdateTextMemory()
     bool displayLine = false;
     bool filterAdress = (m_MemDisplayValue >= 0 && m_MemDisplayValue <= 65535);
     bool filterValue = (m_MemFilterValue >= 0 && m_MemFilterValue <= 255);
-    for(unsigned int j = 0; j < m_MemBytesPerLine; j++) {
-      unsigned int val = ReadMem(i*m_MemBytesPerLine+j);
-      memLine << std::setw(2) << val << " ";
+    bool first = true;
+    for(auto f : m_MemFormat) {
+      if (!first) {
+        memLine << " | ";
+      }
+      first = false;
+      for(unsigned int j = 0; j < m_MemBytesPerLine; j+=FormatSize(f)) {
+        switch (f) {
+          case Format::Hex:
+            {
+              unsigned int val = ReadMem(i*m_MemBytesPerLine+j);
+              memLine << std::setfill('0') << std::setw(2) << std::hex << val << " ";
+              break;
+            }
+          case Format::Char:
+            {
+              char val = ReadMem(i*m_MemBytesPerLine+j);
+              if (val >= 32) {
+                memLine << val;
+              } else {
+                memLine << ".";
+              }
+              break;
+            }
+          case Format::U8:
+            {
+              unsigned int val = ReadMem(i*m_MemBytesPerLine+j);
+              memLine << std::setfill(' ') << std::setw(3) << std::dec << val << " ";
+              break;
+            }
+          case Format::U16:
+            {
+              unsigned int val = static_cast<uint32_t>(ReadMem(i*m_MemBytesPerLine+j)) +
+                (static_cast<uint32_t>(ReadMem(i*m_MemBytesPerLine+j+1) << 8));
+              memLine << std::setfill(' ') << std::setw(5) << std::dec << val << " ";
+              break;
+            }
+          case Format::U32:
+            {
+              unsigned int val = static_cast<uint32_t>(ReadMem(i*m_MemBytesPerLine+j)) +
+                (static_cast<uint32_t>(ReadMem(i*m_MemBytesPerLine+j+1) << 8)) +
+                (static_cast<uint32_t>(ReadMem(i*m_MemBytesPerLine+j+2) << 16)) +
+                (static_cast<uint32_t>(ReadMem(i*m_MemBytesPerLine+j+3) << 24));
+              memLine << std::setfill(' ') << std::setw(10) << std::dec << val << " ";
+              break;
+            }
+          case Format::I8:
+            {
+              int8_t val = static_cast<int8_t>(ReadMem(i*m_MemBytesPerLine+j));
+              memLine << std::setfill(' ') << std::setw(4) << std::dec << val << " ";
+              break;
+            }
+          case Format::I16:
+            {
+              int16_t val = static_cast<uint16_t>(ReadMem(i*m_MemBytesPerLine+j)) +
+                (static_cast<uint16_t>(ReadMem(i*m_MemBytesPerLine+j+1) << 8));
+              memLine << std::setfill(' ') << std::setw(6) << std::dec << val << " ";
+              break;
+            }
+          case Format::I32:
+            {
+              int32_t val = static_cast<int32_t>(ReadMem(i*m_MemBytesPerLine+j)) +
+                (static_cast<int32_t>(ReadMem(i*m_MemBytesPerLine+j+1) << 8)) +
+                (static_cast<int32_t>(ReadMem(i*m_MemBytesPerLine+j+2) << 16)) +
+                (static_cast<int32_t>(ReadMem(i*m_MemBytesPerLine+j+3) << 24));
+              memLine << std::setfill(' ') << std::setw(11) << std::dec << val << " ";
+              break;
+            }
+        }
+      }
       if(!filterAdress && !filterValue) {
         displayLine = true;
-      }
-      if(filterValue && static_cast<int>(val) == m_MemFilterValue) {
-        displayLine = true;
-      }
-      if(filterAdress && (i*m_MemBytesPerLine+j == static_cast<unsigned int>(m_MemDisplayValue))) {
-        displayLine = true;
+      } else {
+        for(unsigned int j = 0; j < m_MemBytesPerLine; j++) {
+          unsigned int val = ReadMem(i*m_MemBytesPerLine+j);
+          if(filterValue && static_cast<int>(val) == m_MemFilterValue) {
+            displayLine = true;
+          }
+          if(filterAdress && (i*m_MemBytesPerLine+j == static_cast<unsigned int>(m_MemDisplayValue))) {
+            displayLine = true;
+          }
+        }
       }
     }
     if(displayLine) {
@@ -902,21 +1057,54 @@ bool CapriceDevTools::HandleMessage(CMessage* pMessage)
             }
           }
         }
-        if (pMessage->Destination() == m_pMemBytesPerLine) {
-          m_MemBytesPerLine = 1 << m_pMemBytesPerLine->GetSelectedIndex();
-          // Note: Any saved filter doesn't make sense anymore but we keep it
-          // just in case the user wants to come back to the previous
-          // BytesPerLine.
-          // It would be nice to have a mechanism to warn the user if the
-          // filter is not aligned with the BytesPerLine setting.
-          UpdateTextMemory();
+        if (pMessage->Destination() == m_pGroupBoxTabMemory) {
+          if (pMessage->Source() == m_pMemBytesPerLine) {
+            m_MemBytesPerLine = 1 << m_pMemBytesPerLine->GetSelectedIndex();
+            // Note: Any saved filter doesn't make sense anymore but we keep it
+            // just in case the user wants to come back to the previous
+            // BytesPerLine.
+            // It would be nice to have a mechanism to warn the user if the
+            // filter is not aligned with the BytesPerLine setting.
+            UpdateTextMemory();
+          }
+          if (pMessage->Source() == m_pMemFormat) {
+            m_MemFormat.clear();
+            for (auto f : stringutils::split(m_pMemFormat->GetWindowText(), '&')) {
+              f = stringutils::lower(stringutils::trim(f, ' '));
+              if (f == "hex") {
+                m_MemFormat.push_back(Format::Hex);
+              } else if (f == "char") {
+                m_MemFormat.push_back(Format::Char);
+              } else if (f == "u8") {
+                m_MemFormat.push_back(Format::U8);
+              } else if (f == "u16") {
+                m_MemFormat.push_back(Format::U16);
+              } else if (f == "u32") {
+                m_MemFormat.push_back(Format::U32);
+              } else if (f == "i8") {
+                m_MemFormat.push_back(Format::I8);
+              } else if (f == "i16") {
+                m_MemFormat.push_back(Format::I16);
+              } else if (f == "i32") {
+                m_MemFormat.push_back(Format::I32);
+              } else {
+                LOG_WARNING("Unknown format token '" << f << "', skipping.");
+                continue;
+              }
+            }
+            if (m_MemFormat.empty()) {
+              LOG_ERROR("No valid format provided in '" << m_pMemFormat->GetWindowText() << "', defaulting to 'Hex'.");
+              m_MemFormat.push_back(Format::Hex);
+            }
+            UpdateTextMemory();
+          }
         }
 #if __GNUC__ >= 7
         [[gnu::fallthrough]];
 #endif
       case CMessage::CTRL_VALUECHANGING:
         if (pMessage->Destination() == m_pGroupBoxTabZ80) {
-          // Handle scrollbars
+          // TODO: Handle scrollbars
         }
         break;
 
