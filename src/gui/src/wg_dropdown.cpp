@@ -198,18 +198,22 @@ bool CDropDown::HandleMessage(CMessage* pMessage)
         }
       case CMessage::CTRL_VALUECHANGE:
         {
-          TIntMessage* pCtrlMessage = dynamic_cast<TIntMessage*>(pMessage);
-          if (pCtrlMessage && pMessage->Destination() == this)
+          TIntMessage* pIntMessage = dynamic_cast<TIntMessage*>(pMessage);
+          if (pIntMessage && pMessage->Destination() == this)
           {
-            if (pCtrlMessage->Source() == m_pListBox)
+            if (pIntMessage->Source() == m_pListBox)
             {
-              const SListItem& ListItem = m_pListBox->GetItem(pCtrlMessage->Value());
+              const SListItem& ListItem = m_pListBox->GetItem(pIntMessage->Value());
               SetWindowText(ListItem.sItemText);
               HideListBox();
               Application().MessageServer()->QueueMessage(new TIntMessage(CMessage::CTRL_VALUECHANGE, m_pParentWindow, this, 0));
               bHandled = true;
             }
-            else if (pCtrlMessage->Source() == m_pEditBox)
+          }
+          TStringMessage* pStringMessage = dynamic_cast<TStringMessage*>(pMessage);
+          if (pStringMessage && pMessage->Destination() == this)
+          {
+            if (pStringMessage->Source() == m_pEditBox)
             {
               m_pListBox->SetAllSelections(false);
               HideListBox();
