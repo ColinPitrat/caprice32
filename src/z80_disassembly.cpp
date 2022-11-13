@@ -27,6 +27,22 @@ uint64_t DisassembledCode::hash() const {
   return h;
 }
 
+std::ostream& operator<<(std::ostream& os, const DisassembledLine& line)
+{
+  os << std::setfill('0') << std::setw(4) << std::hex << line.address_ << ": ";
+  os << std::setfill(' ') << std::setw(8) << line.opcode_ << " " << line.instruction_;
+  return os;
+}
+
+std::ostream& operator<<(std::ostream& os, const DisassembledCode& code)
+{
+  for (const auto& line : code.lines)
+  {
+    os << line << std::endl;
+  }
+  return os;
+}
+
 DisassembledLine::DisassembledLine(word address, uint64_t opcode, std::string&& instruction, int64_t ref_address) :
       address_(address), opcode_(opcode), instruction_(instruction)
 {
@@ -42,10 +58,17 @@ bool operator<(const DisassembledLine& l, const DisassembledLine& r) {
   return l.address_ < r.address_;
 }
 
+bool operator==(const DisassembledLine& l, const DisassembledLine& r) {
+  return l.address_ == r.address_ && l.opcode_ == r.opcode_ && l.instruction_ == r.instruction_;
+}
+
 std::map<int, OpCode> load_opcodes_table()
 {
   std::map<int, OpCode> opcode_to_instruction;
   std::ifstream infile(CPC.resources_path + "/z80_opcodes.txt");
+  if (!infile.good()) {
+    LOG_ERROR("Error opening " << CPC.resources_path << "/z80_opcodes.txt");
+  }
   std::string line;
   while (std::getline(infile, line)) {
     auto delimiter = line.find(':');
@@ -77,73 +100,75 @@ void append_address(std::string& instruction, word address)
   instruction += oss.str();
 }
 
+DisassembledLine disassemble_one(dword& pos, DisassembledCode& result, std::vector<dword>& called_points)
+{
+  static auto opcode_to_instructions = load_opcodes_table();
+  uint64_t opcode = 0;
+  word start_address = pos;
+  for (int bytes_read = 0; bytes_read < 3; bytes_read++) {
+    int64_t ref_address = -1;
+    opcode = (opcode << 8) + z80_read_mem(pos++);
+    //std::cout << "Looking for opcode " << std::hex << opcode << std::endl;
+    if (opcode_to_instructions.find(opcode) != opcode_to_instructions.end()) {
+      auto instr = opcode_to_instructions[opcode];
+      std::string instruction = instr.instruction_;
+      if (instruction.find("**") != std::string::npos) {
+        int op = z80_read_mem(pos++);
+        opcode = (opcode << 8) + op;
+        int second_byte = z80_read_mem(pos++);
+        op += (second_byte << 8);
+        opcode = (opcode << 8) + second_byte;
+        std::ostringstream oss;
+        oss << "$" << std::hex << std::setw(4) << std::setfill('0') << op;
+        instruction.replace(instruction.find("**"), 2, oss.str());
+        if (instruction.rfind("call", 0) == 0 ||
+            instruction.rfind("jp", 0) == 0) {
+          add_if_new(op, result, called_points, instruction, start_address);
+          ref_address = op;
+        }
+      }
+      while (instruction.find('*') != std::string::npos) {
+        auto op = z80_read_mem(pos++);
+        opcode = (opcode << 8) + op;
+        std::ostringstream oss;
+        oss << "$" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(op);
+        instruction.replace(instruction.find('*'), 1, oss.str());
+        if (instruction.rfind("jr", 0) == 0 ||
+            instruction.rfind("djnz", 0) == 0) {
+          word address = pos + static_cast<int8_t>(op);
+          append_address(instruction, address);
+          add_if_new(address, result, called_points, instruction, start_address);
+          ref_address = address;
+        }
+        if (instruction.rfind("rst", 0) == 0) {
+          // RST instruction is of the form rst xxh where xx can be 00, 08,
+          // 10, 18, 20, 28, 30 or 38
+          word address = std::stol(instruction.substr(4,2), nullptr, 16);
+          append_address(instruction, address);
+          add_if_new(address, result, called_points, instruction, start_address);
+          ref_address = address;
+        }
+      }
+      // TODO: Detect inconsistencies (overlapping instructions). This
+      // requires checking the instructions before and after the newly
+      // emplaced one.
+      return DisassembledLine(start_address, opcode, std::move(instruction), ref_address);
+    }
+  }
+  LOG_VERBOSE("No opcode found at " << std::hex << start_address << " for " << opcode << " from " << start_address);
+  uint64_t value = z80_read_mem(start_address);
+  std::ostringstream oss;
+  oss << "db $" << std::hex << value;
+  return DisassembledLine(start_address, value, oss.str());
+}
+
 // We use a dword for pos to allow to check if we're reaching the end of the memory
 void disassemble_from(dword pos, DisassembledCode& result, std::vector<dword>& to_disassemble_from)
 {
-  static auto opcode_to_instructions = load_opcodes_table();
-  word original_start = pos;
   while (pos <= 0xFFFF) {
-    uint64_t opcode = 0;
-    word start_address = pos;
-    bool found = false;
-    for (int bytes_read = 0; bytes_read < 3; bytes_read++) {
-      int64_t ref_address = -1;
-      opcode = (opcode << 8) + z80_read_mem(pos++);
-      //std::cout << "Looking for opcode " << std::hex << opcode << std::endl;
-      if (opcode_to_instructions.find(opcode) != opcode_to_instructions.end()) {
-        auto instr = opcode_to_instructions[opcode];
-        std::string instruction = instr.instruction_;
-        if (instruction.find("**") != std::string::npos) {
-         int op = z80_read_mem(pos++);
-          op += (z80_read_mem(pos++) << 8);
-          opcode = (opcode << 16) + op;
-          std::ostringstream oss;
-          oss << "$" << std::hex << std::setw(4) << std::setfill('0') << op;
-          instruction.replace(instruction.find("**"), 2, oss.str());
-          if (instruction.rfind("call", 0) == 0 ||
-              instruction.rfind("jp", 0) == 0) {
-            add_if_new(op, result, to_disassemble_from, instruction, start_address);
-            ref_address = op;
-          }
-        }
-        while (instruction.find('*') != std::string::npos) {
-          auto op = z80_read_mem(pos++);
-          opcode = (opcode << 8) + op;
-          std::ostringstream oss;
-          oss << "$" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(op);
-          instruction.replace(instruction.find('*'), 1, oss.str());
-          if (instruction.rfind("jr", 0) == 0 ||
-              instruction.rfind("djnz", 0) == 0) {
-            word address = pos + static_cast<int8_t>(op);
-            append_address(instruction, address);
-            add_if_new(address, result, to_disassemble_from, instruction, start_address);
-            ref_address = address;
-          }
-          if (instruction.rfind("rst", 0) == 0) {
-            // RST instruction is of the form rst xxh where xx can be 00, 08,
-            // 10, 18, 20, 28, 30 or 38
-            word address = std::stol(instruction.substr(4,2), nullptr, 16);
-            append_address(instruction, address);
-            add_if_new(address, result, to_disassemble_from, instruction, start_address);
-            ref_address = address;
-          }
-        }
-        // TODO: Detect inconsistencies. This requires checking the instructions
-        // before and after the newly emplaced one.
-        result.lines.emplace(start_address, opcode, std::move(instruction), ref_address);
-        if (instruction == "ret") return;
-        found = true;
-        break;
-      }
-    }
-    if (!found) {
-      // TODO(ColinPitrat): Handle inconsistency
-      LOG_VERBOSE("No opcode found at " << std::hex << start_address << " for " << opcode << " from " << original_start);
-      uint64_t value = z80_read_mem(start_address);
-      std::ostringstream oss;
-      oss << "db $" << std::hex << value;
-      result.lines.emplace(start_address, value, oss.str());
-    }
+    auto line = disassemble_one(pos, result, to_disassemble_from);
+    result.lines.insert(line);
+    if (line.instruction_ == "ret") return;
   }
 }
 

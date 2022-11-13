@@ -25,6 +25,7 @@ class DisassembledLine {
     void AddRefAddress(word address);
 
     friend bool operator<(const DisassembledLine& l, const DisassembledLine& r);
+    friend bool operator==(const DisassembledLine& l, const DisassembledLine& r);
 
     word address_;
     uint64_t opcode_;
@@ -32,6 +33,8 @@ class DisassembledLine {
     word ref_address_ = 0;
     std::string ref_address_string_;
 };
+
+std::ostream& operator<<(std::ostream& os, const DisassembledLine& line);
 
 class DisassembledCode {
   public:
@@ -42,7 +45,10 @@ class DisassembledCode {
     std::set<DisassembledLine> lines;
 };
 
+std::ostream& operator<<(std::ostream& os, const DisassembledCode& code);
+
 std::map<int, OpCode> load_opcodes_table();
+DisassembledLine disassemble_one(dword& pos, std::vector<dword>& entry_points);
 DisassembledCode disassemble(const std::vector<word>& entry_points);
 
 #endif
