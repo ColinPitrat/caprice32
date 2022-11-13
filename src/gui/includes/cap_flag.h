@@ -1,10 +1,10 @@
-// wg_flag.h
+// cap_flag.h
 //
 // A widget combining a label, a field and a tooltip for displaying the content
 // of a z80 flag.
 
-#ifndef _WG_FLAG_H_
-#define _WG_FLAG_H_
+#ifndef _CAP_FLAG_H_
+#define _CAP_FLAG_H_
 
 #include <string>
 #include "wg_window.h"
@@ -53,4 +53,4 @@ private:
 
 }
 
-#endif // _WG_FLAG_H_
+#endif // _CAP_FLAG_H_

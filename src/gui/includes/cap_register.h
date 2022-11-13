@@ -1,11 +1,11 @@
-// wg_register.h
+// cap_register.h
 //
 // A widget combining a label and 3 fields for hexadecimal, decimal and char
 // content of a register or memory location.
 
 
-#ifndef _WG_REGISTER_H_
-#define _WG_REGISTER_H_
+#ifndef _CAP_REGISTER_H_
+#define _CAP_REGISTER_H_
 
 #include <string>
 #include "wg_window.h"
@@ -54,4 +54,4 @@ private:
 
 }
 
-#endif // _WG_EDITBOX_H_
+#endif // _CAP_EDITBOX_H_

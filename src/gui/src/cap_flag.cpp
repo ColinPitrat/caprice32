@@ -1,4 +1,4 @@
-#include "wg_flag.h"
+#include "cap_flag.h"
 
 namespace wGui
 {
