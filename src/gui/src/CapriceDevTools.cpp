@@ -235,6 +235,7 @@ CapriceDevTools::CapriceDevTools(const CRect& WindowRect, CWindow* pParent, CFon
     m_pMemBytesPerLineLbl = new CLabel(       CPoint(235, 18),             m_pGroupBoxTabMemory, "Bytes per line:");
     m_pMemBytesPerLine  = new CDropDown( CRect(CPoint(315, 13), 50, 20),   m_pGroupBoxTabMemory, false);
     m_pMemBytesPerLine->AddItem(SListItem("1"));
+    m_pMemBytesPerLine->AddItem(SListItem("2"));
     m_pMemBytesPerLine->AddItem(SListItem("4"));
     m_pMemBytesPerLine->AddItem(SListItem("8"));
     m_pMemBytesPerLine->AddItem(SListItem("16"));
@@ -242,7 +243,7 @@ CapriceDevTools::CapriceDevTools(const CRect& WindowRect, CWindow* pParent, CFon
     m_pMemBytesPerLine->AddItem(SListItem("64"));
     m_pMemBytesPerLine->SetListboxHeight(4);
     m_MemBytesPerLine = 16;
-    m_pMemBytesPerLine->SelectItem(3);
+    m_pMemBytesPerLine->SelectItem(4);
     m_pMemBytesPerLine->SetIsFocusable(true);
 
     m_pMemFilterLabel     = new CLabel(        CPoint(15, 80),             m_pGroupBoxTabMemory, "Byte: ");
@@ -902,26 +903,7 @@ bool CapriceDevTools::HandleMessage(CMessage* pMessage)
           }
         }
         if (pMessage->Destination() == m_pMemBytesPerLine) {
-          switch (m_pMemBytesPerLine->GetSelectedIndex()) {
-            case 0:
-              m_MemBytesPerLine = 1;
-              break;
-            case 1:
-              m_MemBytesPerLine = 4;
-              break;
-            case 2:
-              m_MemBytesPerLine = 8;
-              break;
-            case 3:
-              m_MemBytesPerLine = 16;
-              break;
-            case 4:
-              m_MemBytesPerLine = 32;
-              break;
-            case 5:
-              m_MemBytesPerLine = 64;
-              break;
-          }
+          m_MemBytesPerLine = 1 << m_pMemBytesPerLine->GetSelectedIndex();
           // Note: Any saved filter doesn't make sense anymore but we keep it
           // just in case the user wants to come back to the previous
           // BytesPerLine.
