@@ -26,7 +26,14 @@
 #include "wg_error.h"
 #include "std_ex.h"
 #include <algorithm>
+#include <iostream>
 
+
+std::ostream& operator<<(std::ostream& os, const wGui::CRect r)
+{
+  os << "(" << r.Left() << ", " << r.Top() << ", " << r.Right() << ", " << r.Bottom() << ")";
+  return os;
+}
 
 namespace wGui
 {

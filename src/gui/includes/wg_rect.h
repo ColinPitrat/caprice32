@@ -247,6 +247,7 @@ protected:
 
 }
 
+std::ostream& operator<<(std::ostream& os, const wGui::CRect r);
 
 #endif // _WG_RECT_H_
 

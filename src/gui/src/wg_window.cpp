@@ -108,7 +108,7 @@ void CWindow::SetWindowRect(const CRect& WindowRect)
 		Application().GetBitsPerPixel(), 0x000000FF, 0x0000FF00, 0x00FF0000, /*0xFF000000*/ 0);
 	if (!m_pSDLSurface)
 	{
-    LOG_ERROR("CWindow::SetWindowRect: Unable to Create SDL Surface: " << SDL_GetError());
+    LOG_ERROR("CWindow::SetWindowRect: Unable to create SDL Surface of size " << m_WindowRect << ": " << SDL_GetError());
 	}
 	m_ClientRect = CRect(stdex::safe_static_cast<int>(m_ClientRect.Left() * dHorizontalScale), stdex::safe_static_cast<int>(m_ClientRect.Top() * dVerticalScale),
 		stdex::safe_static_cast<int>(m_ClientRect.Right() * dHorizontalScale), stdex::safe_static_cast<int>(m_ClientRect.Bottom() * dVerticalScale));
