@@ -36,6 +36,17 @@ namespace wGui
       I32
     };
 
+    enum class SearchFrom {
+      Start, // Actually searching from end when searching backward
+      PositionIncluded,
+      PositionExcluded,
+    };
+
+    enum class SearchDir {
+      Forward,
+      Backward
+    };
+
     int FormatSize(Format f);
     std::ostream& operator<<(std::ostream& os, const Format& f);
     std::ostream& operator<<(std::ostream& os, const std::vector<Format>& f);
@@ -75,6 +86,14 @@ namespace wGui
 
         void CloseFrame() override;
 
+        void UpdateAll();
+
+        // Exposed for testing
+        void SetDisassembly(std::vector<SListItem> items);
+        std::vector<SListItem> GetSelectedAssembly();
+        void SetAssemblySearch(const std::string& text);
+        void AsmSearch(SearchFrom from, SearchDir dir);
+
       protected:
         void PauseExecution();
         void ResumeExecution();
@@ -84,7 +103,6 @@ namespace wGui
         void PrepareMemBankConfig();
 
         void RefreshDisassembly();
-        void UpdateAll();
         void UpdateZ80();
         void UpdateDisassembly();
         void UpdateDisassemblyPos();
@@ -164,6 +182,10 @@ namespace wGui
 
         // Assembly screen
         CListBox *m_pAssemblyCode;
+        CLabel *m_pAssemblySearchLbl;
+        CEditBox *m_pAssemblySearch;
+        CButton *m_pAssemblySearchPrev;
+        CButton *m_pAssemblySearchNext;
         CButton *m_pAssemblyRefresh;
         CLabel* m_pAssemblyStatusLabel;
         CEditBox* m_pAssemblyStatus;

@@ -9,6 +9,7 @@ CapriceDevToolsView::CapriceDevToolsView(CApplication& application, SDL_Surface*
 {
   Application().MessageServer()->RegisterMessageClient(this, CMessage::CTRL_MESSAGEBOXRETURN);
   m_pDevToolsFrame = new CapriceDevTools(CRect(CPoint(0, 0), DEVTOOLS_WIDTH, DEVTOOLS_HEIGHT), this, nullptr, devtools);
+  m_pDevToolsFrame->UpdateAll();
 }
 
 void CapriceDevToolsView::LoadSymbols(const std::string& filename)

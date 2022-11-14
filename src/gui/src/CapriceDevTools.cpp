@@ -234,8 +234,13 @@ CapriceDevTools::CapriceDevTools(const CRect& WindowRect, CWindow* pParent, CFon
 
     // ---------------- 'Assembly' screen ----------------
     m_pAssemblyCode = new CListBox(
-        CRect(10, 10, 320, m_pGroupBoxTabAsm->GetClientRect().Height() - 20),
+        CRect(10, 10, 320, m_pGroupBoxTabAsm->GetClientRect().Height() - 35),
         m_pGroupBoxTabAsm, /*bSingleSelection=*/true, /*iItemHeight=*/14, monoFontEngine);
+    m_pAssemblySearchLbl = new CLabel(CPoint(10, m_pGroupBoxTabAsm->GetClientRect().Height() - 25), m_pGroupBoxTabAsm, "Search: ");
+    m_pAssemblySearch = new CEditBox(CRect(CPoint(50, m_pGroupBoxTabAsm->GetClientRect().Height() - 30), 200, 20), m_pGroupBoxTabAsm);
+    m_pAssemblySearchPrev = new CButton(CRect(CPoint(250, m_pGroupBoxTabAsm->GetClientRect().Height() - 30), 35, 20), m_pGroupBoxTabAsm, "Prev");
+    m_pAssemblySearchNext = new CButton(CRect(CPoint(285, m_pGroupBoxTabAsm->GetClientRect().Height() - 30), 35, 20), m_pGroupBoxTabAsm, "Next");
+
     m_pAssemblyRefresh = new CButton(CRect(CPoint(340, 10), 50, 15), m_pGroupBoxTabAsm, "Refresh");
     m_pAssemblyStatusLabel = new CLabel(CPoint(400, 15), m_pGroupBoxTabAsm, "Status: ");
     // TODO: Allow editbox to have no border and 'transparent' background (i.e dynamic labels ...)
@@ -410,7 +415,9 @@ CapriceDevTools::CapriceDevTools(const CRect& WindowRect, CWindow* pParent, CFon
     m_pChrLabel = new CLabel(CPoint(10, 10), m_pGroupBoxTabChar, "Work in progress ... Nothing to see here yet, but come back later for charmap.");
     // TODO: A 'Graphics' screen displaying memory as graphics (sprites) with choice of mode (0, 1 or 2), width and start address.
 
-    UpdateAll();
+    // Moved to an explicit call by the caller to allow constructing
+    // CapriceDevTools with less constraints in tests.
+    //UpdateAll();
 }
 
 CapriceDevTools::~CapriceDevTools() = default;
@@ -459,9 +466,77 @@ std::string FormatSymbol(const std::map<word, std::string>::iterator& symbol_it)
   return oss.str();
 }
 
-void CapriceDevTools::RefreshDisassembly()
+void CapriceDevTools::AsmSearch(SearchFrom from, SearchDir dir)
+{
+  const auto& lines = m_pAssemblyCode->GetAllItems();
+  std::vector<SListItem>::const_iterator start_line, end_line;
+  auto pos = m_pAssemblyCode->getFirstSelectedIndex();
+  if (pos == -1) {
+    from = SearchFrom::Start;
+  }
+  int delta = dir == SearchDir::Forward ? 1 : -1;
+  switch (from)
+  {
+    case SearchFrom::PositionIncluded:
+      break;
+    case SearchFrom::PositionExcluded:
+      pos += delta;
+      break;
+    case SearchFrom::Start:
+      if (dir == SearchDir::Forward) {
+        pos = 0;
+      } else {
+        pos = lines.size() - 1;
+      }
+      break;
+  }
+
+  start_line = lines.begin() + pos;
+  if (dir == SearchDir::Forward) {
+    end_line = lines.end();
+  } else {
+    end_line = lines.begin()-1;
+  }
+
+  std::string to_find = m_pAssemblySearch->GetWindowText();
+  for (auto l = start_line; l != end_line; l += delta)
+  {
+    if (l->sItemText.find(to_find) != std::string::npos) {
+      m_pAssemblyCode->SetAllSelections(false);
+      m_pAssemblyCode->SetPosition(pos, CListBox::CENTER);
+      m_pAssemblyCode->SetSelection(pos, /*bSelected=*/true, /*bNotify=*/true);
+      break;
+    }
+    pos += delta;
+  }
+}
+
+void CapriceDevTools::SetDisassembly(std::vector<SListItem> items)
 {
   m_pAssemblyCode->ClearItems();
+  m_pAssemblyCode->AddItems(items);
+}
+
+std::vector<SListItem> CapriceDevTools::GetSelectedAssembly()
+{
+  // TODO: This code should really be in CListBox!!
+  std::vector<SListItem> result;
+  for(unsigned int i = 0; i < m_pAssemblyCode->Size(); i++)
+  {
+    if (m_pAssemblyCode->IsSelected(i)) {
+      result.push_back(m_pAssemblyCode->GetItem(i));
+    }
+  }
+  return result;
+}
+
+void CapriceDevTools::SetAssemblySearch(const std::string& text)
+{
+  m_pAssemblySearch->SetWindowText(text);
+}
+
+void CapriceDevTools::RefreshDisassembly()
+{
   std::vector<SListItem> items;
   std::map<word, std::string> symbols = m_Symfile.Symbols();
   std::map<word, std::string>::iterator symbols_it = symbols.begin();
@@ -506,7 +581,7 @@ void CapriceDevTools::RefreshDisassembly()
     items.emplace_back(instruction, reinterpret_cast<void*>(line.address_), color);
   }
 
-  m_pAssemblyCode->AddItems(items);
+  SetDisassembly(items);
   UpdateDisassemblyPos();
 }
 
@@ -887,6 +962,12 @@ bool CapriceDevTools::HandleMessage(CMessage* pMessage)
               UpdateDisassembly();
               break;
             }
+            if (pMessage->Source() == m_pAssemblySearchPrev) {
+              AsmSearch(SearchFrom::PositionExcluded, SearchDir::Backward);
+            }
+            if (pMessage->Source() == m_pAssemblySearchNext) {
+              AsmSearch(SearchFrom::PositionExcluded, SearchDir::Forward);
+            }
           }
           if (pMessage->Destination() == m_pAssemblyEntryPointsGrp) {
             if (pMessage->Source() == m_pAssemblyAddEntryPoint) {
@@ -1055,6 +1136,11 @@ bool CapriceDevTools::HandleMessage(CMessage* pMessage)
                          break;
                        }
             }
+          }
+        }
+        if (pMessage->Destination() == m_pGroupBoxTabAsm) {
+          if (pMessage->Source() == m_pAssemblySearch) {
+            AsmSearch(SearchFrom::PositionIncluded, SearchDir::Forward);
           }
         }
         if (pMessage->Destination() == m_pGroupBoxTabMemory) {
