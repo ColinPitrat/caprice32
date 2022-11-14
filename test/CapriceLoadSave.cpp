@@ -18,12 +18,15 @@ class CapriceLoadSaveTest : public testing::Test {
       CPC.resources_path = "resources";
       app.Init();
       CRect rect;
-      view = new CapriceGuiView(app, &surface, &surface, rect);
+      surface = SDL_CreateRGBSurface(/*flags=*/0,/*width=*/10,/*height=*/10,/*depth=*/32,0,0,0,0);
+      view = new CapriceGuiView(app, surface, surface, rect);
       cls = new CapriceLoadSave(CRect(), /*pParent=*/view, /*pFontEngine=*/nullptr);
     }
 
     void TearDown() {
+      delete cls;
       delete view;
+      SDL_FreeSurface(surface);
     }
 
     void SetFileSpec(const std::list<std::string> &fileSpec) {
@@ -34,7 +37,7 @@ class CapriceLoadSaveTest : public testing::Test {
     CApplication app;
     CapriceLoadSave *cls;
     CapriceGuiView *view;
-    SDL_Surface surface;
+    SDL_Surface *surface;
 };
 
 TEST_F(CapriceLoadSaveTest, MatchCurrentFileSpecReturnsFalseIfExtensionListIsEmpty)
