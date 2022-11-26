@@ -112,6 +112,9 @@ namespace wGui
         void UpdateMemConfig();
         void UpdateTextMemory();
 
+        void RemoveEphemeralBreakpoints();
+
+        CButton* m_pButtonStepOut;
         CButton* m_pButtonStepIn;
         CButton* m_pButtonStepOver;
         CButton* m_pButtonPause;

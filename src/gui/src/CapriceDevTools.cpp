@@ -172,11 +172,17 @@ CapriceDevTools::CapriceDevTools(const CRect& WindowRect, CWindow* pParent, CFon
 
     EnableTab("z80");
 
-    m_pButtonStepIn   = new CButton(CRect(CPoint(m_ClientRect.Width() - 150, 10), 70, 15), this, "Step in");
+    m_pButtonStepIn   = new CButton(CRect(CPoint(m_ClientRect.Width() - 150, 5), 70, 15), this, "Step in");
     m_pButtonStepIn->SetIsFocusable(true);
-    m_pButtonPause   = new CButton(CRect(CPoint(m_ClientRect.Width() - 70, 10), 50, 15), this, (CPC.paused ? "Resume" : "Pause"));
+    m_pButtonStepOver   = new CButton(CRect(CPoint(m_ClientRect.Width() - 150, 25), 70, 15), this, "Step over");
+    m_pButtonStepOver->SetIsFocusable(true);
+    m_pButtonStepOut   = new CButton(CRect(CPoint(m_ClientRect.Width() - 150, 45), 70, 15), this, "Step out");
+    m_pButtonStepOut->SetIsFocusable(true);
+    m_pButtonStepOut->SetButtonState(CButton::DISABLED);
+
+    m_pButtonPause   = new CButton(CRect(CPoint(m_ClientRect.Width() - 70, 25), 50, 15), this, (CPC.paused ? "Resume" : "Pause"));
     m_pButtonPause->SetIsFocusable(true);
-    m_pButtonClose   = new CButton(CRect(CPoint(m_ClientRect.Width() - 70, 35), 50, 15), this, "Close");
+    m_pButtonClose   = new CButton(CRect(CPoint(m_ClientRect.Width() - 70, 45), 50, 15), this, "Close");
     m_pButtonClose->SetIsFocusable(true);
 
     auto monoFontEngine = Application().GetFontEngine(CPC.resources_path + "/vera_mono.ttf", 10);
@@ -865,6 +871,14 @@ void CapriceDevTools::LoadSymbols(const std::string& filename)
   RefreshDisassembly();
 }
 
+void CapriceDevTools::RemoveEphemeralBreakpoints()
+{
+  breakpoints.erase(
+      std::remove_if(breakpoints.begin(), breakpoints.end(),
+                     [](const auto& x){ return x.type | EPHEMERAL; }),
+      breakpoints.end());
+}
+
 void CapriceDevTools::PreUpdate()
 {
   // Pause on breakpoints and watchpoints.
@@ -873,6 +887,7 @@ void CapriceDevTools::PreUpdate()
   if (!breakpoints.empty() || !watchpoints.empty()) {
     if (z80.watchpoint_reached || z80.breakpoint_reached) {
       PauseExecution();
+      RemoveEphemeralBreakpoints();
     };
   }
   if (CPC.paused) {
@@ -951,6 +966,23 @@ bool CapriceDevTools::HandleMessage(CMessage* pMessage)
             if (pMessage->Source() == m_pButtonStepIn) {
               z80.step_in = 1;
               ResumeExecution();
+              break;
+            }
+            if (pMessage->Source() == m_pButtonStepOver) {
+              // Like StepIn except if the instruction is a call
+              std::vector<dword> unused_entrypoints;
+              DisassembledCode unused_code;
+              auto current_line = disassemble_one(z80.PC.d, unused_code, unused_entrypoints);
+              if (current_line.instruction_.rfind("call", 0) == 0) {
+                breakpoints.emplace_back(z80.PC.d + current_line.Size(), EPHEMERAL);
+              } else {
+                z80.step_in = 1;
+              }
+              ResumeExecution();
+              break;
+            }
+            if (pMessage->Source() == m_pButtonStepOut) {
+              // TODO: Implement step-out
               break;
             }
           }

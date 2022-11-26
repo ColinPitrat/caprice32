@@ -52,9 +52,17 @@ typedef union {
 #define X1flag 0x20 // bit 5 - unused flag
 #define X2flag 0x28 // bit 3 - unused flag
 
+enum BreakpointType {
+  NORMAL = 0,
+  // Ephemeral breakpoint are removed next time the execution pauses.
+  EPHEMERAL = 1,
+};
+
 struct Breakpoint {
-  Breakpoint(word val) : address(val) {};
+  Breakpoint(word val, BreakpointType type = NORMAL) : address(val), type(type) {};
+
   dword address;
+  BreakpointType type;
 };
 
 enum WatchpointType {
