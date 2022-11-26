@@ -27,6 +27,15 @@ uint64_t DisassembledCode::hash() const {
   return h;
 }
 
+std::optional<DisassembledLine> DisassembledCode::LineAt(word address) const {
+  for (const auto& l : lines) {
+    if (l.address_ == address) {
+      return l;
+    }
+  }
+  return {};
+}
+
 std::ostream& operator<<(std::ostream& os, const DisassembledLine& line)
 {
   os << std::setfill('0') << std::setw(4) << std::hex << line.address_ << ": ";
@@ -52,6 +61,18 @@ DisassembledLine::DisassembledLine(word address, uint64_t opcode, std::string&& 
     oss << "$" << std::hex << std::setw(4) << std::setfill('0') << ref_address;
     ref_address_string_ = oss.str();
   }
+}
+
+int DisassembledLine::Size() const
+{
+  if (opcode_ < 0x100) return 1;
+  if (opcode_ < 0x10000) return 2;
+  if (opcode_ < 0x1000000) return 3;
+  if (opcode_ < 0x100000000) return 4;
+  if (opcode_ < 0x10000000000) return 5;
+  if (opcode_ < 0x1000000000000) return 6;
+  if (opcode_ < 0x100000000000000) return 7;
+  return 8;
 }
 
 bool operator<(const DisassembledLine& l, const DisassembledLine& r) {
@@ -100,11 +121,11 @@ void append_address(std::string& instruction, word address)
   instruction += oss.str();
 }
 
-DisassembledLine disassemble_one(dword& pos, DisassembledCode& result, std::vector<dword>& called_points)
+DisassembledLine disassemble_one(dword start_address, DisassembledCode& result, std::vector<dword>& called_points)
 {
   static auto opcode_to_instructions = load_opcodes_table();
   uint64_t opcode = 0;
-  word start_address = pos;
+  word pos = start_address;
   for (int bytes_read = 0; bytes_read < 3; bytes_read++) {
     int64_t ref_address = -1;
     opcode = (opcode << 8) + z80_read_mem(pos++);
@@ -167,6 +188,7 @@ void disassemble_from(dword pos, DisassembledCode& result, std::vector<dword>& t
 {
   while (pos <= 0xFFFF) {
     auto line = disassemble_one(pos, result, to_disassemble_from);
+    pos += line.Size();
     result.lines.insert(line);
     if (line.instruction_ == "ret") return;
   }

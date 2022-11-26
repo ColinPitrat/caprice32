@@ -84,4 +84,35 @@ TEST(Z80DisassemblyTest, SqrtRoutine)
   EXPECT_EQ(want.lines, code.lines);
 }
 
+TEST(Z80DisassemblyTest, DisassembleOne)
+{
+  byte membank0[16] = { 0x21, 0x64, 0x00, 0x11, 0x01, 0x00, 0xAF, 0x3D, 0xED, 0x52, 0x13, 0x13, 0x3C, 0x30, 0xF9, 0xC9 };
+
+  CPC.resources_path = "resources";
+  membank_read[0] = membank0;
+
+  std::vector<dword> unused_entry_points;
+  DisassembledCode unused_code;
+
+  auto line = disassemble_one(10, unused_code, unused_entry_points);
+  EXPECT_EQ(DisassembledLine(10, 0x13, "inc de"), line);
+
+  line = disassemble_one(13, unused_code, unused_entry_points);
+  EXPECT_EQ(DisassembledLine(13, 0x30F9, "jr nc,$f9  ; $0008"), line);
+}
+
+TEST(Z80DisassemblyTest, LineAt)
+{
+  byte membank0[16] = { 0x21, 0x64, 0x00, 0x11, 0x01, 0x00, 0xAF, 0x3D, 0xED, 0x52, 0x13, 0x13, 0x3C, 0x30, 0xF9, 0xC9 };
+
+  CPC.resources_path = "resources";
+  membank_read[0] = membank0;
+
+  auto code = disassemble({0});
+
+  EXPECT_FALSE(code.LineAt(9).has_value());
+  EXPECT_TRUE(code.LineAt(10).has_value());
+  EXPECT_EQ(DisassembledLine(10, 0x13, "inc de"), code.LineAt(10).value());
+}
+
 }
