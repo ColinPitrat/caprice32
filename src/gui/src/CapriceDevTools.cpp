@@ -877,7 +877,7 @@ void CapriceDevTools::RemoveEphemeralBreakpoints()
 {
   breakpoints.erase(
       std::remove_if(breakpoints.begin(), breakpoints.end(),
-                     [](const auto& x){ return x.type | EPHEMERAL; }),
+                     [](const auto& x){ return x.type & EPHEMERAL; }),
       breakpoints.end());
 }
 
