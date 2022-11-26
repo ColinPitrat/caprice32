@@ -902,6 +902,7 @@ void CapriceDevTools::PreUpdate()
   // This is particularly needed for disassembly pos as otherwise it's not
   // possible to scroll in the disassembled code.
   if (wasRunning) {
+    wasRunning = !CPC.paused;
     switch (m_pNavigationBar->getSelectedIndex()) {
       case 0 : { // 'z80'
                  UpdateZ80();
@@ -925,8 +926,9 @@ void CapriceDevTools::PreUpdate()
                  break;
                }
     }
+  } else {
+    wasRunning = !CPC.paused;
   }
-  wasRunning = !CPC.paused;
 }
 
 void CapriceDevTools::PostUpdate()
@@ -992,6 +994,7 @@ bool CapriceDevTools::HandleMessage(CMessage* pMessage)
             }
             if (pMessage->Source() == m_pButtonStepOut) {
               z80.step_out = 1;
+              z80.step_out_addresses.clear();
               ResumeExecution();
               break;
             }
