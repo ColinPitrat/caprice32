@@ -120,6 +120,10 @@ namespace wGui
         CButton* m_pButtonPause;
         CButton* m_pButtonClose;
 
+        CToolTip* m_pToolTipStepIn;
+        CToolTip* m_pToolTipStepOut;
+        CToolTip* m_pToolTipStepOver;
+
         // New navigation bar control (to select the different pages or tabs on the options dialog)
         CNavigationBar* m_pNavigationBar; 
 

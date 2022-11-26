@@ -174,10 +174,13 @@ CapriceDevTools::CapriceDevTools(const CRect& WindowRect, CWindow* pParent, CFon
 
     m_pButtonStepIn   = new CButton(CRect(CPoint(m_ClientRect.Width() - 150, 5), 70, 15), this, "Step in");
     m_pButtonStepIn->SetIsFocusable(true);
+    m_pToolTipStepIn = new CToolTip(m_pButtonStepIn, "One instruction", COLOR_BLACK);
     m_pButtonStepOver   = new CButton(CRect(CPoint(m_ClientRect.Width() - 150, 25), 70, 15), this, "Step over");
     m_pButtonStepOver->SetIsFocusable(true);
+    m_pToolTipStepOver = new CToolTip(m_pButtonStepOver, "One instruction or call", COLOR_BLACK);
     m_pButtonStepOut   = new CButton(CRect(CPoint(m_ClientRect.Width() - 150, 45), 70, 15), this, "Step out");
     m_pButtonStepOut->SetIsFocusable(true);
+    m_pToolTipStepOut = new CToolTip(m_pButtonStepOut, "Exit current call/interrupt", COLOR_BLACK);
 
     m_pButtonPause   = new CButton(CRect(CPoint(m_ClientRect.Width() - 70, 25), 50, 15), this, (CPC.paused ? "Resume" : "Pause"));
     m_pButtonPause->SetIsFocusable(true);
