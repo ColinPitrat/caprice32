@@ -77,14 +77,27 @@ struct Watchpoint {
   WatchpointType type;
 };
 
-typedef struct {
+class t_z80regs {
+  public:
+   t_z80regs() {
+     AF.d = 0;  BC.d = 0;  DE.d = 0;  HL.d = 0;  PC.d = 0; SP.d = 0;
+     AFx.d = 0; BCx.d = 0; DEx.d = 0; HLx.d = 0; IX.d = 0; IY.d = 0;
+     I = 0; R = 0; Rb7 = 0; IFF1 = 0; IFF2 = 0; IM = 0; HALT = 0;
+     EI_issued = 0; int_pending = 0;
+     watchpoint_reached = 0; breakpoint_reached = 0;
+     step_in = 0; step_out = 0;
+     break_point = 0; trace = 0;
+   };
+
    reg_pair AF, BC, DE, HL, PC, SP, AFx, BCx, DEx, HLx, IX, IY;
    byte I, R, Rb7, IFF1, IFF2, IM, HALT, EI_issued, int_pending;
    byte watchpoint_reached;
    byte breakpoint_reached;
    byte step_in;
+   byte step_out;
+   std::vector<word> step_out_addresses;
    dword break_point, trace;
-} t_z80regs;
+};
 
 
 #define EC_BREAKPOINT      10

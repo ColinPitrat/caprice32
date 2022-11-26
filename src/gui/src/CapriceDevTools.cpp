@@ -178,7 +178,6 @@ CapriceDevTools::CapriceDevTools(const CRect& WindowRect, CWindow* pParent, CFon
     m_pButtonStepOver->SetIsFocusable(true);
     m_pButtonStepOut   = new CButton(CRect(CPoint(m_ClientRect.Width() - 150, 45), 70, 15), this, "Step out");
     m_pButtonStepOut->SetIsFocusable(true);
-    m_pButtonStepOut->SetButtonState(CButton::DISABLED);
 
     m_pButtonPause   = new CButton(CRect(CPoint(m_ClientRect.Width() - 70, 25), 50, 15), this, (CPC.paused ? "Resume" : "Pause"));
     m_pButtonPause->SetIsFocusable(true);
@@ -881,6 +880,7 @@ void CapriceDevTools::RemoveEphemeralBreakpoints()
 
 void CapriceDevTools::PreUpdate()
 {
+  static bool wasRunning;
   // Pause on breakpoints and watchpoints.
   // Before updating display so that we can update differently: faster if not
   // paused, more details if paused.
@@ -895,29 +895,35 @@ void CapriceDevTools::PreUpdate()
   } else {
     m_pButtonPause->SetWindowText("Pause");
   }
-  switch (m_pNavigationBar->getSelectedIndex()) {
-    case 0 : { // 'z80'
-               UpdateZ80();
-               break;
-             }
-    case 1 : { // 'Assembly'
-               UpdateDisassemblyPos();
-               break;
-             }
-    case 2 : { // 'Memory'
-               UpdateMemConfig();
-               break;
-             }
-    case 3 : { // 'Video'
-               break;
-             }
-    case 4 : { // 'Audio'
-               break;
-             }
-    case 5 : { // 'Characters'
-               break;
-             }
+  // Do not update if we're paused.
+  // This is particularly needed for disassembly pos as otherwise it's not
+  // possible to scroll in the disassembled code.
+  if (wasRunning) {
+    switch (m_pNavigationBar->getSelectedIndex()) {
+      case 0 : { // 'z80'
+                 UpdateZ80();
+                 break;
+               }
+      case 1 : { // 'Assembly'
+                 UpdateDisassemblyPos();
+                 break;
+               }
+      case 2 : { // 'Memory'
+                 UpdateMemConfig();
+                 break;
+               }
+      case 3 : { // 'Video'
+                 break;
+               }
+      case 4 : { // 'Audio'
+                 break;
+               }
+      case 5 : { // 'Characters'
+                 break;
+               }
+    }
   }
+  wasRunning = !CPC.paused;
 }
 
 void CapriceDevTools::PostUpdate()
@@ -982,7 +988,8 @@ bool CapriceDevTools::HandleMessage(CMessage* pMessage)
               break;
             }
             if (pMessage->Source() == m_pButtonStepOut) {
-              // TODO: Implement step-out
+              z80.step_out = 1;
+              ResumeExecution();
               break;
             }
           }

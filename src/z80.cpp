@@ -445,6 +445,9 @@ void z80_write_mem(word addr, byte val) {
 
 #define CALL \
 { \
+   if (z80.step_out) { \
+     z80.step_out_addresses.push_back(_PC+2); \
+   } \
    reg_pair dest; \
    dest.b.l = read_mem(_PC++); /* subroutine address low byte */ \
    dest.b.h = read_mem(_PC++); /* subroutine address high byte */ \
@@ -572,6 +575,16 @@ void z80_write_mem(word addr, byte val) {
 { \
    z80.PC.b.l = read_mem(_SP++); \
    z80.PC.b.h = read_mem(_SP++); \
+   if (z80.step_out) { \
+     if (z80.step_out_addresses.empty()) { \
+       z80.step_out = 0; \
+       z80.step_in = 2; \
+     } \
+     /* If the address is not in step_out_addresses, it doesn't come from a call */ \
+     else if (z80.step_out_addresses.back() == z80.PC.w.l) { \
+       z80.step_out_addresses.pop_back(); \
+     } \
+   } \
 }
 
 #define RLA \
@@ -605,6 +618,9 @@ void z80_write_mem(word addr, byte val) {
 
 #define RST(addr) \
 { \
+   if (z80.step_out) { \
+     z80.step_out_addresses.push_back(_PC+2); \
+   } \
    write_mem(--_SP, z80.PC.b.h); /* store high byte of current PC */ \
    write_mem(--_SP, z80.PC.b.l); /* store low byte of current PC */ \
    _PC = addr; /* continue execution at restart address */ \
@@ -955,6 +971,9 @@ inline byte SRL(byte val) {
          if (iWSAdjust) { \
             iCycleCount -= 4; \
          } \
+        if (z80.step_out) { \
+          z80.step_out_addresses.push_back(_PC+2); \
+        } \
          write_mem(--_SP, z80.PC.b.h); /* store high byte of current PC */ \
          write_mem(--_SP, z80.PC.b.l); /* store low byte of current PC */ \
          addr.b.l = 0xff; /* assemble pointer */ \
@@ -968,7 +987,7 @@ inline byte SRL(byte val) {
 
 void z80_reset()
 {
-   memset(&z80, 0, sizeof(z80)); // clear all Z80 registers and support variables
+   z80 = t_z80regs();
    _IX =
    _IY = 0xffff; // IX and IY are FFFF after a reset!
    _F = Zflag; // set zero flag
