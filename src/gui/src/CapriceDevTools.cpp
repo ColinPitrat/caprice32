@@ -867,7 +867,6 @@ void CapriceDevTools::LoadSymbols(const std::string& filename)
 
 void CapriceDevTools::PreUpdate()
 {
-  bool wasRunning = !CPC.paused;
   // Pause on breakpoints and watchpoints.
   // Before updating display so that we can update differently: faster if not
   // paused, more details if paused.
@@ -881,30 +880,28 @@ void CapriceDevTools::PreUpdate()
   } else {
     m_pButtonPause->SetWindowText("Pause");
   }
-  if (wasRunning) {
-    switch (m_pNavigationBar->getSelectedIndex()) {
-      case 0 : { // 'z80'
-                 UpdateZ80();
-                 break;
-               }
-      case 1 : { // 'Assembly'
-                 UpdateDisassemblyPos();
-                 break;
-               }
-      case 2 : { // 'Memory'
-                 UpdateMemConfig();
-                 break;
-               }
-      case 3 : { // 'Video'
-                 break;
-               }
-      case 4 : { // 'Audio'
-                 break;
-               }
-      case 5 : { // 'Characters'
-                 break;
-               }
-    }
+  switch (m_pNavigationBar->getSelectedIndex()) {
+    case 0 : { // 'z80'
+               UpdateZ80();
+               break;
+             }
+    case 1 : { // 'Assembly'
+               UpdateDisassemblyPos();
+               break;
+             }
+    case 2 : { // 'Memory'
+               UpdateMemConfig();
+               break;
+             }
+    case 3 : { // 'Video'
+               break;
+             }
+    case 4 : { // 'Audio'
+               break;
+             }
+    case 5 : { // 'Characters'
+               break;
+             }
   }
 }
 
