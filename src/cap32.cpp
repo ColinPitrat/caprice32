@@ -1150,19 +1150,19 @@ int emulator_init ()
                checksum += pchRomData[n];
             }
 
-            //Check for Graduate Software ROM structure termination with $ in the header
+            // Check for Graduate Software ROM structure termination with $ in the header
             word gradcheck = 0;
             for (int n = 0; n < 0x43; n++) {
                if(pchRomData[n]==0x24) {
                  gradcheck = 1;
                }
             }
-            if((pchRomData[0x38]==0xc9) && (gradcheck==1)) { //extra validation step ensure 0x38 has 0xc9 if a $ terminated string was in the header
+            if((pchRomData[0x38]==0xc9) && (gradcheck==1)) { // extra validation step ensure 0x38 has 0xc9 if a $ terminated string was in the header
               gradcheck = 1;
             } else {
-              gradcheck = 0; //reset flag is there was a $ was found, but offset 0x38 wasn't 0xc9
+              gradcheck = 0; // reset flag is there was a $ was found, but offset 0x38 wasn't 0xc9
             }
-            //end of Graduate accessory ROM checks
+            // end of Graduate accessory ROM checks
 
 
             if (checksum == ((pchRomData[0x43] << 8) + pchRomData[0x44])) { // if the checksum matches, we got us an AMSDOS header
@@ -1177,10 +1177,10 @@ int emulator_init ()
                  return ERR_NOT_A_CPC_ROM;
                }
                memmap_ROM[iRomNum] = pchRomData; // update the ROM map
-            } else if ((pchRomData[0] == 0x47) && (gradcheck==1)) { //Is it a Graduate CPM Accessory Rom? (ID="G")
-            //Graduate Software Accessory Roms use a non standard format. Only the first byte is validated, and as long as
-            //it's a "G" and terminated with a "$" it'll try to use it.
-            //See https://www.cpcwiki.eu/index.php/Graduate_Software#Structure_of_a_utility_ROM for more details.
+            } else if ((pchRomData[0] == 0x47) && (gradcheck==1)) { // Is it a Graduate CPM Accessory Rom? (ID="G")
+            // Graduate Software Accessory Roms use a non standard format. Only the first byte is validated, and as long as
+            // it's a "G" and terminated with a "$" it'll try to use it.
+            // See https://www.cpcwiki.eu/index.php/Graduate_Software#Structure_of_a_utility_ROM for more details.
               if(fread(pchRomData+128, 16384-128, 1, pfileObject) != 1) { // read the rest of the ROM file
                 fclose(pfileObject);
                 return ERR_NOT_A_CPC_ROM;
