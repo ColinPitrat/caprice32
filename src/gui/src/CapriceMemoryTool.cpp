@@ -23,7 +23,7 @@ CapriceMemoryTool::CapriceMemoryTool(const CRect& WindowRect, CWindow* pParent, 
     Application().MessageServer()->RegisterMessageClient(this, CMessage::CTRL_VALUECHANGE);
     Application().MessageServer()->RegisterMessageClient(this, CMessage::CTRL_VALUECHANGING);
 
-    m_pPokeAdressLabel = new CLabel(        CPoint(15, 18),             this, "Adress: ");
+    m_pPokeAdressLabel = new CLabel(        CPoint(10, 18),             this, "Address: ");
     m_pPokeAdress      = new CEditBox(CRect(CPoint(55, 13),  30, 20),   this);
     m_pPokeAdress->SetIsFocusable(true);
     m_pPokeValueLabel  = new CLabel(        CPoint(95, 18),             this, "Value: ");
@@ -32,7 +32,7 @@ CapriceMemoryTool::CapriceMemoryTool(const CRect& WindowRect, CWindow* pParent, 
     m_pButtonPoke      = new CButton( CRect(CPoint(175, 13), 30, 20),   this, "Poke");
     m_pButtonPoke->SetIsFocusable(true);
 
-    m_pAdressLabel     = new CLabel(        CPoint(15, 50),             this, "Adress: ");
+    m_pAdressLabel     = new CLabel(        CPoint(10, 50),             this, "Address: ");
     m_pAdressValue     = new CEditBox(CRect(CPoint(55, 45), 30, 20),    this);
     m_pAdressValue->SetIsFocusable(true);
     m_pButtonDisplay   = new CButton( CRect(CPoint(95, 45), 45, 20),    this, "Display");
@@ -112,7 +112,7 @@ bool CapriceMemoryTool::HandleMessage(CMessage* pMessage)
                 m_displayValue = strtol(display.c_str(), nullptr, 16);
               }
               m_filterValue = -1;
-              std::cout << "Displaying adress " << m_displayValue << " in memory." << std::endl;
+              std::cout << "Displaying address " << m_displayValue << " in memory." << std::endl;
               UpdateTextMemory();
               bHandled = true;
               break;
