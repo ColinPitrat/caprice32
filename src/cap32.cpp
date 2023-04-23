@@ -1037,7 +1037,7 @@ void emulator_reset ()
 
 // Z80
    z80_reset();
-   
+
 // CPC
    CPC.cycle_count = CYCLE_COUNT_INIT;
    memset(keyboard_matrix, 0xff, sizeof(keyboard_matrix)); // clear CPC keyboard matrix
@@ -1149,6 +1149,22 @@ int emulator_init ()
             for (int n = 0; n < 0x43; n++) {
                checksum += pchRomData[n];
             }
+
+            // Check for Graduate Software ROM structure termination with $ in the header
+            word gradcheck = 0;
+            for (int n = 0; n < 0x43; n++) {
+               if(pchRomData[n]==0x24) {
+                 gradcheck = 1;
+               }
+            }
+            if((pchRomData[0x38]==0xc9) && (gradcheck==1)) { // extra validation step ensure 0x38 has 0xc9 if a $ terminated string was in the header
+              gradcheck = 1;
+            } else {
+              gradcheck = 0; // reset flag is there was a $ was found, but offset 0x38 wasn't 0xc9
+            }
+            // end of Graduate accessory ROM checks
+
+
             if (checksum == ((pchRomData[0x43] << 8) + pchRomData[0x44])) { // if the checksum matches, we got us an AMSDOS header
                if(fread(pchRomData, 128, 1, pfileObject) != 1) { // skip it
                  fclose(pfileObject);
@@ -1161,6 +1177,15 @@ int emulator_init ()
                  return ERR_NOT_A_CPC_ROM;
                }
                memmap_ROM[iRomNum] = pchRomData; // update the ROM map
+            } else if ((pchRomData[0] == 0x47) && (gradcheck==1)) { // Is it a Graduate CPM Accessory Rom? (ID="G")
+            // Graduate Software Accessory Roms use a non standard format. Only the first byte is validated, and as long as
+            // it's a "G" and terminated with a "$" it'll try to use it.
+            // See https://www.cpcwiki.eu/index.php/Graduate_Software#Structure_of_a_utility_ROM for more details.
+              if(fread(pchRomData+128, 16384-128, 1, pfileObject) != 1) { // read the rest of the ROM file
+                fclose(pfileObject);
+                return ERR_NOT_A_CPC_ROM;
+              }
+              memmap_ROM[iRomNum] = pchRomData; // update the ROM map
             } else { // not a valid ROM file
                fprintf(stderr, "ERROR: %s is not a CPC ROM file - clearing ROM slot %d.\n", rom_file.c_str(), iRomNum);
                delete [] pchRomData; // free memory on error
@@ -1699,7 +1724,7 @@ std::string getConfigurationFilename(bool forWrite)
       return s;
     }
   }
-  
+
   std::cout << "No valid configuration file found, using empty config." << std::endl;
   return "";
 }
@@ -2734,11 +2759,11 @@ int cap32_main (int argc, char **argv)
 
          auto nextVirtualEvent = &virtualKeyboardEvents.front();
          SDL_PushEvent(nextVirtualEvent);
-         
+
          auto keysym = nextVirtualEvent->key.keysym;
          auto evtype = nextVirtualEvent->key.type;
          LOG_DEBUG("Inserted virtual event keysym=" << int(keysym.sym) << " (" << evtype << ")");
-         
+
          CPCScancode scancode = CPC.InputMapper->CPCscancodeFromKeysym(keysym);
          if (!(scancode & MOD_EMU_KEY)) {
             LOG_DEBUG("The virtual event is a keypress (not a command), so introduce a pause.");
@@ -2754,7 +2779,7 @@ int cap32_main (int argc, char **argv)
 
          virtualKeyboardEvents.pop_front();
       }
-      
+
       if (!devtools.empty()) {
         devtools.remove_if([](DevTools& d) { return !d.IsActive(); });
         // Ensure execution is resumed when all devtools are closed
@@ -3085,7 +3110,7 @@ int cap32_main (int argc, char **argv)
          CPC.scr_pos = CPC.scr_base + dwOffset; // update current rendering position
 
          iExitCondition = z80_execute(); // run the emulation until an exit condition is met
-         
+
          if (iExitCondition == EC_BREAKPOINT) {
             if (z80.breakpoint_reached || z80.watchpoint_reached) {
               // This is a breakpoint from DevTools or symbol file
