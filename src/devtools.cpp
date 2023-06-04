@@ -12,12 +12,11 @@ bool DevTools::Activate(int scale) {
     // the window where there's the most space available. On the other hand, getting display size is not very reliable on multi-screen setups under linux ...
     window = SDL_CreateWindow("Caprice32 - Developers' tools", 100, 100, DEVTOOLS_WIDTH*scale, DEVTOOLS_HEIGHT*scale, SDL_WINDOW_SHOWN);
     renderer = SDL_CreateRenderer(window, -1, 0);
-    // TODO: Better handling of error (free stuff, surface error ...)
-    if (!window || !renderer) return false;
+    if (!window || !renderer) { Deactivate(); return false; }
     surface = SDL_CreateRGBSurface(0, DEVTOOLS_WIDTH, DEVTOOLS_HEIGHT, renderer_bpp(renderer), 0, 0, 0, 0);
-    if (!surface) return false;
+    if (!surface) { Deactivate(); return false; }
     texture = SDL_CreateTextureFromSurface(renderer, surface);
-    if (!texture) return false;
+    if (!texture) { Deactivate(); return false; }
     SDL_FillRect(surface, nullptr, SDL_MapRGB(surface->format, 0, 0, 0));
     capriceGui = std::make_unique<CapriceGui>(window, /*bInMainView=*/false, scale);
     capriceGui->Init();
@@ -34,10 +33,14 @@ void DevTools::Deactivate() {
   ShowCursor(false);
   devToolsView = nullptr;
   capriceGui = nullptr;
-  SDL_DestroyTexture(texture);
-  SDL_FreeSurface(surface);
-  SDL_DestroyRenderer(renderer);
-  SDL_DestroyWindow(window);
+  if (texture) SDL_DestroyTexture(texture);
+  if (surface) SDL_FreeSurface(surface);
+  if (renderer) SDL_DestroyRenderer(renderer);
+  if (window) SDL_DestroyWindow(window);
+  texture = nullptr;
+  surface = nullptr;
+  renderer = nullptr;
+  window = nullptr;
   active = false;
 }
 
