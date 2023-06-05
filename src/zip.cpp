@@ -8,6 +8,7 @@
 #include <string>
 #include "errors.h"
 #include "log.h"
+#include "memutils.h"
 
 // TODO(cpitrat): refactoring
 namespace zip
@@ -31,15 +32,15 @@ namespace zip
     wCentralDirEntries = 0;
     wCentralDirSize = 0;
     dwCentralDirPosition = 0;
+    auto closure  = [&]() { fclose(pfileObject); };
+    memutils::scope_exit<decltype(closure)> cs(closure);
     do {
       lFilePosition -= 256; // move backwards through ZIP file
       if (fseek(pfileObject, lFilePosition, SEEK_END) != 0) {
-        fclose(pfileObject);
         LOG_ERROR("Couldn't read zip file: " << zi->filename);
         return ERR_FILE_BAD_ZIP; // exit if loading of data chunck failed
       };
       if (fread(pbGPBuffer, 256, 1, pfileObject) == 0) {
-        fclose(pfileObject);
         LOG_ERROR("Couldn't read zip file: " << zi->filename);
         return ERR_FILE_BAD_ZIP; // exit if loading of data chunck failed
       }
@@ -55,17 +56,14 @@ namespace zip
       }
     } while (wCentralDirEntries == 0);
     if (wCentralDirSize == 0) {
-      fclose(pfileObject);
       LOG_ERROR("Couldn't read zip file (no central directory): " << zi->filename);
       return ERR_FILE_BAD_ZIP; // exit if no central directory was found
     }
     if (fseek(pfileObject, dwCentralDirPosition, SEEK_SET) != 0) {
-      fclose(pfileObject);
       LOG_ERROR("Couldn't read zip file: " << zi->filename);
       return ERR_FILE_BAD_ZIP; // exit if seeking to the central directory failed
     };
     if (fread(pbGPBuffer, wCentralDirSize, 1, pfileObject) == 0) {
-      fclose(pfileObject);
       LOG_ERROR("Couldn't read zip file: " << zi->filename);
       return ERR_FILE_BAD_ZIP; // exit if reading the central directory failed
     }
@@ -89,7 +87,6 @@ namespace zip
       }
       pbPtr += dwNextEntry;
     }
-    fclose(pfileObject);
 
     if (zi->filesOffsets.empty()) { // no files found?
       LOG_ERROR("Empty zip file: " << zi->filename);
@@ -131,18 +128,19 @@ namespace zip
     pfileIn = fopen(zi.filename.c_str(), "rb"); // open ZIP file for reading
     if (pfileIn == nullptr) {
       LOG_ERROR("Couldn't open zip file for reading: " << zi.filename);
+      fclose(*pfileOut);
       return ERR_FILE_UNZIP_FAILED; // couldn't open input file
     }
+    auto closure  = [&]() { fclose(pfileIn); };
+    memutils::scope_exit<decltype(closure)> cs(closure);
     if (fseek(pfileIn, dwOffset, SEEK_SET) != 0) {  // move file pointer to beginning of data block
       LOG_ERROR("Couldn't read zip file: " << zi.filename);
-      fclose(pfileIn);
       fclose(*pfileOut);
       return ERR_FILE_UNZIP_FAILED;
     };
     size_t rc;
     if((rc = fread(pbGPBuffer, 30, 1, pfileIn)) != 1) { // read local header
       LOG_ERROR("Couldn't read zip file: " << zi.filename);
-      fclose(pfileIn);
       fclose(*pfileOut);
       return ERR_FILE_UNZIP_FAILED;
     }
@@ -150,7 +148,6 @@ namespace zip
     dwOffset += 30 + *reinterpret_cast<word *>(pbGPBuffer + 26) + *reinterpret_cast<word *>(pbGPBuffer + 28);
     if (fseek(pfileIn, dwOffset, SEEK_SET) != 0) {  // move file pointer to start of compressed data
       LOG_ERROR("Couldn't read zip file: " << zi.filename);
-      fclose(pfileIn);
       fclose(*pfileOut);
       return ERR_FILE_UNZIP_FAILED;
     }
@@ -177,7 +174,6 @@ namespace zip
         if (iCount) { // save data to file if some is available
           if (fwrite(pbOutputBuffer, iCount, 1, *pfileOut) != 1) {
             LOG_ERROR("Couldn't unzip file: Couldn't write to output file:");
-            fclose(pfileIn);
             fclose(*pfileOut);
             return ERR_FILE_UNZIP_FAILED;
           }
@@ -190,7 +186,6 @@ namespace zip
       return ERR_FILE_UNZIP_FAILED; // abort on error
     }
     iStatus = inflateEnd(&z); // clean up
-    fclose(pfileIn);
     fseek(*pfileOut, 0, SEEK_SET);
 
     return 0; // data was successfully decompressed
