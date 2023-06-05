@@ -34,6 +34,7 @@
 #include "video.h"
 #include "z80.h"
 #include "configuration.h"
+#include "memutils.h"
 #include "stringutils.h"
 #include "zip.h"
 #include "keyboard.h"
@@ -1265,22 +1266,22 @@ void bin_load (const std::string& filename, const size_t offset)
     return;
   }
 
+  auto closure = [&]() { fclose(file); };
+  memutils::scope_exit<decltype(closure)> cs(closure); // TODO: when C++20, can become a one liner expression.
+
   size_t ram_size = 0XFFFF; // TODO: Find a way to have the real RAM size
   size_t max_size = ram_size - offset;
   size_t read = fread(&pbRAM[offset], 1, max_size, file);
   if (!feof(file)) {
     LOG_ERROR("Bin file too big to fit in memory");
-    fclose(file);
     return;
   }
   if (ferror(file)) {
     LOG_ERROR("Error reading the bin file: " << ferror(file));
-    fclose(file);
     return;
   }
   if (read == 0) {
     LOG_ERROR("Empty bin file");
-    fclose(file);
     return;
   }
   // Jump at the beginning of the program
@@ -1292,8 +1293,6 @@ void bin_load (const std::string& filename, const size_t offset)
   z80_write_mem(--z80.SP.w.l, 0x89);
   z80_write_mem(--z80.SP.w.l, 0xb9);
   z80_write_mem(--z80.SP.w.l, 0xa2);
-
-  fclose(file);
 }
 
 
