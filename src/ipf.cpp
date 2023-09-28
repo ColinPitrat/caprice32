@@ -13,6 +13,7 @@
 #include "disk.h"
 #include "errors.h"
 #include "fileutils.h"
+#include "memutils.h"
 #include "ipf.h"
 #include "log.h"
 #include "slotshandler.h"
@@ -449,10 +450,12 @@ int ipf_load (const std::string &filename, t_drive *drive)
     return ERR_DSK_INVALID;
     }
 
+  auto closure  = [&]() { fclose(f); };
+  memutils::scope_exit<decltype(closure)> cs(closure);
+
   // Check for IPF file signature
-  if (!fread(sz, 4, 1, f) || fclose(f) || memcmp(sz, "CAPS", sizeof(sz)))
+  if (!fread(sz, 4, 1, f) || memcmp(sz, "CAPS", sizeof(sz)))
   {
-    fclose(f);
     LOG_ERROR("Wrong IPF header in: " << filename);
     return ERR_DSK_INVALID;
   }
