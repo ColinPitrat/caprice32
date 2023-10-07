@@ -39,7 +39,7 @@ void usage(std::ostream &os, char *progPath, int errcode)
    os << "   -c/--cfg_file=<file>:   use <file> as the emulator configuration file instead of the default.\n";
    os << "   -h/--help:              shows this help\n";
    os << "   -i/--inject=<file>:     inject a binary in memory after the CPC startup finishes\n";
-   os << "   -o/--offset <address>:  offset at which to inject the binary provided with -i (default: 0x6000)\n";
+   os << "   -o/--offset=<address>:  offset at which to inject the binary provided with -i (default: 0x6000)\n";
    os << "   -O/--override:          override an option from the config. Can be repeated. (example: -O system.model=3)\n";
    os << "   -s/--sym_file=<file>:   use <file> as a source of symbols and entry points for disassembling in developers' tools.\n";
    os << "   -V/--version:           outputs version and exit\n";
