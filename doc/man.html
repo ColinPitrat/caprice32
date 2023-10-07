@@ -1,5 +1,5 @@
-<!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Fri Jun  9 09:16:47 2017 -->
+<!-- Creator     : groff version 1.22.4 -->
+<!-- CreationDate: Sat Oct  7 02:26:21 2023 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -100,20 +100,26 @@ configuration file was specified using the <b>--cfg_file</b>
 command line switch, Caprice32 will try and use it. If no
 configuration file was specified, or the configuration file
 specified does not exist, Caprice32 will try and open, in
-this order: <b>$CWD/cap32.cfg</b> ($CWD being the directory
-where the cap32 executable resides), then a
-<b>.cap32.cfg</b> file in the user home directory, then
-<b>/etc/cap32.cfg</b>. Caprice32 will use the first valid
-file it finds. If no configuration file is found, a default
-configuration will be used.</p>
+this order: <br>
+- <b>$CWD/cap32.cfg</b> ($CWD being the directory where the
+cap32 executable resides) <br>
+- <b>cap32.cfg</b> file in the location pointed to by the
+XDG_CONFIG_HOME environment variable. If XDG_CONFIG_HOME is
+undefined, it will look at $HOME/.config/ as default
+XDG_CONFIG_HOME directory. <br>
+- <b>$HOME/.cap32.cfg</b> for compatibility. <br>
+- <b>/etc/cap32.cfg</b>. <br>
+Caprice32 will use the first valid file it finds. If no
+configuration file is found, a default configuration will be
+used.</p>
 
 <p style="margin-left:22%; margin-top: 1em">The
 configuration file contains various configuration
 parameters, some of which can be modified from the GUI. When
 saving the configuration from the GUI, it will be written in
-the configuration file specified by the <b>--cfg_file</b>
-switch, if it exists, else in $CWD/cap32.cfg if it exists,
-otherwise in $HOME/.cap32.cfg.</p>
+the configuration file following the same order than
+previously described, except for the addition of the write
+permission condition.</p>
 
 <p style="margin-left:22%; margin-top: 1em">Most of the
 configuration file entries are commented in the
@@ -208,6 +214,29 @@ configuration file.</p>
 
 <p style="margin-left:22%;">display short help and
 exits</p>
+
+<p style="margin-left:11%;"><b>-i</b>, <b>--inject</b></p>
+
+<p style="margin-left:22%;">inject a binary in memory after
+the CPC startup finishes</p>
+
+<p style="margin-left:11%;"><b>-o</b>, <b>--offset</b></p>
+
+<p style="margin-left:22%;">offset at which to inject the
+binary provided with -i (default: 0x6000)</p>
+
+<p style="margin-left:11%;"><b>-O</b>,
+<b>--override</b></p>
+
+<p style="margin-left:22%;">override an option from the
+config. Can be repeated. (example: -O system.model=3)</p>
+
+<p style="margin-left:11%;"><b>-s</b>,
+<b>--sym_file</b>=<i>file</i></p>
+
+<p style="margin-left:22%;">use &lt;file&gt; as a source of
+symbols and entry points for disassembling in
+developers&rsquo; tools.</p>
 
 <p style="margin-left:11%;"><b>-V</b>, <b>--version</b></p>
 
