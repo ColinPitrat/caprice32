@@ -26,13 +26,13 @@ The \fBrom_path\fR entry in the configuration file is used by the emulator to fi
 .PP
 \fBConfiguration\fR
 .RS
-When launched, Caprice32 will look for a configuration file in several locations. If a configuration file was specified using the \fB\-\-cfg_file\fR command line switch, Caprice32 will try and use it. If no configuration file was specified, or the configuration file specified does not exist, Caprice32 will try and open, in this order: 
+When launched, Caprice32 will look for a configuration file in several locations. If a configuration file was specified using the \fB\-\-cfg_file\fR command line switch, Caprice32 will try and use it. If no configuration file was specified, or the configuration file specified does not exist, Caprice32 will try and open, in this order:
 .br
   - \fB$CWD/cap32.cfg\fR ($CWD being the directory where the cap32 executable resides)
 .br
   - \fBcap32.cfg\fR file in the location pointed to by the XDG_CONFIG_HOME environment variable. If XDG_CONFIG_HOME is undefined, it will look at $HOME/.config/ as default XDG_CONFIG_HOME directory.
 .br
-  - \fB$HOME/.cap32.cfg\fR for compatibility. 
+  - \fB$HOME/.cap32.cfg\fR for compatibility.
 .br
   - \fB/etc/cap32.cfg\fR.
 .br
@@ -120,6 +120,18 @@ use FILE as the emulator configuration file.
 .TP
 \fB\-h\fR, \fB\-\-help\fR
 display short help and exits
+.TP
+\fB\-i\fR, \fB\-\-inject\fR
+inject a binary in memory after the CPC startup finishes
+.TP
+\fB\-o\fR, \fB\-\-offset\fR
+offset at which to inject the binary provided with -i (default: 0x6000)
+.TP
+\fB\-O\fR, \fB\-\-override\fR
+override an option from the config. Can be repeated. (example: -O system.model=3)
+.TP
+\fB\-s\fR, \fB\-\-sym_file\fR=\fIfile\fR
+use <file> as a source of symbols and entry points for disassembling in developers' tools.
 .TP
 \fB\-V\fR, \fB\-\-version\fR
 display Caprice32 version and exits

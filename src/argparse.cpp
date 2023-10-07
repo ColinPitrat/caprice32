@@ -38,9 +38,9 @@ void usage(std::ostream &os, char *progPath, int errcode)
    os << "   -a/--autocmd=<command>: execute command as soon as the emulator starts.\n";
    os << "   -c/--cfg_file=<file>:   use <file> as the emulator configuration file instead of the default.\n";
    os << "   -h/--help:              shows this help\n";
-   os << "   -i/--inject:            inject a binary in memory after the CPC startup finishes\n";
-   os << "   -o/--offset:            offset at which to inject the binary provided with -i (default: 0x6000)\n";
-   os << "   -O/--override:          override an option from the config. Can be repeated. (example: -o system.model=3)\n";
+   os << "   -i/--inject=<file>:     inject a binary in memory after the CPC startup finishes\n";
+   os << "   -o/--offset <address>:  offset at which to inject the binary provided with -i (default: 0x6000)\n";
+   os << "   -O/--override:          override an option from the config. Can be repeated. (example: -O system.model=3)\n";
    os << "   -s/--sym_file=<file>:   use <file> as a source of symbols and entry points for disassembling in developers' tools.\n";
    os << "   -V/--version:           outputs version and exit\n";
    os << "   -v/--verbose:           be talkative\n";
@@ -189,7 +189,7 @@ void parseArguments(int argc, char **argv, std::vector<std::string>& slot_list, 
 #ifdef DEBUG
                       << " DEBUG"
 #endif
-#ifdef	WITH_IPF 
+#ifdef	WITH_IPF
                       << " WITH_IPF"
 #endif
                       << "\n";
@@ -211,4 +211,3 @@ void parseArguments(int argc, char **argv, std::vector<std::string>& slot_list, 
    slot_list.assign(argv+optind, argv+argc);
    LOG_DEBUG("slot_list: " << stringutils::join(slot_list, ","))
 }
-
