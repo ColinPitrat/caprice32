@@ -2668,6 +2668,10 @@ int cap32_main (int argc, char **argv)
    }
    parseArguments(argc, argv, slot_list, args);
 
+   if (args.headless) {
+     SDL_SetHint(SDL_HINT_VIDEODRIVER, "offscreen");
+   }
+
    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_TIMER | SDL_INIT_NOPARACHUTE) < 0) { // initialize SDL
       fprintf(stderr, "SDL_Init() failed: %s\n", SDL_GetError());
       exit(-1);

@@ -17,6 +17,7 @@ const struct option long_options[] =
 {
    {"autocmd",  required_argument, nullptr, 'a'},
    {"cfg_file", required_argument, nullptr, 'c'},
+   {"headless", no_argument, nullptr, 'l'},
    {"inject", required_argument, nullptr, 'i'},
    {"offset", required_argument, nullptr, 'o'},
    {"override", required_argument, nullptr, 'O'},
@@ -37,6 +38,7 @@ void usage(std::ostream &os, char *progPath, int errcode)
    os << "\nSupported options are:\n";
    os << "   -a/--autocmd=<command>: execute command as soon as the emulator starts.\n";
    os << "   -c/--cfg_file=<file>:   use <file> as the emulator configuration file instead of the default.\n";
+   os << "   -l/--headless:          run without display or keyboard/mouse events (for automated tests)\n";
    os << "   -h/--help:              shows this help\n";
    os << "   -i/--inject=<file>:     inject a binary in memory after the CPC startup finishes\n";
    os << "   -o/--offset=<address>:  offset at which to inject the binary provided with -i (default: 0x6000)\n";
@@ -102,7 +104,7 @@ void parseArguments(int argc, char **argv, std::vector<std::string>& slot_list, 
 
    optind = 0; // To please test framework, when this function is called multiple times !
    while(true) {
-      c = getopt_long (argc, argv, "a:c:hi:o:O:s:vV",
+      c = getopt_long (argc, argv, "a:c:lhi:o:O:s:vV",
                        long_options, &option_index);
       // Logs before processing of the -v will not be visible.
       LOG_DEBUG("Next option: " << c << "(" << static_cast<char>(c) << ")");
@@ -121,6 +123,10 @@ void parseArguments(int argc, char **argv, std::vector<std::string>& slot_list, 
 
          case 'c':
             args.cfgFilePath = optarg;
+            break;
+
+         case 'l':
+            args.headless = true;
             break;
 
          case 'h':

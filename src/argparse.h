@@ -11,6 +11,7 @@ class CapriceArgs
       CapriceArgs() = default;
       std::string autocmd;
       std::string cfgFilePath;
+      bool headless;
       std::string binFile;
       size_t binOffset;
       std::map<std::string, std::map<std::string, std::string>> cfgOverrides;
