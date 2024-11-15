@@ -10,6 +10,49 @@ You will need the following to successfully compile an executable:
 
 # Compiling
 
+### How to compile on macOS
+
+Thes works fine for macOS Sequoia 15.1.
+
+You will need SDL installed. Install brew if you don't have it. Then:
+
+`brew install SDL`
+
+Use make to build:
+
+`make`
+
+After a while you will get the executable.
+
+But first create a ./disk folder:
+
+`mkdir disk`
+
+Copy some .dsk files in it.
+
+Start the emulator with:
+
+`./cap32`
+
+or
+
+`./cap32 ./disk/name-of-disk.dsk`
+
+Hit F1 within the emulator for a menu.
+
+Load .dsk file you want.
+
+Hit resume.
+
+Back in the emulator type:
+`cat`
+`load"<your-dsk-file>
+`run`
+
+Enjoy the game!
+
+
+
 ### Linux target:
 
 To build with default options, use :
