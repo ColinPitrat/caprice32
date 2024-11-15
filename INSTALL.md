@@ -45,6 +45,11 @@ Load .dsk file you want.
 Hit resume.
 
 Back in the emulator type:
+
+`run"<your-dsk-file>
+
+or
+
 `cat`
 `load"<your-dsk-file>
 `run`
