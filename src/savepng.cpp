@@ -8,6 +8,7 @@
  */
 #include <SDL.h>
 #include <png.h>
+#include <cinttypes>
 #include <cstdint>
 #include <string>
 #include <memory>
