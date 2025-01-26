@@ -10,7 +10,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - run: sudo apt-get update
-      - run: sudo apt-get install pkg-config libsdl2-dev libfreetype6-dev zlib-devel libpng-devel
+      - run: sudo apt-get install pkg-config libsdl2-dev libfreetype6-dev zlib1g-dev libpng-dev
       - run: wget http://softpres.org/_media/files:ipflib42_linux-x86_64.tar.gz -O /tmp/ipflib42_linux-x86_64.tar.gz
       - run: tar -xf /tmp/ipflib42_linux-x86_64.tar.gz 2>&1 >/dev/null
       - run: sudo cp -r x86_64-linux-gnu-capsimage/include/caps /usr/include
