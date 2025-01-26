@@ -19,7 +19,13 @@
 #include <algorithm>
 
 #ifdef WINDOWS
-#define realpath(N,R) _fullpath((R),(N),_MAX_PATH)
+#include <filesystem>
+
+char *realpath(const char *path, char *resolved_path) {
+  auto fs_path = std::filesystem::path(path);
+  auto canonical = std::filesystem::canonical(fs_path);
+  strncpy(resolved_path, canonical.c_str(), _MAX_PATH);
+}
 #endif
 
 
