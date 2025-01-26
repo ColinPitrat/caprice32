@@ -24,7 +24,9 @@ WINE = wine
 
 ARCH ?= linux
 
-ifeq ($(ARCH),win64)
+ifeq ($(ARCH),msys2_win64)
+COMMON_CFLAGS = -DWINDOWS
+else ifeq ($(ARCH),win64)
 TRIPLE = x86_64-w64-mingw32
 PLATFORM=windows
 CAPSIPFDLL=CAPSImg_x64.dll
