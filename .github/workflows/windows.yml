@@ -14,11 +14,7 @@ jobs:
             ctags
             gcc
             git
-            libpng
             make
-            mingw-w64-freetype
-            mingw-w64-libpng
-            mingw-w64-SDL2
             zlib
       - shell: msys2 {0}
         run: |
