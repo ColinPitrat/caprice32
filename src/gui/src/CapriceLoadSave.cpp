@@ -25,6 +25,8 @@ char *realpath(const char *path, char *resolved_path) {
   auto fs_path = std::filesystem::path(path);
   auto canonical = std::filesystem::canonical(fs_path);
   strncpy(resolved_path, canonical.c_str(), _MAX_PATH);
+  // TODO: This should return nullptr on error.
+  return resolved_path;
 }
 #endif
 
