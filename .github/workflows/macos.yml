@@ -9,7 +9,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
+      - uses: actions/setup-node@v4
       - run: brew update
       - run: brew install sdl2 freetype zlib libpng gnu-sed
       - run: make -j 3 ARCH=macos
