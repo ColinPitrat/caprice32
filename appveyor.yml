@@ -8,7 +8,7 @@ branches:
 
 environment:
   access_token:
-    secure: piEKiVbXBFm0fcZCREEII0pxZth77lewlfMc7qApggKVDXswkPaFJKM9eyGAaUy3
+    secure: WOWWFZfEHBTsIZgOXJ2PrswjYGwCpxQJeRtAxG7tIzR4VHJSFNecTXdK7Z7kxLcs9W7rQ/8K7yYjQgA+Jm/Rw8EabETzo9ZvNDsx2SQksYaVZOS5tzuK8sJQC5njFOvO
   MSYS2_BASEVER: 20241208
   MSYS2_ARCH: x86_64
   MSYS2_URL: "http://repo.msys2.org/distrib/%MSYS2_ARCH%/msys2-base-%MSYS2_ARCH%-%MSYS2_BASEVER%.tar.xz"
@@ -115,7 +115,7 @@ deploy:
   description: "Latest build of Caprice 32, with the newest cool features and the most recent bugs."
   provider: GitHub
   auth_token:
-    secure: piEKiVbXBFm0fcZCREEII0pxZth77lewlfMc7qApggKVDXswkPaFJKM9eyGAaUy3
+    secure: WOWWFZfEHBTsIZgOXJ2PrswjYGwCpxQJeRtAxG7tIzR4VHJSFNecTXdK7Z7kxLcs9W7rQ/8K7yYjQgA+Jm/Rw8EabETzo9ZvNDsx2SQksYaVZOS5tzuK8sJQC5njFOvO
   artifact: cap32-%WINARCH%.zip
   draft: false
   prerelease: false
@@ -129,7 +129,7 @@ deploy:
 #  description: "Latest build of Caprice 32, with the newest cool features and the most recent bugs."
 #  provider: GitHub
 #  auth_token:
-#    secure: piEKiVbXBFm0fcZCREEII0pxZth77lewlfMc7qApggKVDXswkPaFJKM9eyGAaUy3
+#    secure: WOWWFZfEHBTsIZgOXJ2PrswjYGwCpxQJeRtAxG7tIzR4VHJSFNecTXdK7Z7kxLcs9W7rQ/8K7yYjQgA+Jm/Rw8EabETzo9ZvNDsx2SQksYaVZOS5tzuK8sJQC5njFOvO
 #  artifact: cap32-%WINARCH%.zip
 #  draft: false
 #  prerelease: false
@@ -142,7 +142,7 @@ deploy:
   tag: "%APPVEYOR_REPO_TAG_NAME%"
   provider: GitHub
   auth_token:
-    secure: piEKiVbXBFm0fcZCREEII0pxZth77lewlfMc7qApggKVDXswkPaFJKM9eyGAaUy3
+    secure: WOWWFZfEHBTsIZgOXJ2PrswjYGwCpxQJeRtAxG7tIzR4VHJSFNecTXdK7Z7kxLcs9W7rQ/8K7yYjQgA+Jm/Rw8EabETzo9ZvNDsx2SQksYaVZOS5tzuK8sJQC5njFOvO
   artifact: cap32-%WINARCH%.zip
   draft: false
   prerelease: false
