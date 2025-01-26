@@ -22,4 +22,4 @@ jobs:
             zlib
       - shell: msys2 {0}
         run: |
-          make ARCH=win64 WINE=\"\" debug
+          make ARCH=win64 CXX=g++ WINE=\"\" debug
