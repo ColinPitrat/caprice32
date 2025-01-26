@@ -1,0 +1,29 @@
+name: Linux build
+
+on: [push]
+
+jobs:
+  linux-build:
+    name: Linux build
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - run: sudo apt-get update
+      - run: sudo apt-get install pkg-config libsdl2-dev libfreetype6-dev zlib-devel libpng-devel
+      - run: wget http://softpres.org/_media/files:ipflib42_linux-x86_64.tar.gz -O /tmp/ipflib42_linux-x86_64.tar.gz
+      - tar -xf /tmp/ipflib42_linux-x86_64.tar.gz 2>&1 >/dev/null
+      - sudo cp -r x86_64-linux-gnu-capsimage/include/caps /usr/include
+
+      - run: make -j 3 WITH_IPF=true
+      - run: make -j 3 WITH_IPF=true unit_test
+      - run: make -j 3 e2e_test
+
+      - run: make -j 3 clean
+      - run: make -j 3 debug CFLAGS=-Wno-literal-suffix
+      - run: make -j 3 clang-tidy
+      - run: make -j 3 deb_pkg VERSION=99.99.0 REVISION=1
+
+      - run: make -j 3 clean
+      - run: make -j 3 APP_PATH=/tmp/cap32 DESTDIR=/tmp/cap32 install
+      - run: test/integrated/test_make_install.sh /tmp/cap32
