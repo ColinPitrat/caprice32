@@ -9,7 +9,7 @@ branches:
 environment:
   access_token:
     secure: piEKiVbXBFm0fcZCREEII0pxZth77lewlfMc7qApggKVDXswkPaFJKM9eyGAaUy3
-  MSYS2_BASEVER: 20210604
+  MSYS2_BASEVER: 20241208
   MSYS2_ARCH: x86_64
   MSYS2_URL: "http://repo.msys2.org/distrib/%MSYS2_ARCH%/msys2-base-%MSYS2_ARCH%-%MSYS2_BASEVER%.tar.xz"
   MSYS2_ARCHIVE: msys2.tar.xz
