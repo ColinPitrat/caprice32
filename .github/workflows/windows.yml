@@ -15,6 +15,9 @@ jobs:
             gcc
             git
             make
+            mingw64/mingw-w64-x86_64-freetype
+            mingw64/mingw-w64-x86_64-libpng
+            mingw64/mingw-w64-x86_64-SDL2
             zlib
       - shell: msys2 {0}
         run: |
