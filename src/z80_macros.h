@@ -25,6 +25,19 @@
 #ifndef Z80_MACROS_H
 #define Z80_MACROS_H
 
+// _B, _C and _L are already defined in ctype.h on some versions of MSYS2.
+#ifdef _B
+#undef _B
+#endif
+
+#ifdef _C
+#undef _C
+#endif
+
+#ifdef _L
+#undef _L
+#endif
+
 #define _A        z80.AF.b.h
 #define _F        z80.AF.b.l
 #define _AF       z80.AF.w.l
