@@ -7,7 +7,7 @@
 
 https://github.com/ColinPitrat/caprice32
 
-Linux build: [![Linux build Status](https://www.travis-ci.com/ColinPitrat/caprice32.svg?branch=master)](https://www.travis-ci.com/ColinPitrat/caprice32)
+Linux build: [![Linux build Status](https://github.com/ColinPitrat/caprice32/actions/workflows/linux.yml/badge.svg)](https://github.com/ColinPitrat/caprice32/actions/workflows/linux.yml)
 
 Windows build: [![Windows build status](https://ci.appveyor.com/api/projects/status/h795wt2xlttaj6sk?svg=true)](https://ci.appveyor.com/project/ColinPitrat/caprice32)
 
