@@ -22,4 +22,7 @@ jobs:
             zlib
       - shell: msys2 {0}
         run: |
+          pkg-config --cflags zlib
+          pkg-config --libs zlib
+          find / -name zlib.h
           make ARCH=msys2_win64 CXX=g++ WINE=\"\" debug -j 4 -k
