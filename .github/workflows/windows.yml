@@ -26,4 +26,5 @@ jobs:
           pkg-config --cflags zlib
           pkg-config --libs libpng
           pkg-config --cflags libpng
+          find D:/a/_temp/msys64/mingw64/include
           make ARCH=msys2_win64 CXX=g++ WINE=\"\" debug -j 4 -k
