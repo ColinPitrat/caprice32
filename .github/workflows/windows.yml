@@ -9,17 +9,18 @@ jobs:
       - uses: actions/checkout@v2
       - uses: msys2/setup-msys2@v2
         with:
+          msystem: MINGW64
           update: true
           install: >-
             ctags
             gcc
             git
             make
-            mingw64/mingw-w64-x86_64-crt-git
             mingw64/mingw-w64-x86_64-freetype
             mingw64/mingw-w64-x86_64-libpng
             mingw64/mingw-w64-x86_64-pkg-config
             mingw64/mingw-w64-x86_64-SDL2
+            mingw64/mingw-w64-x86_64-toolchain
             mingw64/mingw-w64-x86_64-zlib
       # This is awful but we have to pass the mingw64/include directory so that
       # zlib.h can be found because pkg-config doesn't return any cflags for
@@ -28,6 +29,5 @@ jobs:
         run: |
           sdl2-config --libs
           echo " ==== find in msys64 ===="
-          find D:/a/_temp/msys64
-          echo " ==== start build ===="
+          find D:/a/_temp/msys64 | grep libmi
           make ARCH=msys2_win64 CXX=g++ WINE=\"\" CFLAGS="-ID:/a/_temp/msys64/mingw64/include/" debug -j 4 -k
