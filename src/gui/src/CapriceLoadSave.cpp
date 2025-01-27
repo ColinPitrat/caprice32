@@ -22,10 +22,15 @@
 #include <filesystem>
 
 char *realpath(const char *path, char *resolved_path) {
-  auto fs_path = std::filesystem::path(path);
-  auto canonical = std::filesystem::canonical(fs_path);
-  strncpy(resolved_path, canonical.c_str(), _MAX_PATH);
-  // TODO: This should return nullptr on error.
+  try {
+    auto fs_path = std::filesystem::path(path);
+    auto canonical = std::filesystem::canonical(fs_path);
+    // Need to call .string() because .c_str() on path returns value_type
+    // which can be wchar_t* on windows.
+    strncpy(resolved_path, canonical.string().c_str(), _MAX_PATH);
+  } catch (...) {
+    return nullptr;
+  }
   return resolved_path;
 }
 #endif
