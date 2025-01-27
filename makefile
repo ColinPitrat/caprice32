@@ -31,7 +31,7 @@ ifeq ($(ARCH),msys2_win64)
 # Do not make an error of old-style-cast on msys2 as the version of GCC used by
 # msys2 on GitHub actions is 13.3 which has a bug and raise it on a cast from
 # zlib.h
-COMMON_CFLAGS = -DWINDOWS -D_POSIX_C_SOURCE=200809L -Dmain=SDL_main -Wno-error=old-style-cast
+COMMON_CFLAGS = -DWINDOWS -D_POSIX_C_SOURCE=200809L -Wno-error=old-style-cast
 else ifeq ($(ARCH),win64)
 TRIPLE = x86_64-w64-mingw32
 PLATFORM=windows
