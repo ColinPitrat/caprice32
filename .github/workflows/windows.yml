@@ -22,4 +22,8 @@ jobs:
             mingw64/mingw-w64-x86_64-zlib
       - shell: msys2 {0}
         run: |
+          pkg-config --libs zlib
+          pkg-config --cflags zlib
+          pkg-config --libs libpng
+          pkg-config --cflags libpng
           make ARCH=msys2_win64 CXX=g++ WINE=\"\" debug -j 4 -k
