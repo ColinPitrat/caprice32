@@ -26,8 +26,7 @@ jobs:
       - shell: msys2 {0}
         run: |
           sdl2-config --libs
-          echo "find libmingw"
-          find D:/a/_temp/msys64 | grep libmingw
-          echo "find mingw32"
-          find D:/a/_temp/msys64 | grep mingw32
+          echo " ==== find in msys64 ===="
+          find D:/a/_temp/msys64
+          echo " ==== start build ===="
           make ARCH=msys2_win64 CXX=g++ WINE=\"\" CFLAGS="-ID:/a/_temp/msys64/mingw64/include/" debug -j 4 -k
