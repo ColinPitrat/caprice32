@@ -4,6 +4,7 @@
 #include <cstring>
 #include <sstream>
 #include <string>
+#include <strings.h>
 
 namespace stringutils
 {
