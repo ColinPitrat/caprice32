@@ -27,7 +27,7 @@ ARCH ?= linux
 COMMON_CFLAGS ?= 
 
 ifeq ($(ARCH),msys2_win64)
-COMMON_CFLAGS = -DWINDOWS
+COMMON_CFLAGS = -DWINDOWS -D_POSIX_C_SOURCE
 else ifeq ($(ARCH),win64)
 TRIPLE = x86_64-w64-mingw32
 PLATFORM=windows
