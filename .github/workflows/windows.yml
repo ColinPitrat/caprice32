@@ -20,11 +20,9 @@ jobs:
             mingw64/mingw-w64-x86_64-pkg-config
             mingw64/mingw-w64-x86_64-SDL2
             mingw64/mingw-w64-x86_64-zlib
+      # This is awful but we have to pass the mingw64/include directory so that
+      # zlib.h can be found because pkg-config doesn't return any cflags for
+      # zlib.
       - shell: msys2 {0}
         run: |
-          pkg-config --libs zlib
-          pkg-config --cflags zlib
-          pkg-config --libs libpng
-          pkg-config --cflags libpng
-          find D:/a/_temp/msys64/mingw64/include
-          make ARCH=msys2_win64 CXX=g++ WINE=\"\" debug -j 4 -k
+          make ARCH=msys2_win64 CXX=g++ WINE=\"\" CFLAGS="-ID:/a/_temp/msys64/mingw64/include/" debug -j 4 -k
