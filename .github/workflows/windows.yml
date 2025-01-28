@@ -28,6 +28,7 @@ jobs:
       - shell: msys2 {0}
         run: |
           sdl2-config --libs
-          echo " ==== find in msys64 ===="
-          find D:/a/_temp/msys64 | grep libmi
+          echo " ==== grep SDL_main in msys64 ===="
+          grep -rI -C 10 SDL_main D:/a/_temp/msys64/include/ || true
+          grep -rI -C 10 SDL_main D:/a/_temp/msys64/mingw64/include/ || true
           make ARCH=msys2_win64 CXX=g++ WINE=\"\" CFLAGS="-ID:/a/_temp/msys64/mingw64/include/" debug -j 4 -k
