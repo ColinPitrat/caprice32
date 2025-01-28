@@ -206,7 +206,6 @@ DLLS = SDL2.dll libbz2-1.dll libfreetype-6.dll libpng16-16.dll libstdc++-6.dll \
 			 libbrotlidec.dll libbrotlicommon.dll
 
 $(TARGET): $(OBJECTS) $(MAIN) cap32.cfg
-	nm -A $(MAIN)
 	$(CXX) $(LDFLAGS) -o $(TARGET) $(OBJECTS) $(MAIN) $(LIBS)
 
 distrib: $(TARGET)
@@ -227,7 +226,6 @@ install: $(TARGET)
 else
 
 $(TARGET): $(OBJECTS) $(MAIN) cap32.cfg
-	nm -A $(MAIN)
 	$(CXX) $(LDFLAGS) -o $(TARGET) $(OBJECTS) $(MAIN) $(LIBS)
 
 ifeq ($(ARCH),macos)
