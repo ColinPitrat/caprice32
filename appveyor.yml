@@ -52,7 +52,7 @@ before_build:
 - msys64\usr\bin\bash -lc "%MINGW_DIR%/bin/g++ --version"
 - msys64\usr\bin\bash -lc "/usr/bin/make --version"
 - echo "NUMBER_OF_PROCESSORS=%NUMBER_OF_PROCESSORS%"
-- find /mingw64/lib | grep SDL
+- msys64\usr\bin\find /mingw64/lib | grep SDL
 
 build_script:
 # TODO(cpitrat): Find a way to use %APPVEYOR_BUILD_FOLDER%, replacing \ by /
