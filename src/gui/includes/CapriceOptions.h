@@ -42,7 +42,7 @@ namespace wGui
         CapriceRomSlots* pRomSlotsDialog;
 
       // New navigation bar control (to select the different pages or tabs on the options dialog)
-      CNavigationBar* m_pNavigationBar; 
+      CNavigationBar* m_pNavigationBar;
 
       // groupbox to group the controls on each 'tab':
       CGroupBox* m_pGroupBoxTabGeneral;
@@ -53,7 +53,7 @@ namespace wGui
       CGroupBox* m_pGroupBoxTabInput;
 
       // General options
-      CLabel* m_pLabelCPCModel;   
+      CLabel* m_pLabelCPCModel;
       CDropDown* m_pDropDownCPCModel;    // CPC model (464,664,6128...)
 
       CLabel* m_pLabelRamSize;           // amount of RAM memory (64k up to 576k)
@@ -100,7 +100,7 @@ namespace wGui
       CDropDown* m_pDropDownSamplingRate; // Select audio sampling rate
       CLabel* m_pLabelSamplingRate;
 
-      CGroupBox* m_pGroupBoxChannels; 
+      CGroupBox* m_pGroupBoxChannels;
       CGroupBox* m_pGroupBoxSampleSize;
 
       CLabel* m_pLabelSoundVolume;
@@ -123,6 +123,8 @@ namespace wGui
       CLabel* m_pLabelDriveAFormat;
       CDropDown* m_pDropDownDriveBFormat;
       CLabel* m_pLabelDriveBFormat;
+      CButton* m_pButtonDriveAFormat;
+      CButton* m_pButtonDriveBFormat;
 
       // Input options
       CLabel* m_pLabelCPCLanguage;
@@ -134,7 +136,7 @@ namespace wGui
       CLabel* m_pLabelJoysticks;
       CCheckBox* m_pCheckBoxJoysticks;
 
-      t_CPC m_oldCPCsettings;  // we will store the current CPC settings in this variable, and 
+      t_CPC m_oldCPCsettings;  // we will store the current CPC settings in this variable, and
                                // when clicking OK in the options screen, check what options have changed
                                // and take a required action (e.g. emulator reset, sound system reset...)
       bool ProcessOptionChanges(t_CPC& CPC, bool saveChanges); // see m_oldCPCsettings
@@ -142,7 +144,7 @@ namespace wGui
       private:
 
         std::map<std::string, CGroupBox*> TabMap;  // mapping: <tab name> -> <groupbox that contains the 'tab'>.
-        
+
         CapriceOptions(const CapriceOptions&) = delete;
         CapriceOptions& operator=(const CapriceOptions&) = delete;
     };

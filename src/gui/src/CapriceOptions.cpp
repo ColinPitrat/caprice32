@@ -10,10 +10,14 @@
 #include "keyboard.h"
 #include "fileutils.h"
 #include "wg_messagebox.h"
+#include "slotshandler.h"
 
 // CPC emulation properties, defined in cap32.h:
 extern t_CPC CPC;
 std::vector<std::string> mapFileList;
+
+extern t_drive driveA;
+extern t_drive driveB;
 
 namespace wGui {
 
@@ -247,8 +251,8 @@ CapriceOptions::CapriceOptions(const CRect& WindowRect, CWindow* pParent, CFontE
     m_pLabelSoundVolumeValue = new CLabel(CPoint(190, 108), m_pGroupBoxTabAudio, stdex::itoa(CPC.snd_volume) + "%  ");
 
     // ---------------- 'Disk' Options ----------------
-    m_pGroupBoxDriveA  = new CGroupBox(CRect(CPoint(10, 0), 280, 45), m_pGroupBoxTabDisk, "CPC Drive A");
-    m_pGroupBoxDriveB  = new CGroupBox(CRect(CPoint(10, 50), 280, 45), m_pGroupBoxTabDisk, "CPC Drive B");
+    m_pGroupBoxDriveA  = new CGroupBox(CRect(CPoint(10, 00), 280, 65), m_pGroupBoxTabDisk, "CPC Drive A");
+    m_pGroupBoxDriveB  = new CGroupBox(CRect(CPoint(10, 70), 280, 65), m_pGroupBoxTabDisk, "CPC Drive B");
     m_pLabelDriveAFormat    = new CLabel(CPoint(10,3), m_pGroupBoxDriveA, "Insert blank disks as");
     m_pDropDownDriveAFormat = new CDropDown(CRect(CPoint(130,1),140,16), m_pGroupBoxDriveA, false);
     m_pDropDownDriveAFormat->AddItem(SListItem("178K Data Format"));
@@ -256,6 +260,9 @@ CapriceOptions::CapriceOptions(const CRect& WindowRect, CWindow* pParent, CFontE
     m_pDropDownDriveAFormat->SetListboxHeight(2);
     m_pDropDownDriveAFormat->SelectItem(CPC.drvA_format == 0 ? 0 : 1);
     m_pDropDownDriveAFormat->SetIsFocusable(true);
+    m_pButtonDriveAFormat   = new CButton(CRect(CPoint(10, 20), 50, 15), m_pGroupBoxDriveA, "Format");
+    m_pButtonDriveAFormat->SetIsFocusable(true);
+
     m_pLabelDriveBFormat    = new CLabel(CPoint(10,3), m_pGroupBoxDriveB, "Insert blank disks as");;
     m_pDropDownDriveBFormat = new CDropDown(CRect(CPoint(130,1),140,16), m_pGroupBoxDriveB, false);
     m_pDropDownDriveBFormat->AddItem(SListItem("178K Data Format"));
@@ -263,6 +270,9 @@ CapriceOptions::CapriceOptions(const CRect& WindowRect, CWindow* pParent, CFontE
     m_pDropDownDriveBFormat->SetListboxHeight(2);
     m_pDropDownDriveBFormat->SelectItem(CPC.drvB_format == 0 ? 0 : 1);
     m_pDropDownDriveBFormat->SetIsFocusable(true);
+    m_pButtonDriveBFormat   = new CButton(CRect(CPoint(10, 20), 50, 15), m_pGroupBoxDriveB, "Format");
+    m_pButtonDriveBFormat->SetIsFocusable(true);
+
 
     // ---------------- 'Input' Options ----------------
     // option 'keyboard' which is the CPC language
@@ -389,6 +399,14 @@ bool CapriceOptions::HandleMessage(CMessage* pMessage)
               bHandled = true;
               break;
             }
+          }
+
+          // 'Format' button clicked
+          if (pMessage->Source() == m_pButtonDriveAFormat) {
+              dsk_format(&driveA,m_pDropDownDriveAFormat->GetSelectedIndex());
+          }
+          if (pMessage->Source() == m_pButtonDriveBFormat) {
+              dsk_format(&driveB,m_pDropDownDriveBFormat->GetSelectedIndex());
           }
 
           // 'ROM' button clicked: open the ROM selection dialog:
