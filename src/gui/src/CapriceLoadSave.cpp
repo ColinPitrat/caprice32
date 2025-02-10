@@ -171,6 +171,12 @@ bool CapriceLoadSave::HandleMessage(CMessage* pMessage)
                     switch (m_pTypeValue->GetSelectedIndex()) {
                       case 0: // Drive A
                         std::cout << "Save dsk A: " << filename << std::endl;
+                        if (driveA.tracks==0) {
+                            //If no disk was inserted, tracks will be 0. Raise an error message, just so it doesn't silently fail.
+                            wGui::CMessageBox *pMessageBox = new wGui::CMessageBox(CRect(CPoint(m_ClientRect.Width() /2 - 125, m_ClientRect.Height() /2 - 30), 250, 60), this, nullptr, "Error Saving", "No Valid Disk Inserted", CMessageBox::BUTTON_OK);
+                            pMessageBox->SetModal(true);
+                            break;
+                        }
                         dsk_save(filename, &driveA);
                         actionDone = true;
                         break;
