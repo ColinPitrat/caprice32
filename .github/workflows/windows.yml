@@ -33,7 +33,7 @@ jobs:
           IPF_WIN_URL: "http://www.softpres.org/_media/files:ipflib42_win_x64.zip"
         run: |
           make ARCH=win64 CXX=g++ WINE=\"\" CFLAGS="-ID:/a/_temp/msys64/mingw64/include/" debug -j 4 -k
-          wget "$IPF_LINUX_URL" -O ipflib42_linux-i686.tar.gz && 7z x ipflib42_linux-i686.tar.gz && 7z x ipflib42_linux-i686.tar && cd i686-linux-gnu-capsimage/ && ln -s libcapsimage.so.4.2 libcapsimage.so.4 && ln -s libcapsimage.so.4.2 libcapsimage.so
+          wget "$IPF_LINUX_URL" -O ipflib42_linux-i686.tar.gz && 7z x ipflib42_linux-i686.tar.gz && 7z x ipflib42_linux-i686.tar && cd i686-linux-gnu-capsimage/ && ln -s libcapsimage.so.4.2 libcapsimage.so.4 && ln -s libcapsimage.so.4.2 libcapsimage.so && cd ..
           make ARCH=win64 CXX=g++ WINE=\"\" CFLAGS="-ID:/a/_temp/msys64/mingw64/include/" -j 4 clean
           make ARCH=win64 CXX=g++ WINE=\"\" CFLAGS="-ID:/a/_temp/msys64/mingw64/include/" WITH_IPF=true -j 4 -k
           make ARCH=win64 CXX=g++ WINE=\"\" CFLAGS="-ID:/a/_temp/msys64/mingw64/include/" WINE=\"\" WITH_IPF=true CFLAGS=-Ii686-linux-gnu-capsimage/include -j 4 -k unit_test
