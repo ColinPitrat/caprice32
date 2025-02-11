@@ -45,7 +45,7 @@ jobs:
       # TODO: Build and publish Caprice32.dmg
       - name: Publish latest
         uses: ColinPitrat/update-release@master
-        if: ${{ github.ref == "master" }}
+        if: ${{ github.ref_name == 'master' }}
         with:
           release: latest
           message: Caprice32 latest
@@ -56,7 +56,7 @@ jobs:
 
       - name: Publish release
         uses: ColinPitrat/update-release@master
-        if: ${{ startsWith('v', github.ref) }}
+        if: ${{ startsWith('v', github.ref_name) }}
         with:
           release: ${{ github.ref }}
           message: Caprice32 ${{ github.ref }}
