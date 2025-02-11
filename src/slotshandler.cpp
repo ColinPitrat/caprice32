@@ -626,7 +626,7 @@ int dsk_save (const std::string &filename, t_drive *drive)
    t_track_header th;
    dword track, side, pos, sector;
 
-   //If there are no tracks, don't save
+   // If there are no tracks, don't save
    if (drive->tracks==0) {
        return ERR_DSK_WRITE;
    }
