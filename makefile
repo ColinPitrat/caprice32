@@ -26,17 +26,19 @@ ARCH ?= linux
 
 COMMON_CFLAGS ?= 
 
-ifeq ($(ARCH),msys2_win64)
+ifeq ($(ARCH),win64)
 # Rename main to SDL_main to solve the "undefined reference to `SDL_main'".
 # Do not make an error of old-style-cast on msys2 as the version of GCC used by
 # msys2 on GitHub actions is 13.3 which has a bug and raise it on a cast from
 # zlib.h
 COMMON_CFLAGS = -DWINDOWS -D_POSIX_C_SOURCE=200809L -Wno-error=old-style-cast
-else ifeq ($(ARCH),win64)
+else ifeq ($(ARCH),win32)
+COMMON_CFLAGS = -DWINDOWS -D_POSIX_C_SOURCE=200809L -Wno-error=old-style-cast
+else ifeq ($(ARCH),old_win64)
 TRIPLE = x86_64-w64-mingw32
 PLATFORM=windows
 CAPSIPFDLL=CAPSImg_x64.dll
-else ifeq ($(ARCH),win32)
+else ifeq ($(ARCH),old_win32)
 TRIPLE = i686-w64-mingw32
 PLATFORM=windows
 CAPSIPFDLL=CAPSImg.dll
