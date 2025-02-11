@@ -14,9 +14,9 @@ CFlag::CFlag(const CRect& WindowRect, CWindow* pParent, const std::string& name,
 	{
 		m_pFontEngine = Application().GetDefaultFontEngine();
 	}
-  m_pLabel = new CLabel(CPoint(0, 7), this, name);
-  m_pValue = new CEditBox(CRect(CPoint(20, 0), 20, 20), this);
-  m_pTooltip = new CToolTip(this, description, COLOR_BLACK);
+	m_pLabel = new CLabel(CPoint(0, 7), this, name);
+	m_pValue = new CEditBox(CRect(CPoint(20, 0), 20, 20), this);
+	m_pTooltip = new CToolTip(this, description, COLOR_BLACK);
 
 	Draw();
 }
@@ -31,7 +31,15 @@ CFlag::~CFlag()  // virtual
 
 void CFlag::SetValue(const std::string& c)
 {
-  m_pValue->SetWindowText(c);
+	m_pValue->SetWindowText(c);
+}
+
+bool CFlag::GetValue() const {
+	return m_pValue->GetWindowText() == "1";
+}
+
+void CFlag::SetReadOnly(bool bReadOnly) {
+	m_pValue->SetReadOnly(bReadOnly);
 }
 
 }

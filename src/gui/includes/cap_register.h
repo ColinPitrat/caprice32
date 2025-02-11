@@ -36,6 +36,14 @@ public:
 	//! \param c The value to assign to the control
 	void SetValue(const unsigned int c);
 
+	//! Get the value of the register
+	//! \return The value contained in the register
+	unsigned int GetValue() const;
+
+	//! Set the Read-only state of the control
+	//! \param bReadOnly  If set to true, the control will not take any input
+	void SetReadOnly(bool bReadOnly);
+
 protected:
 
 	CFontEngine* m_pFontEngine; //!< A pointer to the font engine to use to render the text
@@ -48,7 +56,7 @@ protected:
 
 
 private:
-  CRegister(const CRegister&) = delete;
+	CRegister(const CRegister&) = delete;
 	CRegister& operator=(const CRegister&) = delete;
 };
 

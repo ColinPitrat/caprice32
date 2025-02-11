@@ -206,7 +206,7 @@ CapriceDevTools::CapriceDevTools(const CRect& WindowRect, CWindow* pParent, CFon
     m_pZ80RegI = new CRegister(CRect(CPoint(10, 150), 110, 20), m_pGroupBoxTabZ80, "I");
     m_pZ80RegR = new CRegister(CRect(CPoint(150, 150), 110, 20), m_pGroupBoxTabZ80, "R");
     m_pZ80RegIXH = new CRegister(CRect(CPoint(10, 170), 110, 20), m_pGroupBoxTabZ80, "IXH");
-    m_pZ80RegIXL = new CRegister(CRect(CPoint(150, 170), 110, 20), m_pGroupBoxTabZ80, "IXL'");
+    m_pZ80RegIXL = new CRegister(CRect(CPoint(150, 170), 110, 20), m_pGroupBoxTabZ80, "IXL");
     m_pZ80RegIYH = new CRegister(CRect(CPoint(10, 190), 110, 20), m_pGroupBoxTabZ80, "IYH");
     m_pZ80RegIYL = new CRegister(CRect(CPoint(150, 190), 110, 20), m_pGroupBoxTabZ80, "IYL");
     m_pZ80RegAF = new CRegister(CRect(CPoint(10, 230), 110, 20), m_pGroupBoxTabZ80, "AF");
@@ -237,6 +237,35 @@ CapriceDevTools::CapriceDevTools(const CRect& WindowRect, CWindow* pParent, CFon
     m_pZ80FlagPV = new CFlag(CRect(CPoint(340, 300), 35, 20), m_pGroupBoxTabZ80, "PV", "Parity/overflow flag");
     m_pZ80FlagN  = new CFlag(CRect(CPoint(340, 320), 35, 20), m_pGroupBoxTabZ80, "N",  "Add/substract flag");
     m_pZ80FlagC  = new CFlag(CRect(CPoint(340, 340), 35, 20), m_pGroupBoxTabZ80, "C",  "Carry flag");
+
+    // Only allow to modify registers for which saving is implemented.
+    // The main problem is that a same register is displayed multiple times
+    // (e.g. A in both A and AF) so allowing to modify both leads to the problem
+    // that we don't know which one we should take.
+    m_pZ80RegA->SetReadOnly(false);
+    m_pZ80RegB->SetReadOnly(false);
+    m_pZ80RegC->SetReadOnly(false);
+    m_pZ80RegD->SetReadOnly(false);
+    m_pZ80RegE->SetReadOnly(false);
+    m_pZ80RegH->SetReadOnly(false);
+    m_pZ80RegI->SetReadOnly(false);
+    m_pZ80RegL->SetReadOnly(false);
+    m_pZ80RegR->SetReadOnly(false);
+    m_pZ80RegIX->SetReadOnly(false);
+    m_pZ80RegIY->SetReadOnly(false);
+    m_pZ80RegPC->SetReadOnly(false);
+    m_pZ80RegSP->SetReadOnly(false);
+    // TODO: Allow to modify individual flags instead of F as a whole.
+    m_pZ80RegF->SetReadOnly(false);
+    m_pZ80FlagS->SetReadOnly(true);
+    m_pZ80FlagZ->SetReadOnly(true);
+    m_pZ80FlagX1->SetReadOnly(true);
+    m_pZ80FlagH->SetReadOnly(true);
+    m_pZ80FlagX2->SetReadOnly(true);
+    m_pZ80FlagPV->SetReadOnly(true);
+    m_pZ80FlagN->SetReadOnly(true);
+    m_pZ80FlagC->SetReadOnly(true);
+    // TODO: Allow to modify prime registers too.
 
     // TODO: Add information about interrupts (mode, IFF1, IFF2)
 
@@ -854,6 +883,20 @@ void CapriceDevTools::ResumeExecution()
 {
   CPC.paused = false;
   m_pButtonPause->SetWindowText("Pause");
+  _A = m_pZ80RegA->GetValue();
+  _B = m_pZ80RegB->GetValue();
+  _C = m_pZ80RegC->GetValue();
+  _D = m_pZ80RegD->GetValue();
+  _E = m_pZ80RegE->GetValue();
+  _F = m_pZ80RegF->GetValue();
+  _H = m_pZ80RegH->GetValue();
+  _I = m_pZ80RegI->GetValue();
+  _L = m_pZ80RegL->GetValue();
+  _R = m_pZ80RegR->GetValue();
+  _IX = m_pZ80RegIXH->GetValue();
+  _IY = m_pZ80RegIYH->GetValue();
+  _PC = m_pZ80RegPC->GetValue();
+  _SP = m_pZ80RegSP->GetValue();
 }
 
 void CapriceDevTools::LoadSymbols(const std::string& filename)

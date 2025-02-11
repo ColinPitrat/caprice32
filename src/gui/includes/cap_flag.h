@@ -37,17 +37,25 @@ public:
 	//! \param c The value to assign to the control
 	void SetValue(const std::string& c);
 
+	//! Get the value of the flag
+	//! \return The value of the flag.
+	bool GetValue() const;
+
+	//! Set the Read-only state of the control
+	//! \param bReadOnly  If set to true, the control will not take any input
+	void SetReadOnly(bool bReadOnly);
+
 protected:
 
 	CFontEngine* m_pFontEngine; //!< A pointer to the font engine to use to render the text
 
 	CLabel* m_pLabel;
 	CEditBox* m_pValue;
-  CToolTip* m_pTooltip;
+	CToolTip* m_pTooltip;
 
 
 private:
-  CFlag(const CFlag&) = delete;
+	CFlag(const CFlag&) = delete;
 	CFlag& operator=(const CFlag&) = delete;
 };
 
