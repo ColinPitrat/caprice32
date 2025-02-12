@@ -69,7 +69,10 @@ LIBS = `sdl2-config --libs` `pkg-config --libs freetype2` `pkg-config --libs lib
 CXX ?= g++
 COMMON_CFLAGS += -fPIC
 ifdef WITH_IPF
+# TODO: Better way to decide whether the add -ldl
+ifneq ($(ARCH),win64)
 LIBS += -ldl
+endif
 endif
 endif
 
