@@ -19,8 +19,6 @@ VERSION=latest
 REVISION=0
 
 LAST_BUILD_IN_DEBUG = $(shell [ -e .debug ] && echo 1 || echo 0)
-# If compiling under native windows, set WINE to ""
-WINE = wine
 
 ARCH ?= linux
 
@@ -305,11 +303,10 @@ $(TEST_TARGET): $(OBJECTS) $(TEST_OBJECTS) $(OBJDIR)/$(GTEST_DIR)/src/gtest-all.
 	$(CXX) $(LDFLAGS) -o $(TEST_TARGET) $(OBJDIR)/$(GTEST_DIR)/src/gtest-all.o $(OBJDIR)/$(GMOCK_DIR)/src/gmock-all.o $(TEST_OBJECTS) $(OBJECTS) $(LIBS) -lpthread
 
 ifeq ($(PLATFORM),windows)
-unit_test: $(TEST_TARGET)
+unit_test: $(TEST_TARGET) distrib
 	cp $(TEST_TARGET) $(ARCHIVE)/
 	rm -fr $(ARCHIVE)/test
 	ln -s -f ../../test $(ARCHIVE)/test
-	#cd $(ARCHIVE) && $(WINE) ./$(TEST_TARGET) --gtest_shuffle
 	cd $(ARCHIVE) && ./$(TEST_TARGET) --gtest_shuffle
 
 e2e_test: $(TARGET)
