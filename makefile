@@ -218,14 +218,18 @@ distrib: $(TARGET)
 	mkdir -p $(ARCHIVE)
 	rm -f $(ARCHIVE).zip
 	cp $(TARGET) $(ARCHIVE)/
+ifeq ($(VARIANT),old_win)
 	$(foreach DLL,$(DLLS),[ -f $(MINGW_PATH)/bin/$(DLL) ] && cp $(MINGW_PATH)/bin/$(DLL) $(ARCHIVE)/;)
 	cp $(MINGW_PATH)/bin/libgcc_s_*-1.dll $(ARCHIVE)/
 ifdef WITH_IPF
 	cp $(MINGW_PATH)/bin/$(CAPSIPFDLL) $(ARCHIVE)/CAPSImg.dll
 endif
+endif
 	cp cap32.cfg.tmpl cap32.cfg COPYING.txt README.md $(ARCHIVE)/
 	cp -r resources/ rom/ licenses/ $(ARCHIVE)/
 	zip -r $(ARCHIVE).zip $(ARCHIVE)
+  # TODO: Remove, for debugging only
+  nm $(TARGET)
 
 install: $(TARGET)
 
