@@ -32,15 +32,19 @@ ifeq ($(ARCH),win64)
 # msys2 on GitHub actions is 13.3 which has a bug and raise it on a cast from
 # zlib.h
 COMMON_CFLAGS = -DWINDOWS -D_POSIX_C_SOURCE=200809L -Wno-error=old-style-cast
+PLATFORM=windows
 else ifeq ($(ARCH),win32)
 COMMON_CFLAGS = -DWINDOWS -D_POSIX_C_SOURCE=200809L -Wno-error=old-style-cast
+PLATFORM=windows
 else ifeq ($(ARCH),old_win64)
 TRIPLE = x86_64-w64-mingw32
 PLATFORM=windows
+VARIANT=old_win
 CAPSIPFDLL=CAPSImg_x64.dll
 else ifeq ($(ARCH),old_win32)
 TRIPLE = i686-w64-mingw32
 PLATFORM=windows
+VARIANT=old_win
 CAPSIPFDLL=CAPSImg.dll
 else ifeq ($(ARCH),linux)
 PLATFORM=linux
@@ -54,26 +58,26 @@ endif
 ifeq ($(PLATFORM),windows)
 TARGET = cap32.exe
 TEST_TARGET = test_runner.exe
-MINGW_PATH = /usr/$(TRIPLE)
-IPATHS = -Isrc/ -Isrc/gui/includes -I$(MINGW_PATH)/include -I$(MINGW_PATH)/include/SDL2 -I$(MINGW_PATH)/include/freetype2
-LIBS = $(MINGW_PATH)/lib/libSDL2.dll.a $(MINGW_PATH)/lib/libSDL2main.a $(MINGW_PATH)/lib/libfreetype.dll.a $(MINGW_PATH)/lib/libz.dll.a $(MINGW_PATH)/lib/libpng16.dll.a $(MINGW_PATH)/lib/libpng.dll.a
 COMMON_CFLAGS += -DWINDOWS
-CXX ?= $(TRIPLE)-g++
-
 else
 prefix = /usr/local
 TARGET = cap32
 TEST_TARGET = test_runner
+ifdef WITH_IPF
+LIBS += -ldl
+endif
+endif
+
 IPATHS = -Isrc/ -Isrc/gui/includes `pkg-config --cflags freetype2` `sdl2-config --cflags` `pkg-config --cflags libpng` `pkg-config --cflags zlib`
 LIBS = `sdl2-config --libs` `pkg-config --libs freetype2` `pkg-config --libs libpng` `pkg-config --libs zlib`
 CXX ?= g++
 COMMON_CFLAGS += -fPIC
-ifdef WITH_IPF
-# TODO: Better way to decide whether the add -ldl
-ifneq ($(ARCH),win64)
-LIBS += -ldl
-endif
-endif
+
+ifeq ($(VARIANT),old_win)
+MINGW_PATH = /usr/$(TRIPLE)
+IPATHS = -Isrc/ -Isrc/gui/includes -I$(MINGW_PATH)/include -I$(MINGW_PATH)/include/SDL2 -I$(MINGW_PATH)/include/freetype2
+LIBS = $(MINGW_PATH)/lib/libSDL2.dll.a $(MINGW_PATH)/lib/libSDL2main.a $(MINGW_PATH)/lib/libfreetype.dll.a $(MINGW_PATH)/lib/libz.dll.a $(MINGW_PATH)/lib/libpng16.dll.a $(MINGW_PATH)/lib/libpng.dll.a
+CXX ?= $(TRIPLE)-g++
 endif
 
 ifneq (,$(findstring g++,$(CXX)))
