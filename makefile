@@ -228,8 +228,8 @@ endif
 	cp cap32.cfg.tmpl cap32.cfg COPYING.txt README.md $(ARCHIVE)/
 	cp -r resources/ rom/ licenses/ $(ARCHIVE)/
 	zip -r $(ARCHIVE).zip $(ARCHIVE)
-  # TODO: Remove, for debugging only
-  nm $(TARGET)
+	# TODO: Remove, for debugging only
+	nm $(TARGET)
 
 install: $(TARGET)
 
