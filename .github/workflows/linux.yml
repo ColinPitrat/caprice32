@@ -33,9 +33,15 @@ jobs:
       # Linux build is responsible for pushing the latest tag.
       # MacOS & Windows build will create the release and upload artifacts to it
       # when they'll be called to build the tag itself.
-      - uses: richardsimko/update-tag@v1
-        if: github.ref_name == 'master'
+      - if: github.ref_name == 'master'
+        uses: dev-drprasad/delete-tag-and-release@v0.2.0
         with:
-          tag_name: latest
+          delete_release: false
+          tag_name: "latest"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: tvdias/github-tagger@v0.0.1
+        if: github.ref_name == 'master'
+        with:
+          tag: latest
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
