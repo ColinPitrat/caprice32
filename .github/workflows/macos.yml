@@ -26,8 +26,8 @@ jobs:
           message: Caprice32 latest
           body: Latest build of Caprice 32, with the newest cool features and the most recent bugs.
           files: |
-            Caprice32.dmg
-            cap32-macos.zip
+            release/cap32-macos-bundle/Caprice32.dmg
+            release/cap32-macos.zip
           fail_on_unmatched_files: true
           draft: false
           prerelease: false
@@ -43,8 +43,8 @@ jobs:
           message: Caprice32 ${{ github.ref }}
           body: Caprice32 ${{ github.ref }}. Release notes to be added manually.
           files: |
-            Caprice32.dmg
-            cap32-macos.zip
+            release/cap32-macos-bundle/Caprice32.dmg
+            release/cap32-macos.zip
           fail_on_unmatched_files: true
           draft: false
           prerelease: false
