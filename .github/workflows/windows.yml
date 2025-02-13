@@ -16,6 +16,7 @@ jobs:
             gcc
             git
             make
+            zip
             mingw64/mingw-w64-x86_64-diffutils
             mingw64/mingw-w64-x86_64-freetype
             mingw64/mingw-w64-x86_64-libpng
@@ -23,7 +24,6 @@ jobs:
             mingw64/mingw-w64-x86_64-SDL2
             mingw64/mingw-w64-x86_64-toolchain
             mingw64/mingw-w64-x86_64-zlib
-            mingw64/mingw-w64-x86_64-zip
             mingw64/mingw-w64-x86_64-7zip
       # This is awful but we have to pass the mingw64/include directory so that
       # zlib.h can be found because pkg-config doesn't return any cflags for
