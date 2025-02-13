@@ -17,40 +17,36 @@ jobs:
       - run: alias sed=gsed && make -j 3 e2e_test
       - run: make -j 3 ARCH=macos macos_bundle
 
-      # Only upload asset to a release when pushing a tag
-      - uses: jonfriesen/get-release-by-tag@v0.0.11
-        id: get_release_by_tag
-        if: ${{ startsWith(github.ref, 'refs/tags/') }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Publish latest
+        uses: softprops/action-gh-release@v2
+        if: github.ref_name == 'master'
         with:
-          tag_name: ${{ github.ref }}
-      # Delete the asset if it already exists (should only be useful for latest)
-      - uses: mknejp/delete-release-assets@v1
-        if: ${{ startsWith(github.ref, 'refs/tags/') }}
-        with:
-          token: ${{ github.token }}
-          tag: ${{ github.ref }}
-          assets: |
+          name: latest
+          tag_name: latest
+          message: Caprice32 latest
+          body: Latest build of Caprice 32, with the newest cool features and the most recent bugs.
+          files: |
             Caprice32.dmg
             cap32-macos.zip
-          fail-if-no-assets: false
-          fail-if-no-release: false
-      - uses: actions/upload-release-asset@v1.0.1
-        if: ${{ startsWith(github.ref, 'refs/tags/') }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          fail_on_unmatched_files: true
+          draft: false
+          prerelease: false
+          make_latest: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Publish release
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref_name, 'v')
         with:
-          upload_url: ${{ steps.get_release_by_tag.outputs.upload_url }}
-          asset_path: 'release/cap32-macos-bundle/Caprice32.dmg'
-          asset_name: 'Caprice32.dmg'
-          asset_content_type: 'com.apple.disk-image'
-      - uses: actions/upload-release-asset@v1.0.1
-        if: ${{ startsWith(github.ref, 'refs/tags/') }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.get_release_by_tag.outputs.upload_url }}
-          asset_path: 'release/cap32-macos.zip'
-          asset_name: 'cap32-macos.zip'
-          asset_content_type: 'application/zip'
+          name: ${{ github.ref_name }}
+          tag_name: ${{ github.ref_name }}
+          message: Caprice32 ${{ github.ref }}
+          body: Caprice32 ${{ github.ref }}. Release notes to be added manually.
+          files: |
+            Caprice32.dmg
+            cap32-macos.zip
+          fail_on_unmatched_files: true
+          draft: false
+          prerelease: false
+          make_latest: true
+          token: ${{ secrets.GITHUB_TOKEN }}
