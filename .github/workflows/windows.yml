@@ -47,14 +47,18 @@ jobs:
       # TODO: Build and publish cap32-macos.zip
       # TODO: Build and publish Caprice32.dmg
       - name: Publish latest
-        uses: ColinPitrat/update-release@master
-        if: ${{ github.ref_name == 'master' }}
+        uses: softprops/action-gh-release@v2
+        if: github.ref_name == 'master'
         with:
-          release: latest
+          name: latest
+          tag_name: latest
           message: Caprice32 latest
           body: Latest build of Caprice 32, with the newest cool features and the most recent bugs.
           files: release/cap32-win64.zip
+          fail_on_unmatched_files: true
+          draft: false
           prerelease: false
+          make_latest: true
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Publish release
