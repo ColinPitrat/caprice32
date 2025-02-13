@@ -40,8 +40,8 @@ jobs:
           make ARCH=win64 CXX=g++ WINE=\"\" CFLAGS="-ID:/a/_temp/msys64/mingw64/include/ -Ii686-linux-gnu-capsimage/include" WITH_IPF=true -j 4 -k
           make ARCH=win64 CXX=g++ WINE=\"\" CFLAGS="-ID:/a/_temp/msys64/mingw64/include/ -Ii686-linux-gnu-capsimage/include" WINE=\"\" WITH_IPF=true -j 4 -k unit_test
           make ARCH=win64 CXX=g++ WINE=\"\" CFLAGS="-ID:/a/_temp/msys64/mingw64/include/ -Ii686-linux-gnu-capsimage/include" WINE=\"\" WITH_IPF=true -j 4 -k e2e_test
-          ./test/integrated/test_win_package.sh win64 || true
-          ./test/integrated/test_win_deps.sh win64 || true
+          ./test/integrated/test_win_package.sh win64
+          ./test/integrated/test_win_deps.sh win64
 
       # TODO: Build and publish cap32-win32.zip
       # TODO: Build and publish cap32-macos.zip
@@ -62,12 +62,16 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Publish release
-        uses: ColinPitrat/update-release@master
-        if: ${{ startsWith('v', github.ref_name) }}
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref_name, 'v')
         with:
-          release: ${{ github.ref }}
+          name: ${{ github.ref_name }}
+          tag_name: ${{ github.ref_name }}
           message: Caprice32 ${{ github.ref }}
           body: Caprice32 ${{ github.ref }}. Release notes to be added manually.
           files: release/cap32-win64.zip
+          fail_on_unmatched_files: true
+          draft: false
           prerelease: false
+          make_latest: true
           token: ${{ secrets.GITHUB_TOKEN }}
