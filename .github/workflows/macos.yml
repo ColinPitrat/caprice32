@@ -19,7 +19,7 @@ jobs:
 
       - name: Publish latest
         uses: softprops/action-gh-release@v2
-        if: github.ref_name == 'master'
+        if: github.ref == 'refs/tags/master'
         with:
           name: latest
           tag_name: latest
@@ -36,7 +36,7 @@ jobs:
 
       - name: Publish release
         uses: softprops/action-gh-release@v2
-        if: startsWith(github.ref_name, 'v')
+        if: startsWith(github.ref, 'refs/tags/v')
         with:
           name: ${{ github.ref_name }}
           tag_name: ${{ github.ref_name }}
