@@ -19,7 +19,7 @@ jobs:
 
       - name: Publish latest
         uses: softprops/action-gh-release@v2
-        if: github.ref == 'refs/tags/master'
+        if: github.ref == 'refs/tags/latest'
         with:
           name: latest
           tag_name: latest
