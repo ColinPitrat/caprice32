@@ -34,7 +34,7 @@ jobs:
       # MacOS & Windows build will create the release and upload artifacts to it
       # when they'll be called to build the tag itself.
       - if: github.ref_name == 'master'
-        uses: dev-drprasad/delete-tag-and-release@v0.2.0
+        uses: dev-drprasad/delete-tag-and-release@v1.1
         with:
           delete_release: false
           tag_name: "latest"
