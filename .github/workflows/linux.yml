@@ -33,6 +33,14 @@ jobs:
       # Linux build is responsible for pushing the latest tag.
       # MacOS & Windows build will create the release and upload artifacts to it
       # when they'll be called to build the tag itself.
+      #
+      # We have to use a dedicated access token because events raised by workflows
+      # using GITHUB_TOKEN do not trigger other workflows:
+      # https://help.github.com/en/actions/automating-your-workflow-with-github-actions/events-that-trigger-workflows#about-workflow-events
+      # To create the token, see:
+      # https://docs.github.com/en/github/authenticating-to-github/creating-a-personal-access-token
+      # And then to create the secret containing it, see:
+      # https://docs.github.com/en/actions/reference/encrypted-secrets#creating-encrypted-secrets-for-a-repository
       - if: github.ref_name == 'master'
         uses: dev-drprasad/delete-tag-and-release@v1.1
         with:
@@ -44,4 +52,4 @@ jobs:
         if: github.ref_name == 'master'
         with:
           tag: latest
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          repo-token: ${{ secrets.LATEST_TOKEN }}
