@@ -112,8 +112,11 @@ If the mapping file is not defined or not found, Caprice32 will default to a sta
 .SH OPTIONS
 .PP
 .TP
-\fB\-a\fR, \fB\-\-autocmd\fR=\fICOMMAND\fR
+\fB\-a\fR, \fB\-\-autocmd\fR=\fICOMMAND\fR | \fI@FILENAME\fR
 pass command to execute to the emulator. The option can be repeated to pass multiple commands. For example: cap32 -a 'print "Hello"' -a 'print "World"'
+.RS
+with prefix "@", a filename is specified. All commands in the file are passed. For example: cap32 -a '@/tmp/cmd.txt'
+.RE
 .TP
 \fB\-c\fR, \fB\-\-cfg_file\fR=\fIFILE\fR
 use FILE as the emulator configuration file.
