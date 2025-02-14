@@ -7,8 +7,8 @@ jobs:
     strategy:
       matrix:
         include:
-         - { version: MINGW32, env: i686, arch: win32 }
-         - { version: MINGW64, env: x86_64, arch: win64 }
+         - { version: MINGW32, mingw: mingw32, arch: win32, env: i686 }
+         - { version: MINGW64, mingw: mingw64, arch: win64, env: x86_64 }
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v2
@@ -22,15 +22,15 @@ jobs:
             git
             make
             zip
-            mingw64/mingw-w64-${{matrix.env}}-diffutils
-            mingw64/mingw-w64-${{matrix.env}}-freetype
-            mingw64/mingw-w64-${{matrix.env}}-libpng
-            mingw64/mingw-w64-${{matrix.env}}-pkg-config
-            mingw64/mingw-w64-${{matrix.env}}-SDL2
-            mingw64/mingw-w64-${{matrix.env}}-toolchain
-            mingw64/mingw-w64-${{matrix.env}}-zlib
-            mingw64/mingw-w64-${{matrix.env}}-7zip
-      # This is awful but we have to pass the mingw64/include directory so that
+            ${{matrix.mingw}}/mingw-w64-${{matrix.env}}-diffutils
+            ${{matrix.mingw}}/mingw-w64-${{matrix.env}}-freetype
+            ${{matrix.mingw}}/mingw-w64-${{matrix.env}}-libpng
+            ${{matrix.mingw}}/mingw-w64-${{matrix.env}}-pkg-config
+            ${{matrix.mingw}}/mingw-w64-${{matrix.env}}-SDL2
+            ${{matrix.mingw}}/mingw-w64-${{matrix.env}}-toolchain
+            ${{matrix.mingw}}/mingw-w64-${{matrix.env}}-zlib
+            ${{matrix.mingw}}/mingw-w64-${{matrix.env}}-7zip
+      # This is awful but we have to pass the mingw{32,64}/include directory so that
       # zlib.h can be found because pkg-config doesn't return any cflags for
       # zlib.
       - name: Build caprice
@@ -39,12 +39,12 @@ jobs:
           IPF_LINUX_URL: "http://www.softpres.org/_media/files:ipflib42_linux-i686.tar.gz"
           IPF_WIN_URL: "http://www.softpres.org/_media/files:ipflib42_win_x64.zip"
         run: |
-          make ARCH=${{matrix.arch}} CXX=g++ WINE=\"\" CFLAGS="-ID:/a/_temp/msys64/mingw64/include/" debug -j 4 -k
+          make ARCH=${{matrix.arch}} CXX=g++ WINE=\"\" CFLAGS="-ID:/a/_temp/msys64/${{matrix.mingw}}/include/" debug -j 4 -k
           wget "$IPF_LINUX_URL" -O ipflib42_linux-i686.tar.gz && 7z x ipflib42_linux-i686.tar.gz && 7z x ipflib42_linux-i686.tar && cd i686-linux-gnu-capsimage/ && ln -s libcapsimage.so.4.2 libcapsimage.so.4 && ln -s libcapsimage.so.4.2 libcapsimage.so && cd ..
-          make ARCH=${{matrix.arch}} CXX=g++ WINE=\"\" CFLAGS="-ID:/a/_temp/msys64/mingw64/include/" -j 4 clean
-          make ARCH=${{matrix.arch}} CXX=g++ WINE=\"\" CFLAGS="-ID:/a/_temp/msys64/mingw64/include/ -Ii686-linux-gnu-capsimage/include" WITH_IPF=true -j 4 -k
-          make ARCH=${{matrix.arch}} CXX=g++ WINE=\"\" CFLAGS="-ID:/a/_temp/msys64/mingw64/include/ -Ii686-linux-gnu-capsimage/include" WINE=\"\" WITH_IPF=true -j 4 -k unit_test
-          make ARCH=${{matrix.arch}} CXX=g++ WINE=\"\" CFLAGS="-ID:/a/_temp/msys64/mingw64/include/ -Ii686-linux-gnu-capsimage/include" WINE=\"\" WITH_IPF=true -j 4 -k e2e_test
+          make ARCH=${{matrix.arch}} CXX=g++ WINE=\"\" CFLAGS="-ID:/a/_temp/msys64/${{matrix.mingw}}/include/" -j 4 clean
+          make ARCH=${{matrix.arch}} CXX=g++ WINE=\"\" CFLAGS="-ID:/a/_temp/msys64/${{matrix.mingw}}/include/ -Ii686-linux-gnu-capsimage/include" WITH_IPF=true -j 4 -k
+          make ARCH=${{matrix.arch}} CXX=g++ WINE=\"\" CFLAGS="-ID:/a/_temp/msys64/${{matrix.mingw}}/include/ -Ii686-linux-gnu-capsimage/include" WINE=\"\" WITH_IPF=true -j 4 -k unit_test
+          make ARCH=${{matrix.arch}} CXX=g++ WINE=\"\" CFLAGS="-ID:/a/_temp/msys64/${{matrix.mingw}}/include/ -Ii686-linux-gnu-capsimage/include" WINE=\"\" WITH_IPF=true -j 4 -k e2e_test
           ./test/integrated/test_win_package.sh ${{matrix.arch}}
           ./test/integrated/test_win_deps.sh ${{matrix.arch}}
 
