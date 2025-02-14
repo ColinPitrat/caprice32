@@ -41,13 +41,16 @@ jobs:
       # https://docs.github.com/en/github/authenticating-to-github/creating-a-personal-access-token
       # And then to create the secret containing it, see:
       # https://docs.github.com/en/actions/reference/encrypted-secrets#creating-encrypted-secrets-for-a-repository
-      - if: github.ref_name == 'master'
-        uses: dev-drprasad/delete-tag-and-release@v1.1
-        with:
-          delete_release: false
-          tag_name: "latest"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #
+      ## Unfortunately we have to delete the release as otherwise draft releases pile-up.
+      ## I really don't like it because this means the latest release disappears on each push on master.
+      #- if: github.ref_name == 'master'
+      #  uses: dev-drprasad/delete-tag-and-release@v1.1
+      #  with:
+      #    delete_release: true
+      #    tag_name: "latest"
+      #  env:
+      #    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - uses: tvdias/github-tagger@v0.0.1
         if: github.ref_name == 'master'
         with:
