@@ -229,7 +229,7 @@ endif
 	cp -r resources/ rom/ licenses/ $(ARCHIVE)/
 	zip -r $(ARCHIVE).zip $(ARCHIVE)
 	# TODO: Remove: for debugging only
-	nm -A $(ARCHIVE)/$(TARGET)
+	ldd $(ARCHIVE)/$(TARGET)
 
 install: $(TARGET)
 
