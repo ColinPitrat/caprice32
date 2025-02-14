@@ -4,12 +4,17 @@ on: [push]
 
 jobs:
   build:
+    strategy:
+      matrix:
+        include:
+         - { version: MINGW32, env: i686, arch: win32 }
+         - { version: MINGW64, env: x86_64, arch: win64 }
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v2
       - uses: msys2/setup-msys2@v2
         with:
-          msystem: MINGW64
+          msystem: ${{ matrix.version }}
           update: true
           install: >-
             ctags
@@ -17,14 +22,14 @@ jobs:
             git
             make
             zip
-            mingw64/mingw-w64-x86_64-diffutils
-            mingw64/mingw-w64-x86_64-freetype
-            mingw64/mingw-w64-x86_64-libpng
-            mingw64/mingw-w64-x86_64-pkg-config
-            mingw64/mingw-w64-x86_64-SDL2
-            mingw64/mingw-w64-x86_64-toolchain
-            mingw64/mingw-w64-x86_64-zlib
-            mingw64/mingw-w64-x86_64-7zip
+            mingw64/mingw-w64-${{matrix.env}}-diffutils
+            mingw64/mingw-w64-${{matrix.env}}-freetype
+            mingw64/mingw-w64-${{matrix.env}}-libpng
+            mingw64/mingw-w64-${{matrix.env}}-pkg-config
+            mingw64/mingw-w64-${{matrix.env}}-SDL2
+            mingw64/mingw-w64-${{matrix.env}}-toolchain
+            mingw64/mingw-w64-${{matrix.env}}-zlib
+            mingw64/mingw-w64-${{matrix.env}}-7zip
       # This is awful but we have to pass the mingw64/include directory so that
       # zlib.h can be found because pkg-config doesn't return any cflags for
       # zlib.
@@ -34,18 +39,15 @@ jobs:
           IPF_LINUX_URL: "http://www.softpres.org/_media/files:ipflib42_linux-i686.tar.gz"
           IPF_WIN_URL: "http://www.softpres.org/_media/files:ipflib42_win_x64.zip"
         run: |
-          make ARCH=win64 CXX=g++ WINE=\"\" CFLAGS="-ID:/a/_temp/msys64/mingw64/include/" debug -j 4 -k
+          make ARCH=${{matrix.arch}} CXX=g++ WINE=\"\" CFLAGS="-ID:/a/_temp/msys64/mingw64/include/" debug -j 4 -k
           wget "$IPF_LINUX_URL" -O ipflib42_linux-i686.tar.gz && 7z x ipflib42_linux-i686.tar.gz && 7z x ipflib42_linux-i686.tar && cd i686-linux-gnu-capsimage/ && ln -s libcapsimage.so.4.2 libcapsimage.so.4 && ln -s libcapsimage.so.4.2 libcapsimage.so && cd ..
-          make ARCH=win64 CXX=g++ WINE=\"\" CFLAGS="-ID:/a/_temp/msys64/mingw64/include/" -j 4 clean
-          make ARCH=win64 CXX=g++ WINE=\"\" CFLAGS="-ID:/a/_temp/msys64/mingw64/include/ -Ii686-linux-gnu-capsimage/include" WITH_IPF=true -j 4 -k
-          make ARCH=win64 CXX=g++ WINE=\"\" CFLAGS="-ID:/a/_temp/msys64/mingw64/include/ -Ii686-linux-gnu-capsimage/include" WINE=\"\" WITH_IPF=true -j 4 -k unit_test
-          make ARCH=win64 CXX=g++ WINE=\"\" CFLAGS="-ID:/a/_temp/msys64/mingw64/include/ -Ii686-linux-gnu-capsimage/include" WINE=\"\" WITH_IPF=true -j 4 -k e2e_test
-          ./test/integrated/test_win_package.sh win64
-          ./test/integrated/test_win_deps.sh win64
+          make ARCH=${{matrix.arch}} CXX=g++ WINE=\"\" CFLAGS="-ID:/a/_temp/msys64/mingw64/include/" -j 4 clean
+          make ARCH=${{matrix.arch}} CXX=g++ WINE=\"\" CFLAGS="-ID:/a/_temp/msys64/mingw64/include/ -Ii686-linux-gnu-capsimage/include" WITH_IPF=true -j 4 -k
+          make ARCH=${{matrix.arch}} CXX=g++ WINE=\"\" CFLAGS="-ID:/a/_temp/msys64/mingw64/include/ -Ii686-linux-gnu-capsimage/include" WINE=\"\" WITH_IPF=true -j 4 -k unit_test
+          make ARCH=${{matrix.arch}} CXX=g++ WINE=\"\" CFLAGS="-ID:/a/_temp/msys64/mingw64/include/ -Ii686-linux-gnu-capsimage/include" WINE=\"\" WITH_IPF=true -j 4 -k e2e_test
+          ./test/integrated/test_win_package.sh ${{matrix.arch}}
+          ./test/integrated/test_win_deps.sh ${{matrix.arch}}
 
-      # TODO: Build and publish cap32-win32.zip
-      # TODO: Build and publish cap32-macos.zip
-      # TODO: Build and publish Caprice32.dmg
       - name: Publish latest
         uses: softprops/action-gh-release@v2
         if: github.ref == 'refs/tags/latest'
@@ -54,7 +56,7 @@ jobs:
           tag_name: latest
           message: Caprice32 latest
           body: Latest build of Caprice 32, with the newest cool features and the most recent bugs.
-          files: release/cap32-win64.zip
+          files: release/cap32-${{matrix.arch}}.zip
           fail_on_unmatched_files: true
           draft: false
           prerelease: false
@@ -69,7 +71,7 @@ jobs:
           tag_name: ${{ github.ref_name }}
           message: Caprice32 ${{ github.ref }}
           body: Caprice32 ${{ github.ref }}. Release notes to be added manually.
-          files: release/cap32-win64.zip
+          files: release/cap32-${{matrix.arch}}.zip
           fail_on_unmatched_files: true
           draft: false
           prerelease: false
