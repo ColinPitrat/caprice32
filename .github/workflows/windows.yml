@@ -13,8 +13,8 @@ jobs:
     strategy:
       matrix:
         include:
-         - { version: MINGW32, mingw: mingw32, arch: win32, env: i686 }
-         - { version: MINGW64, mingw: mingw64, arch: win64, env: x86_64 }
+         - { version: MINGW32, mingw: mingw32, arch: win32, env: i686,   ipf_win_file: ipflib42_w32.zip,     ipf_dll: ipflib42_w32/CAPSImg.dll, ipf_license: ipflib42_w32/LICENSE.txt }
+         - { version: MINGW64, mingw: mingw64, arch: win64, env: x86_64, ipf_win_file: ipflib42_win_x64.zip, ipf_dll: CAPSImg_x64.dll,          ipf_license: LICENSE.txt }
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v2
@@ -43,10 +43,13 @@ jobs:
         shell: msys2 {0}
         env:
           IPF_LINUX_URL: "http://www.softpres.org/_media/files:ipflib42_linux-i686.tar.gz"
-          IPF_WIN_URL: "http://www.softpres.org/_media/files:ipflib42_win_x64.zip"
+          IPF_WIN_URL: "http://www.softpres.org/_media/files:${{matrix.ipf_win_file}}"
+          IPF_DLL_SRC: ${{matrix.ipf_dll}}
+          IPF_LICENCE_SRC: ${{matrix.ipf_license}}
         run: |
           make ARCH=${{matrix.arch}} CXX=g++ WINE=\"\" CFLAGS="-ID:/a/_temp/msys64/${{matrix.mingw}}/include/" debug -j 4 -k
           wget "$IPF_LINUX_URL" -O ipflib42_linux-i686.tar.gz && 7z x ipflib42_linux-i686.tar.gz && 7z x ipflib42_linux-i686.tar && cd i686-linux-gnu-capsimage/ && ln -s libcapsimage.so.4.2 libcapsimage.so.4 && ln -s libcapsimage.so.4.2 libcapsimage.so && cd ..
+          wget "$IPF_WIN_URL" && 7z x *ipflib*zip && cp $IPF_DLL_SRC /${{matrix.mingw}}/bin/ && cp $IPF_LICENCE_SRC c:/projects/caprice32/licenses/CAPSImg\ license.txt
           make ARCH=${{matrix.arch}} CXX=g++ WINE=\"\" CFLAGS="-ID:/a/_temp/msys64/${{matrix.mingw}}/include/" -j 4 clean
           make ARCH=${{matrix.arch}} CXX=g++ WINE=\"\" CFLAGS="-ID:/a/_temp/msys64/${{matrix.mingw}}/include/ -Ii686-linux-gnu-capsimage/include" WITH_IPF=true -j 4 -k
           make ARCH=${{matrix.arch}} CXX=g++ WINE=\"\" CFLAGS="-ID:/a/_temp/msys64/${{matrix.mingw}}/include/ -Ii686-linux-gnu-capsimage/include" WINE=\"\" WITH_IPF=true -j 4 -k unit_test
