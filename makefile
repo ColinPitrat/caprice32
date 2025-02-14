@@ -31,9 +31,11 @@ ifeq ($(ARCH),win64)
 # zlib.h
 COMMON_CFLAGS = -DWINDOWS -D_POSIX_C_SOURCE=200809L -Wno-error=old-style-cast
 PLATFORM=windows
+MINGW_PATH=/mingw64/bin/
 else ifeq ($(ARCH),win32)
 COMMON_CFLAGS = -DWINDOWS -D_POSIX_C_SOURCE=200809L -Wno-error=old-style-cast
 PLATFORM=windows
+MINGW_PATH=/mingw32/bin/
 else ifeq ($(ARCH),old_win64)
 TRIPLE = x86_64-w64-mingw32
 PLATFORM=windows
@@ -218,12 +220,10 @@ distrib: $(TARGET)
 	mkdir -p $(ARCHIVE)
 	rm -f $(ARCHIVE).zip
 	cp $(TARGET) $(ARCHIVE)/
-ifeq ($(VARIANT),old_win)
 	$(foreach DLL,$(DLLS),[ -f $(MINGW_PATH)/bin/$(DLL) ] && cp $(MINGW_PATH)/bin/$(DLL) $(ARCHIVE)/;)
 	cp $(MINGW_PATH)/bin/libgcc_s_*-1.dll $(ARCHIVE)/
 ifdef WITH_IPF
 	cp $(MINGW_PATH)/bin/$(CAPSIPFDLL) $(ARCHIVE)/CAPSImg.dll
-endif
 endif
 	cp cap32.cfg.tmpl cap32.cfg COPYING.txt README.md $(ARCHIVE)/
 	cp -r resources/ rom/ licenses/ $(ARCHIVE)/
