@@ -36,7 +36,7 @@ EOF
 echo "ldd output:"
 ldd cap32.exe
 
-ldd cap32.exe | grep mingw | sed 's/ =>.*//' | sed 's/^[ \t]*//' | sort > ${ACTUAL}
+ldd cap32.exe | grep mingw | sed 's/ =>.*//' | sed 's/^[ \t]*//' | sort -u > ${ACTUAL}
 
 echo "mingw dependencies:"
 cat "${ACTUAL}"
