@@ -1,6 +1,9 @@
 name: MacOS build
 
-on: [push]
+on:
+  push:
+    branches-ignore:
+      - master
 
 jobs:
   macos-build:

@@ -1,6 +1,9 @@
 name: Linux build
 
-on: [push]
+on:
+  push:
+    tags-ignore:
+      - latest
 
 jobs:
   linux-build:
