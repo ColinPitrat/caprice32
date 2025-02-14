@@ -3,6 +3,7 @@ name: Linux build
 on:
   push:
     branches:
+      - '**'
     tags-ignore:
       - latest
 

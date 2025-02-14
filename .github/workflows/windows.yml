@@ -3,6 +3,8 @@ name: Windows build
 on:
   push:
     tags:
+      - 'latest'
+      - 'v*'
     branches-ignore:
       - master
 

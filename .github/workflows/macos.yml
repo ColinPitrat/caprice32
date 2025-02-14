@@ -3,6 +3,8 @@ name: MacOS build
 on:
   push:
     tags:
+      - 'latest'
+      - 'v*'
     branches-ignore:
       - master
 
