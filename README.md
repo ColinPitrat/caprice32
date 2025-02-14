@@ -3,15 +3,13 @@
 
 (c) Copyright 1997-2015 Ulrich Doewich
 
-(c) Copyright 2016-2021 Colin Pitrat
+(c) Copyright 2016-2025 Colin Pitrat
 
 https://github.com/ColinPitrat/caprice32
 
 Linux build: [![Linux build Status](https://github.com/ColinPitrat/caprice32/actions/workflows/linux.yml/badge.svg)](https://github.com/ColinPitrat/caprice32/actions/workflows/linux.yml)
 
 Windows build: [![Windows build Status](https://github.com/ColinPitrat/caprice32/actions/workflows/windows.yml/badge.svg)](https://github.com/ColinPitrat/caprice32/actions/workflows/windows.yml)
-
-Windows release: [![Windows release status](https://ci.appveyor.com/api/projects/status/h795wt2xlttaj6sk?svg=true)](https://ci.appveyor.com/project/ColinPitrat/caprice32)
 
 MacOS build: [![MacOS build status](https://github.com/ColinPitrat/caprice32/actions/workflows/macos.yml/badge.svg)](https://github.com/ColinPitrat/caprice32/actions/workflows/macos.yml)
 
