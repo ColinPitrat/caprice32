@@ -56,8 +56,15 @@ jobs:
       #    tag_name: "latest"
       #  env:
       #    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - uses: tvdias/github-tagger@v0.0.1
+      ## This one requires the tag to be deleted before creating it
+      #- uses: tvdias/github-tagger@v0.0.1
+      #  if: github.ref_name == 'master'
+      #  with:
+      #    tag: latest
+      #    repo-token: ${{ secrets.LATEST_TOKEN }}
+      - uses: richardsimko/update-tag@v1
         if: github.ref_name == 'master'
         with:
-          tag: latest
-          repo-token: ${{ secrets.LATEST_TOKEN }}
+          tag_name: latest
+        env:
+          GITHUB_TOKEN: ${{ secrets.LATEST_TOKEN }}
