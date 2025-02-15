@@ -220,7 +220,7 @@ distrib: $(TARGET)
 	mkdir -p $(ARCHIVE)
 	rm -f $(ARCHIVE).zip
 	cp $(TARGET) $(ARCHIVE)/
-	$(foreach DLL,$(DLLS),[ -f $(MINGW_PATH)/bin/$(DLL) ] && cp $(MINGW_PATH)/bin/$(DLL) $(ARCHIVE)/;)
+	$(foreach DLL,$(DLLS),[ -f $(MINGW_PATH)/bin/$(DLL) ] && cp $(MINGW_PATH)/bin/$(DLL) $(ARCHIVE)/ || (echo "$(MINGW_PATH)/bin/$(DLL) doesn't exist" && false);)
 	cp $(MINGW_PATH)/bin/libgcc_s_*-1.dll $(ARCHIVE)/
 ifdef WITH_IPF
 	cp $(MINGW_PATH)/bin/$(CAPSIPFDLL) $(ARCHIVE)/CAPSImg.dll
