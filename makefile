@@ -225,6 +225,7 @@ distrib: $(TARGET)
 	$(foreach DLL,$(DLLS),[ -f $(MINGW_PATH)/bin/$(DLL) ] && cp $(MINGW_PATH)/bin/$(DLL) $(ARCHIVE)/ || (echo "$(MINGW_PATH)/bin/$(DLL) doesn't exist" && false);)
 	cp $(MINGW_PATH)/bin/libgcc_s_*-1.dll $(ARCHIVE)/
 ifdef WITH_IPF
+	ls $(MINGW_PATH)/bin/
 	cp $(MINGW_PATH)/bin/$(CAPSIPFDLL) $(ARCHIVE)/CAPSImg.dll
 endif
 	cp cap32.cfg.tmpl cap32.cfg COPYING.txt README.md $(ARCHIVE)/
