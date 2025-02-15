@@ -38,16 +38,6 @@ COMMON_CFLAGS = -DWINDOWS -D_POSIX_C_SOURCE=200809L -Wno-error=old-style-cast
 PLATFORM=windows
 MINGW_PATH=/mingw32
 CAPSIPFDLL=CAPSImg.dll
-else ifeq ($(ARCH),old_win64)
-TRIPLE = x86_64-w64-mingw32
-PLATFORM=windows
-VARIANT=old_win
-CAPSIPFDLL=CAPSImg_x64.dll
-else ifeq ($(ARCH),old_win32)
-TRIPLE = i686-w64-mingw32
-PLATFORM=windows
-VARIANT=old_win
-CAPSIPFDLL=CAPSImg.dll
 else ifeq ($(ARCH),linux)
 PLATFORM=linux
 else ifeq ($(ARCH),macos)
@@ -74,13 +64,6 @@ IPATHS = -Isrc/ -Isrc/gui/includes `pkg-config --cflags freetype2` `sdl2-config 
 LIBS = `sdl2-config --libs` `pkg-config --libs freetype2` `pkg-config --libs libpng` `pkg-config --libs zlib`
 CXX ?= g++
 COMMON_CFLAGS += -fPIC
-
-ifeq ($(VARIANT),old_win)
-MINGW_PATH = /usr/$(TRIPLE)
-IPATHS = -Isrc/ -Isrc/gui/includes -I$(MINGW_PATH)/include -I$(MINGW_PATH)/include/SDL2 -I$(MINGW_PATH)/include/freetype2
-LIBS = $(MINGW_PATH)/lib/libSDL2.dll.a $(MINGW_PATH)/lib/libSDL2main.a $(MINGW_PATH)/lib/libfreetype.dll.a $(MINGW_PATH)/lib/libz.dll.a $(MINGW_PATH)/lib/libpng16.dll.a $(MINGW_PATH)/lib/libpng.dll.a
-CXX ?= $(TRIPLE)-g++
-endif
 
 ifneq (,$(findstring g++,$(CXX)))
 LIBS += -lstdc++fs
@@ -112,7 +95,9 @@ CLANG_CHECKS=modernize-*,performance-*,misc-*,readability-*,-misc-definitions-in
 SRCDIR:=src
 TSTDIR:=test
 OBJDIR:=obj/$(ARCH)
-ARCHIVE = release/cap32-$(ARCH)
+RELEASE_DIR = release
+ARCHIVE = cap32-$(ARCH)
+ARCHIVE_DIR = $(RELEASE_DIR)/$(ARCHIVE)
 
 HTML_DOC:=doc/man.html
 GROFF_DOC:=doc/man6/cap32.6
@@ -219,20 +204,18 @@ DLLS = SDL2.dll libbz2-1.dll libfreetype-6.dll libpng16-16.dll libstdc++-6.dll \
 			 libbrotlidec.dll libbrotlicommon.dll
 
 distrib: $(TARGET)
-	mkdir -p $(ARCHIVE)
-	rm -f $(ARCHIVE).zip
-	cp $(TARGET) $(ARCHIVE)/
-	$(foreach DLL,$(DLLS),[ -f $(MINGW_PATH)/bin/$(DLL) ] && cp $(MINGW_PATH)/bin/$(DLL) $(ARCHIVE)/ || (echo "$(MINGW_PATH)/bin/$(DLL) doesn't exist" && false);)
-	cp $(MINGW_PATH)/bin/libgcc_s_*-1.dll $(ARCHIVE)/
+	mkdir -p $(ARCHIVE_DIR)
+	rm -f $(RELEASE_DIR)/$(ARCHIVE).zip
+	cp $(TARGET) $(ARCHIVE_DIR)/
+	$(foreach DLL,$(DLLS),[ -f $(MINGW_PATH)/bin/$(DLL) ] && cp $(MINGW_PATH)/bin/$(DLL) $(ARCHIVE_DIR)/ || (echo "$(MINGW_PATH)/bin/$(DLL) doesn't exist" && false);)
+	cp $(MINGW_PATH)/bin/libgcc_s_*-1.dll $(ARCHIVE_DIR)/
 ifdef WITH_IPF
-	ls $(MINGW_PATH)/bin/
-	cp $(MINGW_PATH)/bin/$(CAPSIPFDLL) $(ARCHIVE)/CAPSImg.dll
+	cp $(MINGW_PATH)/bin/$(CAPSIPFDLL) $(ARCHIVE_DIR)/CAPSImg.dll
 endif
-	cp cap32.cfg.tmpl cap32.cfg COPYING.txt README.md $(ARCHIVE)/
-	cp -r resources/ rom/ licenses/ $(ARCHIVE)/
+	cp cap32.cfg.tmpl cap32.cfg COPYING.txt README.md $(ARCHIVE_DIR)/
+	cp -r resources/ rom/ licenses/ $(ARCHIVE_DIR)/
+	cd $(RELEASE_DIR)
 	zip -r $(ARCHIVE).zip $(ARCHIVE)
-	# TODO: Remove: for debugging only
-	ldd $(ARCHIVE)/$(TARGET)
 
 install: $(TARGET)
 
@@ -242,16 +225,17 @@ ifeq ($(ARCH),macos)
 
 # Create a zip with a cap32 binary that should work launched locally
 distrib: $(TARGET)
-	mkdir -p $(ARCHIVE)
-	rm -f $(ARCHIVE).zip
-	cp $(TARGET) $(ARCHIVE)/
-	cp -r rom resources doc licenses $(ARCHIVE)
-	cp cap32.cfg README.md COPYING.txt $(ARCHIVE)
+	mkdir -p $(ARCHIVE_DIR)
+	rm -f $(RELEASE_DIR)/$(ARCHIVE).zip
+	cp $(TARGET) $(ARCHIVE_DIR)/
+	cp -r rom resources doc licenses $(ARCHIVE_DIR)
+	cp cap32.cfg README.md COPYING.txt $(ARCHIVE_DIR)
+	cd $(RELEASE_DIR)
 	zip -r $(ARCHIVE).zip $(ARCHIVE)
 
 else
 
-SRC_PACKAGE_DIR=$(ARCHIVE)/caprice32-$(VERSION)
+SRC_PACKAGE_DIR=$(ARCHIVE_DIR)/caprice32-$(VERSION)
 
 # Create a debian source package
 distrib: $(TARGET)
@@ -259,8 +243,8 @@ distrib: $(TARGET)
 	rm -fr $(SRC_PACKAGE_DIR)/*
 	cp -r src rom resources doc licenses debian $(SRC_PACKAGE_DIR)
 	cp main.cpp cap32.cfg.tmpl cap32.cfg makefile README.md INSTALL.md COPYING.txt $(SRC_PACKAGE_DIR)
-	tar jcf $(SRC_PACKAGE_DIR).tar.bz2 -C $(ARCHIVE) caprice32-$(VERSION)
-	ln -s caprice32-$(VERSION).tar.bz2 $(ARCHIVE)/caprice32_$(VERSION).orig.tar.bz2 || true
+	tar jcf $(SRC_PACKAGE_DIR).tar.bz2 -C $(ARCHIVE_DIR) caprice32-$(VERSION)
+	ln -s caprice32-$(VERSION).tar.bz2 $(ARCHIVE_DIR)/caprice32_$(VERSION).orig.tar.bz2 || true
 
 endif  # ARCH =? macos
 
@@ -311,10 +295,10 @@ $(TEST_TARGET): $(OBJECTS) $(TEST_OBJECTS) $(OBJDIR)/$(GTEST_DIR)/src/gtest-all.
 
 ifeq ($(PLATFORM),windows)
 unit_test: $(TEST_TARGET) distrib
-	cp $(TEST_TARGET) $(ARCHIVE)/
-	rm -fr $(ARCHIVE)/test
-	ln -s -f ../../test $(ARCHIVE)/test
-	cd $(ARCHIVE) && ./$(TEST_TARGET) --gtest_shuffle
+	cp $(TEST_TARGET) $(ARCHIVE_DIR)/
+	rm -fr $(ARCHIVE_DIR)/test
+	ln -s -f ../../test $(ARCHIVE_DIR)/test
+	cd $(ARCHIVE_DIR) && ./$(TEST_TARGET) --gtest_shuffle
 
 e2e_test: $(TARGET)
 	cd test/integrated && ./run_tests.sh
@@ -329,8 +313,8 @@ endif
 deb_pkg: all
 	# Both changelog files need to be patched with the proper version !
 	sed -i "1s/(.*)/($(VERSION)-$(REVISION))/" debian/changelog
-	sed -i "1s/(.*)/($(VERSION)-$(REVISION))/" $(ARCHIVE)/caprice32-$(VERSION)/debian/changelog
-	cd $(ARCHIVE)/caprice32-$(VERSION)/debian && debuild -e CXX -us -uc --lintian-opts --profile debian
+	sed -i "1s/(.*)/($(VERSION)-$(REVISION))/" $(ARCHIVE_DIR)/caprice32-$(VERSION)/debian/changelog
+	cd $(ARCHIVE_DIR)/caprice32-$(VERSION)/debian && debuild -e CXX -us -uc --lintian-opts --profile debian
 
 BUNDLE_DIR=release/cap32-macos-bundle/Caprice32.app
 macos_bundle: all
