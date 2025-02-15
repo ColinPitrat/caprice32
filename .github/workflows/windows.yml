@@ -49,7 +49,7 @@ jobs:
         run: |
           make ARCH=${{matrix.arch}} CXX=g++ WINE=\"\" CFLAGS="-ID:/a/_temp/msys64/${{matrix.mingw}}/include/" debug -j 4 -k
           wget "$IPF_LINUX_URL" -O ipflib42_linux-i686.tar.gz && 7z x ipflib42_linux-i686.tar.gz && 7z x ipflib42_linux-i686.tar && cd i686-linux-gnu-capsimage/ && ln -s libcapsimage.so.4.2 libcapsimage.so.4 && ln -s libcapsimage.so.4.2 libcapsimage.so && cd ..
-          wget "$IPF_WIN_URL" && 7z x *ipflib*zip && cp $IPF_DLL_SRC /${{matrix.mingw}}/bin/ && cp $IPF_LICENCE_SRC licenses/CAPSImg\ license.txt
+          wget "$IPF_WIN_URL" && 7z x -y *ipflib*zip && cp $IPF_DLL_SRC /${{matrix.mingw}}/bin/ && cp $IPF_LICENCE_SRC licenses/CAPSImg\ license.txt
           make ARCH=${{matrix.arch}} CXX=g++ WINE=\"\" CFLAGS="-ID:/a/_temp/msys64/${{matrix.mingw}}/include/" -j 4 clean
           make ARCH=${{matrix.arch}} CXX=g++ WINE=\"\" CFLAGS="-ID:/a/_temp/msys64/${{matrix.mingw}}/include/ -Ii686-linux-gnu-capsimage/include" WITH_IPF=true -j 4 -k
           make ARCH=${{matrix.arch}} CXX=g++ WINE=\"\" CFLAGS="-ID:/a/_temp/msys64/${{matrix.mingw}}/include/ -Ii686-linux-gnu-capsimage/include" WINE=\"\" WITH_IPF=true -j 4 -k unit_test
