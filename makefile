@@ -214,8 +214,7 @@ ifdef WITH_IPF
 endif
 	cp cap32.cfg.tmpl cap32.cfg COPYING.txt README.md $(ARCHIVE_DIR)/
 	cp -r resources/ rom/ licenses/ $(ARCHIVE_DIR)/
-	cd $(RELEASE_DIR)
-	zip -r $(ARCHIVE).zip $(ARCHIVE)
+	cd $(RELEASE_DIR) && zip -r $(ARCHIVE).zip $(ARCHIVE)
 
 install: $(TARGET)
 
@@ -230,8 +229,7 @@ distrib: $(TARGET)
 	cp $(TARGET) $(ARCHIVE_DIR)/
 	cp -r rom resources doc licenses $(ARCHIVE_DIR)
 	cp cap32.cfg README.md COPYING.txt $(ARCHIVE_DIR)
-	cd $(RELEASE_DIR)
-	zip -r $(ARCHIVE).zip $(ARCHIVE)
+	cd $(RELEASE_DIR) && zip -r $(ARCHIVE).zip $(ARCHIVE)
 
 else
 
