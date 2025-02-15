@@ -31,11 +31,11 @@ ifeq ($(ARCH),win64)
 # zlib.h
 COMMON_CFLAGS = -DWINDOWS -D_POSIX_C_SOURCE=200809L -Wno-error=old-style-cast
 PLATFORM=windows
-MINGW_PATH=/mingw64/bin/
+MINGW_PATH=/mingw64/
 else ifeq ($(ARCH),win32)
 COMMON_CFLAGS = -DWINDOWS -D_POSIX_C_SOURCE=200809L -Wno-error=old-style-cast
 PLATFORM=windows
-MINGW_PATH=/mingw32/bin/
+MINGW_PATH=/mingw32/
 else ifeq ($(ARCH),old_win64)
 TRIPLE = x86_64-w64-mingw32
 PLATFORM=windows
