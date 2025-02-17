@@ -24,7 +24,7 @@ F9 - Limit speed
 F10 - Quit
 Shift + F1 - Virtual keyboard
 Shift + F2 - Developers' tools
-Shift + F3 - Save machine snapshot youhou
+Shift + F3 - Save machine snapshot
 Shift + F4 - Load last snapshot
 Shift + F7 - Activate phazer)";
 
