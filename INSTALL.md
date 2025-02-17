@@ -10,7 +10,7 @@ You will need the following to successfully compile an executable:
 
 # Compiling
 
-### Linux target:
+### Linux/macOS target:
 
 To build with default options, use :
 
@@ -244,7 +244,7 @@ Caprice32 supports IPF file format (http://www.softpres.org/).
 To enable it, you need to first download the proper package from http://softpres.org/download (under "User Distribution").
 You need version 4.2 at least.
 
-#### On Linux
+#### On Linux/macOS
 
 Unpack the package and copy the library and headers in a place where they will be found by the compilation.
 Typically:
