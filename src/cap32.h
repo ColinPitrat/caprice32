@@ -250,9 +250,7 @@ typedef struct {
 
    std::string dsk_path;
    std::string drvA_file;
-   unsigned int drvA_format;
    std::string drvB_file;
-   unsigned int drvB_format;
 
    std::string tape_path;
    std::string tape_file;
