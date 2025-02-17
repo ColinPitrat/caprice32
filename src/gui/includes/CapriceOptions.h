@@ -123,8 +123,6 @@ namespace wGui
       CLabel* m_pLabelDriveAFormat;
       CDropDown* m_pDropDownDriveBFormat;
       CLabel* m_pLabelDriveBFormat;
-      CButton* m_pButtonDriveAFormat;
-      CButton* m_pButtonDriveBFormat;
 
       // Input options
       CLabel* m_pLabelCPCLanguage;
