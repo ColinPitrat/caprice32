@@ -31,6 +31,36 @@ Alternatively, the debug target also work:
 
 `make debug`
 
+### How to compile on macOS
+
+This was tested for macOS Sequoia 15.1.
+
+You will need SDL installed. Install brew if you don't have it. Then:
+
+`brew install SDL`
+
+Use make to build:
+
+`make`
+
+After a while you will get the executable.
+
+The usual way to organize disk/tape/cartridge images and snapshots is to create directories `disk`, `tape`, `cart` and `snap`:
+
+`mkdir disk tape cart snap`
+
+Start the emulator with:
+
+`./cap32`
+
+or
+
+`./cap32 <file>`
+
+where `file` can be a `.dsk`, `.voc`, `.cdt`, `.cpr`, `.sna` or a `.zip` containing one of these files.
+
+See "Using the emulator" below for information on how to use Caprice.
+
 ### Troubleshooting
 
 If you encounter an error like:
@@ -242,4 +272,27 @@ You can then run an IPF file as you would do for a DSK file:
 #### On Windows
 
 The windows builds available in releases include IPF support.
+
+# Using the emulator
+
+F1 provides the emulator's main menu. The `About` section contains a list of shortcuts.
+
+To get a list of supported command line flags:
+`cap32 --help` 
+
+These flags can be useful to automate things.
+
+Once in the emulator, you can type F1 and then "Load/Save" to:
+ - Load an image of a disk, tape, cartridge
+ - Load an emulator state from a snapshot
+ - Insert a new (empty) disk
+ - Save a disk
+ - Save the emulator's state in a snapshot
+
+By default, Caprice uses CPC 6128 which is on disk by default. To see what's on a disk loaded in drive A, type `cat`.
+
+To start a program, type `run"program`.
+
+You can find more details on the web. CPCWiki is full of nice resources, in particular the user manual which is a good start:
+https://www.cpcwiki.eu/index.php/User_Manual
 
