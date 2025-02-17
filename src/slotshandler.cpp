@@ -626,6 +626,10 @@ int dsk_save (const std::string &filename, t_drive *drive)
    t_track_header th;
    dword track, side, pos, sector;
 
+   // If there are no tracks, don't save
+   if (drive->tracks==0) {
+      return ERR_DSK_WRITE;
+   }
    if ((pfileObject = fopen(filename.c_str(), "wb")) != nullptr) {
       memset(&dh, 0, sizeof(dh));
       memcpy(dh.id, "EXTENDED CPC DSK File\r\nDisk-Info\r\n", sizeof(dh.id));
@@ -1289,7 +1293,7 @@ int tape_insert_voc (FILE *pfile)
                   bByte = 0;
                }
             }
-	    delete [] pbVocDataBlock;
+            delete [] pbVocDataBlock;
             break;
          case 0x3: // silence
             iBlockLength = 4;
@@ -1383,4 +1387,3 @@ int file_load(const std::string& filepath, const DRIVE drive)
   LOG_ERROR("File format unsupported for " << filepath);
   return ERR_FILE_UNSUPPORTED;
 }
-
