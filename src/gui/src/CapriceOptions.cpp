@@ -34,7 +34,7 @@ CapriceOptions::CapriceOptions(const CRect& WindowRect, CWindow* pParent, CFontE
     m_pNavigationBar->AddItem(SNavBarItem("ROMs",    CPC.resources_path + "/rom.bmp"));
     m_pNavigationBar->AddItem(SNavBarItem("Video",   CPC.resources_path + "/video.bmp"));
     m_pNavigationBar->AddItem(SNavBarItem("Audio",   CPC.resources_path + "/audio.bmp"));
-    m_pNavigationBar->AddItem(SNavBarItem("Disk",    CPC.resources_path + "/disk.bmp"));
+    //m_pNavigationBar->AddItem(SNavBarItem("Disk",    CPC.resources_path + "/disk.bmp"));
     m_pNavigationBar->AddItem(SNavBarItem("Input",   CPC.resources_path + "/input.bmp"));
     m_pNavigationBar->SelectItem(0);
     m_pNavigationBar->SetIsFocusable(true);
@@ -52,7 +52,7 @@ CapriceOptions::CapriceOptions(const CRect& WindowRect, CWindow* pParent, CFontE
     TabMap["expansion"] = m_pGroupBoxTabExpansion;
     TabMap["video"] = m_pGroupBoxTabVideo;
     TabMap["audio"] = m_pGroupBoxTabAudio;
-    TabMap["disk"] = m_pGroupBoxTabDisk;
+    //TabMap["disk"] = m_pGroupBoxTabDisk;
     TabMap["input"] = m_pGroupBoxTabInput;
 
     // ---------------- 'General' Options ----------------
@@ -424,11 +424,13 @@ bool CapriceOptions::HandleMessage(CMessage* pMessage)
                          EnableTab("audio");
                          break;
                        }
+             /*
               case 4 : { // 'Disk'
                          EnableTab("disk");
                          break;
                        }
-              case 5 : { // 'Input'
+                       */
+              case 4 : { // 'Input'
                          EnableTab("input");
                          break;
                        }

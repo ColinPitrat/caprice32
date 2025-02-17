@@ -26,6 +26,7 @@ namespace wGui
         bool HandleMessage(CMessage* pMessage) override;
         std::string simplifyDirPath(std::string path);
         void UpdateFilesList();
+        void UpdateActionsList();
         bool MatchCurrentFileSpec(const char* filename);
 
       protected:
@@ -36,6 +37,8 @@ namespace wGui
         CDropDown *m_pTypeValue;
         CLabel   *m_pActionLabel;
         CDropDown *m_pActionValue;
+        CLabel   *m_pFormatLabel;
+        CDropDown *m_pFormatValue;
         CLabel   *m_pDirectoryLabel;
         CEditBox *m_pDirectoryValue;
         CListBox *m_pFilesList;

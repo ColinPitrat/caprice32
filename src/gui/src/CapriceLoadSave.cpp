@@ -44,7 +44,7 @@ extern t_drive driveB;
 namespace wGui {
 
 CapriceLoadSave::CapriceLoadSave(const CRect& WindowRect, CWindow* pParent, CFontEngine* pFontEngine) :
-  CFrame(WindowRect, pParent, pFontEngine, "Load / Save", false)
+  CFrame(WindowRect, pParent, pFontEngine, "Load / Save / Insert new disk", false)
 {
   SetModal(true);
   // Make this window listen to incoming CTRL_VALUECHANGE messages (used for updating drop down values)
@@ -53,7 +53,7 @@ CapriceLoadSave::CapriceLoadSave(const CRect& WindowRect, CWindow* pParent, CFon
 
   // File type (.SNA, .DSK, .TAP, .VOC)
   m_pTypeLabel = new CLabel(          CPoint(15, 25),             this, "File type: ");
-  m_pTypeValue = new CDropDown( CRect(CPoint(80, 20), 150, 20),    this, false);
+  m_pTypeValue = new CDropDown( CRect(CPoint(70, 20), 100, 20),    this, false);
 #ifndef WITH_IPF
   m_pTypeValue->AddItem(SListItem("Drive A (.dsk)"));
   m_pTypeValue->AddItem(SListItem("Drive B (.dsk)"));
@@ -71,34 +71,44 @@ CapriceLoadSave::CapriceLoadSave(const CRect& WindowRect, CWindow* pParent, CFon
 
   // Action: load / save
   m_pActionLabel = new CLabel(          CPoint(15, 55),             this, "Action: ");
-  m_pActionValue = new CDropDown( CRect(CPoint(80, 50), 150, 20),   this, false);
-  m_pActionValue->AddItem(SListItem("Load"));
-  m_pActionValue->AddItem(SListItem("Save"));
-  m_pActionValue->SetListboxHeight(2);
+  m_pActionValue = new CDropDown( CRect(CPoint(70, 50), 100, 20),   this, false);
+  UpdateActionsList();
   m_pActionValue->SelectItem(0);
   m_pActionValue->SetIsFocusable(true);
 
+  // For new disks: format to use.
+  // Same placement as directory (except shorter).
+  m_pFormatLabel = new CLabel(         CPoint(15, 85),            this, "Format: ");
+  m_pFormatValue = new CDropDown(CRect(CPoint(70, 80), 150, 20),  this, false);
+  m_pFormatValue->AddItem(SListItem("178K Data Format"));
+  m_pFormatValue->AddItem(SListItem("169K Vendor Format"));
+  m_pFormatValue->SetListboxHeight(2);
+  m_pFormatValue->SelectItem(CPC.drvA_format == 0 ? 0 : 1);
+  m_pFormatValue->SetIsFocusable(true);
+  m_pFormatLabel->SetVisible(false);
+  m_pFormatValue->SetVisible(false);
+
   // Directory
   m_pDirectoryLabel = new CLabel(          CPoint(15, 85),             this, "Directory: ");
-  m_pDirectoryValue = new CEditBox( CRect( CPoint(80, 80), 150, 20),    this);
+  m_pDirectoryValue = new CEditBox( CRect( CPoint(70, 80), 250, 20),    this);
   m_pDirectoryValue->SetWindowText(simplifyDirPath(CPC.current_dsk_path));
   m_pDirectoryValue->SetReadOnly(true);
 
   // File list
-  m_pFilesList = new CListBox(CRect(CPoint(80, 115), 150, 80), this, true);
+  m_pFilesList = new CListBox(CRect(CPoint(70, 115), 170, 80), this, true);
   m_pFilesList->SetIsFocusable(true);
   UpdateFilesList();
 
   // File name
   m_pFileNameLabel  = new CLabel(          CPoint(15, 215),              this, "File: ");
-  m_pFileNameValue  = new CEditBox( CRect( CPoint(80, 210), 150, 20),    this);
+  m_pFileNameValue  = new CEditBox( CRect( CPoint(70, 210), 170, 20),    this);
   m_pFileNameValue->SetWindowText("");
   m_pFileNameValue->SetReadOnly(true);
 
   // Buttons
-  m_pCancelButton   = new CButton(  CRect( CPoint(250, 180), 50, 20), this, "Cancel");
+  m_pCancelButton   = new CButton(  CRect( CPoint(270, 180), 50, 20), this, "Cancel");
   m_pCancelButton->SetIsFocusable(true);
-  m_pLoadSaveButton = new CButton(  CRect( CPoint(250, 210), 50, 20), this, "Load");
+  m_pLoadSaveButton = new CButton(  CRect( CPoint(270, 210), 50, 20), this, "Load");
   m_pLoadSaveButton->SetIsFocusable(true);
 }
 
@@ -122,101 +132,135 @@ bool CapriceLoadSave::HandleMessage(CMessage* pMessage)
               break;
             }
             if (pMessage->Source() == m_pLoadSaveButton) {
+              std::cout << "cpitrat: Load/Save button pressed" << std::endl;
               bool actionDone = false;
               std::string filename = m_pFileNameValue->GetWindowText();
+              std::string directory = m_pDirectoryValue->GetWindowText();
               if(!filename.empty()) {
-                std::string directory = m_pDirectoryValue->GetWindowText();
                 filename = directory + '/' + filename;
-                switch (m_pActionValue->GetSelectedIndex()) {
-                  case 0: // Load
-                    {
-                      DRIVE drive;
-                      switch (m_pTypeValue->GetSelectedIndex()) {
-                        case 0: // Drive A
-                          drive = DSK_A;
-                          actionDone = true;
-                          CPC.current_dsk_path = directory;
-                          break;
-                        case 1: // Drive B
-                          drive = DSK_B;
-                          actionDone = true;
-                          CPC.current_dsk_path = directory;
-                          break;
-                        case 2: // Snapshot
-                          drive = OTHER;
-                          actionDone = true;
-                          CPC.current_snap_path = directory;
-                          break;
-                        case 3: // Tape
-                          drive = OTHER;
-                          actionDone = true;
-                          CPC.current_tape_path = directory;
-                          break;
-                        case 4: // Cartridge
-                          drive = OTHER;
-                          actionDone = true;
-                          CPC.current_cart_path = directory;
-                          break;
-                      }
-                      if (actionDone) {
-                        file_load(filename, drive);
-                      }
-                      if (m_pTypeValue->GetSelectedIndex() == 4) {
-                        emulator_reset();
-                      }
+              }
+              switch (m_pActionValue->GetSelectedIndex()) {
+                case 0: // Load
+                  {
+                    if(filename.empty()) {
+                      wGui::CMessageBox *pMessageBox = new wGui::CMessageBox(CRect(CPoint(m_ClientRect.Width() /2 - 125, m_ClientRect.Height() /2 - 30), 250, 60), this, nullptr, "Error Loading", "No filename provided", CMessageBox::BUTTON_OK);
+                      pMessageBox->SetModal(true);
                       break;
                     }
-                  case 1: // Save
-                    // TODO(cpitrat): Ensure the proper extension is present in the filename, otherwise add it.
+                    DRIVE drive;
                     switch (m_pTypeValue->GetSelectedIndex()) {
                       case 0: // Drive A
-                        std::cout << "Save dsk A: " << filename << std::endl;
-                        if (driveA.tracks==0) {
-                          // If no disk was inserted, tracks will be 0. Raise an error message, just so it doesn't silently fail.
-                          wGui::CMessageBox *pMessageBox = new wGui::CMessageBox(CRect(CPoint(m_ClientRect.Width() /2 - 125, m_ClientRect.Height() /2 - 30), 250, 60), this, nullptr, "Error Saving", "No Valid Disk Inserted", CMessageBox::BUTTON_OK);
-                          pMessageBox->SetModal(true);
-                          break;
-                        }
-                        dsk_save(filename, &driveA);
+                        drive = DSK_A;
+                        actionDone = true;
+                        CPC.current_dsk_path = directory;
+                        break;
+                      case 1: // Drive B
+                        drive = DSK_B;
+                        actionDone = true;
+                        CPC.current_dsk_path = directory;
+                        break;
+                      case 2: // Snapshot
+                        drive = OTHER;
+                        actionDone = true;
+                        CPC.current_snap_path = directory;
+                        break;
+                      case 3: // Tape
+                        drive = OTHER;
+                        actionDone = true;
+                        CPC.current_tape_path = directory;
+                        break;
+                      case 4: // Cartridge
+                        drive = OTHER;
+                        actionDone = true;
+                        CPC.current_cart_path = directory;
+                        break;
+                    }
+                    if (actionDone) {
+                      file_load(filename, drive);
+                    }
+                    if (m_pTypeValue->GetSelectedIndex() == 4) {
+                      emulator_reset();
+                    }
+                    break;
+                  }
+                case 1: // Save
+                    if(filename.empty()) {
+                      wGui::CMessageBox *pMessageBox = new wGui::CMessageBox(CRect(CPoint(m_ClientRect.Width() /2 - 125, m_ClientRect.Height() /2 - 30), 250, 60), this, nullptr, "Error Saving", "No filename provided", CMessageBox::BUTTON_OK);
+                      pMessageBox->SetModal(true);
+                      break;
+                    }
+                        // TODO(cpitrat): Ensure the proper extension is present in the filename, otherwise add it.
+                  switch (m_pTypeValue->GetSelectedIndex()) {
+                    case 0: // Drive A
+                      std::cout << "Save dsk A: " << filename << std::endl;
+                      if (driveA.tracks==0) {
+                        // If no disk was inserted, tracks will be 0. Raise an error message, just so it doesn't silently fail.
+                        wGui::CMessageBox *pMessageBox = new wGui::CMessageBox(CRect(CPoint(m_ClientRect.Width() /2 - 125, m_ClientRect.Height() /2 - 30), 250, 60), this, nullptr, "Error Saving", "No Valid Disk Inserted", CMessageBox::BUTTON_OK);
+                        pMessageBox->SetModal(true);
+                        break;
+                      }
+                      dsk_save(filename, &driveA);
+                      actionDone = true;
+                      break;
+                    case 1: // Drive B
+                      std::cout << "Save dsk B: " << filename << std::endl;
+                      if (driveB.tracks==0) {
+                        // If no disk was inserted, tracks will be 0. Raise an error message, just so it doesn't silently fail.
+                        wGui::CMessageBox *pMessageBox = new wGui::CMessageBox(CRect(CPoint(m_ClientRect.Width() /2 - 125, m_ClientRect.Height() /2 - 30), 250, 60), this, nullptr, "Error Saving", "No Valid Disk Inserted", CMessageBox::BUTTON_OK);
+                        pMessageBox->SetModal(true);
+                        break;
+                      }
+                      dsk_save(filename, &driveB);
+                      actionDone = true;
+                      break;
+                    case 2: // Snapshot
+                      std::cout << "Save snapshot: " << filename << std::endl;
+                      snapshot_save(filename);
+                      actionDone = true;
+                      break;
+                    case 3: // Tape
+                      {
+                        std::cout << "Save tape: " << filename << std::endl;
+                        // Unsupported - shouldn't happen as UI shouldn't permit it
+                        wGui::CMessageBox *pMessageBox = new wGui::CMessageBox(CRect(CPoint(m_ClientRect.Width() /2 - 125, m_ClientRect.Height() /2 - 30), 250, 60), this, nullptr, "Not implemented", "Saving tape not yet implemented", CMessageBox::BUTTON_OK);
+                        pMessageBox->SetModal(true);
+                        //tape_save(filename);
+                        break;
+                      }
+                    case 4: // Cartridge
+                      {
+                        std::cout << "Save cartridge: " << filename << std::endl;
+                        // Unsupported - shouldn't happen as UI shouldn't permit it
+                        wGui::CMessageBox *pMessageBox = new wGui::CMessageBox(CRect(CPoint(m_ClientRect.Width() /2 - 125, m_ClientRect.Height() /2 - 30), 250, 60), this, nullptr, "Not implemented", "Saving cartridge not yet implemented", CMessageBox::BUTTON_OK);
+                        pMessageBox->SetModal(true);
+                        //cpr_save(filename);
+                        break;
+                      }
+                  }
+                  break;
+                  case 2: // Insert new
+                    switch (m_pTypeValue->GetSelectedIndex()) {
+                      case 0: // Drive A
+                        std::cout << "Insert new dsk A: " << filename << std::endl;
+                        dsk_format(&driveA, m_pFormatValue->GetSelectedIndex());
                         actionDone = true;
                         break;
                       case 1: // Drive B
-                        std::cout << "Save dsk B: " << filename << std::endl;
-                        if (driveB.tracks==0) {
-                            // If no disk was inserted, tracks will be 0. Raise an error message, just so it doesn't silently fail.
-                            wGui::CMessageBox *pMessageBox = new wGui::CMessageBox(CRect(CPoint(m_ClientRect.Width() /2 - 125, m_ClientRect.Height() /2 - 30), 250, 60), this, nullptr, "Error Saving", "No Valid Disk Inserted", CMessageBox::BUTTON_OK);
-                            pMessageBox->SetModal(true);
-                            break;
-                        }
-                        dsk_save(filename, &driveB);
+                        std::cout << "Insert new dsk B: " << filename << std::endl;
+                        dsk_format(&driveB, m_pFormatValue->GetSelectedIndex());
                         actionDone = true;
                         break;
-                      case 2: // Snapshot
-                        std::cout << "Save snapshot: " << filename << std::endl;
-                        snapshot_save(filename);
-                        actionDone = true;
-                        break;
-                      case 3: // Tape
+                      default:
                         {
-                          std::cout << "Save tape: " << filename << std::endl;
-                          // Unsupported
-                          wGui::CMessageBox *pMessageBox = new wGui::CMessageBox(CRect(CPoint(m_ClientRect.Width() /2 - 125, m_ClientRect.Height() /2 - 30), 250, 60), this, nullptr, "Not implemented", "Saving tape not yet implemented", CMessageBox::BUTTON_OK);
+                          // Unsupported - shouldn't happen as UI shouldn't permit it
+                          wGui::CMessageBox *pMessageBox = new wGui::CMessageBox(CRect(CPoint(m_ClientRect.Width() /2 - 125, m_ClientRect.Height() /2 - 30), 250, 60), this, nullptr, "Not implemented", "Inserting new not yet implemented for this type of media", CMessageBox::BUTTON_OK);
                           pMessageBox->SetModal(true);
-                          //tape_save(filename);
-                          break;
-                        }
-                      case 4: // Cartridge
-                        {
-                          std::cout << "Save cartridge: " << filename << std::endl;
-                          // Unsupported
-                          wGui::CMessageBox *pMessageBox = new wGui::CMessageBox(CRect(CPoint(m_ClientRect.Width() /2 - 125, m_ClientRect.Height() /2 - 30), 250, 60), this, nullptr, "Not implemented", "Saving cartridge not yet implemented", CMessageBox::BUTTON_OK);
-                          pMessageBox->SetModal(true);
-                          //cpr_save(filename);
                           break;
                         }
                     }
                     break;
-                }
+                  default:
+                    std::cout << "cpitrat: Unsupported action " << m_pActionValue->GetSelectedIndex() << std::endl;
               }
               if(actionDone) {
                 CloseFrame();
@@ -234,10 +278,34 @@ bool CapriceLoadSave::HandleMessage(CMessage* pMessage)
             case 0: // Load
               m_pLoadSaveButton->SetWindowText("Load");
               m_pFileNameValue->SetReadOnly(true);
+              m_pFormatLabel->SetVisible(false);
+              m_pFormatValue->SetVisible(false);
+              m_pDirectoryLabel->SetVisible(true);
+              m_pDirectoryValue->SetVisible(true);
+              m_pFilesList->SetVisible(true);
+              m_pFileNameLabel->SetVisible(true);
+              m_pFileNameValue->SetVisible(true);
               break;
             case 1: // Save
               m_pLoadSaveButton->SetWindowText("Save");
               m_pFileNameValue->SetReadOnly(false);
+              m_pFormatLabel->SetVisible(false);
+              m_pFormatValue->SetVisible(false);
+              m_pDirectoryLabel->SetVisible(true);
+              m_pDirectoryValue->SetVisible(true);
+              m_pFilesList->SetVisible(true);
+              m_pFileNameLabel->SetVisible(true);
+              m_pFileNameValue->SetVisible(true);
+              break;
+            case 2: // Insert new
+              m_pLoadSaveButton->SetWindowText("Insert");
+              m_pFormatLabel->SetVisible(true);
+              m_pFormatValue->SetVisible(true);
+              m_pDirectoryLabel->SetVisible(false);
+              m_pDirectoryValue->SetVisible(false);
+              m_pFilesList->SetVisible(false);
+              m_pFileNameLabel->SetVisible(false);
+              m_pFileNameValue->SetVisible(false);
               break;
           }
         }
@@ -250,26 +318,31 @@ bool CapriceLoadSave::HandleMessage(CMessage* pMessage)
 #else
               m_fileSpec = { ".dsk", ".ipf", ".zip" };
 #endif
+              UpdateActionsList();
               UpdateFilesList();
               break;
             case 1: // Drive B
               m_pDirectoryValue->SetWindowText(simplifyDirPath(CPC.current_dsk_path));
               m_fileSpec = { ".dsk", ".zip" };
+              UpdateActionsList();
               UpdateFilesList();
               break;
             case 2: // Snapshot
               m_pDirectoryValue->SetWindowText(simplifyDirPath(CPC.current_snap_path));
               m_fileSpec = { ".sna", ".zip" };
+              UpdateActionsList();
               UpdateFilesList();
               break;
             case 3: // Tape
               m_pDirectoryValue->SetWindowText(simplifyDirPath(CPC.current_tape_path));
               m_fileSpec = { ".cdt", ".voc", ".zip" };
+              UpdateActionsList();
               UpdateFilesList();
               break;
             case 4: // Cartridge
               m_pDirectoryValue->SetWindowText(simplifyDirPath(CPC.current_cart_path));
               m_fileSpec = { ".cpr", ".zip" };
+              UpdateActionsList();
               UpdateFilesList();
               break;
           }
@@ -373,6 +446,38 @@ void CapriceLoadSave::UpdateFilesList()
     for(const auto &file : files) {
       m_pFilesList->AddItem(SListItem(file));
     }
+  }
+}
+
+void CapriceLoadSave::UpdateActionsList() {
+  m_pActionValue->ClearItems();
+  switch (m_pTypeValue->GetSelectedIndex()) {
+    case 0:
+#if __GNUC__ >= 7
+      [[gnu::fallthrough]];
+#endif
+    case 1:
+      // Drive A & Drive B (disks) support loading, saving and inserting new media.
+      m_pActionValue->AddItem(SListItem("Load"));
+      m_pActionValue->AddItem(SListItem("Save"));
+      m_pActionValue->AddItem(SListItem("Insert empty"));
+      m_pActionValue->SetListboxHeight(3);
+      break;
+    case 2:
+      // Snapshots support loading and saving.
+      m_pActionValue->AddItem(SListItem("Load"));
+      m_pActionValue->AddItem(SListItem("Save"));
+      m_pActionValue->SetListboxHeight(2);
+      break;
+    default:
+      // Tapes and cartrdiges support loading only.
+      m_pActionValue->AddItem(SListItem("Load"));
+      // Should be 1 but it doesn't work well ("down" button is outside of the widget).
+      m_pActionValue->SetListboxHeight(2);
+      break;
+  }
+  if (m_pActionValue->GetSelectedIndex() < 0 || m_pActionValue->GetSelectedIndex() >= m_pActionValue->Size()) {
+    m_pActionValue->SelectItem(0);
   }
 }
 
