@@ -83,7 +83,7 @@ CapriceLoadSave::CapriceLoadSave(const CRect& WindowRect, CWindow* pParent, CFon
   m_pFormatValue->AddItem(SListItem("178K Data Format"));
   m_pFormatValue->AddItem(SListItem("169K Vendor Format"));
   m_pFormatValue->SetListboxHeight(2);
-  m_pFormatValue->SelectItem(CPC.drvA_format == 0 ? 0 : 1);
+  m_pFormatValue->SelectItem(0);
   m_pFormatValue->SetIsFocusable(true);
   m_pFormatLabel->SetVisible(false);
   m_pFormatValue->SetVisible(false);
@@ -132,7 +132,6 @@ bool CapriceLoadSave::HandleMessage(CMessage* pMessage)
               break;
             }
             if (pMessage->Source() == m_pLoadSaveButton) {
-              std::cout << "cpitrat: Load/Save button pressed" << std::endl;
               bool actionDone = false;
               std::string filename = m_pFileNameValue->GetWindowText();
               std::string directory = m_pDirectoryValue->GetWindowText();
@@ -184,12 +183,12 @@ bool CapriceLoadSave::HandleMessage(CMessage* pMessage)
                     break;
                   }
                 case 1: // Save
-                    if(filename.empty()) {
-                      wGui::CMessageBox *pMessageBox = new wGui::CMessageBox(CRect(CPoint(m_ClientRect.Width() /2 - 125, m_ClientRect.Height() /2 - 30), 250, 60), this, nullptr, "Error Saving", "No filename provided", CMessageBox::BUTTON_OK);
-                      pMessageBox->SetModal(true);
-                      break;
-                    }
-                        // TODO(cpitrat): Ensure the proper extension is present in the filename, otherwise add it.
+                  if(filename.empty()) {
+                    wGui::CMessageBox *pMessageBox = new wGui::CMessageBox(CRect(CPoint(m_ClientRect.Width() /2 - 125, m_ClientRect.Height() /2 - 30), 250, 60), this, nullptr, "Error Saving", "No filename provided", CMessageBox::BUTTON_OK);
+                    pMessageBox->SetModal(true);
+                    break;
+                  }
+                  // TODO(cpitrat): Ensure the proper extension is present in the filename, otherwise add it.
                   switch (m_pTypeValue->GetSelectedIndex()) {
                     case 0: // Drive A
                       std::cout << "Save dsk A: " << filename << std::endl;
@@ -259,8 +258,6 @@ bool CapriceLoadSave::HandleMessage(CMessage* pMessage)
                         }
                     }
                     break;
-                  default:
-                    std::cout << "cpitrat: Unsupported action " << m_pActionValue->GetSelectedIndex() << std::endl;
               }
               if(actionDone) {
                 CloseFrame();

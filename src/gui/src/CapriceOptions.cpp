@@ -34,7 +34,6 @@ CapriceOptions::CapriceOptions(const CRect& WindowRect, CWindow* pParent, CFontE
     m_pNavigationBar->AddItem(SNavBarItem("ROMs",    CPC.resources_path + "/rom.bmp"));
     m_pNavigationBar->AddItem(SNavBarItem("Video",   CPC.resources_path + "/video.bmp"));
     m_pNavigationBar->AddItem(SNavBarItem("Audio",   CPC.resources_path + "/audio.bmp"));
-    //m_pNavigationBar->AddItem(SNavBarItem("Disk",    CPC.resources_path + "/disk.bmp"));
     m_pNavigationBar->AddItem(SNavBarItem("Input",   CPC.resources_path + "/input.bmp"));
     m_pNavigationBar->SelectItem(0);
     m_pNavigationBar->SetIsFocusable(true);
@@ -44,7 +43,6 @@ CapriceOptions::CapriceOptions(const CRect& WindowRect, CWindow* pParent, CFontE
     m_pGroupBoxTabExpansion = new CGroupBox(CRect(CPoint(5, 60), m_ClientRect.Width() - 12, m_ClientRect.Height() - 80), this, "ROM slots");
     m_pGroupBoxTabVideo     = new CGroupBox(CRect(CPoint(5, 60), m_ClientRect.Width() - 12, m_ClientRect.Height() - 80), this, "");
     m_pGroupBoxTabAudio     = new CGroupBox(CRect(CPoint(5, 60), m_ClientRect.Width() - 12, m_ClientRect.Height() - 80), this, "");
-    m_pGroupBoxTabDisk      = new CGroupBox(CRect(CPoint(5, 60), m_ClientRect.Width() - 12, m_ClientRect.Height() - 80), this, "");
     m_pGroupBoxTabInput     = new CGroupBox(CRect(CPoint(5, 60), m_ClientRect.Width() - 12, m_ClientRect.Height() - 80), this, "");
 
     // Store associations, see EnableTab method:
@@ -52,7 +50,6 @@ CapriceOptions::CapriceOptions(const CRect& WindowRect, CWindow* pParent, CFontE
     TabMap["expansion"] = m_pGroupBoxTabExpansion;
     TabMap["video"] = m_pGroupBoxTabVideo;
     TabMap["audio"] = m_pGroupBoxTabAudio;
-    //TabMap["disk"] = m_pGroupBoxTabDisk;
     TabMap["input"] = m_pGroupBoxTabInput;
 
     // ---------------- 'General' Options ----------------
@@ -246,24 +243,6 @@ CapriceOptions::CapriceOptions(const CRect& WindowRect, CWindow* pParent, CFontE
     m_pScrollBarVolume->SetIsFocusable(true);
     m_pLabelSoundVolumeValue = new CLabel(CPoint(190, 108), m_pGroupBoxTabAudio, stdex::itoa(CPC.snd_volume) + "%  ");
 
-    // ---------------- 'Disk' Options ----------------
-    m_pGroupBoxDriveA  = new CGroupBox(CRect(CPoint(10, 0), 280, 45), m_pGroupBoxTabDisk, "CPC Drive A");
-    m_pGroupBoxDriveB  = new CGroupBox(CRect(CPoint(10, 50), 280, 45), m_pGroupBoxTabDisk, "CPC Drive B");
-    m_pLabelDriveAFormat    = new CLabel(CPoint(10,3), m_pGroupBoxDriveA, "Insert blank disks as");
-    m_pDropDownDriveAFormat = new CDropDown(CRect(CPoint(130,1),140,16), m_pGroupBoxDriveA, false);
-    m_pDropDownDriveAFormat->AddItem(SListItem("178K Data Format"));
-    m_pDropDownDriveAFormat->AddItem(SListItem("169K Vendor Format"));
-    m_pDropDownDriveAFormat->SetListboxHeight(2);
-    m_pDropDownDriveAFormat->SelectItem(CPC.drvA_format == 0 ? 0 : 1);
-    m_pDropDownDriveAFormat->SetIsFocusable(true);
-    m_pLabelDriveBFormat    = new CLabel(CPoint(10,3), m_pGroupBoxDriveB, "Insert blank disks as");;
-    m_pDropDownDriveBFormat = new CDropDown(CRect(CPoint(130,1),140,16), m_pGroupBoxDriveB, false);
-    m_pDropDownDriveBFormat->AddItem(SListItem("178K Data Format"));
-    m_pDropDownDriveBFormat->AddItem(SListItem("169K Vendor Format"));
-    m_pDropDownDriveBFormat->SetListboxHeight(2);
-    m_pDropDownDriveBFormat->SelectItem(CPC.drvB_format == 0 ? 0 : 1);
-    m_pDropDownDriveBFormat->SetIsFocusable(true);
-
     // ---------------- 'Input' Options ----------------
     // option 'keyboard' which is the CPC language
     m_pLabelCPCLanguage    = new CLabel(CPoint(10,3), m_pGroupBoxTabInput, "CPC language");;
@@ -372,9 +351,6 @@ bool CapriceOptions::HandleMessage(CMessage* pMessage)
               CPC.snd_volume = m_pScrollBarVolume->GetValue();
               CPC.snd_stereo = m_pRadioButtonStereo->GetState()==CRadioButton::CHECKED ? 1 : 0;
               CPC.snd_bits   = m_pRadioButton16bit->GetState()==CRadioButton::CHECKED ? 1 : 0;
-              // 'Disk' settings
-              CPC.drvA_format = m_pDropDownDriveAFormat->GetSelectedIndex() == 0 ? 0 : 1;
-              CPC.drvB_format = m_pDropDownDriveBFormat->GetSelectedIndex() == 0 ? 0 : 1;
 
               // 'Input' settings
               CPC.keyboard = m_pDropDownCPCLanguage->GetSelectedIndex();
@@ -424,12 +400,6 @@ bool CapriceOptions::HandleMessage(CMessage* pMessage)
                          EnableTab("audio");
                          break;
                        }
-             /*
-              case 4 : { // 'Disk'
-                         EnableTab("disk");
-                         break;
-                       }
-                       */
               case 4 : { // 'Input'
                          EnableTab("input");
                          break;
