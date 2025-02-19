@@ -102,6 +102,10 @@ namespace wGui
         void WriteMem(word address, byte value);
         void PrepareMemBankConfig();
 
+        void UnlockRegisters();
+        void LockRegisters();
+        void SaveRegisters();
+
         void RefreshDisassembly();
         void UpdateZ80();
         void UpdateDisassembly();
@@ -111,6 +115,7 @@ namespace wGui
         void UpdateWatchPointsList();
         void UpdateMemConfig();
         void UpdateTextMemory();
+        void UpdateAudio();
 
         void RemoveEphemeralBreakpoints();
 
@@ -182,6 +187,8 @@ namespace wGui
         CFlag* m_pZ80FlagPV;
         CFlag* m_pZ80FlagN;
         CFlag* m_pZ80FlagC;
+
+        CButton* m_pZ80ModifyRegisters;
 
         // Stack
         CLabel* m_pZ80StackLabel;
@@ -299,12 +306,35 @@ namespace wGui
 
         // Video screen
         CLabel* m_pVidLabel;
+
         // Audio screen
-        CLabel* m_pAudLabel;
+        CLabel* m_pAudFreqALabel;
+        CLabel* m_pAudFreqBLabel;
+        CLabel* m_pAudFreqCLabel;
+        CLabel* m_pAudFreqNoiseLabel;
+        CLabel* m_pAudMixerControlLabel;
+        CLabel* m_pAudVolALabel;
+        CLabel* m_pAudVolBLabel;
+        CLabel* m_pAudVolCLabel;
+        CLabel* m_pAudVolEnvFreqLabel;
+        CLabel* m_pAudVolEnvShapeLabel;
+        CEditBox* m_pAudFreqA;
+        CEditBox* m_pAudFreqB;
+        CEditBox* m_pAudFreqC;
+        CEditBox* m_pAudFreqNoise;
+        CEditBox* m_pAudMixerControl;
+        CEditBox* m_pAudVolA;
+        CEditBox* m_pAudVolB;
+        CEditBox* m_pAudVolC;
+        CEditBox* m_pAudVolEnvFreq;
+        CEditBox* m_pAudVolEnvShape;
+
         // Characters screen
         CLabel* m_pChrLabel;
 
         DevTools* m_pDevTools;
+
+        bool registersLocked;
 
       private:
 
