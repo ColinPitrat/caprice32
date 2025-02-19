@@ -875,6 +875,12 @@ void CapriceDevTools::UpdateTextMemory()
 
 void CapriceDevTools::PauseExecution()
 {
+  if (!CPC.paused) {
+    // Update all before pausing to be sure that the state is consistent.
+    // This is particularly important for Z80 as the registers need to be
+    // up-to-date otherwise we'll mess with the state when we resume.
+    UpdateAll();
+  }
   CPC.paused = true;
   m_pButtonPause->SetWindowText("Resume");
 }
@@ -883,6 +889,7 @@ void CapriceDevTools::ResumeExecution()
 {
   CPC.paused = false;
   m_pButtonPause->SetWindowText("Pause");
+
   _A = m_pZ80RegA->GetValue();
   _B = m_pZ80RegB->GetValue();
   _C = m_pZ80RegC->GetValue();
