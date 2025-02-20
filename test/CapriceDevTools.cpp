@@ -6,6 +6,7 @@
 #include "CapriceDevTools.h"
 #include "cap32.h"
 
+extern byte *membank_read[4];
 extern t_CPC CPC;
 
 using namespace wGui;
@@ -15,6 +16,11 @@ class CapriceDevToolsTest : public testing::Test {
     CapriceDevToolsTest() : app(/*pWindow=*/nullptr) {}
 
     void SetUp() {
+      byte membank0[1] = {0};
+      membank_read[0] = membank0;
+      membank_read[1] = membank0;
+      membank_read[2] = membank0;
+      membank_read[3] = membank0;
       CPC.resources_path = "resources";
       app.Init();
       CRect rect;
