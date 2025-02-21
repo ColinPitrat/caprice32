@@ -308,6 +308,17 @@ namespace wGui
         CLabel* m_pVidLabel;
 
         // Audio screen
+        CGroupBox* m_pAudPSGGrp;
+        CLabel* m_pAudChannelALabel;
+        CLabel* m_pAudChannelBLabel;
+        CLabel* m_pAudChannelCLabel;
+        CLabel* m_pAudNoiseLabel;
+
+        CLabel* m_pAudToneLabel;
+        CLabel* m_pAudVolLabel;
+        CLabel* m_pAudToneOnOffLabel;
+        CLabel* m_pAudNoiseOnOffLabel;
+
         CLabel* m_pAudFreqALabel;
         CLabel* m_pAudFreqBLabel;
         CLabel* m_pAudFreqCLabel;
@@ -316,18 +327,26 @@ namespace wGui
         CLabel* m_pAudVolALabel;
         CLabel* m_pAudVolBLabel;
         CLabel* m_pAudVolCLabel;
+
         CLabel* m_pAudVolEnvFreqLabel;
         CLabel* m_pAudVolEnvShapeLabel;
-        CEditBox* m_pAudFreqA;
-        CEditBox* m_pAudFreqB;
-        CEditBox* m_pAudFreqC;
-        CEditBox* m_pAudFreqNoise;
-        CEditBox* m_pAudMixerControl;
-        CEditBox* m_pAudVolA;
-        CEditBox* m_pAudVolB;
-        CEditBox* m_pAudVolC;
-        CEditBox* m_pAudVolEnvFreq;
-        CEditBox* m_pAudVolEnvShape;
+        CLabel* m_pAudFreqA;
+        CLabel* m_pAudFreqB;
+        CLabel* m_pAudFreqC;
+        CLabel* m_pAudFreqNoise;
+        CLabel* m_pAudVolA;
+        CLabel* m_pAudVolB;
+        CLabel* m_pAudVolC;
+        CCheckBox* m_pAudToneA;
+        CCheckBox* m_pAudToneB;
+        CCheckBox* m_pAudToneC;
+        CCheckBox* m_pAudNoiseA;
+        CCheckBox* m_pAudNoiseB;
+        CCheckBox* m_pAudNoiseC;
+
+        CLabel* m_pAudMixerControl;
+        CLabel* m_pAudVolEnvFreq;
+        CLabel* m_pAudVolEnvShape;
 
         // Characters screen
         CLabel* m_pChrLabel;

@@ -423,38 +423,48 @@ CapriceDevTools::CapriceDevTools(const CRect& WindowRect, CWindow* pParent, CFon
     m_pVidLabel = new CLabel(CPoint(10, 10), m_pGroupBoxTabVideo, "Work in progress ... Nothing to see here yet, but come back later for video (CRTC & GateArray info).");
 
     // ---------------- 'Audio' screen ----------------
-    m_pAudFreqALabel = new CLabel(CPoint(10, 10), m_pGroupBoxTabAudio, "Channel A frequency:");
-    m_pAudFreqBLabel = new CLabel(CPoint(10, 30), m_pGroupBoxTabAudio, "Channel B frequency:");
-    m_pAudFreqCLabel = new CLabel(CPoint(10, 50), m_pGroupBoxTabAudio, "Channel C frequency:");
-    m_pAudFreqNoiseLabel = new CLabel(CPoint(10, 70), m_pGroupBoxTabAudio, "Noise frequency:");
-    m_pAudMixerControlLabel = new CLabel(CPoint(10, 90), m_pGroupBoxTabAudio, "Mixer control:");
-    m_pAudVolALabel = new CLabel(CPoint(10, 110), m_pGroupBoxTabAudio, "Channel A volume:");
-    m_pAudVolBLabel = new CLabel(CPoint(10, 130), m_pGroupBoxTabAudio, "Channel B volume:");
-    m_pAudVolCLabel = new CLabel(CPoint(10, 150), m_pGroupBoxTabAudio, "Channel C volume:");
-    m_pAudVolEnvFreqLabel = new CLabel(CPoint(10, 170), m_pGroupBoxTabAudio, "Envelope frequence:");
-    m_pAudVolEnvShapeLabel = new CLabel(CPoint(10, 190), m_pGroupBoxTabAudio, "Envelope shape:");
+    m_pAudPSGGrp = new CGroupBox(
+        CRect(CPoint(5, 0), m_pGroupBoxTabAudio->GetClientRect().Width()-10, 120),
+        m_pGroupBoxTabAudio, "PSG");
+    m_pAudChannelALabel = new CLabel(CPoint(10, 30), m_pGroupBoxTabAudio, "Channel A:");
+    m_pAudChannelBLabel = new CLabel(CPoint(10, 50), m_pGroupBoxTabAudio, "Channel B:");
+    m_pAudChannelCLabel = new CLabel(CPoint(10, 70), m_pGroupBoxTabAudio, "Channel C:");
+    m_pAudNoiseLabel = new CLabel(CPoint(10, 90), m_pGroupBoxTabAudio, "Noise:");
 
-    m_pAudFreqA = new CEditBox(CRect(CPoint(130, 5), 150, 20), m_pGroupBoxTabAudio);
-    m_pAudFreqB = new CEditBox(CRect(CPoint(130, 25), 150, 20), m_pGroupBoxTabAudio);
-    m_pAudFreqC = new CEditBox(CRect(CPoint(130, 45), 150, 20), m_pGroupBoxTabAudio);
-    m_pAudFreqNoise = new CEditBox(CRect(CPoint(130, 65), 150, 20), m_pGroupBoxTabAudio);
-    m_pAudMixerControl = new CEditBox(CRect(CPoint(130, 85), 150, 20), m_pGroupBoxTabAudio);
-    m_pAudVolA = new CEditBox(CRect(CPoint(130, 105), 150, 20), m_pGroupBoxTabAudio);
-    m_pAudVolB = new CEditBox(CRect(CPoint(130, 125), 150, 20), m_pGroupBoxTabAudio);
-    m_pAudVolC = new CEditBox(CRect(CPoint(130, 145), 150, 20), m_pGroupBoxTabAudio);
-    m_pAudVolEnvFreq = new CEditBox(CRect(CPoint(130, 165), 150, 20), m_pGroupBoxTabAudio);
-    m_pAudVolEnvShape = new CEditBox(CRect(CPoint(130, 185), 150, 20), m_pGroupBoxTabAudio);
+    m_pAudToneLabel = new CLabel(CPoint(100, 10), m_pGroupBoxTabAudio, "Tone");
+    m_pAudVolLabel = new CLabel(CPoint(180, 10), m_pGroupBoxTabAudio, "Volume");
+    m_pAudToneOnOffLabel = new CLabel(CPoint(230, 10), m_pGroupBoxTabAudio, "Tone");
+    m_pAudNoiseOnOffLabel = new CLabel(CPoint(280, 10), m_pGroupBoxTabAudio, "Noise");
 
-    m_pAudFreqA->SetReadOnly(true);
-    m_pAudFreqB->SetReadOnly(true);
-    m_pAudFreqC->SetReadOnly(true);
-    m_pAudFreqNoise->SetReadOnly(true);
-    m_pAudMixerControl->SetReadOnly(true);
-    m_pAudVolA->SetReadOnly(true);
-    m_pAudVolB->SetReadOnly(true);
-    m_pAudVolC->SetReadOnly(true);
-    m_pAudVolEnvFreq->SetReadOnly(true);
-    m_pAudVolEnvShape->SetReadOnly(true);
+    m_pAudFreqA = new CLabel(CPoint(95, 30), m_pGroupBoxTabAudio);
+    m_pAudFreqB = new CLabel(CPoint(95, 50), m_pGroupBoxTabAudio);
+    m_pAudFreqC = new CLabel(CPoint(95, 70), m_pGroupBoxTabAudio);
+    m_pAudFreqNoise = new CLabel(CPoint(95, 90), m_pGroupBoxTabAudio);
+    m_pAudVolA = new CLabel(CPoint(180, 30), m_pGroupBoxTabAudio);
+    m_pAudVolB = new CLabel(CPoint(180, 50), m_pGroupBoxTabAudio);
+    m_pAudVolC = new CLabel(CPoint(180, 70), m_pGroupBoxTabAudio);
+
+    m_pAudToneA = new CCheckBox(CRect(CPoint(230, 30), 10, 10), m_pGroupBoxTabAudio);
+    m_pAudToneB = new CCheckBox(CRect(CPoint(230, 50), 10, 10), m_pGroupBoxTabAudio);
+    m_pAudToneC = new CCheckBox(CRect(CPoint(230, 70), 10, 10), m_pGroupBoxTabAudio);
+    m_pAudNoiseA = new CCheckBox(CRect(CPoint(280, 30), 10, 10), m_pGroupBoxTabAudio);
+    m_pAudNoiseB = new CCheckBox(CRect(CPoint(280, 50), 10, 10), m_pGroupBoxTabAudio);
+    m_pAudNoiseC = new CCheckBox(CRect(CPoint(280, 70), 10, 10), m_pGroupBoxTabAudio);
+
+    m_pAudMixerControlLabel = new CLabel(CPoint(390, 30), m_pGroupBoxTabAudio, "Mixer control:");
+    m_pAudVolEnvFreqLabel = new CLabel(CPoint(390, 50), m_pGroupBoxTabAudio, "Envelope frequence:");
+    m_pAudVolEnvShapeLabel = new CLabel(CPoint(390, 70), m_pGroupBoxTabAudio, "Envelope shape:");
+
+    m_pAudMixerControl = new CLabel(CPoint(520, 30), m_pGroupBoxTabAudio);
+    m_pAudVolEnvFreq = new CLabel(CPoint(520, 50), m_pGroupBoxTabAudio);
+    m_pAudVolEnvShape = new CLabel(CPoint(520, 70), m_pGroupBoxTabAudio);
+
+    m_pAudToneA->SetReadOnly(true);
+    m_pAudToneB->SetReadOnly(true);
+    m_pAudToneC->SetReadOnly(true);
+    m_pAudNoiseA->SetReadOnly(true);
+    m_pAudNoiseB->SetReadOnly(true);
+    m_pAudNoiseC->SetReadOnly(true);
 
     // ---------------- 'Characters' screen ----------------
     m_pChrLabel = new CLabel(CPoint(10, 10), m_pGroupBoxTabChar, "Work in progress ... Nothing to see here yet, but come back later for charmap.");
@@ -829,6 +839,13 @@ void CapriceDevTools::UpdateWatchPointsList()
   }
 }
 
+std::string toneString(unsigned short tone) {
+  if (tone == 0) {
+    return "0";
+  }
+  return std::to_string(tone) + " (" + std::to_string(62500/tone)+ " Hz)";
+}
+
 void CapriceDevTools::UpdateMemConfig()
 {
   RAMConfig CurConfig = RAMConfig::CurrentConfig();
@@ -842,38 +859,22 @@ void CapriceDevTools::UpdateAudio()
 {
     // TODO(cpitrat): More user friendly display:
     //  - frequency in Hz on top of internal repr for frequency.
-    //  - mixer control details
     // TODO(cpitrat): Make these fields read-only
-    m_pAudFreqA->SetWindowText(std::to_string(PSG.RegisterAY.TonA));
-    m_pAudFreqB->SetWindowText(std::to_string(PSG.RegisterAY.TonB));
-    m_pAudFreqC->SetWindowText(std::to_string(PSG.RegisterAY.TonC));
-    m_pAudFreqNoise->SetWindowText(std::to_string(PSG.RegisterAY.Noise));
-    auto mixercontrol = std::to_string(PSG.RegisterAY.Mixer);
-    mixercontrol += " Tone: ";
-    if (PSG.RegisterAY.Mixer & 1) {
-      mixercontrol += "A";
-    }
-    if (PSG.RegisterAY.Mixer & 2) {
-      mixercontrol += "B";
-    }
-    if (PSG.RegisterAY.Mixer & 4) {
-      mixercontrol += "C";
-    }
-    mixercontrol += " Noise: ";
-    if (PSG.RegisterAY.Mixer & 8) {
-      mixercontrol += "A";
-    }
-    if (PSG.RegisterAY.Mixer & 16) {
-      mixercontrol += "B";
-    }
-    if (PSG.RegisterAY.Mixer & 32) {
-      mixercontrol += "C";
-    }
-    m_pAudMixerControl->SetWindowText(mixercontrol);
+    m_pAudFreqA->SetWindowText(toneString(PSG.RegisterAY.TonA));
+    m_pAudFreqB->SetWindowText(toneString(PSG.RegisterAY.TonB));
+    m_pAudFreqC->SetWindowText(toneString(PSG.RegisterAY.TonC));
+    m_pAudFreqNoise->SetWindowText(toneString(PSG.RegisterAY.Noise));
+    m_pAudToneA->SetCheckBoxState(PSG.RegisterAY.Mixer & 1 ? CCheckBox::UNCHECKED : CCheckBox::CHECKED);
+    m_pAudToneB->SetCheckBoxState(PSG.RegisterAY.Mixer & 2 ? CCheckBox::UNCHECKED : CCheckBox::CHECKED);
+    m_pAudToneC->SetCheckBoxState(PSG.RegisterAY.Mixer & 4 ? CCheckBox::UNCHECKED : CCheckBox::CHECKED);
+    m_pAudNoiseA->SetCheckBoxState(PSG.RegisterAY.Mixer & 8 ? CCheckBox::UNCHECKED : CCheckBox::CHECKED);
+    m_pAudNoiseB->SetCheckBoxState(PSG.RegisterAY.Mixer & 16 ? CCheckBox::UNCHECKED : CCheckBox::CHECKED);
+    m_pAudNoiseC->SetCheckBoxState(PSG.RegisterAY.Mixer & 32 ? CCheckBox::UNCHECKED : CCheckBox::CHECKED);
+    m_pAudMixerControl->SetWindowText(std::to_string(PSG.RegisterAY.Mixer));
     m_pAudVolA->SetWindowText(std::to_string(PSG.RegisterAY.AmplitudeA));
     m_pAudVolB->SetWindowText(std::to_string(PSG.RegisterAY.AmplitudeB));
     m_pAudVolC->SetWindowText(std::to_string(PSG.RegisterAY.AmplitudeC));
-    m_pAudVolEnvFreq->SetWindowText(std::to_string(PSG.RegisterAY.Envelope));
+    m_pAudVolEnvFreq->SetWindowText(toneString(PSG.RegisterAY.Envelope));
     auto envtype = std::to_string(PSG.RegisterAY.EnvType);
     switch (PSG.RegisterAY.EnvType) {
       case 0:
