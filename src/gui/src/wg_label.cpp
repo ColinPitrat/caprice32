@@ -33,6 +33,7 @@ CLabel::CLabel(const CRect& WindowRect, CWindow* pParent, std::string sText, CRG
 	CWindow(WindowRect, pParent),
 	m_FontColor(FontColor)
 {
+	dynamic_size = false;
 	m_sWindowText = sText;
 	if (pFontEngine)
 	{
@@ -54,6 +55,7 @@ CLabel::CLabel(const CPoint& point, CWindow* pParent, std::string sText, CRGBCol
 	CWindow(pParent),
 	m_FontColor(FontColor)
 {
+	dynamic_size = true;
 	m_sWindowText = sText;
 	if (pFontEngine)
 	{
@@ -65,8 +67,8 @@ CLabel::CLabel(const CPoint& point, CWindow* pParent, std::string sText, CRGBCol
 	}
 	m_pRenderedString.reset(new CRenderedString(m_pFontEngine, sText, CRenderedString::VALIGN_TOP, CRenderedString::HALIGN_LEFT));
 	m_BackgroundColor = Application().GetDefaultBackgroundColor();
-  // set width and height of the label's rectangle:
-  CWindow::SetWindowRect(CRect(point, m_pRenderedString->GetWidth(sText) + 1, m_pRenderedString->GetMaxFontHeight() + 1));
+	// set width and height of the label's rectangle:
+	CWindow::SetWindowRect(CRect(point, m_pRenderedString->GetWidth(sText) + 1, m_pRenderedString->GetMaxFontHeight() + 1));
 	Draw();
 }
 
@@ -76,12 +78,12 @@ CLabel::~CLabel() = default;
 
 void CLabel::Draw() const
 {
- 	CWindow::Draw();
+	CWindow::Draw();
 
 	if (m_pSDLSurface && m_pRenderedString.get())
 	{
 		// judb together with VALIGN_CENTER, the originpoint should be
-        // the height of the rectangle/2 (so also vertically centered)
+		// the height of the rectangle/2 (so also vertically centered)
 		//m_pRenderedString->Draw(m_pSDLSurface, m_WindowRect.SizeRect(), CPoint(0, m_WindowRect.Height()/2), m_FontColor);
 		 m_pRenderedString->Draw(m_pSDLSurface, m_WindowRect.SizeRect(), CPoint(0, 0), m_FontColor);
 	}
@@ -93,6 +95,9 @@ void CLabel::SetWindowText(const std::string& sWindowText)
 	m_pRenderedString.reset(new CRenderedString(
 		m_pFontEngine, sWindowText, CRenderedString::VALIGN_TOP, CRenderedString::HALIGN_LEFT));
 	CWindow::SetWindowText(sWindowText);
+	if (dynamic_size) {
+		CWindow::SetWindowRect(CRect(m_WindowRect.TopLeft(), m_pRenderedString->GetWidth(sWindowText) + 1, m_pRenderedString->GetMaxFontHeight() + 1));
+	}
 }
 
 }

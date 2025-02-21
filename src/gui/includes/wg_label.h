@@ -42,7 +42,7 @@ class CLabel : public CWindow
 {
 public:
 	//! Construct a new label
-  	//! \param WindowRect A CRect that defines the outer limits of the control
+ 	//! \param WindowRect A CRect that defines the outer limits of the control
 	//! \param pParent A pointer to the parent window
 	//! \param sText The label text, defaults to an empty string
 	//! \param FontColor The color of the label text, defaults to the DEFAULT_LINE_COLOR
@@ -81,10 +81,11 @@ protected:
 	CFontEngine* m_pFontEngine;  //!< A pointer to the font engine to use to render the text
 	std::unique_ptr<CRenderedString> m_pRenderedString;  //!< An autopointer to the rendered version of the string
 	CRGBColor m_FontColor;  //!< The font color
+	bool dynamic_size;
 
 
 private:
-  CLabel(const CLabel&) = delete;
+	CLabel(const CLabel&) = delete;
 	CLabel& operator=(const CLabel&) = delete;
 };
 
