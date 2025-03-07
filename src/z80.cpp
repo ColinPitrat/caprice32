@@ -42,7 +42,6 @@ extern t_FDC FDC;
 extern t_GateArray GateArray;
 extern t_PSG PSG;
 extern t_VDU VDU;
-extern byte *pbTapeImage;
 extern dword dwMF2Flags;
 extern dword dwMF2ExitAddr;
 

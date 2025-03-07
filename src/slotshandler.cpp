@@ -50,7 +50,7 @@ extern byte *pbROM;
 extern std::string chROMFile[];
 
 byte *pbTapeImageEnd = nullptr;
-extern byte *pbTapeImage;
+extern std::vector<byte> pbTapeImage;
 extern byte *pbGPBuffer;
 extern byte *pbRAM;
 extern byte *pbRAMbuffer;
@@ -739,8 +739,7 @@ exit:
 
 void tape_eject ()
 {
-   delete [] pbTapeImage;
-   pbTapeImage = nullptr;
+  pbTapeImage.clear();
 }
 
 int snapshot_load (FILE *pfile)
@@ -1008,21 +1007,21 @@ int tape_insert_cdt (FILE *pfile)
       LOG_DEBUG("Invalid CDT file size");
       return ERR_TAP_INVALID;
    }
-   pbTapeImage = new byte[lFileSize+6];
-   *pbTapeImage = 0x20; // start off with a pause block
-   *reinterpret_cast<word *>(pbTapeImage+1) = 2000; // set the length to 2 seconds
-   if(fread(pbTapeImage+3, lFileSize, 1, pfile) != 1) { // append the entire CDT file
+   pbTapeImage.resize(lFileSize+6);
+   pbTapeImage[0] = 0x20; // start off with a pause block
+   *reinterpret_cast<word *>(&pbTapeImage[1]) = 2000; // set the length to 2 seconds
+   if(fread(&pbTapeImage[3], lFileSize, 1, pfile) != 1) { // append the entire CDT file
       LOG_DEBUG("Couldn't read CDT file");
      return ERR_TAP_INVALID;
    }
-   *(pbTapeImage+lFileSize+3) = 0x20; // end with a pause block
-   *reinterpret_cast<word *>(pbTapeImage+lFileSize+3+1) = 2000; // set the length to 2 seconds
+   *(&pbTapeImage[lFileSize+3]) = 0x20; // end with a pause block
+   *reinterpret_cast<word *>(&pbTapeImage[lFileSize+3+1]) = 2000; // set the length to 2 seconds
 
    #ifdef DEBUG_TAPE
    fputs("--- New Tape\r\n", pfoDebug);
    #endif
-   pbTapeImageEnd = pbTapeImage + lFileSize+6;
-   pbBlock = pbTapeImage;
+   pbTapeImageEnd = &pbTapeImage[lFileSize+6];
+   pbBlock = &pbTapeImage[0];
    bool bolGotDataBlock = false;
    while (pbBlock < pbTapeImageEnd) {
       bID = *pbBlock++;
@@ -1052,7 +1051,7 @@ int tape_insert_cdt (FILE *pfile)
             bolGotDataBlock = true;
             break;
          case 0x20: // pause
-            if ((!bolGotDataBlock) && (pbBlock != pbTapeImage+1)) {
+            if ((!bolGotDataBlock) && (pbBlock != &pbTapeImage[1])) {
                *reinterpret_cast<word *>(pbBlock) = 0; // remove any pauses (execept ours) before the data starts
             }
             iBlockLength = 2;
@@ -1221,16 +1220,16 @@ int tape_insert_voc (FILE *pfile)
    if (dwCompressedSize > 0x00ffffff) { // we only support one direct recording block right now
       return ERR_TAP_BAD_VOC;
    }
-   pbTapeImage = new byte[dwCompressedSize+1+8+6];
-   *pbTapeImage = 0x20; // start off with a pause block
-   *reinterpret_cast<word *>(pbTapeImage+1) = 2000; // set the length to 2 seconds
+   pbTapeImage.resize(dwCompressedSize+1+8+6);
+   pbTapeImage[0] = 0x20; // start off with a pause block
+   *reinterpret_cast<word *>(&pbTapeImage[1]) = 2000; // set the length to 2 seconds
 
-   *(pbTapeImage+3) = 0x15; // direct recording block
-   *reinterpret_cast<word *>(pbTapeImage+4) = static_cast<word>(dwTapePulseCycles); // number of T states per sample
-   *reinterpret_cast<word *>(pbTapeImage+6) = 0; // pause after block
-   *(pbTapeImage+8) = lSampleLength & 7 ? lSampleLength & 7 : 8; // bits used in last byte
-   *reinterpret_cast<dword *>(pbTapeImage+9) = dwCompressedSize & 0x00ffffff; // data length
-   pbTapeImagePtr = pbTapeImage + 12;
+   *(&pbTapeImage[3]) = 0x15; // direct recording block
+   *reinterpret_cast<word *>(&pbTapeImage[4]) = static_cast<word>(dwTapePulseCycles); // number of T states per sample
+   *reinterpret_cast<word *>(&pbTapeImage[6]) = 0; // pause after block
+   pbTapeImage[8] = lSampleLength & 7 ? lSampleLength & 7 : 8; // bits used in last byte
+   *reinterpret_cast<dword *>(&pbTapeImage[9]) = dwCompressedSize & 0x00ffffff; // data length
+   pbTapeImagePtr = &pbTapeImage[12];
 
    lOffset = lInitialOffset;
    bolDone = false;

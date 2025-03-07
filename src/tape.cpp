@@ -20,6 +20,8 @@
    (c) Copyright 2002,2003 Ulrich Doewich
 */
 
+#include <vector>
+
 #include "cap32.h"
 #include "tape.h"
 #include "z80.h"
@@ -37,7 +39,7 @@
 #define MS_TO_CYCLES(p) (static_cast<dword>(p) * 4000)
 //#define MS_TO_CYCLES(p) ((dword)(p) * 3994)
 
-extern byte *pbTapeImage;
+extern std::vector<byte> pbTapeImage;
 extern byte *pbTapeImageEnd;
 extern t_CPC CPC;
 
@@ -592,7 +594,7 @@ void Tape_UpdateLevel()
 
 void Tape_Rewind()
 {
-   pbTapeBlock = pbTapeImage;
+   pbTapeBlock = &pbTapeImage[0];
    bTapeLevel = TAPE_LEVEL_LOW;
    iTapeCycleCount = 0;
    CPC.tape_play_button = 0;
