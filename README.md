@@ -7,11 +7,11 @@
 
 https://github.com/ColinPitrat/caprice32
 
-Linux build: [![Linux build Status](https://github.com/ColinPitrat/caprice32/actions/workflows/linux.yml/badge.svg)](https://github.com/ColinPitrat/caprice32/actions/workflows/linux.yml)
+Linux build: [![Linux build Status](https://github.com/ColinPitrat/caprice32/actions/workflows/linux.yml/badge.svg?branch=master)](https://github.com/ColinPitrat/caprice32/actions/workflows/linux.yml)
 
-Windows build: [![Windows build Status](https://github.com/ColinPitrat/caprice32/actions/workflows/windows.yml/badge.svg)](https://github.com/ColinPitrat/caprice32/actions/workflows/windows.yml)
+Windows build: [![Windows build Status](https://github.com/ColinPitrat/caprice32/actions/workflows/windows.yml/badge.svg?branch=latest)](https://github.com/ColinPitrat/caprice32/actions/workflows/windows.yml)
 
-MacOS build: [![MacOS build status](https://github.com/ColinPitrat/caprice32/actions/workflows/macos.yml/badge.svg)](https://github.com/ColinPitrat/caprice32/actions/workflows/macos.yml)
+MacOS build: [![MacOS build status](https://github.com/ColinPitrat/caprice32/actions/workflows/macos.yml/badge.svg?branch=latest)](https://github.com/ColinPitrat/caprice32/actions/workflows/macos.yml)
 
 # What is it ?
 

@@ -114,7 +114,7 @@ byte *pbROMhi = nullptr;
 byte *pbExpansionROM = nullptr;
 byte *pbMF2ROMbackup = nullptr;
 byte *pbMF2ROM = nullptr;
-byte *pbTapeImage = nullptr;
+std::vector<byte> pbTapeImage;
 byte keyboard_matrix[16];
 
 std::list<SDL_Event> virtualKeyboardEvents;
@@ -2879,7 +2879,7 @@ int cap32_main (int argc, char **argv)
                         case CAP32_TAPEPLAY:
                            LOG_VERBOSE("Request to play tape");
                            Tape_Rewind();
-                           if (pbTapeImage) {
+                           if (!pbTapeImage.empty()) {
                               if (CPC.tape_play_button) {
                                  LOG_VERBOSE("Play button released");
                                  CPC.tape_play_button = 0;
