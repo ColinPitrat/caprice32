@@ -628,6 +628,7 @@ int dsk_save (const std::string &filename, t_drive *drive)
 
    // If there are no tracks, don't save
    if (drive->tracks==0) {
+      LOG_ERROR("No tracks to save");
       return ERR_DSK_WRITE;
    }
    if ((pfileObject = fopen(filename.c_str(), "wb")) != nullptr) {
@@ -647,6 +648,7 @@ int dsk_save (const std::string &filename, t_drive *drive)
       }
       if (!fwrite(&dh, sizeof(dh), 1, pfileObject)) { // write header to file
          fclose(pfileObject);
+         LOG_ERROR("Error while writing to the file '" << filename << "'");
          return ERR_DSK_WRITE;
       }
 
@@ -669,10 +671,12 @@ int dsk_save (const std::string &filename, t_drive *drive)
                }
                if (!fwrite(&th, sizeof(th), 1, pfileObject)) { // write track header
                   fclose(pfileObject);
+                  LOG_ERROR("Error while writing to the file '" << filename << "'");
                   return ERR_DSK_WRITE;
                }
                if (!fwrite(drive->track[track][side].data, drive->track[track][side].size, 1, pfileObject)) { // write track data
                   fclose(pfileObject);
+                  LOG_ERROR("Error while writing to the file '" << filename << "'");
                   return ERR_DSK_WRITE;
                }
             }
@@ -681,6 +685,7 @@ int dsk_save (const std::string &filename, t_drive *drive)
       drive->altered = false;  // Drive is not modified anymore
       fclose(pfileObject);
    } else {
+      LOG_ERROR("Error while opening the file '" << filename << "' for write: " << strerror(errno));
       return ERR_DSK_WRITE; // write attempt failed
    }
 
@@ -753,14 +758,17 @@ int snapshot_load (FILE *pfile)
 
   memset(&sh, 0, sizeof(sh));
   if(fread(&sh, sizeof(sh), 1, pfile) != 1) { // read snapshot header
+    LOG_ERROR("Error loading snapshot: couldn't read header");
     return ERR_SNA_INVALID;
   }
   if (memcmp(sh.id, "MV - SNA", 8) != 0) { // valid SNApshot image?
+    LOG_ERROR("Error loading snapshot: invalid header");
     return ERR_SNA_INVALID;
   }
   dwSnapSize = sh.ram_size[0] + (sh.ram_size[1] * 256); // memory dump size
   dwSnapSize &= ~0x3f; // limit to multiples of 64
   if (!dwSnapSize) {
+    LOG_ERROR("Error loading snapshot: zero size");
     return ERR_SNA_SIZE;
   }
   if (dwSnapSize > CPC.ram_size) { // memory dump size differs from current RAM size?
@@ -777,6 +785,7 @@ int snapshot_load (FILE *pfile)
   n = fread(pbRAM, dwSnapSize*1024, 1, pfile); // read memory dump into CPC RAM
   if (!n) {
     emulator_reset();
+    LOG_ERROR("Error loading snapshot: couldn't read RAM");
     return ERR_SNA_INVALID;
   }
 
@@ -861,6 +870,7 @@ int snapshot_load (FILE *pfile)
     if (dwModel != CPC.model) { // different from what we're currently running?
       if (dwModel > 3) { // not one of the known models?
         emulator_reset();
+        LOG_ERROR("Error loading snapshot: invalid or unsupported CPC model");
         return ERR_SNA_CPC_TYPE;
       }
       std::string romFilename = CPC.rom_path + "/" + chROMFile[dwModel];
@@ -869,11 +879,13 @@ int snapshot_load (FILE *pfile)
         fclose(pfileObject);
         if (!n) {
           emulator_reset();
+          LOG_ERROR("Error loading snapshot: couldn't read ROM");
           return ERR_CPC_ROM_MISSING;
         }
         CPC.model = dwModel;
       } else { // ROM image load failed
         emulator_reset();
+        LOG_ERROR("Error loading snapshot: couldn't open ROM '" << romFilename << "'");
         return ERR_CPC_ROM_MISSING;
       }
     }
@@ -944,6 +956,7 @@ int snapshot_load (const std::string &filename)
    if ((pfileObject = fopen(filename.c_str(), "rb")) != nullptr) {
      return snapshot_load(pfileObject);
    }
+   LOG_ERROR("Error loading snapshot: file not found: '" << filename << "'");
    return ERR_FILE_NOT_FOUND;
 }
 
@@ -951,6 +964,7 @@ int tape_insert (FILE *pfile)
 {
    tape_eject();
    if(fread(pbGPBuffer, 10, 1, pfile) != 1) { // read beginning of header
+      LOG_ERROR("Error loading tape: couldn't read header");
       return ERR_TAP_INVALID;
    }
    // Reset so that the next method can recheck the header
@@ -965,7 +979,7 @@ int tape_insert (FILE *pfile)
       return tape_insert_voc(pfile);
    }
    // Unknown file
-   LOG_DEBUG("tape_insert unknown file");
+   LOG_ERROR("Error loading tape: Unrecognized file type");
    return ERR_TAP_INVALID;
 }
 
@@ -974,6 +988,7 @@ int tape_insert (const std::string &filename)
    LOG_DEBUG("tape_insert " << filename);
    FILE *pfile;
    if ((pfile = fopen(filename.c_str(), "rb")) == nullptr) {
+      LOG_ERROR("Error loading tape: File not found: '" << filename << "'");
       return ERR_FILE_NOT_FOUND;
    }
 
@@ -991,28 +1006,28 @@ int tape_insert_cdt (FILE *pfile)
    byte *pbPtr, *pbBlock;
 
    if(fread(pbGPBuffer, 10, 1, pfile) != 1) { // read CDT header
-      LOG_DEBUG("Couldn't read CDT header");
+      LOG_ERROR("Couldn't read CDT header");
       return ERR_TAP_INVALID;
    }
    pbPtr = pbGPBuffer;
    if (memcmp(pbPtr, "ZXTape!\032", 8) != 0) { // valid CDT file?
-      LOG_DEBUG("Invalid CDT header '" << pbPtr << "'");
+      LOG_ERROR("Invalid CDT header '" << pbPtr << "'");
       return ERR_TAP_INVALID;
    }
    if (*(pbPtr + 0x08) != 1) { // major version must be 1
-      LOG_DEBUG("Invalid CDT major version");
+      LOG_ERROR("Invalid CDT major version");
       return ERR_TAP_INVALID;
    }
    lFileSize = file_size(fileno(pfile)) - 0x0a;
    if (lFileSize <= 0) { // the tape image should have at least one block...
-      LOG_DEBUG("Invalid CDT file size");
+      LOG_ERROR("Invalid CDT file size");
       return ERR_TAP_INVALID;
    }
    pbTapeImage = new byte[lFileSize+6];
    *pbTapeImage = 0x20; // start off with a pause block
    *reinterpret_cast<word *>(pbTapeImage+1) = 2000; // set the length to 2 seconds
    if(fread(pbTapeImage+3, lFileSize, 1, pfile) != 1) { // append the entire CDT file
-      LOG_DEBUG("Couldn't read CDT file");
+      LOG_ERROR("Couldn't read CDT file");
      return ERR_TAP_INVALID;
    }
    *(pbTapeImage+lFileSize+3) = 0x20; // end with a pause block
@@ -1064,32 +1079,32 @@ int tape_insert_cdt (FILE *pfile)
             iBlockLength = 0;
             break;
          case 0x23: // jump to block
-            LOG_DEBUG("Couldn't load CDT file: unsupported " << bID);
+            LOG_ERROR("Couldn't load CDT file: unsupported block ID: " << bID);
             return ERR_TAP_UNSUPPORTED;
             iBlockLength = 2;
             break;
          case 0x24: // loop start
-            LOG_DEBUG("Couldn't load CDT file: unsupported " << bID);
+            LOG_ERROR("Couldn't load CDT file: unsupported block ID: " << bID);
             return ERR_TAP_UNSUPPORTED;
             iBlockLength = 2;
             break;
          case 0x25: // loop end
-            LOG_DEBUG("Couldn't load CDT file: unsupported " << bID);
+            LOG_ERROR("Couldn't load CDT file: unsupported block ID: " << bID);
             return ERR_TAP_UNSUPPORTED;
             iBlockLength = 0;
             break;
          case 0x26: // call sequence
-            LOG_DEBUG("Couldn't load CDT file: unsupported " << bID);
+            LOG_ERROR("Couldn't load CDT file: unsupported block ID: " << bID);
             return ERR_TAP_UNSUPPORTED;
             iBlockLength = (*reinterpret_cast<word *>(pbBlock) * 2) + 2;
             break;
          case 0x27: // return from sequence
-            LOG_DEBUG("Couldn't load CDT file: unsupported " << bID);
+            LOG_ERROR("Couldn't load CDT file: unsupported block ID: " << bID);
             return ERR_TAP_UNSUPPORTED;
             iBlockLength = 0;
             break;
          case 0x28: // select block
-            LOG_DEBUG("Couldn't load CDT file: unsupported " << bID);
+            LOG_ERROR("Couldn't load CDT file: unsupported block ID: " << bID);
             return ERR_TAP_UNSUPPORTED;
             iBlockLength = *reinterpret_cast<word *>(pbBlock) + 2;
             break;
@@ -1129,7 +1144,7 @@ int tape_insert_cdt (FILE *pfile)
       pbBlock += iBlockLength;
    }
    if (pbBlock != pbTapeImageEnd) {
-      LOG_DEBUG("CDT file error: Didn't reach end of tape");
+      LOG_ERROR("CDT file error: Didn't reach end of tape");
       tape_eject();
       return ERR_TAP_INVALID;
    }
@@ -1146,17 +1161,20 @@ int tape_insert_voc (FILE *pfile)
 
    tape_eject();
    if(fread(pbGPBuffer, 26, 1, pfile) != 1) { // read VOC header
+     LOG_ERROR("Reading VOC file: Invalid VOC file: error reading header");
      return ERR_TAP_BAD_VOC;
    }
    pbPtr = pbGPBuffer;
    if (memcmp(pbPtr, "Creative Voice File\032", 20) != 0) { // valid VOC file?
-      return ERR_TAP_BAD_VOC;
+     LOG_ERROR("Reading VOC file: Invalid VOC file");
+     return ERR_TAP_BAD_VOC;
    }
    lOffset =
    lInitialOffset = *reinterpret_cast<word *>(pbPtr + 0x14);
    lFileSize = file_size(fileno(pfile));
    if ((lFileSize-26) <= 0) { // should have at least one block...
-      return ERR_TAP_BAD_VOC;
+     LOG_ERROR("Reading VOC file: Invalid VOC file: no block");
+     return ERR_TAP_BAD_VOC;
    }
 
    #ifdef DEBUG_TAPE
@@ -1169,6 +1187,7 @@ int tape_insert_voc (FILE *pfile)
    while ((!bolDone) && (lOffset < lFileSize)) {
       fseek(pfile, lOffset, SEEK_SET);
       if(fread(pbPtr, 16, 1, pfile) != 1) { // read block ID + size
+        LOG_ERROR("Reading VOC file: Invalid VOC file: couldn't read block at " << lOffset);
         return ERR_TAP_BAD_VOC;
       }
       #ifdef DEBUG_TAPE
@@ -1182,10 +1201,12 @@ int tape_insert_voc (FILE *pfile)
             iBlockLength = (*reinterpret_cast<dword *>(pbPtr+0x01) & 0x00ffffff) + 4;
             lSampleLength += iBlockLength - 6;
             if ((bSampleRate) && (bSampleRate != *(pbPtr+0x04))) { // no change in sample rate allowed
+               LOG_ERROR("Reading VOC file: unsupported change in sample rate");
                return ERR_TAP_BAD_VOC;
             }
             bSampleRate = *(pbPtr+0x04);
             if (*(pbPtr+0x05) != 0) { // must be 8 bits wide
+               LOG_ERROR("Reading VOC file: unsupported non-8 bits codec");
                return ERR_TAP_BAD_VOC;
             }
             break;
@@ -1197,6 +1218,7 @@ int tape_insert_voc (FILE *pfile)
             iBlockLength = 4;
             lSampleLength += *reinterpret_cast<word *>(pbPtr+0x01) + 1;
             if ((bSampleRate) && (bSampleRate != *(pbPtr+0x03))) { // no change in sample rate allowed
+               LOG_ERROR("Reading VOC file: unsupported change in sample rate");
                return ERR_TAP_BAD_VOC;
             }
             bSampleRate = *(pbPtr+0x03);
@@ -1207,7 +1229,20 @@ int tape_insert_voc (FILE *pfile)
          case 0x5: // ascii
             iBlockLength = (*reinterpret_cast<dword *>(pbPtr+0x01) & 0x00ffffff) + 4;
             break;
+         case 0x6: // repeat
+            LOG_ERROR("Reading VOC file: unsupported repeat block");
+            return ERR_TAP_BAD_VOC;
+         case 0x7: // end repeat
+            LOG_ERROR("Reading VOC file: unsupported end repeat block");
+            return ERR_TAP_BAD_VOC;
+         case 0x8: // extended
+            LOG_ERROR("Reading VOC file: unsupported extended block");
+            return ERR_TAP_BAD_VOC;
+         case 0x9: // sound data - new format
+            LOG_ERROR("Reading VOC file: unsupported new format sound data block");
+            return ERR_TAP_BAD_VOC;
          default:
+            LOG_ERROR("Reading VOC file: unsupported unknown block type: " << static_cast<int>(*pbPtr));
             return ERR_TAP_BAD_VOC;
       }
       lOffset += iBlockLength;
@@ -1219,6 +1254,7 @@ int tape_insert_voc (FILE *pfile)
    dword dwTapePulseCycles = 3500000L / (1000000L / (256 - bSampleRate)); // length of one pulse in ZX Spectrum T states
    dword dwCompressedSize = lSampleLength >> 3; // 8x data reduction
    if (dwCompressedSize > 0x00ffffff) { // we only support one direct recording block right now
+      LOG_ERROR("Reading VOC file: tape size is too big");
       return ERR_TAP_BAD_VOC;
    }
    pbTapeImage = new byte[dwCompressedSize+1+8+6];
@@ -1239,6 +1275,7 @@ int tape_insert_voc (FILE *pfile)
    while ((!bolDone) && (lOffset < lFileSize)) {
       fseek(pfile, lOffset, SEEK_SET);
       if(fread(pbPtr, 1, 1, pfile) != 1) { // read block ID
+        LOG_ERROR("Reading VOC file: error reading block ID");
         return ERR_TAP_BAD_VOC;
       }
       switch(*pbPtr) {
@@ -1247,12 +1284,14 @@ int tape_insert_voc (FILE *pfile)
             break;
          case 0x1: // sound data
             if(fread(pbPtr, 3+2, 1, pfile) != 1) { // get block size and sound info
+              LOG_ERROR("Reading VOC file: error reading sound data");
               return ERR_TAP_BAD_VOC;
             }
             iBlockLength = (*reinterpret_cast<dword *>(pbPtr) & 0x00ffffff) + 4;
             lSampleLength = iBlockLength - 6;
             pbVocDataBlock = new byte[lSampleLength];
             if(fread(pbVocDataBlock, lSampleLength, 1, pfile) != 1) {
+              LOG_ERROR("Reading VOC file: error reading sound data");
               return ERR_TAP_BAD_VOC;
             }
             pbVocDataBlockPtr = pbVocDataBlock;
@@ -1272,12 +1311,14 @@ int tape_insert_voc (FILE *pfile)
             break;
          case 0x2: // sound continue
             if(fread(pbPtr, 3, 1, pfile) != 1) { // get block size
+              LOG_ERROR("Reading VOC file: error reading sound continue");
               return ERR_TAP_BAD_VOC;
             }
             iBlockLength = (*reinterpret_cast<dword *>(pbPtr) & 0x00ffffff) + 4;
             lSampleLength = iBlockLength - 4;
             pbVocDataBlock = new byte[lSampleLength];
             if(fread(pbVocDataBlock, lSampleLength, 1, pfile) != 1) {
+              LOG_ERROR("Reading VOC file: error reading sound continue");
               return ERR_TAP_BAD_VOC;
             }
             pbVocDataBlockPtr = pbVocDataBlock;
@@ -1313,6 +1354,9 @@ int tape_insert_voc (FILE *pfile)
          case 0x5: // ascii
             iBlockLength = (*reinterpret_cast<dword *>(pbPtr) & 0x00ffffff) + 4;
             break;
+         default:
+            LOG_ERROR("Reading VOC file: unsupported unknown block type: " << static_cast<int>(*pbPtr));
+            return ERR_TAP_BAD_VOC;
       }
       lOffset += iBlockLength;
    }
@@ -1341,6 +1385,7 @@ int cartridge_load (const std::string& filepath)
   if (CPC.model >= 3) {
     return cpr_load(filepath);
   }
+  LOG_ERROR("Loading cartridge: not supported on the chosen CPC model: CPC.model=" << CPC.model);
   return ERR_FILE_UNSUPPORTED;
 }
 
@@ -1348,13 +1393,17 @@ int cartridge_load (FILE *file) {
   if (CPC.model >= 3) {
     return cpr_load(file);
   }
+  LOG_ERROR("Loading cartridge: not supported on the chosen CPC model: CPC.model=" << CPC.model);
   return ERR_FILE_UNSUPPORTED;
 }
 
 // Still some duplication there... but it cannot really be helped
 int file_load(const std::string& filepath, const DRIVE drive)
 {
-  if (filepath.length() < 4) return ERR_FILE_UNSUPPORTED;
+  if (filepath.length() < 4) {
+    LOG_ERROR("File path is too short: '" << filepath << "'");
+    return ERR_FILE_UNSUPPORTED;
+  }
   int pos = filepath.length() - 4;
   std::string extension = stringutils::lower(filepath.substr(pos));
 
