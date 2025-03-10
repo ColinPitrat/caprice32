@@ -1322,8 +1322,13 @@ void printer_stop ()
 
 void audio_update (void *userdata __attribute__((unused)), byte *stream, int len)
 {
-   memcpy(stream, pbSndBuffer.get(), len);
-   dwSndBufferCopied = 1;
+  if (CPC.snd_ready) {
+    //LOG_VERBOSE("Audio: audio_update: copying " << len << " bytes");
+    memcpy(stream, pbSndBuffer.get(), len);
+    dwSndBufferCopied = 1;
+  } else {
+    LOG_VERBOSE("Audio: audio_update: skipping the copy of " << len << " bytes: sound buffer not ready");
+  }
 }
 
 
@@ -1348,16 +1353,18 @@ int audio_init ()
       return 0;
    }
 
+   CPC.snd_ready = false;
+
+   for (int i = 0; i < SDL_GetNumAudioDevices(0); i++) {
+      LOG_VERBOSE("Audio: device " << i << ": " << SDL_GetAudioDeviceName(i, 0));
+   }
+
    desired.freq = freq_table[CPC.snd_playback_rate];
    desired.format = CPC.snd_bits ? AUDIO_S16LSB : AUDIO_S8;
    desired.channels = CPC.snd_stereo+1;
    desired.samples = audio_align_samples(desired.freq * FRAME_PERIOD_MS / 1000);
    desired.callback = audio_update;
    desired.userdata = nullptr;
-
-   for (int i = 0; i < SDL_GetNumAudioDevices(0); i++) {
-      LOG_VERBOSE("Audio: device " << i << ": " << SDL_GetAudioDeviceName(i, 0));
-   }
 
    audio_device_id = SDL_OpenAudioDevice(nullptr, 0, &desired, &obtained, 0 /* no change allowed */);
    if (audio_device_id == 0) {
@@ -1366,14 +1373,16 @@ int audio_init ()
    }
    SDL_PauseAudioDevice(audio_device_id, 0);
 
-   LOG_VERBOSE("Audio: Desired: Freq: " << desired.freq << ", Format: " << desired.format << ", Channels: " << desired.channels << ", Samples: " << desired.samples);
-   LOG_VERBOSE("Audio: Obtained: Freq: " << obtained.freq << ", Format: " << obtained.format << ", Channels: " << obtained.channels << ", Samples: " << obtained.samples);
+   LOG_VERBOSE("Audio: Desired: Freq: " << desired.freq << ", Format: " << desired.format << ", Channels: " << static_cast<int>(desired.channels) << ", Samples: " << desired.samples << ", Size: " << desired.size);
+   LOG_VERBOSE("Audio: Obtained: Freq: " << obtained.freq << ", Format: " << obtained.format << ", Channels: " << static_cast<int>(obtained.channels) << ", Samples: " << obtained.samples << ", Size: " << obtained.size);
 
    CPC.snd_buffersize = obtained.size; // size is samples * channels * bytes per sample (1 or 2)
    pbSndBuffer = std::make_unique<byte[]>(CPC.snd_buffersize); // allocate the sound data buffer
    pbSndBufferEnd = pbSndBuffer.get() + CPC.snd_buffersize;
    memset(pbSndBuffer.get(), 0, CPC.snd_buffersize);
    CPC.snd_bufferptr = pbSndBuffer.get(); // init write cursor
+   CPC.snd_ready = true;
+   LOG_VERBOSE("Audio: Sound buffer ready");
 
    InitAY();
 

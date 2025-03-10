@@ -223,6 +223,7 @@ typedef struct {
    int devtools_scale;
 
    unsigned int snd_enabled;
+   bool snd_ready;
    unsigned int snd_playback_rate;
    unsigned int snd_bits;
    unsigned int snd_stereo;
