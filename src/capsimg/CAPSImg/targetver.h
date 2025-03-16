@@ -8,7 +8,9 @@
 // target Windows XP for 32 bit, the latest Windows version for 64 bit compilation
 #ifndef _WIN64
 #include <winsdkver.h>
+#ifndef _WIN32_WINNT
 #define _WIN32_WINNT _WIN32_WINNT_WINXP
+#endif
 #endif
 
 #include <SDKDDKVer.h>

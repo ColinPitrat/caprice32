@@ -86,6 +86,8 @@ typedef const char *LPCTSTR;
 #include "CapsFDCEmulator.h"
 #include "CapsFormatMFM.h"
 
+#define __assume(cond) do { if (!(cond)) __builtin_unreachable(); } while (0)
+
 #ifndef WINDOWS
 #define _access access
 #ifndef __MINGW32__
@@ -94,7 +96,6 @@ typedef const char *LPCTSTR;
 #define _mkdir(x) mkdir(x)
 #endif
 #define d_namlen d_reclen
-#define __assume(cond) do { if (!(cond)) __builtin_unreachable(); } while (0)
 
 typedef struct _SYSTEMTIME {
         WORD wYear;
