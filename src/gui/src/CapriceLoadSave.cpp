@@ -54,13 +54,8 @@ CapriceLoadSave::CapriceLoadSave(const CRect& WindowRect, CWindow* pParent, CFon
   // File type (.SNA, .DSK, .TAP, .VOC)
   m_pTypeLabel = new CLabel(          CPoint(15, 25),             this, "File type: ");
   m_pTypeValue = new CDropDown( CRect(CPoint(70, 20), 100, 20),    this, false);
-#ifndef WITH_IPF
-  m_pTypeValue->AddItem(SListItem("Drive A (.dsk)"));
-  m_pTypeValue->AddItem(SListItem("Drive B (.dsk)"));
-#else
   m_pTypeValue->AddItem(SListItem("Drive A (.dsk/.ipf)"));
   m_pTypeValue->AddItem(SListItem("Drive B (.dsk/.ipf)"));
-#endif
   m_pTypeValue->AddItem(SListItem("Snapshot (.sna)"));
   m_pTypeValue->AddItem(SListItem("Tape (.cdt/.voc)"));
   m_pTypeValue->AddItem(SListItem("Cartridge (.cpr)"));
@@ -310,11 +305,7 @@ bool CapriceLoadSave::HandleMessage(CMessage* pMessage)
           switch (m_pTypeValue->GetSelectedIndex()) {
             case 0: // Drive A
               m_pDirectoryValue->SetWindowText(simplifyDirPath(CPC.current_dsk_path));
-#ifndef WITH_IPF
-              m_fileSpec = { ".dsk", ".zip" };
-#else
               m_fileSpec = { ".dsk", ".ipf", ".zip" };
-#endif
               UpdateActionsList();
               UpdateFilesList();
               break;

@@ -20,7 +20,6 @@ The following options are available:
 
  * `DEBUG=TRUE`
  * `WITHOUT_GL=TRUE`
- * `WITH_IPF=TRUE`
  * `ARCH=(win32|win64|linux)`
 
 For example, for a linux debug build, use:
@@ -260,14 +259,6 @@ sudo cp -r include/caps /usr/include
 sudo chmod a-x /usr/include/caps/* /usr/lib/libcapsimage.so*
 sudo chmod a+r /usr/include/caps /usr/include/caps/* /usr/lib/libcapsimage.so*
 ```
-
-Then build Caprice with WITH_IPF:
-
-`make WITH_IPF=true`
-
-You can then run an IPF file as you would do for a DSK file:
-
-`./cap32 disk.ipf`
 
 #### On Windows
 

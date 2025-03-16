@@ -75,7 +75,6 @@ file_loader files_loader_list[] =
     [](const std::string& filename) -> int { return dsk_load(filename, &driveB); },
     [](FILE* file) -> int { return dsk_load(file, &driveB); } },
 
-#ifdef WITH_IPF
   { DSK_A, ".ipf",
     [](const std::string& filename) -> int { return ipf_load(filename, &driveA); },
     [](FILE* file) -> int { return ipf_load(file, &driveA); } },
@@ -83,7 +82,6 @@ file_loader files_loader_list[] =
   { DSK_B, ".ipf",
     [](const std::string& filename) -> int { return ipf_load(filename, &driveB); },
     [](FILE* file) -> int { return ipf_load(file, &driveB); } },
-#endif
 
   { OTHER, ".sna",
     &snapshot_load,

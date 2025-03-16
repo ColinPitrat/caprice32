@@ -16,12 +16,9 @@ jobs:
       - uses: actions/checkout@v2
       - run: sudo apt-get update
       - run: sudo apt-get install pkg-config libsdl2-dev libfreetype6-dev zlib1g-dev libpng-dev devscripts
-      - run: wget http://softpres.org/_media/files:ipflib42_linux-x86_64.tar.gz -O /tmp/ipflib42_linux-x86_64.tar.gz
-      - run: tar -xf /tmp/ipflib42_linux-x86_64.tar.gz 2>&1 >/dev/null
-      - run: sudo cp -r x86_64-linux-gnu-capsimage/include/caps /usr/include
 
-      - run: make -j 3 WITH_IPF=true
-      - run: make -j 3 WITH_IPF=true unit_test
+      - run: make -j 3
+      - run: make -j 3 unit_test
       - run: make -j 3 e2e_test
 
       - run: make -j 3 clean

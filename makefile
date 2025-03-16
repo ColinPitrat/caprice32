@@ -12,7 +12,6 @@
 #  - CFLAGS
 #  - LDFLAGS
 #  - WITHOUT_GL
-#  - WITH_IPF
 
 # To be overridden for debian packaging
 VERSION=latest
@@ -32,12 +31,10 @@ ifeq ($(ARCH),win64)
 COMMON_CFLAGS = -DWINDOWS -D_POSIX_C_SOURCE=200809L -Wno-error=old-style-cast
 PLATFORM=windows
 MINGW_PATH=/mingw64
-CAPSIPFDLL=CAPSImg_x64.dll
 else ifeq ($(ARCH),win32)
 COMMON_CFLAGS = -DWINDOWS -D_POSIX_C_SOURCE=200809L -Wno-error=old-style-cast
 PLATFORM=windows
 MINGW_PATH=/mingw32
-CAPSIPFDLL=CAPSImg.dll
 else ifeq ($(ARCH),linux)
 PLATFORM=linux
 else ifeq ($(ARCH),macos)
@@ -55,22 +52,17 @@ else
 prefix = /usr/local
 TARGET = cap32
 TEST_TARGET = test_runner
-ifdef WITH_IPF
-LIBS += -ldl
-endif
 endif
 
-IPATHS = -Isrc/ -Isrc/gui/includes `pkg-config --cflags freetype2` `sdl2-config --cflags` `pkg-config --cflags libpng` `pkg-config --cflags zlib`
+CAPS_INCLUDES=-Isrc/capsimg/LibIPF -Isrc/capsimg/Device -Isrc/capsimg/CAPSImg -Isrc/capsimg/Codec -Isrc/capsimg/Core
+
+IPATHS = -Isrc/ $(CAPS_INCLUDES) -Isrc/gui/includes `pkg-config --cflags freetype2` `sdl2-config --cflags` `pkg-config --cflags libpng` `pkg-config --cflags zlib`
 LIBS = `sdl2-config --libs` `pkg-config --libs freetype2` `pkg-config --libs libpng` `pkg-config --libs zlib`
 CXX ?= g++
 COMMON_CFLAGS += -fPIC
 
 ifneq (,$(findstring g++,$(CXX)))
 LIBS += -lstdc++fs
-endif
-
-ifdef WITH_IPF
-COMMON_CFLAGS += -DWITH_IPF
 endif
 
 ifndef RELEASE
@@ -209,9 +201,6 @@ distrib: $(TARGET)
 	cp $(TARGET) $(ARCHIVE_DIR)/
 	$(foreach DLL,$(DLLS),[ -f $(MINGW_PATH)/bin/$(DLL) ] && cp $(MINGW_PATH)/bin/$(DLL) $(ARCHIVE_DIR)/ || (echo "$(MINGW_PATH)/bin/$(DLL) doesn't exist" && false);)
 	cp $(MINGW_PATH)/bin/libgcc_s_*-1.dll $(ARCHIVE_DIR)/
-ifdef WITH_IPF
-	cp $(MINGW_PATH)/bin/$(CAPSIPFDLL) $(ARCHIVE_DIR)/CAPSImg.dll
-endif
 	cp cap32.cfg.tmpl cap32.cfg COPYING.txt README.md $(ARCHIVE_DIR)/
 	cp -r resources/ rom/ licenses/ $(ARCHIVE_DIR)/
 	cd $(RELEASE_DIR) && zip -r $(ARCHIVE).zip $(ARCHIVE)

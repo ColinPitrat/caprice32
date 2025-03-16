@@ -41,19 +41,12 @@ jobs:
       # zlib.
       - name: Build caprice
         shell: msys2 {0}
-        env:
-          IPF_LINUX_URL: "http://www.softpres.org/_media/files:ipflib42_linux-i686.tar.gz"
-          IPF_WIN_URL: "http://www.softpres.org/_media/files:${{matrix.ipf_win_file}}"
-          IPF_DLL_SRC: ${{matrix.ipf_dll}}
-          IPF_LICENCE_SRC: ${{matrix.ipf_license}}
         run: |
           make ARCH=${{matrix.arch}} CXX=g++ WINE=\"\" CFLAGS="-ID:/a/_temp/msys64/${{matrix.mingw}}/include/" debug -j 4 -k
-          wget "$IPF_LINUX_URL" -O ipflib42_linux-i686.tar.gz && 7z x ipflib42_linux-i686.tar.gz && 7z x ipflib42_linux-i686.tar && cd i686-linux-gnu-capsimage/ && ln -s libcapsimage.so.4.2 libcapsimage.so.4 && ln -s libcapsimage.so.4.2 libcapsimage.so && cd ..
-          wget "$IPF_WIN_URL" && 7z x -y *ipflib*zip && cp $IPF_DLL_SRC /${{matrix.mingw}}/bin/ && cp $IPF_LICENCE_SRC licenses/CAPSImg\ license.txt
           make ARCH=${{matrix.arch}} CXX=g++ WINE=\"\" CFLAGS="-ID:/a/_temp/msys64/${{matrix.mingw}}/include/" -j 4 clean
-          make ARCH=${{matrix.arch}} CXX=g++ WINE=\"\" CFLAGS="-ID:/a/_temp/msys64/${{matrix.mingw}}/include/ -Ii686-linux-gnu-capsimage/include" WITH_IPF=true -j 4 -k
-          make ARCH=${{matrix.arch}} CXX=g++ WINE=\"\" CFLAGS="-ID:/a/_temp/msys64/${{matrix.mingw}}/include/ -Ii686-linux-gnu-capsimage/include" WINE=\"\" WITH_IPF=true -j 4 -k unit_test
-          make ARCH=${{matrix.arch}} CXX=g++ WINE=\"\" CFLAGS="-ID:/a/_temp/msys64/${{matrix.mingw}}/include/ -Ii686-linux-gnu-capsimage/include" WINE=\"\" WITH_IPF=true -j 4 -k e2e_test
+          make ARCH=${{matrix.arch}} CXX=g++ WINE=\"\" CFLAGS="-ID:/a/_temp/msys64/${{matrix.mingw}}/include/ -Ii686-linux-gnu-capsimage/include" -j 4 -k
+          make ARCH=${{matrix.arch}} CXX=g++ WINE=\"\" CFLAGS="-ID:/a/_temp/msys64/${{matrix.mingw}}/include/ -Ii686-linux-gnu-capsimage/include" WINE=\"\" -j 4 -k unit_test
+          make ARCH=${{matrix.arch}} CXX=g++ WINE=\"\" CFLAGS="-ID:/a/_temp/msys64/${{matrix.mingw}}/include/ -Ii686-linux-gnu-capsimage/include" WINE=\"\" -j 4 -k e2e_test
           ./test/integrated/test_win_package.sh ${{matrix.arch}}
           ./test/integrated/test_win_deps.sh ${{matrix.arch}}
 
