@@ -196,7 +196,6 @@ Adjust the win64 part in the makefile.
 ifeq ($(ARCH),win64)
 TRIPLE = x86_64-w64-mingw32
 PLATFORM=windows
-CAPSIPFDLL=CAPSImg_x64.dll
 MINGW_PATH = /mingw64
 ```
 
@@ -237,12 +236,6 @@ If you want to build the 32 bit version you need to adjust the MINGW_PATH in the
 `pacman -S mingw-w64-i686-gcc`
 
 
-# IPF support
-
-Caprice32 supports IPF file format (http://www.softpres.org/).
-To enable it, you need to first download the proper package from http://softpres.org/download (under "User Distribution").
-You need version 4.2 at least.
-
 #### On Linux/macOS
 
 Unpack the package and copy the library and headers in a place where they will be found by the compilation.
@@ -261,8 +254,6 @@ sudo chmod a+r /usr/include/caps /usr/include/caps/* /usr/lib/libcapsimage.so*
 ```
 
 #### On Windows
-
-The windows builds available in releases include IPF support.
 
 # Using the emulator
 

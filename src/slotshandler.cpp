@@ -83,6 +83,14 @@ file_loader files_loader_list[] =
     [](const std::string& filename) -> int { return ipf_load(filename, &driveB); },
     [](FILE* file) -> int { return ipf_load(file, &driveB); } },
 
+  { DSK_A, ".raw",
+    [](const std::string& filename) -> int { return ipf_load(filename, &driveA); },
+    [](FILE* file) -> int { return ipf_load(file, &driveA); } },
+
+  { DSK_B, ".raw",
+    [](const std::string& filename) -> int { return ipf_load(filename, &driveB); },
+    [](FILE* file) -> int { return ipf_load(file, &driveB); } },
+
   { OTHER, ".sna",
     &snapshot_load,
     &snapshot_load },
@@ -136,7 +144,7 @@ void fillSlots (std::vector<std::string> slot_list, t_CPC& CPC)
          if (extension == ".zip") { // are we dealing with a zip archive?
            zip::t_zip_info zip_info;
            zip_info.filename = fullpath;
-           zip_info.extensions = ".dsk.sna.cdt.voc.cpr.ipf";
+           zip_info.extensions = ".dsk.sna.cdt.voc.cpr.ipf.raw";
            if (zip::dir(&zip_info)) {
              continue; // error or nothing relevant found
            }
@@ -149,9 +157,13 @@ void fillSlots (std::vector<std::string> slot_list, t_CPC& CPC)
             continue;
          if (fillSlot(CPC.drvA_file, have_DSKA, fullpath, extension, ".ipf", "drive A disk (IPF)"))
             continue;
+         if (fillSlot(CPC.drvA_file, have_DSKA, fullpath, extension, ".raw", "drive A disk (CT-RAW)"))
+            continue;
          if (fillSlot(CPC.drvB_file, have_DSKB, fullpath, extension, ".dsk", "drive B disk"))
             continue;
          if (fillSlot(CPC.drvB_file, have_DSKB, fullpath, extension, ".ipf", "drive B disk (IPF)"))
+            continue;
+         if (fillSlot(CPC.drvB_file, have_DSKB, fullpath, extension, ".raw", "drive B disk (CT-IPF)"))
             continue;
          if (fillSlot(CPC.snap_file, have_SNA, fullpath, extension, ".sna", "CPC state snapshot"))
             continue;
@@ -1397,9 +1409,14 @@ int cartridge_load (FILE *file) {
 // Still some duplication there... but it cannot really be helped
 int file_load(const std::string& filepath, const DRIVE drive)
 {
+  if (filepath.empty()) {
+    // Special casing because this is not an error if called from loadSlots
+    LOG_VERBOSE("Ignoring empty filename passed to file_load.")
+    return ERR_FILE_NOT_FOUND;
+  }
   if (filepath.length() < 4) {
     LOG_ERROR("File path is too short: '" << filepath << "'");
-    return ERR_FILE_UNSUPPORTED;
+    return ERR_FILE_NOT_FOUND;
   }
   int pos = filepath.length() - 4;
   std::string extension = stringutils::lower(filepath.substr(pos));
