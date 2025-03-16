@@ -20,6 +20,9 @@
 #include <io.h>
 #include <direct.h>
 
+#define _lrotl(x,n) (((x) << (n)) | ((x) >> (sizeof(x)*8-(n))))
+#define _lrotr(x,n) (((x) >> (n)) | ((x) << (sizeof(x)*8-(n))))
+
 #else
 
 #include <stddef.h>			// offsetof
