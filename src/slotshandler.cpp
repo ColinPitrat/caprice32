@@ -1425,7 +1425,7 @@ int file_load(const std::string& filepath, const DRIVE drive)
   if (extension == ".zip") {
     zip::t_zip_info zip_info;
     zip_info.filename = filepath;
-    zip_info.extensions = ".dsk.sna.cdt.voc.cpr.ipf";
+    zip_info.extensions = ".dsk.sna.cdt.voc.cpr.ipf.raw";
     if (zip::dir(&zip_info)) {
       // error or nothing relevant found
       LOG_ERROR("Error opening or parsing zip file " << filepath);
