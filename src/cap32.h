@@ -251,6 +251,7 @@ typedef struct {
 
    std::string dsk_path;
    std::string drvA_file;
+   unsigned int drvA_zip_index;
    std::string drvB_file;
 
    std::string tape_path;
@@ -403,6 +404,7 @@ typedef struct {
 using t_MemBankConfig = std::array<std::array<byte*, 4>, 8>;
 
 // cap32.cpp
+void set_osd_message(const std::string& message, uint32_t for_milliseconds = 1000);
 void ga_init_banking(t_MemBankConfig& membank_config, unsigned char RAM_bank);
 bool driveAltered();
 void emulator_reset();

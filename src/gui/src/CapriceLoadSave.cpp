@@ -144,33 +144,33 @@ bool CapriceLoadSave::HandleMessage(CMessage* pMessage)
                     DRIVE drive;
                     switch (m_pTypeValue->GetSelectedIndex()) {
                       case 0: // Drive A
-                        drive = DSK_A;
+                        drive = DRIVE::DSK_A;
                         actionDone = true;
                         CPC.current_dsk_path = directory;
                         break;
                       case 1: // Drive B
-                        drive = DSK_B;
+                        drive = DRIVE::DSK_B;
                         actionDone = true;
                         CPC.current_dsk_path = directory;
                         break;
                       case 2: // Snapshot
-                        drive = OTHER;
+                        drive = DRIVE::SNAPSHOT;
                         actionDone = true;
                         CPC.current_snap_path = directory;
                         break;
                       case 3: // Tape
-                        drive = OTHER;
+                        drive = DRIVE::TAPE;
                         actionDone = true;
                         CPC.current_tape_path = directory;
                         break;
                       case 4: // Cartridge
-                        drive = OTHER;
+                        drive = DRIVE::CARTRIDGE;
                         actionDone = true;
                         CPC.current_cart_path = directory;
                         break;
                     }
                     if (actionDone) {
-                      file_load(filename, drive);
+                      file_load(filename, drive, 0);
                     }
                     if (m_pTypeValue->GetSelectedIndex() == 4) {
                       emulator_reset();

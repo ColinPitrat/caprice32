@@ -142,8 +142,8 @@ dword freq_table[MAX_FREQ_ENTRIES] = {
 
 #include "font.h"
 
-void set_osd_message(const std::string& message) {
-   osd_timing = SDL_GetTicks() + 1000;
+void set_osd_message(const std::string& message, uint32_t for_milliseconds) {
+   osd_timing = SDL_GetTicks() + for_milliseconds;
    osd_message = " " + message;
 }
 
@@ -2977,6 +2977,14 @@ int cap32_main (int argc, char **argv)
                            }
                            #endif
                            set_osd_message(std::string("Debug mode: ") + (log_verbose ? "on" : "off"));
+                           break;
+
+                        case CAP32_NEXTDISKA:
+                           // Technically, this could overflow at some point.
+                           // In practice, it's unlikely anyone will ever switch file enough for that.
+                           // The problem is that to make it loop, we would need to know the number of matching files in the zip.
+                           CPC.drvA_zip_index += 1;
+                           file_load(CPC.drvA_file, DRIVE::DSK_A, CPC.drvA_zip_index);
                            break;
                      }
                   }
