@@ -1008,7 +1008,7 @@ int emulator_patch_ROM ()
             pbPtr += 0x1eef; // location of the keyboard translation table
             break;
          case 3: // 6128+
-            if(CPC.cart_file == CPC.rom_path + "/" + chROMFile[3]) { // Only patch system cartridge - we don't want to break another one by messing with it
+            if(CPC.cartridge.file == CPC.rom_path + "/" + chROMFile[3]) { // Only patch system cartridge - we don't want to break another one by messing with it
                pbPtr += 0x1eef; // location of the keyboard translation table
             }
             break;
@@ -1849,7 +1849,7 @@ void loadConfiguration (t_CPC &CPC, const std::string& configFilename)
    }
    CPC.rom_mf2 = conf.getStringValue("rom", "rom_mf2", "");
 
-   CPC.cart_file = CPC.rom_path + "/system.cpr"; // Only default path defined. Needed for CPC6128+
+   CPC.cartridge.file = CPC.rom_path + "/system.cpr"; // Only default path defined. Needed for CPC6128+
 }
 
 
@@ -2980,11 +2980,8 @@ int cap32_main (int argc, char **argv)
                            break;
 
                         case CAP32_NEXTDISKA:
-                           // Technically, this could overflow at some point.
-                           // In practice, it's unlikely anyone will ever switch file enough for that.
-                           // The problem is that to make it loop, we would need to know the number of matching files in the zip.
-                           CPC.drvA_zip_index += 1;
-                           file_load(CPC.drvA_file, DRIVE::DSK_A, CPC.drvA_zip_index);
+                           CPC.driveA.zip_index += 1;
+                           file_load(CPC.driveA);
                            break;
                      }
                   }

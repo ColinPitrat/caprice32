@@ -19,14 +19,6 @@
 #include "disk.h"
 #include <string>
 
-enum class DRIVE {
-  DSK_A,
-  DSK_B,
-  TAPE,
-  CARTRIDGE,
-  SNAPSHOT,
-};
-
 FILE *extractFile(const std::string& zipfile, const std::string& filename, const std::string& ext);
 int snapshot_load (FILE *pfile);
 int snapshot_load (const std::string& filename);
@@ -46,7 +38,7 @@ int cartridge_load (const std::string& filepath);
 int cartridge_load (FILE *file);
 // Smart load: support loading DSK, SNA, CDT, VOC, CPR or a zip containing one of these.
 // drive must match the type of file being loaded
-int file_load(const std::string& filepath, const DRIVE drive, unsigned int zip_index);
+int file_load(t_slot& slot);
 // Retrieve files that are passed as argument and update CPC fields so that they will be loaded properly
 void fillSlots (std::vector<std::string> slot_list, t_CPC& CPC);
 // Loads slot content in memory

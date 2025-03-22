@@ -113,10 +113,11 @@ t_disk_format disk_format[MAX_DISK_FORMAT] = {
    { "169K Vendor Format", 40, 1, 9, 2, 0x52, 0xe5, {{ 0x41, 0x46, 0x42, 0x47, 0x43, 0x48, 0x44, 0x49, 0x45 }} }
 };
 
-inline bool fillSlot(std::string &filevar, bool &processedvar, const std::string& fullpath, const std::string& extension, const std::string& type_ext, const std::string& type_desc) {
+inline bool fillSlot(t_slot& slot, bool &processedvar, const std::string& fullpath, const std::string& extension, const std::string& type_ext, const std::string& type_desc) {
    if ((!processedvar) && (extension == type_ext)) {
       LOG_VERBOSE("Loading " << type_desc << " file: " << fullpath);
-      filevar = fullpath;
+      slot.file = fullpath;
+      slot.zip_index = 0;
       processedvar = true;
       return true;
    }
@@ -153,32 +154,25 @@ void fillSlots (std::vector<std::string> slot_list, t_CPC& CPC)
            extension = filename.substr(pos); // grab the extension
          }
 
-         if (fillSlot(CPC.drvA_file, have_DSKA, fullpath, extension, ".dsk", "drive A disk")) {
-           // TODO: Move this in fillSlot
-           CPC.drvA_zip_index = 0;
+         if (fillSlot(CPC.driveA, have_DSKA, fullpath, extension, ".dsk", "drive A disk"))
            continue;
-         }
-         if (fillSlot(CPC.drvA_file, have_DSKA, fullpath, extension, ".ipf", "drive A disk (IPF)")) {
-            CPC.drvA_zip_index = 0;
+         if (fillSlot(CPC.driveA, have_DSKA, fullpath, extension, ".ipf", "drive A disk (IPF)"))
             continue;
-         }
-         if (fillSlot(CPC.drvA_file, have_DSKA, fullpath, extension, ".raw", "drive A disk (CT-RAW)")) {
-           CPC.drvA_zip_index = 0;
+         if (fillSlot(CPC.driveA, have_DSKA, fullpath, extension, ".raw", "drive A disk (CT-RAW)"))
            continue;
-         }
-         if (fillSlot(CPC.drvB_file, have_DSKB, fullpath, extension, ".dsk", "drive B disk"))
+         if (fillSlot(CPC.driveB, have_DSKB, fullpath, extension, ".dsk", "drive B disk"))
             continue;
-         if (fillSlot(CPC.drvB_file, have_DSKB, fullpath, extension, ".ipf", "drive B disk (IPF)"))
+         if (fillSlot(CPC.driveB, have_DSKB, fullpath, extension, ".ipf", "drive B disk (IPF)"))
             continue;
-         if (fillSlot(CPC.drvB_file, have_DSKB, fullpath, extension, ".raw", "drive B disk (CT-IPF)"))
+         if (fillSlot(CPC.driveB, have_DSKB, fullpath, extension, ".raw", "drive B disk (CT-IPF)"))
             continue;
-         if (fillSlot(CPC.snap_file, have_SNA, fullpath, extension, ".sna", "CPC state snapshot"))
+         if (fillSlot(CPC.snapshot, have_SNA, fullpath, extension, ".sna", "CPC state snapshot"))
             continue;
-         if (fillSlot(CPC.tape_file, have_TAP, fullpath, extension, ".cdt", "tape (CDT)"))
+         if (fillSlot(CPC.tape, have_TAP, fullpath, extension, ".cdt", "tape (CDT)"))
             continue;
-         if (fillSlot(CPC.tape_file, have_TAP, fullpath, extension, ".voc", "tape (VOC)"))
+         if (fillSlot(CPC.tape, have_TAP, fullpath, extension, ".voc", "tape (VOC)"))
             continue;
-         if (fillSlot(CPC.cart_file, have_CPR, fullpath, extension, ".cpr", "cartridge"))
+         if (fillSlot(CPC.cartridge, have_CPR, fullpath, extension, ".cpr", "cartridge"))
             continue;
       }
    }
@@ -186,11 +180,11 @@ void fillSlots (std::vector<std::string> slot_list, t_CPC& CPC)
 
 void loadSlots() {
    memset(&driveA, 0, sizeof(t_drive)); // clear disk drive A data structure
-   file_load(CPC.drvA_file, DRIVE::DSK_A, 0);
+   file_load(CPC.driveA);
    memset(&driveB, 0, sizeof(t_drive)); // clear disk drive B data structure
-   file_load(CPC.drvB_file, DRIVE::DSK_B, 0);
-   file_load(CPC.tape_file, DRIVE::TAPE, 0);
-   file_load(CPC.snap_file, DRIVE::SNAPSHOT, 0);
+   file_load(CPC.driveB);
+   file_load(CPC.tape);
+   file_load(CPC.snapshot);
    // Cartridge was loaded by emulator_init which called cartridge_load if needed
 }
 
@@ -1389,7 +1383,7 @@ int tape_insert_voc (FILE *pfile)
 void cartridge_load ()
 {
   if (CPC.model >= 3) {
-     if (file_load(CPC.cart_file, DRIVE::CARTRIDGE, 0)) {
+     if (file_load(CPC.cartridge)) {
         fprintf(stderr, "Load of cartridge failed. Aborting.\n");
         cleanExit(-1);
      }
@@ -1430,37 +1424,37 @@ std::string drive_extensions(const DRIVE drive) {
 }
 
 // Still some duplication there... but it cannot really be helped
-int file_load(const std::string& filepath, const DRIVE drive, unsigned int zip_index)
+int file_load(t_slot& slot)
 {
-  if (filepath.empty()) {
+  if (slot.file.empty()) {
     // Special casing because this is not an error if called from loadSlots
     LOG_VERBOSE("Ignoring empty filename passed to file_load.")
     return ERR_FILE_NOT_FOUND;
   }
-  if (filepath.length() < 4) {
-    LOG_ERROR("File path is too short: '" << filepath << "'");
+  if (slot.file.length() < 4) {
+    LOG_ERROR("File path is too short: '" << slot.file << "'");
     return ERR_FILE_NOT_FOUND;
   }
-  int pos = filepath.length() - 4;
-  std::string extension = stringutils::lower(filepath.substr(pos));
+  int pos = slot.file.length() - 4;
+  std::string extension = stringutils::lower(slot.file.substr(pos));
 
   FILE *file = nullptr;
   if (extension == ".zip") {
     zip::t_zip_info zip_info;
-    zip_info.filename = filepath;
-    zip_info.extensions = drive_extensions(drive);
+    zip_info.filename = slot.file;
+    zip_info.extensions = drive_extensions(slot.drive);
     if (zip::dir(&zip_info)) {
       // error or nothing relevant found
-      LOG_ERROR("Error opening or parsing zip file " << filepath);
+      LOG_ERROR("Error opening or parsing zip file " << slot.file);
       return ERR_FILE_UNZIP_FAILED;
     }
 
-    zip_index = zip_index % zip_info.filesOffsets.size();
-    std::string filename = zip_info.filesOffsets[zip_index].first;
+    slot.zip_index = slot.zip_index % zip_info.filesOffsets.size();
+    std::string filename = zip_info.filesOffsets[slot.zip_index].first;
     pos = filename.length() - 4;
     extension = stringutils::lower(filename.substr(pos)); // grab the extension in lowercases
-    LOG_DEBUG("Extracting " << filepath << ", " << filename << ", " << extension);
-    file = extractFile(filepath, filename, extension);
+    LOG_DEBUG("Extracting " << slot.file << ", " << filename << ", " << extension);
+    file = extractFile(slot.file, filename, extension);
     if (zip_info.filesOffsets.size() > 1) {
       // Give 5s to the user to read the message.
       set_osd_message("Loaded '" + filename + "' - Press Shift+F5 for next file", 5000);
@@ -1468,13 +1462,13 @@ int file_load(const std::string& filepath, const DRIVE drive, unsigned int zip_i
   }
 
   for(const auto& loader : files_loader_list) {
-    if (drive == loader.drive && extension == loader.extension) {
+    if (slot.drive == loader.drive && extension == loader.extension) {
       if (file) {
         return loader.load_from_file(file);
       }
-      return loader.load_from_filename(filepath);
+      return loader.load_from_filename(slot.file);
     }
   }
-  LOG_ERROR("File format unsupported for " << filepath);
+  LOG_ERROR("File format unsupported for " << slot.file);
   return ERR_FILE_UNSUPPORTED;
 }

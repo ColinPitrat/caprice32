@@ -141,36 +141,37 @@ bool CapriceLoadSave::HandleMessage(CMessage* pMessage)
                       pMessageBox->SetModal(true);
                       break;
                     }
-                    DRIVE drive;
                     switch (m_pTypeValue->GetSelectedIndex()) {
                       case 0: // Drive A
-                        drive = DRIVE::DSK_A;
+                        CPC.driveA.file = filename;
+                        file_load(CPC.driveA);
                         actionDone = true;
                         CPC.current_dsk_path = directory;
                         break;
                       case 1: // Drive B
-                        drive = DRIVE::DSK_B;
+                        CPC.driveB.file = filename;
+                        file_load(CPC.driveB);
                         actionDone = true;
                         CPC.current_dsk_path = directory;
                         break;
                       case 2: // Snapshot
-                        drive = DRIVE::SNAPSHOT;
+                        CPC.snapshot.file = filename;
+                        file_load(CPC.snapshot);
                         actionDone = true;
                         CPC.current_snap_path = directory;
                         break;
                       case 3: // Tape
-                        drive = DRIVE::TAPE;
+                        CPC.tape.file = filename;
+                        file_load(CPC.tape);
                         actionDone = true;
                         CPC.current_tape_path = directory;
                         break;
                       case 4: // Cartridge
-                        drive = DRIVE::CARTRIDGE;
+                        CPC.cartridge.file = filename;
+                        file_load(CPC.cartridge);
                         actionDone = true;
                         CPC.current_cart_path = directory;
                         break;
-                    }
-                    if (actionDone) {
-                      file_load(filename, drive, 0);
                     }
                     if (m_pTypeValue->GetSelectedIndex() == 4) {
                       emulator_reset();

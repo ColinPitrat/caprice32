@@ -167,6 +167,20 @@ typedef struct {
    unsigned char unused2[75];
 } t_SNA_header;
 
+enum class DRIVE {
+  DSK_A,
+  DSK_B,
+  TAPE,
+  CARTRIDGE,
+  SNAPSHOT,
+};
+
+struct t_slot {
+   DRIVE drive;
+   std::string file;
+   unsigned int zip_index;
+};
+
 typedef struct {
    unsigned int model;
    unsigned int jumpers;
@@ -243,19 +257,16 @@ typedef struct {
 
    unsigned int max_tracksize;
 
-   std::string snap_path; // Path where machine state snapshots will be loaded/saved by default.
-   std::string snap_file; // Path to the actual file (zip or not)
-
-   std::string cart_path;
-   std::string cart_file;
-
    std::string dsk_path;
-   std::string drvA_file;
-   unsigned int drvA_zip_index;
-   std::string drvB_file;
-
    std::string tape_path;
-   std::string tape_file;
+   std::string snap_path; // Path where machine state snapshots will be loaded/saved by default.
+   std::string cart_path;
+
+   t_slot driveA;
+   t_slot driveB;
+   t_slot tape;
+   t_slot snapshot;
+   t_slot cartridge;
 
    std::string printer_file;
    std::string sdump_dir;
