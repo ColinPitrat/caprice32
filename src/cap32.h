@@ -181,7 +181,10 @@ struct t_slot {
    unsigned int zip_index;
 };
 
-typedef struct {
+class t_CPC {
+  public:
+   t_CPC();
+
    unsigned int model;
    unsigned int jumpers;
    unsigned int ram_size;
@@ -282,7 +285,7 @@ typedef struct {
    std::string current_tape_path; // Last used tape path in the file dialog.
 
    class InputMapper *InputMapper;
-} t_CPC;
+};
 
 typedef struct {
    unsigned int requested_addr;

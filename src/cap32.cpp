@@ -215,6 +215,14 @@ std::string chROMFile[4] = {
    "system.cpr"
 };
 
+t_CPC::t_CPC() {
+  driveA.drive = DRIVE::DSK_A;
+  driveB.drive = DRIVE::DSK_B;
+  tape.drive = DRIVE::TAPE;
+  cartridge.drive = DRIVE::CARTRIDGE;
+  snapshot.drive = DRIVE::SNAPSHOT;
+}
+
 t_CPC CPC;
 t_CRTC CRTC;
 t_FDC FDC;
