@@ -470,11 +470,12 @@ int dsk_load (FILE *pfile, t_drive *drive)
   LOG_DEBUG("Loading disk");
   dword dwTrackSize, track, side, sector, dwSectorSize, dwSectors;
   byte *pbPtr, *pbDataPtr, *pbTempPtr, *pbTrackSizeTable;
-  if(fread(pbGPBuffer, 0x100, 1, pfile) != 1) { // read DSK header
+  byte dsk_header[0x100];
+  if(fread(dsk_header, 0x100, 1, pfile) != 1) { // read DSK header
     LOG_ERROR("Couldn't read DSK header");
     return ERR_DSK_INVALID;
   }
-  pbPtr = pbGPBuffer;
+  pbPtr = dsk_header;
 
   if (memcmp(pbPtr, "MV - CPC", 8) == 0) { // normal DSK image?
     LOG_DEBUG("Loading normal disk");
@@ -492,12 +493,13 @@ int dsk_load (FILE *pfile, t_drive *drive)
     drive->sides--; // zero base number of sides
     for (track = 0; track < drive->tracks; track++) { // loop for all tracks
       for (side = 0; side <= drive->sides; side++) { // loop for all sides
-        if(fread(pbGPBuffer+0x100, 0x100, 1, pfile) != 1) { // read track header
+        byte track_header[0x100];
+        if(fread(track_header, 0x100, 1, pfile) != 1) { // read track header
           LOG_ERROR("Couldn't read DSK track header for track " << track << " side " << side);
           dsk_eject(drive);
           return ERR_DSK_INVALID;
         }
-        pbPtr = pbGPBuffer + 0x100;
+        pbPtr = track_header;
         if (memcmp(pbPtr, "Track-Info", 10) != 0) { // abort if ID does not match
           LOG_ERROR("Corrupted DSK track header for track " << track << " side " << side);
           dsk_eject(drive);
@@ -555,12 +557,13 @@ int dsk_load (FILE *pfile, t_drive *drive)
           LOG_DEBUG("Track " << track << ", side " << side << ", size " << dwTrackSize);
           if (dwTrackSize != 0) { // only process if track contains data
             dwTrackSize -= 0x100; // compensate for track header
-            if(fread(pbGPBuffer+0x100, 0x100, 1, pfile) != 1) { // read track header
+            byte track_header[0x100];
+            if(fread(track_header, 0x100, 1, pfile) != 1) { // read track header
               LOG_ERROR("Couldn't read DSK track header for track " << track << " side " << side);
               dsk_eject(drive);
               return ERR_DSK_INVALID;
             }
-            pbPtr = pbGPBuffer + 0x100;
+            pbPtr = track_header;
             if (memcmp(pbPtr, "Track-Info", 10) != 0) { // valid track header?
               LOG_ERROR("Corrupted DSK track header for track " << track << " side " << side);
               dsk_eject(drive);

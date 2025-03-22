@@ -5,8 +5,6 @@
 #include <string>
 
 extern t_drive driveA;
-extern t_drive driveB;
-extern byte* pbGPBuffer;
 
 TEST(SlotHandlerTest, slotsInitializedWithProperDriveTypes)
 {
@@ -181,8 +179,6 @@ TEST(SlotHandlerTest, fillSlotsDiskAZipMultipleFiles)
 {
   std::vector<std::string> slot_list = { "test/zip/test1.zip"};
   t_CPC CPC;
-  // TODO: Replace pbGPBuffer by some dynamic object (e.g. vector), at least in dsk_load.
-  pbGPBuffer = new byte [128*1024];
 
   fillSlots(slot_list, CPC);
 
