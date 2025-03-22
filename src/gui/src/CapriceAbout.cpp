@@ -26,6 +26,7 @@ Shift + F1 - Virtual keyboard
 Shift + F2 - Developers' tools
 Shift + F3 - Save machine snapshot
 Shift + F4 - Load last snapshot
+Shift + F5 - Next disk (drive A)
 Shift + F7 - Activate phazer)";
 
 CapriceAbout::CapriceAbout(const CRect& WindowRect, CWindow* pParent, CFontEngine* pFontEngine) :
