@@ -801,6 +801,10 @@ void CapriceDevTools::UpdateZ80()
     oss << std::hex << std::setw(4) << std::setfill('0') << val
       << " (" << std::dec << val << ")";
     m_pZ80Stack->AddItem(SListItem(oss.str()));
+    if (m_pZ80Stack->Size() >= CPC.devtools_max_stack_size) {
+      m_pZ80Stack->AddItem(SListItem("(...)"));
+      break;
+    }
   }
 }
 

@@ -235,6 +235,7 @@ typedef struct {
    bool scr_gui_is_currently_on;
 
    int devtools_scale;
+   unsigned int devtools_max_stack_size;
 
    unsigned int snd_enabled;
    bool snd_ready;

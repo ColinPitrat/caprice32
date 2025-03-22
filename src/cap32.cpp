@@ -1777,6 +1777,7 @@ void loadConfiguration (t_CPC &CPC, const std::string& configFilename)
    CPC.resources_path = conf.getStringValue("system", "resources_path", appPath + "/resources");
 
    CPC.devtools_scale = conf.getIntValue("devtools", "scale", 1);
+   CPC.devtools_max_stack_size = conf.getIntValue("devtools", "max_stack_size", 50);
 
    CPC.scr_scale = conf.getIntValue("video", "scr_scale", 2);
    CPC.scr_preserve_aspect_ratio = conf.getIntValue("video", "scr_preserve_aspect_ratio", 1);
