@@ -142,8 +142,8 @@ dword freq_table[MAX_FREQ_ENTRIES] = {
 
 #include "font.h"
 
-void set_osd_message(const std::string& message) {
-   osd_timing = SDL_GetTicks() + 1000;
+void set_osd_message(const std::string& message, uint32_t for_milliseconds) {
+   osd_timing = SDL_GetTicks() + for_milliseconds;
    osd_message = " " + message;
 }
 
@@ -214,6 +214,14 @@ std::string chROMFile[4] = {
    "cpc6128.rom",
    "system.cpr"
 };
+
+t_CPC::t_CPC() {
+  driveA.drive = DRIVE::DSK_A;
+  driveB.drive = DRIVE::DSK_B;
+  tape.drive = DRIVE::TAPE;
+  cartridge.drive = DRIVE::CARTRIDGE;
+  snapshot.drive = DRIVE::SNAPSHOT;
+}
 
 t_CPC CPC;
 t_CRTC CRTC;
@@ -1008,7 +1016,7 @@ int emulator_patch_ROM ()
             pbPtr += 0x1eef; // location of the keyboard translation table
             break;
          case 3: // 6128+
-            if(CPC.cart_file == CPC.rom_path + "/" + chROMFile[3]) { // Only patch system cartridge - we don't want to break another one by messing with it
+            if(CPC.cartridge.file == CPC.rom_path + "/" + chROMFile[3]) { // Only patch system cartridge - we don't want to break another one by messing with it
                pbPtr += 0x1eef; // location of the keyboard translation table
             }
             break;
@@ -1778,6 +1786,7 @@ void loadConfiguration (t_CPC &CPC, const std::string& configFilename)
    CPC.resources_path = conf.getStringValue("system", "resources_path", appPath + "/resources");
 
    CPC.devtools_scale = conf.getIntValue("devtools", "scale", 1);
+   CPC.devtools_max_stack_size = conf.getIntValue("devtools", "max_stack_size", 50);
 
    CPC.scr_scale = conf.getIntValue("video", "scr_scale", 2);
    CPC.scr_preserve_aspect_ratio = conf.getIntValue("video", "scr_preserve_aspect_ratio", 1);
@@ -1850,7 +1859,7 @@ void loadConfiguration (t_CPC &CPC, const std::string& configFilename)
    }
    CPC.rom_mf2 = conf.getStringValue("rom", "rom_mf2", "");
 
-   CPC.cart_file = CPC.rom_path + "/system.cpr"; // Only default path defined. Needed for CPC6128+
+   CPC.cartridge.file = CPC.rom_path + "/system.cpr"; // Only default path defined. Needed for CPC6128+
 }
 
 
@@ -2978,6 +2987,11 @@ int cap32_main (int argc, char **argv)
                            }
                            #endif
                            set_osd_message(std::string("Debug mode: ") + (log_verbose ? "on" : "off"));
+                           break;
+
+                        case CAP32_NEXTDISKA:
+                           CPC.driveA.zip_index += 1;
+                           file_load(CPC.driveA);
                            break;
                      }
                   }

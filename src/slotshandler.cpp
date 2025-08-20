@@ -67,43 +67,43 @@ struct file_loader
 
 file_loader files_loader_list[] =
 {
-  { DSK_A, ".dsk",
+  { DRIVE::DSK_A, ".dsk",
     [](const std::string& filename) -> int { return dsk_load(filename, &driveA); },
     [](FILE* file) -> int { return dsk_load(file, &driveA); } },
 
-  { DSK_B, ".dsk",
+  { DRIVE::DSK_B, ".dsk",
     [](const std::string& filename) -> int { return dsk_load(filename, &driveB); },
     [](FILE* file) -> int { return dsk_load(file, &driveB); } },
 
-  { DSK_A, ".ipf",
+  { DRIVE::DSK_A, ".ipf",
     [](const std::string& filename) -> int { return ipf_load(filename, &driveA); },
     [](FILE* file) -> int { return ipf_load(file, &driveA); } },
 
-  { DSK_B, ".ipf",
+  { DRIVE::DSK_B, ".ipf",
     [](const std::string& filename) -> int { return ipf_load(filename, &driveB); },
     [](FILE* file) -> int { return ipf_load(file, &driveB); } },
 
-  { DSK_A, ".raw",
+  { DRIVE::DSK_A, ".raw",
     [](const std::string& filename) -> int { return ipf_load(filename, &driveA); },
     [](FILE* file) -> int { return ipf_load(file, &driveA); } },
 
-  { DSK_B, ".raw",
+  { DRIVE::DSK_B, ".raw",
     [](const std::string& filename) -> int { return ipf_load(filename, &driveB); },
     [](FILE* file) -> int { return ipf_load(file, &driveB); } },
 
-  { OTHER, ".sna",
+  { DRIVE::SNAPSHOT, ".sna",
     &snapshot_load,
     &snapshot_load },
 
-  { OTHER, ".cdt",
+  { DRIVE::TAPE, ".cdt",
     &tape_insert,
     &tape_insert },
 
-  { OTHER, ".voc",
+  { DRIVE::TAPE, ".voc",
     &tape_insert,
     &tape_insert },
 
-  { OTHER, ".cpr",
+  { DRIVE::CARTRIDGE, ".cpr",
     &cartridge_load,
     &cartridge_load },
 };
@@ -113,10 +113,11 @@ t_disk_format disk_format[MAX_DISK_FORMAT] = {
    { "169K Vendor Format", 40, 1, 9, 2, 0x52, 0xe5, {{ 0x41, 0x46, 0x42, 0x47, 0x43, 0x48, 0x44, 0x49, 0x45 }} }
 };
 
-inline bool fillSlot(std::string &filevar, bool &processedvar, const std::string& fullpath, const std::string& extension, const std::string& type_ext, const std::string& type_desc) {
+inline bool fillSlot(t_slot& slot, bool &processedvar, const std::string& fullpath, const std::string& extension, const std::string& type_ext, const std::string& type_desc) {
    if ((!processedvar) && (extension == type_ext)) {
       LOG_VERBOSE("Loading " << type_desc << " file: " << fullpath);
-      filevar = fullpath;
+      slot.file = fullpath;
+      slot.zip_index = 0;
       processedvar = true;
       return true;
    }
@@ -153,25 +154,25 @@ void fillSlots (std::vector<std::string> slot_list, t_CPC& CPC)
            extension = filename.substr(pos); // grab the extension
          }
 
-         if (fillSlot(CPC.drvA_file, have_DSKA, fullpath, extension, ".dsk", "drive A disk"))
+         if (fillSlot(CPC.driveA, have_DSKA, fullpath, extension, ".dsk", "drive A disk"))
+           continue;
+         if (fillSlot(CPC.driveA, have_DSKA, fullpath, extension, ".ipf", "drive A disk (IPF)"))
             continue;
-         if (fillSlot(CPC.drvA_file, have_DSKA, fullpath, extension, ".ipf", "drive A disk (IPF)"))
+         if (fillSlot(CPC.driveA, have_DSKA, fullpath, extension, ".raw", "drive A disk (CT-RAW)"))
+           continue;
+         if (fillSlot(CPC.driveB, have_DSKB, fullpath, extension, ".dsk", "drive B disk"))
             continue;
-         if (fillSlot(CPC.drvA_file, have_DSKA, fullpath, extension, ".raw", "drive A disk (CT-RAW)"))
+         if (fillSlot(CPC.driveB, have_DSKB, fullpath, extension, ".ipf", "drive B disk (IPF)"))
             continue;
-         if (fillSlot(CPC.drvB_file, have_DSKB, fullpath, extension, ".dsk", "drive B disk"))
+         if (fillSlot(CPC.driveB, have_DSKB, fullpath, extension, ".raw", "drive B disk (CT-IPF)"))
             continue;
-         if (fillSlot(CPC.drvB_file, have_DSKB, fullpath, extension, ".ipf", "drive B disk (IPF)"))
+         if (fillSlot(CPC.snapshot, have_SNA, fullpath, extension, ".sna", "CPC state snapshot"))
             continue;
-         if (fillSlot(CPC.drvB_file, have_DSKB, fullpath, extension, ".raw", "drive B disk (CT-IPF)"))
+         if (fillSlot(CPC.tape, have_TAP, fullpath, extension, ".cdt", "tape (CDT)"))
             continue;
-         if (fillSlot(CPC.snap_file, have_SNA, fullpath, extension, ".sna", "CPC state snapshot"))
+         if (fillSlot(CPC.tape, have_TAP, fullpath, extension, ".voc", "tape (VOC)"))
             continue;
-         if (fillSlot(CPC.tape_file, have_TAP, fullpath, extension, ".cdt", "tape (CDT)"))
-            continue;
-         if (fillSlot(CPC.tape_file, have_TAP, fullpath, extension, ".voc", "tape (VOC)"))
-            continue;
-         if (fillSlot(CPC.cart_file, have_CPR, fullpath, extension, ".cpr", "cartridge"))
+         if (fillSlot(CPC.cartridge, have_CPR, fullpath, extension, ".cpr", "cartridge"))
             continue;
       }
    }
@@ -179,12 +180,12 @@ void fillSlots (std::vector<std::string> slot_list, t_CPC& CPC)
 
 void loadSlots() {
    memset(&driveA, 0, sizeof(t_drive)); // clear disk drive A data structure
-   file_load(CPC.drvA_file, DSK_A);
+   file_load(CPC.driveA);
    memset(&driveB, 0, sizeof(t_drive)); // clear disk drive B data structure
-   file_load(CPC.drvB_file, DSK_B);
-   file_load(CPC.tape_file, OTHER);
-   file_load(CPC.snap_file, OTHER);
-   // Cartridge was loaded by emulator_init if needed
+   file_load(CPC.driveB);
+   file_load(CPC.tape);
+   file_load(CPC.snapshot);
+   // Cartridge was loaded by emulator_init which called cartridge_load if needed
 }
 
 // Extract 'filename' from 'zipfile'. Filename must end with one of the extensions listed in 'ext'.
@@ -469,11 +470,12 @@ int dsk_load (FILE *pfile, t_drive *drive)
   LOG_DEBUG("Loading disk");
   dword dwTrackSize, track, side, sector, dwSectorSize, dwSectors;
   byte *pbPtr, *pbDataPtr, *pbTempPtr, *pbTrackSizeTable;
-  if(fread(pbGPBuffer, 0x100, 1, pfile) != 1) { // read DSK header
+  byte dsk_header[0x100];
+  if(fread(dsk_header, 0x100, 1, pfile) != 1) { // read DSK header
     LOG_ERROR("Couldn't read DSK header");
     return ERR_DSK_INVALID;
   }
-  pbPtr = pbGPBuffer;
+  pbPtr = dsk_header;
 
   if (memcmp(pbPtr, "MV - CPC", 8) == 0) { // normal DSK image?
     LOG_DEBUG("Loading normal disk");
@@ -491,12 +493,13 @@ int dsk_load (FILE *pfile, t_drive *drive)
     drive->sides--; // zero base number of sides
     for (track = 0; track < drive->tracks; track++) { // loop for all tracks
       for (side = 0; side <= drive->sides; side++) { // loop for all sides
-        if(fread(pbGPBuffer+0x100, 0x100, 1, pfile) != 1) { // read track header
+        byte track_header[0x100];
+        if(fread(track_header, 0x100, 1, pfile) != 1) { // read track header
           LOG_ERROR("Couldn't read DSK track header for track " << track << " side " << side);
           dsk_eject(drive);
           return ERR_DSK_INVALID;
         }
-        pbPtr = pbGPBuffer + 0x100;
+        pbPtr = track_header;
         if (memcmp(pbPtr, "Track-Info", 10) != 0) { // abort if ID does not match
           LOG_ERROR("Corrupted DSK track header for track " << track << " side " << side);
           dsk_eject(drive);
@@ -554,12 +557,13 @@ int dsk_load (FILE *pfile, t_drive *drive)
           LOG_DEBUG("Track " << track << ", side " << side << ", size " << dwTrackSize);
           if (dwTrackSize != 0) { // only process if track contains data
             dwTrackSize -= 0x100; // compensate for track header
-            if(fread(pbGPBuffer+0x100, 0x100, 1, pfile) != 1) { // read track header
+            byte track_header[0x100];
+            if(fread(track_header, 0x100, 1, pfile) != 1) { // read track header
               LOG_ERROR("Couldn't read DSK track header for track " << track << " side " << side);
               dsk_eject(drive);
               return ERR_DSK_INVALID;
             }
-            pbPtr = pbGPBuffer + 0x100;
+            pbPtr = track_header;
             if (memcmp(pbPtr, "Track-Info", 10) != 0) { // valid track header?
               LOG_ERROR("Corrupted DSK track header for track " << track << " side " << side);
               dsk_eject(drive);
@@ -1382,7 +1386,7 @@ int tape_insert_voc (FILE *pfile)
 void cartridge_load ()
 {
   if (CPC.model >= 3) {
-     if (file_load(CPC.cart_file, OTHER)) {
+     if (file_load(CPC.cartridge)) {
         fprintf(stderr, "Load of cartridge failed. Aborting.\n");
         cleanExit(-1);
      }
@@ -1406,47 +1410,68 @@ int cartridge_load (FILE *file) {
   return ERR_FILE_UNSUPPORTED;
 }
 
+std::string drive_extensions(const DRIVE drive) {
+  switch (drive) {
+    case DRIVE::DSK_A:
+    case DRIVE::DSK_B:
+      return ".dsk.ipf.raw";
+    case DRIVE::TAPE:
+      return ".cdt.voc";
+    case DRIVE::SNAPSHOT:
+      return ".sna";
+    case DRIVE::CARTRIDGE:
+      return ".cpr";
+  }
+  LOG_ERROR("Unsupported drive type: " << static_cast<int>(drive))
+  return "";
+}
+
 // Still some duplication there... but it cannot really be helped
-int file_load(const std::string& filepath, const DRIVE drive)
+int file_load(t_slot& slot)
 {
-  if (filepath.empty()) {
+  if (slot.file.empty()) {
     // Special casing because this is not an error if called from loadSlots
     LOG_VERBOSE("Ignoring empty filename passed to file_load.")
     return ERR_FILE_NOT_FOUND;
   }
-  if (filepath.length() < 4) {
-    LOG_ERROR("File path is too short: '" << filepath << "'");
+  if (slot.file.length() < 4) {
+    LOG_ERROR("File path is too short: '" << slot.file << "'");
     return ERR_FILE_NOT_FOUND;
   }
-  int pos = filepath.length() - 4;
-  std::string extension = stringutils::lower(filepath.substr(pos));
+  int pos = slot.file.length() - 4;
+  std::string extension = stringutils::lower(slot.file.substr(pos));
 
   FILE *file = nullptr;
   if (extension == ".zip") {
     zip::t_zip_info zip_info;
-    zip_info.filename = filepath;
-    zip_info.extensions = ".dsk.sna.cdt.voc.cpr.ipf.raw";
+    zip_info.filename = slot.file;
+    zip_info.extensions = drive_extensions(slot.drive);
     if (zip::dir(&zip_info)) {
       // error or nothing relevant found
-      LOG_ERROR("Error opening or parsing zip file " << filepath);
+      LOG_ERROR("Error opening or parsing zip file " << slot.file);
       return ERR_FILE_UNZIP_FAILED;
     }
 
-    std::string filename = zip_info.filesOffsets[0].first;
+    slot.zip_index = slot.zip_index % zip_info.filesOffsets.size();
+    std::string filename = zip_info.filesOffsets[slot.zip_index].first;
     pos = filename.length() - 4;
     extension = stringutils::lower(filename.substr(pos)); // grab the extension in lowercases
-    LOG_DEBUG("Extracting " << filepath << ", " << filename << ", " << extension);
-    file = extractFile(filepath, filename, extension);
+    LOG_DEBUG("Extracting " << slot.file << ", " << filename << ", " << extension);
+    file = extractFile(slot.file, filename, extension);
+    if (zip_info.filesOffsets.size() > 1) {
+      // Give 5s to the user to read the message.
+      set_osd_message("Loaded '" + filename + "' - Press Shift+F5 for next file", 5000);
+    }
   }
 
   for(const auto& loader : files_loader_list) {
-    if (drive == loader.drive && extension == loader.extension) {
+    if (slot.drive == loader.drive && extension == loader.extension) {
       if (file) {
         return loader.load_from_file(file);
       }
-      return loader.load_from_filename(filepath);
+      return loader.load_from_filename(slot.file);
     }
   }
-  LOG_ERROR("File format unsupported for " << filepath);
+  LOG_ERROR("File format unsupported for " << slot.file);
   return ERR_FILE_UNSUPPORTED;
 }

@@ -167,7 +167,24 @@ typedef struct {
    unsigned char unused2[75];
 } t_SNA_header;
 
-typedef struct {
+enum class DRIVE {
+  DSK_A,
+  DSK_B,
+  TAPE,
+  CARTRIDGE,
+  SNAPSHOT,
+};
+
+struct t_slot {
+   DRIVE drive;
+   std::string file;
+   unsigned int zip_index;
+};
+
+class t_CPC {
+  public:
+   t_CPC();
+
    unsigned int model;
    unsigned int jumpers;
    unsigned int ram_size;
@@ -221,6 +238,7 @@ typedef struct {
    bool scr_gui_is_currently_on;
 
    int devtools_scale;
+   unsigned int devtools_max_stack_size;
 
    unsigned int snd_enabled;
    bool snd_ready;
@@ -243,18 +261,16 @@ typedef struct {
 
    unsigned int max_tracksize;
 
-   std::string snap_path; // Path where machine state snapshots will be loaded/saved by default.
-   std::string snap_file; // Path to the actual file (zip or not)
-
-   std::string cart_path;
-   std::string cart_file;
-
    std::string dsk_path;
-   std::string drvA_file;
-   std::string drvB_file;
-
    std::string tape_path;
-   std::string tape_file;
+   std::string snap_path; // Path where machine state snapshots will be loaded/saved by default.
+   std::string cart_path;
+
+   t_slot driveA;
+   t_slot driveB;
+   t_slot tape;
+   t_slot snapshot;
+   t_slot cartridge;
 
    std::string printer_file;
    std::string sdump_dir;
@@ -269,7 +285,7 @@ typedef struct {
    std::string current_tape_path; // Last used tape path in the file dialog.
 
    class InputMapper *InputMapper;
-} t_CPC;
+};
 
 typedef struct {
    unsigned int requested_addr;
@@ -403,6 +419,7 @@ typedef struct {
 using t_MemBankConfig = std::array<std::array<byte*, 4>, 8>;
 
 // cap32.cpp
+void set_osd_message(const std::string& message, uint32_t for_milliseconds = 1000);
 void ga_init_banking(t_MemBankConfig& membank_config, unsigned char RAM_bank);
 bool driveAltered();
 void emulator_reset();

@@ -4,6 +4,19 @@
 #include "slotshandler.h"
 #include <string>
 
+extern t_drive driveA;
+
+TEST(SlotHandlerTest, slotsInitializedWithProperDriveTypes)
+{
+  t_CPC CPC;
+
+  ASSERT_EQ(DRIVE::DSK_A, CPC.driveA.drive);
+  ASSERT_EQ(DRIVE::DSK_B, CPC.driveB.drive);
+  ASSERT_EQ(DRIVE::TAPE, CPC.tape.drive);
+  ASSERT_EQ(DRIVE::SNAPSHOT, CPC.snapshot.drive);
+  ASSERT_EQ(DRIVE::CARTRIDGE, CPC.cartridge.drive);
+}
+
 TEST(SlotHandlerTest, fillSlotsNoArg)
 {
   std::vector<std::string> slot_list;
@@ -12,14 +25,14 @@ TEST(SlotHandlerTest, fillSlotsNoArg)
   fillSlots(slot_list, CPC);
 
   ASSERT_EQ("", CPC.cart_path);
-  ASSERT_EQ("", CPC.cart_file);
+  ASSERT_EQ("", CPC.cartridge.file);
   ASSERT_EQ("", CPC.dsk_path);
-  ASSERT_EQ("", CPC.drvA_file);
-  ASSERT_EQ("", CPC.drvB_file);
+  ASSERT_EQ("", CPC.driveA.file);
+  ASSERT_EQ("", CPC.driveB.file);
   ASSERT_EQ("", CPC.tape_path);
-  ASSERT_EQ("", CPC.tape_file);
+  ASSERT_EQ("", CPC.tape.file);
   ASSERT_EQ("", CPC.snap_path);
-  ASSERT_EQ("", CPC.snap_file);
+  ASSERT_EQ("", CPC.snapshot.file);
 }
 
 TEST(SlotHandlerTest, fillSlotsOneLocalDskFile)
@@ -30,14 +43,14 @@ TEST(SlotHandlerTest, fillSlotsOneLocalDskFile)
   fillSlots(slot_list, CPC);
 
   ASSERT_EQ("", CPC.cart_path);
-  ASSERT_EQ("", CPC.cart_file);
+  ASSERT_EQ("", CPC.cartridge.file);
   ASSERT_EQ("", CPC.dsk_path);
-  ASSERT_EQ("./test.dsk", CPC.drvA_file);
-  ASSERT_EQ("", CPC.drvB_file);
+  ASSERT_EQ("./test.dsk", CPC.driveA.file);
+  ASSERT_EQ("", CPC.driveB.file);
   ASSERT_EQ("", CPC.tape_path);
-  ASSERT_EQ("", CPC.tape_file);
+  ASSERT_EQ("", CPC.tape.file);
   ASSERT_EQ("", CPC.snap_path);
-  ASSERT_EQ("", CPC.snap_file);
+  ASSERT_EQ("", CPC.snapshot.file);
 
 }
 
@@ -49,14 +62,14 @@ TEST(SlotHandlerTest, fillSlotsTwoDskFiles)
   fillSlots(slot_list, CPC);
 
   ASSERT_EQ("", CPC.cart_path);
-  ASSERT_EQ("", CPC.cart_file);
+  ASSERT_EQ("", CPC.cartridge.file);
   ASSERT_EQ("", CPC.dsk_path);
-  ASSERT_EQ("/tmp/foo.dsk", CPC.drvA_file);
-  ASSERT_EQ("/var/bar.dsk", CPC.drvB_file);
+  ASSERT_EQ("/tmp/foo.dsk", CPC.driveA.file);
+  ASSERT_EQ("/var/bar.dsk", CPC.driveB.file);
   ASSERT_EQ("", CPC.tape_path);
-  ASSERT_EQ("", CPC.tape_file);
+  ASSERT_EQ("", CPC.tape.file);
   ASSERT_EQ("", CPC.snap_path);
-  ASSERT_EQ("", CPC.snap_file);
+  ASSERT_EQ("", CPC.snapshot.file);
 }
 
 TEST(SlotHandlerTest, fillSlotsOneLocalCdtFile)
@@ -67,14 +80,14 @@ TEST(SlotHandlerTest, fillSlotsOneLocalCdtFile)
   fillSlots(slot_list, CPC);
 
   ASSERT_EQ("", CPC.cart_path);
-  ASSERT_EQ("", CPC.cart_file);
+  ASSERT_EQ("", CPC.cartridge.file);
   ASSERT_EQ("", CPC.dsk_path);
-  ASSERT_EQ("", CPC.drvA_file);
-  ASSERT_EQ("", CPC.drvB_file);
+  ASSERT_EQ("", CPC.driveA.file);
+  ASSERT_EQ("", CPC.driveB.file);
   ASSERT_EQ("", CPC.tape_path);
-  ASSERT_EQ("./test.cdt", CPC.tape_file);
+  ASSERT_EQ("./test.cdt", CPC.tape.file);
   ASSERT_EQ("", CPC.snap_path);
-  ASSERT_EQ("", CPC.snap_file);
+  ASSERT_EQ("", CPC.snapshot.file);
 }
 
 TEST(SlotHandlerTest, fillSlotsOneLocalVocFile)
@@ -85,14 +98,14 @@ TEST(SlotHandlerTest, fillSlotsOneLocalVocFile)
   fillSlots(slot_list, CPC);
 
   ASSERT_EQ("", CPC.cart_path);
-  ASSERT_EQ("", CPC.cart_file);
+  ASSERT_EQ("", CPC.cartridge.file);
   ASSERT_EQ("", CPC.dsk_path);
-  ASSERT_EQ("", CPC.drvA_file);
-  ASSERT_EQ("", CPC.drvB_file);
+  ASSERT_EQ("", CPC.driveA.file);
+  ASSERT_EQ("", CPC.driveB.file);
   ASSERT_EQ("", CPC.tape_path);
-  ASSERT_EQ("./test.voc", CPC.tape_file);
+  ASSERT_EQ("./test.voc", CPC.tape.file);
   ASSERT_EQ("", CPC.snap_path);
-  ASSERT_EQ("", CPC.snap_file);
+  ASSERT_EQ("", CPC.snapshot.file);
 }
 
 TEST(SlotHandlerTest, fillSlotsOneLocalSnaFile)
@@ -103,14 +116,14 @@ TEST(SlotHandlerTest, fillSlotsOneLocalSnaFile)
   fillSlots(slot_list, CPC);
 
   ASSERT_EQ("", CPC.cart_path);
-  ASSERT_EQ("", CPC.cart_file);
+  ASSERT_EQ("", CPC.cartridge.file);
   ASSERT_EQ("", CPC.dsk_path);
-  ASSERT_EQ("", CPC.drvA_file);
-  ASSERT_EQ("", CPC.drvB_file);
+  ASSERT_EQ("", CPC.driveA.file);
+  ASSERT_EQ("", CPC.driveB.file);
   ASSERT_EQ("", CPC.tape_path);
-  ASSERT_EQ("", CPC.tape_file);
+  ASSERT_EQ("", CPC.tape.file);
   ASSERT_EQ("", CPC.snap_path);
-  ASSERT_EQ("./test.sna", CPC.snap_file);
+  ASSERT_EQ("./test.sna", CPC.snapshot.file);
 }
 
 TEST(SlotHandlerTest, fillSlotsOneCprFile)
@@ -121,14 +134,14 @@ TEST(SlotHandlerTest, fillSlotsOneCprFile)
   fillSlots(slot_list, CPC);
 
   ASSERT_EQ("", CPC.cart_path);
-  ASSERT_EQ("./test.cpr", CPC.cart_file);
+  ASSERT_EQ("./test.cpr", CPC.cartridge.file);
   ASSERT_EQ("", CPC.dsk_path);
-  ASSERT_EQ("", CPC.drvA_file);
-  ASSERT_EQ("", CPC.drvB_file);
+  ASSERT_EQ("", CPC.driveA.file);
+  ASSERT_EQ("", CPC.driveB.file);
   ASSERT_EQ("", CPC.tape_path);
-  ASSERT_EQ("", CPC.tape_file);
+  ASSERT_EQ("", CPC.tape.file);
   ASSERT_EQ("", CPC.snap_path);
-  ASSERT_EQ("", CPC.snap_file);
+  ASSERT_EQ("", CPC.snapshot.file);
 }
 
 TEST(SlotHandlerTest, fillSlotsOneZippedCprFile)
@@ -139,14 +152,70 @@ TEST(SlotHandlerTest, fillSlotsOneZippedCprFile)
   fillSlots(slot_list, CPC);
 
   ASSERT_EQ("", CPC.cart_path);
-  ASSERT_EQ("test/cartridge/testplus.zip", CPC.cart_file);
+  ASSERT_EQ("test/cartridge/testplus.zip", CPC.cartridge.file);
   ASSERT_EQ("", CPC.dsk_path);
-  ASSERT_EQ("", CPC.drvA_file);
-  ASSERT_EQ("", CPC.drvB_file);
+  ASSERT_EQ("", CPC.driveA.file);
+  ASSERT_EQ("", CPC.driveB.file);
   ASSERT_EQ("", CPC.tape_path);
-  ASSERT_EQ("", CPC.tape_file);
+  ASSERT_EQ("", CPC.tape.file);
   ASSERT_EQ("", CPC.snap_path);
-  ASSERT_EQ("", CPC.snap_file);
+  ASSERT_EQ("", CPC.snapshot.file);
+}
+
+unsigned int checksum(const t_drive* drive)
+{
+  unsigned int checksum = 0;
+  for (unsigned int track = 0; track < drive->tracks; track++) {
+    for (unsigned int side = 0; side <= drive->sides; side++) {
+      for (unsigned int byte = 0; byte < drive->track[track][side].size; byte++) {
+        checksum += drive->track[track][side].data[byte];
+      }
+    }
+  }
+  return checksum;
+}
+
+TEST(SlotHandlerTest, fillSlotsDiskAZipMultipleFiles)
+{
+  std::vector<std::string> slot_list = { "test/zip/test1.zip"};
+  t_CPC CPC;
+
+  fillSlots(slot_list, CPC);
+
+  ASSERT_EQ("", CPC.cart_path);
+  ASSERT_EQ("", CPC.cartridge.file);
+  ASSERT_EQ("", CPC.dsk_path);
+  ASSERT_EQ("test/zip/test1.zip", CPC.driveA.file);
+  ASSERT_EQ("", CPC.driveB.file);
+  ASSERT_EQ("", CPC.tape_path);
+  ASSERT_EQ("", CPC.tape.file);
+  ASSERT_EQ("", CPC.snap_path);
+  ASSERT_EQ("", CPC.snapshot.file);
+
+  // The zip contains 2 files.
+  // First file is empty.dsk
+  file_load(CPC.driveA);
+  auto checksum1 = checksum(&driveA);
+  // Second file is hello.dsk
+  CPC.driveA.zip_index += 1;
+  file_load(CPC.driveA);
+  auto checksum2 = checksum(&driveA);
+  // Switching again should loop back to empty.dsk
+  CPC.driveA.zip_index += 1;
+  file_load(CPC.driveA);
+  auto checksum3 = checksum(&driveA);
+  // And back to hello.dsk
+  CPC.driveA.zip_index += 1;
+  file_load(CPC.driveA);
+  auto checksum4 = checksum(&driveA);
+
+  // 1 and 3 are both "empty.dsk" so they are equals
+  // 2 and 4 are both "hello.dsk" so they are equals
+  ASSERT_EQ(checksum1, checksum3);
+  ASSERT_EQ(checksum2, checksum4);
+
+  // 1 and 2 are "empty.dsk" and "hello.dsk" so they are different
+  ASSERT_NE(checksum1, checksum2);
 }
 
 TEST(SlotHandlerTest, fillSlotsOneFileOfEachKind)
@@ -157,14 +226,14 @@ TEST(SlotHandlerTest, fillSlotsOneFileOfEachKind)
   fillSlots(slot_list, CPC);
 
   ASSERT_EQ("", CPC.cart_path);
-  ASSERT_EQ("/home/cart.cpr", CPC.cart_file);
+  ASSERT_EQ("/home/cart.cpr", CPC.cartridge.file);
   ASSERT_EQ("", CPC.dsk_path);
-  ASSERT_EQ("/tmp/foo.dsk", CPC.drvA_file);
-  ASSERT_EQ("", CPC.drvB_file);
+  ASSERT_EQ("/tmp/foo.dsk", CPC.driveA.file);
+  ASSERT_EQ("", CPC.driveB.file);
   ASSERT_EQ("", CPC.tape_path);
-  ASSERT_EQ("/var/bar.cdt", CPC.tape_file);
+  ASSERT_EQ("/var/bar.cdt", CPC.tape.file);
   ASSERT_EQ("", CPC.snap_path);
-  ASSERT_EQ("/usr/test.sna", CPC.snap_file);
+  ASSERT_EQ("/usr/test.sna", CPC.snapshot.file);
 }
 
 TEST(SlotHandlerTest, fillSlotsManyFilesOfEachKind)
@@ -175,14 +244,14 @@ TEST(SlotHandlerTest, fillSlotsManyFilesOfEachKind)
   fillSlots(slot_list, CPC);
 
   ASSERT_EQ("", CPC.cart_path);
-  ASSERT_EQ("rom/system.cpr", CPC.cart_file);
+  ASSERT_EQ("rom/system.cpr", CPC.cartridge.file);
   ASSERT_EQ("", CPC.dsk_path);
-  ASSERT_EQ("/tmp/foo.dsk", CPC.drvA_file);
-  ASSERT_EQ("/var/test.dsk", CPC.drvB_file);
+  ASSERT_EQ("/tmp/foo.dsk", CPC.driveA.file);
+  ASSERT_EQ("/var/test.dsk", CPC.driveB.file);
   ASSERT_EQ("", CPC.tape_path);
-  ASSERT_EQ("/var/bar.cdt", CPC.tape_file);
+  ASSERT_EQ("/var/bar.cdt", CPC.tape.file);
   ASSERT_EQ("", CPC.snap_path);
-  ASSERT_EQ("/usr/test.sna", CPC.snap_file);
+  ASSERT_EQ("/usr/test.sna", CPC.snapshot.file);
 
 }
 
