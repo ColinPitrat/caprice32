@@ -16,7 +16,15 @@ extern byte *membank_config[8][4];
 extern byte *membank_write[4];
 
 asic_t asic;
-double asic_colours[32][3];
+
+struct asic_color_t {
+  double r;
+  double g;
+  double b;
+  bool set;
+};
+
+asic_color_t asic_colours[32];
 
 void asic_reset() {
   asic.locked = true;
@@ -194,6 +202,29 @@ void asic_dma_cycle() {
   }
 }
 
+void asic_set_palette() {
+  for (int colour = 0; colour < 32; colour++) {
+    if (!asic_colours[colour].set) {
+      continue;
+    }
+    // TODO: deduplicate with code in video_set_palette + make it work in monochrome
+    dword red = static_cast<dword>(asic_colours[colour].r * (CPC.scr_intensity / 10.0) * 255);
+    if (red > 255) { // limit to the maximum
+      red = 255;
+    }
+    dword green = static_cast<dword>(asic_colours[colour].g * (CPC.scr_intensity / 10.0) * 255);
+    if (green > 255) {
+      green = 255;
+    }
+    dword blue = static_cast<dword>(asic_colours[colour].b * (CPC.scr_intensity / 10.0) * 255);
+    if (blue > 255) {
+      blue = 255;
+    }
+    GateArray.palette[colour] = SDL_MapRGB(back_surface->format, red, green, blue);
+    // TODO(cpitrat): Confirm whether we should update the mode 2 'anti-aliasing' colour (cf. src/cap32.cpp where GateArray.palette[33] is set).
+  }
+}
+
 // Return true if byte should be written in memory
 bool asic_register_page_write(word addr, byte val) {
    if (addr < 0x4000 || addr > 0x7FFF) {
@@ -264,39 +295,20 @@ bool asic_register_page_write(word addr, byte val) {
       if ((addr % 2) == 1) {
          double green = static_cast<double>(val & 0x0F)/16;
          //LOG_DEBUG("Received color operation: color " << colour << " has green = " << green);
-         asic_colours[colour][1] = green;
+         asic_colours[colour].g = green;
          pbRegisterPage[(addr & 0x3FFF)] = (val & 0x0F);
          // TODO: find a cleaner way to do this - this is a copy paste from "Set ink value" in cap32.cpp
       } else {
          double red   = static_cast<double>((val & 0xF0) >> 4)/16;
          double blue  = static_cast<double>(val & 0x0F)/16;
          //LOG_DEBUG("Received color operation: color " << colour << " has red = " << red << " and blue = " << blue);
-         asic_colours[colour][0] = red;
-         asic_colours[colour][2] = blue;
+         asic_colours[colour].r = red;
+         asic_colours[colour].b = blue;
          pbRegisterPage[(addr & 0x3FFF)] = val;
       }
-      // TODO: deduplicate with code in video_set_palette + make it work in monochrome
-      dword red = static_cast<dword>(asic_colours[colour][0] * (CPC.scr_intensity / 10.0) * 255);
-      if (red > 255) { // limit to the maximum
-        red = 255;
-      }
-      dword green = static_cast<dword>(asic_colours[colour][1] * (CPC.scr_intensity / 10.0) * 255);
-      if (green > 255) {
-        green = 255;
-      }
-      dword blue = static_cast<dword>(asic_colours[colour][2] * (CPC.scr_intensity / 10.0) * 255);
-      if (blue > 255) {
-        blue = 255;
-      }
-      GateArray.palette[colour] = SDL_MapRGB(back_surface->format, red, green, blue);
-/*
-      if (colour < 2) {
-         byte r = (static_cast<dword>(colours[GateArray.ink_values[0]].r) + static_cast<dword>(colours[GateArray.ink_values[1]].r)) >> 1;
-         byte g = (static_cast<dword>(colours[GateArray.ink_values[0]].g) + static_cast<dword>(colours[GateArray.ink_values[1]].g)) >> 1;
-         byte b = (static_cast<dword>(colours[GateArray.ink_values[0]].b) + static_cast<dword>(colours[GateArray.ink_values[1]].b)) >> 1;
-         GateArray.palette[33] = SDL_MapRGB(back_surface->format, r, g, b); // update the mode 2 'anti-aliasing' colour
-      }
-*/
+      asic_colours[colour].set = true;
+      // TODO(cpitrat): We don't need to set all colours, only colour.
+      asic_set_palette();
       return false;
    } else if (addr >= 0x6800 && addr < 0x6806) {
       if (addr == 0x6800) {

@@ -1595,6 +1595,7 @@ int video_init ()
    if (iErrCode) {
       return iErrCode;
    }
+   asic_set_palette();
 
    CPC.scr_bps = back_surface->pitch; // rendered screen line length in bytes
    CPC.scr_line_offs = CPC.scr_bps * dwYScale;

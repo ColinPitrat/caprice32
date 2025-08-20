@@ -52,6 +52,7 @@ struct asic_t {
 extern asic_t asic;
 extern byte *pbRegisterPage;
 
+void asic_set_palette();
 void asic_reset();
 void asic_poke_lock_sequence(byte val);
 void asic_dma_cycle();
