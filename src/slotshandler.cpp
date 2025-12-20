@@ -151,7 +151,7 @@ void fillSlots (std::vector<std::string> slot_list, t_CPC& CPC)
            }
            std::string filename = zip_info.filesOffsets[0].first;
            pos = filename.length() - 4;
-           extension = filename.substr(pos); // grab the extension
+           extension = stringutils::lower(filename.substr(pos)); // grab the extension
          }
 
          if (fillSlot(CPC.driveA, have_DSKA, fullpath, extension, ".dsk", "drive A disk"))
