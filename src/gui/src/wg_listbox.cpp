@@ -160,8 +160,12 @@ void CListBox::SetSelection(unsigned int iItemIndex, bool bSelected, bool bNotif
     if (m_bSingleSelection)
     {
       SetAllSelections(false);
+      m_SelectedItems.at(iItemIndex) = true;
     }
-		m_SelectedItems.at(iItemIndex) = bSelected;
+    else
+    {
+      m_SelectedItems.at(iItemIndex) = bSelected;
+    }
     CWindow* pDestination = m_pParentWindow;
     if (m_pDropDown)
     {
