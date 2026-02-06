@@ -562,7 +562,8 @@ bool CapriceOptions::ProcessOptionChanges(t_CPC& CPC, bool saveChanges) {
     if (CPC.joystick_emulation != m_oldCPCsettings.joystick_emulation)
     {
        CPC.InputMapper->set_joystick_emulation();
-       SDL_SetRelativeMouseMode(SDL_bool(CPC.joystick_emulation == JoystickEmulation::Mouse));
+       // Voluntarily not setting relative mouse mode: we're still in the GUI.
+       // This will be done when exiting the GUI.
     }
 
     if (saveChanges)
