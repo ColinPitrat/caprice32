@@ -1152,6 +1152,7 @@ int emulator_init ()
          if ((pfileObject = fopen(romFilename.c_str(), "rb")) != nullptr) { // attempt to open the ROM image
             if(fread(pchRomData, 128, 1, pfileObject) != 1) { // read 128 bytes of ROM data
               fclose(pfileObject);
+              LOG_ERROR("Invalid ROM: less than 128 bytes. Not a CPC ROM?");
               return ERR_NOT_A_CPC_ROM;
             }
             word checksum = 0;
@@ -1176,6 +1177,7 @@ int emulator_init ()
 
             if (checksum == ((pchRomData[0x43] << 8) + pchRomData[0x44])) { // if the checksum matches, we got us an AMSDOS header
                if(fread(pchRomData, 128, 1, pfileObject) != 1) { // skip it
+                 LOG_ERROR("Invalid ROM: couldn't read the 128 bytes of the AMSDOS header. Not a CPC ROM?");
                  fclose(pfileObject);
                  return ERR_NOT_A_CPC_ROM;
                }
@@ -1183,6 +1185,7 @@ int emulator_init ()
             if (!(pchRomData[0] & 0xfc)) { // is it a valid CPC ROM image (0 = forground, 1 = background, 2 = extension)?
                if(fread(pchRomData+128, 16384-128, 1, pfileObject) != 1) { // read the rest of the ROM file
                  fclose(pfileObject);
+                 LOG_ERROR("Invalid ROM: total ROM size is not 16kB. Not a CPC ROM?");
                  return ERR_NOT_A_CPC_ROM;
                }
                memmap_ROM[iRomNum] = pchRomData; // update the ROM map
@@ -1192,6 +1195,7 @@ int emulator_init ()
             // See https://www.cpcwiki.eu/index.php/Graduate_Software#Structure_of_a_utility_ROM for more details.
               if(fread(pchRomData+128, 16384-128, 1, pfileObject) != 1) { // read the rest of the ROM file
                 fclose(pfileObject);
+                LOG_ERROR("Invalid ROM: total ROM size is not 16kB. Not a CPC ROM?");
                 return ERR_NOT_A_CPC_ROM;
               }
               memmap_ROM[iRomNum] = pchRomData; // update the ROM map
