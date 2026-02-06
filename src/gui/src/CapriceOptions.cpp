@@ -270,12 +270,13 @@ CapriceOptions::CapriceOptions(const CRect& WindowRect, CWindow* pParent, CFontE
     m_pDropDownPCLanguage->SelectItem(currentMapIndex);
     m_pDropDownPCLanguage->SetIsFocusable(true);
 
-    m_pCheckBoxJoystickEmulation   = new CCheckBox(CRect(CPoint(10, 62), 10, 10), m_pGroupBoxTabInput);
-    if (CPC.joystick_emulation == 1) {
-        m_pCheckBoxJoystickEmulation->SetCheckBoxState(CCheckBox::CHECKED);
-    }
-    m_pLabelJoystickEmulation      = new CLabel(CPoint(27, 63), m_pGroupBoxTabInput, "Joystick emulation");
-    m_pCheckBoxJoystickEmulation->SetIsFocusable(true);
+    m_pDropDownJoystickEmulation   = new CDropDown(CRect(CPoint(130, 61), 140, 16), m_pGroupBoxTabInput, false);
+    m_pLabelJoystickEmulation      = new CLabel(CPoint(10, 63), m_pGroupBoxTabInput, "Joystick emulation");
+    m_pDropDownJoystickEmulation->AddItem(SListItem("None"));
+    m_pDropDownJoystickEmulation->AddItem(SListItem("Keyboard"));
+    m_pDropDownJoystickEmulation->AddItem(SListItem("Mouse"));
+    m_pDropDownJoystickEmulation->SelectItem(static_cast<int>(CPC.joystick_emulation));
+    m_pDropDownJoystickEmulation->SetIsFocusable(true);
 
     m_pCheckBoxJoysticks           = new CCheckBox(CRect(CPoint(10, 92), 10, 10), m_pGroupBoxTabInput);
     if (CPC.joysticks == 1) {
@@ -356,7 +357,7 @@ bool CapriceOptions::HandleMessage(CMessage* pMessage)
               CPC.keyboard = m_pDropDownCPCLanguage->GetSelectedIndex();
               CPC.kbd_layout = mapFileList[m_pDropDownPCLanguage->GetSelectedIndex()];
               CPC.joysticks = (m_pCheckBoxJoysticks->GetCheckBoxState() == CCheckBox::CHECKED)?1:0;
-              CPC.joystick_emulation = (m_pCheckBoxJoystickEmulation->GetCheckBoxState() == CCheckBox::CHECKED)?1:0;
+              CPC.joystick_emulation = static_cast<JoystickEmulation>(m_pDropDownJoystickEmulation->GetSelectedIndex());
 
               // Check if any reset or re-init is required, e.g. emulator reset, sound system reset...
               if (ProcessOptionChanges(CPC, pMessage->Source() == m_pButtonSave)) {
@@ -561,6 +562,7 @@ bool CapriceOptions::ProcessOptionChanges(t_CPC& CPC, bool saveChanges) {
     if (CPC.joystick_emulation != m_oldCPCsettings.joystick_emulation)
     {
        CPC.InputMapper->set_joystick_emulation();
+       SDL_SetRelativeMouseMode(SDL_bool(CPC.joystick_emulation == JoystickEmulation::Mouse));
     }
 
     if (saveChanges)

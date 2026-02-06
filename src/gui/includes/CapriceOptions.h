@@ -130,7 +130,7 @@ namespace wGui
       CLabel* m_pLabelPCLanguage;
       CDropDown* m_pDropDownPCLanguage;
       CLabel* m_pLabelJoystickEmulation;
-      CCheckBox* m_pCheckBoxJoystickEmulation;
+      CDropDown* m_pDropDownJoystickEmulation;
       CLabel* m_pLabelJoysticks;
       CCheckBox* m_pCheckBoxJoysticks;
 

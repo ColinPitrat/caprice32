@@ -215,6 +215,24 @@ std::string chROMFile[4] = {
    "system.cpr"
 };
 
+JoystickEmulation nextJoystickEmulation(JoystickEmulation current) {
+  return static_cast<JoystickEmulation>((static_cast<int>(current)+1) % static_cast<int>(JoystickEmulation::Last));
+}
+
+std::string JoystickEmulationToString(JoystickEmulation value) {
+  switch (value) {
+    case JoystickEmulation::None:
+      return "off";
+    case JoystickEmulation::Keyboard:
+      return "keyboard";
+    case JoystickEmulation::Mouse:
+      return "mouse";
+    case JoystickEmulation::Last:
+      return "<invalid joystick emulation: last>";
+  }
+  return "<invalid joystick emulation>";
+}
+
 t_CPC::t_CPC() {
   driveA.drive = DRIVE::DSK_A;
   driveB.drive = DRIVE::DSK_B;
@@ -1105,6 +1123,7 @@ int input_init ()
 {
    CPC.InputMapper->init();
    CPC.InputMapper->set_joystick_emulation();
+   SDL_SetRelativeMouseMode(SDL_bool(CPC.joystick_emulation == JoystickEmulation::Mouse));
    return 0;
 }
 
@@ -1789,7 +1808,7 @@ void loadConfiguration (t_CPC &CPC, const std::string& configFilename)
    if (CPC.keyboard > MAX_ROM_MODS) {
       CPC.keyboard = 0;
    }
-   CPC.joystick_emulation = conf.getIntValue("system", "joystick_emulation", 0) & 1;
+   CPC.joystick_emulation = static_cast<JoystickEmulation>(conf.getIntValue("system", "joystick_emulation", 0));
    CPC.joysticks = conf.getIntValue("system", "joysticks", 1) & 1;
    CPC.joystick_menu_button = conf.getIntValue("system", "joystick_menu_button", 9) - 1;
    CPC.joystick_vkeyboard_button = conf.getIntValue("system", "joystick_vkeyboard_button", 10) - 1;
@@ -1889,7 +1908,7 @@ bool saveConfiguration (t_CPC &CPC, const std::string& configFilename)
    conf.setIntValue("system", "mf2", CPC.mf2);
    conf.setIntValue("system", "keyboard", CPC.keyboard);
    conf.setIntValue("system", "boot_time", CPC.boot_time);
-   conf.setIntValue("system", "joystick_emulation", CPC.joystick_emulation);
+   conf.setIntValue("system", "joystick_emulation", static_cast<int>(CPC.joystick_emulation));
    conf.setIntValue("system", "joysticks", CPC.joysticks);
    conf.setIntValue("system", "joystick_menu_button", CPC.joystick_menu_button + 1);
    conf.setIntValue("system", "joystick_vkeyboard_button", CPC.joystick_vkeyboard_button + 1);
@@ -1970,6 +1989,7 @@ void ShowCursor(bool show)
 
 SDL_Surface* prepareShowUI()
 {
+   SDL_SetRelativeMouseMode(SDL_bool(false));
    audio_pause();
    CPC.scr_gui_is_currently_on = true;
    ShowCursor(true);
@@ -1987,6 +2007,7 @@ void cleanupShowUI(SDL_Surface* guiBackSurface)
    ShowCursor(false);
    CPC.scr_gui_is_currently_on = false;
    audio_resume();
+   SDL_SetRelativeMouseMode(SDL_bool(CPC.joystick_emulation == JoystickEmulation::Mouse));
 }
 
 bool userConfirmsQuitWithoutSaving()
@@ -2076,6 +2097,9 @@ void loadBreakpoints()
 
 bool showDevTools()
 {
+  // TODO: Find a clean way to restore the relative mouse mode when exiting all dev tools.
+  // Alternatively, cleanly disable JoystickEmulation::Mouse mode here.
+  SDL_SetRelativeMouseMode(SDL_bool(false));
   Uint32 flags = SDL_GetWindowFlags(mainSDLWindow);
   // DevTools don't behave very well in fullscreen mode, so just disallow it
   // It's still possible to use it in fullscreen with multiscreen by starting it
@@ -2773,6 +2797,8 @@ int cap32_main (int argc, char **argv)
 
    iExitCondition = EC_FRAME_COMPLETE;
 
+   dword nextMouseReset = 0;
+   // Whether this loop of emulation should release the joystick axis for mouse emulation.
    while (true) {
       // We can only load bin files after the CPC finished the init
       if (!bin_loaded &&
@@ -2814,6 +2840,13 @@ int cap32_main (int argc, char **argv)
         if (devtools.empty()) CPC.paused = false;
         for (auto& devtool : devtools) devtool.PreUpdate();
         for (auto& devtool : devtools) devtool.PostUpdate();
+      }
+      if (dwFrameCountOverall >= nextMouseReset && CPC.joystick_emulation == JoystickEmulation::Mouse) {
+        // We set release_modifiers = false because otherwise, this somehow break some keys, like | on a french keyboard!
+        applyKeypress(CPC.InputMapper->CPCscancodeFromCPCkey(CPC_J0_RIGHT), keyboard_matrix, false, false);
+        applyKeypress(CPC.InputMapper->CPCscancodeFromCPCkey(CPC_J0_LEFT), keyboard_matrix, false, false);
+        applyKeypress(CPC.InputMapper->CPCscancodeFromCPCkey(CPC_J0_DOWN), keyboard_matrix, false, false);
+        applyKeypress(CPC.InputMapper->CPCscancodeFromCPCkey(CPC_J0_UP), keyboard_matrix, false, false);
       }
       while (SDL_PollEvent(&event)) {
          bool processed = false;
@@ -2947,9 +2980,10 @@ int cap32_main (int argc, char **argv)
                            break;
 
                         case CAP32_JOY:
-                           CPC.joystick_emulation = CPC.joystick_emulation ? 0 : 1;
+                           CPC.joystick_emulation = nextJoystickEmulation(CPC.joystick_emulation);
                            CPC.InputMapper->set_joystick_emulation();
-                           set_osd_message(std::string("Joystick emulation: ") + (CPC.joystick_emulation ? "on" : "off"));
+                           SDL_SetRelativeMouseMode(SDL_bool(CPC.joystick_emulation == JoystickEmulation::Mouse));
+                           set_osd_message(std::string("Joystick emulation: ") + JoystickEmulationToString(CPC.joystick_emulation));
                            break;
 
                         case CAP32_PHAZER:
@@ -3048,6 +3082,22 @@ int cap32_main (int argc, char **argv)
             {
               CPC.phazer_x = (event.motion.x-vid_plugin->x_offset) * vid_plugin->x_scale;
               CPC.phazer_y = (event.motion.y-vid_plugin->y_offset) * vid_plugin->y_scale;
+              if (CPC.joystick_emulation == JoystickEmulation::Mouse) {
+                int threshold = 2;
+                if (event.motion.yrel > threshold) {
+                  applyKeypress(CPC.InputMapper->CPCscancodeFromCPCkey(CPC_J0_DOWN), keyboard_matrix, true);
+                }
+                if (event.motion.yrel < -threshold) {
+                  applyKeypress(CPC.InputMapper->CPCscancodeFromCPCkey(CPC_J0_UP), keyboard_matrix, true);
+                }
+                if (event.motion.xrel > threshold) {
+                  applyKeypress(CPC.InputMapper->CPCscancodeFromCPCkey(CPC_J0_RIGHT), keyboard_matrix, true);
+                }
+                if (event.motion.xrel < -threshold) {
+                  applyKeypress(CPC.InputMapper->CPCscancodeFromCPCkey(CPC_J0_LEFT), keyboard_matrix, true);
+                }
+                nextMouseReset = dwFrameCountOverall + 2;
+              }
             }
             break;
 
@@ -3062,6 +3112,14 @@ int cap32_main (int argc, char **argv)
                 }
                 CPC.phazer_pressed = true;
               }
+              if (CPC.joystick_emulation == JoystickEmulation::Mouse) {
+                if (event.button.button == 1) {
+                  applyKeypress(CPC.InputMapper->CPCscancodeFromCPCkey(CPC_J0_FIRE1), keyboard_matrix, true);
+                }
+                if (event.button.button == 3) {
+                  applyKeypress(CPC.InputMapper->CPCscancodeFromCPCkey(CPC_J0_FIRE2), keyboard_matrix, true);
+                }
+              }
             }
             break;
 
@@ -3073,6 +3131,14 @@ int cap32_main (int argc, char **argv)
                   applyKeypress(scancode, keyboard_matrix, false);
                 }
                 CPC.phazer_pressed = false;
+              }
+              if (CPC.joystick_emulation == JoystickEmulation::Mouse) {
+                if (event.button.button == 1) {
+                  applyKeypress(CPC.InputMapper->CPCscancodeFromCPCkey(CPC_J0_FIRE1), keyboard_matrix, false);
+                }
+                if (event.button.button == 3) {
+                  applyKeypress(CPC.InputMapper->CPCscancodeFromCPCkey(CPC_J0_FIRE2), keyboard_matrix, false);
+                }
               }
             }
             break;

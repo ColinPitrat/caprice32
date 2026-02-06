@@ -272,7 +272,7 @@ using CapriceKey = unsigned int;
 // cf. https://www.cpcwiki.eu/index.php/Programming:Keyboard_scanning#Hardware_scancode_table
 using CPCScancode = dword;
 
-void applyKeypress(CPCScancode cpc_key, byte keyboard_matrix[], bool pressed);
+void applyKeypress(CPCScancode cpc_key, byte keyboard_matrix[], bool pressed, bool release_modifiers = true);
 
 class LineParsingResult {
   public:

@@ -1595,7 +1595,7 @@ void InputMapper::set_joystick_emulation()
     int cpc_idx = joy_layout[n][1]; // get the CPC key to change the assignment for
     if (cpc_idx) {
       PCKey pc_idx = SDLkeysymFromCPCkeys[cpc_idx]; // SDL key corresponding to the CPC key to remap
-      if (CPC->joystick_emulation) {
+      if (CPC->joystick_emulation == JoystickEmulation::Keyboard) {
         CPCkeysFromSDLkeysym[pc_idx] = joy_layout[n][0];
       }
       else {
@@ -1701,7 +1701,7 @@ void InputMapper::CPCscancodeFromJoystickAxis(SDL_JoyAxisEvent jaxis, CPCScancod
 
 InputMapper::InputMapper(t_CPC *CPC): CPC(CPC) { }
 
-void applyKeypress(CPCScancode cpc_key, byte keyboard_matrix[], bool pressed) {
+void applyKeypress(CPCScancode cpc_key, byte keyboard_matrix[], bool pressed, bool release_modifiers) {
     if ((!CPC.paused) && (static_cast<byte>(cpc_key) != 0xff)) {
         if (pressed) {
             keyboard_matrix[static_cast<byte>(cpc_key) >> 4] &= ~bit_values[static_cast<byte>(cpc_key) & 7]; // key is being held down
@@ -1717,8 +1717,10 @@ void applyKeypress(CPCScancode cpc_key, byte keyboard_matrix[], bool pressed) {
             }
         } else {
             keyboard_matrix[static_cast<byte>(cpc_key) >> 4] |= bit_values[static_cast<byte>(cpc_key) & 7]; // key has been released
-            keyboard_matrix[0x25 >> 4] |= bit_values[0x25 & 7]; // make sure key is unSHIFTed
-            keyboard_matrix[0x27 >> 4] |= bit_values[0x27 & 7]; // make sure CONTROL key is not held down
+            if (release_modifiers) {
+              keyboard_matrix[0x25 >> 4] |= bit_values[0x25 & 7]; // make sure key is unSHIFTed
+              keyboard_matrix[0x27 >> 4] |= bit_values[0x27 & 7]; // make sure CONTROL key is not held down
+            }
         }
     }
 }

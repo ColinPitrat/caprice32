@@ -181,6 +181,16 @@ struct t_slot {
    unsigned int zip_index;
 };
 
+enum class JoystickEmulation {
+  None = 0,
+  Keyboard = 1,
+  Mouse = 2,
+  Last = 3,
+};
+
+JoystickEmulation nextJoystickEmulation(JoystickEmulation current);
+std::string JoystickEmulationToString(JoystickEmulation value);
+
 class t_CPC {
   public:
    t_CPC();
@@ -200,7 +210,7 @@ class t_CPC {
    unsigned int printer_port;
    unsigned int mf2;
    unsigned int keyboard;
-   unsigned int joystick_emulation;
+   JoystickEmulation joystick_emulation;
    unsigned int joysticks;
    unsigned int joystick_menu_button;
    unsigned int joystick_vkeyboard_button;
