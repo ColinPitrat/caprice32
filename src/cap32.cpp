@@ -1152,7 +1152,7 @@ int emulator_init ()
          if ((pfileObject = fopen(romFilename.c_str(), "rb")) != nullptr) { // attempt to open the ROM image
             if(fread(pchRomData, 128, 1, pfileObject) != 1) { // read 128 bytes of ROM data
               fclose(pfileObject);
-              LOG_ERROR("Invalid ROM: less than 128 bytes. Not a CPC ROM?");
+              LOG_ERROR("Invalid ROM '" << romFilename << "': less than 128 bytes. Not a CPC ROM?");
               return ERR_NOT_A_CPC_ROM;
             }
             word checksum = 0;
@@ -1174,18 +1174,24 @@ int emulator_init ()
             }
             // end of Graduate accessory ROM checks
 
-
             if (checksum == ((pchRomData[0x43] << 8) + pchRomData[0x44])) { // if the checksum matches, we got us an AMSDOS header
                if(fread(pchRomData, 128, 1, pfileObject) != 1) { // skip it
-                 LOG_ERROR("Invalid ROM: couldn't read the 128 bytes of the AMSDOS header. Not a CPC ROM?");
+                 LOG_ERROR("Invalid ROM '" << romFilename << "': couldn't read the 128 bytes of the AMSDOS header. Not a CPC ROM?");
                  fclose(pfileObject);
                  return ERR_NOT_A_CPC_ROM;
                }
             }
-            if (!(pchRomData[0] & 0xfc)) { // is it a valid CPC ROM image (0 = forground, 1 = background, 2 = extension)?
-               if(fread(pchRomData+128, 16384-128, 1, pfileObject) != 1) { // read the rest of the ROM file
+
+            auto rom_file_size = file_size(fileno(pfileObject));
+            if (rom_file_size > 16384) {
                  fclose(pfileObject);
-                 LOG_ERROR("Invalid ROM: total ROM size is not 16kB. Not a CPC ROM?");
+                 LOG_ERROR("Invalid ROM '" << romFilename << "': total ROM size is greater than 16kB. Not a CPC ROM?");
+                 return ERR_NOT_A_CPC_ROM;
+            }
+            if (!(pchRomData[0] & 0xfc)) { // is it a valid CPC ROM image (0 = foreground, 1 = background, 2 = extension)?
+               if(fread(pchRomData+128, rom_file_size-128, 1, pfileObject) != 1) { // read the rest of the ROM file
+                 fclose(pfileObject);
+                 LOG_ERROR("Internal error: couldn't read the expected ROM size from " << romFilename);
                  return ERR_NOT_A_CPC_ROM;
                }
                memmap_ROM[iRomNum] = pchRomData; // update the ROM map
@@ -1193,9 +1199,9 @@ int emulator_init ()
             // Graduate Software Accessory Roms use a non standard format. Only the first byte is validated, and as long as
             // it's a "G" and terminated with a "$" it'll try to use it.
             // See https://www.cpcwiki.eu/index.php/Graduate_Software#Structure_of_a_utility_ROM for more details.
-              if(fread(pchRomData+128, 16384-128, 1, pfileObject) != 1) { // read the rest of the ROM file
+              if(fread(pchRomData+128, rom_file_size-128, 1, pfileObject) != 1) { // read the rest of the ROM file
                 fclose(pfileObject);
-                LOG_ERROR("Invalid ROM: total ROM size is not 16kB. Not a CPC ROM?");
+                LOG_ERROR("Internal error: couldn't read the expected ROM size from " << romFilename);
                 return ERR_NOT_A_CPC_ROM;
               }
               memmap_ROM[iRomNum] = pchRomData; // update the ROM map
