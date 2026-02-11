@@ -566,6 +566,10 @@ bool CapriceOptions::ProcessOptionChanges(t_CPC& CPC, bool saveChanges) {
        // This will be done when exiting the GUI.
     }
 
+    // Just in case a call to input_init (e.g. through emulator_init) was done,
+    // ensure the mouse is not captured.
+    SDL_SetRelativeMouseMode(SDL_bool(false));
+
     if (saveChanges)
     {
         std::string configuration_file = getConfigurationFilename(true /* forWrite */);
