@@ -95,6 +95,12 @@ std::string replaceCap32Keys(std::string command)
   return command;
 }
 
+void inlineString(CapriceArgs& args, char* data)
+{
+   args.autocmd += replaceCap32Keys(data);
+   args.autocmd += "\n";
+}
+
 void parseArguments(int argc, char **argv, std::vector<std::string>& slot_list, CapriceArgs& args)
 {
    int option_index = 0;
@@ -114,9 +120,29 @@ void parseArguments(int argc, char **argv, std::vector<std::string>& slot_list, 
       switch (c)
       {
          case 'a':
+            if (optarg[0] == '@')
+            {
+               /* Well, this is a file content we want to inject */
+               std::ifstream inlineStream(&optarg[1], std::ifstream::in);
+               if(!inlineStream.is_open())
+               {
+                  /* The filename is not correct, it may be a string to inject */
+                  LOG_VERBOSE("Append to autocmd: " << optarg);
+                  inlineString(args, optarg);
+                  break;
+               }
+               /* Inject all lines from the file */
+               LOG_VERBOSE("Append file content to autocmd: " << &optarg[1]);
+               while(inlineStream.good())
+               {
+                  char chLine[256];
+                  inlineStream.getline(chLine, 256);
+                  inlineString(args, chLine);
+               }
+               break;
+            }
             LOG_VERBOSE("Append to autocmd: " << optarg);
-            args.autocmd += replaceCap32Keys(optarg);
-            args.autocmd += "\n";
+            inlineString(args, optarg);
             break;
 
          case 'c':
