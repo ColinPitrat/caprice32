@@ -158,7 +158,7 @@ When the CPC firmware writes its desired IP address into the W5100S SIPR registe
 - No hardware interrupts (IR pin) — firmware must poll Sn_SR / Sn_RX_RSR.
 - TCP listen / server-side accept is not implemented.
 - ICMP (ping) is not emulated.
-- Windows is not supported — the implementation uses POSIX socket APIs (`<sys/socket.h>`, `fcntl`, etc.) which are not available on Windows.
+- Windows support is untested. The socket layer uses `#ifdef _WIN32` to select Winsock2 vs POSIX APIs, but the Windows build path has not been verified.
 
 # Why another GitHub repository ?
 
