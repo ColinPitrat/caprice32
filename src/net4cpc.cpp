@@ -19,14 +19,41 @@
 
 #include "net4cpc.h"
 
-#include <arpa/inet.h>
 #include <cerrno>
 #include <cstring>
-#include <fcntl.h>
-#include <netinet/in.h>
-#include <sys/select.h>
-#include <sys/socket.h>
-#include <unistd.h>
+
+// ---------------------------------------------------------------------------
+// Platform socket abstraction
+// ---------------------------------------------------------------------------
+
+#ifdef _WIN32
+#  include <winsock2.h>
+#  include <ws2tcpip.h>
+#  pragma comment(lib, "ws2_32.lib")
+   using sock_t = SOCKET;
+   static const sock_t INVALID_SOCK = INVALID_SOCKET;
+   static inline void close_fd(sock_t fd)      { closesocket(fd); }
+   static inline void set_nonblocking(sock_t fd) {
+       u_long mode = 1;
+       ioctlsocket(fd, FIONBIO, &mode);
+   }
+   static inline bool connect_pending() { return WSAGetLastError() == WSAEWOULDBLOCK; }
+#else
+#  include <arpa/inet.h>
+#  include <fcntl.h>
+#  include <netinet/in.h>
+#  include <sys/select.h>
+#  include <sys/socket.h>
+#  include <unistd.h>
+   using sock_t = int;
+   static const sock_t INVALID_SOCK = -1;
+   static inline void close_fd(sock_t fd)      { close(fd); }
+   static inline void set_nonblocking(sock_t fd) {
+       int flags = fcntl(fd, F_GETFL, 0);
+       fcntl(fd, F_SETFL, flags | O_NONBLOCK);
+   }
+   static inline bool connect_pending() { return errno == EINPROGRESS; }
+#endif
 
 // ---------------------------------------------------------------------------
 // W5100S register-space constants
@@ -74,10 +101,10 @@ static const uint8_t SCMD_RECV    = 0x40;
 // Emulator state
 // ---------------------------------------------------------------------------
 
-static uint8_t  regs[65536];    // W5100S register/buffer space
-static uint16_t idm_ar = 0;     // current indirect address register
-static int      sock_fd[4];     // host socket file descriptors
-static uint16_t rx_wr[4];       // internal RX write pointers (free-running)
+static uint8_t  regs[65536];       // W5100S register/buffer space
+static uint16_t idm_ar = 0;        // current indirect address register
+static sock_t   sock_fd[4];        // host socket file descriptors
+static uint16_t rx_wr[4];          // internal RX write pointers (free-running)
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -104,9 +131,9 @@ static void update_tx_fsr(int s) {
 }
 
 static void close_sock(int s) {
-    if (sock_fd[s] >= 0) {
-        close(sock_fd[s]);
-        sock_fd[s] = -1;
+    if (sock_fd[s] != INVALID_SOCK) {
+        close_fd(sock_fd[s]);
+        sock_fd[s] = INVALID_SOCK;
     }
 }
 
@@ -118,7 +145,7 @@ static void close_sock(int s) {
 // For UDP sockets the W5100S prepends an 8-byte header per datagram:
 //   4 B source IP | 2 B source port | 2 B payload length
 static void poll_rx(int s) {
-    if (sock_fd[s] < 0) return;
+    if (sock_fd[s] == INVALID_SOCK) return;
 
     uint8_t sr = regs[SOCK_BASE[s] + SR_SR];
     if (sr != SSTAT_ESTABLISHED && sr != SSTAT_UDP) return;
@@ -137,9 +164,10 @@ static void poll_rx(int s) {
         uint8_t tmp[2048];
         struct sockaddr_in src{};
         socklen_t srclen = sizeof(src);
-        ssize_t n = recvfrom(sock_fd[s], tmp,
+        ssize_t n = recvfrom(sock_fd[s],
+                             reinterpret_cast<char*>(tmp),
                              payload_space < sizeof(tmp) ? payload_space : sizeof(tmp),
-                             MSG_DONTWAIT,
+                             0,
                              reinterpret_cast<struct sockaddr*>(&src), &srclen);
         if (n <= 0) return;
 
@@ -164,9 +192,10 @@ static void poll_rx(int s) {
 
     } else {
         uint8_t tmp[2048];
-        ssize_t n = recv(sock_fd[s], tmp,
+        ssize_t n = recv(sock_fd[s],
+                         reinterpret_cast<char*>(tmp),
                          space < sizeof(tmp) ? space : sizeof(tmp),
-                         MSG_DONTWAIT);
+                         0);
         if (n < 0) return;
         if (n == 0) {
             regs[SOCK_BASE[s] + SR_SR] = SSTAT_CLOSE_WAIT;
@@ -184,7 +213,7 @@ static void poll_rx(int s) {
 
 // Poll a non-blocking connect() for completion.
 static void poll_connect(int s) {
-    if (sock_fd[s] < 0) return;
+    if (sock_fd[s] == INVALID_SOCK) return;
     if (regs[SOCK_BASE[s] + SR_SR] != SSTAT_SYNSENT) return;
 
     fd_set wfds, efds;
@@ -192,10 +221,11 @@ static void poll_connect(int s) {
     FD_ZERO(&efds); FD_SET(sock_fd[s], &efds);
     struct timeval tv = {0, 0};
 
-    if (select(sock_fd[s] + 1, nullptr, &wfds, &efds, &tv) > 0) {
+    if (select(static_cast<int>(sock_fd[s]) + 1, nullptr, &wfds, &efds, &tv) > 0) {
         int err = 0;
         socklen_t len = sizeof(err);
-        getsockopt(sock_fd[s], SOL_SOCKET, SO_ERROR, &err, &len);
+        getsockopt(sock_fd[s], SOL_SOCKET, SO_ERROR,
+                   reinterpret_cast<char*>(&err), &len);
         if (err == 0) {
             regs[SOCK_BASE[s] + SR_SR] = SSTAT_ESTABLISHED;
             set16(SOCK_BASE[s] + SR_TX_FSR, BUF_SIZE);
@@ -220,9 +250,8 @@ static void handle_command(int s, uint8_t cmd) {
         sock_fd[s] = socket(AF_INET,
                             mode == SMODE_UDP ? SOCK_DGRAM : SOCK_STREAM,
                             0);
-        if (sock_fd[s] >= 0) {
-            int flags = fcntl(sock_fd[s], F_GETFL, 0);
-            fcntl(sock_fd[s], F_SETFL, flags | O_NONBLOCK);
+        if (sock_fd[s] != INVALID_SOCK) {
+            set_nonblocking(sock_fd[s]);
             // Bind to the source IP the CPC configured in SIPR (0x000F–0x0012).
             // If the host has that IP on any interface, traffic will originate
             // from it.  Silently fall back to the host IP if bind fails.
@@ -266,7 +295,7 @@ static void handle_command(int s, uint8_t cmd) {
         int r = connect(sock_fd[s],
                         reinterpret_cast<struct sockaddr*>(&addr),
                         sizeof(addr));
-        if (r == 0 || errno == EINPROGRESS) {
+        if (r == 0 || connect_pending()) {
             regs[SOCK_BASE[s] + SR_SR] = SSTAT_SYNSENT;
         } else {
             regs[SOCK_BASE[s] + SR_SR] = SSTAT_CLOSED;
@@ -280,7 +309,7 @@ static void handle_command(int s, uint8_t cmd) {
         uint16_t tx_wr = get16(SOCK_BASE[s] + SR_TX_WR);
         uint16_t len   = static_cast<uint16_t>(tx_wr - tx_rd);
 
-        if (len > 0 && sock_fd[s] >= 0) {
+        if (len > 0 && sock_fd[s] != INVALID_SOCK) {
             uint8_t buf[2048];
             for (uint16_t i = 0; i < len; i++)
                 buf[i] = regs[TX_BASE[s] + ((tx_rd + i) & BUF_MASK)];
@@ -300,10 +329,10 @@ static void handle_command(int s, uint8_t cmd) {
                     (static_cast<uint32_t>(ip1) << 16) |
                     (static_cast<uint32_t>(ip2) <<  8) |
                      static_cast<uint32_t>(ip3));
-                sendto(sock_fd[s], buf, len, 0,
+                sendto(sock_fd[s], reinterpret_cast<const char*>(buf), len, 0,
                        reinterpret_cast<struct sockaddr*>(&dst), sizeof(dst));
             } else {
-                send(sock_fd[s], buf, len, 0);
+                send(sock_fd[s], reinterpret_cast<const char*>(buf), len, 0);
             }
         }
 
@@ -368,6 +397,14 @@ static void reg_write(uint16_t addr, uint8_t val) {
 // ---------------------------------------------------------------------------
 
 void net4cpc_reset() {
+#ifdef _WIN32
+    static bool wsa_init = false;
+    if (!wsa_init) {
+        WSADATA wsa;
+        WSAStartup(MAKEWORD(2, 2), &wsa);
+        wsa_init = true;
+    }
+#endif
     memset(regs, 0, sizeof(regs));
     idm_ar = 0;
     for (int s = 0; s < 4; s++) {
