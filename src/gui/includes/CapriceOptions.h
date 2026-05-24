@@ -70,6 +70,9 @@ namespace wGui
       CLabel* m_pLabelPrinterToFile;     // Capture printer output to file
       CCheckBox* m_pCheckBoxPrinterToFile;
 
+      CLabel* m_pLabelNet4CPC;           // Enable Net4CPC (W5100S) emulation
+      CCheckBox* m_pCheckBoxNet4CPC;
+
       // Expansion ROMs
       std::vector<CButton *> m_pButtonRoms; // contains pointer to 16 'ROM buttons'
 

@@ -209,6 +209,7 @@ class t_CPC {
    unsigned int printer;
    unsigned int printer_port;
    unsigned int mf2;
+   unsigned int net4cpc;
    unsigned int keyboard;
    JoystickEmulation joystick_emulation;
    unsigned int joysticks;
