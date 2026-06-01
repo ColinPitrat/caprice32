@@ -119,7 +119,7 @@ If you have suggestions, a bug report or even want to participate to the develop
 
 # Net4CPC Ethernet emulation
 
-This fork adds emulation of the [Net4CPC](https://github.com/salafek/Net4CPC) expansion board, which connects a WIZnet W5100S Ethernet controller to the CPC expansion bus.
+Caprice32 supports emulation of the [Net4CPC](https://github.com/salafek/Net4CPC) expansion board, which connects a WIZnet W5100S Ethernet controller to the CPC expansion bus.
 
 ## Enabling it
 
