@@ -3,7 +3,10 @@
  * Emulates the W5100S Ethernet controller as accessed through the Net4CPC
  * expansion board at I/O ports 0xFD20–0xFD23 (indirect parallel bus mode).
  *
- * Register space layout (same as real W5100S):
+ * The W5100S supports up to 4 independent, simultaneous hardware sockets
+ * (Sockets 0–3) capable of TCP and UDP.
+ *
+ * Memory layout (same as real W5100S):
  *   0x0000–0x002F  Common registers (MR, GAR, SUBR, SHAR, SIPR, RTR, …)
  *   0x0400–0x04FF  Socket 0 registers
  *   0x0500–0x05FF  Socket 1 registers
