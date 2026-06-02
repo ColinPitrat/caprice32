@@ -7,6 +7,7 @@
 #include "std_ex.h"
 #include "CapriceOptions.h"
 #include "cap32.h"
+#include "net4cpc.h"
 #include "keyboard.h"
 #include "fileutils.h"
 #include "wg_messagebox.h"
@@ -98,6 +99,13 @@ CapriceOptions::CapriceOptions(const CRect& WindowRect, CWindow* pParent, CFontE
         m_pCheckBoxPrinterToFile->SetCheckBoxState(CCheckBox::CHECKED);
     }
     m_pCheckBoxPrinterToFile->SetIsFocusable(true);
+
+    m_pCheckBoxNet4CPC = new CCheckBox(CRect(CPoint(10, 104), 10, 10), m_pGroupBoxTabGeneral);
+    m_pLabelNet4CPC    = new CLabel(CPoint(27, 105), m_pGroupBoxTabGeneral, "Enable Net4CPC ethernet emulation");
+    if (CPC.net4cpc == 1) {
+        m_pCheckBoxNet4CPC->SetCheckBoxState(CCheckBox::CHECKED);
+    }
+    m_pCheckBoxNet4CPC->SetIsFocusable(true);
 
     // ---------------- Expansion ROMs ----------------
     std::string romFileName;
@@ -324,6 +332,7 @@ bool CapriceOptions::HandleMessage(CMessage* pMessage)
               CPC.limit_speed = (m_pCheckBoxLimitSpeed->GetCheckBoxState() == CCheckBox::CHECKED)?1:0;
               CPC.speed    = m_pScrollBarCPCSpeed->GetValue();
               CPC.printer  = (m_pCheckBoxPrinterToFile->GetCheckBoxState() == CCheckBox::CHECKED)?1:0;
+              CPC.net4cpc  = (m_pCheckBoxNet4CPC->GetCheckBoxState() == CCheckBox::CHECKED)?1:0;
               // Selected ROM slots ( "..." is empty)
               // Take the text on each 'ROM' button, if it is "...", clear the ROM, else
               // set the ROM filename:
@@ -517,6 +526,11 @@ bool CapriceOptions::ProcessOptionChanges(t_CPC& CPC, bool saveChanges) {
         } else {
             printer_stop();
         }
+    }
+
+    // Reset Net4CPC when toggled (closes any open host sockets):
+    if (CPC.net4cpc != m_oldCPCsettings.net4cpc) {
+        net4cpc_reset();
     }
 
     if (CPC.snd_enabled != m_oldCPCsettings.snd_enabled) {

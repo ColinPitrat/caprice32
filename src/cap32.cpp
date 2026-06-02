@@ -43,6 +43,7 @@
 #include "argparse.h"
 #include "slotshandler.h"
 #include "fileutils.h"
+#include "net4cpc.h"
 
 #include <errno.h>
 #include <cstring>
@@ -475,6 +476,10 @@ byte z80_IN_handler (reg_pair port)
          }
       }
    }
+// Net4CPC (W5100S) -----------------------------------------------------------
+   else if (CPC.net4cpc && port.b.h == 0xfd) { // Net4CPC chip select?
+      ret_val = net4cpc_in(port.b.l & 0x03);
+   }
    LOG_DEBUG("IN on port " << std::hex << static_cast<int>(port.w.l) << ", ret_val=" << static_cast<int>(ret_val) << std::dec);
    return ret_val;
 }
@@ -856,6 +861,10 @@ void z80_OUT_handler (reg_pair port, byte val)
          ga_memory_manager();
       }
    }
+// Net4CPC (W5100S) -----------------------------------------------------------
+   else if (CPC.net4cpc && port.b.h == 0xfd) { // Net4CPC chip select?
+      net4cpc_out(port.b.l & 0x03, val);
+   }
 }
 
 
@@ -1110,6 +1119,9 @@ void emulator_reset ()
    }
    membank_read[0] = pbROMlo; // 'page in' lower ROM
    membank_read[3] = pbROMhi; // 'page in' upper ROM
+
+// Net4CPC
+   net4cpc_reset();
 
 // Multiface 2
    dwMF2Flags = 0;
@@ -1804,6 +1816,7 @@ void loadConfiguration (t_CPC &CPC, const std::string& configFilename)
    CPC.boot_time = conf.getIntValue("system", "boot_time", 5);
    CPC.printer = conf.getIntValue("system", "printer", 0) & 1;
    CPC.mf2 = conf.getIntValue("system", "mf2", 0) & 1;
+   CPC.net4cpc = conf.getIntValue("system", "net4cpc", 0) & 1;
    CPC.keyboard = conf.getIntValue("system", "keyboard", 0);
    if (CPC.keyboard > MAX_ROM_MODS) {
       CPC.keyboard = 0;
@@ -1906,6 +1919,7 @@ bool saveConfiguration (t_CPC &CPC, const std::string& configFilename)
    conf.setIntValue("system", "auto_pause", CPC.auto_pause);
    conf.setIntValue("system", "printer", CPC.printer);
    conf.setIntValue("system", "mf2", CPC.mf2);
+   conf.setIntValue("system", "net4cpc", CPC.net4cpc);
    conf.setIntValue("system", "keyboard", CPC.keyboard);
    conf.setIntValue("system", "boot_time", CPC.boot_time);
    conf.setIntValue("system", "joystick_emulation", static_cast<int>(CPC.joystick_emulation));
