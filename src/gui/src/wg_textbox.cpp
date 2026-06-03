@@ -182,7 +182,6 @@ void CTextBox::Draw() const
 			std::vector<CPoint> vOffsets;
 			std::vector<CPoint> vBoundingDimensions;
 			std::vector<std::vector<CRect> > vCharRects;
-			int iIndex = 0;
 			for(const auto *str : m_vpRenderedString)
 			{
 				CPoint BoundingDimensions;
@@ -192,7 +191,6 @@ void CTextBox::Draw() const
 				vBoundingDimensions.push_back(BoundingDimensions);
 				vOffsets.push_back(Offset);
 				vCharRects.push_back(CharRects);
-				++iIndex;
 			}
 
 			// move the cursor into view by scrolling if necessary
@@ -317,7 +315,6 @@ bool CTextBox::OnMouseButtonDown(CPoint Point, unsigned int Button)  // virtual
 				// set the cursor
 				std::vector<CPoint> vOffsets;
 				std::vector<std::vector<CRect> > vCharRects;
-				int iIndex = 0;
 				// get the dimensions of all the characters
 				for(const auto *str : m_vpRenderedString)
 				{
@@ -326,7 +323,6 @@ bool CTextBox::OnMouseButtonDown(CPoint Point, unsigned int Button)  // virtual
 					str->GetMetrics(nullptr, &Offset, &CharRects);
 					vOffsets.push_back(Offset);
 					vCharRects.push_back(CharRects);
-					++iIndex;
 				}
 
 				// figure out which line was clicked on
@@ -426,7 +422,6 @@ bool CTextBox::HandleMessage(CMessage* pMessage)  // virtual
 					// get the dimensions for all the characters
 					std::vector<CPoint> vOffsets;
 					std::vector<std::vector<CRect> > vCharRects;
-					int iIndex = 0;
 					for(const auto *str : m_vpRenderedString)
 					{
 						CPoint Offset;
@@ -434,7 +429,6 @@ bool CTextBox::HandleMessage(CMessage* pMessage)  // virtual
 						str->GetMetrics(nullptr, &Offset, &CharRects);
 						vOffsets.push_back(Offset);
 						vCharRects.push_back(CharRects);
-						++iIndex;
 					}
 
 					// figure out which line was clicked on
