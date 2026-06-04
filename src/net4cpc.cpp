@@ -32,7 +32,6 @@
 #ifdef _WIN32
 #  include <winsock2.h>
 #  include <ws2tcpip.h>
-#  pragma comment(lib, "ws2_32.lib")
    using sock_t = SOCKET;
    static const sock_t INVALID_SOCK = INVALID_SOCKET;
    static inline void close_fd(sock_t fd)      { closesocket(fd); }
