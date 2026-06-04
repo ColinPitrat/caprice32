@@ -44,22 +44,24 @@ else
 $(error Unknown ARCH. Supported ones are linux, win32 and win64.)
 endif
 
-ifeq ($(PLATFORM),windows)
-TARGET = cap32.exe
-TEST_TARGET = test_runner.exe
-COMMON_CFLAGS += -DWINDOWS
-else
-prefix = /usr/local
-TARGET = cap32
-TEST_TARGET = test_runner
-endif
-
 CAPS_INCLUDES=-Isrc/capsimg/LibIPF -Isrc/capsimg/Device -Isrc/capsimg/CAPSImg -Isrc/capsimg/Codec -Isrc/capsimg/Core
 
 IPATHS = -Isrc/ $(CAPS_INCLUDES) -Isrc/gui/includes `pkg-config --cflags freetype2` `sdl2-config --cflags` `pkg-config --cflags libpng` `pkg-config --cflags zlib`
 LIBS = `sdl2-config --libs` `pkg-config --libs freetype2` `pkg-config --libs libpng` `pkg-config --libs zlib`
 CXX ?= g++
 COMMON_CFLAGS += -fPIC
+
+
+ifeq ($(PLATFORM),windows)
+TARGET = cap32.exe
+TEST_TARGET = test_runner.exe
+COMMON_CFLAGS += -DWINDOWS
+LIBS += -lws2_32
+else
+prefix = /usr/local
+TARGET = cap32
+TEST_TARGET = test_runner
+endif
 
 ifneq (,$(findstring g++,$(CXX)))
 LIBS += -lstdc++fs
