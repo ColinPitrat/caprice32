@@ -30,7 +30,7 @@ jobs:
            ipf_license: LICENSE.txt
            # These packages don't exist anymore for 32-bit but are needed for running e2e tests.
            # Only install them and run e2e tests on 64-bit.
-           extra_packages: "mingw64/mingw-w64-x86_64-diffutils ming64/mingw-w64-x86_64-7zip"
+           extra_packages: "mingw64/mingw-w64-x86_64-diffutils mingw64/mingw-w64-x86_64-7zip"
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v2
