@@ -13,8 +13,24 @@ jobs:
     strategy:
       matrix:
         include:
-         - { version: MINGW32, mingw: mingw32, arch: win32, env: i686,   ipf_win_file: ipflib42_w32.zip,     ipf_dll: ipflib42_w32/CAPSImg.dll, ipf_license: ipflib42_w32/LICENSE.txt }
-         - { version: MINGW64, mingw: mingw64, arch: win64, env: x86_64, ipf_win_file: ipflib42_win_x64.zip, ipf_dll: CAPSImg_x64.dll,          ipf_license: LICENSE.txt }
+         - version: MINGW32
+           mingw: mingw32
+           arch: win32
+           env: i686
+           ipf_win_file: ipflib42_w32.zip
+           ipf_dll: ipflib42_w32/CAPSImg.dll
+           ipf_license: ipflib42_w32/LICENSE.txt
+           extra_packages: ""
+         - version: MINGW64
+           mingw: mingw64
+           arch: win64
+           env: x86_64
+           ipf_win_file: ipflib42_win_x64.zip
+           ipf_dll: CAPSImg_x64.dll
+           ipf_license: LICENSE.txt
+           # These packages don't exist anymore for 32-bit but are needed for running e2e tests.
+           # Only install them and run e2e tests on 64-bit.
+           extra_packages: "mingw64/mingw-w64-x86_64-diffutils ming64/mingw-w64-x86_64-7zip"
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v2
@@ -34,9 +50,7 @@ jobs:
             ${{matrix.mingw}}/mingw-w64-${{matrix.env}}-SDL2
             ${{matrix.mingw}}/mingw-w64-${{matrix.env}}-toolchain
             ${{matrix.mingw}}/mingw-w64-${{matrix.env}}-zlib
-            ${{matrix.mingw}}/mingw-w64-${{matrix.env}}-diffutils
-          # These packages don't exist for 32-bit anymore, let's see what happens if I remove them!
-          #${{matrix.mingw}}/mingw-w64-${{matrix.env}}-7zip
+            ${{matrix.extra_packages}}
       # This is awful but we have to pass the mingw{32,64}/include directory so that
       # zlib.h can be found because pkg-config doesn't return any cflags for
       # zlib.
@@ -47,6 +61,11 @@ jobs:
           make ARCH=${{matrix.arch}} CXX=g++ WINE=\"\" CFLAGS="-ID:/a/_temp/msys64/${{matrix.mingw}}/include/" -j 4 clean
           make ARCH=${{matrix.arch}} CXX=g++ WINE=\"\" CFLAGS="-ID:/a/_temp/msys64/${{matrix.mingw}}/include/ -Ii686-linux-gnu-capsimage/include" -j 4 -k
           make ARCH=${{matrix.arch}} CXX=g++ WINE=\"\" CFLAGS="-ID:/a/_temp/msys64/${{matrix.mingw}}/include/ -Ii686-linux-gnu-capsimage/include" WINE=\"\" -j 4 -k unit_test
+
+      - name: Run integrated tests
+        if: matrix.version == 'MINGW64'
+        shell: msys2 {0}
+        run: |
           make ARCH=${{matrix.arch}} CXX=g++ WINE=\"\" CFLAGS="-ID:/a/_temp/msys64/${{matrix.mingw}}/include/ -Ii686-linux-gnu-capsimage/include" WINE=\"\" -j 4 -k e2e_test
           ./test/integrated/test_win_package.sh ${{matrix.arch}}
           ./test/integrated/test_win_deps.sh ${{matrix.arch}}
