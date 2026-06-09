@@ -780,11 +780,13 @@ void frame_finished()
 void prerender_border()
 {
    dword dwVal = 0x10101010;
-   *RendPos = dwVal;
-   *(RendPos + 1) = dwVal;
-   *(RendPos + 2) = dwVal;
-   *(RendPos + 3) = dwVal;
-   RendPos += 4;
+   // Global variable privatization
+   dword *pos = RendPos;
+   *pos++ = dwVal;
+   *pos++ = dwVal;
+   *pos++ = dwVal;
+   *pos++ = dwVal;
+   RendPos = pos;
 }
 
 
@@ -792,9 +794,11 @@ void prerender_border()
 void prerender_border_half()
 {
    dword dwVal = 0x10101010;
-   *RendPos = dwVal;
-   *(RendPos + 1) = dwVal;
-   RendPos += 2;
+   // Global variable privatization
+   dword *pos = RendPos;
+   *pos++ = dwVal;
+   *pos++ = dwVal;
+   RendPos = pos;
 }
 
 
@@ -802,11 +806,13 @@ void prerender_border_half()
 void prerender_sync()
 {
    dword dwVal = 0x11111111;
-   *RendPos = dwVal;
-   *(RendPos + 1) = dwVal;
-   *(RendPos + 2) = dwVal;
-   *(RendPos + 3) = dwVal;
-   RendPos += 4;
+   // Global variable privatization
+   dword *pos = RendPos;
+   *pos++ = dwVal;
+   *pos++ = dwVal;
+   *pos++ = dwVal;
+   *pos++ = dwVal;
+   RendPos = pos;
 }
 
 
@@ -814,9 +820,11 @@ void prerender_sync()
 void prerender_sync_half()
 {
    dword dwVal = 0x11111111;
-   *RendPos = dwVal;
-   *(RendPos + 1) = dwVal;
-   RendPos += 2;
+   // Global variable privatization
+   dword *pos = RendPos;
+   *pos++ = dwVal;
+   *pos++ = dwVal;
+   RendPos = pos;
 }
 
 
@@ -845,18 +853,22 @@ dword shiftLittleEndianDwordTriplet(dword val1, dword val2, dword val3, unsigned
 
 void prerender_normal()
 {
-   // getRAMByte, but having the pointer allows to avoid doing the sum twice.
-   const byte *next_addr = pbRAM + CRTC.next_address;
+   // getRAMByte, but having the pointer allows to avoid doing the sum and 
+   // accessing the global variable twice.
+   const byte *ram = pbRAM + CRTC.next_address;
+   // Global variable privatization
+   dword *pos = RendPos;
+   const dword *map = ModeMap;
 
-   byte bVidMem = *next_addr;
-   *RendPos = ModeMap[bVidMem * 2];
-   *(RendPos + 1) = ModeMap[bVidMem * 2 + 1];
+   byte bVidMem = *ram++;
+   *pos++ = map[bVidMem * 2];
+   *pos++ = map[bVidMem * 2 + 1];
 
-   bVidMem = *(next_addr + 1);
-   *(RendPos + 2) = ModeMap[bVidMem * 2];
-   *(RendPos + 3) = ModeMap[bVidMem * 2 + 1];
+   bVidMem = *ram;
+   *pos++ = map[bVidMem * 2];
+   *pos++ = map[bVidMem * 2 + 1];
 
-   RendPos += 4;
+   RendPos = pos;
 }
 
 void prerender_normal_plus()
@@ -897,11 +909,19 @@ void prerender_normal_plus()
 
 void prerender_normal_half()
 {
-   byte bVidMem = getRAMByte(CRTC.next_address);
-   *RendPos = *(ModeMap + bVidMem);
-   bVidMem = getRAMByte(CRTC.next_address + 1);
-   *(RendPos + 1) = *(ModeMap + bVidMem);
-   RendPos += 2;
+   // getRAMByte, but having the pointer allows to avoid doing the sum and 
+   // accessing the global variable twice.
+   const byte *ram = pbRAM + CRTC.next_address;
+   // Global variable privatization
+   dword *pos = RendPos;
+   const dword *map = ModeMap;
+
+   byte bVidMem = *ram++;
+   *pos++ = map[bVidMem];
+   bVidMem = *ram;
+   *pos++ = map[bVidMem];
+
+   RendPos = pos;
 }
 
 void prerender_normal_half_plus()
@@ -955,10 +975,13 @@ void render8bpp()
 {
    byte bCount = *RendWid++;
    byte *dst = CPC.scr_pos;
+   // Global variable privatization
+   const byte *src = RendOut;
    const dword *pal = GateArray.palette;
    while (bCount--) {
-      *dst++ = static_cast<byte>(pal[*RendOut++]);
+      *dst++ = static_cast<byte>(pal[*src++]);
    }
+   RendOut = const_cast<byte*>(src);
    CPC.scr_pos = dst;
 }
 
@@ -969,12 +992,15 @@ void render8bpp_doubleY()
    byte bCount = *RendWid++;
    byte *dst1 = CPC.scr_pos;
    byte *dst2 = CPC.scr_pos + CPC.scr_bps;
+   // Global variable privatization
+   const byte *src = RendOut;
    const dword *pal = GateArray.palette;
    while (bCount--) {
-      byte val = static_cast<byte>(pal[*RendOut++]);
+      byte val = static_cast<byte>(pal[*src++]);
       *dst1++ = val;
       *dst2++ = val;
    }
+   RendOut = const_cast<byte*>(src);
    CPC.scr_pos = dst1;
 }
 
@@ -984,10 +1010,13 @@ void render16bpp()
 {
    byte bCount = *RendWid++;
    word *dst = reinterpret_cast<word*>(CPC.scr_pos);
+   // Global variable privatization
+   const byte *src = RendOut;
    const dword *pal = GateArray.palette;
    while (bCount--) {
-      *dst++ = static_cast<word>(pal[*RendOut++]);
+      *dst++ = static_cast<word>(pal[*src++]);
    }
+   RendOut = const_cast<byte*>(src);
    CPC.scr_pos = reinterpret_cast<byte*>(dst);
 }
 
@@ -998,12 +1027,15 @@ void render16bpp_doubleY()
    byte bCount = *RendWid++;
    word *dst1 = reinterpret_cast<word*>(CPC.scr_pos);
    word *dst2 = reinterpret_cast<word*>(CPC.scr_pos + CPC.scr_bps);
+   // Global variable privatization
+   const byte *src = RendOut;
    const dword *pal = GateArray.palette;
    while (bCount--) {
-      word val = static_cast<word>(pal[*RendOut++]);
+      word val = static_cast<word>(pal[*src++]);
       *dst1++ = val;
       *dst2++ = val;
    }
+   RendOut = const_cast<byte*>(src);
    CPC.scr_pos = reinterpret_cast<byte*>(dst1);
 }
 
@@ -1013,13 +1045,16 @@ void render24bpp()
 {
    byte bCount = *RendWid++;
    byte *dst = CPC.scr_pos;
+   // Global variable privatization
+   const byte *src = RendOut;
    const dword *pal = GateArray.palette;
    while (bCount--) {
-      dword val = pal[*RendOut++];
+      dword val = pal[*src++];
       *reinterpret_cast<word *>(dst) = static_cast<word>(val);
       *(dst + 2) = static_cast<byte>(val >> 16);
       dst += 3;
    }
+   RendOut = const_cast<byte*>(src);
    CPC.scr_pos = dst;
 }
 
@@ -1030,9 +1065,11 @@ void render24bpp_doubleY()
    byte bCount = *RendWid++;
    byte *dst1 = CPC.scr_pos;
    byte *dst2 = CPC.scr_pos + CPC.scr_bps;
+   // Global variable privatization
+   const byte *src = RendOut;
    const dword *pal = GateArray.palette;
    while (bCount--) {
-      dword val = pal[*RendOut++];
+      dword val = pal[*src++];
       word wVal = static_cast<word>(val);
       byte bVal = static_cast<byte>(val >> 16);
 
@@ -1044,6 +1081,7 @@ void render24bpp_doubleY()
       dst1 += 3;
       dst2 += 3;
    }
+   RendOut = const_cast<byte*>(src);
    CPC.scr_pos = dst1;
 }
 
@@ -1053,10 +1091,13 @@ void render32bpp()
 {
    byte bCount = *RendWid++;
    dword *dst = reinterpret_cast<dword*>(CPC.scr_pos);
+   // Global variable privatization
+   const byte *src = RendOut;
    const dword *pal = GateArray.palette;
    while (bCount--) {
-      *dst++ = pal[*RendOut++];
+      *dst++ = pal[*src++];
    }
+   RendOut = const_cast<byte*>(src);
    CPC.scr_pos = reinterpret_cast<byte*>(dst);
 }
 
@@ -1067,12 +1108,15 @@ void render32bpp_doubleY()
    byte bCount = *RendWid++;
    dword *dst1 = reinterpret_cast<dword*>(CPC.scr_pos);
    dword *dst2 = reinterpret_cast<dword*>(CPC.scr_pos + CPC.scr_bps);
+   // Global variable privatization
+   const byte *src = RendOut;
    const dword *pal = GateArray.palette;
    while (bCount--) {
-      dword val = pal[*RendOut++];
+      dword val = pal[*src++];
       *dst1++ = val;
       *dst2++ = val;
    }
+   RendOut = const_cast<byte*>(src);
    CPC.scr_pos = reinterpret_cast<byte*>(dst1);
 }
 
