@@ -88,6 +88,7 @@ CLANG_CHECKS=modernize-*,performance-*,misc-*,readability-*,-misc-definitions-in
 
 SRCDIR:=src
 TSTDIR:=test
+BENCHDIR:=bench
 OBJDIR:=obj/$(ARCH)
 RELEASE_DIR = release
 ARCHIVE = cap32-$(ARCH)
@@ -108,7 +109,12 @@ TEST_HEADERS:=$(shell find $(TSTDIR) -name \*.h)
 TEST_DEPENDS:=$(foreach file,$(TEST_SOURCES:.cpp=.d),$(shell echo "$(OBJDIR)/$(file)"))
 TEST_OBJECTS:=$(TEST_DEPENDS:.d=.o)
 
-.PHONY: all check_deps clean deb_pkg debug debug_flag distrib doc tags unit_test install doxygen
+BENCH_SOURCES:=$(shell find $(BENCHDIR) -name \*.cpp)
+BENCH_HEADERS:=$(shell find $(BENCHDIR) -name \*.h)
+BENCH_DEPENDS:=$(foreach file,$(BENCH_SOURCES:.cpp=.d),$(shell echo "$(OBJDIR)/$(file)"))
+BENCH_OBJECTS:=$(BENCH_DEPENDS:.d=.o)
+
+.PHONY: all benchmark check_deps clean deb_pkg debug debug_flag distrib doc tags unit_test install doxygen
 
 WARNINGS = -Wall -Wextra -Wzero-as-null-pointer-constant -Wformat=2 -Wold-style-cast -Wmissing-include-dirs -Woverloaded-virtual -Wpointer-arith -Wredundant-decls
 COMMON_CFLAGS += $(CFLAGS) -std=c++17 $(IPATHS)
@@ -256,9 +262,22 @@ endif
 googletest:
 	@[ -d googletest ] || git clone https://github.com/google/googletest.git
 
+googlebenchmark:
+	@[ -d googlebenchmark ] || git clone https://github.com/google/benchmark.git googlebenchmark
+
 TEST_CFLAGS = $(COMMON_CFLAGS) -I$(GTEST_DIR)/include -I$(GTEST_DIR) -I$(GMOCK_DIR)/include -I$(GMOCK_DIR)
 GTEST_DIR = googletest/googletest/
 GMOCK_DIR = googletest/googlemock/
+
+BENCH_CFLAGS = $(COMMON_CFLAGS) -I$(GBENCH_DIR)/include
+GBENCH_DIR = googlebenchmark/
+GBENCH_LIB = $(GBENCH_DIR)/build/src/libbenchmark.a
+
+$(GBENCH_LIB): googlebenchmark
+	cd googlebenchmark && \
+  cmake -E make_directory "build" && \
+  cmake -DBENCHMARK_DOWNLOAD_DEPENDENCIES=on -DCMAKE_BUILD_TYPE=Release -S . -B "build" && \
+  cmake --build "build" --config Release
 
 $(GTEST_DIR)/src/gtest-all.cc: googletest
 $(GMOCK_DIR)/src/gmock-all.cc: googletest
@@ -270,6 +289,14 @@ $(TEST_DEPENDS): $(OBJDIR)/%.d: %.cpp
 
 $(TEST_OBJECTS): $(OBJDIR)/%.o: %.cpp googletest
 	$(CXX) -c $(BUILD_FLAGS) $(TEST_CFLAGS) -o $@ $<
+
+$(BENCH_DEPENDS): $(OBJDIR)/%.d: %.cpp
+	@echo Computing dependencies for $<
+	@mkdir -p `dirname $@`
+	@$(CXX) -MM $(BUILD_FLAGS) $(BENCH_CFLAGS) $< | { sed 's#^[^:]*\.o[ :]*#$(OBJDIR)/$*.o $(OBJDIR)/$*.d : #g' ; echo "%.h:;" ; echo "" ; } > $@
+
+$(BENCH_OBJECTS): $(OBJDIR)/%.o: %.cpp googlebenchmark
+	$(CXX) -c $(BUILD_FLAGS) $(BENCH_CFLAGS) -o $@ $<
 
 $(OBJDIR)/$(GTEST_DIR)/src/gtest-all.o: $(GTEST_DIR)/src/gtest-all.cc googletest
 	@mkdir -p `dirname $@`
@@ -298,6 +325,11 @@ unit_test: $(TEST_TARGET)
 e2e_test: $(TARGET)
 	cd test/integrated && ./run_tests.sh
 endif
+
+benchmark: $(OBJECTS) $(BENCH_OBJECTS) $(GBENCH_LIB)
+	$(CXX) $(LDFLAGS) -o benchmark $(BENCH_OBJECTS) $(OBJECTS) $(LIBS) $(GBENCH_LIB)
+	./benchmark
+
 
 deb_pkg: all
 	# Both changelog files need to be patched with the proper version !
@@ -336,6 +368,6 @@ doxygen:
 
 clean:
 	rm -rf obj/ release/ .pc/ doxygen/
-	rm -f test_runner test_runner.exe cap32 cap32.exe .debug tags
+	rm -f test_runner test_runner.exe cap32 cap32.exe .debug tags benchmark
 
--include $(DEPENDS) $(TEST_DEPENDS)
+-include $(DEPENDS) $(TEST_DEPENDS) $(BENCH_DEPENDS)
