@@ -845,12 +845,17 @@ dword shiftLittleEndianDwordTriplet(dword val1, dword val2, dword val3, unsigned
 
 void prerender_normal()
 {
-   byte bVidMem = getRAMByte(CRTC.next_address);
-   *RendPos = *(ModeMap + (bVidMem * 2));
-   *(RendPos + 1) = *(ModeMap + (bVidMem * 2) + 1);
-   bVidMem = getRAMByte(CRTC.next_address + 1);
-   *(RendPos + 2) = *(ModeMap + (bVidMem * 2));
-   *(RendPos + 3) = *(ModeMap + (bVidMem * 2) + 1);
+   // getRAMByte, but having the pointer allows to avoid doing the sum twice.
+   const byte *next_addr = pbRAM + CRTC.next_address;
+
+   byte bVidMem = *next_addr;
+   *RendPos = ModeMap[bVidMem * 2];
+   *(RendPos + 1) = ModeMap[bVidMem * 2 + 1];
+
+   bVidMem = *(next_addr + 1);
+   *(RendPos + 2) = ModeMap[bVidMem * 2];
+   *(RendPos + 3) = ModeMap[bVidMem * 2 + 1];
+
    RendPos += 4;
 }
 
@@ -929,7 +934,7 @@ void prerender_normal_half_plus()
 
 
 
-void set_prerender()
+static inline void set_prerender()
 {
    LastPreRend = flags1.combined;
    if (LastPreRend == 0x03ff0000) {
@@ -945,20 +950,16 @@ void set_prerender()
 
 
 
-unsigned int getPixel()
-{
-   return GateArray.palette[*RendOut++];
-}
-
-
 
 void render8bpp()
 {
    byte bCount = *RendWid++;
+   byte *dst = CPC.scr_pos;
+   const dword *pal = GateArray.palette;
    while (bCount--) {
-      byte val = getPixel();
-      *CPC.scr_pos++ = val;
+      *dst++ = static_cast<byte>(pal[*RendOut++]);
    }
+   CPC.scr_pos = dst;
 }
 
 
@@ -966,11 +967,15 @@ void render8bpp()
 void render8bpp_doubleY()
 {
    byte bCount = *RendWid++;
+   byte *dst1 = CPC.scr_pos;
+   byte *dst2 = CPC.scr_pos + CPC.scr_bps;
+   const dword *pal = GateArray.palette;
    while (bCount--) {
-      byte val = getPixel();
-      *(CPC.scr_pos + CPC.scr_bps) = val;
-      *CPC.scr_pos++ = val;
+      byte val = static_cast<byte>(pal[*RendOut++]);
+      *dst1++ = val;
+      *dst2++ = val;
    }
+   CPC.scr_pos = dst1;
 }
 
 
@@ -978,11 +983,12 @@ void render8bpp_doubleY()
 void render16bpp()
 {
    byte bCount = *RendWid++;
+   word *dst = reinterpret_cast<word*>(CPC.scr_pos);
+   const dword *pal = GateArray.palette;
    while (bCount--) {
-      word val = getPixel();
-      *reinterpret_cast<word*>(CPC.scr_pos) = val;
-      CPC.scr_pos += 2;
+      *dst++ = static_cast<word>(pal[*RendOut++]);
    }
+   CPC.scr_pos = reinterpret_cast<byte*>(dst);
 }
 
 
@@ -990,12 +996,15 @@ void render16bpp()
 void render16bpp_doubleY()
 {
    byte bCount = *RendWid++;
+   word *dst1 = reinterpret_cast<word*>(CPC.scr_pos);
+   word *dst2 = reinterpret_cast<word*>(CPC.scr_pos + CPC.scr_bps);
+   const dword *pal = GateArray.palette;
    while (bCount--) {
-      word val = getPixel();
-      *reinterpret_cast<word*>(CPC.scr_pos) = val;
-      *(reinterpret_cast<word*>(CPC.scr_pos + CPC.scr_bps)) = val;
-      CPC.scr_pos += 2;
+      word val = static_cast<word>(pal[*RendOut++]);
+      *dst1++ = val;
+      *dst2++ = val;
    }
+   CPC.scr_pos = reinterpret_cast<byte*>(dst1);
 }
 
 
@@ -1003,12 +1012,15 @@ void render16bpp_doubleY()
 void render24bpp()
 {
    byte bCount = *RendWid++;
+   byte *dst = CPC.scr_pos;
+   const dword *pal = GateArray.palette;
    while (bCount--) {
-      dword val = getPixel();
-      *reinterpret_cast<word *>(CPC.scr_pos) = static_cast<word>(val);
-      *(CPC.scr_pos + 2) = static_cast<byte>(val >> 16);
-      CPC.scr_pos += 3;
+      dword val = pal[*RendOut++];
+      *reinterpret_cast<word *>(dst) = static_cast<word>(val);
+      *(dst + 2) = static_cast<byte>(val >> 16);
+      dst += 3;
    }
+   CPC.scr_pos = dst;
 }
 
 
@@ -1016,16 +1028,23 @@ void render24bpp()
 void render24bpp_doubleY()
 {
    byte bCount = *RendWid++;
+   byte *dst1 = CPC.scr_pos;
+   byte *dst2 = CPC.scr_pos + CPC.scr_bps;
+   const dword *pal = GateArray.palette;
    while (bCount--) {
-      dword val = getPixel();
-      *reinterpret_cast<word *>(CPC.scr_pos + CPC.scr_bps) = static_cast<word>(val);
-      *reinterpret_cast<word *>(CPC.scr_pos) = static_cast<word>(val);
-      val >>= 16;
-      CPC.scr_pos += 2;
-      *(CPC.scr_pos + CPC.scr_bps) = static_cast<byte>(val);
-      *(CPC.scr_pos) = static_cast<byte>(val);
-      CPC.scr_pos++;
+      dword val = pal[*RendOut++];
+      word wVal = static_cast<word>(val);
+      byte bVal = static_cast<byte>(val >> 16);
+
+      *reinterpret_cast<word *>(dst1) = wVal;
+      *(dst1 + 2) = bVal;
+      *reinterpret_cast<word *>(dst2) = wVal;
+      *(dst2 + 2) = bVal;
+
+      dst1 += 3;
+      dst2 += 3;
    }
+   CPC.scr_pos = dst1;
 }
 
 
@@ -1033,11 +1052,12 @@ void render24bpp_doubleY()
 void render32bpp()
 {
    byte bCount = *RendWid++;
+   dword *dst = reinterpret_cast<dword*>(CPC.scr_pos);
+   const dword *pal = GateArray.palette;
    while (bCount--) {
-      dword val = getPixel();
-      *reinterpret_cast<dword*>(CPC.scr_pos) = val;
-      CPC.scr_pos += 4;
+      *dst++ = pal[*RendOut++];
    }
+   CPC.scr_pos = reinterpret_cast<byte*>(dst);
 }
 
 
@@ -1045,12 +1065,15 @@ void render32bpp()
 void render32bpp_doubleY()
 {
    byte bCount = *RendWid++;
+   dword *dst1 = reinterpret_cast<dword*>(CPC.scr_pos);
+   dword *dst2 = reinterpret_cast<dword*>(CPC.scr_pos + CPC.scr_bps);
+   const dword *pal = GateArray.palette;
    while (bCount--) {
-      dword val = getPixel();
-      *reinterpret_cast<dword*>(CPC.scr_pos) = val;
-      *(reinterpret_cast<dword*>(CPC.scr_pos + CPC.scr_bps)) = val;
-      CPC.scr_pos += 4;
+      dword val = pal[*RendOut++];
+      *dst1++ = val;
+      *dst2++ = val;
    }
+   CPC.scr_pos = reinterpret_cast<byte*>(dst1);
 }
 
 
