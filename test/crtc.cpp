@@ -3,6 +3,7 @@
 
 #include "crtc.h"
 #include "cap32.h"
+#include "asic.h"
 
 extern byte *RendWid, *RendOut;
 extern dword *RendPos, *ModeMap;
@@ -10,6 +11,7 @@ extern byte *pbRAM;
 extern t_GateArray GateArray;
 extern t_CPC CPC;
 extern t_CRTC CRTC;
+extern asic_t asic;
 
 class CrtcTest : public testing::Test {
    public:
@@ -30,6 +32,8 @@ class CrtcTest : public testing::Test {
         RendPos = rend_pos_buff;
         ModeMap = mode_map_buff;
         CRTC.next_address = 0;
+        asic.hscroll = 0;
+        asic.vscroll = 0;
         memset(counts, 0, sizeof(counts));
         memset(indices, 0, sizeof(indices));
         memset(screen, 0, sizeof(screen));
@@ -68,6 +72,85 @@ TEST_F(CrtcTest, PrerenderNormal) {
     EXPECT_EQ(rend_pos_buff[3], 0x44444444);
     EXPECT_EQ(RendPos, rend_pos_buff + 4);
 }
+
+TEST_F(CrtcTest, PrerenderBorder) {
+    prerender_border();
+    EXPECT_EQ(rend_pos_buff[0], 0x10101010);
+    EXPECT_EQ(rend_pos_buff[1], 0x10101010);
+    EXPECT_EQ(rend_pos_buff[2], 0x10101010);
+    EXPECT_EQ(rend_pos_buff[3], 0x10101010);
+    EXPECT_EQ(RendPos, rend_pos_buff + 4);
+}
+
+TEST_F(CrtcTest, PrerenderBorderHalf) {
+    prerender_border_half();
+    EXPECT_EQ(rend_pos_buff[0], 0x10101010);
+    EXPECT_EQ(rend_pos_buff[1], 0x10101010);
+    EXPECT_EQ(RendPos, rend_pos_buff + 2);
+}
+
+TEST_F(CrtcTest, PrerenderSync) {
+    prerender_sync();
+    EXPECT_EQ(rend_pos_buff[0], 0x11111111);
+    EXPECT_EQ(rend_pos_buff[1], 0x11111111);
+    EXPECT_EQ(rend_pos_buff[2], 0x11111111);
+    EXPECT_EQ(rend_pos_buff[3], 0x11111111);
+    EXPECT_EQ(RendPos, rend_pos_buff + 4);
+}
+
+TEST_F(CrtcTest, PrerenderSyncHalf) {
+    prerender_sync_half();
+    EXPECT_EQ(rend_pos_buff[0], 0x11111111);
+    EXPECT_EQ(rend_pos_buff[1], 0x11111111);
+    EXPECT_EQ(RendPos, rend_pos_buff + 2);
+}
+
+TEST_F(CrtcTest, PrerenderNormalHalf) {
+    CRTC.next_address = 10;
+    ram[10] = 0xAA;
+    ram[11] = 0xBB;
+    mode_map_buff[0xAA] = 0x11111111;
+    mode_map_buff[0xBB] = 0x22222222;
+
+    prerender_normal_half();
+
+    EXPECT_EQ(rend_pos_buff[0], 0x11111111);
+    EXPECT_EQ(rend_pos_buff[1], 0x22222222);
+    EXPECT_EQ(RendPos, rend_pos_buff + 2);
+}
+
+TEST_F(CrtcTest, PrerenderNormalPlus) {
+    asic.hscroll = 0;
+    CRTC.next_address = 10;
+    ram[10] = 0xAA;
+    ram[11] = 0xBB;
+    mode_map_buff[0xAA * 2] = 0x11111111;
+    mode_map_buff[0xAA * 2 + 1] = 0x22222222;
+    mode_map_buff[0xBB * 2] = 0x33333333;
+    mode_map_buff[0xBB * 2 + 1] = 0x44444444;
+
+    prerender_normal_plus();
+
+    EXPECT_EQ(rend_pos_buff[0], 0x11111111);
+    EXPECT_EQ(rend_pos_buff[1], 0x22222222);
+    EXPECT_EQ(rend_pos_buff[2], 0x33333333);
+    EXPECT_EQ(rend_pos_buff[3], 0x44444444);
+}
+
+TEST_F(CrtcTest, PrerenderNormalHalfPlus) {
+    asic.hscroll = 0;
+    CRTC.next_address = 10;
+    ram[10] = 0xAA;
+    ram[11] = 0xBB;
+    mode_map_buff[0xAA] = 0x11111111;
+    mode_map_buff[0xBB] = 0x22222222;
+
+    prerender_normal_half_plus();
+
+    EXPECT_EQ(rend_pos_buff[0], 0x11111111);
+    EXPECT_EQ(rend_pos_buff[1], 0x22222222);
+}
+
 
 TEST_F(CrtcTest, Render8bpp) {
     counts[0] = 2;

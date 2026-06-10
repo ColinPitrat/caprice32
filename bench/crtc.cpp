@@ -3,6 +3,11 @@
 
 #include "crtc.h"
 #include "cap32.h"
+#include "asic.h"
+
+// Mock globals that crtc.o depends on, if they aren't linked.
+// Note: If we link the full $(OBJECTS), these might cause duplicate symbol errors.
+// But we need them to be initialized for the benchmarks.
 
 // Global variables defined in crtc.cpp/cap32.cpp
 extern byte *RendWid, *RendOut;
@@ -11,8 +16,9 @@ extern byte *pbRAM;
 extern t_GateArray GateArray;
 extern t_CPC CPC;
 extern t_CRTC CRTC;
+extern asic_t asic;
 
-// Mock data
+// Mock data buffers
 static byte counts[256];
 static byte indices[1024];
 static byte screen[640 * 480 * 4];
@@ -29,6 +35,7 @@ static void setup_benchmark() {
     RendPos = rend_pos_buff;
     ModeMap = mode_map_buff;
     CRTC.next_address = 0;
+    asic.hscroll = 0;
 
     memset(counts, 40, sizeof(counts));
     memset(indices, 1, sizeof(indices));
@@ -58,6 +65,68 @@ static void BM_PrerenderNormal(benchmark::State& state) {
     }
 }
 BENCHMARK(BM_PrerenderNormal);
+
+static void BM_PrerenderBorderHalf(benchmark::State& state) {
+    setup_benchmark();
+    for (auto _ : state) {
+        RendPos = rend_pos_buff;
+        prerender_border_half();
+        benchmark::DoNotOptimize(RendPos);
+    }
+}
+BENCHMARK(BM_PrerenderBorderHalf);
+
+static void BM_PrerenderSync(benchmark::State& state) {
+    setup_benchmark();
+    for (auto _ : state) {
+        RendPos = rend_pos_buff;
+        prerender_sync();
+        benchmark::DoNotOptimize(RendPos);
+    }
+}
+BENCHMARK(BM_PrerenderSync);
+
+static void BM_PrerenderSyncHalf(benchmark::State& state) {
+    setup_benchmark();
+    for (auto _ : state) {
+        RendPos = rend_pos_buff;
+        prerender_sync_half();
+        benchmark::DoNotOptimize(RendPos);
+    }
+}
+BENCHMARK(BM_PrerenderSyncHalf);
+
+static void BM_PrerenderNormalPlus(benchmark::State& state) {
+    setup_benchmark();
+    asic.hscroll = 4;
+    for (auto _ : state) {
+        RendPos = rend_pos_buff;
+        prerender_normal_plus();
+        benchmark::DoNotOptimize(RendPos);
+    }
+}
+BENCHMARK(BM_PrerenderNormalPlus);
+
+static void BM_PrerenderNormalHalf(benchmark::State& state) {
+    setup_benchmark();
+    for (auto _ : state) {
+        RendPos = rend_pos_buff;
+        prerender_normal_half();
+        benchmark::DoNotOptimize(RendPos);
+    }
+}
+BENCHMARK(BM_PrerenderNormalHalf);
+
+static void BM_PrerenderNormalHalfPlus(benchmark::State& state) {
+    setup_benchmark();
+    asic.hscroll = 4;
+    for (auto _ : state) {
+        RendPos = rend_pos_buff;
+        prerender_normal_half_plus();
+        benchmark::DoNotOptimize(RendPos);
+    }
+}
+BENCHMARK(BM_PrerenderNormalHalfPlus);
 
 static void BM_Render8bpp(benchmark::State& state) {
     setup_benchmark();
