@@ -102,6 +102,12 @@ std::string lastSavedSnapshot;
 
 dword dwBreakPoint, dwTrace, dwMF2ExitAddr;
 dword dwMF2Flags = 0;
+
+// Benchmark mode (--benchmark): monotonic Z80 T-state counter and markers.
+// Driven from the Amstrad code via OUT to ports &FED0 (start) / &FED1 (stop) / &FED2 (lap).
+uint64_t g_bench_tstates = 0; // monotonic T-state counter (wait states included)
+uint64_t g_bench_start   = 0; // baseline captured on START (0 = since boot)
+bool     g_bench_mode    = false; // set by --benchmark
 std::unique_ptr<byte[]> pbSndBuffer;
 byte *pbGPBuffer = nullptr;
 byte *pbSndBufferEnd = nullptr;
@@ -489,6 +495,29 @@ byte z80_IN_handler (reg_pair port)
 void z80_OUT_handler (reg_pair port, byte val)
 {
    LOG_DEBUG("OUT on port " << std::hex << static_cast<int>(port.w.l) << ", val=" << static_cast<int>(val) << std::dec);
+   // Benchmark markers: ports &FED0/&FED1/&FED2 are inert on real CPC hardware (the MF2
+   // only responds to &FEE8/&FEEA, and only when present). Intercepted here, before any
+   // peripheral decoding, so they never reach the hardware. The command is the port, not
+   // the written value. The measured delta includes a small, constant marker overhead.
+   if (g_bench_mode && port.b.h == 0xfe) {
+      switch (port.b.l) {
+         case 0xd0: // START: capture baseline
+            g_bench_start = g_bench_tstates;
+            return;
+         case 0xd2: // LAP: partial result on stderr, keep running
+            fprintf(stderr, "[bench] lap %llu T-states\n",
+                    static_cast<unsigned long long>(g_bench_tstates - g_bench_start));
+            return;
+         case 0xd1: { // STOP: print T-states delta and quit
+            uint64_t delta = g_bench_tstates - g_bench_start;
+            printf("%llu\n", static_cast<unsigned long long>(delta)); // stdout: raw integer
+            fflush(stdout);
+            fprintf(stderr, "[bench] %llu T-states = %.1f us (%.2f frames @50Hz)\n",
+                    static_cast<unsigned long long>(delta), delta / 4.0, delta / 80000.0);
+            cleanExit(0, false); // clean teardown, no "unsaved" prompt
+         }
+      }
+   }
    // Amstrad Magnum Phazer
    if ((port.b.h == 0xfb) && (port.b.l == 0xfe)) {
      // When the phazer is not pressed, the CRTC is constantly refreshing R16 & R17:
@@ -1773,7 +1802,7 @@ std::string getConfigurationFilename(bool forWrite)
     if (!p.first) continue;
     std::string s = std::string(p.first) + p.second;
     if (access(s.c_str(), mode) == 0) {
-      std::cout << "Using configuration file" << (forWrite ? " to save" : "") << ": " << s << std::endl;
+      (args.benchmark ? std::cerr : std::cout) << "Using configuration file" << (forWrite ? " to save" : "") << ": " << s << std::endl;
       // Dirty hack for MacOS Bundle to work: change dir to the bin dir
       // cap32.cfg is edited to have relative paths from the bin dir
       if (p.second == "/../Resources/cap32.cfg") {
@@ -1783,7 +1812,7 @@ std::string getConfigurationFilename(bool forWrite)
     }
   }
 
-  std::cout << "No valid configuration file found, using empty config." << std::endl;
+  (args.benchmark ? std::cerr : std::cout) << "No valid configuration file found, using empty config." << std::endl;
   return "";
 }
 
@@ -2735,6 +2764,15 @@ int cap32_main (int argc, char **argv)
    }
    parseArguments(argc, argv, slot_list, args);
 
+   if (args.benchmark) {
+      // Force a reliable headless setup for automated benchmarking (overwrite=1, so it
+      // wins over the environment in CI). SDL_setenv is cross-platform; setenv() is not
+      // available on Windows, which caprice32 supports.
+      SDL_setenv("SDL_VIDEODRIVER",   "dummy",    1);
+      SDL_setenv("SDL_AUDIODRIVER",   "dummy",    1);
+      SDL_setenv("SDL_RENDER_DRIVER", "software", 1); // "Direct" plugin uses SDL_CreateWindowAndRenderer
+   }
+
    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_TIMER | SDL_INIT_NOPARACHUTE) < 0) { // initialize SDL
       fprintf(stderr, "SDL_Init() failed: %s\n", SDL_GetError());
       exit(-1);
@@ -2750,6 +2788,18 @@ int cap32_main (int argc, char **argv)
    #endif
 
    loadConfiguration(CPC, getConfigurationFilename()); // retrieve the emulator configuration
+
+   if (args.benchmark) {
+      // Override config for benchmarking: run headless at full speed, no audio, no pausing.
+      g_bench_mode    = true;
+      g_bench_tstates = 0;
+      g_bench_start   = 0;
+      CPC.limit_speed = 0;                  // run as fast as possible (no real-time throttle)
+      CPC.snd_enabled = 0;                  // skip PSG synthesis in z80_wait_states
+      CPC.auto_pause  = 0;                  // never pause when the window loses focus
+      CPC.scr_style   = DEFAULT_VIDEO_PLUGIN; // software "Direct" plugin, avoids needing a GL context
+   }
+
    if (CPC.printer) {
       if (!printer_start()) { // start capturing printer output, if enabled
          CPC.printer = 0;
