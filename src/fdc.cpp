@@ -55,7 +55,7 @@ dword dwBytesTransferred = 0;
 #define RES_N     6
 
 #define OVERRUN_TIMEOUT (128*4)
-#define INITIAL_TIMEOUT (OVERRUN_TIMEOUT*4)
+#define INITIAL_TIMEOUT (OVERRUN_TIMEOUT*4*20)
 
 void fdc_specify();
 void fdc_drvstat();
