@@ -55,7 +55,10 @@ dword dwBytesTransferred = 0;
 #define RES_N     6
 
 #define OVERRUN_TIMEOUT (128*4)
-#define INITIAL_TIMEOUT (OVERRUN_TIMEOUT*4*20)
+// Finding the right value for INITIAL_TIMEOUT is tricky. Orion Prime breaks if using only 4*4*128.
+// It seems to work fine with 16*4*128. There's no obvious issue with taking a large margin here,
+// so taking 80*4*128 for now.
+#define INITIAL_TIMEOUT (OVERRUN_TIMEOUT*80)
 
 void fdc_specify();
 void fdc_drvstat();
