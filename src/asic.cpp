@@ -251,30 +251,28 @@ bool asic_register_page_write(word addr, byte val) {
          case 0:
             // X position
             asic.sprites_x[id] = (asic.sprites_x[id] & 0xFF00) | val;
-            //LOG_DEBUG("Received sprite X for sprite " << id << " x=" << asic.sprites_x[id]);
+            //LOG_DEBUG("Received sprite X (LSB) for sprite " << id << " x=" << asic.sprites_x[id]);
             // Mirrored in RAM image 4 bytes after
             pbRegisterPage[(addr & 0x3FFF) + 4] = val;
             break;
          case 1:
             // X position
-            val = val & 0x3;
             asic.sprites_x[id] = (asic.sprites_x[id] & 0x00FF) | (val << 8);
-            //LOG_DEBUG("Received sprite X for sprite " << id << " x=" << asic.sprites_x[id]);
+            //LOG_DEBUG("Received sprite X (MSB) for sprite " << id << " x=" << asic.sprites_x[id]);
             // Mirrored in RAM image 4 bytes after
             pbRegisterPage[(addr & 0x3FFF) + 4] = val;
             break;
          case 2:
             // Y position
             asic.sprites_y[id] = ((asic.sprites_y[id] & 0xFF00) | val);
-            //LOG_DEBUG("Received sprite Y for sprite " << id << " y=" << asic.sprites_y[id]);
+            //LOG_DEBUG("Received sprite Y (LSB) for sprite " << id << " y=" << asic.sprites_y[id]);
             // Mirrored in RAM image 4 bytes after
             pbRegisterPage[(addr & 0x3FFF) + 4] = val;
             break;
          case 3:
             // Y position
-            val = val & 0x1;
             asic.sprites_y[id] = ((asic.sprites_y[id] & 0x00FF) | (val << 8));
-            //LOG_DEBUG("Received sprite Y for sprite " << id << " y=" << asic.sprites_y[id]);
+            //LOG_DEBUG("Received sprite Y (MSB) for sprite " << id << " y=" << asic.sprites_y[id]);
             // Affect RAM image
             // Mirrored in RAM image 4 bytes after
             pbRegisterPage[(addr & 0x3FFF) + 4] = val;
