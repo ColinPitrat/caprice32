@@ -970,12 +970,13 @@ inline byte SRL(byte val) {
          if (iWSAdjust) { \
             iCycleCount -= 4; \
          } \
-        if (z80.step_out) { \
-          z80.step_out_addresses.push_back(_PC+2); \
-        } \
+         if (z80.step_out) { \
+           z80.step_out_addresses.push_back(_PC+2); \
+         } \
          write_mem(--_SP, z80.PC.b.h); /* store high byte of current PC */ \
          write_mem(--_SP, z80.PC.b.l); /* store low byte of current PC */ \
-         addr.b.l = 0xff; /* assemble pointer */ \
+         /* assemble pointer */ \
+         addr.b.l = asic_get_interrupt_vector(); \
          addr.b.h = _I; \
          z80.PC.b.l = read_mem(addr.w.l); /* retrieve low byte of vector */ \
          z80.PC.b.h = read_mem(addr.w.l+1); /* retrieve high byte of vector */ \

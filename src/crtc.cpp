@@ -33,6 +33,7 @@ extern t_CRTC CRTC;
 extern t_GateArray GateArray;
 extern t_VDU VDU;
 extern t_z80regs z80;
+extern byte *membank_write[4];
 
 extern dword dwXScale;
 extern byte *pbRAM;
@@ -665,13 +666,20 @@ inline void match_hsw()
 {
    if (CRTC.hsw_count == CRTC.hsw) { // matches horizontal sync width?
       GateArray.sl_count++; // update GA scan line counter
+      //LOG_DEBUG("Raster interrupt logic: " << CRTC.hsw_count << "==" << CRTC.hsw << " - GA.sl_count=" << static_cast<int>(GateArray.sl_count) << ", CRTC.sl_count=" << CRTC.sl_count << ", CRTC.interrupt_sl=" << static_cast<int>(CRTC.interrupt_sl));
       if (GateArray.sl_count == 52) { // trigger interrupt?
          if (CRTC.interrupt_sl == 0) {
             z80.int_pending = 1; // queue Z80 interrupt
          }
          GateArray.sl_count = 0; // clear counter
-      } else if (CRTC.sl_count == CRTC.interrupt_sl && CRTC.interrupt_sl != 0) {
+      }
+      if (CRTC.sl_count == CRTC.interrupt_sl && CRTC.interrupt_sl != 0) {
+         LOG_INFO("Firing PRI interrupt at GA.sl_count=" << static_cast<int>(GateArray.sl_count) << ", CRTC.sl_count=" << CRTC.sl_count);
          z80.int_pending = 1;
+         asic.raster_int_pending = true;
+         // Set the bit for the raster interrupt in DCSR.
+         word dcsr_addr = 0x6C0F;
+         *(membank_write[dcsr_addr >> 14] + (dcsr_addr & 0x3fff)) |= 0x80;
       }
       if (GateArray.hs_count) { // delaying on VSYNC?
          GateArray.hs_count--;

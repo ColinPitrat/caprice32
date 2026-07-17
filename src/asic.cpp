@@ -3,9 +3,11 @@
 #include "cap32.h"
 #include "SDL.h"
 #include "crtc.h"
+#include "z80.h"
 
 byte *pbRegisterPage;
 extern SDL_Color colours[32];
+extern t_z80regs z80;
 extern t_GateArray GateArray;
 extern t_CRTC CRTC;
 extern t_CPC CPC;
@@ -42,7 +44,6 @@ void asic_reset() {
     }
   }
 
-  asic.raster_interrupt = false;
   asic.interrupt_vector = 1;
 
   for(auto &channel : asic.dma.ch) {
@@ -50,7 +51,7 @@ void asic_reset() {
     channel.loop_address = 0;
     channel.prescaler = 0;
     channel.enabled = false;
-    channel.interrupt = false;
+    channel.int_pending = false;
     channel.pause_ticks = 0;
     channel.tick_cycles = 0;
     channel.loops = 0;
@@ -112,12 +113,12 @@ void asic_dma_cycle() {
   //  - REPEAT NNN keep address of loop start (next instruction) and a counter of loops
   //  - NOP does nothing
   //  - LOOP jump to address of loop stat if counter of loops is >0 and decrement it (yes, code is actually executed NNN+1 times)
-  //  - INT generates an interruption for chX by setting chX.interrupt to true (code for CPU to detect it must also be done !)
+  //  - INT generates an interruption for chX by setting chX.int_pending to true (code for CPU to detect it must also be done !)
   //  - STOP set chX.enabled to false ? (still increment address for when processing will restart)
   //  The last 4 can be OR-ed to be combined
 
-  // The two first bits of the address give the page to read from
-  byte dcsr = 0;
+  word dcsr_addr = 0x6C0F;
+  byte dcsr = *(membank_write[dcsr_addr >> 14] + (dcsr_addr & 0x3fff));
   bool dcsr_changed = false;
   for(int c = 0; c < NB_DMA_CHANNELS; c++) {
     dma_channel &channel = asic.dma.ch[c];
@@ -163,8 +164,9 @@ void asic_dma_cycle() {
           }
         }
         if(instruction & 0x0010) { // INT
-          channel.interrupt = true;
-          LOG_DEBUG("DMA [" << c << "] interrupt");
+          LOG_DEBUG("DMA [" << c << "] interrupt for channel " << c);
+          channel.int_pending = true;
+          z80.int_pending = 1;
         }
         if(instruction & 0x0020) { // STOP
           channel.enabled = false;
@@ -179,15 +181,13 @@ void asic_dma_cycle() {
       *(membank_write[addr >> 14] + (addr & 0x3fff)) = static_cast<byte>(channel.source_address & 0xFF);
       addr++;
       *(membank_write[addr >> 14] + (addr & 0x3fff)) = static_cast<byte>((channel.source_address & 0xFF00) >> 8);
-      /* Useless ?
       addr++;
       *(membank_write[addr >> 14] + (addr & 0x3fff)) = channel.prescaler;
-      */
       if (channel.enabled) {
         dcsr |= (0x1 << c);
         dcsr_changed = true;
       }
-      if (channel.interrupt) {
+      if (channel.int_pending) {
         dcsr |= (0x40 >> c);
         dcsr_changed = true;
       }
@@ -197,9 +197,42 @@ void asic_dma_cycle() {
   // Run RAM test of testplus.cpr when touching this (this is not a guarantee that this is correct but at least it's a guarantee that it's less wrong ! cf issue #40)
   if (dcsr_changed)
   {
-    word addr = 0x6C0F;
-    *(membank_write[addr >> 14] + (addr & 0x3fff)) = dcsr;
+    *(membank_write[dcsr_addr >> 14] + (dcsr_addr & 0x3fff)) = dcsr;
   }
+}
+
+byte asic_get_interrupt_vector() {
+  if (asic.locked) {
+    return 0xff;
+  }
+
+  bool more_pending = false;
+  byte return_value = 0;
+  // Priority of interrupts are: PRI, DMA2, DMA1, DMA0.
+  // Their source IDs are respectively 6, 0, 2, and 4.
+  if (asic.raster_int_pending) {
+      return_value = asic.interrupt_vector | 6;
+  }
+  int source_id = 0;
+  for (int c = NB_DMA_CHANNELS; c >= 0; c--) {
+    if (asic.dma.ch[c].int_pending) {
+      asic.dma.ch[c].int_pending = false;
+      if (return_value) {
+        more_pending = true;
+      } else {
+        return_value = asic.interrupt_vector | source_id;
+      }
+    }
+    source_id += 2;
+  }
+  if (!return_value) {
+    LOG_WARNING("asic_get_interrupt_vector called but no pending interrupt!");
+    return_value = asic.interrupt_vector | 6;
+  }
+  if (more_pending) {
+    z80.int_pending = true;
+  }
+  return return_value;
 }
 
 void asic_set_palette() {
@@ -315,6 +348,7 @@ bool asic_register_page_write(word addr, byte val) {
       } else if (addr == 0x6801) {
          LOG_DEBUG("Received scan line for split: " << static_cast<int>(val));
          CRTC.split_sl = val;
+         CRTC.sl_count = 0;
       } else if (addr == 0x6802) {
          CRTC.split_addr &= 0x00FF;
          CRTC.split_addr |= (val << 8);
@@ -330,12 +364,11 @@ bool asic_register_page_write(word addr, byte val) {
          LOG_DEBUG("Received soft scroll control: " << static_cast<int>(val) << ": dx=" << asic.hscroll << ", dy=" << asic.vscroll << ", border=" << asic.extend_border);
          update_skew();
       } else if (addr == 0x6805) {
-         LOG_DEBUG("[UNSUPPORTED] Received interrupt vector: " << static_cast<int>(val));
+         LOG_DEBUG("Received interrupt vector: " << static_cast<int>(val));
          asic.interrupt_vector = val & 0xF8;
-         // TODO: Write this part !!! (Interrupt service part from http://www.cpcwiki.eu/index.php/Arnold_V_Specs_Revised)
       }
    } else if (addr >= 0x6808 && addr < 0x6810) {
-     LOG_DEBUG("[UNSUPPORTED] Received analog input stuff");
+     LOG_WARNING("[UNSUPPORTED] Received analog input stuff");
    } else if (addr >= 0x6C00 && addr < 0x6C0B) {
      int c = ((addr & 0xc) >> 2);
      LOG_DEBUG("Received DMA source address: " << std::hex << addr << " (channel " << c << ") " << static_cast<int>(val) << std::dec);
@@ -360,17 +393,32 @@ bool asic_register_page_write(word addr, byte val) {
      }
    } else if (addr == 0x6C0F) {
       LOG_DEBUG("Received DMA control register: " << std::hex << static_cast<int>(val) << std::dec);
+      // TODO: Factorized DCSR maintenance logic in a dedicated function.
+      word dcsr_addr = 0x6C0F;
+      byte dcsr = *(membank_write[dcsr_addr >> 14] + (dcsr_addr & 0x3fff));
       for (int c = 0; c < NB_DMA_CHANNELS; c++) {
         asic.dma.ch[c].enabled = (val & (0x1 << c));
+        if (asic.dma.ch[c].enabled) {
+          dcsr |= (0x1 << c);
+        } else {
+          dcsr &= ~(0x1 << c);
+        }
+        if (val & (0x40 >> c)) {
+          asic.dma.ch[c].int_pending = false;
+          dcsr &= ~(0x40 >> c);
+          LOG_INFO("DMA [" << c << "] clearing interrupt for channel " << c);
+        }
         LOG_DEBUG("DMA channel " << c << (asic.dma.ch[c].enabled ? " enabled" : " disabled"))
       }
+      *(membank_write[dcsr_addr >> 14] + (dcsr_addr & 0x3fff)) = dcsr;
+      return false;
    } else {
       LOG_DEBUG("Received unused write at " << std::hex << addr << " - val: " << static_cast<int>(val) << std::dec);
    }
    return true;
 }
 
-void putpixel(SDL_Surface *surface, int x, int y, Uint32 pixel)
+static inline void putpixel(SDL_Surface *surface, int x, int y, Uint32 pixel)
 {
    int bpp = surface->format->BytesPerPixel;
    /* Here p is the address to the pixel we want to set */

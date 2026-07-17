@@ -20,7 +20,7 @@ struct dma_channel {
   unsigned int loop_address;
   byte prescaler;
   bool enabled;
-  bool interrupt;
+  bool int_pending;
   int pause_ticks;
   byte tick_cycles;
   int loops;
@@ -43,7 +43,7 @@ struct asic_t {
   short int sprites_mag_x[16];
   short int sprites_mag_y[16];
 
-  bool raster_interrupt;
+  bool raster_int_pending;
   byte interrupt_vector;
 
   dma_t dma;
@@ -52,10 +52,11 @@ struct asic_t {
 extern asic_t asic;
 extern byte *pbRegisterPage;
 
-void asic_set_palette();
 void asic_reset();
 void asic_poke_lock_sequence(byte val);
 void asic_dma_cycle();
+byte asic_get_interrupt_vector();
+void asic_set_palette();
 bool asic_register_page_write(word addr, byte val);
 void asic_draw_sprites();
 

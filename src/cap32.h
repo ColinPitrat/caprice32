@@ -332,7 +332,7 @@ typedef struct {
    void (*CharInstSL)();
    unsigned char reg_select;
    unsigned char registers[18];
-   // 6128+ split screen support
+   // 6128+ split screen and PRI support
    unsigned int split_addr;
    unsigned char split_sl;
    unsigned int sl_count;

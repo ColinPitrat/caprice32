@@ -118,6 +118,10 @@ TEST_F(AsicTest, UnlockWithRepetitionOfFirstTwoBytesOfSequence)
 
 TEST_F(AsicTest, SetDMAControlAndStatusRegister)
 {
+  // DCSR is at 0x6C0F, we need memory allocated there.
+  std::vector<byte> membank1(0x4000, 0);
+  membank_write[1] = &membank1[0];
+
   asic_register_page_write(0x6C0F, 1);
 
   EXPECT_TRUE(asic.dma.ch[0].enabled);
@@ -152,7 +156,7 @@ TEST_F(AsicTest, AsicReset)
   asic.dma.ch[0].loop_address = 0x1234;
   asic.dma.ch[0].prescaler = 42;
   asic.dma.ch[0].enabled = true;
-  asic.dma.ch[0].interrupt = true;
+  asic.dma.ch[0].int_pending = true;
   asic.dma.ch[0].pause_ticks = 42;
   asic.dma.ch[0].tick_cycles = 42;
   asic.dma.ch[0].loops = 42;
@@ -166,7 +170,7 @@ TEST_F(AsicTest, AsicReset)
   ASSERT_EQ(0, asic.dma.ch[0].loop_address);
   ASSERT_EQ(0, asic.dma.ch[0].prescaler);
   ASSERT_FALSE(asic.dma.ch[0].enabled);
-  ASSERT_FALSE(asic.dma.ch[0].interrupt);
+  ASSERT_FALSE(asic.dma.ch[0].int_pending);
   ASSERT_EQ(0, asic.dma.ch[0].pause_ticks);
   ASSERT_EQ(0, asic.dma.ch[0].tick_cycles);
   ASSERT_EQ(0, asic.dma.ch[0].loops);
