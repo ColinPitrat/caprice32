@@ -175,6 +175,11 @@ CPC_ES_NTILDE	SDLK_SEMICOLON	MOD_PC_SHIFT
 CPC_ES_nTILDE	SDLK_SEMICOLON
 # No peseta symbol on modern spanish keyboard. Using euro glyph
 #CPC_ES_PESETA	SDLK_e	MOD_PC_MODE
+# Extra keypad bindings, on top of the main-keyboard ones above.
+CPC_SLASH	SDLK_KP_DIVIDE
+CPC_ASTERISK	SDLK_KP_MULTIPLY
+CPC_MINUS	SDLK_KP_MINUS
+CPC_PLUS	SDLK_KP_PLUS
 #
 # Emulator keymap
 #

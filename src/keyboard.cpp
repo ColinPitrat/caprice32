@@ -752,7 +752,7 @@ const std::map<const char, const CPC_KEYS> InputMapper::CPCkeysFromChars = {
     //{ '~', {0, KMOD_NONE} } // should be pound but it's not part of base ascii (it's in extended ASCII)
 };
 
-std::map<CapriceKey, PCKey> InputMapper::SDLkeysymFromCPCkeys_us = {
+std::multimap<CapriceKey, PCKey> InputMapper::SDLkeysymFromCPCkeys_us = {
   { CPC_0,           SDLK_0 },
   { CPC_1,           SDLK_1 },
   { CPC_2,           SDLK_2 },
@@ -961,7 +961,12 @@ std::map<CapriceKey, PCKey> InputMapper::SDLkeysymFromCPCkeys_us = {
   { CAP32_DEBUG,     SDLK_F12 },
   { CAP32_TAPEPLAY,  SDLK_F4 },
   { CAP32_DELAY,     SDLK_PAUSE },
-  { CAP32_WAITBREAK, SDLK_PAUSE | MOD_PC_SHIFT }
+  { CAP32_WAITBREAK, SDLK_PAUSE | MOD_PC_SHIFT },
+  // Extra keypad bindings, on top of the main-keyboard ones above.
+  { CPC_SLASH,       SDLK_KP_DIVIDE },
+  { CPC_ASTERISK,    SDLK_KP_MULTIPLY },
+  { CPC_MINUS,       SDLK_KP_MINUS },
+  { CPC_PLUS,        SDLK_KP_PLUS },
 };
 
 const std::map<const std::string, const CapriceKey> InputMapper::CPCkeysFromStrings = {
@@ -1407,7 +1412,7 @@ LineParsingResult InputMapper::process_cfg_line(char *line)
       break;
   }
   result.contains_mapping = true;
-  SDLkeysymFromCPCkeys[result.cpc_key] = result.sdl_key;
+  SDLkeysymFromCPCkeys.insert({result.cpc_key, result.sdl_key});
   return result;
 }
 
@@ -1423,7 +1428,6 @@ bool InputMapper::load_layout(const std::string& filename)
   }
   else {
     std::istream is(&fb);
-    std::set<CapriceKey> mapped_cpc_keys;
     std::set<PCKey> mapped_sdl_keys;
     while (is.good()) {
       is.getline(line, MAX_LINE_LENGTH);
@@ -1435,13 +1439,10 @@ bool InputMapper::load_layout(const std::string& filename)
       auto parsed_line = process_cfg_line(line);
       valid &= parsed_line.valid;
       if (!parsed_line.contains_mapping) continue;
-      // Verify that each CPC key is mapped only once
-      if (mapped_cpc_keys.count(parsed_line.cpc_key) != 0) {
-        LOG_ERROR("Mapping '" << filename << "' contains a CPC key multiple times: " << parsed_line.cpc_key_name);
-        valid = false;
-      }
-      mapped_cpc_keys.insert(parsed_line.cpc_key);
-      // And that no SDL key combination is mapped to 2 different CPC keys
+      // A CPC key can legitimately be mapped several times (e.g. the main
+      // keyboard's '/' and the keypad's '/' both bound to CPC_SLASH), so
+      // that's not checked here. But no SDL key combination should be
+      // mapped to 2 different CPC keys.
       if (mapped_sdl_keys.count(parsed_line.sdl_key) != 0) {
         LOG_ERROR("Mapping '" << filename << "' contains a SDL key multiple times: " << parsed_line.sdl_key_name);
         valid = false;
@@ -1468,8 +1469,15 @@ void InputMapper::init()
   }
 
   for (const auto &mapping : CPCkeysFromChars) {
-    if (SDLkeysymFromCPCkeys.count(mapping.second) != 0) {
-      PCKey sdl_moddedkey = SDLkeysymFromCPCkeys[mapping.second];
+    // A CPC key can now have several host keys (e.g. main keyboard '/' and
+    // keypad '/' both bound to CPC_SLASH). find() picks whichever was
+    // inserted first for that CPC key, which is always the layout's
+    // primary/main-keyboard binding (extra bindings, like the keypad ones,
+    // are appended after it) - the one we want here, since pasted text
+    // should simulate the real key, not a keypad shortcut.
+    auto sdl_moddedkey_it = SDLkeysymFromCPCkeys.find(mapping.second);
+    if (sdl_moddedkey_it != SDLkeysymFromCPCkeys.end()) {
+      PCKey sdl_moddedkey = sdl_moddedkey_it->second;
       SDLkeysFromChars[mapping.first] = std::make_pair(static_cast<SDL_Keycode>(sdl_moddedkey & BITMASK_NOMOD), static_cast<SDL_Keymod>(sdl_moddedkey >> BITSHIFT_MOD));
     }
   }
@@ -1594,7 +1602,12 @@ void InputMapper::set_joystick_emulation()
   for (int n = 0; n < 6; n++) {
     int cpc_idx = joy_layout[n][1]; // get the CPC key to change the assignment for
     if (cpc_idx) {
-      PCKey pc_idx = SDLkeysymFromCPCkeys[cpc_idx]; // SDL key corresponding to the CPC key to remap
+      // A CPC key can have several host keys now (see SDLkeysymFromCPCkeys);
+      // find() picks the one inserted first, which is always the layout's
+      // primary/main-keyboard binding - the one joystick emulation should
+      // redirect.
+      auto pc_idx_it = SDLkeysymFromCPCkeys.find(cpc_idx);
+      PCKey pc_idx = (pc_idx_it != SDLkeysymFromCPCkeys.end()) ? pc_idx_it->second : 0; // SDL key corresponding to the CPC key to remap
       if (CPC->joystick_emulation == JoystickEmulation::Keyboard) {
         CPCkeysFromSDLkeysym[pc_idx] = joy_layout[n][0];
       }

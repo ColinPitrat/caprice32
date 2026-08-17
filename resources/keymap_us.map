@@ -175,6 +175,11 @@ CPC_TAB	SDLK_TAB
 CPC_UNDERSCORE	SDLK_MINUS	MOD_PC_SHIFT
 # No pound on a US keyboard... emulating it with AltGr + P
 CPC_POUND	SDLK_p	MOD_PC_MODE
+# Extra keypad bindings, on top of the main-keyboard ones above.
+CPC_SLASH	SDLK_KP_DIVIDE
+CPC_ASTERISK	SDLK_KP_MULTIPLY
+CPC_MINUS	SDLK_KP_MINUS
+CPC_PLUS	SDLK_KP_PLUS
 #
 # Emulator keymap
 #
