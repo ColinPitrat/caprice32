@@ -157,6 +157,7 @@ void parseArguments(int argc, char **argv, std::vector<std::string>& slot_list, 
             }
 
          case 's':
+            LOG_INFO("Reading symbols from file: '" << optarg << "'");
             args.symFilePath = optarg;
             break;
 

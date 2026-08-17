@@ -2128,7 +2128,9 @@ bool showDevTools()
   if (!devtools.back().Activate(CPC.devtools_scale)) {
     LOG_ERROR("Failed to activate developers tools");
   }
-  if (!args.symFilePath.empty()) devtools.back().LoadSymbols(args.symFilePath);
+  if (!args.symFilePath.empty()) {
+    devtools.back().LoadSymbols(args.symFilePath);
+  }
   return true;
 }
 
