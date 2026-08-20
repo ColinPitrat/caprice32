@@ -2739,13 +2739,11 @@ int cap32_main (int argc, char **argv)
       fprintf(stderr, "SDL_Init() failed: %s\n", SDL_GetError());
       exit(-1);
    }
-   // SDL enables text input (IME) by default. With an IME active (e.g. IBus),
-   // this lets it intercept and consume raw key events for composable
-   // characters (accented letters) before they ever reach our SDL_KEYDOWN
-   // handling, so those keys silently do nothing on the CPC keyboard.
-   // The GUI's own text fields (wg_editbox, wg_textbox) already call
-   // SDL_StartTextInput()/SDL_StopTextInput() themselves when focused, so
-   // this only sets the initial (no text field focused) state.
+   // SDL enables text input by default, which intercepts and consumes raw
+   // key events for composable characters, preventing SDL_KEYDOWN events.
+   // So in the emulator, disable it to get all key events.
+   // The GUI's text fields (wg_editbox, wg_textbox) call
+   // SDL_StartTextInput()/SDL_StopTextInput() themselves when focused.
    SDL_StopTextInput();
 
    #ifndef APP_PATH
