@@ -44,6 +44,8 @@ extern t_PSG PSG;
 extern t_VDU VDU;
 extern dword dwMF2Flags;
 extern dword dwMF2ExitAddr;
+extern uint64_t g_bench_tstates; // benchmark T-state counter (see cap32.cpp)
+extern bool g_bench_mode;
 
 extern int iTapeCycleCount;
 
@@ -407,6 +409,7 @@ void z80_write_mem(word addr, byte val) {
          } \
       } \
       CPC.cycle_count -= iCycleCount; \
+      if (g_bench_mode) g_bench_tstates += iCycleCount; /* benchmark: coste ~0 fuera de bench */ \
    } \
 }
 

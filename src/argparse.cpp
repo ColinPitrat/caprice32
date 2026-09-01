@@ -16,6 +16,7 @@
 const struct option long_options[] =
 {
    {"autocmd",  required_argument, nullptr, 'a'},
+   {"benchmark", no_argument, nullptr, 'b'},
    {"cfg_file", required_argument, nullptr, 'c'},
    {"inject", required_argument, nullptr, 'i'},
    {"offset", required_argument, nullptr, 'o'},
@@ -36,6 +37,7 @@ void usage(std::ostream &os, char *progPath, int errcode)
    os << "Usage: " << progname << " [options] <slotfile(s)>\n";
    os << "\nSupported options are:\n";
    os << "   -a/--autocmd=<command>: execute command as soon as the emulator starts.\n";
+   os << "   -b/--benchmark:         measure Z80 T-states between the START (OUT &FED0) and STOP (OUT &FED1) markers, print the count to stdout and exit. Runs headless at full speed.\n";
    os << "   -c/--cfg_file=<file>:   use <file> as the emulator configuration file instead of the default.\n";
    os << "   -h/--help:              shows this help\n";
    os << "   -i/--inject=<file>:     inject a binary in memory after the CPC startup finishes\n";
@@ -102,7 +104,7 @@ void parseArguments(int argc, char **argv, std::vector<std::string>& slot_list, 
 
    optind = 0; // To please test framework, when this function is called multiple times !
    while(true) {
-      c = getopt_long (argc, argv, "a:c:hi:o:O:s:vV",
+      c = getopt_long (argc, argv, "a:bc:hi:o:O:s:vV",
                        long_options, &option_index);
       // Logs before processing of the -v will not be visible.
       LOG_DEBUG("Next option: " << c << "(" << static_cast<char>(c) << ")");
@@ -117,6 +119,10 @@ void parseArguments(int argc, char **argv, std::vector<std::string>& slot_list, 
             LOG_VERBOSE("Append to autocmd: " << optarg);
             args.autocmd += replaceCap32Keys(optarg);
             args.autocmd += "\n";
+            break;
+
+         case 'b':
+            args.benchmark = true;
             break;
 
          case 'c':
