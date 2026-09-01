@@ -135,7 +135,7 @@ TEST_F(InputMapperTest, Keymapping)
 
 }
 
-TEST_F(InputMapperTest, KeymappingKeypadIsExtraBindingAlongsideMainKeyboard)
+TEST_F(InputMapperTest, KeypadDualMapping)
 {
   SDL_Keysym keysym;
 
@@ -157,7 +157,7 @@ TEST_F(InputMapperTest, KeymappingKeypadIsExtraBindingAlongsideMainKeyboard)
   ASSERT_EQ(main_slash, keypad_slash);
 }
 
-TEST_F(InputMapperTest, JoystickKeyboardEmulationStillRedirectsMainKeyboardKeys)
+TEST_F(InputMapperTest, JoystickKeyboardEmulationRedirectsMainKeyboardKeys)
 {
   SDL_Keysym keysym;
 
@@ -168,9 +168,7 @@ TEST_F(InputMapperTest, JoystickKeyboardEmulationStillRedirectsMainKeyboardKeys)
   CPC.InputMapper->set_joystick_emulation();
 
   // The main keyboard's cursor keys must be redirected to the joystick,
-  // not left mapped to CPC_CUR_UP/DOWN/LEFT/RIGHT. This must keep working
-  // now that CPC keys can have multiple host key bindings: set_joystick_emulation()
-  // has to keep picking the layout's primary binding to redirect.
+  // not left mapped to CPC_CUR_UP/DOWN/LEFT/RIGHT.
   keysym.sym = SDLK_UP;
   keysym.mod = KMOD_NONE;
   ASSERT_EQ(CPC_J0_UP, CPC.InputMapper->CPCkeyFromKeysym(keysym));
