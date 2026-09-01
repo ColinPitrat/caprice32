@@ -134,3 +134,57 @@ TEST_F(InputMapperTest, Keymapping)
 
 
 }
+
+TEST_F(InputMapperTest, KeypadDualMapping)
+{
+  SDL_Keysym keysym;
+
+  CPC.kbd_layout ="keymap_fr_linux.map";
+  CPC.keyboard = 1;
+  CPC.InputMapper->init();
+
+  // Main keyboard '/' (Shift+:) and keypad '/' must both resolve to the
+  // same CPC_SLASH scancode - the keypad binding complements the layout's
+  // binding, it doesn't replace it.
+  keysym.sym = SDLK_COLON;
+  keysym.mod = KMOD_LSHIFT;
+  CPCScancode main_slash = CPC.InputMapper->CPCscancodeFromKeysym(keysym);
+  ASSERT_NE(0xff, main_slash);
+
+  keysym.sym = SDLK_KP_DIVIDE;
+  keysym.mod = KMOD_NONE;
+  CPCScancode keypad_slash = CPC.InputMapper->CPCscancodeFromKeysym(keysym);
+  ASSERT_EQ(main_slash, keypad_slash);
+}
+
+TEST_F(InputMapperTest, JoystickKeyboardEmulationRedirectsMainKeyboardKeys)
+{
+  SDL_Keysym keysym;
+
+  CPC.kbd_layout ="keymap_fr_linux.map";
+  CPC.keyboard = 1;
+  CPC.joystick_emulation = JoystickEmulation::Keyboard;
+  CPC.InputMapper->init();
+  CPC.InputMapper->set_joystick_emulation();
+
+  // The main keyboard's cursor keys must be redirected to the joystick,
+  // not left mapped to CPC_CUR_UP/DOWN/LEFT/RIGHT.
+  keysym.sym = SDLK_UP;
+  keysym.mod = KMOD_NONE;
+  ASSERT_EQ(CPC_J0_UP, CPC.InputMapper->CPCkeyFromKeysym(keysym));
+
+  keysym.sym = SDLK_DOWN;
+  ASSERT_EQ(CPC_J0_DOWN, CPC.InputMapper->CPCkeyFromKeysym(keysym));
+
+  keysym.sym = SDLK_LEFT;
+  ASSERT_EQ(CPC_J0_LEFT, CPC.InputMapper->CPCkeyFromKeysym(keysym));
+
+  keysym.sym = SDLK_RIGHT;
+  ASSERT_EQ(CPC_J0_RIGHT, CPC.InputMapper->CPCkeyFromKeysym(keysym));
+
+  keysym.sym = SDLK_z;
+  ASSERT_EQ(CPC_J0_FIRE1, CPC.InputMapper->CPCkeyFromKeysym(keysym));
+
+  keysym.sym = SDLK_x;
+  ASSERT_EQ(CPC_J0_FIRE2, CPC.InputMapper->CPCkeyFromKeysym(keysym));
+}
