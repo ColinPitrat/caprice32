@@ -41,6 +41,7 @@ inline void asic_reset_dma_channel(int c) {
 
 void asic_reset() {
   asic.locked = true;
+  asic.lockSeqPos = 0;
 
   asic.extend_border = false;
   asic.hscroll = 0;
@@ -55,6 +56,7 @@ void asic_reset() {
     }
   }
 
+  asic.raster_int_pending = false;
   asic.interrupt_vector = 1;
 
   for(int c = 0; c < NB_DMA_CHANNELS; c++) {
@@ -385,7 +387,9 @@ bool asic_register_page_write(word addr, byte val) {
       } else if (addr == 0x6801) {
          LOG_DEBUG("Received scan line for split: " << static_cast<int>(val));
          CRTC.split_sl = val;
-         CRTC.sl_count = 0;
+         // TODO(cpitrat): Clarify whether this is needed or not.
+         // This shouldn't be and it doesn't seem to have any effect in practice.
+         //CRTC.sl_count = 0;
       } else if (addr == 0x6802) {
          CRTC.split_addr &= 0x00FF;
          CRTC.split_addr |= (val << 8);
