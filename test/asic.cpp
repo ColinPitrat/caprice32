@@ -273,4 +273,28 @@ TEST_F(AsicTest, SpriteCoordinatesSignExtension)
    pbRegisterPage = nullptr;
 }
 
+TEST_F(AsicTest, InterruptVectorBit0AutoClear)
+{
+   asic_reset();
+
+   // On reset, IVR bit 0 should be 1 (manual clear)
+   EXPECT_EQ(1, asic.interrupt_vector & 1);
+
+   asic.locked = false; // unlock so asic_get_interrupt_vector doesn't return 0xFF
+   asic.dma.ch[0].int_pending = true;
+
+   // First acknowledge: interrupt should not be automatically cleared because bit 0 is 1
+   byte vec = asic_get_interrupt_vector();
+   EXPECT_EQ(0x04, vec & 0x07); // DMA0 source ID is 4
+   EXPECT_TRUE(asic.dma.ch[0].int_pending);
+
+   // Set bit 0 to 0 (automatic clear)
+   asic.interrupt_vector = 0;
+
+   // Second acknowledge: interrupt should now be automatically cleared because bit 0 is 0
+   vec = asic_get_interrupt_vector();
+   EXPECT_EQ(0x04, vec & 0x07);
+   EXPECT_FALSE(asic.dma.ch[0].int_pending);
+}
+
 }

@@ -28,6 +28,17 @@ struct asic_color_t {
 
 asic_color_t asic_colours[32];
 
+inline void asic_reset_dma_channel(int c) {
+  asic.dma.ch[c].source_address = 0;
+  asic.dma.ch[c].loop_address = 0;
+  asic.dma.ch[c].prescaler = 0;
+  asic.dma.ch[c].enabled = false;
+  asic.dma.ch[c].int_pending = false;
+  asic.dma.ch[c].pause_ticks = 0;
+  asic.dma.ch[c].tick_cycles = 0;
+  asic.dma.ch[c].loops = 0;
+}
+
 void asic_reset() {
   asic.locked = true;
 
@@ -46,15 +57,8 @@ void asic_reset() {
 
   asic.interrupt_vector = 1;
 
-  for(auto &channel : asic.dma.ch) {
-    channel.source_address = 0;
-    channel.loop_address = 0;
-    channel.prescaler = 0;
-    channel.enabled = false;
-    channel.int_pending = false;
-    channel.pause_ticks = 0;
-    channel.tick_cycles = 0;
-    channel.loops = 0;
+  for(int c = 0; c < NB_DMA_CHANNELS; c++) {
+    asic_reset_dma_channel(c);
   }
 }
 
@@ -212,7 +216,11 @@ byte asic_get_interrupt_vector() {
   // Priority of interrupts are: PRI, DMA2, DMA1, DMA0.
   // Their source IDs are respectively 6, 0, 2, and 4.
   if (asic.raster_int_pending) {
-      return_value = asic.interrupt_vector | 6;
+      return_value = (asic.interrupt_vector & 0xF8) | 6;
+      // Clear the interrupt automatically if bit 0 of the interrupt vector is 0
+      if ((asic.interrupt_vector & 1) == 0) {
+        asic.raster_int_pending = false;
+      }
   }
   int source_id = 0;
   for (int c = NB_DMA_CHANNELS-1; c >= 0; c--) {
@@ -220,8 +228,11 @@ byte asic_get_interrupt_vector() {
       if (return_value) {
         more_pending = true;
       } else {
-        return_value = asic.interrupt_vector | source_id;
-        asic.dma.ch[c].int_pending = false;
+        return_value = (asic.interrupt_vector & 0xF8) | source_id;
+        // Clear the interrupt automatically if bit 0 of the interrupt vector is 0
+        if ((asic.interrupt_vector & 1) == 0) {
+          asic.dma.ch[c].int_pending = false;
+        }
       }
     }
     source_id += 2;
@@ -342,7 +353,9 @@ bool asic_register_page_write(word addr, byte val) {
             // Write-only: does not affect pbRegisterPage
             return false;
          default:
-            LOG_WARNING("Received sprite operation of unsupported type: " << type << " addr=" << std::hex << addr << " - val=" << static_cast<int>(val) << std::dec);
+            // This is only a LOG_DEBUG because this happens on Burnin' Rubber which is likely
+            // copying a whole memory area rather than only meaningful bytes.
+            LOG_DEBUG("Received sprite operation of unsupported type: " << type << " addr=" << std::hex << addr << " - val=" << static_cast<int>(val) << std::dec);
             break;
       }
    } else if (addr >= 0x6400 && addr < 0x6440) {
@@ -389,7 +402,8 @@ bool asic_register_page_write(word addr, byte val) {
          update_skew();
       } else if (addr == 0x6805) {
          LOG_DEBUG("Received interrupt vector: " << static_cast<int>(val));
-         asic.interrupt_vector = val & 0xF8;
+         // Keep bits 3-7 (base vector) and bit 0 (auto-clear control)
+         asic.interrupt_vector = val & 0xF9;
       }
    } else if (addr >= 0x6808 && addr < 0x6810) {
      LOG_WARNING("[UNSUPPORTED] Received analog input stuff");
@@ -426,6 +440,7 @@ bool asic_register_page_write(word addr, byte val) {
           dcsr |= (0x1 << c);
         } else {
           dcsr &= ~(0x1 << c);
+          asic_reset_dma_channel(c);
         }
         if (val & (0x40 >> c)) {
           asic.dma.ch[c].int_pending = false;
