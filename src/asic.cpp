@@ -239,7 +239,7 @@ byte asic_get_interrupt_vector() {
   }
   if (!return_value) {
     LOG_WARNING("asic_get_interrupt_vector called but no pending interrupt!");
-    return_value = asic.interrupt_vector | 6;
+    return_value = (asic.interrupt_vector & 0xF8) | 6;
   }
   if (more_pending) {
     z80.int_pending = true;
