@@ -281,32 +281,55 @@ bool asic_register_page_write(word addr, byte val) {
       int id = ((addr - 0x6000) >> 3);
       int type = (addr & 0x7);
       switch (type) {
+         // From Arnold V5 specs:
+         // Data written to these registers should be between +767 and -256 for X, and between +255 and -256 for Y.
+         // With standard 6845 timing (64us scan lines, 200 visible lines), "on screen" positions at maximum sprite magnification are -64 to +639 in x and -63 to +199 in y.
+         // A sprite will not be displayed if either the vertical or the horizontal positions outside the on screen range.
          case 0:
             // X position
-            asic.sprites_x[id] = (asic.sprites_x[id] & 0xFF00) | val;
-            //LOG_DEBUG("Received sprite X (LSB) for sprite " << id << " x=" << asic.sprites_x[id]);
+            {
+               uint16_t x = (static_cast<uint16_t>(asic.sprites_x[id]) & 0xFF00) | val;
+               x &= 0x03FF;
+               if (x > 767) x |= 0xFC00; // Sign-extend bit 10
+               asic.sprites_x[id] = static_cast<int16_t>(x);
+            }
+            LOG_DEBUG("Received sprite X (LSB=" << static_cast<uint16_t>(val) << ") for sprite " << id << " x=" << asic.sprites_x[id]);
             // Mirrored in RAM image 4 bytes after
             pbRegisterPage[(addr & 0x3FFF) + 4] = val;
             break;
          case 1:
             // X position
-            asic.sprites_x[id] = (asic.sprites_x[id] & 0x00FF) | (val << 8);
-            //LOG_DEBUG("Received sprite X (MSB) for sprite " << id << " x=" << asic.sprites_x[id]);
+            {
+               uint16_t x = (static_cast<uint16_t>(asic.sprites_x[id]) & 0x00FF) | (val << 8);
+               x &= 0x03FF;
+               if (x > 767) x |= 0xFC00; // Sign-extend bit 10
+               asic.sprites_x[id] = static_cast<int16_t>(x);
+            }
+            LOG_DEBUG("Received sprite X (MSB=" << static_cast<uint16_t>(val) << ") for sprite " << id << " x=" << asic.sprites_x[id]);
             // Mirrored in RAM image 4 bytes after
             pbRegisterPage[(addr & 0x3FFF) + 4] = val;
             break;
          case 2:
             // Y position
-            asic.sprites_y[id] = ((asic.sprites_y[id] & 0xFF00) | val);
-            //LOG_DEBUG("Received sprite Y (LSB) for sprite " << id << " y=" << asic.sprites_y[id]);
+            {
+               uint16_t y = (static_cast<uint16_t>(asic.sprites_y[id]) & 0xFF00) | val;
+               y &= 0x01FF;
+               if (y > 255) y |= 0xFE00; // Sign-extend bit 8
+               asic.sprites_y[id] = static_cast<int16_t>(y);
+            }
+            LOG_DEBUG("Received sprite Y (LSB=" << static_cast<uint16_t>(val) << ") for sprite " << id << " y=" << asic.sprites_y[id]);
             // Mirrored in RAM image 4 bytes after
             pbRegisterPage[(addr & 0x3FFF) + 4] = val;
             break;
          case 3:
             // Y position
-            asic.sprites_y[id] = ((asic.sprites_y[id] & 0x00FF) | (val << 8));
-            //LOG_DEBUG("Received sprite Y (MSB) for sprite " << id << " y=" << asic.sprites_y[id]);
-            // Affect RAM image
+            {
+               uint16_t y = (static_cast<uint16_t>(asic.sprites_y[id]) & 0x00FF) | (val << 8);
+               y &= 0x01FF;
+               if (y > 255) y |= 0xFE00; // Sign-extend bit 8
+               asic.sprites_y[id] = static_cast<int16_t>(y);
+            }
+            LOG_DEBUG("Received sprite Y (MSB=" << static_cast<uint16_t>(val) << ") for sprite " << id << " y=" << asic.sprites_y[id]);
             // Mirrored in RAM image 4 bytes after
             pbRegisterPage[(addr & 0x3FFF) + 4] = val;
             break;

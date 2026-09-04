@@ -674,7 +674,7 @@ inline void match_hsw()
          GateArray.sl_count = 0; // clear counter
       }
       if (CRTC.sl_count == CRTC.interrupt_sl && CRTC.interrupt_sl != 0) {
-         LOG_INFO("Firing PRI interrupt at GA.sl_count=" << static_cast<int>(GateArray.sl_count) << ", CRTC.sl_count=" << CRTC.sl_count);
+         LOG_DEBUG("Firing PRI interrupt at GA.sl_count=" << static_cast<int>(GateArray.sl_count) << ", CRTC.sl_count=" << CRTC.sl_count);
          z80.int_pending = 1;
          asic.raster_int_pending = true;
          // Set the bit for the raster interrupt in DCSR.

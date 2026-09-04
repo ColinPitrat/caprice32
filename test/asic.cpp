@@ -7,6 +7,7 @@
 extern byte *membank_config[8][4];
 extern byte *membank_write[4];
 extern t_GateArray GateArray;
+extern byte *pbRegisterPage;
 
 namespace 
 {
@@ -197,6 +198,79 @@ TEST_F(AsicTest, AsicDMACycleWriteBackDCSR)
 
   EXPECT_EQ(2, *(membank_write[1] + 0x2c00));
   EXPECT_EQ(1, *(membank_write[1] + 0x2c0f));
+}
+
+TEST_F(AsicTest, SpriteCoordinatesSignExtension)
+{
+   std::vector<byte> registerPage(16 * 1024, 0);
+   pbRegisterPage = registerPage.data();
+
+   // Clear sprites x and y coordinates
+   for (int i = 0; i < 16; ++i) {
+      asic.sprites_x[i] = 0;
+      asic.sprites_y[i] = 0;
+   }
+
+   //////
+   // Test X coordinate parsing (id = 0)
+   //////
+
+   // Positive X coordinate below 512
+   // 350 = 0x015E
+   asic_register_page_write(0x6000, 0x5E);
+   asic_register_page_write(0x6001, 0x01);
+   EXPECT_EQ(350, asic.sprites_x[0]);
+
+   // Positive X coordinate above 512 but below 768
+   // 640 = 0x0280
+   asic_register_page_write(0x6000, 0x80);
+   asic_register_page_write(0x6001, 0x02);
+   EXPECT_EQ(640, asic.sprites_x[0]);
+
+   // 767 = 0x02FF
+   asic_register_page_write(0x6000, 0xFF);
+   asic_register_page_write(0x6001, 0x02);
+   EXPECT_EQ(767, asic.sprites_x[0]);
+
+   // Negative X coordinate >= 768
+   // 768 = 0x0300 (= -256)
+   asic_register_page_write(0x6000, 0x00);
+   asic_register_page_write(0x6001, 0x03);
+   EXPECT_EQ(-256, asic.sprites_x[0]);
+
+   // 1000 = 0x03E8 (= -24)
+   asic_register_page_write(0x6000, 0xE8);
+   asic_register_page_write(0x6001, 0x03);
+   EXPECT_EQ(-24, asic.sprites_x[0]);
+
+
+   //////
+   // Test Y coordinate parsing (id = 0)
+   //////
+
+   // Positive Y coordinate below 256
+   // 200 = 0x00C8
+   asic_register_page_write(0x6002, 0xC8);
+   asic_register_page_write(0x6003, 0x00);
+   EXPECT_EQ(200, asic.sprites_y[0]);
+
+   // 255 = 0x00FF
+   asic_register_page_write(0x6002, 0xFF);
+   asic_register_page_write(0x6003, 0x00);
+   EXPECT_EQ(255, asic.sprites_y[0]);
+
+   // Negative Y coordinate >= 256
+   // 256 = 0x0100 (= -256)
+   asic_register_page_write(0x6002, 0x00);
+   asic_register_page_write(0x6003, 0x01);
+   EXPECT_EQ(-256, asic.sprites_y[0]);
+
+   // 500 = 0x01F4 (= -12)
+   asic_register_page_write(0x6002, 0xF4);
+   asic_register_page_write(0x6003, 0x01);
+   EXPECT_EQ(-12, asic.sprites_y[0]);
+
+   pbRegisterPage = nullptr;
 }
 
 }
