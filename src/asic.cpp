@@ -147,6 +147,7 @@ void asic_dma_cycle() {
     }
     else {
       if (opcode & 0x01) { // PAUSE
+        // Tried with -1 here as we want to delay for exactly N scanlines, and current code suggests we'll pause for N+1 scanlines, but this sounds wrong on Burnin' Rubber.
         channel.pause_ticks = (instruction) & 0x0FFF;
         channel.tick_cycles = 0;
         LOG_DEBUG("DMA [" << c << "] pause " << channel.pause_ticks << "*" << static_cast<int>(channel.prescaler) << " cycles");
@@ -214,13 +215,13 @@ byte asic_get_interrupt_vector() {
       return_value = asic.interrupt_vector | 6;
   }
   int source_id = 0;
-  for (int c = NB_DMA_CHANNELS; c >= 0; c--) {
+  for (int c = NB_DMA_CHANNELS-1; c >= 0; c--) {
     if (asic.dma.ch[c].int_pending) {
-      asic.dma.ch[c].int_pending = false;
       if (return_value) {
         more_pending = true;
       } else {
         return_value = asic.interrupt_vector | source_id;
+        asic.dma.ch[c].int_pending = false;
       }
     }
     source_id += 2;
