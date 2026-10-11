@@ -203,6 +203,7 @@ class t_CPC {
    bool paused;
    unsigned int auto_pause;
    unsigned int boot_time;
+   unsigned int inject_rom_off;
    unsigned int keyboard_line;
    unsigned int tape_motor;
    unsigned int tape_play_button;
