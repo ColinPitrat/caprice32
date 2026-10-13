@@ -1318,7 +1318,7 @@ void bin_load (const std::string& filename, const size_t offset)
   auto closure = [&]() { fclose(file); };
   memutils::scope_exit<decltype(closure)> cs(closure); // TODO: when C++20, can become a one liner expression.
 
-  size_t ram_size = 0XFFFF; // TODO: Find a way to have the real RAM size
+  size_t ram_size = 0xFFFF; // TODO: Find a way to have the real RAM size
   size_t max_size = ram_size - offset;
   size_t read = fread(&pbRAM[offset], 1, max_size, file);
   if (!feof(file)) {
@@ -1333,14 +1333,27 @@ void bin_load (const std::string& filename, const size_t offset)
     LOG_ERROR("Empty bin file");
     return;
   }
-  // Jump at the beginning of the program
-  z80.PC.w.l = offset;
-
-  // Disable ROM for programs that are loaded below 0x4000
+  // Simulate what the firmware would do when loading the program:
+  // Disable ROM (both lower and upper)
   GateArray.ROM_config |= 0x0C;
   ga_memory_manager();
-  z80.IFF1 = 0;
-  z80.IFF2 = 0;
+
+  // Configure the CPC registers
+  z80.PC.w.l = offset; // Jump at the beginning of the program
+  z80.HL.w.l = offset; // The firmware leaves HL with the program's address (does a JP (HL)).
+  z80.SP.w.l = 0xc000;
+  z80.AF.w.l = 0x0000;
+  z80.BC.w.l = 0x0000;
+  z80.DE.w.l = 0x0000;
+
+  // Set interrupt mode to 1, with interrupts enabled.
+  z80.IFF1 = 1;
+  z80.IFF2 = 1;
+  z80.IM = 1;
+
+  // Technically we should also reset PSG registers, clear sound queues, clear sound ticker event chains.
+  // But in practice, because we just booted, this should all be zeroed already.
+
   return;
 }
 
