@@ -1335,21 +1335,13 @@ void bin_load (const std::string& filename, const size_t offset)
   }
   // Jump at the beginning of the program
   z80.PC.w.l = offset;
-  // option to turn rom off on injection and no stack for development pipeline
-  if (CPC.inject_rom_off) {
-    GateArray.ROM_config |= 0x0C;
-    ga_memory_manager();
-    z80.IFF1 = 0;
-    z80.IFF2 = 0;
-    return;
-  }
-  // Setup the stack the way it would be if we had launch it with run"
-  z80_write_mem(--z80.SP.w.l, 0x0);
-  z80_write_mem(--z80.SP.w.l, 0x98);
-  z80_write_mem(--z80.SP.w.l, 0x7f);
-  z80_write_mem(--z80.SP.w.l, 0x89);
-  z80_write_mem(--z80.SP.w.l, 0xb9);
-  z80_write_mem(--z80.SP.w.l, 0xa2);
+
+  // Disable ROM for programs that are loaded below 0x4000
+  GateArray.ROM_config |= 0x0C;
+  ga_memory_manager();
+  z80.IFF1 = 0;
+  z80.IFF2 = 0;
+  return;
 }
 
 
@@ -1822,7 +1814,6 @@ void loadConfiguration (t_CPC &CPC, const std::string& configFilename)
    CPC.limit_speed = conf.getIntValue("system", "limit_speed", 1) & 1;
    CPC.auto_pause = conf.getIntValue("system", "auto_pause", 1) & 1;
    CPC.boot_time = conf.getIntValue("system", "boot_time", 5);
-   CPC.inject_rom_off = conf.getIntValue("system", "inject_rom_off", 0) & 1;
    CPC.printer = conf.getIntValue("system", "printer", 0) & 1;
    CPC.mf2 = conf.getIntValue("system", "mf2", 0) & 1;
    CPC.net4cpc = conf.getIntValue("system", "net4cpc", 0) & 1;
