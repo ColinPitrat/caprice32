@@ -30,7 +30,7 @@ do
 
   mv -v screenshot_*png ${OUTPUT_DIR}/screenshot-${address}.png
 
-  if ! $DIFF ${OUTPUT_DIR}/screenshot-${address}.png model/screenshot-${address}.png >> "${LOGFILE}"
+  if ! $DIFF ${OUTPUT_DIR}/screenshot-${address}.png model/screenshot.png >> "${LOGFILE}"
   then
     echo "!! Test failed for load at address=${address}"
     rc=1
