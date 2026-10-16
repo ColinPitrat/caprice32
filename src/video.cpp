@@ -1236,76 +1236,130 @@ void swbilin_flip(video_plugin* t __attribute__((unused)))
 /* ------------------------------------------------------------------------------------ */
 /* Software bicubic video plugin ------------------------------------------------------ */
 /* ------------------------------------------------------------------------------------ */
-#define BLUE_MASK565 0x001F001F
-#define RED_MASK565 0xF800F800
-#define GREEN_MASK565 0x07E007E0
+// For fixed 2x upscaling (fsx = fsy = 0.5), the cubic B-spline kernel
+//   CUBIC_WEIGHT(x) = (P(x+2)^3 - 4*P(x+1)^3 + 6*P(x)^3 - 4*P(x-1)^3) / 6
+// is separable and only evaluated at fractional offsets 0.0 (even) and 0.5 (odd):
+//   - dec = 0.0 (m, n in {-1, 0, 1, 2}): [1,  4,  1, 0] / 6
+//   - dec = 0.5 (m, n in {-1, 0, 1, 2}): [1, 23, 23, 1] / 48
+// This yields 2D rational denominators of 36 (even, even), 288 (even, odd /
+// odd, even), and 2304 (odd, odd).
+static constexpr int kBicubicMaxRowSize = CPC_VISIBLE_SCR_WIDTH * 2 + 32;
 
-#define BLUE_MASK555 0x001F001F
-#define RED_MASK555 0x7C007C00
-#define GREEN_MASK555 0x03E003E0
+struct BicubicUnpackedRow {
+  alignas(32) uint16_t r[kBicubicMaxRowSize];
+  alignas(32) uint16_t g[kBicubicMaxRowSize];
+  alignas(32) uint16_t b[kBicubicMaxRowSize];
+};
 
-__inline__ static void MULT(uint16_t c, float* r, float* g, float* b, float alpha) {
-  *r += alpha * ((c & RED_MASK565  ) >> 11);
-  *g += alpha * ((c & GREEN_MASK565) >>  5);
-  *b += alpha * ((c & BLUE_MASK565 ) >>  0);
+static inline uint16_t bicubic_div36(uint16_t x) { return x / 36U; }
+static inline uint16_t bicubic_div288(uint16_t x) { return x / 288U; }
+
+// Computes (x0 + 23*(x1 + x2) + x3) / 2304 in 16-bit unsigned arithmetic
+// without overflowing uint16_t (raw sum reaches 63 * 2304 = 145152 > 65535):
+//   floor((16*s_in + 7*s_in + s_out) / 64) == ((s_in << 2) + ((7*s_in + s_out) >> 2)) >> 4
+// followed by division by 36 (since 2304 = 64 * 36).
+static inline uint16_t bicubic_div2304(uint16_t x0, uint16_t x1, uint16_t x2, uint16_t x3) {
+  uint16_t s_in = x1 + x2;
+  uint16_t s_out = x0 + x3;
+  uint16_t b_val = 7 * s_in + s_out;
+  uint16_t shr6 = static_cast<uint16_t>((s_in << 2) + (b_val >> 2)) >> 4;
+  return shr6 / 36U;
 }
 
-__inline__ static uint16_t MAKE_RGB565(float r, float g, float b) {
-  return 
-    (((static_cast<uint8_t>(r)) << 11) & RED_MASK565  ) |
-    (((static_cast<uint8_t>(g)) <<  5) & GREEN_MASK565) |
-    (((static_cast<uint8_t>(b)) <<  0) & BLUE_MASK565 );
+static inline void bicubic_unpack_row(const uint16_t * __restrict src,
+                                      uint16_t * __restrict dst_r,
+                                      uint16_t * __restrict dst_g,
+                                      uint16_t * __restrict dst_b, int total) {
+  for (int u = 0; u < total; ++u) {
+    uint16_t c = src[u];
+    dst_r[u] = c >> 11;
+    dst_g[u] = (c >> 5) & 0x3F;
+    dst_b[u] = c & 0x1F;
+  }
 }
 
-__inline__ float CUBIC_WEIGHT(float x) {
-  // P(x) = { x, x>0 | 0, x<=0 }
-  // P(x + 2) ^ 3 - 4 * P(x + 1) ^ 3 + 6 * P(x) ^ 3 - 4 * P(x - 1) ^ 3
-  double r = 0.;
-  if(x + 2 > 0) r +=      pow(x + 2, 3);
-  if(x + 1 > 0) r += -4 * pow(x + 1, 3);
-  if(x     > 0) r +=  6 * pow(x    , 3);
-  if(x - 1 > 0) r += -4 * pow(x - 1, 3);
-  return static_cast<float>(r) / 6;
+static inline void bicubic_vpass_channel(const uint16_t * __restrict p0,
+                                         const uint16_t * __restrict p1,
+                                         const uint16_t * __restrict p2,
+                                         const uint16_t * __restrict p3,
+                                         uint16_t * __restrict ve,
+                                         uint16_t * __restrict vo, int total) {
+  for (int u = 0; u < total; ++u) {
+    ve[u] = p0[u] + 4 * p1[u] + p2[u];
+    vo[u] = p0[u] + 23 * (p1[u] + p2[u]) + p3[u];
+  }
+}
+
+static inline void bicubic_hpass_even(const uint16_t * __restrict ve_r,
+                                      const uint16_t * __restrict ve_g,
+                                      const uint16_t * __restrict ve_b,
+                                      uint16_t * __restrict q_even, int width) {
+  for (int u = 0; u < width; ++u) {
+    uint16_t re0 = bicubic_div36(ve_r[u] + 4 * ve_r[u + 1] + ve_r[u + 2]);
+    uint16_t ge0 = bicubic_div36(ve_g[u] + 4 * ve_g[u + 1] + ve_g[u + 2]);
+    uint16_t be0 = bicubic_div36(ve_b[u] + 4 * ve_b[u + 1] + ve_b[u + 2]);
+
+    uint16_t re1 = bicubic_div288(ve_r[u] + 23 * (ve_r[u + 1] + ve_r[u + 2]) + ve_r[u + 3]);
+    uint16_t ge1 = bicubic_div288(ve_g[u] + 23 * (ve_g[u + 1] + ve_g[u + 2]) + ve_g[u + 3]);
+    uint16_t be1 = bicubic_div288(ve_b[u] + 23 * (ve_b[u + 1] + ve_b[u + 2]) + ve_b[u + 3]);
+
+    q_even[2 * u] = (re0 << 11) | (ge0 << 5) | be0;
+    q_even[2 * u + 1] = (re1 << 11) | (ge1 << 5) | be1;
+  }
+}
+
+static inline void bicubic_hpass_odd(const uint16_t * __restrict vo_r,
+                                     const uint16_t * __restrict vo_g,
+                                     const uint16_t * __restrict vo_b,
+                                     uint16_t * __restrict q_odd, int width) {
+  for (int u = 0; u < width; ++u) {
+    uint16_t ro0 = bicubic_div288(vo_r[u] + 4 * vo_r[u + 1] + vo_r[u + 2]);
+    uint16_t go0 = bicubic_div288(vo_g[u] + 4 * vo_g[u + 1] + vo_g[u + 2]);
+    uint16_t bo0 = bicubic_div288(vo_b[u] + 4 * vo_b[u + 1] + vo_b[u + 2]);
+
+    uint16_t ro1 = bicubic_div2304(vo_r[u], vo_r[u + 1], vo_r[u + 2], vo_r[u + 3]);
+    uint16_t go1 = bicubic_div2304(vo_g[u], vo_g[u + 1], vo_g[u + 2], vo_g[u + 3]);
+    uint16_t bo1 = bicubic_div2304(vo_b[u], vo_b[u + 1], vo_b[u + 2], vo_b[u + 3]);
+
+    q_odd[2 * u] = (ro0 << 11) | (go0 << 5) | bo0;
+    q_odd[2 * u + 1] = (ro1 << 11) | (go1 << 5) | bo1;
+  }
 }
 
 void filter_bicubic(uint8_t *srcPtr, uint32_t srcPitch, 
     uint8_t *dstPtr, uint32_t dstPitch, 
     int width, int height)
 {
+  if (width <= 0 || height <= 0) return;
   unsigned int nextlineSrc = srcPitch / sizeof(uint16_t);
-  uint16_t *p = reinterpret_cast<uint16_t *>(srcPtr);
+  const uint16_t *p = reinterpret_cast<const uint16_t *>(srcPtr);
   unsigned int nextlineDst = dstPitch / sizeof(uint16_t);
   uint16_t *q = reinterpret_cast<uint16_t *>(dstPtr);
-  int dx = width << 1, dy = height << 1;
-  float fsx = static_cast<float>(width) / dx;
-  float fsy = static_cast<float>(height) / dy;
-  float v = 0.0f;
-  int j = 0;
-  for(; j < dy; ++j) {
-    float u = 0.0f;
-    int iv = static_cast<int>(v);
-    float decy = v - iv;
-    int i = 0;
-    for(; i < dx; ++i) {
-      int iu = static_cast<int>(u);
-      float decx = u - iu;
-      float r, g, b;
-      int m;
-      r = g = b = 0.;
-      for(m = -1; m <= 2; ++m) {
-        float r1 = CUBIC_WEIGHT(decy - m);
-        int n;
-        for(n = -1; n <= 2; ++n) {
-          float r2 = CUBIC_WEIGHT(n - decx);
-          uint16_t* pIn = p + (iu  + n) + (iv + m) * static_cast<int>(nextlineSrc);
-          MULT(*pIn, &r, &g, &b, r1 * r2);
-        }
-      }
-      *(q + i) = MAKE_RGB565(r, g, b);
-      u += fsx;
-    }
-    q += nextlineDst;
-    v += fsy;
+
+  BicubicUnpackedRow ubuf[4];
+  int total_h = width + 3;
+  bicubic_unpack_row(p - static_cast<int>(nextlineSrc) - 1, ubuf[0].r, ubuf[0].g, ubuf[0].b, total_h);
+  bicubic_unpack_row(p - 1, ubuf[1].r, ubuf[1].g, ubuf[1].b, total_h);
+  bicubic_unpack_row(p + nextlineSrc - 1, ubuf[2].r, ubuf[2].g, ubuf[2].b, total_h);
+
+  alignas(32) uint16_t ve_r[kBicubicMaxRowSize], ve_g[kBicubicMaxRowSize], ve_b[kBicubicMaxRowSize];
+  alignas(32) uint16_t vo_r[kBicubicMaxRowSize], vo_g[kBicubicMaxRowSize], vo_b[kBicubicMaxRowSize];
+
+  for (int v = 0; v < height; ++v) {
+    const BicubicUnpackedRow &row0 = ubuf[(v + 0) & 3];
+    const BicubicUnpackedRow &row1 = ubuf[(v + 1) & 3];
+    const BicubicUnpackedRow &row2 = ubuf[(v + 2) & 3];
+    BicubicUnpackedRow &row3 = ubuf[(v + 3) & 3];
+    bicubic_unpack_row(p + (v + 2) * static_cast<int>(nextlineSrc) - 1, row3.r, row3.g, row3.b, total_h);
+
+    bicubic_vpass_channel(row0.r, row1.r, row2.r, row3.r, ve_r, vo_r, total_h);
+    bicubic_vpass_channel(row0.g, row1.g, row2.g, row3.g, ve_g, vo_g, total_h);
+    bicubic_vpass_channel(row0.b, row1.b, row2.b, row3.b, ve_b, vo_b, total_h);
+
+    bicubic_hpass_even(ve_r, ve_g, ve_b, q, width);
+    bicubic_hpass_odd(vo_r, vo_g, vo_b, q + nextlineDst, width);
+
+    q += nextlineDst << 1;
   }
 }
 
