@@ -528,7 +528,16 @@ void z80_OUT_handler (reg_pair port, byte val)
                   byte b = (static_cast<dword>(colours[GateArray.ink_values[0]].b) + static_cast<dword>(colours[GateArray.ink_values[1]].b)) >> 1;
                   GateArray.palette[33] = SDL_MapRGB(back_surface->format, r, g, b); // update the mode 2 'anti-aliasing' colour
                }
-               // TODO: update pbRegisterPage
+               if (CPC.model > 2 && pbRegisterPage != nullptr) {
+                 auto to_asic_nibble = [](double c) -> byte {
+                   return (c == 0.0) ? 0x0 : ((c == 1.0) ? 0xf : 0x6);
+                 };
+                 byte r_nib = to_asic_nibble(colours_rgb[colour][0]);
+                 byte g_nib = to_asic_nibble(colours_rgb[colour][1]);
+                 byte b_nib = to_asic_nibble(colours_rgb[colour][2]);
+                 pbRegisterPage[0x2400 + GateArray.pen * 2]     = (r_nib << 4) | b_nib;
+                 pbRegisterPage[0x2400 + GateArray.pen * 2 + 1] = g_nib;
+               }
             }
             if (CPC.mf2) { // MF2 enabled?
                int iPen = *(pbMF2ROM + 0x03fcf);
