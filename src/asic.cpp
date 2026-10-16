@@ -461,11 +461,11 @@ bool asic_register_page_write(word addr, byte val) {
    return true;
 }
 
-static inline void putpixel(SDL_Surface *surface, int x, int y, Uint32 pixel)
+static inline void putpixel(SDL_Surface *surface, int x, int y, uint32_t pixel)
 {
    int bpp = surface->format->BytesPerPixel;
    /* Here p is the address to the pixel we want to set */
-   Uint8 *p = static_cast<Uint8 *>(surface->pixels) + y * surface->pitch + x * bpp;
+   uint8_t *p = static_cast<uint8_t *>(surface->pixels) + y * surface->pitch + x * bpp;
 
    switch(bpp) {
       case 1:
@@ -473,7 +473,7 @@ static inline void putpixel(SDL_Surface *surface, int x, int y, Uint32 pixel)
          break;
 
       case 2:
-         *reinterpret_cast<Uint16 *>(p) = pixel;
+         *reinterpret_cast<uint16_t *>(p) = pixel;
          break;
 
       case 3:
@@ -489,7 +489,7 @@ static inline void putpixel(SDL_Surface *surface, int x, int y, Uint32 pixel)
          break;
 
       case 4:
-         *reinterpret_cast<Uint32 *>(p) = pixel;
+         *reinterpret_cast<uint32_t *>(p) = pixel;
          break;
    }
 }
@@ -532,7 +532,7 @@ void asic_draw_sprites() {
                   // Draw pixel
                   byte p = asic.sprites[i][x][y];
                   if(p) {
-                     Uint32 pixel = GateArray.palette[p];
+                     uint32_t pixel = GateArray.palette[p];
                      for(int dx = 0; dx < mx; dx++) {
                         for(int dy = 0; dy < my * static_cast<int>(dwXScale); dy++) {
                            putpixel(back_surface, (sx+(x*mx)+dx) * dwXScale / 2, (sy+(y*my)) * dwXScale + dy, pixel);

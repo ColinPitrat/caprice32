@@ -57,7 +57,7 @@ public:
 	//! Construct a CRGBColor object from an SDL Color
 	//! \param pColorValue A pointer to the SDL Color
 	//! \param pFormat A pointer to the SDL Pixel Format
-	CRGBColor(const Uint32* pColorValue, const SDL_PixelFormat* pFormat);
+	CRGBColor(const uint32_t* pColorValue, const SDL_PixelFormat* pFormat);
 
 	//! Construct a CRGBColor object from a text string
 	//!  The string can be passed one of 2 ways.

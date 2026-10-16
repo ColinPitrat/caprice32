@@ -155,7 +155,7 @@ int SDL_SavePNG(SDL_Surface *src, const std::string& file)
   png_write_image(png_ptr, row_pointers.get());
 #else
   for (i = 0; i < surface->h; i++)
-    png_write_row(png_ptr, (png_bytep)(Uint8*)surface->pixels + i * surface->pitch);
+    png_write_row(png_ptr, (png_bytep)(uint8_t*)surface->pixels + i * surface->pitch);
 #endif
   png_write_end(png_ptr, info_ptr);
 

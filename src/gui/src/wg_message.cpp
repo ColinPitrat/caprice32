@@ -113,7 +113,7 @@ CMouseMessage::CMouseMessage(const EMessageType MessageType, const CMessageClien
 }
 
 
-unsigned int CMouseMessage::TranslateSDLButton(Uint8 SDLButton)
+unsigned int CMouseMessage::TranslateSDLButton(uint8_t SDLButton)
 {
 	unsigned int Button = 0;
 	switch (SDLButton)
@@ -136,7 +136,7 @@ unsigned int CMouseMessage::TranslateSDLButton(Uint8 SDLButton)
 }
 
 
-unsigned int CMouseMessage::TranslateSDLButtonState(Uint8 SDLButtonState)
+unsigned int CMouseMessage::TranslateSDLButtonState(uint8_t SDLButtonState)
 {
 	unsigned int Button = 0;
 	if (SDLButtonState & SDL_BUTTON(1))

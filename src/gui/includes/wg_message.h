@@ -198,10 +198,10 @@ public:
 		CPoint Point, CPoint Relative, unsigned int Button);
 
 	//! Converst an SDLButton value into an EMouseButton value
-	static unsigned int TranslateSDLButton(Uint8 SDLButton);
+	static unsigned int TranslateSDLButton(uint8_t SDLButton);
 
 	//! Converts an SDLButtonState value into an ORing of EMouseButton values
-	static unsigned int TranslateSDLButtonState(Uint8 SDLButtonState);
+	static unsigned int TranslateSDLButtonState(uint8_t SDLButtonState);
 
 	CPoint Point;  //!< The point where the mouse cursor was at the time of the message
 	CPoint Relative;  //!< The relative movement of the cursor (only valid for MOUSE_MOVE messages)

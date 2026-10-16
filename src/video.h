@@ -38,7 +38,7 @@ typedef struct video_plugin
   void (*close)();
 
   /* this plugin wants : 0 half sized pixels (320x200 screen)/1 full sized pixels (640x200 screen)*/
-  Uint8 half_pixels;
+  uint8_t half_pixels;
 
   /* mouse offset/scaling info */
   int x_offset, y_offset;
@@ -51,7 +51,7 @@ video_plugin;
 extern std::vector<video_plugin> video_plugin_list;
 
 /* Only exposed for testing purposes. Do not use. */
-void compute_rects_for_tests(SDL_Rect* src, SDL_Rect* dst, Uint8 half_pixels);
+void compute_rects_for_tests(SDL_Rect* src, SDL_Rect* dst, uint8_t half_pixels);
 
 int renderer_bpp(SDL_Renderer *sdl_renderer);
 

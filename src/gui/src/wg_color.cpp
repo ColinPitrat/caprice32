@@ -29,7 +29,7 @@
 namespace wGui
 {
 
-CRGBColor::CRGBColor(const Uint32* pColorValue, const SDL_PixelFormat* pFormat)
+CRGBColor::CRGBColor(const uint32_t* pColorValue, const SDL_PixelFormat* pFormat)
 {
 	red = stdex::safe_static_cast<unsigned char>((pFormat->Rmask & *pColorValue) >> pFormat->Rshift);
 	green = stdex::safe_static_cast<unsigned char>((pFormat->Gmask & *pColorValue) >> pFormat->Gshift);

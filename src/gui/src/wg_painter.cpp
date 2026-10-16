@@ -208,28 +208,28 @@ void CPainter::DrawPoint(const CPoint& Point, const CRGBColor& PointColor)
 	if (CRect(0, 0, m_pSurface->w, m_pSurface->h).HitTest(RealPoint) == CRect::RELPOS_INSIDE)
 	{
 		LockSurface();
-		Uint8* PixelOffset = static_cast<Uint8*>(m_pSurface->pixels) +
+		uint8_t* PixelOffset = static_cast<uint8_t*>(m_pSurface->pixels) +
 			m_pSurface->format->BytesPerPixel * RealPoint.XPos() + m_pSurface->pitch * RealPoint.YPos();
 		switch (m_pSurface->format->BytesPerPixel)
 		{
 		case 1: // 8 bpp
-			*reinterpret_cast<Uint8*>(PixelOffset) = static_cast<Uint8>(MixColor(ReadPoint(Point), PointColor).SDLColor(m_pSurface->format));
+			*reinterpret_cast<uint8_t*>(PixelOffset) = static_cast<uint8_t>(MixColor(ReadPoint(Point), PointColor).SDLColor(m_pSurface->format));
 			break;
 		case 2: // 16 bpp
-			*reinterpret_cast<Uint16*>(PixelOffset) = static_cast<Uint16>(MixColor(ReadPoint(Point), PointColor).SDLColor(m_pSurface->format));
+			*reinterpret_cast<uint16_t*>(PixelOffset) = static_cast<uint16_t>(MixColor(ReadPoint(Point), PointColor).SDLColor(m_pSurface->format));
 			break;
 		case 3:  // 24 bpp
 		{
-			Uint32 PixelColor = MixColor(ReadPoint(Point), PointColor).SDLColor(m_pSurface->format);
-			Uint8* pPixelSource = reinterpret_cast<Uint8*>(&PixelColor);
-			Uint8* pPixelDest = reinterpret_cast<Uint8*>(PixelOffset);
+			uint32_t PixelColor = MixColor(ReadPoint(Point), PointColor).SDLColor(m_pSurface->format);
+			uint8_t* pPixelSource = reinterpret_cast<uint8_t*>(&PixelColor);
+			uint8_t* pPixelDest = reinterpret_cast<uint8_t*>(PixelOffset);
 			*pPixelDest = *pPixelSource;
 			*(++pPixelDest) = *(++pPixelSource);
 			*(++pPixelDest) = *(++pPixelSource);
 			break;
 		}
 		case 4: // 32 bpp
-			*reinterpret_cast<Uint32*>(PixelOffset) = static_cast<Uint32>(MixColor(ReadPoint(Point), PointColor).SDLColor(m_pSurface->format));
+			*reinterpret_cast<uint32_t*>(PixelOffset) = static_cast<uint32_t>(MixColor(ReadPoint(Point), PointColor).SDLColor(m_pSurface->format));
 			break;
 		default:
 			throw(Wg_Ex_SDL("Unrecognized BytesPerPixel.", "CPainter::DrawPoint"));
@@ -243,30 +243,30 @@ void CPainter::DrawPoint(const CPoint& Point, const CRGBColor& PointColor)
 CRGBColor CPainter::ReadPoint(const CPoint& Point)
 {
 	CPoint RealPoint = (m_pWindow != nullptr) ? Point + m_pWindow->GetClientRect().TopLeft() : Point;
-	Uint32 PixelColor = 0;
+	uint32_t PixelColor = 0;
 	if (CRect(0, 0, m_pSurface->w, m_pSurface->h).HitTest(RealPoint) == CRect::RELPOS_INSIDE)
 	{
-		Uint8* PixelOffset = static_cast<Uint8*>(m_pSurface->pixels) +
+		uint8_t* PixelOffset = static_cast<uint8_t*>(m_pSurface->pixels) +
 			m_pSurface->format->BytesPerPixel * RealPoint.XPos() + m_pSurface->pitch * RealPoint.YPos();
 		switch (m_pSurface->format->BytesPerPixel)
 		{
 		case 1: // 8 bpp
-			PixelColor = *reinterpret_cast<Uint8*>(PixelOffset);
+			PixelColor = *reinterpret_cast<uint8_t*>(PixelOffset);
 			break;
 		case 2: // 16 bpp
-			PixelColor = *reinterpret_cast<Uint16*>(PixelOffset);
+			PixelColor = *reinterpret_cast<uint16_t*>(PixelOffset);
 			break;
 		case 3: // 24 bpp
 		{
-			Uint8* pPixelDest = reinterpret_cast<Uint8*>(&PixelColor);
-			Uint8* pPixelSource = reinterpret_cast<Uint8*>(PixelOffset);
+			uint8_t* pPixelDest = reinterpret_cast<uint8_t*>(&PixelColor);
+			uint8_t* pPixelSource = reinterpret_cast<uint8_t*>(PixelOffset);
 			*pPixelDest = *pPixelSource;
 			*(++pPixelDest) = *(++pPixelSource);
 			*(++pPixelDest) = *(++pPixelSource);
 			break;
 		}
 		case 4: // 32 bpp
-			PixelColor = *reinterpret_cast<Uint32*>(PixelOffset);
+			PixelColor = *reinterpret_cast<uint32_t*>(PixelOffset);
 			break;
 		default:
 			throw(Wg_Ex_SDL("Unrecognized BytesPerPixel.", "CPainter::DrawPoint"));

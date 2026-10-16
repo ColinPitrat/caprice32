@@ -2127,7 +2127,7 @@ bool showDevTools()
   // TODO: Find a clean way to restore the relative mouse mode when exiting all dev tools.
   // Alternatively, cleanly disable JoystickEmulation::Mouse mode here.
   SDL_SetRelativeMouseMode(SDL_bool(false));
-  Uint32 flags = SDL_GetWindowFlags(mainSDLWindow);
+  uint32_t flags = SDL_GetWindowFlags(mainSDLWindow);
   // DevTools don't behave very well in fullscreen mode, so just disallow it
   // It's still possible to use it in fullscreen with multiscreen by starting it
   // when in windowed mode, moving the window on a different screen and

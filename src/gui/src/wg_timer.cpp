@@ -29,7 +29,7 @@
 namespace wGui
 {
 
-Uint32 TimerCallback(Uint32 Interval, void* param)
+uint32_t TimerCallback(uint32_t Interval, void* param)
 {
 	return static_cast<CTimer*>(param)->TimerHit(Interval);
 }
@@ -71,7 +71,7 @@ void CTimer::StopTimer()
 }
 
 
-Uint32 CTimer::TimerHit(Uint32 Interval)
+uint32_t CTimer::TimerHit(uint32_t Interval)
 {
 	m_iCounter++;
 	Application().MessageServer()->QueueMessage(new TIntMessage(CMessage::CTRL_TIMER, m_pOwner, this, m_iCounter));

@@ -33,7 +33,7 @@ namespace wGui
 
 //! For internal use only
 //! \internal The callback used by the SDL Timer
-Uint32 TimerCallback(Uint32 Interval, void* param);
+uint32_t TimerCallback(uint32_t Interval, void* param);
 
 
 //! A simple timer class
@@ -75,7 +75,7 @@ public:
 
 	//! For internal use only
 	//! \internal This is where the SDL timer calls back to, and should not be used elsewhere
-	Uint32 TimerHit(Uint32 Interval);
+	uint32_t TimerHit(uint32_t Interval);
 
 
 	// CMessageClient overrides
