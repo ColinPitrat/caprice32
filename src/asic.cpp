@@ -193,6 +193,9 @@ void asic_dma_cycle() {
       if (channel.enabled) {
         dcsr |= (0x1 << c);
         dcsr_changed = true;
+      } else {
+        dcsr &= ~(0x1 << c);
+        dcsr_changed = true;
       }
       if (channel.int_pending) {
         dcsr |= (0x40 >> c);
