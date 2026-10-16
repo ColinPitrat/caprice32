@@ -1068,6 +1068,8 @@ void emulator_reset ()
          pbROMlo = pbCartridgePages[0];
          pbROMhi =
            pbExpansionROM = pbCartridgePages[1];
+         // On the 6128+ (and GX4000), there is no cassette port on the hardware and bit 7 of port B is pulled high.
+         bTapeLevel = TAPE_LEVEL_HIGH;
       }
    }
 
