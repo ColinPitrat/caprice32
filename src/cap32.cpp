@@ -1028,6 +1028,8 @@ int emulator_patch_ROM ()
    } else { // Plus range
       if (pbCartridgePages[0] != nullptr) {
          pbROMlo = pbCartridgePages[0];
+         pbROMhi =
+           pbExpansionROM = pbCartridgePages[1];
       }
    }
 
@@ -1064,6 +1066,8 @@ void emulator_reset ()
    if (CPC.model > 2) {
       if (pbCartridgePages[0] != nullptr) {
          pbROMlo = pbCartridgePages[0];
+         pbROMhi =
+           pbExpansionROM = pbCartridgePages[1];
       }
    }
 
@@ -1091,7 +1095,7 @@ void emulator_reset ()
 // Gate Array
    memset(&GateArray, 0, sizeof(GateArray)); // clear GA data structure
    GateArray.scr_mode =
-   GateArray.requested_scr_mode = 1; // set to mode 1
+     GateArray.requested_scr_mode = 1; // set to mode 1
    GateArray.registerPageOn = false;
    GateArray.lower_ROM_bank = 0;
    ga_init_banking(membank_config, GateArray.RAM_bank);
@@ -1159,7 +1163,7 @@ int emulator_init ()
    pbRegisterPage = new byte [16*1024];
    pbROMlo = pbROM;
    pbROMhi =
-   pbExpansionROM = pbROM + 16384;
+     pbExpansionROM = pbROM + 16384;
    memset(memmap_ROM, 0, sizeof(memmap_ROM[0]) * 256); // clear the expansion ROM map
    ga_init_banking(membank_config, GateArray.RAM_bank); // init the CPC memory banking map
    if ((iErr = emulator_patch_ROM())) {
@@ -1662,7 +1666,7 @@ int video_init ()
    CPC.scr_bps = back_surface->pitch; // rendered screen line length in bytes
    CPC.scr_line_offs = CPC.scr_bps * dwYScale;
    CPC.scr_pos =
-   CPC.scr_base = static_cast<byte *>(back_surface->pixels); // memory address of back buffer
+     CPC.scr_base = static_cast<byte *>(back_surface->pixels); // memory address of back buffer
    CPC.scr_gui_is_currently_on = false;
 
    crtc_init();
@@ -1885,13 +1889,13 @@ void loadConfiguration (t_CPC &CPC, const std::string& configFilename)
 
    CPC.max_tracksize = conf.getIntValue("file", "max_track_size", 6144-154);
    CPC.current_snap_path =
-   CPC.snap_path = conf.getStringValue("file", "snap_path", appPath + "/snap/");
+     CPC.snap_path = conf.getStringValue("file", "snap_path", appPath + "/snap/");
    CPC.current_cart_path =
-   CPC.cart_path = conf.getStringValue("file", "cart_path", appPath + "/cart/");
+     CPC.cart_path = conf.getStringValue("file", "cart_path", appPath + "/cart/");
    CPC.current_dsk_path =
-   CPC.dsk_path = conf.getStringValue("file", "dsk_path", appPath + "/disk/");
+     CPC.dsk_path = conf.getStringValue("file", "dsk_path", appPath + "/disk/");
    CPC.current_tape_path =
-   CPC.tape_path = conf.getStringValue("file", "tape_path", appPath + "/tape/");
+     CPC.tape_path = conf.getStringValue("file", "tape_path", appPath + "/tape/");
 
    int iFmt = FIRST_CUSTOM_DISK_FORMAT;
    for (int i = iFmt; i < MAX_DISK_FORMAT; i++) { // loop through all user definable disk formats
