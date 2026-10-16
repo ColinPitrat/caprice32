@@ -1102,6 +1102,7 @@ void emulator_reset ()
 
 // PPI
    memset(&PPI, 0, sizeof(PPI)); // clear PPI data structure
+   PPI.control = 0x9b; // all ports set to input on reset
 
 // PSG
    PSG.control = 0;
@@ -1355,6 +1356,10 @@ void bin_load (const std::string& filename, const size_t offset)
   z80.IFF2 = 1;
   z80.IM = 1;
 
+  // During normal boot, CPC sets port control to 0x82.
+  // This could have changed for other reasons in a regular session, so any
+  // decent program wouldn't rely on that, but is a safe default.
+  PPI.control = 0x82;
   // Technically we should also reset PSG registers, clear sound queues, clear sound ticker event chains.
   // But in practice, because we just booted, this should all be zeroed already.
 
