@@ -28,6 +28,8 @@ struct asic_color_t {
 
 asic_color_t asic_colours[32];
 
+static const word dcsr_addr = 0x6C0F;
+
 inline void asic_reset_dma_channel(int c) {
   asic.dma.ch[c].source_address = 0;
   asic.dma.ch[c].loop_address = 0;
@@ -109,6 +111,22 @@ static inline unsigned short decode_magnification(byte val) {
    return mag;
 }
 
+byte asic_read_dcsr() {
+  return *(membank_write[dcsr_addr >> 14] + (dcsr_addr & 0x3fff));
+}
+
+void asic_update_dcsr(byte val) {
+  // Write back the DCSR value over all DMA registers.
+  // Because the ASIC only decodes the upper address bits when reading from
+  // the DMA register block (&6c00–&6c0f), reading any address in &6c00–&6c0f
+  // returns the value of DCSR (&6c0f).
+  // Writing the DCSR at all these addresses rather than handling this special
+  // case on the read path allows for faster reads.
+  for (auto addr = dcsr_addr & 0xfff0; addr <= dcsr_addr; addr++) {
+    *(membank_write[addr >> 14] + (addr & 0x3fff)) = val;
+  }
+}
+
 void asic_dma_cycle() {
   // Use the DMA info to feed PSG from RAM:
   // Read one 16bits instruction for each enabled channel X at each scan line and execute it.
@@ -123,8 +141,7 @@ void asic_dma_cycle() {
   //  - STOP set chX.enabled to false ? (still increment address for when processing will restart)
   //  The last 4 can be OR-ed to be combined
 
-  word dcsr_addr = 0x6C0F;
-  byte dcsr = *(membank_write[dcsr_addr >> 14] + (dcsr_addr & 0x3fff));
+  byte dcsr = asic_read_dcsr();
   bool dcsr_changed = false;
   for(int c = 0; c < NB_DMA_CHANNELS; c++) {
     dma_channel &channel = asic.dma.ch[c];
@@ -182,14 +199,7 @@ void asic_dma_cycle() {
       }
     }
     channel.source_address += 2;
-    // TODO: cleaner way to modify back the register value here ...
     {
-      word addr = 0x6C00 + (c << 2);
-      *(membank_write[addr >> 14] + (addr & 0x3fff)) = static_cast<byte>(channel.source_address & 0xFF);
-      addr++;
-      *(membank_write[addr >> 14] + (addr & 0x3fff)) = static_cast<byte>((channel.source_address & 0xFF00) >> 8);
-      addr++;
-      *(membank_write[addr >> 14] + (addr & 0x3fff)) = channel.prescaler;
       if (channel.enabled) {
         dcsr |= (0x1 << c);
         dcsr_changed = true;
@@ -203,11 +213,10 @@ void asic_dma_cycle() {
       }
     }
   }
-  // TODO: ... and here
   // Run RAM test of testplus.cpr when touching this (this is not a guarantee that this is correct but at least it's a guarantee that it's less wrong ! cf issue #40)
   if (dcsr_changed)
   {
-    *(membank_write[dcsr_addr >> 14] + (dcsr_addr & 0x3fff)) = dcsr;
+    asic_update_dcsr(dcsr);
   }
 }
 
@@ -439,8 +448,7 @@ bool asic_register_page_write(word addr, byte val) {
    } else if (addr == 0x6C0F) {
       LOG_DEBUG("Received DMA control register: " << std::hex << static_cast<int>(val) << std::dec);
       // TODO: Factorized DCSR maintenance logic in a dedicated function.
-      word dcsr_addr = 0x6C0F;
-      byte dcsr = *(membank_write[dcsr_addr >> 14] + (dcsr_addr & 0x3fff));
+      byte dcsr = asic_read_dcsr();
       for (int c = 0; c < NB_DMA_CHANNELS; c++) {
         asic.dma.ch[c].enabled = (val & (0x1 << c));
         if (asic.dma.ch[c].enabled) {
@@ -456,7 +464,7 @@ bool asic_register_page_write(word addr, byte val) {
         }
         LOG_DEBUG("DMA channel " << c << (asic.dma.ch[c].enabled ? " enabled" : " disabled"))
       }
-      *(membank_write[dcsr_addr >> 14] + (dcsr_addr & 0x3fff)) = dcsr;
+      asic_update_dcsr(dcsr);
       return false;
    } else {
       LOG_DEBUG("Received unused write at " << std::hex << addr << " - val: " << static_cast<int>(val) << std::dec);

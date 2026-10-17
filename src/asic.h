@@ -54,6 +54,8 @@ extern byte *pbRegisterPage;
 
 void asic_reset();
 void asic_poke_lock_sequence(byte val);
+byte asic_read_dcsr();
+void asic_update_dcsr(byte val);
 void asic_dma_cycle();
 byte asic_get_interrupt_vector();
 void asic_set_palette();

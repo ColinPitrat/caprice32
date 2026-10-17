@@ -678,8 +678,7 @@ inline void match_hsw()
          z80.int_pending = 1;
          asic.raster_int_pending = true;
          // Set the bit for the raster interrupt in DCSR.
-         word dcsr_addr = 0x6C0F;
-         *(membank_write[dcsr_addr >> 14] + (dcsr_addr & 0x3fff)) |= 0x80;
+         asic_update_dcsr(asic_read_dcsr() | 0x80);
       }
       if (GateArray.hs_count) { // delaying on VSYNC?
          GateArray.hs_count--;
