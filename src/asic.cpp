@@ -303,7 +303,7 @@ bool asic_register_page_write(word addr, byte val) {
       asic.sprites[id][x][y] = color;
       //LOG_DEBUG("Received sprite data for sprite " << id << ": x=" << x << ", y=" << y << ", color=" << static_cast<int>(val));
       return false;
-   } else if (addr >= 0x6000 && addr < 0x607D) {
+   } else if (addr >= 0x6000 && addr < 0x6080) {
       int id = ((addr - 0x6000) >> 3);
       int type = (addr & 0x7);
       switch (type) {
@@ -330,11 +330,15 @@ bool asic_register_page_write(word addr, byte val) {
                x &= 0x03FF;
                if (x > 767) x |= 0xFC00; // Sign-extend bit 10
                asic.sprites_x[id] = static_cast<int16_t>(x);
+
+               // Sign-extended high byte written to ASIC registers.
+               pbRegisterPage[(addr & 0x3FFF)] = static_cast<byte>(x >> 8);
+               // Mirrored in RAM image 4 bytes after
+               pbRegisterPage[(addr & 0x3FFF) + 4] = static_cast<byte>(x >> 8);
             }
             LOG_DEBUG("Received sprite X (MSB=" << static_cast<uint16_t>(val) << ") for sprite " << id << " x=" << asic.sprites_x[id]);
-            // Mirrored in RAM image 4 bytes after
-            pbRegisterPage[(addr & 0x3FFF) + 4] = val;
-            break;
+            // We handled writing the sign-extended value.
+            return false;
          case 2:
             // Y position
             {
@@ -354,11 +358,15 @@ bool asic_register_page_write(word addr, byte val) {
                y &= 0x01FF;
                if (y > 255) y |= 0xFE00; // Sign-extend bit 8
                asic.sprites_y[id] = static_cast<int16_t>(y);
+
+               // Sign-extended high byte written to ASIC registers.
+               pbRegisterPage[(addr & 0x3FFF)] = static_cast<byte>(y >> 8);
+               // Mirrored in RAM image 4 bytes after
+               pbRegisterPage[(addr & 0x3FFF) + 4] = val;
             }
             LOG_DEBUG("Received sprite Y (MSB=" << static_cast<uint16_t>(val) << ") for sprite " << id << " y=" << asic.sprites_y[id]);
-            // Mirrored in RAM image 4 bytes after
-            pbRegisterPage[(addr & 0x3FFF) + 4] = val;
-            break;
+            // We handled writing the sign-extended value.
+            return false;
          case 4:
             // Magnification
             asic.sprites_mag_x[id] = decode_magnification(val >> 2);
@@ -370,7 +378,7 @@ bool asic_register_page_write(word addr, byte val) {
             // This is only a LOG_DEBUG because this happens on Burnin' Rubber which is likely
             // copying a whole memory area rather than only meaningful bytes.
             LOG_DEBUG("Received sprite operation of unsupported type: " << type << " addr=" << std::hex << addr << " - val=" << static_cast<int>(val) << std::dec);
-            break;
+            return false;
       }
    } else if (addr >= 0x6400 && addr < 0x6440) {
       int colour = (addr & 0x3F) >> 1;
