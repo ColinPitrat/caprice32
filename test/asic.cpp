@@ -192,11 +192,40 @@ TEST_F(AsicTest, AsicDMACycleWriteBackDCSR)
   asic.dma.ch[0].source_address = 0x0;
 
   EXPECT_EQ(0, *(membank_write[1] + 0x2c00));
+  EXPECT_EQ(0, *(membank_write[1] + 0x2c01));
+  EXPECT_EQ(0, *(membank_write[1] + 0x2c02));
+  EXPECT_EQ(0, *(membank_write[1] + 0x2c03));
+  EXPECT_EQ(0, *(membank_write[1] + 0x2c04));
+  EXPECT_EQ(0, *(membank_write[1] + 0x2c05));
+  EXPECT_EQ(0, *(membank_write[1] + 0x2c06));
+  EXPECT_EQ(0, *(membank_write[1] + 0x2c07));
+  EXPECT_EQ(0, *(membank_write[1] + 0x2c08));
+  EXPECT_EQ(0, *(membank_write[1] + 0x2c09));
+  EXPECT_EQ(0, *(membank_write[1] + 0x2c0a));
+  EXPECT_EQ(0, *(membank_write[1] + 0x2c0b));
+  EXPECT_EQ(0, *(membank_write[1] + 0x2c0c));
+  EXPECT_EQ(0, *(membank_write[1] + 0x2c0d));
+  EXPECT_EQ(0, *(membank_write[1] + 0x2c0e));
   EXPECT_EQ(0, *(membank_write[1] + 0x2c0f));
 
   asic_dma_cycle();
 
-  EXPECT_EQ(2, *(membank_write[1] + 0x2c00));
+  // All DMA registers reflect the DCSR register value.
+  EXPECT_EQ(1, *(membank_write[1] + 0x2c00));
+  EXPECT_EQ(1, *(membank_write[1] + 0x2c01));
+  EXPECT_EQ(1, *(membank_write[1] + 0x2c02));
+  EXPECT_EQ(1, *(membank_write[1] + 0x2c03));
+  EXPECT_EQ(1, *(membank_write[1] + 0x2c04));
+  EXPECT_EQ(1, *(membank_write[1] + 0x2c05));
+  EXPECT_EQ(1, *(membank_write[1] + 0x2c06));
+  EXPECT_EQ(1, *(membank_write[1] + 0x2c07));
+  EXPECT_EQ(1, *(membank_write[1] + 0x2c08));
+  EXPECT_EQ(1, *(membank_write[1] + 0x2c09));
+  EXPECT_EQ(1, *(membank_write[1] + 0x2c0a));
+  EXPECT_EQ(1, *(membank_write[1] + 0x2c0b));
+  EXPECT_EQ(1, *(membank_write[1] + 0x2c0c));
+  EXPECT_EQ(1, *(membank_write[1] + 0x2c0d));
+  EXPECT_EQ(1, *(membank_write[1] + 0x2c0e));
   EXPECT_EQ(1, *(membank_write[1] + 0x2c0f));
 }
 
