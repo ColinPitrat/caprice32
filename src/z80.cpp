@@ -344,6 +344,19 @@ inline byte read_mem(word addr) {
       z80.watchpoint_reached = 1;
     }
   }
+  // PERF_ACCURACY_BALANCE: This is very likely not important for accuracy but
+  // could negatively impact performances.
+  // If introducing a compile-time "performance mode", this would be a good
+  // candidate to make optional.
+  if (GateArray.registerPageOn && (addr & 0xC000) == 0x4000) {
+    if ((addr >= 0x5000 && addr < 0x6000) ||
+        (addr >= 0x6080 && addr < 0x6400) ||
+        (addr >= 0x6440 && addr < 0x6808) ||
+        (addr >= 0x6810 && addr < 0x6C00) ||
+        (addr >= 0x6C10)) {
+      return read_mem_no_watchpoint(z80.PC.w.l - 1);
+    }
+  }
   return read_mem_no_watchpoint(addr);
 }
 
