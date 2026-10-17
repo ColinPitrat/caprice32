@@ -377,11 +377,112 @@ void ga_memory_manager ()
 
 
 
+void gate_array_port_write(byte val)
+{
+   switch (val >> 6) {
+      case 0: // select pen
+         #ifdef DEBUG_GA
+         if (dwDebugFlag) {
+            fprintf(pfoDebug, "pen 0x%02x\r\n", val);
+         }
+         #endif
+         GateArray.pen = val & 0x10 ? 0x10 : val & 0x0f; // if bit 5 is set, pen indexes the border colour
+         LOG_DEBUG("Set pen value to " << static_cast<int>(GateArray.pen));
+         if (CPC.mf2) { // MF2 enabled?
+            *(pbMF2ROM + 0x03fcf) = val;
+         }
+         break;
+      case 1: // set colour
+         #ifdef DEBUG_GA
+         if (dwDebugFlag) {
+            fprintf(pfoDebug, "clr 0x%02x\r\n", val);
+         }
+         #endif
+         {
+            byte colour = val & 0x1f; // isolate colour value
+            LOG_DEBUG("Set ink value " << static_cast<int>(GateArray.pen) << " to " << static_cast<int>(colour));
+            GateArray.ink_values[GateArray.pen] = colour;
+            GateArray.palette[GateArray.pen] = SDL_MapRGB(back_surface->format,
+                  colours[colour].r, colours[colour].g, colours[colour].b);
+            if (GateArray.pen < 2) {
+               byte r = (static_cast<dword>(colours[GateArray.ink_values[0]].r) + static_cast<dword>(colours[GateArray.ink_values[1]].r)) >> 1;
+               byte g = (static_cast<dword>(colours[GateArray.ink_values[0]].g) + static_cast<dword>(colours[GateArray.ink_values[1]].g)) >> 1;
+               byte b = (static_cast<dword>(colours[GateArray.ink_values[0]].b) + static_cast<dword>(colours[GateArray.ink_values[1]].b)) >> 1;
+               GateArray.palette[33] = SDL_MapRGB(back_surface->format, r, g, b); // update the mode 2 'anti-aliasing' colour
+            }
+            if (CPC.model > 2 && pbRegisterPage != nullptr) {
+              auto to_asic_nibble = [](double c) -> byte {
+                return (c == 0.0) ? 0x0 : ((c == 1.0) ? 0xf : 0x6);
+              };
+              byte r_nib = to_asic_nibble(colours_rgb[colour][0]);
+              byte g_nib = to_asic_nibble(colours_rgb[colour][1]);
+              byte b_nib = to_asic_nibble(colours_rgb[colour][2]);
+              pbRegisterPage[0x2400 + GateArray.pen * 2]     = (r_nib << 4) | b_nib;
+              pbRegisterPage[0x2400 + GateArray.pen * 2 + 1] = g_nib;
+            }
+         }
+         if (CPC.mf2) { // MF2 enabled?
+            int iPen = *(pbMF2ROM + 0x03fcf);
+            *(pbMF2ROM + (0x03f90 | ((iPen & 0x10) << 2) | (iPen & 0x0f))) = val;
+         }
+         break;
+      case 2: // set mode
+         if (!asic.locked && (val & 0x20)) {
+            // 6128+ RMR2 register
+            int membank = (val >> 3) & 3;
+            if (membank == 3) { // Map register page at 0x4000
+               LOG_DEBUG("Register page on");
+               GateArray.registerPageOn = true;
+               membank = 0;
+            } else {
+               LOG_DEBUG("Register page off");
+               GateArray.registerPageOn = false;
+            }
+            int page = (val & 0x7);
+            LOG_DEBUG("RMR2: Low bank rom = 0x" << std::hex << (4*membank) << std::dec << "000 - page " << page);
+            GateArray.lower_ROM_bank = membank;
+            pbROMlo = pbCartridgePages[page];
+            ga_memory_manager();
+         } else {
+            #ifdef DEBUG_GA
+            if (dwDebugFlag) {
+               fprintf(pfoDebug, "rom 0x%02x\r\n", val);
+            }
+            #endif
+            LOG_DEBUG("MRER: ROM config = " << std::hex << static_cast<int>(val) << std::dec << " - mode=" << static_cast<int>(val & 0x03));
+            GateArray.ROM_config = val;
+            GateArray.requested_scr_mode = val & 0x03; // request a new CPC screen mode
+            ga_memory_manager();
+            if (val & 0x10) { // delay Z80 interrupt?
+               z80.int_pending = 0; // clear pending interrupts
+               GateArray.sl_count = 0; // reset GA scanline counter
+            }
+            if (CPC.mf2) { // MF2 enabled?
+               *(pbMF2ROM + 0x03fef) = val;
+            }
+         }
+         break;
+      case 3:
+         // Reading https://www.cpcwiki.eu/index.php/Gate_Array
+         // suggests this should set memory configuration but actually this is contradicted by:
+         //  - http://cpctech.cpc-live.com/docs/rampage.html
+         //  - https://www.cpcwiki.eu/index.php/I/O_Port_Summary
+         //  - https://www.cpcwiki.eu/index.php/Default_I/O_Port_Summary
+         // which tell that this is controlled by address at %0xxxxxxx xxxxxxxx
+         // so this is handled separately in z80_OUT_handler
+         break;
+   }
+}
+
+
+
 byte z80_IN_handler (reg_pair port)
 {
-   byte ret_val;
+   // Default return value is:
+   //  - 0xff on regular CPC (pull-up resistors on the bus)
+   //  - last byte fetched from memory on Plus (floating bus)
+   byte ret_val = (CPC.model > 2) ? z80_read_mem(z80.PC.w.l - 1) : 0xff;
 
-   ret_val = 0xff; // default return value
 // CRTC -----------------------------------------------------------------------
    if (!(port.b.h & 0x40)) { // CRTC chip select?
       if ((port.b.h & 3) == 3) { // read CRTC register?
@@ -480,6 +581,13 @@ byte z80_IN_handler (reg_pair port)
    else if (CPC.net4cpc && port.b.h == 0xfd) { // Net4CPC chip select?
       ret_val = net4cpc_in(port.b.l & 0x03);
    }
+
+   // Gate Array does not check /RD or /WR => any IN instruction cause the GA to
+   // latch in the byte on the data bus.
+   if ((port.b.h & 0xc0) == 0x40) { // GA chip select?
+      gate_array_port_write(ret_val);
+   }
+
    LOG_DEBUG("IN on port " << std::hex << static_cast<int>(port.w.l) << ", ret_val=" << static_cast<int>(ret_val) << std::dec);
    return ret_val;
 }
@@ -497,99 +605,7 @@ void z80_OUT_handler (reg_pair port, byte val)
    }
 // Gate Array -----------------------------------------------------------------
    if ((port.b.h & 0xc0) == 0x40) { // GA chip select?
-      switch (val >> 6) {
-         case 0: // select pen
-            #ifdef DEBUG_GA
-            if (dwDebugFlag) {
-               fprintf(pfoDebug, "pen 0x%02x\r\n", val);
-            }
-            #endif
-            GateArray.pen = val & 0x10 ? 0x10 : val & 0x0f; // if bit 5 is set, pen indexes the border colour
-            LOG_DEBUG("Set pen value to " << static_cast<int>(GateArray.pen));
-            if (CPC.mf2) { // MF2 enabled?
-               *(pbMF2ROM + 0x03fcf) = val;
-            }
-            break;
-         case 1: // set colour
-            #ifdef DEBUG_GA
-            if (dwDebugFlag) {
-               fprintf(pfoDebug, "clr 0x%02x\r\n", val);
-            }
-            #endif
-            {
-               byte colour = val & 0x1f; // isolate colour value
-               LOG_DEBUG("Set ink value " << static_cast<int>(GateArray.pen) << " to " << static_cast<int>(colour));
-               GateArray.ink_values[GateArray.pen] = colour;
-               GateArray.palette[GateArray.pen] = SDL_MapRGB(back_surface->format,
-                     colours[colour].r, colours[colour].g, colours[colour].b);
-               if (GateArray.pen < 2) {
-                  byte r = (static_cast<dword>(colours[GateArray.ink_values[0]].r) + static_cast<dword>(colours[GateArray.ink_values[1]].r)) >> 1;
-                  byte g = (static_cast<dword>(colours[GateArray.ink_values[0]].g) + static_cast<dword>(colours[GateArray.ink_values[1]].g)) >> 1;
-                  byte b = (static_cast<dword>(colours[GateArray.ink_values[0]].b) + static_cast<dword>(colours[GateArray.ink_values[1]].b)) >> 1;
-                  GateArray.palette[33] = SDL_MapRGB(back_surface->format, r, g, b); // update the mode 2 'anti-aliasing' colour
-               }
-               if (CPC.model > 2 && pbRegisterPage != nullptr) {
-                 auto to_asic_nibble = [](double c) -> byte {
-                   return (c == 0.0) ? 0x0 : ((c == 1.0) ? 0xf : 0x6);
-                 };
-                 byte r_nib = to_asic_nibble(colours_rgb[colour][0]);
-                 byte g_nib = to_asic_nibble(colours_rgb[colour][1]);
-                 byte b_nib = to_asic_nibble(colours_rgb[colour][2]);
-                 pbRegisterPage[0x2400 + GateArray.pen * 2]     = (r_nib << 4) | b_nib;
-                 pbRegisterPage[0x2400 + GateArray.pen * 2 + 1] = g_nib;
-               }
-            }
-            if (CPC.mf2) { // MF2 enabled?
-               int iPen = *(pbMF2ROM + 0x03fcf);
-               *(pbMF2ROM + (0x03f90 | ((iPen & 0x10) << 2) | (iPen & 0x0f))) = val;
-            }
-            break;
-         case 2: // set mode
-            if (!asic.locked && (val & 0x20)) {
-               // 6128+ RMR2 register
-               int membank = (val >> 3) & 3;
-               if (membank == 3) { // Map register page at 0x4000
-                  LOG_DEBUG("Register page on");
-                  GateArray.registerPageOn = true;
-                  membank = 0;
-               } else {
-                  LOG_DEBUG("Register page off");
-                  GateArray.registerPageOn = false;
-               }
-               int page = (val & 0x7);
-               LOG_DEBUG("RMR2: Low bank rom = 0x" << std::hex << (4*membank) << std::dec << "000 - page " << page);
-               GateArray.lower_ROM_bank = membank;
-               pbROMlo = pbCartridgePages[page];
-               ga_memory_manager();
-            } else {
-               #ifdef DEBUG_GA
-               if (dwDebugFlag) {
-                  fprintf(pfoDebug, "rom 0x%02x\r\n", val);
-               }
-               #endif
-               LOG_DEBUG("MRER: ROM config = " << std::hex << static_cast<int>(val) << std::dec << " - mode=" << static_cast<int>(val & 0x03));
-               GateArray.ROM_config = val;
-               GateArray.requested_scr_mode = val & 0x03; // request a new CPC screen mode
-               ga_memory_manager();
-               if (val & 0x10) { // delay Z80 interrupt?
-                  z80.int_pending = 0; // clear pending interrupts
-                  GateArray.sl_count = 0; // reset GA scanline counter
-               }
-               if (CPC.mf2) { // MF2 enabled?
-                  *(pbMF2ROM + 0x03fef) = val;
-               }
-            }
-            break;
-         case 3:
-            // Reading https://www.cpcwiki.eu/index.php/Gate_Array
-            // suggests this should set memory configuration but actually this is contradicted by:
-            //  - http://cpctech.cpc-live.com/docs/rampage.html
-            //  - https://www.cpcwiki.eu/index.php/I/O_Port_Summary
-            //  - https://www.cpcwiki.eu/index.php/Default_I/O_Port_Summary
-            // which tell that this is controlled by address at %0xxxxxxx xxxxxxxx
-            // so this is handled separately below
-            break;
-      }
+     gate_array_port_write(val);
    }
 // Memory configuration -------------------------------------------------------
    if (!(port.b.h & 0x80) && (val & 0xc0) == 0xc0) {
