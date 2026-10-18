@@ -304,6 +304,9 @@ TEST_F(AsicTest, SpriteCoordinatesSignExtension)
 
 TEST_F(AsicTest, InterruptVectorBit0AutoClear)
 {
+   // DCSR is at 0x6C0F, we need memory allocated there.
+   std::vector<byte> membank1(0x4000, 0);
+   membank_write[1] = &membank1[0];
    asic_reset();
 
    // On reset, IVR bit 0 should be 1 (manual clear)
