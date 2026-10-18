@@ -115,6 +115,23 @@ byte asic_read_dcsr() {
   return *(membank_write[dcsr_addr >> 14] + (dcsr_addr & 0x3fff));
 }
 
+byte asic_compute_dcsr() {
+  byte dcsr = asic_read_dcsr();
+  for (int c = 0; c < NB_DMA_CHANNELS; c++) {
+    if (asic.dma.ch[c].enabled) {
+      dcsr |= (0x1 << c);
+    } else {
+      dcsr &= ~(0x1 << c);
+    }
+    if (asic.dma.ch[c].int_pending) {
+      dcsr |= (0x40 >> c);
+    } else {
+      dcsr &= ~(0x40 >> c);
+    }
+  }
+  return dcsr;
+}
+
 void asic_update_dcsr(byte val) {
   // Write back the DCSR value over all DMA registers.
   // Because the ASIC only decodes the upper address bits when reading from
@@ -258,6 +275,7 @@ byte asic_get_interrupt_vector() {
   if (more_pending) {
     z80.int_pending = true;
   }
+  asic_update_dcsr(asic_compute_dcsr());
   return return_value;
 }
 
@@ -455,7 +473,7 @@ bool asic_register_page_write(word addr, byte val) {
      }
    } else if (addr == 0x6C0F) {
       LOG_DEBUG("Received DMA control register: " << std::hex << static_cast<int>(val) << std::dec);
-      // TODO: Factorized DCSR maintenance logic in a dedicated function.
+      // TODO: Factorize DCSR maintenance logic by using asic_compute_dcsr here.
       byte dcsr = asic_read_dcsr();
       for (int c = 0; c < NB_DMA_CHANNELS; c++) {
         asic.dma.ch[c].enabled = (val & (0x1 << c));

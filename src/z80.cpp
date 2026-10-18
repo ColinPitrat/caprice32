@@ -974,6 +974,8 @@ inline byte SRL(byte val) {
          if (iWSAdjust) { \
             iCycleCount -= 4; \
          } \
+         /* Only to clear interrupt in the ASIC */ \
+         asic_get_interrupt_vector(); \
          RST(0x0038); \
          z80_wait_states \
       } \
