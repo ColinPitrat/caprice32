@@ -10,10 +10,12 @@ extern bool log_verbose;
 #define LOG_ERROR(message) LOG_TO(std::cerr, "ERROR  ", message)
 #define LOG_WARNING(message) LOG_TO(std::cerr, "WARNING", message)
 #define LOG_INFO(message) LOG_TO(std::cerr, "INFO   ", message)
-#define LOG_VERBOSE(message) if(log_verbose) { LOG_TO(std::cout, "VERBOSE", message) }
+// Diagnostics go to stderr so that stdout stays clean for tool-friendly output
+// (e.g. the single integer printed by --benchmark, regardless of -v / arg order).
+#define LOG_VERBOSE(message) if(log_verbose) { LOG_TO(std::cerr, "VERBOSE", message) }
 
 #ifdef DEBUG
-#define LOG_DEBUG(message) if(log_verbose) { LOG_TO(std::cout, "DEBUG  ", message) }
+#define LOG_DEBUG(message) if(log_verbose) { LOG_TO(std::cerr, "DEBUG  ", message) }
 #else
 #define LOG_DEBUG(message)
 #endif
