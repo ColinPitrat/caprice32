@@ -45,6 +45,7 @@ jobs:
             git
             make
             zip
+            ${{matrix.mingw}}/mingw-w64-${{matrix.env}}-ffmpeg
             ${{matrix.mingw}}/mingw-w64-${{matrix.env}}-freetype
             ${{matrix.mingw}}/mingw-w64-${{matrix.env}}-libpng
             ${{matrix.mingw}}/mingw-w64-${{matrix.env}}-pkg-config

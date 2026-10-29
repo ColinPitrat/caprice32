@@ -15,7 +15,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - run: sudo apt-get update
-      - run: sudo apt-get install pkg-config libsdl2-dev libfreetype6-dev zlib1g-dev libpng-dev devscripts
+      - run: sudo apt-get install pkg-config libsdl2-dev libfreetype6-dev zlib1g-dev libpng-dev devscripts ffmpeg
 
       - run: make -j 3
       - run: make -j 3 unit_test
