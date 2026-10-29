@@ -480,16 +480,20 @@ int dsk_load (FILE *pfile, t_drive *drive)
   if (memcmp(pbPtr, "MV - CPC", 8) == 0) { // normal DSK image?
     LOG_DEBUG("Loading normal disk");
     drive->tracks = *(pbPtr + 0x30); // grab number of tracks
+    LOG_DEBUG("with " << drive->tracks << " tracks");
     if (drive->tracks > DSK_TRACKMAX) { // compare against upper limit
       drive->tracks = DSK_TRACKMAX; // limit to maximum
+      LOG_DEBUG("  limited to " << drive->tracks << " tracks");
     }
     drive->sides = *(pbPtr + 0x31); // grab number of sides
+    LOG_DEBUG("with " << drive->sides << " sides");
     if (drive->sides > DSK_SIDEMAX) { // abort if more than maximum
       LOG_ERROR("DSK header has " << drive->sides << " sides, expected " << DSK_SIDEMAX << " or less");
       dsk_eject(drive);
       return ERR_DSK_SIDES;
     }
     dwTrackSize = (*(pbPtr + 0x32) + (*(pbPtr + 0x33) << 8)) - 0x100; // determine track size in bytes, minus track header
+    LOG_DEBUG("  track size = " << dwTrackSize);
     drive->sides--; // zero base number of sides
     for (track = 0; track < drive->tracks; track++) { // loop for all tracks
       for (side = 0; side <= drive->sides; side++) { // loop for all sides
@@ -512,6 +516,7 @@ int dsk_load (FILE *pfile, t_drive *drive)
           dsk_eject(drive);
           return ERR_DSK_SECTORS;
         }
+        LOG_DEBUG("  track " << track << ", side " << side << ", sectors=" << dwSectors << ", sectors size=" << dwSectorSize);
         drive->track[track][side].sectors = dwSectors; // store sector count
         drive->track[track][side].size = dwTrackSize; // store track size
         drive->track[track][side].data = new byte[dwTrackSize]; // attempt to allocate the required memory
@@ -629,6 +634,7 @@ int dsk_load (const std::string &filename, t_drive *drive)
    }
 
    if (iRetCode != 0) { // on error, 'eject' disk from drive
+      LOG_ERROR("Error loading DSK: " << filename);
       dsk_eject(drive);
    }
    return iRetCode;
