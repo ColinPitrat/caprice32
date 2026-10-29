@@ -151,6 +151,7 @@ void parseArguments(int argc, char **argv, std::vector<std::string>& slot_list, 
                 LOG_ERROR("Couldn't parse override: '" << opt << "'");
               } else {
                 args.cfgOverrides[section][item] = value;
+                // TODO: Error if the section or item doesn't exist.
                 LOG_INFO("Override configuration: " << section << "." << item << " = " << value);
               }
               break;
