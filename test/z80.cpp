@@ -102,4 +102,18 @@ TEST_F(Z80Test, SqrtRoutine)
   EXPECT_EQ(10, _A);
 }
 
+TEST(Z80RegTest, RegPairCombined)
+{
+  reg_pair reg;
+
+  reg.b.l = 0x67;
+  reg.b.h = 0x45;
+  reg.b.h2 = 0x23;
+  reg.b.h3 = 0x01;
+
+  EXPECT_EQ(0x4567, reg.w.l);
+  EXPECT_EQ(0x0123, reg.w.h);
+  EXPECT_EQ(0x01234567, reg.d);
+}
+
 }
