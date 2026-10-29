@@ -2856,6 +2856,14 @@ int cap32_main (int argc, char **argv)
 
    // Fill the buffer with autocmd if provided
    virtualKeyboardEvents = CPC.InputMapper->StringToEvents(args.autocmd);
+   size_t bin_load_init_events = 0;
+   if (!args.binFile.empty() && CPC.model > 2 &&
+       std::filesystem::path(CPC.cartridge.file).filename() == "system.cpr") {
+      // On Plus with default system.cpr, select BASIC (F1) and wait for init before bin_load
+      auto initEvents = CPC.InputMapper->StringToEvents(replaceCap32Keys("CPC_F1CAP32_DELAY"));
+      bin_load_init_events = initEvents.size();
+      virtualKeyboardEvents.splice(virtualKeyboardEvents.begin(), initEvents);
+   }
    // Give some time to the CPC to start before sending any command
    nextVirtualEventFrameCount = dwFrameCountOverall + CPC.boot_time;
 
@@ -2873,7 +2881,8 @@ int cap32_main (int argc, char **argv)
    while (true) {
       // We can only load bin files after the CPC finished the init
       if (!bin_loaded &&
-          dwFrameCountOverall > CPC.boot_time) {
+          bin_load_init_events == 0 &&
+          nextVirtualEventFrameCount < dwFrameCountOverall) {
           bin_loaded = true;
           if (!args.binFile.empty()) bin_load(args.binFile, args.binOffset);
       }
@@ -2903,6 +2912,7 @@ int cap32_main (int argc, char **argv)
          }
 
          virtualKeyboardEvents.pop_front();
+         if (bin_load_init_events > 0) bin_load_init_events--;
       }
 
       if (!devtools.empty()) {
