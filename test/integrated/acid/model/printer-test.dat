@@ -1,0 +1,37 @@
+pal mask-PASS
+CPC colour set (bit 5=0)-PASS
+CPC colour set (bit 5=1)-PASS
+CPC pen set (bit 5=0)-PASS
+CPC pen set (bit 5=1)-PASS
+CPC border set (bit 5=0)-PASS
+CPC border set (bit 5=1)-PASS
+CPC mode set (bit 5=0) (locked)-PASS
+CPC mode set (bit 5=1) (locked)-PASS
+CPC mode set (bit 5=0) (unlocked)-PASS
+CPC mode set (rmr2) (bit 5=1) (unlocked)-PASS
+IN set colour-PASS
+DCSR mirror-PASS
+sprite coord test x (l/h)-PASS
+sprite coord test y (l/h)-PASS
+sprite coord test x (ffc0-0040)-PASS
+sprite coord test y (ffc0-0040)-PASS
+sprite coord test x (200-400)-PASS
+sprite coord test y (0080-0280)-PASS
+ASIC GA I/O decode test-PASS
+sprite ram mask (0)-PASS
+sprite ram mask (1)-PASS
+sprite ram mask (2)-PASS
+sprite ram mask (3)-PASS
+sprite ram mask (4)-PASS
+sprite ram mask (5)-PASS
+sprite ram mask (6)-PASS
+sprite ram mask (7)-PASS
+sprite ram mask (8)-PASS
+sprite ram mask (9)-PASS
+sprite ram mask (10)-PASS
+sprite ram mask (11)-PASS
+sprite ram mask (12)-PASS
+sprite ram mask (13)-PASS
+sprite ram mask (14)-PASS
+sprite ram mask (15)-PASS
+sprite coord mirror-PASS
