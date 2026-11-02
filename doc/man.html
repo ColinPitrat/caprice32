@@ -1,5 +1,5 @@
-<!-- Creator     : groff version 1.22.4 -->
-<!-- CreationDate: Sat Oct  7 02:26:21 2023 -->
+<!-- Creator     : groff version 1.23.0 -->
+<!-- CreationDate: Sun Jun 14 12:40:47 2026 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -38,7 +38,7 @@
 </h2>
 
 
-<p style="margin-left:11%; margin-top: 1em">cap32 -
+<p style="margin-left:9%; margin-top: 1em">cap32 -
 Caprice32 Amstrad CPC emulator</p>
 
 <h2>SYNOPSIS
@@ -46,7 +46,7 @@ Caprice32 Amstrad CPC emulator</p>
 </h2>
 
 
-<p style="margin-left:11%; margin-top: 1em"><b>cap32</b>
+<p style="margin-left:9%; margin-top: 1em"><b>cap32</b>
 [<i>OPTION</i>]... [<i>FILE</i>]...</p>
 
 <h2>DESCRIPTION
@@ -55,14 +55,14 @@ Caprice32 Amstrad CPC emulator</p>
 
 
 
-<p style="margin-left:11%; margin-top: 1em"><b>Caprice32</b>
+<p style="margin-left:9%; margin-top: 1em"><b>Caprice32</b>
 is an Amstrad CPC emulator. It emulates the Amstrad CPC464,
 664, 6128 and 6128+ home computers.</p>
 
-<p style="margin-left:11%; margin-top: 1em"><b>Media
+<p style="margin-left:9%; margin-top: 1em"><b>Media
 loading</b></p>
 
-<p style="margin-left:22%;">Upon invocation, the FILEs
+<p style="margin-left:18%;">Upon invocation, the FILEs
 specified as arguments will be used to populate the various
 available CPC machine slots. The type of slot is determined
 by the file format, detected by its extension. Caprice32
@@ -71,15 +71,15 @@ image), <b>.ipf</b> (Interchangeable Preservation Format
 disk image), <b>.raw</b> (CT-RAW format), <b>.voc</b> or
 <b>.cdt</b> (tape image), <b>.cpr</b> (cartridge image),
 <b>.sna</b> (snapshot image), <b>.zip</b> (zip of any
-previously described file). Specifying slot content on
-the command line is optional.</p>
+previously described file). Specifying slot content on the
+command line is optional.</p>
 
-<p style="margin-left:22%; margin-top: 1em">Caprice32
+<p style="margin-left:18%; margin-top: 1em">Caprice32
 supports two disk drives: drive A and drive B. If two disk
 image files (.dsk or .ipf) are provided, the first one will
 be loaded in drive A and the second one in drive B.</p>
 
-<p style="margin-left:22%; margin-top: 1em">The
+<p style="margin-left:18%; margin-top: 1em">The
 <b>cart_path</b>, <b>snap_path</b>, <b>dsk_path</b> and
 <b>tape_path</b> entries in the configuration file are
 <i>only</i> used to specify the directory to open when
@@ -87,15 +87,15 @@ loading/saving files in the GUI. The full path to the
 various slot contents must be provided on the command
 line.</p>
 
-<p style="margin-left:22%; margin-top: 1em">The
+<p style="margin-left:18%; margin-top: 1em">The
 <b>rom_path</b> entry in the configuration file is used by
 the emulator to find its <i>system</i> ROM and
 cartridges.</p>
 
 
-<p style="margin-left:11%; margin-top: 1em"><b>Configuration</b></p>
+<p style="margin-left:9%; margin-top: 1em"><b>Configuration</b></p>
 
-<p style="margin-left:22%;">When launched, Caprice32 will
+<p style="margin-left:18%;">When launched, Caprice32 will
 look for a configuration file in several locations. If a
 configuration file was specified using the <b>--cfg_file</b>
 command line switch, Caprice32 will try and use it. If no
@@ -114,7 +114,7 @@ Caprice32 will use the first valid file it finds. If no
 configuration file is found, a default configuration will be
 used.</p>
 
-<p style="margin-left:22%; margin-top: 1em">The
+<p style="margin-left:18%; margin-top: 1em">The
 configuration file contains various configuration
 parameters, some of which can be modified from the GUI. When
 saving the configuration from the GUI, it will be written in
@@ -122,16 +122,16 @@ the configuration file following the same order than
 previously described, except for the addition of the write
 permission condition.</p>
 
-<p style="margin-left:22%; margin-top: 1em">Most of the
+<p style="margin-left:18%; margin-top: 1em">Most of the
 configuration file entries are commented in the
 configuration file provided by default with Caprice32.
 However, when overwriting the configuration file from the
 emulator menu, all comments will be lost.</p>
 
 
-<p style="margin-left:11%; margin-top: 1em"><b>Control</b></p>
+<p style="margin-left:9%; margin-top: 1em"><b>Control</b></p>
 
-<p style="margin-left:22%;">Emulator functionalities are
+<p style="margin-left:18%;">Emulator functionalities are
 available through function keys (F1-F12). As CPC also had
 function keys, those are emulated by keys from the numpad.
 This makes sense since their disposition on the CPC keyboard
@@ -142,10 +142,10 @@ through the virtual keyboard. The emulator function key
 mapping can also be redefined through the host keyboard
 mapping file.</p>
 
-<p style="margin-left:22%; margin-top: 1em">The emulator
+<p style="margin-left:18%; margin-top: 1em">The emulator
 function default key mapping is:</p>
 
-<p style="margin-left:32%;"><b>F1</b> - Show GUI (and pause
+<p style="margin-left:27%;"><b>F1</b> - Show GUI (and pause
 the emulator) <b><br>
 F2</b> - Toggle fullscreen / windowed mode <b><br>
 F3</b> - Take screenshot <b><br>
@@ -160,26 +160,26 @@ F12</b> - Toggle debug mode <b><br>
 Shift+F1</b> - Show virtual keyboard <b><br>
 Shift+F3</b> - Take a machine snapshot</p>
 
-<p style="margin-left:11%; margin-top: 1em"><b>Joystick
+<p style="margin-left:9%; margin-top: 1em"><b>Joystick
 support</b></p>
 
-<p style="margin-left:22%;">Joystick emulation can be
+<p style="margin-left:18%;">Joystick emulation can be
 turned on with the F7 key. When joystick emulation is on,
 real joysticks are disabled, and the keyboard arrows
 (directions) as well as X and Z (fire buttons) keys are
 remapped to emulate the joystick 1 of the CPC machine.</p>
 
-<p style="margin-left:22%; margin-top: 1em">Caprice32 can
+<p style="margin-left:18%; margin-top: 1em">Caprice32 can
 also be controlled completely from the joystick. The
 configuration file <b>joystick_menu_button</b> and
 <b>joystick_vkeyboard_button</b> entries allow binding menu
 and virtual keyboard invocations to some of the (host)
 joystick button.</p>
 
-<p style="margin-left:11%; margin-top: 1em"><b>Keyboard
+<p style="margin-left:9%; margin-top: 1em"><b>Keyboard
 mapping</b></p>
 
-<p style="margin-left:22%;">Caprice32 supports CPC English,
+<p style="margin-left:18%;">Caprice32 supports CPC English,
 French and Spanish keyboard layouts. The CPC keyboard layout
 is defined in the configuration file by the <b>keyboard</b>
 entry (0: English, 1: French, 2: Spanish). The host keyboard
@@ -191,62 +191,106 @@ configuration file <b>resources_path</b> entry. If the
 mapping file is not defined or not found, Caprice32 will
 default to a standard US keyboard map.</p>
 
+
+<p style="margin-left:9%; margin-top: 1em"><b>Benchmarking</b></p>
+
+<p style="margin-left:18%;">When started with
+<b>--benchmark</b>, Caprice32 measures Z80 T-states (wait
+states included, as on real hardware) and is driven by the
+emulated program through OUT instructions to three
+otherwise-inert I/O ports. The command is selected by the
+port; the written value is ignored: <br>
+- <b>&amp;FED0</b> (START): capture the baseline T-state
+count. <br>
+- <b>&amp;FED1</b> (STOP): print the elapsed T-states
+(current minus baseline) as a single integer to stdout and
+quit the emulator. <br>
+- <b>&amp;FED2</b> (LAP): print a partial result to stderr
+and keep running.</p>
+
+<p style="margin-left:18%; margin-top: 1em">A
+human-readable summary (microseconds and frame count) is
+written to stderr, so stdout carries only the integer and
+can be captured directly, e.g. <b>C=$(cap32 --benchmark
+engine.sna)</b>. If STOP is reached without a prior START,
+the count is measured from boot.</p>
+
+<p style="margin-left:18%; margin-top: 1em">The measured
+delta includes a small, constant marker overhead, so compare
+versions instrumented with the same markers. Each LAP
+between START and STOP adds its own cycles to the final
+total. To exclude the 50 Hz interrupt from the count, wrap
+the measured region in <b>DI</b> ... <b>EI</b>. These ports
+are inert on real CPC hardware (the Multiface 2 only answers
+&amp;FEE8/&amp;FEEA, and only when fitted), so an
+instrumented snapshot still runs harmlessly elsewhere.
+Ready-to-use assembler macros and BASIC examples are
+provided in <b>doc/z80_bench.md</b>.</p>
+
 <h2>OPTIONS
 <a name="OPTIONS"></a>
 </h2>
 
 
-<p style="margin-left:11%; margin-top: 1em"><b>-a</b>,
+<p style="margin-left:9%; margin-top: 1em"><b>-a</b>,
 <b>--autocmd</b>=<i>COMMAND</i></p>
 
-<p style="margin-left:22%;">pass command to execute to the
+<p style="margin-left:18%;">pass command to execute to the
 emulator. The option can be repeated to pass multiple
 commands. For example: cap32 -a &rsquo;print
 &quot;Hello&quot;&rsquo; -a &rsquo;print
 &quot;World&quot;&rsquo;</p>
 
-<p style="margin-left:11%;"><b>-c</b>,
+<p style="margin-left:9%;"><b>-b</b>,
+<b>--benchmark</b></p>
+
+<p style="margin-left:18%;">measure the number of Z80
+T-states executed between the START and STOP markers, print
+that count as a single integer to stdout and exit. Runs
+headless at full speed. See the <b>Benchmarking</b>
+section.</p>
+
+<p style="margin-left:9%;"><b>-c</b>,
 <b>--cfg_file</b>=<i>FILE</i></p>
 
-<p style="margin-left:22%;">use FILE as the emulator
+<p style="margin-left:18%;">use FILE as the emulator
 configuration file.</p>
 
-<p style="margin-left:11%;"><b>-h</b>, <b>--help</b></p>
+<p style="margin-left:9%;"><b>-h</b>, <b>--help</b></p>
 
-<p style="margin-left:22%;">display short help and
+<p style="margin-left:18%;">display short help and
 exits</p>
 
-<p style="margin-left:11%;"><b>-i</b>, <b>--inject</b></p>
+<p style="margin-left:9%;"><b>-i</b>, <b>--inject</b></p>
 
-<p style="margin-left:22%;">inject a binary in memory after
+<p style="margin-left:18%;">inject a binary in memory after
 the CPC startup finishes</p>
 
-<p style="margin-left:11%;"><b>-o</b>, <b>--offset</b></p>
+<p style="margin-left:9%;"><b>-o</b>, <b>--offset</b></p>
 
-<p style="margin-left:22%;">offset at which to inject the
+<p style="margin-left:18%;">offset at which to inject the
 binary provided with -i (default: 0x6000)</p>
 
-<p style="margin-left:11%;"><b>-O</b>,
-<b>--override</b></p>
+<p style="margin-left:9%;"><b>-O</b>, <b>--override</b></p>
 
-<p style="margin-left:22%;">override an option from the
+<p style="margin-left:18%;">override an option from the
 config. Can be repeated. (example: -O system.model=3)</p>
 
-<p style="margin-left:11%;"><b>-s</b>,
+<p style="margin-left:9%;"><b>-s</b>,
 <b>--sym_file</b>=<i>file</i></p>
 
-<p style="margin-left:22%;">use &lt;file&gt; as a source of
+<p style="margin-left:18%;">use &lt;file&gt; as a source of
 symbols and entry points for disassembling in
 developers&rsquo; tools.</p>
 
-<p style="margin-left:11%;"><b>-V</b>, <b>--version</b></p>
+<p style="margin-left:9%;"><b>-V</b>, <b>--version</b></p>
 
-<p style="margin-left:22%;">display Caprice32 version and
+<p style="margin-left:18%;">display Caprice32 version and
 exits</p>
 
-<p style="margin-left:11%;"><b>-v</b>, <b>--verbose</b></p>
+<p style="margin-left:9%;"><b>-v</b>, <b>--verbose</b></p>
 
-<p style="margin-left:22%;">be talkative about what the
+<p style="margin-left:18%;">be talkative about what the
 emulator is doing (mostly for debug builds)</p>
 
 <h2>EXAMPLES
@@ -254,23 +298,31 @@ emulator is doing (mostly for debug builds)</p>
 </h2>
 
 
-<p style="margin-left:11%; margin-top: 1em">cap32
+<p style="margin-left:9%; margin-top: 1em">cap32
 ./disk/sorcery.dsk ./trail.dsk</p>
 
-<p style="margin-left:22%;">Launches cap32, loads the
+<p style="margin-left:18%;">Launches cap32, loads the
 content of ./disk/sorcery.dsk in the drive A slot, and
 ./trail.dsk in the drive B slot.</p>
+
+<p style="margin-left:9%; margin-top: 1em">cap32
+--benchmark ./engine.sna</p>
+
+<p style="margin-left:18%;">Runs engine.sna headless and
+prints to stdout the number of Z80 T-states executed between
+its START (OUT &amp;FED0) and STOP (OUT &amp;FED1)
+markers.</p>
 
 <h2>BUGS
 <a name="BUGS"></a>
 </h2>
 
 
-<p style="margin-left:11%; margin-top: 1em">CPC6128+
+<p style="margin-left:9%; margin-top: 1em">CPC6128+
 emulation is incomplete: vectored &amp; DMA interrupts,
 analog joysticks and 8 bit printer are not emulated.</p>
 
-<p style="margin-left:11%; margin-top: 1em">See
+<p style="margin-left:9%; margin-top: 1em">See
 https://github.com/ColinPitrat/caprice32/issues for the list
 of reported bugs.</p>
 
@@ -279,13 +331,13 @@ of reported bugs.</p>
 </h2>
 
 
-<p style="margin-left:11%; margin-top: 1em">Caprice32 was
+<p style="margin-left:9%; margin-top: 1em">Caprice32 was
 originally written by Ulrich Doewich.</p>
 
-<p style="margin-left:11%; margin-top: 1em">This manual
-page covers Colin Pitrat&rsquo;s fork of Caprice32.</p>
+<p style="margin-left:9%; margin-top: 1em">This manual page
+covers Colin Pitrat&rsquo;s fork of Caprice32.</p>
 
-<p style="margin-left:11%; margin-top: 1em">The screen
+<p style="margin-left:9%; margin-top: 1em">The screen
 capture code uses driedfruit SDL_SavePNG code
 (https://github.com/driedfruit/SDL_SavePNG).</p>
 
@@ -295,7 +347,7 @@ capture code uses driedfruit SDL_SavePNG code
 
 
 
-<p style="margin-left:11%; margin-top: 1em">$HOME/.cap32.cfg
+<p style="margin-left:9%; margin-top: 1em">$HOME/.cap32.cfg
 <br>
 /etc/cap32.cfg</p>
 
@@ -305,7 +357,7 @@ capture code uses driedfruit SDL_SavePNG code
 
 
 
-<p style="margin-left:11%; margin-top: 1em">https://github.com/ColinPitrat/caprice32
+<p style="margin-left:9%; margin-top: 1em">https://github.com/ColinPitrat/caprice32
 <br>
  https://github.com/driedfruit/SDL_SavePNG</p>
 <hr>

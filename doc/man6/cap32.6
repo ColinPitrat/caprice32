@@ -103,6 +103,22 @@ The mapping file must be put in the resources directory, defined by the configur
 If the mapping file is not defined or not found, Caprice32 will default to a standard US keyboard map.
 .RE
 
+.PP
+\fBBenchmarking\fR
+.RS
+When started with \fB\-\-benchmark\fR, Caprice32 measures Z80 T-states (wait states included, as on real hardware) and is driven by the emulated program through OUT instructions to three otherwise-inert I/O ports. The command is selected by the port; the written value is ignored:
+.br
+  - \fB&FED0\fR (START): capture the baseline T-state count.
+.br
+  - \fB&FED1\fR (STOP): print the elapsed T-states (current minus baseline) as a single integer to stdout and quit the emulator.
+.br
+  - \fB&FED2\fR (LAP): print a partial result to stderr and keep running.
+.PP
+A human-readable summary (microseconds and frame count) is written to stderr, so stdout carries only the integer and can be captured directly, e.g. \fBC=$(cap32 --benchmark engine.sna)\fR. If STOP is reached without a prior START, the count is measured from boot.
+.PP
+The measured delta includes a small, constant marker overhead, so compare versions instrumented with the same markers. Each LAP between START and STOP adds its own cycles to the final total. To exclude the 50 Hz interrupt from the count, wrap the measured region in \fBDI\fR ... \fBEI\fR. These ports are inert on real CPC hardware (the Multiface 2 only answers &FEE8/&FEEA, and only when fitted), so an instrumented snapshot still runs harmlessly elsewhere. Ready-to-use assembler macros and BASIC examples are provided in \fBdoc/z80_bench.md\fR.
+.RE
+
 \" Missing sections to add:
 \" Multiface 2 invocation
 \" Memory tool usage
@@ -114,6 +130,9 @@ If the mapping file is not defined or not found, Caprice32 will default to a sta
 .TP
 \fB\-a\fR, \fB\-\-autocmd\fR=\fICOMMAND\fR
 pass command to execute to the emulator. The option can be repeated to pass multiple commands. For example: cap32 -a 'print "Hello"' -a 'print "World"'
+.TP
+\fB\-b\fR, \fB\-\-benchmark\fR
+measure the number of Z80 T-states executed between the START and STOP markers, print that count as a single integer to stdout and exit. Runs headless at full speed. See the \fBBenchmarking\fR section.
 .TP
 \fB\-c\fR, \fB\-\-cfg_file\fR=\fIFILE\fR
 use FILE as the emulator configuration file.
@@ -144,6 +163,11 @@ be talkative about what the emulator is doing (mostly for debug builds)
 cap32 ./disk/sorcery.dsk ./trail.dsk
 .RS
 Launches cap32, loads the content of ./disk/sorcery.dsk in the drive A slot, and ./trail.dsk in the drive B slot.
+.RE
+.PP
+cap32 --benchmark ./engine.sna
+.RS
+Runs engine.sna headless and prints to stdout the number of Z80 T-states executed between its START (OUT &FED0) and STOP (OUT &FED1) markers.
 .SH BUGS
 CPC6128+ emulation is incomplete: vectored & DMA interrupts, analog joysticks and 8 bit printer are not emulated.
 .PP

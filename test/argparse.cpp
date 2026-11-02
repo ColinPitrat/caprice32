@@ -100,3 +100,38 @@ TEST(argParseTest, replaceCap32KeysRepeatedKeywords)
 
   ASSERT_EQ(expected, replaceCap32Keys(command));
 }
+
+TEST(argParseTest, benchmarkFlagDefaultsFalse)
+{
+   const char *argv[] = {"./cap32", "./foo.sna"};
+   CapriceArgs args;
+   std::vector<std::string> slot_list;
+
+   parseArguments(2, const_cast<char **>(argv), slot_list, args);
+
+   ASSERT_FALSE(args.benchmark);
+}
+
+TEST(argParseTest, benchmarkFlagLong)
+{
+   const char *argv[] = {"./cap32", "--benchmark", "./foo.sna"};
+   CapriceArgs args;
+   std::vector<std::string> slot_list;
+
+   parseArguments(3, const_cast<char **>(argv), slot_list, args);
+
+   ASSERT_TRUE(args.benchmark);
+   ASSERT_EQ(1, slot_list.size());
+   ASSERT_EQ("./foo.sna", slot_list.at(0));
+}
+
+TEST(argParseTest, benchmarkFlagShort)
+{
+   const char *argv[] = {"./cap32", "-b", "./foo.sna"};
+   CapriceArgs args;
+   std::vector<std::string> slot_list;
+
+   parseArguments(3, const_cast<char **>(argv), slot_list, args);
+
+   ASSERT_TRUE(args.benchmark);
+}

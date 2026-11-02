@@ -12,9 +12,10 @@ class CapriceArgs
       std::string autocmd;
       std::string cfgFilePath;
       std::string binFile;
-      size_t binOffset;
+      size_t binOffset = 0x6000; // default injection offset, as documented in usage()
       std::map<std::string, std::map<std::string, std::string>> cfgOverrides;
       std::string symFilePath;
+      bool benchmark = false; // --benchmark: measure Z80 T-states and exit on STOP marker
 };
 
 std::string replaceCap32Keys(std::string command);
