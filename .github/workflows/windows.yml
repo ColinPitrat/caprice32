@@ -11,29 +11,18 @@ on:
 jobs:
   build:
     strategy:
-      # Allow 64 bits to complete even if 32 bits fails (or the reverse).
-      # 32 bits has been breaking a lot lately...
-      fail-fast: false
       matrix:
         include:
-         - version: MINGW32
-           mingw: mingw32
-           arch: win32
-           env: i686
-           ipf_win_file: ipflib42_w32.zip
-           ipf_dll: ipflib42_w32/CAPSImg.dll
-           ipf_license: ipflib42_w32/LICENSE.txt
-           extra_packages: ""
-         - version: MINGW64
-           mingw: mingw64
+         - version: UCRT64
+           mingw: ucrt64
            arch: win64
-           env: x86_64
+           env: ucrt-x86_64
            ipf_win_file: ipflib42_win_x64.zip
            ipf_dll: CAPSImg_x64.dll
            ipf_license: LICENSE.txt
            # These packages don't exist anymore for 32-bit but are needed for running e2e tests.
            # Only install them and run e2e tests on 64-bit.
-           extra_packages: "mingw64/mingw-w64-x86_64-7zip mingw64/mingw-w64-x86_64-ffmpeg"
+           extra_packages: "ucrt64/mingw-w64-ucrt-x86_64-7zip ucrt64/mingw-w64-ucrt-x86_64-ffmpeg"
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v2
