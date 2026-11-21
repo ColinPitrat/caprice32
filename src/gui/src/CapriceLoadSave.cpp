@@ -343,7 +343,17 @@ bool CapriceLoadSave::HandleMessage(CMessage* pMessage)
             fn = m_pFilesList->GetItem(idx).sItemText;
           }
           if(!fn.empty() && fn[fn.size()-1] == '/') {
+#ifdef WINDOWS
+            if (fn.size() == 3) {
+              // User selected a different drive.
+              LOG_INFO("Switching to drive " << fn);
+              m_pDirectoryValue->SetWindowText(simplifyDirPath(fn));
+            } else {
+#endif
             m_pDirectoryValue->SetWindowText(simplifyDirPath(m_pDirectoryValue->GetWindowText() + '/' + fn));
+#ifdef WINDOWS
+            }
+#endif
             m_pFileNameValue->SetWindowText("");
             UpdateFilesList();
           } else {
@@ -422,14 +432,13 @@ void CapriceLoadSave::UpdateFilesList()
 
   std::string current_dir = m_pDirectoryValue->GetWindowText();
 
-  // List of drives if user clicked '../' when at the root of a drive.
 #ifdef WINDOWS
+  // List of drives if we're at the root of a drive.
   LOG_INFO("Current directory: " << current_dir);
-  if (current_dir.empty() || current_dir == "/") {
+  if (current_dir.size() <= 3 && current_dir[1] == ':') {
     for (const auto& path : get_system_roots()) {
       m_pFilesList->AddItem(SListItem(path));
     }
-    return;
   }
 #endif
 
@@ -439,14 +448,6 @@ void CapriceLoadSave::UpdateFilesList()
   } else {
     std::vector<std::string> directories;
     std::vector<std::string> files;
-    // Inject '..' when at the root on windows (e.g. directly in C:/) because
-    // it's not there by default.
-#ifdef WINDOWS
-    if (current_dir.size() <= 3 && current_dir[1] == ':') {
-      LOG_INFO("At root directory of drive, injecting ../");
-      directories.push_back("../");
-    }
-#endif
     struct dirent *ep;
     while((ep = readdir(dp)) != nullptr) {
       std::string entry_name = ep->d_name;
