@@ -385,6 +385,25 @@ std::string CapriceLoadSave::simplifyDirPath(std::string path)
   return std::string(simplepath);
 }
 
+std::vector<std::string> get_system_roots() {
+    std::vector<std::string> roots;
+#ifdef WINDOWS
+    // Probe A: through Z:
+    std::error_code ec;
+    for (char letter = 'A'; letter <= 'Z'; ++letter) {
+        LOG_VERBOSE("Testing drive " << letter << ":/");
+        std::filesystem::path drive = std::string(1, letter) + ":/";
+        if (std::filesystem::exists(drive, ec)) {
+            LOG_INFO("Found drive " << letter << ":/");
+            roots.push_back(drive.u8string());
+        }
+    }
+#else
+    roots.push_back("/");
+#endif
+    return roots;
+}
+
 bool CapriceLoadSave::MatchCurrentFileSpec(const char* filename)
 {
   for(const auto &ext : m_fileSpec) {
@@ -401,15 +420,34 @@ void CapriceLoadSave::UpdateFilesList()
 {
   m_pFilesList->ClearItems();
 
-  DIR *dp;
-  struct dirent *ep;
+  std::string current_dir = m_pDirectoryValue->GetWindowText();
 
-  dp = opendir(m_pDirectoryValue->GetWindowText().c_str());
+  // List of drives if user clicked '../' when at the root of a drive.
+#ifdef WINDOWS
+  LOG_INFO("Current directory: " << current_dir);
+  if (current_dir.empty() || current_dir == "/") {
+    for (const auto& path : get_system_roots()) {
+      m_pFilesList->AddItem(SListItem(path));
+    }
+    return;
+  }
+#endif
+
+  DIR *dp = opendir(current_dir.c_str());
   if(dp == nullptr) {
     LOG_ERROR("Could not open " << m_pDirectoryValue->GetWindowText() << ": " << strerror(errno));
   } else {
     std::vector<std::string> directories;
     std::vector<std::string> files;
+    // Inject '..' when at the root on windows (e.g. directly in C:/) because
+    // it's not there by default.
+#ifdef WINDOWS
+    if (current_dir.size() <= 3 && current_dir[1] == ':') {
+      LOG_INFO("At root directory of drive, injecting ../");
+      directories.push_back("../");
+    }
+#endif
+    struct dirent *ep;
     while((ep = readdir(dp)) != nullptr) {
       std::string entry_name = ep->d_name;
       // ep->d_type is always set to DT_UNKNOWN on my computer => use a call to stat to determine if it's a directory
