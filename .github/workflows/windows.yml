@@ -11,6 +11,9 @@ on:
 jobs:
   build:
     strategy:
+      # Allow 64 bits to complete even if 32 bits fails (or the reverse).
+      # 32 bits has been breaking a lot lately...
+      fail-fast: false
       matrix:
         include:
          - version: MINGW32
