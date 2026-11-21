@@ -30,7 +30,7 @@ ifeq ($(ARCH),win64)
 # zlib.h
 COMMON_CFLAGS = -DWINDOWS -D_POSIX_C_SOURCE=200809L -Wno-error=old-style-cast
 PLATFORM=windows
-MINGW_PATH=/mingw64
+MINGW_PATH=/ucrt64
 else ifeq ($(ARCH),win32)
 COMMON_CFLAGS = -DWINDOWS -D_POSIX_C_SOURCE=200809L -Wno-error=old-style-cast
 PLATFORM=windows
