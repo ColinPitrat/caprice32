@@ -344,7 +344,7 @@ bool CapriceLoadSave::HandleMessage(CMessage* pMessage)
           }
           if(!fn.empty() && fn[fn.size()-1] == '/') {
 #ifdef WINDOWS
-            if (fn.size() == 3) {
+            if (fn.size() == 3 && fn[1] == ':') {
               // User selected a different drive.
               LOG_INFO("Switching to drive " << fn);
               m_pDirectoryValue->SetWindowText(simplifyDirPath(fn));
