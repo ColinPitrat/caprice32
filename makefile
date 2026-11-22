@@ -1,13 +1,13 @@
 # use "make" to build for linux
 # use "make debug" or "make DEBUG=TRUE" to build a debug executable for linux
-# use "make ARCH=win32" or "make ARCH=win64" to build for windows
+# use "make ARCH=win64" to build for windows
 # Interesting targets (in addition to the default 'all'):
 #  - debug
 #  - clean
 #  - distrib
 #  - doc
 # Supported variables:
-#  - ARCH = (linux|win32|win64|macos)
+#  - ARCH = (linux|win64|macos)
 #  - CXX (default = g++)
 #  - CFLAGS
 #  - LDFLAGS
@@ -31,17 +31,13 @@ ifeq ($(ARCH),win64)
 COMMON_CFLAGS = -DWINDOWS -D_POSIX_C_SOURCE=200809L -Wno-error=old-style-cast
 PLATFORM=windows
 MINGW_PATH=/ucrt64
-else ifeq ($(ARCH),win32)
-COMMON_CFLAGS = -DWINDOWS -D_POSIX_C_SOURCE=200809L -Wno-error=old-style-cast
-PLATFORM=windows
-MINGW_PATH=/mingw32
 else ifeq ($(ARCH),linux)
 PLATFORM=linux
 else ifeq ($(ARCH),macos)
 # Yes that's weird, but the build on macos works the same way as on linux
 PLATFORM=linux
 else
-$(error Unknown ARCH. Supported ones are linux, win32 and win64.)
+$(error Unknown ARCH. Supported ones are linux, macos and win64.)
 endif
 
 CAPS_INCLUDES=-Isrc/capsimg/LibIPF -Isrc/capsimg/Device -Isrc/capsimg/CAPSImg -Isrc/capsimg/Codec -Isrc/capsimg/Core
