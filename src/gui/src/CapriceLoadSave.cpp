@@ -345,11 +345,12 @@ bool CapriceLoadSave::HandleMessage(CMessage* pMessage)
           if(!fn.empty() && fn[fn.size()-1] == '/') {
 #ifdef WINDOWS
             auto currentDir = m_pDirectoryValue->GetWindowText();
+            LOG_VERBOSE("Updating directory: current directory = " << currentDir << ", selected=" << fn);
             if (currentDir == "/" && fn.size() == 3 && fn[1] == ':') {
               // User selected a windows drive.
               LOG_VERBOSE("Switching to drive " << fn);
               m_pDirectoryValue->SetWindowText(simplifyDirPath(fn));
-            } else if (currentDir.size() <= 3 && currentDir[1] == ':' && fn == "..") {
+            } else if (currentDir.size() <= 3 && currentDir[1] == ':' && fn.substr(0, 2) == "..") {
               // User selected '..' at the root of a windows drive.
               LOG_VERBOSE("Going to parent of " << currentDir << " - switching to list of drives");
               m_pDirectoryValue->SetWindowText("/");
