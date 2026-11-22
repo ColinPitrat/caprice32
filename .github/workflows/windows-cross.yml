@@ -17,16 +17,10 @@ jobs:
            host: x86_64-w64-mingw32
            cxx: x86_64-w64-mingw32-g++-posix
            wine: wine64
-           ipf_win_file: ipflib42_win_x64.zip
-           ipf_dll: CAPSImg_x64.dll
-           ipf_license: LICENSE.txt
          - arch: win32
            host: i686-w64-mingw32
            cxx: i686-w64-mingw32-g++-posix
            wine: wine32
-           ipf_win_file: ipflib42_win.zip
-           ipf_dll: CAPSImg.dll
-           ipf_license: LICENSE.txt
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -127,8 +121,8 @@ jobs:
             mkdir -p "$XDG_RUNTIME_DIR"
             xvfb-run -a make ARCH=${{matrix.arch}} CXX=${{matrix.cxx}} MINGW_PATH=/opt/${{matrix.arch}} MINGW_GCC_DLL_PATH="${{ env.GCC_DLL_DIR }}" WINE=${{matrix.wine}} CFLAGS="-I/opt/${{matrix.arch}}/include/" debug -j 4 -k
             make ARCH=${{matrix.arch}} CXX=${{matrix.cxx}} MINGW_PATH=/opt/${{matrix.arch}} MINGW_GCC_DLL_PATH="${{ env.GCC_DLL_DIR }}" WINE=${{matrix.wine}} CFLAGS="-I/opt/${{matrix.arch}}/include/" -j 4 clean
-            make ARCH=${{matrix.arch}} CXX=${{matrix.cxx}} MINGW_PATH=/opt/${{matrix.arch}} MINGW_GCC_DLL_PATH="${{ env.GCC_DLL_DIR }}" WINE=${{matrix.wine}} CFLAGS="-I/opt/${{matrix.arch}}/include/ -Ii686-linux-gnu-capsimage/include" -j 4 -k
-            xvfb-run -a make ARCH=${{matrix.arch}} CXX=${{matrix.cxx}} MINGW_PATH=/opt/${{matrix.arch}} MINGW_GCC_DLL_PATH="${{ env.GCC_DLL_DIR }}" WINE=${{matrix.wine}} CFLAGS="-I/opt/${{matrix.arch}}/include/ -Ii686-linux-gnu-capsimage/include" -j 4 -k unit_test
+            make ARCH=${{matrix.arch}} CXX=${{matrix.cxx}} MINGW_PATH=/opt/${{matrix.arch}} MINGW_GCC_DLL_PATH="${{ env.GCC_DLL_DIR }}" WINE=${{matrix.wine}} CFLAGS="-I/opt/${{matrix.arch}}/include/" -j 4 -k
+            xvfb-run -a make ARCH=${{matrix.arch}} CXX=${{matrix.cxx}} MINGW_PATH=/opt/${{matrix.arch}} MINGW_GCC_DLL_PATH="${{ env.GCC_DLL_DIR }}" WINE=${{matrix.wine}} CFLAGS="-I/opt/${{matrix.arch}}/include/" -j 4 -k unit_test
           }
           # When running with https://github.com/nektos/act everything run as root
           # But unit tests fail when running as root (the non-writable config test in particular)
@@ -146,7 +140,7 @@ jobs:
           SDL2_CONFIG: /opt/${{ matrix.arch }}/bin/sdl2-config
           WINEDEBUG: fixme-all,err+module
         run: |
-          xvfb-run -a make ARCH=${{matrix.arch}} CXX=${{matrix.cxx}} MINGW_PATH=/opt/${{matrix.arch}} MINGW_GCC_DLL_PATH="${{ env.GCC_DLL_DIR }}" WINE=${{matrix.wine}} CFLAGS="-I/opt/${{matrix.arch}}/include/ -Ii686-linux-gnu-capsimage/include" OBJDUMP=${{ matrix.host }}-objdump -j 4 -k e2e_test
+          xvfb-run -a make ARCH=${{matrix.arch}} CXX=${{matrix.cxx}} MINGW_PATH=/opt/${{matrix.arch}} MINGW_GCC_DLL_PATH="${{ env.GCC_DLL_DIR }}" WINE=${{matrix.wine}} CFLAGS="-I/opt/${{matrix.arch}}/include/" OBJDUMP=${{ matrix.host }}-objdump -j 4 -k e2e_test
           ./test/integrated/test_win_package.sh ${{matrix.arch}}
           ./test/integrated/test_win_deps.sh ${{matrix.arch}}
 
