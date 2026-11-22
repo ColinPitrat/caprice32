@@ -122,10 +122,23 @@ jobs:
           SDL2_CONFIG: /opt/${{ matrix.arch }}/bin/sdl2-config
           WINEDEBUG: fixme-all,err+module
         run: |
-          xvfb-run -a make ARCH=${{matrix.arch}} CXX=${{matrix.cxx}} MINGW_PATH=/opt/${{matrix.arch}} MINGW_GCC_DLL_PATH="${{ env.GCC_DLL_DIR }}" WINE=${{matrix.wine}} CFLAGS="-I/opt/${{matrix.arch}}/include/" OBJDUMP=${{ matrix.host }}-objdump debug -j 4 -k
-          make ARCH=${{matrix.arch}} CXX=${{matrix.cxx}} MINGW_PATH=/opt/${{matrix.arch}} MINGW_GCC_DLL_PATH="${{ env.GCC_DLL_DIR }}" WINE=${{matrix.wine}} CFLAGS="-I/opt/${{matrix.arch}}/include/" OBJDUMP=${{ matrix.host }}-objdump -j 4 clean
-          make ARCH=${{matrix.arch}} CXX=${{matrix.cxx}} MINGW_PATH=/opt/${{matrix.arch}} MINGW_GCC_DLL_PATH="${{ env.GCC_DLL_DIR }}" WINE=${{matrix.wine}} CFLAGS="-I/opt/${{matrix.arch}}/include/ OBJDUMP=${{ matrix.host }}-objdump -Ii686-linux-gnu-capsimage/include" -j 4 -k
-          xvfb-run -a make ARCH=${{matrix.arch}} CXX=${{matrix.cxx}} MINGW_PATH=/opt/${{matrix.arch}} MINGW_GCC_DLL_PATH="${{ env.GCC_DLL_DIR }}" WINE=${{matrix.wine}} CFLAGS="-I/opt/${{matrix.arch}}/include/ OBJDUMP=${{ matrix.host }}-objdump -Ii686-linux-gnu-capsimage/include" -j 4 -k unit_test
+          run_build() {
+            export XDG_RUNTIME_DIR="/tmp/runtime-$(id -u)"
+            mkdir -p "$XDG_RUNTIME_DIR"
+            xvfb-run -a make ARCH=${{matrix.arch}} CXX=${{matrix.cxx}} MINGW_PATH=/opt/${{matrix.arch}} MINGW_GCC_DLL_PATH="${{ env.GCC_DLL_DIR }}" WINE=${{matrix.wine}} CFLAGS="-I/opt/${{matrix.arch}}/include/" debug -j 4 -k
+            make ARCH=${{matrix.arch}} CXX=${{matrix.cxx}} MINGW_PATH=/opt/${{matrix.arch}} MINGW_GCC_DLL_PATH="${{ env.GCC_DLL_DIR }}" WINE=${{matrix.wine}} CFLAGS="-I/opt/${{matrix.arch}}/include/" -j 4 clean
+            make ARCH=${{matrix.arch}} CXX=${{matrix.cxx}} MINGW_PATH=/opt/${{matrix.arch}} MINGW_GCC_DLL_PATH="${{ env.GCC_DLL_DIR }}" WINE=${{matrix.wine}} CFLAGS="-I/opt/${{matrix.arch}}/include/" -Ii686-linux-gnu-capsimage/include" -j 4 -k
+            xvfb-run -a make ARCH=${{matrix.arch}} CXX=${{matrix.cxx}} MINGW_PATH=/opt/${{matrix.arch}} MINGW_GCC_DLL_PATH="${{ env.GCC_DLL_DIR }}" WINE=${{matrix.wine}} CFLAGS="-I/opt/${{matrix.arch}}/include/ -Ii686-linux-gnu-capsimage/include" -j 4 -k unit_test
+          }
+          # When running with https://github.com/nektos/act everything run as root
+          # But unit tests fail when running as root (the non-writable config test in particular)
+          if [ "$(id -u)" -eq 0 ]; then
+            chown -R builder:builder .
+            export -f run_build
+            su -p builder -c 'HOME=/home/builder run_build'
+          else
+            run_build
+          fi
 
       - name: Run integrated tests
         env:
@@ -133,7 +146,7 @@ jobs:
           SDL2_CONFIG: /opt/${{ matrix.arch }}/bin/sdl2-config
           WINEDEBUG: fixme-all,err+module
         run: |
-          xvfb-run -a make ARCH=${{matrix.arch}} CXX=${{matrix.cxx}} MINGW_PATH=/opt/${{matrix.arch}} MINGW_GCC_DLL_PATH="${{ env.GCC_DLL_DIR }}" WINE=${{matrix.wine}} CFLAGS="-I/opt/${{matrix.arch}}/include/ OBJDUMP=${{ matrix.host }}-objdump -Ii686-linux-gnu-capsimage/include" -j 4 -k e2e_test
+          xvfb-run -a make ARCH=${{matrix.arch}} CXX=${{matrix.cxx}} MINGW_PATH=/opt/${{matrix.arch}} MINGW_GCC_DLL_PATH="${{ env.GCC_DLL_DIR }}" WINE=${{matrix.wine}} CFLAGS="-I/opt/${{matrix.arch}}/include/ -Ii686-linux-gnu-capsimage/include" OBJDUMP=${{ matrix.host }}-objdump -j 4 -k e2e_test
           ./test/integrated/test_win_package.sh ${{matrix.arch}}
           ./test/integrated/test_win_deps.sh ${{matrix.arch}}
 
