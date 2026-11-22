@@ -127,7 +127,7 @@ jobs:
             mkdir -p "$XDG_RUNTIME_DIR"
             xvfb-run -a make ARCH=${{matrix.arch}} CXX=${{matrix.cxx}} MINGW_PATH=/opt/${{matrix.arch}} MINGW_GCC_DLL_PATH="${{ env.GCC_DLL_DIR }}" WINE=${{matrix.wine}} CFLAGS="-I/opt/${{matrix.arch}}/include/" debug -j 4 -k
             make ARCH=${{matrix.arch}} CXX=${{matrix.cxx}} MINGW_PATH=/opt/${{matrix.arch}} MINGW_GCC_DLL_PATH="${{ env.GCC_DLL_DIR }}" WINE=${{matrix.wine}} CFLAGS="-I/opt/${{matrix.arch}}/include/" -j 4 clean
-            make ARCH=${{matrix.arch}} CXX=${{matrix.cxx}} MINGW_PATH=/opt/${{matrix.arch}} MINGW_GCC_DLL_PATH="${{ env.GCC_DLL_DIR }}" WINE=${{matrix.wine}} CFLAGS="-I/opt/${{matrix.arch}}/include/" -Ii686-linux-gnu-capsimage/include" -j 4 -k
+            make ARCH=${{matrix.arch}} CXX=${{matrix.cxx}} MINGW_PATH=/opt/${{matrix.arch}} MINGW_GCC_DLL_PATH="${{ env.GCC_DLL_DIR }}" WINE=${{matrix.wine}} CFLAGS="-I/opt/${{matrix.arch}}/include/ -Ii686-linux-gnu-capsimage/include" -j 4 -k
             xvfb-run -a make ARCH=${{matrix.arch}} CXX=${{matrix.cxx}} MINGW_PATH=/opt/${{matrix.arch}} MINGW_GCC_DLL_PATH="${{ env.GCC_DLL_DIR }}" WINE=${{matrix.wine}} CFLAGS="-I/opt/${{matrix.arch}}/include/ -Ii686-linux-gnu-capsimage/include" -j 4 -k unit_test
           }
           # When running with https://github.com/nektos/act everything run as root
