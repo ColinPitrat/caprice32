@@ -345,12 +345,12 @@ bool CapriceLoadSave::HandleMessage(CMessage* pMessage)
           if(!fn.empty() && fn[fn.size()-1] == '/') {
 #ifdef WINDOWS
             auto currentDir = m_pDirectoryValue->GetWindowText();
-            LOG_VERBOSE("Updating directory: current directory = " << currentDir << ", selected=" << fn);
+            LOG_VERBOSE("Changing directory: current directory='" << currentDir << "', selected='" << fn << "'");
             if (currentDir == "/" && fn.size() == 3 && fn[1] == ':') {
               // User selected a windows drive.
               LOG_VERBOSE("Switching to drive " << fn);
               m_pDirectoryValue->SetWindowText(simplifyDirPath(fn));
-            } else if (currentDir.size() <= 3 && currentDir[1] == ':' && fn.substr(0, 2) == "..") {
+            } else if (currentDir.size() <= 3 && currentDir[1] == ':' && fn == "../") {
               // User selected '..' at the root of a windows drive.
               LOG_VERBOSE("Going to parent of " << currentDir << " - switching to list of drives");
               m_pDirectoryValue->SetWindowText("/");
@@ -440,8 +440,9 @@ void CapriceLoadSave::UpdateFilesList()
 
 #ifdef WINDOWS
   // List of drives if we're at the "fake root" on windows.
-  LOG_VERBOSE("Current directory: " << current_dir);
+  LOG_VERBOSE("Current directory: '" << current_dir << "'");
   if (current_dir == "/") {
+    LOG_VERBOSE("Adding system roots");
     for (const auto& path : get_system_roots()) {
       m_pFilesList->AddItem(SListItem(path));
     }
@@ -449,7 +450,8 @@ void CapriceLoadSave::UpdateFilesList()
   }
   // Add '..' if we're at the root of a drive on windows.
   if (current_dir.size() <= 3 && current_dir[1] == ':') {
-      m_pFilesList->AddItem(SListItem(".."));
+    LOG_VERBOSE("Adding ../");
+    m_pFilesList->AddItem(SListItem("../"));
   }
 #endif
 
