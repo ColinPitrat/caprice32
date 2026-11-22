@@ -23,14 +23,15 @@ ARCH ?= linux
 
 COMMON_CFLAGS ?= 
 
-ifeq ($(ARCH),win64)
+ifneq (,$(filter win%,$(ARCH)))
 # Rename main to SDL_main to solve the "undefined reference to `SDL_main'".
 # Do not make an error of old-style-cast on msys2 as the version of GCC used by
 # msys2 on GitHub actions is 13.3 which has a bug and raise it on a cast from
 # zlib.h
 COMMON_CFLAGS = -DWINDOWS -D_POSIX_C_SOURCE=200809L -Wno-error=old-style-cast
 PLATFORM=windows
-MINGW_PATH=/ucrt64
+MINGW_PATH ?= /ucrt64
+MINGW_GCC_DLL_PATH ?= $(MINGW_PATH)/bin
 else ifeq ($(ARCH),linux)
 PLATFORM=linux
 else ifeq ($(ARCH),macos)
@@ -40,10 +41,15 @@ else
 $(error Unknown ARCH. Supported ones are linux, macos and win64.)
 endif
 
+PKG_CONFIG ?= pkg-config
+SDL2_CONFIG ?= sdl2-config
+WINE ?=
+OBJDUMP ?= objdump
+
 CAPS_INCLUDES=-Isrc/capsimg/LibIPF -Isrc/capsimg/Device -Isrc/capsimg/CAPSImg -Isrc/capsimg/Codec -Isrc/capsimg/Core
 
-IPATHS = -Isrc/ $(CAPS_INCLUDES) -Isrc/gui/includes `pkg-config --cflags freetype2` `sdl2-config --cflags` `pkg-config --cflags libpng` `pkg-config --cflags zlib`
-LIBS = `sdl2-config --libs` `pkg-config --libs freetype2` `pkg-config --libs libpng` `pkg-config --libs zlib`
+IPATHS = -Isrc/ $(CAPS_INCLUDES) -Isrc/gui/includes `$(PKG_CONFIG) --cflags freetype2` `$(SDL2_CONFIG) --cflags` `$(PKG_CONFIG) --cflags libpng` `$(PKG_CONFIG) --cflags zlib`
+LIBS = `$(SDL2_CONFIG) --libs` `$(PKG_CONFIG) --libs freetype2` `$(PKG_CONFIG) --libs libpng` `$(PKG_CONFIG) --libs zlib`
 CXX ?= g++
 COMMON_CFLAGS += -fPIC
 
@@ -169,11 +175,11 @@ endif
 
 ifeq ($(PLATFORM),linux)
 check_deps:
-	@sdl2-config --cflags >/dev/null 2>&1 || (echo "Error: missing dependency libSDL2. Try installing libsdl2 development package (e.g: libsdl2-dev)" && false)
-	@pkg-config --version >/dev/null 2>&1 || (echo "Error: missing pkg-config. Try installing pkg-config" && false)
-	@pkg-config --cflags freetype2 >/dev/null 2>&1 || (echo "Error: missing dependency libfreetype. Try installing libfreetype development package (e.g: libfreetype6-dev)" && false)
-	@pkg-config --cflags zlib >/dev/null 2>&1 || (echo "Error: missing dependency zlib. Try installing zlib development package (e.g: zlib1g-dev)" && false)
-	@pkg-config --cflags libpng >/dev/null 2>&1 || (echo "Error: missing dependency libpng. Try installing libpng development package (e.g: libpng-dev)" && false)
+	@$(SDL2_CONFIG) --cflags >/dev/null 2>&1 || (echo "Error: missing dependency libSDL2. Try installing libsdl2 development package (e.g: libsdl2-dev)" && false)
+	@$(PKG_CONFIG) --version >/dev/null 2>&1 || (echo "Error: missing pkg-config. Try installing pkg-config" && false)
+	@$(PKG_CONFIG) --cflags freetype2 >/dev/null 2>&1 || (echo "Error: missing dependency libfreetype. Try installing libfreetype development package (e.g: libfreetype6-dev)" && false)
+	@$(PKG_CONFIG) --cflags zlib >/dev/null 2>&1 || (echo "Error: missing dependency zlib. Try installing zlib development package (e.g: zlib1g-dev)" && false)
+	@$(PKG_CONFIG) --cflags libpng >/dev/null 2>&1 || (echo "Error: missing dependency libpng. Try installing libpng development package (e.g: libpng-dev)" && false)
 else
 # TODO(cpitrat): Implement check_deps for windows build
 check_deps:
@@ -194,17 +200,18 @@ $(TARGET): $(OBJECTS) $(MAIN) cap32.cfg
 	$(CXX) $(LDFLAGS) -o $(TARGET) $(OBJECTS) $(MAIN) $(LIBS)
 
 ifeq ($(PLATFORM),windows)
-DLLS = SDL2.dll SDL3.dll libz-1.dll libbz2-1.dll libfreetype-6.dll \
-       libpng16-16.dll libstdc++-6.dll libwinpthread-1.dll zlib1.dll \
-			 libglib-2.0-0.dll libgraphite2.dll libharfbuzz-0.dll libiconv-2.dll \
-			 libintl-8.dll libpcre2-8-0.dll libbrotlidec.dll libbrotlicommon.dll
 
 distrib: $(TARGET)
 	mkdir -p $(ARCHIVE_DIR)
 	rm -f $(RELEASE_DIR)/$(ARCHIVE).zip
 	cp $(TARGET) $(ARCHIVE_DIR)/
-	$(foreach DLL,$(DLLS),[ -f $(MINGW_PATH)/bin/$(DLL) ] && cp $(MINGW_PATH)/bin/$(DLL) $(ARCHIVE_DIR)/ || (echo "$(MINGW_PATH)/bin/$(DLL) doesn't exist" && false);)
-	cp $(MINGW_PATH)/bin/libgcc_s_*-1.dll $(ARCHIVE_DIR)/
+	@for pass in $$(seq 1 5); do \
+		for dll in $$($(OBJDUMP) -p $(ARCHIVE_DIR)/*.exe $(ARCHIVE_DIR)/*.dll 2>/dev/null | awk '/DLL Name:/ {print $$3}' | sort -u); do \
+			echo "Copying $$dll"; \
+			if [ -f "$(MINGW_PATH)/bin/$$dll" ]; then cp -n "$(MINGW_PATH)/bin/$$dll" $(ARCHIVE_DIR)/; \
+			elif [ -f "$(MINGW_GCC_DLL_PATH)/$$dll" ]; then cp -n "$(MINGW_GCC_DLL_PATH)/$$dll" $(ARCHIVE_DIR)/; fi; \
+		done; \
+	done
 	cp cap32.cfg.tmpl cap32.cfg COPYING.txt README.md $(ARCHIVE_DIR)/
 	cp -r resources/ rom/ licenses/ $(ARCHIVE_DIR)/
 	cd $(RELEASE_DIR) && zip -r $(ARCHIVE).zip $(ARCHIVE)
@@ -310,7 +317,7 @@ unit_test: $(TEST_TARGET) distrib
 	cp $(TEST_TARGET) $(ARCHIVE_DIR)/
 	rm -fr $(ARCHIVE_DIR)/test
 	ln -s -f ../../test $(ARCHIVE_DIR)/test
-	cd $(ARCHIVE_DIR) && ./$(TEST_TARGET) --gtest_shuffle
+	cd $(ARCHIVE_DIR) && $(WINE) ./$(TEST_TARGET) --gtest_shuffle
 
 e2e_test: $(TARGET)
 	cd test/integrated && ./run_tests.sh
@@ -325,7 +332,6 @@ endif
 benchmark: $(OBJECTS) $(BENCH_OBJECTS) $(GBENCH_LIB)
 	$(CXX) $(LDFLAGS) -o benchmark $(BENCH_OBJECTS) $(OBJECTS) $(LIBS) $(GBENCH_LIB)
 	./benchmark
-
 
 deb_pkg: all
 	# Both changelog files need to be patched with the proper version !
@@ -348,7 +354,6 @@ macos_bundle: all
 	for lib in `otool -L $(BUNDLE_DIR)/Contents/MacOS/Caprice32 | grep ".dylib" | awk '{ print $$1 }'`; do echo "Copying '$$lib'"; cp "$$lib" $(BUNDLE_DIR)/Contents/Frameworks/; done || true
 	# Retry hdiutil up to 3 times: it occasionally fails with "Resource Busy"
 	for i in 1 2 3; do hdiutil create -volname Caprice32-$(VERSION) -srcfolder $(BUNDLE_DIR) -ov -format UDZO release/cap32-macos-bundle/Caprice32.dmg && break || sleep 5; done
-
 clang-tidy:
 	if $(CLANG_TIDY) -checks=-*,$(CLANG_CHECKS) $(SOURCES) -header-filter=src/* -- $(COMMON_CFLAGS) | grep "."; then false; fi
 	./tools/check_includes.sh

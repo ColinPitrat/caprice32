@@ -1,0 +1,168 @@
+name: Windows cross-compile build
+
+on:
+  push:
+    tags:
+      - 'latest'
+      - 'v*'
+    branches-ignore:
+      - master
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        include:
+         - arch: win64
+           host: x86_64-w64-mingw32
+           cxx: x86_64-w64-mingw32-g++-posix
+           wine: wine64
+           ipf_win_file: ipflib42_win_x64.zip
+           ipf_dll: CAPSImg_x64.dll
+           ipf_license: LICENSE.txt
+         - arch: win32
+           host: i686-w64-mingw32
+           cxx: i686-w64-mingw32-g++-posix
+           wine: wine32
+           ipf_win_file: ipflib42_win.zip
+           ipf_dll: CAPSImg.dll
+           ipf_license: LICENSE.txt
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install cross-compilation tools and wine
+        run: |
+          sudo dpkg --add-architecture i386
+          sudo apt-get update
+          sudo apt-get install -y \
+            cmake \
+            curl \
+            exuberant-ctags \
+            ffmpeg \
+            g++-mingw-w64-i686-posix \
+            g++-mingw-w64-x86-64-posix \
+            git \
+            make \
+            p7zip-full \
+            pkg-config \
+            wine \
+            wine32 \
+            wine64 \
+            xvfb \
+            zip
+
+      - name: Build and install Windows dependencies (SDL2, zlib, libpng, freetype)
+        run: |
+          PREFIX="/opt/${{ matrix.arch }}"
+          sudo mkdir -p "${PREFIX}"
+          sudo chown -R $(id -u):$(id -g) "${PREFIX}"
+          mkdir -p /tmp/deps && cd /tmp/deps
+
+          # Official SDL2 MinGW release (true SDL2, no SDL3 dependency)
+          SDL2_VER=2.30.11
+          curl -fsSL "https://github.com/libsdl-org/SDL/releases/download/release-${SDL2_VER}/SDL2-devel-${SDL2_VER}-mingw.tar.gz" -o sdl2.tar.gz
+          tar -xzf sdl2.tar.gz
+          cp -r "SDL2-${SDL2_VER}/${{ matrix.host }}"/* "${PREFIX}/"
+          sed -i "s|/opt/local/${{ matrix.host }}|${PREFIX}|g" "${PREFIX}/bin/sdl2-config" "${PREFIX}/lib/pkgconfig/sdl2.pc"
+
+          # Common CMake cross-compilation flags
+          CMAKE_CROSS=(
+            -DCMAKE_SYSTEM_NAME=Windows
+            -DCMAKE_C_COMPILER=${{ matrix.host }}-gcc-posix
+            -DCMAKE_CXX_COMPILER=${{ matrix.cxx }}
+            -DCMAKE_RC_COMPILER=${{ matrix.host }}-windres
+            -DCMAKE_FIND_ROOT_PATH="${PREFIX}"
+            -DCMAKE_FIND_ROOT_PATH_MODE_PROGRAM=NEVER
+            -DCMAKE_FIND_ROOT_PATH_MODE_LIBRARY=ONLY
+            -DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=ONLY
+            -DCMAKE_INSTALL_PREFIX="${PREFIX}"
+            -DCMAKE_BUILD_TYPE=Release
+            -DBUILD_SHARED_LIBS=OFF
+          )
+
+          # zlib
+          ZLIB_VER=1.3.1
+          curl -fsSL "https://github.com/madler/zlib/releases/download/v${ZLIB_VER}/zlib-${ZLIB_VER}.tar.gz" -o zlib.tar.gz
+          tar -xzf zlib.tar.gz
+          cmake -S "zlib-${ZLIB_VER}" -B build-zlib "${CMAKE_CROSS[@]}" -DZLIB_BUILD_EXAMPLES=OFF
+          cmake --build build-zlib -j4 --target install
+          # zlib builds libzlibstatic.a on Windows; copy to libz.a so -lz works seamlessly
+          cp "${PREFIX}/lib/libzlibstatic.a" "${PREFIX}/lib/libz.a"
+
+          # libpng
+          LIBPNG_VER=1.6.44
+          curl -fsSL "https://download.sourceforge.net/libpng/libpng-${LIBPNG_VER}.tar.gz" -o libpng.tar.gz
+          tar -xzf libpng.tar.gz
+          cmake -S "libpng-${LIBPNG_VER}" -B build-libpng "${CMAKE_CROSS[@]}" -DPNG_SHARED=OFF -DPNG_STATIC=ON -DPNG_TESTS=OFF
+          cmake --build build-libpng -j4 --target install
+
+          # FreeType (static, no external harfbuzz/brotli/bzip2 deps)
+          FT_VER=2.13.3
+          curl -fsSL "https://download.savannah.gnu.org/releases/freetype/freetype-${FT_VER}.tar.gz" -o freetype.tar.gz
+          tar -xzf freetype.tar.gz
+          cmake -S "freetype-${FT_VER}" -B build-freetype "${CMAKE_CROSS[@]}" \
+            -DFT_DISABLE_HARFBUZZ=ON \
+            -DFT_DISABLE_BROTLI=ON \
+            -DFT_DISABLE_BZIP2=ON
+          cmake --build build-freetype -j4 --target install
+
+          GCC_DLL_DIR=$(dirname $(${{ matrix.cxx }} -print-file-name=libstdc++-6.dll))
+          echo "GCC_DLL_DIR=${GCC_DLL_DIR}" >> $GITHUB_ENV
+
+          # File required by CAPSImg (but hopefully not used)
+          touch "${PREFIX}/include/SDKDDKVer.h"
+
+          # Ensure libwinpthread is available to run unit tests
+          cp "$(${{ matrix.cxx }} -print-file-name=libwinpthread-1.dll)" "${PREFIX}/bin/"
+
+      - name: Build caprice
+        env:
+          PKG_CONFIG_LIBDIR: /opt/${{ matrix.arch }}/lib/pkgconfig:/opt/${{ matrix.arch }}/share/pkgconfig
+          SDL2_CONFIG: /opt/${{ matrix.arch }}/bin/sdl2-config
+          WINEDEBUG: fixme-all,err+module
+        run: |
+          xvfb-run -a make ARCH=${{matrix.arch}} CXX=${{matrix.cxx}} MINGW_PATH=/opt/${{matrix.arch}} MINGW_GCC_DLL_PATH="${{ env.GCC_DLL_DIR }}" WINE=${{matrix.wine}} CFLAGS="-I/opt/${{matrix.arch}}/include/" OBJDUMP=${{ matrix.host }}-objdump debug -j 4 -k
+          make ARCH=${{matrix.arch}} CXX=${{matrix.cxx}} MINGW_PATH=/opt/${{matrix.arch}} MINGW_GCC_DLL_PATH="${{ env.GCC_DLL_DIR }}" WINE=${{matrix.wine}} CFLAGS="-I/opt/${{matrix.arch}}/include/" OBJDUMP=${{ matrix.host }}-objdump -j 4 clean
+          make ARCH=${{matrix.arch}} CXX=${{matrix.cxx}} MINGW_PATH=/opt/${{matrix.arch}} MINGW_GCC_DLL_PATH="${{ env.GCC_DLL_DIR }}" WINE=${{matrix.wine}} CFLAGS="-I/opt/${{matrix.arch}}/include/ OBJDUMP=${{ matrix.host }}-objdump -Ii686-linux-gnu-capsimage/include" -j 4 -k
+          xvfb-run -a make ARCH=${{matrix.arch}} CXX=${{matrix.cxx}} MINGW_PATH=/opt/${{matrix.arch}} MINGW_GCC_DLL_PATH="${{ env.GCC_DLL_DIR }}" WINE=${{matrix.wine}} CFLAGS="-I/opt/${{matrix.arch}}/include/ OBJDUMP=${{ matrix.host }}-objdump -Ii686-linux-gnu-capsimage/include" -j 4 -k unit_test
+
+      - name: Run integrated tests
+        env:
+          PKG_CONFIG_LIBDIR: /opt/${{ matrix.arch }}/lib/pkgconfig:/opt/${{ matrix.arch }}/share/pkgconfig
+          SDL2_CONFIG: /opt/${{ matrix.arch }}/bin/sdl2-config
+          WINEDEBUG: fixme-all,err+module
+        run: |
+          xvfb-run -a make ARCH=${{matrix.arch}} CXX=${{matrix.cxx}} MINGW_PATH=/opt/${{matrix.arch}} MINGW_GCC_DLL_PATH="${{ env.GCC_DLL_DIR }}" WINE=${{matrix.wine}} CFLAGS="-I/opt/${{matrix.arch}}/include/ OBJDUMP=${{ matrix.host }}-objdump -Ii686-linux-gnu-capsimage/include" -j 4 -k e2e_test
+          ./test/integrated/test_win_package.sh ${{matrix.arch}}
+          ./test/integrated/test_win_deps.sh ${{matrix.arch}}
+
+      - name: Publish latest
+        uses: softprops/action-gh-release@v2
+        if: github.ref == 'refs/tags/latest'
+        with:
+          name: latest
+          tag_name: latest
+          message: Caprice32 latest
+          body: Latest build of Caprice 32, with the newest cool features and the most recent bugs.
+          files: release/cap32-${{matrix.arch}}.zip
+          fail_on_unmatched_files: true
+          draft: false
+          prerelease: false
+          make_latest: ${{ matrix.arch == 'win64' }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Publish release
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/v')
+        with:
+          name: ${{ github.ref_name }}
+          tag_name: ${{ github.ref_name }}
+          message: Caprice32 ${{ github.ref }}
+          body: Caprice32 ${{ github.ref }}. Release notes to be added manually.
+          files: release/cap32-${{matrix.arch}}.zip
+          fail_on_unmatched_files: true
+          draft: false
+          prerelease: false
+          make_latest: ${{ matrix.arch == 'win64' }}
+          token: ${{ secrets.GITHUB_TOKEN }}
