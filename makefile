@@ -44,9 +44,6 @@ endif
 PKG_CONFIG ?= pkg-config
 SDL2_CONFIG ?= sdl2-config
 WINE ?=
-ifeq ($(WINE),"")
-WINE =
-endif
 OBJDUMP ?= objdump
 
 CAPS_INCLUDES=-Isrc/capsimg/LibIPF -Isrc/capsimg/Device -Isrc/capsimg/CAPSImg -Isrc/capsimg/Codec -Isrc/capsimg/Core
