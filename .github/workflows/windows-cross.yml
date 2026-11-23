@@ -140,6 +140,7 @@ jobs:
           PKG_CONFIG_LIBDIR: /opt/${{ matrix.arch }}/lib/pkgconfig:/opt/${{ matrix.arch }}/share/pkgconfig
           SDL2_CONFIG: /opt/${{ matrix.arch }}/bin/sdl2-config
           WINEDEBUG: fixme-all,err+module
+          WINEPATH: /opt/${{ matrix.arch }}/bin;${{ env.GCC_DLL_DIR }}
         run: |
           xvfb-run -a make ARCH=${{matrix.arch}} CXX=${{matrix.cxx}} MINGW_PATH=/opt/${{matrix.arch}} MINGW_GCC_DLL_PATH="${{ env.GCC_DLL_DIR }}" WINE=${{matrix.wine}} CFLAGS="-I/opt/${{matrix.arch}}/include/" OBJDUMP=${{ matrix.host }}-objdump -j 4 -k e2e_test
           ./test/integrated/test_win_package.sh ${{matrix.arch}}
