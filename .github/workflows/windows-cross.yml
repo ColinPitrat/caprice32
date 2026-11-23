@@ -127,6 +127,7 @@ jobs:
           # When running with https://github.com/nektos/act everything run as root
           # But unit tests fail when running as root (the non-writable config test in particular)
           if [ "$(id -u)" -eq 0 ]; then
+            id -u builder &>/dev/null || useradd -m -s /bin/bash builder
             chown -R builder:builder .
             export -f run_build
             su -p builder -c 'HOME=/home/builder run_build'
