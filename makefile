@@ -319,15 +319,13 @@ unit_test: $(TEST_TARGET) distrib
 	ln -s -f ../../test $(ARCHIVE_DIR)/test
 	cd $(ARCHIVE_DIR) && $(WINE) ./$(TEST_TARGET) --gtest_shuffle
 
-e2e_test: $(TARGET)
-	cd test/integrated && ./run_tests.sh
 else
 unit_test: $(TEST_TARGET)
 	./$(TEST_TARGET) --gtest_shuffle
+endif
 
 e2e_test: $(TARGET)
-	cd test/integrated && ./run_tests.sh
-endif
+	cd test/integrated && WINE=$(WINE) ./run_tests.sh
 
 benchmark: $(OBJECTS) $(BENCH_OBJECTS) $(GBENCH_LIB)
 	$(CXX) $(LDFLAGS) -o benchmark $(BENCH_OBJECTS) $(OBJECTS) $(LIBS) $(GBENCH_LIB)

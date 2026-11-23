@@ -26,7 +26,7 @@ rc=0
 for i in 1 2 3 4 5 6 7 8 9 a b
 do
   address=0x${i}000
-  $CAP32DIR/cap32 -c cap32.cfg -a CAP32_DELAY -a CAP32_DELAY -a CAP32_SCRNSHOT -a CAP32_EXIT -i cap32_bin_load_test.bin -o ${address} >> "${LOGFILE}" 2>&1
+  $WINE $CAP32DIR/cap32 -c cap32.cfg -a CAP32_DELAY -a CAP32_DELAY -a CAP32_SCRNSHOT -a CAP32_EXIT -i cap32_bin_load_test.bin -o ${address} >> "${LOGFILE}" 2>&1
 
   mv -v screenshot_*png ${OUTPUT_DIR}/screenshot-${address}.png
 

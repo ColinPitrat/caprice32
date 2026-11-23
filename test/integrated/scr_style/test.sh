@@ -27,14 +27,14 @@ echo "" > "${LOGFILE}"
 
 cd "$TSTDIR"
 
-nb_plugins=`$CAP32DIR/cap32 -V | grep "Number of video plugins available: " | cut -d : -f 2 | xargs`
+nb_plugins=`$WINE $CAP32DIR/cap32 -V | grep "Number of video plugins available: " | cut -d : -f 2 | xargs`
 let last_plugin=${nb_plugins}-1
 
 rc=0
 for style in `seq 0 $last_plugin`
 do
   $SED -i "s/^scr_style=.*$/scr_style=${style}/" cap32.cfg || rc=2
-  $CAP32DIR/cap32 -c cap32.cfg -a "print #8,\"style=${style}\"" -a CAP32_EXIT >> "${LOGFILE}" 2>&1
+  $WINE $CAP32DIR/cap32 -c cap32.cfg -a "print #8,\"style=${style}\"" -a CAP32_EXIT >> "${LOGFILE}" 2>&1
 
   mv ${OUTPUT_DIR}/printer.dat ${OUTPUT_DIR}/printer.dat.${style}
   if ! $DIFF ${OUTPUT_DIR}/printer.dat.${style} model/printer.dat.${style} >> "${LOGFILE}"

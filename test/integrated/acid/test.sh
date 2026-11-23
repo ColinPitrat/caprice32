@@ -21,7 +21,7 @@ for spec in "lock:0x8000" "rom:0x9100" "test:0x8000"
 do
   tst="${spec%%:*}"
   address="${spec#*:}"
-  $CAP32DIR/cap32 -c cap32.cfg -O system.limit_speed=0 -a CAP32_WAITBREAK -a CAP32_EXIT -i ${tst}.raw -o ${address} >> "${LOGFILE}" 2>&1
+  $WINE $CAP32DIR/cap32 -c cap32.cfg -O system.limit_speed=0 -a CAP32_WAITBREAK -a CAP32_EXIT -i ${tst}.raw -o ${address} >> "${LOGFILE}" 2>&1
 
   # Strip 0x02 bytes generated when ga_io_decode scans all 65536 I/O ports with 0x82
   tr -d '\002' < ${OUTPUT_DIR}/printer.dat > ${OUTPUT_DIR}/printer-${tst}.dat

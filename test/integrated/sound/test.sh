@@ -83,7 +83,7 @@ do
   expected_wav=model/${filename_base}.wav
   export SDL_DISKAUDIOFILE=${PWD}/${output_raw}
 
-  $CAP32DIR/cap32 -c cap32.cfg -a "run\"scale" -a CAP32_WAITBREAK -a CAP32_EXIT scale.zip >> ${LOGFILE} 2>&1
+  $WINE $CAP32DIR/cap32 -c cap32.cfg -a "run\"scale" -a CAP32_WAITBREAK -a CAP32_EXIT scale.zip >> ${LOGFILE} 2>&1
 
   ffmpeg -f ${FFMPEG_BITS[$bits]} -ar ${FFMPEG_FREQS[$freq]} -ac ${FFMPEG_CHANS[$channels]} -i ${output_raw} \
     -af "silenceremove=start_periods=1:start_threshold=-60dB:stop_periods=-1:stop_threshold=-60dB" \
