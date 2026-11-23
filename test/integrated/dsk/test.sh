@@ -5,6 +5,11 @@ OUTPUT_DIR="output"
 LOGFILE="test.log"
 CAP32DIR="${TSTDIR}/../../../"
 
+if [ -z "$CAP32BIN" ]
+then
+  CAP32BIN="cap32"
+fi
+
 if [ -z "$DIFF" ]
 then
   DIFF=diff
@@ -16,7 +21,7 @@ echo "" > "${LOGFILE}"
 
 cd "$TSTDIR"
 
-$WINE $CAP32DIR/cap32 -c cap32.cfg -a "run\"hello" -a "call 0" -a CAP32_WAITBREAK -a CAP32_EXIT hello.zip >> "${LOGFILE}" 2>&1
+$WINE $CAP32DIR/$CAP32BIN -c cap32.cfg -a "run\"hello" -a "call 0" -a CAP32_WAITBREAK -a CAP32_EXIT hello.zip >> "${LOGFILE}" 2>&1
 
 if $DIFF output/printer.dat expected.dat >> "${LOGFILE}"
 then

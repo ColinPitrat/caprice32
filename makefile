@@ -325,7 +325,7 @@ unit_test: $(TEST_TARGET)
 endif
 
 e2e_test: $(TARGET)
-	cd test/integrated && WINE=$(WINE) ./run_tests.sh
+	cd test/integrated && WINE=$(WINE) CAP32BIN=$(TARGET) ./run_tests.sh
 
 benchmark: $(OBJECTS) $(BENCH_OBJECTS) $(GBENCH_LIB)
 	$(CXX) $(LDFLAGS) -o benchmark $(BENCH_OBJECTS) $(OBJECTS) $(LIBS) $(GBENCH_LIB)
