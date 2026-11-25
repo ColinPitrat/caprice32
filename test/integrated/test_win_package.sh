@@ -1,3 +1,4 @@
+#!/bin/bash
 # The idea of this test is to detect when DLLs are missing from the Windows
 # release.
 # TODO: Find a way to make this work. On AppVeyor, this never fails because the
