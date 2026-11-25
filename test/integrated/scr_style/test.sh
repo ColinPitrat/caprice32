@@ -32,7 +32,7 @@ echo "" > "${LOGFILE}"
 
 cd "$TSTDIR"
 
-nb_plugins=`$WINE $CAP32DIR/$CAP32BIN -V | grep "Number of video plugins available: " | cut -d : -f 2 | xargs`
+nb_plugins=`$WINE $CAP32DIR/$CAP32BIN -V | grep "Number of video plugins available: " | cut -d : -f 2 | tr -d '\r' | xargs`
 let last_plugin=${nb_plugins}-1
 
 rc=0
