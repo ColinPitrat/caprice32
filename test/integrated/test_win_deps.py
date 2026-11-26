@@ -38,9 +38,9 @@ system_dlls = {
   "ws2_32.dll",
   # Not sure if they count as system. They are used by the msys2 build (ucrt64)
   # and apparently don't need to be distributed.
-  "DWrite.dll",
-  "RPCRT4.dll",
-  "USP10.dll",
+  "dwrite.dll",
+  "rpcrt4.dll",
+  "usp10.dll",
   "api-ms-win-crt-convert-l1-1-0.dll",
   "api-ms-win-crt-environment-l1-1-0.dll",
   "api-ms-win-crt-filesystem-l1-1-0.dll",
