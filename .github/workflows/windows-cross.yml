@@ -38,6 +38,7 @@ jobs:
             g++-mingw-w64-x86-64-posix \
             git \
             make \
+            mingw-w64-tools \
             p7zip-full \
             pkg-config \
             wine \
@@ -142,9 +143,9 @@ jobs:
           WINEDEBUG: fixme-all,err+module
           WINEPATH: /opt/${{ matrix.arch }}/bin;${{ env.GCC_DLL_DIR }}
         run: |
-          xvfb-run -a make ARCH=${{matrix.arch}} CXX=${{matrix.cxx}} MINGW_PATH=/opt/${{matrix.arch}} MINGW_GCC_DLL_PATH="${{ env.GCC_DLL_DIR }}" WINE=${{matrix.wine}} CFLAGS="-I/opt/${{matrix.arch}}/include/" OBJDUMP=${{ matrix.host }}-objdump -j 4 -k e2e_test
-          WINE=${{matrix.wine}} xvfb-run -a ./test/integrated/test_win_package.sh ${{matrix.arch}}
-          ./test/integrated/test_win_deps.sh ${{matrix.arch}}
+          SDL_AUDIODRIVER=dummy xvfb-run -a make ARCH=${{matrix.arch}} CXX=${{matrix.cxx}} MINGW_PATH=/opt/${{matrix.arch}} MINGW_GCC_DLL_PATH="${{ env.GCC_DLL_DIR }}" WINE=${{matrix.wine}} CFLAGS="-I/opt/${{matrix.arch}}/include/" OBJDUMP=${{ matrix.host }}-objdump -j 4 -k e2e_test
+          SDL_AUDIODRIVER=dummy WINE=${{matrix.wine}} xvfb-run -a ./test/integrated/test_win_package.sh ${{matrix.arch}}
+          ./test/integrated/test_win_deps.py ${{matrix.arch}} release/cap32-${{matrix.arch}}/cap32.exe
 
       - name: Publish latest
         uses: softprops/action-gh-release@v2

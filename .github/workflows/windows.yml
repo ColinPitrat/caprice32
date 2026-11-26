@@ -58,7 +58,7 @@ jobs:
         run: |
           make ARCH=${{matrix.arch}} CXX=g++ CFLAGS="-ID:/a/_temp/msys64/${{matrix.mingw}}/include/" -j 4 -k e2e_test
           ./test/integrated/test_win_package.sh ${{matrix.arch}}
-          ./test/integrated/test_win_deps.sh ${{matrix.arch}}
+          ./test/integrated/test_win_deps.py ${{matrix.mingw}} release/cap32-${{matrix.arch}}/cap32.exe
 
       - name: Publish latest
         uses: softprops/action-gh-release@v2
