@@ -22,20 +22,20 @@ def get_direct_imports(pe_path: str) -> list[str]:
 
 
 # System DLL expected to be available by default on Windows.
-allowed_missing_dlls = {
-  "ADVAPI32.dll",
-  "GDI32.dll",
-  "IMM32.dll",
-  "KERNEL32.dll",
+system_dlls = {
+  "advapi32.dll",
+  "gdi32.dll",
+  "imm32.dll",
+  "kernel32.dll",
   "msvcrt.dll",
   "ole32.dll",
-  "OLEAUT32.dll",
-  "SETUPAPI.dll",
-  "SHELL32.dll",
-  "USER32.dll",
-  "VERSION.dll",
-  "WINMM.dll",
-  "WS2_32.dll",
+  "oleaut32.dll",
+  "setupapi.dll",
+  "shell32.dll",
+  "user32.dll",
+  "version.dll",
+  "winmm.dll",
+  "ws2_32.dll",
 }
 
 def resolve_transitive_deps(archive_dir: str, exe_name: str) -> tuple[set[str], list[str]]:
@@ -51,6 +51,9 @@ def resolve_transitive_deps(archive_dir: str, exe_name: str) -> tuple[set[str], 
             if dll_lower in seen:
                 continue
             seen.add(dll_lower)
+
+            if dll_lower in system_dlls:
+                continue
 
             matched_file = next(
                 (f for f in os.listdir(archive_dir) if f.lower() == dll_lower),
