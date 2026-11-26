@@ -41,6 +41,7 @@ jobs:
             mingw-w64-tools \
             p7zip-full \
             pkg-config \
+            python3-pefile \
             wine \
             wine32 \
             wine64 \
