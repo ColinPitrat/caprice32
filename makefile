@@ -207,11 +207,17 @@ distrib: $(TARGET)
 	cp $(TARGET) $(ARCHIVE_DIR)/
 	@for pass in $$(seq 1 5); do \
 		for dll in $$($(OBJDUMP) -p $(ARCHIVE_DIR)/*.exe $(ARCHIVE_DIR)/*.dll 2>/dev/null | awk '/DLL Name:/ {print $$3}' | sort -u); do \
-			echo "Copying $$dll"; \
-			if [ -f "$(MINGW_PATH)/bin/$$dll" ]; then cp -n "$(MINGW_PATH)/bin/$$dll" $(ARCHIVE_DIR)/; \
-			elif [ -f "$(MINGW_GCC_DLL_PATH)/$$dll" ]; then cp -n "$(MINGW_GCC_DLL_PATH)/$$dll" $(ARCHIVE_DIR)/; fi; \
+			if [ -f "$(MINGW_PATH)/bin/$$dll" ]; then \
+			  echo "Copying $$dll"; \
+			  cp -n "$(MINGW_PATH)/bin/$$dll" $(ARCHIVE_DIR)/; \
+			elif [ -f "$(MINGW_GCC_DLL_PATH)/$$dll" ]; then \
+			  echo "Copying $$dll"; \
+			  cp -n "$(MINGW_GCC_DLL_PATH)/$$dll" $(ARCHIVE_DIR)/; \
+			fi; \
 		done; \
 	done
+	# Copy SDL3.dll if it exists, in case SDL2.dll is the sdl2-compat version, which relies on sdl3.
+	@[ -f "$(MINGW_PATH)/bin/SDL3.dll" ] && cp -n "$(MINGW_PATH)/bin/SDL3.dll" $(ARCHIVE_DIR)/ || true
 	cp cap32.cfg.tmpl cap32.cfg COPYING.txt README.md $(ARCHIVE_DIR)/
 	cp -r resources/ rom/ licenses/ $(ARCHIVE_DIR)/
 	cd $(RELEASE_DIR) && zip -r $(ARCHIVE).zip $(ARCHIVE)
