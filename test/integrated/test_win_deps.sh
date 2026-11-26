@@ -8,12 +8,6 @@ ARCH=$1
 ACTUAL=$(mktemp)
 EXPECTED=$(mktemp)
 
-if [ "${ARCH}" == "win32" ]
-then
-  echo "Skipping test for ${ARCH}"
-  exit 0
-fi
-
 cat << EOF > ${EXPECTED}
 libbrotlicommon.dll
 libbrotlidec.dll
@@ -35,12 +29,12 @@ ucrtbase.dll
 zlib1.dll
 EOF
 
-echo "ldd output:"
-ldd cap32.exe
+echo "objdump output:"
+objdump -p cap32.exe | grep "DLL Name" | awk '{ print $3 }'
 
-ldd cap32.exe | grep ucrt | sed 's/ =>.*//' | sed 's/^[ \t]*//' | sort -u > ${ACTUAL}
+objdump -p cap32.exe | grep "DLL Name" | awk '{ print $3 }' | sed 's/ =>.*//' | sed 's/^[ \t]*//' | sort -u > ${ACTUAL}
 
-echo "mingw dependencies:"
+echo "actual dependencies:"
 cat "${ACTUAL}"
 
 if ! diff ${ACTUAL} ${EXPECTED}
