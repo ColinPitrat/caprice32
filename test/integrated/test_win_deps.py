@@ -21,6 +21,23 @@ def get_direct_imports(pe_path: str) -> list[str]:
     return [entry.dll.decode("utf-8") for entry in pe.DIRECTORY_ENTRY_IMPORT]
 
 
+# System DLL expected to be available by default on Windows.
+allowed_missing_dlls = {
+  "ADVAPI32.dll",
+  "GDI32.dll",
+  "IMM32.dll",
+  "KERNEL32.dll",
+  "msvcrt.dll",
+  "ole32.dll",
+  "OLEAUT32.dll",
+  "SETUPAPI.dll",
+  "SHELL32.dll",
+  "USER32.dll",
+  "VERSION.dll",
+  "WINMM.dll",
+  "WS2_32.dll",
+}
+
 def resolve_transitive_deps(archive_dir: str, exe_name: str) -> tuple[set[str], list[str]]:
     seen: set[str] = set()
     bundled_deps: set[str] = set()
