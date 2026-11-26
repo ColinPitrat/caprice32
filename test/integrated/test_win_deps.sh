@@ -7,6 +7,7 @@
 ARCH=$1
 ACTUAL=$(mktemp)
 EXPECTED=$(mktemp)
+LDD ?= ldd
 
 cat << EOF > ${EXPECTED}
 libbrotlicommon.dll
@@ -29,11 +30,12 @@ ucrtbase.dll
 zlib1.dll
 EOF
 
-echo "objdump output:"
-objdump -p cap32.exe | grep "DLL Name" | awk '{ print $3 }'
+echo "ldd output:"
+$LDD cap32.exe
 
-objdump -p cap32.exe | grep "DLL Name" | awk '{ print $3 }' | sed 's/ =>.*//' | sed 's/^[ \t]*//' | sort -u > ${ACTUAL}
+$LDD cap32.exe | grep ucrt | sed 's/ =>.*//' | sed 's/^[ \t]*//' | sort -u > ${ACTUAL}
 
+echo ""
 echo "actual dependencies:"
 cat "${ACTUAL}"
 
