@@ -39,6 +39,7 @@ jobs:
             ${{matrix.mingw}}/mingw-w64-${{matrix.env}}-pkg-config
             ${{matrix.mingw}}/mingw-w64-${{matrix.env}}-SDL2
             ${{matrix.mingw}}/mingw-w64-${{matrix.env}}-toolchain
+            ${{matrix.mingw}}/mingw-w64-${{matrix.env}}-tools
             ${{matrix.mingw}}/mingw-w64-${{matrix.env}}-zlib
             ${{matrix.extra_packages}}
       # This is awful but we have to pass the mingw{32,64}/include directory so that
