@@ -36,6 +36,24 @@ system_dlls = {
   "version.dll",
   "winmm.dll",
   "ws2_32.dll",
+  # Not sure if they count as system. They are used by the msys2 build (ucrt64)
+  # and apparently don't need to be distributed.
+  "DWrite.dll",
+  "RPCRT4.dll",
+  "USP10.dll",
+  "api-ms-win-crt-convert-l1-1-0.dll",
+  "api-ms-win-crt-environment-l1-1-0.dll",
+  "api-ms-win-crt-filesystem-l1-1-0.dll",
+  "api-ms-win-crt-heap-l1-1-0.dll",
+  "api-ms-win-crt-locale-l1-1-0.dll",
+  "api-ms-win-crt-math-l1-1-0.dll",
+  "api-ms-win-crt-private-l1-1-0.dll",
+  "api-ms-win-crt-process-l1-1-0.dll",
+  "api-ms-win-crt-runtime-l1-1-0.dll",
+  "api-ms-win-crt-stdio-l1-1-0.dll",
+  "api-ms-win-crt-string-l1-1-0.dll",
+  "api-ms-win-crt-time-l1-1-0.dll",
+  "api-ms-win-crt-utility-l1-1-0.dll",
 }
 
 def resolve_transitive_deps(archive_dir: str, exe_name: str) -> tuple[set[str], list[str]]:
