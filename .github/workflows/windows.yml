@@ -33,7 +33,6 @@ jobs:
             gcc
             git
             make
-            python3-pefile
             zip
             ${{matrix.mingw}}/mingw-w64-${{matrix.env}}-freetype
             ${{matrix.mingw}}/mingw-w64-${{matrix.env}}-libpng
