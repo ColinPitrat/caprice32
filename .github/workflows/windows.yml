@@ -38,6 +38,7 @@ jobs:
             ${{matrix.mingw}}/mingw-w64-${{matrix.env}}-freetype
             ${{matrix.mingw}}/mingw-w64-${{matrix.env}}-libpng
             ${{matrix.mingw}}/mingw-w64-${{matrix.env}}-pkg-config
+            ${{matrix.mingw}}/mingw-w64-${{matrix.env}}-python-pefile
             ${{matrix.mingw}}/mingw-w64-${{matrix.env}}-SDL2
             ${{matrix.mingw}}/mingw-w64-${{matrix.env}}-toolchain
             ${{matrix.mingw}}/mingw-w64-${{matrix.env}}-tools
